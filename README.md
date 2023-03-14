@@ -21,7 +21,7 @@ It has more info and any changes over there will be pulled into the master branc
 ## LICENSE
 
 Even though the code in this repo is licensed under the MIT License, the copyright for the Cross Universe card game itself belongs to [Cross Universe](https://crossuniverse.jp/).  
-That means the MIT license cannot cover parts of the game itself such as the logo, rules, card backs and field graphic.  
+That means the MIT license cannot cover parts of the game itself such as the logo, card backs and field graphic.  
 Those fall under Cross Universe's own license which can be found here: https://crossuniverse.jp/約束事/
 
 They are included in this repo despite that since the site and code would break without them.
