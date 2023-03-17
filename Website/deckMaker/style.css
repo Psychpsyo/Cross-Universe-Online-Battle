@@ -2,13 +2,6 @@ html {
 	overflow: hidden;
 }
 
-body {
-	background-image: var(--theme-background);
-	background-position-x: center;
-	background-position-y: var(--theme-background-y);
-	background-size: cover;
-}
-
 #deckMakerHeader {
 	text-align: center;
 	height: 1.75em;

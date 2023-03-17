@@ -14,64 +14,68 @@
 		<link rel="stylesheet" href="settings/style.css">
 	</head>
 	<body>
-		<header id="title">Settings</header>
+		<div id="headerHolder">
+			<header id="title">Settings</header>
+		</div>
 		
-		<h2 id="generalHeading">General</h2>
-		<div class="settingsBlock">
-			<div id="languageSelectorDiv" data-warning-count="0">
-				<label for="languageSelector" id="languageSelectorLabel">Language:</label>
-				<select id="languageSelector" autocomplete="off">
-					<option value="en">🇺🇸 English</option>
-					<option value="de">🇩🇪 Deutsch</option>
-					<option value="ja">🇯🇵 日本語</option>
-				</select>
-				<div id="languageWarnings"></div>
+		<div id="mainSection">
+			<h2 id="generalHeading">General</h2>
+			<div class="settingsBlock">
+				<div id="languageSelectorDiv" data-warning-count="0">
+					<label for="languageSelector" id="languageSelectorLabel">Language:</label>
+					<select id="languageSelector" autocomplete="off">
+						<option value="en">🇺🇸 English</option>
+						<option value="de">🇩🇪 Deutsch</option>
+						<option value="ja">🇯🇵 日本語</option>
+					</select>
+					<div id="languageWarnings"></div>
+				</div>
+				<div><input type="checkbox" id="partnerChoiceToggle"> <label for="partnerChoiceToggle" id="partnerChoiceLabel">Always give Partner Choice</label></div>
+				<div><input type="checkbox" id="closePreviewToggle"> <label for="closePreviewToggle" id="closePreviewToggleLabel">Close Card Preview When Clicking off of It</label></div>
 			</div>
-			<div><input type="checkbox" id="partnerChoiceToggle"> <label for="partnerChoiceToggle" id="partnerChoiceLabel">Always give Partner Choice</label></div>
-			<div><input type="checkbox" id="closePreviewToggle"> <label for="closePreviewToggle" id="closePreviewToggleLabel">Close Card Preview When Clicking off of It</label></div>
-		</div>
-		<hr>
-		
-		<h2 id="profileHeading">Profile</h2>
-		<div class="settingsBlock">
-			<div><label for="usernameInput" id="usernameLabel">Your Username:</label><input type="text" id="usernameInput" placeholder="No username set."></div>
-			<div><label for="customCardBack" id="cardBackLabel">Custom Card Back Link:</label><input type="text" id="customCardBack" placeholder="No card back set."></div>
-		</div>
-		<hr>
-		
-		<h2 id="customizationHeading">Customization</h2>
-		<div class="settingsBlock">
-			<div><input type="checkbox" id="fieldLabelToggle"> <label for="fieldLabelToggle" id="fieldLabelToggleLabel">Show Field Labels</label></div>
-			<div><input type="checkbox" id="cardBackToggle"> <label for="cardBackToggle" id="cardBackToggleLabel">Disable Opponent Card Backs</label></div>
-			<div>
-				<label for="themeSelector" id="themeSelectorLabel">Theme:</label>
-				<select id="themeSelector" autocomplete="off">
-					<option value="default">Default</option>
-					<option value="worldTree">The World Tree</option>
-					<option value="deepSea">Deep Sea</option>
-				</select>
+			<br>
+			<br>
+			<h2 id="profileHeading">Profile</h2>
+			<div class="settingsBlock">
+				<div><label for="usernameInput" id="usernameLabel">Your Username:</label><input type="text" id="usernameInput" placeholder="No username set."></div>
+				<div><label for="customCardBack" id="cardBackLabel">Custom Card Back Link:</label><input type="text" id="customCardBack" placeholder="No card back set."></div>
 			</div>
+			<br>
+			<br>
+			<h2 id="customizationHeading">Customization</h2>
+			<div class="settingsBlock">
+				<div><input type="checkbox" id="fieldLabelToggle"> <label for="fieldLabelToggle" id="fieldLabelToggleLabel">Show Field Labels</label></div>
+				<div><input type="checkbox" id="cardBackToggle"> <label for="cardBackToggle" id="cardBackToggleLabel">Disable Opponent Card Backs</label></div>
+				<div>
+					<label for="themeSelector" id="themeSelectorLabel">Theme:</label>
+					<select id="themeSelector" autocomplete="off">
+						<option value="default">Default</option>
+						<option value="worldTree">The World Tree</option>
+						<option value="deepSea">Deep Sea</option>
+					</select>
+				</div>
+			</div>
+			<br>
+			<br>
+			<h2 id="hotkeysHeading">Hotkeys</h2>
+			<div class="settingsBlock">
+				<div><label for="hotkeyShowYourDiscard" id="hotkeyShowYourDiscardLabel">Show Your Discard Pile:</label><button id="hotkeyShowYourDiscard" class="keybind">---</button></div>
+				<div><label for="hotkeyShowOpponentDiscard" id="hotkeyShowOpponentDiscardLabel">Show Opponent Discard Pile:</label><button id="hotkeyShowOpponentDiscard" class="keybind">---</button></div>
+				<div><label for="hotkeyShowYourExile" id="hotkeyShowYourExileLabel">Show Your Exile Zone:</label><button id="hotkeyShowYourExile" class="keybind">---</button></div>
+				<div><label for="hotkeyShowOpponentExile" id="hotkeyShowOpponentExileLabel">Show Opponent Exile Zone:</label><button id="hotkeyShowOpponentExile" class="keybind">---</button></div>
+				<div><label for="hotkeyShowDeck" id="hotkeyShowDeckLabel">Search Your Deck:</label><button id="hotkeyShowDeck" class="keybind">---</button></div>
+				<div><label for="hotkeySelectToken" id="hotkeySelectTokenLabel">Open Token Selector:</label><button id="hotkeySelectToken" class="keybind">---</button></div>
+				<div><label for="hotkeyShowField" id="hotkeyShowFieldLabel">Show Field:</label><button id="hotkeyShowField" class="keybind">---</button></div>
+				<div><label for="hotkeyDestroyToken" id="hotkeyDestroyTokenLabel">Destroy Grabbed Token:</label><button id="hotkeyDestroyToken" class="keybind">---</button></div>
+				<div><label for="hotkeyChat" id="hotkeyChatLabel">Write Chat Message:</label><button id="hotkeyChat" class="keybind">---</button></div>
+				<div><label for="hotkeyDrawCard" id="hotkeyDrawCardLabel">Draw Card:</label><button id="hotkeyDrawCard" class="keybind">---</button></div>
+				<div><label for="hotkeyShuffleDeck" id="hotkeyShuffleDeckLabel">Shuffle Deck:</label><button id="hotkeyShuffleDeck" class="keybind">---</button></div>
+				<div><label for="hotkeyShowDeckTop" id="hotkeyShowDeckTopLabel">View Top Card of Deck:</label><button id="hotkeyShowDeckTop" class="keybind">---</button></div>
+				<!--Fake button, number keys will always be hand cards -->
+				<div><label for="hotkeyPreviewHand" id="hotkeyPreviewHandLabel">Preview Hand Cards:</label><button id="hotkeyPreviewHand" class="keybind" disabled>1 - 9</button></div>
+				<button id="resetDefaultHotkeys">Reset Hotkeys</button>
+			</div><br>
 		</div>
-		<hr>
-		
-		<h2 id="hotkeysHeading">Hotkeys</h2>
-		<div class="settingsBlock">
-			<div><label for="hotkeyShowYourDiscard" id="hotkeyShowYourDiscardLabel">Show Your Discard Pile:</label><button id="hotkeyShowYourDiscard" class="keybind">---</button></div>
-			<div><label for="hotkeyShowOpponentDiscard" id="hotkeyShowOpponentDiscardLabel">Show Opponent Discard Pile:</label><button id="hotkeyShowOpponentDiscard" class="keybind">---</button></div>
-			<div><label for="hotkeyShowYourExile" id="hotkeyShowYourExileLabel">Show Your Exile Zone:</label><button id="hotkeyShowYourExile" class="keybind">---</button></div>
-			<div><label for="hotkeyShowOpponentExile" id="hotkeyShowOpponentExileLabel">Show Opponent Exile Zone:</label><button id="hotkeyShowOpponentExile" class="keybind">---</button></div>
-			<div><label for="hotkeyShowDeck" id="hotkeyShowDeckLabel">Search Your Deck:</label><button id="hotkeyShowDeck" class="keybind">---</button></div>
-			<div><label for="hotkeySelectToken" id="hotkeySelectTokenLabel">Open Token Selector:</label><button id="hotkeySelectToken" class="keybind">---</button></div>
-			<div><label for="hotkeyShowField" id="hotkeyShowFieldLabel">Show Field:</label><button id="hotkeyShowField" class="keybind">---</button></div>
-			<div><label for="hotkeyDestroyToken" id="hotkeyDestroyTokenLabel">Destroy Grabbed Token:</label><button id="hotkeyDestroyToken" class="keybind">---</button></div>
-			<div><label for="hotkeyChat" id="hotkeyChatLabel">Write Chat Message:</label><button id="hotkeyChat" class="keybind">---</button></div>
-			<div><label for="hotkeyDrawCard" id="hotkeyDrawCardLabel">Draw Card:</label><button id="hotkeyDrawCard" class="keybind">---</button></div>
-			<div><label for="hotkeyShuffleDeck" id="hotkeyShuffleDeckLabel">Shuffle Deck:</label><button id="hotkeyShuffleDeck" class="keybind">---</button></div>
-			<div><label for="hotkeyShowDeckTop" id="hotkeyShowDeckTopLabel">View Top Card of Deck:</label><button id="hotkeyShowDeckTop" class="keybind">---</button></div>
-			<!--Fake button, number keys will always be hand cards -->
-			<div><label for="hotkeyPreviewHand" id="hotkeyPreviewHandLabel">Preview Hand Cards:</label><button id="hotkeyPreviewHand" class="keybind" disabled>1 - 9</button></div>
-			<button id="resetDefaultHotkeys">Reset Hotkeys</button>
-		</div><br>
 		
 		<template id="langWarning">
 			<span class="warningNote"><b>ⓘ</b> <span class="warningText"></span></span>

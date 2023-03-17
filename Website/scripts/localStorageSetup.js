@@ -20,14 +20,14 @@ var themes = {
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/ホームページ背景2.jpg",
 		"backgroundY": "top",
 		"fieldDropShadow": true,
-		"shadowColor": "rgba(48, 48, 48, 0.5)",
+		"shadowColor": "rgba(0, 0, 0, 0.5)",
 		"textShadow": "2px 2px 2px black"
 	},
 	"deepSea": {
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/6501dd551fcd4880fce262e4993896a8.png",
 		"backgroundY": "10%",
 		"fieldDropShadow": true,
-		"shadowColor": "rgba(48, 48, 48, 0.5)",
+		"shadowColor": "rgba(0, 0, 0, 0.5)",
 		"textShadow": "2px 2px 2px black"
 	}
 }

@@ -1,22 +1,46 @@
+#headerHolder {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	
+	background-color: #333;
+	background-image: var(--theme-background);
+	background-position-x: center;
+	background-position-y: var(--theme-background-y);
+	background-size: cover;
+	background-attachment: fixed;
+}
+
 header {
 	text-align: center;
 	height: 1.75em;
 	border-bottom: 2px #eee solid;
 	line-height: 1.75em;
-	position: sticky;
-	top: 0;
-	background-color: #333;
-	z-index: 100;
+	background-color: var(--theme-shadow);
+}
+
+#mainSection {
+	max-width: 100%;
+	width: 30.5em;
+	margin: auto;
+	background-color: var(--theme-shadow);
 }
 
 h2 {
 	width: 100%;
-	margin: .2em;
+	margin: 0;
+	padding: .2em;
 	text-align: center;
+}
+
+hr {
+	width: 100vw;
+	transform: translate(-25%);
 }
 
 .settingsBlock {
 	width: 30em;
+	max-width: 100%;
 	margin: auto;
 	text-align: center;
 }
