@@ -55,7 +55,7 @@ document.getElementById("manaDown").addEventListener("click", function() {
 //chat box
 allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 function putChatMessage(message, type) {
-	chat = document.getElementById("chatBox");
+	let messageSpan = document.createElement("div");
 	
 	while (message.indexOf(":") != -1) {
 		if (message.indexOf(":", message.indexOf(":") + 1) == -1) {
@@ -63,28 +63,27 @@ function putChatMessage(message, type) {
 		}
 		let foundEmoji = message.substr(message.indexOf(":") + 1, message.indexOf(":", message.indexOf(":") + 1) - (message.indexOf(":") + 1));
 		if (allEmoji.includes(foundEmoji)) {
-			chat.appendChild(document.createTextNode(message.substr(0, message.indexOf(":"))));
+			messageSpan.appendChild(document.createTextNode(message.substr(0, message.indexOf(":"))));
 			let emojiImg = document.createElement("img");
 			emojiImg.src = "images/emoji/" + foundEmoji + ".png";
 			emojiImg.classList.add("emoji");
 			emojiImg.alt = ":" + foundEmoji + ":";
 			emojiImg.title = ":" + foundEmoji + ":";
 			emojiImg.draggable = false;
-			chat.appendChild(emojiImg);
+			messageSpan.appendChild(emojiImg);
 			message = message.substr(message.indexOf(":", message.indexOf(":") + 1) + 1);
 		} else {
-			chat.appendChild(document.createTextNode(message.substr(0, message.indexOf(":", message.indexOf(":") + 1))));
+			messageSpan.appendChild(document.createTextNode(message.substr(0, message.indexOf(":", message.indexOf(":") + 1))));
 			message = message.substr(message.indexOf(":", message.indexOf(":") + 1));
 		}
 	}
 	
-	let messageSpan = document.createElement("div");
+	messageSpan.appendChild(document.createTextNode(message));
 	if (type) {
 		messageSpan.classList.add(type);
 	}
-	messageSpan.appendChild(document.createTextNode(message));
-	chat.appendChild(messageSpan);
-	chat.scrollTop = chat.scrollHeight - chat.clientHeight
+	chatBox.appendChild(messageSpan);
+	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight
 }
 
 document.getElementById("chatInput").addEventListener("keyup", function(e) {
