@@ -254,6 +254,7 @@
 	},
 	
 	"deckMaker": {
+		"title": "Deck Creator",
 		"deck": "Deck",
 		"search": "Search",
 		

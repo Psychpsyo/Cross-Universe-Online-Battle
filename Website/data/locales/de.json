@@ -16,7 +16,7 @@
 	},
 	
 	"settingsButton": "Einstellungen",
-	"deckCreatorButton": "Deck-Editor Öffnen",
+	"deckCreatorButton": "Deck Editor Öffnen",
 	
 	"infoYou": "Du",
 	"infoOpponent": "Gegner",
@@ -254,6 +254,7 @@
 	},
 	
 	"deckMaker": {
+		"title": "Deck Editor",
 		"deck": "Deck",
 		"search": "Suche",
 		

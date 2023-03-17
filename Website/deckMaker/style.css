@@ -2,11 +2,20 @@ html {
 	overflow: hidden;
 }
 
+body {
+	background-image: var(--theme-background);
+	background-position-x: center;
+	background-position-y: var(--theme-background-y);
+	background-size: cover;
+}
+
 #deckMakerHeader {
 	text-align: center;
 	height: 1.75em;
 	border-bottom: 2px #eee solid;
 	line-height: 1.75em;
+	font-weight: bold;
+	background-color: var(--theme-shadow);
 }
 
 #deckMakerPanels {
@@ -34,6 +43,8 @@ html {
 
 .deckMakerHeader {
 	text-align: center;
+	font-weight: bold;
+	text-shadow: var(--theme-text-shadow);
 }
 
 #cardSearchPanel, #cardInfoMainArea {
@@ -53,12 +64,14 @@ html {
 }
 
 .deckMakerTopButton {
+	all: inherit;
 	height: 100%;
 	padding: 0 1em;
 	border: none;
 	color: #eee;
 	font-size: 1em;
 	background: none;
+	user-select: none;
 }
 
 #deckMakerSearchButton {

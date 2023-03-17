@@ -70,6 +70,7 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	locale = jsonData;
 	
 	// main section
+	document.getElementById("deckCreatorTitle").textContent = locale["deckMaker"]["title"];
 	document.getElementById("deckMakerDeckButton").textContent = locale["deckMaker"]["deck"];
 	document.getElementById("deckMakerSearchButton").textContent = locale["deckMaker"]["search"];
 	
