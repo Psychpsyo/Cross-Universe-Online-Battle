@@ -145,7 +145,7 @@ html {
 	box-sizing: border-box;
 	
 	border-right: 2px #eee solid;
-	background-color: rgba(48, 48, 48, 0.5);
+	background-color: var(--theme-shadow);
 }
 
 #roomcodeDisplay {

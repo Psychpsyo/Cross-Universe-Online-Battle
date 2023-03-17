@@ -12,17 +12,23 @@ var themes = {
 	"default": {
 		"background": null,
 		"backgroundY": "center",
-		"fieldDropShadow": false
+		"fieldDropShadow": false,
+		"shadowColor": "transparent",
+		"textShadow": "none"
 	},
 	"worldTree": {
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/ホームページ背景2.jpg",
 		"backgroundY": "top",
-		"fieldDropShadow": true
+		"fieldDropShadow": true,
+		"shadowColor": "rgba(48, 48, 48, 0.5)",
+		"textShadow": "2px 2px 2px black"
 	},
 	"deepSea": {
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/6501dd551fcd4880fce262e4993896a8.png",
 		"backgroundY": "10%",
-		"fieldDropShadow": true
+		"fieldDropShadow": true,
+		"shadowColor": "rgba(48, 48, 48, 0.5)",
+		"textShadow": "2px 2px 2px black"
 	}
 }
 function applyTheme(theme) {
@@ -30,6 +36,8 @@ function applyTheme(theme) {
 	document.documentElement.style.setProperty("--theme-background", "url(" + (themes[theme].background != null? '"' + themes[theme].background + '"' : "") + ")");
 	document.documentElement.style.setProperty("--theme-background-y", themes[theme].backgroundY);
 	document.documentElement.style.setProperty("--theme-field-filter", themes[theme].fieldDropShadow? "drop-shadow(0 0 2vh rgba(0, 0, 0, 0.5))" : "");
+	document.documentElement.style.setProperty("--theme-shadow", themes[theme].shadowColor);
+	document.documentElement.style.setProperty("--theme-text-shadow", themes[theme].textShadow);
 }
 applyTheme(localStorage.getItem("theme") ?? "default");
 

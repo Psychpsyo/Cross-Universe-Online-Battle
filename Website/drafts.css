@@ -8,6 +8,7 @@
 	font-size: 2em;
 	text-align: center;
 	margin: 1rem;
+	text-shadow: var(--theme-text-shadow);
 }
 
 #draftCardSelection {
@@ -39,6 +40,7 @@
 	padding: 0 1em;
 	font-size: 1.5em;
 	border-bottom: 2px solid #eee;
+	text-shadow: var(--theme-text-shadow);
 }
 
 #draftDeckHolder {
@@ -53,6 +55,7 @@
 .draftDeckTitleBar {
 	display: flex;
 	justify-content: space-between;
+	text-shadow: var(--theme-text-shadow);
 }
 
 .draftDeckList {
@@ -62,6 +65,7 @@
 	box-sizing: border-box;
 	border: 2px solid #eee;
 	aspect-ratio: 8130 / 3555;
+	background-color: var(--theme-shadow);
 }
 
 .draftDeckList img {
