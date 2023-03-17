@@ -19,8 +19,8 @@
 		<h2 id="generalHeading">General</h2>
 		<div class="settingsBlock">
 			<div id="languageSelectorDiv" data-warning-count="0">
-				<label for="languageSelect" id="languageSelectorLabel">Language:</label>
-				<select id="languageSelect" autocomplete="off">
+				<label for="languageSelector" id="languageSelectorLabel">Language:</label>
+				<select id="languageSelector" autocomplete="off">
 					<option value="en">🇺🇸 English</option>
 					<option value="de">🇩🇪 Deutsch</option>
 					<option value="ja">🇯🇵 日本語</option>
@@ -39,10 +39,18 @@
 		</div>
 		<hr>
 		
-		<h2 id="preferencesHeading">Preferences</h2>
+		<h2 id="customizationHeading">Customization</h2>
 		<div class="settingsBlock">
 			<div><input type="checkbox" id="fieldLabelToggle"> <label for="fieldLabelToggle" id="fieldLabelToggleLabel">Show Field Labels</label></div>
 			<div><input type="checkbox" id="cardBackToggle"> <label for="cardBackToggle" id="cardBackToggleLabel">Disable Opponent Card Backs</label></div>
+			<div>
+				<label for="themeSelector" id="themeSelectorLabel">Theme:</label>
+				<select id="themeSelector" autocomplete="off">
+					<option value="default">Default</option>
+					<option value="worldTree">The World Tree</option>
+					<option value="deepSea">Deep Sea</option>
+				</select>
+			</div>
 		</div>
 		<hr>
 		

@@ -1,3 +1,11 @@
+body {
+	overflow: hidden;
+	background-image: var(--theme-background);
+	background-position-x: center;
+	background-position-y: var(--theme-background-y);
+	background-size: cover;
+}
+
 #unofficialNotice {
 	position: absolute;
 	left: 50%;

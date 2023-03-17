@@ -1,3 +1,4 @@
+// general
 localStorage.setItem("autoClosePreview", localStorage.getItem("autoClosePreview") ?? "false");
 localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("cardBackToggle", localStorage.getItem("cardBackToggle") ?? false);
@@ -6,6 +7,31 @@ localStorage.setItem("language", localStorage.getItem("language") ?? (navigator.
 localStorage.setItem("partnerChoiceToggle", localStorage.getItem("partnerChoiceToggle") ?? false);
 localStorage.setItem("username", localStorage.getItem("username") ?? "");
 
+// themes
+var themes = {
+	"default": {
+		"background": null,
+		"backgroundY": "center",
+		"fieldDropShadow": false
+	},
+	"worldTree": {
+		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/ホームページ背景2.jpg",
+		"backgroundY": "top",
+		"fieldDropShadow": true
+	},
+	"deepSea": {
+		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/6501dd551fcd4880fce262e4993896a8.png",
+		"backgroundY": "10%",
+		"fieldDropShadow": true
+	}
+}
+function applyTheme(theme) {
+	localStorage.setItem("theme", theme);
+	document.documentElement.style.setProperty("--theme-background", "url(" + (themes[theme].background != null? '"' + themes[theme].background + '"' : "") + ")");
+	document.documentElement.style.setProperty("--theme-background-y", themes[theme].backgroundY);
+	document.documentElement.style.setProperty("--theme-field-filter", themes[theme].fieldDropShadow? "drop-shadow(0 0 2vh rgba(0, 0, 0, 0.5))" : "");
+}
+applyTheme(localStorage.getItem("theme") ?? "default");
 
 // hotkeys
 let hotkeyDefaults = {

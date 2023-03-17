@@ -86,9 +86,13 @@ function setLanguage(language) {
 		usernameLabel.textContent = locale["settings"]["username"];
 		cardBackLabel.textContent = locale["settings"]["cardBackLink"];
 		
-		preferencesHeading.textContent = locale["settings"]["preferences"];
+		customizationHeading.textContent = locale["settings"]["customization"];
 		fieldLabelToggleLabel.textContent = locale["settings"]["fieldLabels"];
 		cardBackToggleLabel.textContent = locale["settings"]["disableCardBacks"];
+		themeSelectorLabel.textContent = locale["settings"]["theme"];
+		Array.from(themeSelector.children).forEach(theme => {
+			theme.textContent = locale["settings"]["themes"][theme.value];
+		});
 		
 		hotkeysHeading.textContent = locale["settings"]["hotkeys"];
 		hotkeyShowYourDiscardLabel.textContent = locale["settings"]["showYourDiscardPile"];
@@ -111,7 +115,7 @@ function setLanguage(language) {
 }
 
 // load settings
-languageSelect.value = localStorage.getItem("language");
+languageSelector.value = localStorage.getItem("language");
 partnerChoiceToggle.checked = localStorage.getItem("partnerChoiceToggle") === "true";
 closePreviewToggle.checked = localStorage.getItem("autoClosePreview") === "true";
 
@@ -120,12 +124,13 @@ customCardBack.value = localStorage.getItem("cardBack");
 
 fieldLabelToggle.checked = localStorage.getItem("fieldLabelToggle") === "true";
 cardBackToggle.checked = localStorage.getItem("cardBackToggle") === "true";
+themeSelector.value = localStorage.getItem("theme");
 
-setLanguage(languageSelect.value);
+setLanguage(languageSelector.value);
 validateHotkeys();
 
 // event listeners
-languageSelect.addEventListener("change", function() {
+languageSelector.addEventListener("change", function() {
 	setLanguage(this.value);
 });
 partnerChoiceToggle.addEventListener("change", function() {
@@ -147,6 +152,9 @@ fieldLabelToggle.addEventListener("change", function() {
 });
 cardBackToggle.addEventListener("change", function() {
 	localStorage.setItem("cardBackToggle", this.checked);
+});
+themeSelector.addEventListener("change", function() {
+	applyTheme(this.value);
 });
 
 // for hotkeys

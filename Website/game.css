@@ -2,10 +2,6 @@ html {
 	--faded-background: #000B;
 }
 
-body {
-	overflow: hidden;
-}
-
 #gameDiv {
 	display: none;
 }
@@ -38,6 +34,7 @@ body {
 	background-repeat: no-repeat;
 	background-position: center;
 	user-select: none;
+	filter: var(--theme-field-filter);
 }
 
 #cardDetails {
@@ -148,6 +145,7 @@ body {
 	box-sizing: border-box;
 	
 	border-right: 2px #eee solid;
+	background-color: rgba(48, 48, 48, 0.5);
 }
 
 #roomcodeDisplay {

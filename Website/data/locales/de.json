@@ -114,9 +114,15 @@
 		"username": "Dein Nutzername:",
 		"cardBackLink": "Link für einen Kartenrücken:",
 		
-		"preferences": "Präferenzen",
+		"customization": "Display & Themes",
 		"fieldLabels": "Feldbeschriftung Zeigen",
 		"disableCardBacks": "Gegnerische Kartenrücken Deaktivieren",
+		"theme": "Theme:",
+		"themes": {
+			"default": "Standard",
+			"worldTree": "Der World Tree",
+			"deepSea": "Tiefsee"
+		},
 		
 		"hotkeys": "Hotkeys",
 		"resetHotkeys": "Hotkeys Zurücksetzen",
