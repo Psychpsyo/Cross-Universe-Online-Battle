@@ -47,11 +47,17 @@ html {
 	
 	position: absolute;
 	top: 50%;
-	right: -50vh;
+	--side-distance: -50vh;
+	right: var(--side-distance);
 	transform: translateY(-50%);
-	transition: right 0.3s ease-out;
+	transition: right 0.2s ease-out;
 	
 	z-index: 500;
+}
+.leftField #cardDetails {
+	left: var(--side-distance);
+	transition: left 0.2s ease-out;
+	right: unset;
 }
 
 #cardDetailsControl {
@@ -69,6 +75,10 @@ html {
 	border: 2px #eee solid;
 	border-bottom: none;
 	border-radius: 1em 1em 0px 0px;
+}
+.leftField #cardDetailsControl {
+	left: 0;
+	right: unset;
 }
 
 #cardDetailsControl > div {
@@ -108,6 +118,9 @@ html {
 	border-radius: 1em 0 1em 1em;
 	
 	overflow-y: auto;
+}
+.leftField #cardDetailsText {
+	border-radius: 0 1em 1em 1em;
 }
 
 #cardDetailsName, #cardDetailsInfo, .cardDetailsEffect {

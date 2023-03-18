@@ -89,6 +89,7 @@ function setLanguage(language) {
 		customizationHeading.textContent = locale["settings"]["customization"];
 		fieldLabelToggleLabel.textContent = locale["settings"]["fieldLabels"];
 		cardBackToggleLabel.textContent = locale["settings"]["disableCardBacks"];
+		fieldLeftToggleLabel.textContent = locale["settings"]["leftField"];
 		themeSelectorLabel.textContent = locale["settings"]["theme"];
 		Array.from(themeSelector.children).forEach(theme => {
 			theme.textContent = locale["settings"]["themes"][theme.value];

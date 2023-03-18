@@ -171,7 +171,7 @@ document.getElementById("startingPlayerSelect").addEventListener("click", functi
 
 // card preview
 function closeCardPreview() {
-	cardDetails.style.right = "-50vh";
+	cardDetails.style.setProperty("--side-distance", "-50vh");
 	cardDetails.dataset.currentCard = "";
 	cardDetailsImage.dataset.open = false;
 }
@@ -271,7 +271,7 @@ function previewCard(cardId) {
 			cardDetailsEffectList.appendChild(effectDiv);
 		});
 		
-		cardDetails.style.right = ".5em";
+		cardDetails.style.setProperty("--side-distance", ".5em");
 		cardDetailsImage.dataset.open = true;
 	});
 }
