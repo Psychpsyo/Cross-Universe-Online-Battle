@@ -3,6 +3,7 @@ localStorage.setItem("autoClosePreview", localStorage.getItem("autoClosePreview"
 localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("cardBackToggle", localStorage.getItem("cardBackToggle") ?? false);
 localStorage.setItem("fieldLabelToggle", localStorage.getItem("fieldLabelToggle") ?? true);
+localStorage.setItem("fieldLeftToggle", localStorage.getItem("fieldLeftToggle") ?? false);
 localStorage.setItem("language", localStorage.getItem("language") ?? (navigator.language.startsWith("ja")? "ja" : "en"));
 localStorage.setItem("partnerChoiceToggle", localStorage.getItem("partnerChoiceToggle") ?? false);
 localStorage.setItem("username", localStorage.getItem("username") ?? "");

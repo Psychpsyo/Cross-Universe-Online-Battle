@@ -1,3 +1,9 @@
+//position the menu on the right if that option is enabled
+if (localStorage.getItem("fieldLeftToggle") == "true") {
+	document.documentElement.classList.add("leftField");
+}
+
+
 //life changes
 document.getElementById("lifeUp100").addEventListener("click", function() {
 	life[1] += 100;

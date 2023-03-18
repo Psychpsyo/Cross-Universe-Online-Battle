@@ -10,6 +10,10 @@ html {
 	display: flex;
 }
 
+.leftField #gameFlexBox {
+	flex-direction: row-reverse;
+}
+
 #mainGameArea {
 	display: none;
 	position: relative;
@@ -146,6 +150,11 @@ html {
 	
 	border-right: 2px #eee solid;
 	background-color: var(--theme-shadow);
+}
+
+.leftField #leftPanel {
+	border-right: none;
+	border-left: 2px #eee solid;
 }
 
 #roomcodeDisplay {
@@ -831,7 +840,6 @@ label[for="fileSelectDeckLoader"] {
 
 /* field labels */
 .fieldLabel {
-	display: var(--field-label-display);
 	position: absolute;
 	top: 50%;
 	left: 50%;

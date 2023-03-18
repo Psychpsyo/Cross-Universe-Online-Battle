@@ -124,6 +124,7 @@ customCardBack.value = localStorage.getItem("cardBack");
 
 fieldLabelToggle.checked = localStorage.getItem("fieldLabelToggle") === "true";
 cardBackToggle.checked = localStorage.getItem("cardBackToggle") === "true";
+fieldLeftToggle.checked = localStorage.getItem("fieldLeftToggle") === "true";
 themeSelector.value = localStorage.getItem("theme");
 
 setLanguage(languageSelector.value);
@@ -149,6 +150,9 @@ customCardBack.addEventListener("change", function() {
 
 fieldLabelToggle.addEventListener("change", function() {
 	localStorage.setItem("fieldLabelToggle", this.checked);
+});
+fieldLeftToggle.addEventListener("change", function() {
+	localStorage.setItem("fieldLeftToggle", this.checked);
 });
 cardBackToggle.addEventListener("change", function() {
 	localStorage.setItem("cardBackToggle", this.checked);
