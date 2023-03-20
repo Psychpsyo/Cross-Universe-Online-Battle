@@ -626,11 +626,11 @@ async function recalculateDeckStats() {
 	}
 	
 	//enable/disable warnings
-	document.getElementById("unitWarning").style.display = unitCount == 0? "inline" : "none";
-	document.getElementById("tokenWarning").style.display = tokenCount == 0? "none" : "inline";
-	document.getElementById("cardMinWarning").style.display = deckList.length >= 30? "none" : "inline";
-	document.getElementById("cardMaxWarning").style.display = deckList.length < 51? "none" : "inline";
-	document.getElementById("partnerWarning").style.display = document.getElementById("deckMakerDetailsPartnerSelect").value == ""? "inline" : "none";
+	document.getElementById("unitWarning").style.display = unitCount == 0? "block" : "none";
+	document.getElementById("tokenWarning").style.display = tokenCount == 0? "none" : "block";
+	document.getElementById("cardMinWarning").style.display = deckList.length >= 30? "none" : "block";
+	document.getElementById("cardMaxWarning").style.display = deckList.length < 51? "none" : "block";
+	document.getElementById("partnerWarning").style.display = document.getElementById("deckMakerDetailsPartnerSelect").value == ""? "block" : "none";
 	document.getElementById("dotDeckExportBtn").disabled = document.getElementById("deckMakerDetailsPartnerSelect").value == "";
 }
 
