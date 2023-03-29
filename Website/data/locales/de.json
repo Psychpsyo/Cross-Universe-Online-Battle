@@ -112,7 +112,9 @@
 		
 		"profile": "Profil",
 		"username": "Dein Nutzername:",
+		"usernamePlaceholder": "Kein Nutzernahme gewählt.",
 		"cardBackLink": "Link für einen Kartenrücken:",
+		"cardBackLinkPlaceholder": "Kein Kartenrücken gewählt.",
 		
 		"customization": "Display & Themes",
 		"fieldLabels": "Feldbeschriftung Zeigen",

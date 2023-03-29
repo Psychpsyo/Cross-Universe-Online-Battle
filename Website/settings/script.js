@@ -84,7 +84,9 @@ function setLanguage(language) {
 		
 		profileHeading.textContent = locale["settings"]["profile"];
 		usernameLabel.textContent = locale["settings"]["username"];
+		usernameInput.placeholder = locale["settings"]["usernamePlaceholder"];
 		cardBackLabel.textContent = locale["settings"]["cardBackLink"];
+		customCardBack.placeholder = locale["settings"]["cardBackLinkPlaceholder"];
 		
 		customizationHeading.textContent = locale["settings"]["customization"];
 		fieldLabelToggleLabel.textContent = locale["settings"]["fieldLabels"];

@@ -112,7 +112,9 @@
 		
 		"profile": "Profile",
 		"username": "Your Username:",
+		"usernamePlaceholder": "No username set.",
 		"cardBackLink": "Custom Card Back Link:",
+		"cardBackLinkPlaceholder": "No card back set.",
 		
 		"customization": "Customization",
 		"fieldLabels": "Show Field Labels",
