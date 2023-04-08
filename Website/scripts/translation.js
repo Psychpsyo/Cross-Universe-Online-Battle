@@ -1,5 +1,7 @@
 let locale = {};
 
+document.documentElement.lang = localStorage.getItem("language");
+
 fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 .then(response => {
 	return response.json()
@@ -8,6 +10,7 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	locale = jsonData;
 	
 	document.getElementById("roomCodeInputLabel").textContent = locale["enterRoomcode"];
+	document.getElementById("roomCodeRefresh").setAttribute("aria-label", locale["rerollRoomcode"]);
 	
 	document.getElementById("gameModeSelectorLabel").textContent = locale["gamemode"];
 	document.getElementById("gameModeNormalOption").textContent = locale["gamemodes"]["normal"];

@@ -92,7 +92,7 @@ cardSelectorReturnToDeck.addEventListener("click", function() {
 
 function doSelectStartingPlayer() {
 	if (youAre === 0 && cardAreas["field2"].isFaceDown() && cardAreas["field17"].isFaceDown()) {
-		startingPlayerSelect.style.display = "block";	
+		startingPlayerSelect.style.display = "block";
 	}
 }
 

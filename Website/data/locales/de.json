@@ -2,6 +2,7 @@
 	"warnings": ["noRules", "noCards"],
 	"code": "de",
 	"enterRoomcode": "Raum-Code:",
+	"rerollRoomcode": "Zufälligen Raum-Code generieren",
 	"connectToRoom": "Verbinden",
 	"waitingForOpponent": "Warte auf den Gegner...",
 	"cancelWaiting": "Abbrechen",

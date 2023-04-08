@@ -62,6 +62,7 @@ let jpTypesHiragana = {
 }
 
 // load locale and translate page
+document.documentElement.lang = localStorage.getItem("language");
 fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 .then(response => {
 	return response.json()

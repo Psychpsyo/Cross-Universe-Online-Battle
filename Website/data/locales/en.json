@@ -2,6 +2,7 @@
 	"warnings": [],
 	"code": "en",
 	"enterRoomcode": "Room Code:",
+	"rerollRoomcode": "Generate random room code",
 	"connectToRoom": "Connect",
 	"waitingForOpponent": "Waiting for Opponent...",
 	"cancelWaiting": "Cancel",

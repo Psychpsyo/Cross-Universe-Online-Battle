@@ -2,6 +2,7 @@
 	"warnings": ["incomplete"],
 	"code": "ja",
 	"enterRoomcode": "対戦ID：",
+	"rerollRoomcode": "Generate random room code",
 	"connectToRoom": "接続",
 	"waitingForOpponent": "承認待ち",
 	"cancelWaiting": "キャンセル",

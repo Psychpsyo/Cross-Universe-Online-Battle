@@ -56,6 +56,7 @@ let locale = {};
 function setLanguage(language) {
 	localStorage.setItem("language", language);
 	
+	document.documentElement.lang = language;
 	fetch("../data/locales/" + language + ".json")
 	.then(response => {
 		return response.json()

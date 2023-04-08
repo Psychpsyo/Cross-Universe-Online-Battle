@@ -344,8 +344,9 @@ function connect() {
 		socket.addEventListener("message", receiveMessage);
 		
 		// hide input field and show waiting indicator
-		document.getElementById("roomCodeInputFieldSpan").style.display = "none";
-		document.getElementById("waitingForOpponentSpan").style.display = "inline";
+		roomCodeInputFieldSpan.style.display = "none";
+		waitingForOpponentSpan.style.display = "inline";
+		// TODO: Make screenreader read out the connecting message
 	}
 }
 // pressing enter in the roomcode entry field to connect
@@ -360,8 +361,9 @@ document.getElementById("connectBtn").addEventListener("click", connect);
 document.getElementById("cancelWaitingBtn").addEventListener("click", function() {
 			roomcode = "";
 			socket.close();
-			document.getElementById("waitingForOpponentSpan").style.display = "none";
-			document.getElementById("roomCodeInputFieldSpan").style.display = "inline";
+			waitingForOpponentSpan.style.display = "none";
+			roomCodeInputFieldSpan.style.display = "inline";
+			roomCodeInputField.focus();
 });
 
 // sending cursor updates

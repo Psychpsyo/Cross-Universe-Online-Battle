@@ -26,6 +26,10 @@ header {
 	background-color: var(--theme-shadow);
 }
 
+h1 {
+	all: unset;
+}
+
 h2 {
 	width: 100%;
 	margin: 0;
