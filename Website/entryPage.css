@@ -16,31 +16,23 @@ body {
 }
 
 #centerDiv {
-	text-align: center;
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	
 	display: flex;
 	flex-direction: column;
-	gap: 1vh;
-	height: 80vh;
-}
-
-#mainLogoContainer {
-	flex-grow: 1;
-	position: relative;
-	max-height: 45vh;
+	gap: 5vh;
+	align-items: center;
+	text-align: center;
+	justify-content: center;
+	
+	height: 100vh;
+	padding: 2em;
+	box-sizing: border-box;
 }
 
 #mainLogo {
-	width: 70vw;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+	min-height: 25vh;
+	max-height: 35vh;
 	filter: drop-shadow(0 .2em 0.3em black);
+	flex-grow: 1;
 }
 
 #centerRoomCodeDiv {
@@ -63,6 +55,11 @@ h1 {
 	width: 2em;
 }
 
+#mainNavigation {
+	width: 100%;
+	min-height: 5em
+}
+
 #rulesButton {
 	background-color: var(--theme-shadow);
 	color: #eee;
@@ -75,22 +72,12 @@ h1 {
 	width: fit-content;
 }
 
-.textSettingInputDiv {
-	display: flex;
-	width: 100%;
-	gap: 1em;
-}
-
-.textSettingInputDiv :first-child {
-	white-space: nowrap;
-	flex-grow: 1;
-}
-
-.textSettingInputDiv :last-child {
-	width: 100%;
-}
-
 #deckMakerButton, #settingsButton {
+	position: absolute;
+	top: 0;
+	width: 20vw;
+	height: 1.5em;
+	
 	color: inherit;
 	text-decoration: none;
 	
@@ -99,21 +86,11 @@ h1 {
 	border-top: none;
 	border-radius: 0 0 1em 1em;
 	text-align: center;
-	cursor: default;
+	cursor: pointer;
 }
-
 #deckMakerButton {
-	position: absolute;
 	right: 2vw;
-	top: 0;
-	width: 20vw;
-	height: 1.5em;
 }
-
 #settingsButton {
-	position: absolute;
 	left: 2vw;
-	top: 0;
-	width: 20vw;
-	height: 1.5em;
 }

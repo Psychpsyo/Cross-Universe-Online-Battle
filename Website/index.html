@@ -17,9 +17,7 @@
 		<!--MAIN PAGE-->
 		<div id="roomCodeEntry">
 			<div id="centerDiv">
-				<div id="mainLogoContainer">
-					<img id="mainLogo" src="/images/logo.png" alt="">
-				</div>
+				<img id="mainLogo" src="/images/logo.png" alt="">
 				<main id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
 					<span id="roomCodeInputFieldSpan">
 						<h1 id="roomCodeInputTitle">Connect through Room Code</h1><br>
@@ -36,20 +34,22 @@
 						<span id="trWaitingForOpponent" aria-live="polite" aria-atomic="true">Waiting for Opponent...</span><br>
 						<button id="cancelWaitingBtn">Cancel</button>
 					</span>
-				</main><br>
-				<a id="rulesButton" href="/rules.html" target="_blank">
-					Game Rules
-				</a>
+				</main>
+				<nav id="mainNavigation">
+					<a id="rulesButton" href="/rules.html" target="_blank">
+						Game Rules
+					</a>
+					<a id="settingsButton" href="/settings">
+						Settings
+					</a>
+					<a id="deckMakerButton" href="/deckMaker">
+						Open Deck Creator
+					</a>
+				</nav>
 			</div>
-			<a id="settingsButton" href="/settings">
-				Settings
-			</a>
-			<a id="deckMakerButton" href="/deckMaker">
-				Open Deck Creator
-			</a>
-			<div id="unofficialNotice">
+			<footer id="unofficialNotice">
 				This site is an unofficial, fan-made implementation of Cross Universe. Visit the official page at <a href="https://www.crossuniverse.jp">crossuniverse.jp</a>!
-			</div>
+			</footer>
 		</div>
 		
 		<!--IN-GAME-->
