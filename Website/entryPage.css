@@ -49,17 +49,18 @@ body {
 	background-color: var(--theme-shadow);
 	border: 2px #eee solid;
 	border-radius: 1em;
-	padding: 1em;
+	padding: .5em 1em;
 	margin: 0 auto;
 	width: fit-content;
 }
 
-#roomCodeRefresh {
-	width: 2em;
+h1 {
+	all: unset;
+	font-weight: bold;
 }
 
-#waitingForOpponentSpan {
-	display: none;
+#roomCodeRefresh {
+	width: 2em;
 }
 
 #rulesButton {

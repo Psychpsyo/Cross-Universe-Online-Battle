@@ -2,14 +2,15 @@
 let defaultRoomCode = 10000 + (Math.floor(Math.random() * 90000));
 document.getElementById("roomCodeInputField").placeholder = defaultRoomCode;
 // if no room code filled in, fill in the default
-if (document.getElementById("roomCodeInputField").value == "") {
-	document.getElementById("roomCodeInputField").value = defaultRoomCode;
+if (roomCodeInputField.value == "") {
+	roomCodeInputField.value = defaultRoomCode;
 }
 // refresh button refreshes default room code
 document.getElementById("roomCodeRefresh").addEventListener("click", function() {
 	defaultRoomCode = 10000 + (Math.floor(Math.random() * 90000));
-	document.getElementById("roomCodeInputField").placeholder = defaultRoomCode;
-	document.getElementById("roomCodeInputField").value = defaultRoomCode;
+	roomCodeInputField.placeholder = defaultRoomCode;
+	roomCodeInputField.value = defaultRoomCode;
+	roomCodeInputField.setAttribute("aria-live", "polite");
 });
 
 function cardIdToLocal(cardId) {
@@ -344,9 +345,13 @@ function connect() {
 		socket.addEventListener("message", receiveMessage);
 		
 		// hide input field and show waiting indicator
-		roomCodeInputFieldSpan.style.display = "none";
-		waitingForOpponentSpan.style.display = "inline";
-		// TODO: Make screenreader read out the connecting message
+		roomCodeInputFieldSpan.setAttribute("hidden", "");
+		waitingForOpponentSpan.removeAttribute("hidden");
+		// refresh the "Waiting for Opponent" text so screen readers read it out.
+		setTimeout(() => {
+			trWaitingForOpponent.textContent = locale["waitingForOpponent"];
+			cancelWaitingBtn.focus();
+		}, 100);
 	}
 }
 // pressing enter in the roomcode entry field to connect
@@ -359,11 +364,11 @@ document.getElementById("roomCodeInputField").addEventListener("keyup", function
 document.getElementById("connectBtn").addEventListener("click", connect);
 // canceling a connection
 document.getElementById("cancelWaitingBtn").addEventListener("click", function() {
-			roomcode = "";
-			socket.close();
-			waitingForOpponentSpan.style.display = "none";
-			roomCodeInputFieldSpan.style.display = "inline";
-			roomCodeInputField.focus();
+	roomcode = "";
+	socket.close();
+	waitingForOpponentSpan.setAttribute("hidden", "");
+	roomCodeInputFieldSpan.removeAttribute("hidden");
+	roomCodeInputField.focus();
 });
 
 // sending cursor updates

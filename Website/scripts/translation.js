@@ -1,7 +1,5 @@
 let locale = {};
 
-document.documentElement.lang = localStorage.getItem("language");
-
 fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 .then(response => {
 	return response.json()
@@ -9,6 +7,7 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 .then(jsonData => {
 	locale = jsonData;
 	
+	roomCodeInputTitle.textContent = locale["roomCodeInputTitle"];
 	document.getElementById("roomCodeInputLabel").textContent = locale["enterRoomcode"];
 	document.getElementById("roomCodeRefresh").setAttribute("aria-label", locale["rerollRoomcode"]);
 	
@@ -99,4 +98,7 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	
 	// draft game
 	document.getElementById("draftStartButton").textContent = locale["draft"]["startGame"];
+	
+	document.documentElement.lang = localStorage.getItem("language");
+	document.documentElement.removeAttribute("aria-busy");
 });

@@ -157,6 +157,10 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	// starting hand generator
 	document.getElementById("handGeneratorTitle").textContent = locale["deckMaker"]["startingHandGenerator"]["title"];
 	document.getElementById("regenerateStartingHand").textContent = locale["deckMaker"]["startingHandGenerator"]["redraw"];
+	
+	
+	document.documentElement.lang = localStorage.getItem("language");
+	document.documentElement.removeAttribute("aria-busy");
 });
 
 //track shift key

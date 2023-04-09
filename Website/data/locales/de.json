@@ -1,6 +1,7 @@
 {
 	"warnings": ["noRules", "noCards"],
 	"code": "de",
+	"roomCodeInputTitle": "Mit Raum-Code verbinden",
 	"enterRoomcode": "Raum-Code:",
 	"rerollRoomcode": "Zufälligen Raum-Code generieren",
 	"connectToRoom": "Verbinden",
@@ -109,6 +110,7 @@
 				"noCards": "Die Karten gibt es in dieser Sprache nicht. Englische Karten werden gezeigt.",
 				"partialCards": "Es gibt in dieser Sprache nicht alle Karten. Fehlende Karten werden auf Englisch sein."
 			},
+			"languageWarningName": "Achtung:",
 			"partnerChoice": "Immer die Wahl des Partners geben",
 			"autoClosePreview": "Kartenvorschau durch Danebenklicken schließen"
 		},

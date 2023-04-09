@@ -11,6 +11,10 @@ html {
 	background-color: var(--theme-shadow);
 }
 
+h1 {
+	all: unset;
+}
+
 #deckMakerPanels {
 	display: flex;
 	justify-content: space-between;

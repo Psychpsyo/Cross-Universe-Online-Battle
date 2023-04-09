@@ -74,8 +74,9 @@ function setLanguage(language) {
 		languageSelectorDiv.style.marginBottom = 0;
 		if (locale.warnings.length > 0) {
 			for (const warning of locale.warnings) {
-				let template = document.getElementById(warning == "incomplete"? "langWarningLink" : "langWarning").content.firstElementChild.cloneNode(true);;
+				let template = document.getElementById(warning == "incomplete"? "langWarningLink" : "langWarning").content.firstElementChild.cloneNode(true);
 				template.querySelector(".warningText").textContent = locale["settings"]["general"]["languageWarnings"][warning];
+				template.querySelector(".warningNoteIcon").setAttribute("aria-label", locale["settings"]["general"]["languageWarningName"]);
 				languageWarnings.appendChild(template);
 				languageWarnings.appendChild(document.createElement("br"));
 			}
@@ -129,6 +130,9 @@ function setLanguage(language) {
 		resetDefaultHotkeys.textContent = locale["settings"]["hotkeys"]["resetHotkeys"];
 		
 		relabelAllHotkeys();
+		
+		document.documentElement.lang = localStorage.getItem("language");
+		document.documentElement.removeAttribute("aria-busy");
 	});
 }
 

@@ -1,6 +1,7 @@
 {
 	"warnings": [],
 	"code": "en",
+	"roomCodeInputTitle": "Connect through Room Code",
 	"enterRoomcode": "Room Code:",
 	"rerollRoomcode": "Generate random room code",
 	"connectToRoom": "Connect",
@@ -109,6 +110,7 @@
 				"noCards": "The cards are not available in this language. English cards will be shown.",
 				"partialCards": "Not all cards are available in this language. Missing cards will be in English."
 			},
+			"languageWarningName": "Note:",
 			"partnerChoice": "Always give Partner Choice",
 			"autoClosePreview": "Close Card Preview When Clicking off of It"
 		},

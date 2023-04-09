@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html aria-busy="true">
 	<head>
 		<meta charset="utf-8"/>
 		<title>Cross Universe Online Battle</title>
@@ -18,12 +18,13 @@
 		<div id="roomCodeEntry">
 			<div id="centerDiv">
 				<div id="mainLogoContainer">
-					<img id="mainLogo" src="/images/logo.png" alt="Cross Universe Online Battle">
+					<img id="mainLogo" src="/images/logo.png" alt="">
 				</div>
-				<div id="centerRoomCodeDiv">
+				<main id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
 					<span id="roomCodeInputFieldSpan">
+						<h1 id="roomCodeInputTitle">Connect through Room Code</h1><br>
 						<label for="roomCodeInputField" id="roomCodeInputLabel">Room Code:</label>
-						<span><input id="roomCodeInputField" aria-live="polite" aria-atomic="true"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
+						<span><input id="roomCodeInputField" aria-atomic="true"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
 						<label for="gameModeSelect" id="gameModeSelectorLabel">Gamemode:</label>
 						<select id="gameModeSelect" autocomplete="off">
 							<option id="gameModeNormalOption" value="normal">Normal</option>
@@ -31,12 +32,12 @@
 						</select><br>
 						<button id="connectBtn">Connect</button>
 					</span>
-					<span id="waitingForOpponentSpan">
-						<span id="trWaitingForOpponent">Waiting for Opponent...</span><br>
+					<span id="waitingForOpponentSpan" hidden>
+						<span id="trWaitingForOpponent" aria-live="polite" aria-atomic="true">Waiting for Opponent...</span><br>
 						<button id="cancelWaitingBtn">Cancel</button>
 					</span>
-				</div><br>
-				<a id="rulesButton" href="/rules.html" target="_blank" role="button">
+				</main><br>
+				<a id="rulesButton" href="/rules.html" target="_blank">
 					Game Rules
 				</a>
 			</div>
