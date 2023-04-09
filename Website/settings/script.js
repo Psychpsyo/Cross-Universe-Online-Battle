@@ -53,6 +53,7 @@ async function relabelAllHotkeys() {
 
 // custom font helper
 function updateCustomFontInputDiv() {
+	customFontInput.value = localStorage.getItem("customFont");
 	customFontInputDiv.style.display = fontSelector.value == "custom"? "block" : "none";
 	(fontSelector.value == "custom"? fontSettingsRow : fontSelector).after(customFontInputDiv);
 }
