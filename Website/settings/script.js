@@ -21,7 +21,7 @@ async function hotkeyToString(hotkey) {
 	keyName = keyName[0].toUpperCase() + keyName.substring(1);
 	return (hotkey.ctrl? locale["settings"]["hotkeys"]["keyCtrl"] + " + " : "") + (hotkey.shift? locale["settings"]["hotkeys"]["keyShift"] + " + " : "") + (hotkey.alt? locale["settings"]["hotkeys"]["keyAlt"] + " + " : "") + keyName;
 }
-// colors repeat hotkeys in red
+// coloring repeat hotkeys in red
 function validateHotkeys() {
 	let seenHotkeys = [];
 	for (const [name, hotkey] of Object.entries(JSON.parse(localStorage.getItem("hotkeys")))) {
@@ -49,6 +49,12 @@ async function relabelAllHotkeys() {
 	for (const [name, hotkey] of Object.entries(JSON.parse(localStorage.getItem("hotkeys")))) {
 		document.getElementById(hotkeyToId(name)).textContent = await hotkeyToString(hotkey);
 	}
+}
+
+// custom font helper
+function updateCustomFontInputDiv() {
+	customFontInputDiv.style.display = fontSelector.value == "custom"? "block" : "none";
+	(fontSelector.value == "custom"? fontSettingsRow : fontSelector).after(customFontInputDiv);
 }
 
 // translation
@@ -103,6 +109,8 @@ function setLanguage(language) {
 		Array.from(fontSelector.children).forEach(font => {
 			font.textContent = locale["settings"]["accessibility"]["fonts"][font.value];
 		});
+		customFontLabel.textContent = locale["settings"]["accessibility"]["customFont"];
+		customFontInput.placeholder = locale["settings"]["accessibility"]["customFontPlaceholder"];
 		
 		hotkeysHeading.textContent = locale["settings"]["hotkeys"]["title"];
 		hotkeyShowYourDiscardLabel.textContent = locale["settings"]["hotkeys"]["showYourDiscardPile"];
@@ -138,6 +146,7 @@ fieldLeftToggle.checked = localStorage.getItem("fieldLeftToggle") === "true";
 themeSelector.value = localStorage.getItem("theme");
 
 fontSelector.value = localStorage.getItem("font");
+updateCustomFontInputDiv();
 
 setLanguage(languageSelector.value);
 validateHotkeys();
@@ -175,6 +184,12 @@ themeSelector.addEventListener("change", function() {
 
 fontSelector.addEventListener("change", function() {
 	applyFont(this.value);
+	updateCustomFontInputDiv();
+});
+customFontInput.addEventListener("change", function() {
+	fonts.custom = this.value;
+	applyFont("custom");
+	localStorage.setItem("customFont", this.value);
 });
 
 // for hotkeys

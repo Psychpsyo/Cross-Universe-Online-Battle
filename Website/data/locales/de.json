@@ -141,8 +141,11 @@
 				"default": "Standard",
 				"atkinsonHyperlegible": "Atkinson Hyperlegible",
 				"openDyslexic": "OpenDyslexic",
-				"comicSans": "Comic Sans"
-			}
+				"comicSans": "Comic Sans",
+				"custom": "Benutzerdefiniert"
+			},
+			"customFont": "Name der Schriftart:",
+			"customFontPlaceholder": "Keine Benutzerdefinierte Schriftart gewählt."
 		},
 		
 		"hotkeys": {
