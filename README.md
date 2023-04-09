@@ -24,4 +24,8 @@ Even though the code in this repo is licensed under the MIT License, the copyrig
 That means the MIT license cannot cover parts of the game itself such as the logo, card backs and field graphic.  
 Those fall under Cross Universe's own license which can be found here: https://crossuniverse.jp/約束事/
 
-They are included in this repo despite that since the site and code would break without them.
+Similarly, the fonts in ``Website/fonts/`` are not covered by the MIT license either. Their licenses can be found here:  
+Atkinson Hyperlegible: [Atkinson Hyperlegible Font License](http://brailleinstitute.org/wp-content/uploads/2020/11/Atkinson-Hyperlegible-Font-License-2020-1104.pdf)
+OpenDyslexic: [SIL-OFL License](https://github.com/antijingoist/opendyslexic/blob/master/OFL.txt)
+
+These things are included in this repo despite that since the site and code would break without them.

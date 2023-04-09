@@ -11,7 +11,7 @@ async function hotkeyToString(hotkey) {
 	if (hotkey.keyCode === "") {
 		return "---";
 	}
-	let keyName = locale["settings"]["keys"][hotkey.keyCode];
+	let keyName = locale["settings"]["hotkeys"]["keys"][hotkey.keyCode];
 	if ("keyboard" in navigator) {
 		// Keyboard API works on Chrome already, but not in Firefox. :(
 		// My own system is used in addition to it since, even on Chrome, the API has far from all the keys.
@@ -19,7 +19,7 @@ async function hotkeyToString(hotkey) {
 	}
 	keyName = keyName ?? "?";
 	keyName = keyName[0].toUpperCase() + keyName.substring(1);
-	return (hotkey.ctrl? locale["settings"]["keyCtrl"] + " + " : "") + (hotkey.shift? locale["settings"]["keyShift"] + " + " : "") + (hotkey.alt? locale["settings"]["keyAlt"] + " + " : "") + keyName;
+	return (hotkey.ctrl? locale["settings"]["hotkeys"]["keyCtrl"] + " + " : "") + (hotkey.shift? locale["settings"]["hotkeys"]["keyShift"] + " + " : "") + (hotkey.alt? locale["settings"]["hotkeys"]["keyAlt"] + " + " : "") + keyName;
 }
 // colors repeat hotkeys in red
 function validateHotkeys() {
@@ -69,7 +69,7 @@ function setLanguage(language) {
 		if (locale.warnings.length > 0) {
 			for (const warning of locale.warnings) {
 				let template = document.getElementById(warning == "incomplete"? "langWarningLink" : "langWarning").content.firstElementChild.cloneNode(true);;
-				template.querySelector(".warningText").textContent = locale["settings"]["languageWarnings"][warning];
+				template.querySelector(".warningText").textContent = locale["settings"]["general"]["languageWarnings"][warning];
 				languageWarnings.appendChild(template);
 				languageWarnings.appendChild(document.createElement("br"));
 			}
@@ -78,41 +78,47 @@ function setLanguage(language) {
 		
 		title.textContent = locale["settings"]["title"];
 		
-		generalHeading.textContent = locale["settings"]["general"];
-		languageSelectorLabel.textContent = locale["settings"]["language"];
-		partnerChoiceLabel.textContent = locale["settings"]["partnerChoice"];
-		closePreviewToggleLabel.textContent = locale["settings"]["autoClosePreview"];
+		generalHeading.textContent = locale["settings"]["general"]["title"];
+		languageSelectorLabel.textContent = locale["settings"]["general"]["language"];
+		partnerChoiceLabel.textContent = locale["settings"]["general"]["partnerChoice"];
+		closePreviewToggleLabel.textContent = locale["settings"]["general"]["autoClosePreview"];
 		
-		profileHeading.textContent = locale["settings"]["profile"];
-		usernameLabel.textContent = locale["settings"]["username"];
-		usernameInput.placeholder = locale["settings"]["usernamePlaceholder"];
-		cardBackLabel.textContent = locale["settings"]["cardBackLink"];
-		customCardBack.placeholder = locale["settings"]["cardBackLinkPlaceholder"];
+		profileHeading.textContent = locale["settings"]["profile"]["title"];
+		usernameLabel.textContent = locale["settings"]["profile"]["username"];
+		usernameInput.placeholder = locale["settings"]["profile"]["usernamePlaceholder"];
+		cardBackLabel.textContent = locale["settings"]["profile"]["cardBackLink"];
+		customCardBack.placeholder = locale["settings"]["profile"]["cardBackLinkPlaceholder"];
 		
-		customizationHeading.textContent = locale["settings"]["customization"];
-		fieldLabelToggleLabel.textContent = locale["settings"]["fieldLabels"];
-		cardBackToggleLabel.textContent = locale["settings"]["disableCardBacks"];
-		fieldLeftToggleLabel.textContent = locale["settings"]["leftField"];
-		themeSelectorLabel.textContent = locale["settings"]["theme"];
+		customizationHeading.textContent = locale["settings"]["customization"]["title"];
+		fieldLabelToggleLabel.textContent = locale["settings"]["customization"]["fieldLabels"];
+		cardBackToggleLabel.textContent = locale["settings"]["customization"]["disableCardBacks"];
+		fieldLeftToggleLabel.textContent = locale["settings"]["customization"]["leftField"];
+		themeSelectorLabel.textContent = locale["settings"]["customization"]["theme"];
 		Array.from(themeSelector.children).forEach(theme => {
-			theme.textContent = locale["settings"]["themes"][theme.value];
+			theme.textContent = locale["settings"]["customization"]["themes"][theme.value];
 		});
 		
-		hotkeysHeading.textContent = locale["settings"]["hotkeys"];
-		hotkeyShowYourDiscardLabel.textContent = locale["settings"]["showYourDiscardPile"];
-		hotkeyShowOpponentDiscardLabel.textContent = locale["settings"]["showOpponentDiscardPile"];
-		hotkeyShowYourExileLabel.textContent = locale["settings"]["showYourExileZone"];
-		hotkeyShowOpponentExileLabel.textContent = locale["settings"]["showOpponentExileZone"];
-		hotkeyShowDeckLabel.textContent = locale["settings"]["searchYourDeck"];
-		hotkeySelectTokenLabel.textContent = locale["settings"]["tokenSelector"];
-		hotkeyShowFieldLabel.textContent = locale["settings"]["showField"];
-		hotkeyDestroyTokenLabel.textContent = locale["settings"]["destroyGrabbedToken"];
-		hotkeyChatLabel.textContent = locale["settings"]["writeChatMessage"];
-		hotkeyDrawCardLabel.textContent = locale["settings"]["drawCard"];
-		hotkeyShuffleDeckLabel.textContent = locale["settings"]["shuffleDeck"];
-		hotkeyShowDeckTopLabel.textContent = locale["settings"]["showDeckTop"];
-		hotkeyPreviewHandLabel.textContent = locale["settings"]["previewHandCard"];
-		resetDefaultHotkeys.textContent = locale["settings"]["resetHotkeys"];
+		accessibilityHeading.textContent = locale["settings"]["accessibility"]["title"];
+		fontSelectorLabel.textContent = locale["settings"]["accessibility"]["font"];
+		Array.from(fontSelector.children).forEach(font => {
+			font.textContent = locale["settings"]["accessibility"]["fonts"][font.value];
+		});
+		
+		hotkeysHeading.textContent = locale["settings"]["hotkeys"]["title"];
+		hotkeyShowYourDiscardLabel.textContent = locale["settings"]["hotkeys"]["showYourDiscardPile"];
+		hotkeyShowOpponentDiscardLabel.textContent = locale["settings"]["hotkeys"]["showOpponentDiscardPile"];
+		hotkeyShowYourExileLabel.textContent = locale["settings"]["hotkeys"]["showYourExileZone"];
+		hotkeyShowOpponentExileLabel.textContent = locale["settings"]["hotkeys"]["showOpponentExileZone"];
+		hotkeyShowDeckLabel.textContent = locale["settings"]["hotkeys"]["searchYourDeck"];
+		hotkeySelectTokenLabel.textContent = locale["settings"]["hotkeys"]["tokenSelector"];
+		hotkeyShowFieldLabel.textContent = locale["settings"]["hotkeys"]["showField"];
+		hotkeyDestroyTokenLabel.textContent = locale["settings"]["hotkeys"]["destroyGrabbedToken"];
+		hotkeyChatLabel.textContent = locale["settings"]["hotkeys"]["writeChatMessage"];
+		hotkeyDrawCardLabel.textContent = locale["settings"]["hotkeys"]["drawCard"];
+		hotkeyShuffleDeckLabel.textContent = locale["settings"]["hotkeys"]["shuffleDeck"];
+		hotkeyShowDeckTopLabel.textContent = locale["settings"]["hotkeys"]["showDeckTop"];
+		hotkeyPreviewHandLabel.textContent = locale["settings"]["hotkeys"]["previewHandCard"];
+		resetDefaultHotkeys.textContent = locale["settings"]["hotkeys"]["resetHotkeys"];
 		
 		relabelAllHotkeys();
 	});
@@ -130,6 +136,8 @@ fieldLabelToggle.checked = localStorage.getItem("fieldLabelToggle") === "true";
 cardBackToggle.checked = localStorage.getItem("cardBackToggle") === "true";
 fieldLeftToggle.checked = localStorage.getItem("fieldLeftToggle") === "true";
 themeSelector.value = localStorage.getItem("theme");
+
+fontSelector.value = localStorage.getItem("font");
 
 setLanguage(languageSelector.value);
 validateHotkeys();
@@ -165,6 +173,10 @@ themeSelector.addEventListener("change", function() {
 	applyTheme(this.value);
 });
 
+fontSelector.addEventListener("change", function() {
+	applyFont(this.value);
+});
+
 // for hotkeys
 resetDefaultHotkeys.addEventListener("click", function() {
 	localStorage.setItem("hotkeys", JSON.stringify(hotkeyDefaults));
@@ -177,7 +189,7 @@ Array.from(document.querySelectorAll(".keybind")).forEach(button => {
 	button.addEventListener("click", function() {
 		editingHotkey = button.id;
 		button.classList.remove("invalidHotkey");
-		button.textContent = locale["settings"]["pressKey"];
+		button.textContent = locale["settings"]["hotkeys"]["pressKey"];
 	});
 });
 
@@ -214,7 +226,7 @@ document.addEventListener("keydown", function(e) {
 		case "ControlRight":
 		case "AltLeft":
 		case "AltRight": {
-			document.getElementById(editingHotkey).textContent = (e.ctrlKey? locale["settings"]["keyCtrl"] + " + " : "") + (e.shiftKey? locale["settings"]["keyShift"] + " + " : "") + (e.altKey? locale["settings"]["keyAlt"] + " + " : "");
+			document.getElementById(editingHotkey).textContent = (e.ctrlKey? locale["settings"]["hotkeys"]["keyCtrl"] + " + " : "") + (e.shiftKey? locale["settings"]["hotkeys"]["keyShift"] + " + " : "") + (e.altKey? locale["settings"]["hotkeys"]["keyAlt"] + " + " : "");
 			return;
 		}
 		default: {
@@ -245,9 +257,9 @@ document.addEventListener("keyup", function(e) {
 		case "ControlRight":
 		case "AltLeft":
 		case "AltRight": {
-			document.getElementById(editingHotkey).textContent = (e.ctrlKey? locale["settings"]["keyCtrl"] + " + " : "") + (e.shiftKey? locale["settings"]["keyShift"] + " + " : "") + (e.altKey? locale["settings"]["keyAlt"] + " + " : "");
+			document.getElementById(editingHotkey).textContent = (e.ctrlKey? locale["settings"]["hotkeys"]["keyCtrl"] + " + " : "") + (e.shiftKey? locale["settings"]["hotkeys"]["keyShift"] + " + " : "") + (e.altKey? locale["settings"]["hotkeys"]["keyAlt"] + " + " : "");
 			if (document.getElementById(editingHotkey).textContent == "") {
-				document.getElementById(editingHotkey).textContent = locale["settings"]["pressKey"];
+				document.getElementById(editingHotkey).textContent = locale["settings"]["hotkeys"]["pressKey"];
 			}
 			return;
 		}

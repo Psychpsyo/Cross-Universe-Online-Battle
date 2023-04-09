@@ -362,7 +362,6 @@ img[src$="cardBackFrameP1.png"] {
 	width: 95%;
 	z-index: 1;
 	
-	background-color: #0005;
 	border-radius: 1em;
 	
 	transition-property: background;
@@ -404,18 +403,18 @@ img[src$="cardBackFrameP1.png"] {
 #hand0 {
 	top: -11vh;
 	flex-direction: row-reverse;
-	background: linear-gradient(rgba(0, 0, 0, 0.333) 50%, rgba(0, 0, 0, 0.333) 80%);
+	background: linear-gradient(var(--theme-shadow) 50%, var(--theme-shadow) 80%);
 }
 #hand0.shown {
-	background: linear-gradient(rgb(42, 72, 130) 50%, rgba(0, 0, 0, 0.333) 80%);
+	background: linear-gradient(rgb(42, 72, 130) 50%, var(--theme-shadow) 80%);
 }
 
 #hand1 {
 	bottom: -11vh;
-	background: linear-gradient(rgba(0, 0, 0, 0.333) 20%, rgba(0, 0, 0, 0.333) 50%);
+	background: linear-gradient(var(--theme-shadow) 20%, var(--theme-shadow) 50%);
 }
 #hand1.shown {
-	background: linear-gradient(rgba(0, 0, 0, 0.333) 20%, rgb(42, 72, 130) 50%);
+	background: linear-gradient(var(--theme-shadow) 20%, rgb(42, 72, 130) 50%);
 }
 
 #deckDropzone {

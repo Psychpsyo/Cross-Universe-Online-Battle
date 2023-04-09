@@ -14,21 +14,21 @@ var themes = {
 		"background": null,
 		"backgroundY": "center",
 		"fieldDropShadow": false,
-		"shadowColor": "transparent",
+		"shadowColor": "#0005",
 		"textShadow": "none"
 	},
 	"worldTree": {
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/ホームページ背景2.jpg",
 		"backgroundY": "top",
 		"fieldDropShadow": true,
-		"shadowColor": "rgba(0, 0, 0, 0.5)",
+		"shadowColor": "rgba(0, 0, 0, 0.7)",
 		"textShadow": "2px 2px 2px black"
 	},
 	"deepSea": {
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/6501dd551fcd4880fce262e4993896a8.png",
 		"backgroundY": "10%",
 		"fieldDropShadow": true,
-		"shadowColor": "rgba(0, 0, 0, 0.5)",
+		"shadowColor": "rgba(0, 0, 0, 0.7)",
 		"textShadow": "2px 2px 2px black"
 	}
 }
@@ -41,6 +41,19 @@ function applyTheme(theme) {
 	document.documentElement.style.setProperty("--theme-text-shadow", themes[theme].textShadow);
 }
 applyTheme(localStorage.getItem("theme") ?? "default");
+
+// accessibility
+var fonts = {
+	"default": "游ゴシック",
+	"atkinsonHyperlegible": "Atkinson Hyperlegible",
+	"openDyslexic": "OpenDyslexic",
+	"comicSans": "Comic Sans MS",
+}
+function applyFont(font) {
+	localStorage.setItem("font", font);
+	document.documentElement.style.setProperty("--custom-font", fonts[font]);
+}
+applyFont(localStorage.getItem("font") ?? "default");
 
 // hotkeys
 let hotkeyDefaults = {
