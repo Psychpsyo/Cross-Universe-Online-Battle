@@ -18,7 +18,7 @@
 	},
 	
 	"settingsButton": "Settings",
-	"deckCreatorButton": "Open Deck Creator",
+	"deckCreatorButton": "Deck Creator",
 	
 	"infoYou": "You",
 	"infoOpponent": "Opponent",
@@ -389,7 +389,7 @@
 	"cardDetailsEffects": "Effects: ",
 	"cardDetailsInfoString": "Lv{#LEVEL} {#CARDTYPE}",
 	"cardDetailsQuestionMark": "?",
-	"unitCardDetailType": "Unit Card",
+	"unitCardDetailType": "Unit",
 	"tokenCardDetailType": "Token",
 	"standardSpellCardDetailType": "Standard Spell",
 	"continuousSpellCardDetailType": "Continuous Spell",

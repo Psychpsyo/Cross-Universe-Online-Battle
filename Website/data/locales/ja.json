@@ -18,7 +18,7 @@
 	},
 	
 	"settingsButton": "Settings",
-	"deckCreatorButton": "Open Deck Creator",
+	"deckCreatorButton": "Deck Creator",
 	
 	"infoYou": "自分",
 	"infoOpponent": "相手",
@@ -45,7 +45,7 @@
 	"life": "Lp",
 	"mana": "魔力",
 	
-	"roomCode": "対戦ID： ",
+	"roomCode": "対戦ID：",
 	"roomCodeShow": "表示する",
 	"roomCodeHide": "非表示にする",
 	"roomCodeHidden": "非表示中",
@@ -98,8 +98,8 @@
 		"opponentDeck": "相手のデッキ"
 	},
 	
-	"cardAltText": "{#NAME},レベル{#LEVEL}{#CARDTYPE},\n{#TYPES},\n効果：\n{#EFFECTS}",
-	"unitAltText": "{#NAME},レベル{#LEVEL}{#CARDTYPE},\n{#ATK}attack,{#DEF}defense,\n{#TYPES},\n効果：\n{#EFFECTS}",
+	"cardAltText": "{#NAME}、レベル{#LEVEL}{#CARDTYPE}、\n{#TYPES}、\n効果：\n{#EFFECTS}",
+	"unitAltText": "{#NAME}、レベル{#LEVEL}{#CARDTYPE}、\n{#ATK}攻撃力、{#DEF}防御力、\n{#TYPES}、\n効果：\n{#EFFECTS}",
 	
 	"settings": {
 		"title": "Settings",
