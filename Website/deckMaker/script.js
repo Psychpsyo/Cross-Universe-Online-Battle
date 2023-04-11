@@ -96,6 +96,7 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	document.getElementById("recentCardsHeaderBtn").textContent = locale["deckMaker"]["deckMenu"]["recentCardsTitle"];
 	
 	document.getElementById("deckMakerDetailsName").textContent = locale["deckMaker"]["deckMenu"]["name"];
+	document.getElementById("deckMakerDetailsNameInput").placeholder = locale["deckMaker"]["deckMenu"]["namePlaceholder"];
 	document.getElementById("deckMakerDetailsDescription").textContent = locale["deckMaker"]["deckMenu"]["description"];
 	document.getElementById("deckMakerDetailsPartner").textContent = locale["deckMaker"]["deckMenu"]["partner"];
 	
@@ -160,6 +161,8 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	});
 	
 	//card info panel
+	document.getElementById("cardInfoPanelContent").setAttribute("aria-label", locale["deckMaker"]["cardInfo"]["title"]);
+	document.getElementById("cardInfoGeneralSection").setAttribute("aria-label", locale["deckMaker"]["cardInfo"]["generalSection"]);
 	document.getElementById("cardInfoReleaseDateLabel").textContent = locale["deckMaker"]["cardInfo"]["released"];
 	document.getElementById("cardInfoIllustratorLabel").textContent = locale["deckMaker"]["cardInfo"]["illustrator"];
 	document.getElementById("cardInfoIdeaLabel").textContent = locale["deckMaker"]["cardInfo"]["idea"];
@@ -254,7 +257,9 @@ function searchCards(query) {
 	.then(response => {
 		JSON.parse(response).forEach(card => {
 			cardInfoCache[card.cardID] = card;
-			document.getElementById(card.cardType + "Grid").appendChild(createCardButton(card, true));
+			let listItem = document.createElement("li");
+			listItem.appendChild(createCardButton(card, true));
+			document.getElementById(card.cardType + "Grid").appendChild(listItem);
 		});
 	});
 }

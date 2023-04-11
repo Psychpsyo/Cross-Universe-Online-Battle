@@ -289,7 +289,7 @@
 		"deck": "Deck",
 		"search": "Suche",
 		
-		"seachResults": "Suchergebnisse",
+		"searchResults": "Suchergebnisse",
 		"unitTokenColumn": "Einheiten-/Tokenspalte",
 		"spellColumn": "Zauberspalte",
 		"itemColumn": "Itemspalte",
@@ -336,6 +336,8 @@
 		},
 		
 		"cardInfo": {
+			"title": "Karteninfo",
+			"generalSection": "Allgemeine Infos",
 			"released": "Erschienen:",
 			"illustrator": "Illustrator:",
 			"idea": "Idee:",
@@ -353,8 +355,9 @@
 			"recentCardsTitle": "Zuletzt Benutzte Karten",
 			
 			"name": "Deckname:",
+			"namePlaceholder": "Neues Deck",
 			"description": "Beschreibung:",
-			"partner": "Partner:",
+			"partner": "Partnerkarte:",
 			
 			"cardTotal": "Gesamt:",
 			"unitTotal": "Einheiten:",

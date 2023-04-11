@@ -23,39 +23,39 @@
 			<section id="deckMakerUnits" aria-label="Unit/Token Column">
 				<section id="unitList" aria-labelledBy="unitHeader">
 					<h2 id="unitHeader" class="deckMakerHeader">Units</h2>
-					<div id="unitGrid" class="deckMakerGrid cardList"></div>
+					<ul id="unitGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 				<section id="tokenList" aria-labelledBy="tokenHeader">
 					<h2 id="tokenHeader" class="deckMakerHeader">Tokens</h2>
-					<div id="tokenGrid" class="deckMakerGrid cardList"></div>
+					<ul id="tokenGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 			</section>
 			<section id="deckMakerSpells" aria-label="Spell Column">
 				<section id="standardSpellList" aria-labelledBy="standardSpellHeader">
 					<h2 id="standardSpellHeader" class="deckMakerHeader">Standard Spells</h2>
-					<div id="standardSpellGrid" class="deckMakerGrid cardList"></div>
+					<ul id="standardSpellGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 				<section id="continuousSpellList" aria-labelledBy="continuousSpellHeader">
 					<h2 id="continuousSpellHeader" class="deckMakerHeader">Continuous Spells</h2>
-					<div id="continuousSpellGrid" class="deckMakerGrid cardList"></div>
+					<ul id="continuousSpellGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 				<section id="enchantSpellList" aria-labelledBy="enchantSpellHeader">
 					<h2 id="enchantSpellHeader" class="deckMakerHeader">Enchant Spells</h2>
-					<div id="enchantSpellGrid" class="deckMakerGrid cardList"></div>
+					<ul id="enchantSpellGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 			</section>
 			<section id="deckMakerItems" aria-label="Item Column">
 				<section id="standardItemList" aria-labelledBy="standardItemHeader">
 					<h2 id="standardItemHeader" class="deckMakerHeader">Standard Items</h2>
-					<div id="standardItemGrid" class="deckMakerGrid cardList"></div>
+					<ul id="standardItemGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 				<section id="continuousItemList" aria-labelledBy="continuousItemHeader">
 					<h2 id="continuousItemHeader" class="deckMakerHeader">Continuous Items</h2>
-					<div id="continuousItemGrid" class="deckMakerGrid cardList"></div>
+					<ul id="continuousItemGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 				<section id="equipableItemList" aria-labelledBy="equipableItemHeader">
 					<h2 id="equipableItemHeader" class="deckMakerHeader">Equipable Items</h2>
-					<div id="equipableItemGrid" class="deckMakerGrid cardList"></div>
+					<ul id="equipableItemGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 			</section>
 		</section>
@@ -181,7 +181,7 @@
 						<header><h3 id="deckDetailsHeader">Details</h3></header>
 						<div class="deckCreatorScrollArea">
 							<div class="optionListingItem">
-								<label for="deckMakerDetailsNameInput" id="deckMakerDetailsName">Deck Name:</label><input id="deckMakerDetailsNameInput" type="text" autocomplete="off" placeholder="New Deck">
+								<label for="deckMakerDetailsNameInput" id="deckMakerDetailsName">Deck Name:</label><input id="deckMakerDetailsNameInput" type="text" autocomplete="off" placeholder="New Deck" data-form-type="other">
 							</div>
 							<div class="optionListingItem">
 								<label for="deckMakerDetailsPartnerSelect" id="deckMakerDetailsPartner">Partner:</label>
@@ -273,35 +273,37 @@
 		
 		<!--card info panel-->
 		<dialog id="cardInfoPanel" aria-labelledBy="cardInfoCardName">
-			<div id="cardInfoPanelContent" class="dialogContent">
+			<section id="cardInfoPanelContent" class="dialogContent" aria-label="Card Info">
 				<header><h2 id="cardInfoCardName">Card Name Here</h2></header>
 				<div id="cardInfoMainArea" class="dialogScrollArea">
-					<div id="cardInfoImgArea">
-						<img id="cardInfoCardImg" src="" alt=""><br>
-						<span id="cardInfoCardID">CUU00000</span>
-					</div><br>
-					<span id="cardInfoReleaseDateArea"><span id="cardInfoReleaseDateLabel">Released:</span> <span id="cardInfoReleaseDate"></span><br></span>
-					<span id="cardInfoIllustratorArea"><span id="cardInfoIllustratorLabel">Illustrator:</span> <span id="cardInfoIllustrator"></span><br></span>
-					<span id="cardInfoIdeaArea"><span id="cardInfoIdeaLabel">Idea:</span> <span id="cardInfoIdea"></span><br></span>
-					<div id="cardInfoMentionedArea">
-						<span id="cardInfoMentionedHeader">Mentioned Cards:</span>
+					<section id="cardInfoGeneralSection" aria-label="General Info">
+						<div id="cardInfoImgArea">
+							<img id="cardInfoCardImg" src="" alt=""><br>
+							<span id="cardInfoCardID">CUU00000</span>
+						</div><br>
+						<span id="cardInfoReleaseDateArea"><span id="cardInfoReleaseDateLabel">Released:</span> <span id="cardInfoReleaseDate"></span><br></span>
+						<span id="cardInfoIllustratorArea"><span id="cardInfoIllustratorLabel">Illustrator:</span> <span id="cardInfoIllustrator"></span><br></span>
+						<span id="cardInfoIdeaArea"><span id="cardInfoIdeaLabel">Idea:</span> <span id="cardInfoIdea"></span></span>
+					</section>
+					<section id="cardInfoMentionedArea" aria-labelledBy="cardInfoMentionedHeader">
+						<h3 id="cardInfoMentionedHeader">Mentioned Cards:</h3>
 						<div id="cardInfoMentionedGrid" class="cardInfoGrid cardList"></div>
-					</div>
-					<div id="cardInfoMentionedOnArea">
-						<span id="cardInfoMentionedOnHeader">Mentioned On:</span>
+					</section>
+					<section id="cardInfoMentionedOnArea" aria-labelledBy="cardInfoMentionedOnHeader">
+						<h3 id="cardInfoMentionedOnHeader">Mentioned On:</h3>
 						<div id="cardInfoMentionedOnGrid" class="cardInfoGrid cardList"></div>
-					</div>
-					<div id="cardInfoVisibleArea">
-						<span id="cardInfoVisibleHeader">Visible Cards:</span>
+					</section>
+					<section id="cardInfoVisibleArea" aria-labelledBy="cardInfoVisibleHeader">
+						<h3 id="cardInfoVisibleHeader">Visible Cards:</h3>
 						<div id="cardInfoVisibleGrid" class="cardInfoGrid cardList"></div>
-					</div>
-					<div id="cardInfoVisibleOnArea">
-						<span id="cardInfoVisibleOnHeader">Appears On:</span>
+					</section>
+					<section id="cardInfoVisibleOnArea" aria-labelledBy="cardInfoVisibleOnHeader">
+						<h3 id="cardInfoVisibleOnHeader">Appears On:</h3>
 						<div id="cardInfoVisibleOnGrid" class="cardInfoGrid cardList"></div>
-					</div>
+					</section>
 				</div>
 				<button id="cardInfoToDeck">Add Card To Deck</button>
-			</div>
+			</section>
 		</dialog>
 		
 		<!--starting hand generator panel-->
