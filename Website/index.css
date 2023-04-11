@@ -32,6 +32,7 @@ a {
 	color: #aaf;
 }
 
+/* form controls */
 button, input, select, textarea {
 	font-size: .6em;
 	font-family: inherit;
@@ -39,4 +40,37 @@ button, input, select, textarea {
 
 textarea {
 	resize: none;
+}
+
+
+/* dialogs */
+dialog {
+	max-height: fit-content;
+	overflow: hidden;
+	
+	text-align: center;
+	color: inherit;
+	padding: 0;
+	
+	background-color: #000c;
+	border: 2px #eee solid;
+	border-radius: 1em;
+}
+
+.dialogContent {
+	display: flex;
+	flex-direction: column;
+	height: max-content;
+	max-height: 90vh;
+}
+
+::backdrop {
+	background-color: rgba(1, 1, 1, .5);
+}
+
+dialog header {
+	border-bottom: 2px solid #eee;
+	padding: .3em .5em;
+	text-align: center;
+	white-space: nowrap;
 }

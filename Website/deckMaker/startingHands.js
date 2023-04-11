@@ -1,17 +1,7 @@
 startingHandGenBtn.addEventListener("click", function() {
-	startingHandOverlayBlocker.style.display = "block";
-	startingHandGenerator.style.display = "block";
+	startingHandGenerator.showModal();
 	generateStartingHand();
 });
-
-function closeStartingHandGenerator() {
-	startingHandGenerator.style.display = "none";
-	startingHandOverlayBlocker.style.display = "none";
-}
-startingHandOverlayBlocker.addEventListener("click", function() {
-	closeStartingHandGenerator();
-});
-
 function generateStartingHand() {
 	startingHandGeneratorCards.innerHTML = "";
 	let cards = [...deckList];

@@ -98,6 +98,9 @@
 		"opponentDeck": "Opponent Deck"
 	},
 	
+	"cardAltText": "{#NAME}, level {#LEVEL} {#CARDTYPE},\n{#TYPES},\nEffects:\n{#EFFECTS}",
+	"unitAltText": "{#NAME}, level {#LEVEL} {#CARDTYPE},\n{#ATK} Attack, {#DEF} Defense,\n{#TYPES},\nEffects:\n{#EFFECTS}",
+	
 	"settings": {
 		"title": "Settings",
 		
@@ -286,6 +289,10 @@
 		"deck": "Deck",
 		"search": "Search",
 		
+		"seachResults": "Search Results",
+		"unitTokenColumn": "Unit/Token Column",
+		"spellColumn": "Spell Column",
+		"itemColumn": "Item Column",
 		"units": "Units",
 		"tokens": "Tokens",
 		"standardSpells": "Standard Spells",
@@ -296,14 +303,22 @@
 		"equipableItems": "Equipable Items",
 		
 		"searchMenu": {
+			"title": "Card Search",
 			"search": "Search",
 			"cardName": "Card Name:",
+			"cardNamePlaceholder": "Search by card name",
 			"cardId": "Card ID:",
+			"cardIdPlaceholder": "Search by card ID",
 			"attack": "Attack:",
 			"defense": "Defense:",
+			"atkDefMinimum": "Minimum",
+			"atkDefMaximum": "Maximum",
 			"textBox": "Text Box:",
+			"textBoxPlaceholder": "Search the text box of the card",
 			"types": "Types:",
 			"characters": "Characters:",
+			"charactersPlaceholder": "Search by visible characters",
+			"charactersMouseover": "Separate multiple characters with commas. (i.e. Iruyanka, Cheering Angel)",
 			"deckLimit": "Deck Limit:",
 			"deckLimitAny": "any",
 			"deckLimitThree": "3",

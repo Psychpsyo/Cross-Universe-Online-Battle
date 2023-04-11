@@ -19,299 +19,303 @@
 			<h1 id="deckCreatorTitle">Deck Creator</h1>
 			<button id="deckMakerSearchButton" class="deckMakerTopButton">Search</button>
 		</header>
-		<div id="deckMakerPanels">
-			<div id="deckMakerUnits">
-				<div id="unitList">
-					<header id="unitHeader" class="deckMakerHeader">
-						Units
-					</header>
+		<section id="deckMakerPanels" aria-label="Search Results">
+			<section id="deckMakerUnits" aria-label="Unit/Token Column">
+				<section id="unitList" aria-labelledBy="unitHeader">
+					<h2 id="unitHeader" class="deckMakerHeader">Units</h2>
 					<div id="unitGrid" class="deckMakerGrid cardList"></div>
-				</div>
-				<div id="tokenList">
-					<header id="tokenHeader" class="deckMakerHeader">
-						Tokens
-					</header>
+				</section>
+				<section id="tokenList" aria-labelledBy="tokenHeader">
+					<h2 id="tokenHeader" class="deckMakerHeader">Tokens</h2>
 					<div id="tokenGrid" class="deckMakerGrid cardList"></div>
-				</div>
-			</div>
-			<div id="deckMakerSpells">
-				<div id="standardSpellList">
-					<header id="standardSpellHeader" class="deckMakerHeader">
-						Standard Spells
-					</header>
+				</section>
+			</section>
+			<section id="deckMakerSpells" aria-label="Spell Column">
+				<section id="standardSpellList" aria-labelledBy="standardSpellHeader">
+					<h2 id="standardSpellHeader" class="deckMakerHeader">Standard Spells</h2>
 					<div id="standardSpellGrid" class="deckMakerGrid cardList"></div>
-				</div>
-				<div id="continuousSpellList">
-					<header id="continuousSpellHeader" class="deckMakerHeader">
-						Continuous Spells
-					</header>
+				</section>
+				<section id="continuousSpellList" aria-labelledBy="continuousSpellHeader">
+					<h2 id="continuousSpellHeader" class="deckMakerHeader">Continuous Spells</h2>
 					<div id="continuousSpellGrid" class="deckMakerGrid cardList"></div>
-				</div>
-				<div id="enchantSpellList">
-					<header id="enchantSpellHeader" class="deckMakerHeader">
-						Enchant Spells
-					</header>
+				</section>
+				<section id="enchantSpellList" aria-labelledBy="enchantSpellHeader">
+					<h2 id="enchantSpellHeader" class="deckMakerHeader">Enchant Spells</h2>
 					<div id="enchantSpellGrid" class="deckMakerGrid cardList"></div>
-				</div>
-			</div>
-			<div id="deckMakerItems">
-				<div id="standardItemList">
-					<header id="standardItemHeader" class="deckMakerHeader">
-						Standard Items
-					</header>
+				</section>
+			</section>
+			<section id="deckMakerItems" aria-label="Item Column">
+				<section id="standardItemList" aria-labelledBy="standardItemHeader">
+					<h2 id="standardItemHeader" class="deckMakerHeader">Standard Items</h2>
 					<div id="standardItemGrid" class="deckMakerGrid cardList"></div>
-				</div>
-				<div id="continuousItemList">
-					<header id="continuousItemHeader" class="deckMakerHeader">
-						Continuous Items
-					</header>
+				</section>
+				<section id="continuousItemList" aria-labelledBy="continuousItemHeader">
+					<h2 id="continuousItemHeader" class="deckMakerHeader">Continuous Items</h2>
 					<div id="continuousItemGrid" class="deckMakerGrid cardList"></div>
-				</div>
-				<div id="equipableItemList">
-					<header id="equipableItemHeader" class="deckMakerHeader">
-						Equipable Items
-					</header>
+				</section>
+				<section id="equipableItemList" aria-labelledBy="equipableItemHeader">
+					<h2 id="equipableItemHeader" class="deckMakerHeader">Equipable Items</h2>
 					<div id="equipableItemGrid" class="deckMakerGrid cardList"></div>
-				</div>
-			</div>
-		</div>
-		
-		<!--div behind search and deck overlays-->
-		<div id="mainOverlayBlocker" class="overlayBlocker"></div>
+				</section>
+			</section>
+		</section>
 		
 		<!--search panel-->
-		<div id="cardSearchPanel" class="overlayBox">
-			<div class="optionListingItem">
-				<label id="cardSearchNameLabel" for="cardSearchNameInput">Card Name:</label><input id="cardSearchNameInput" type="text" autocomplete="off" placeholder="Search by card name.">
+		<dialog id="cardSearchPanel" aria-labelledBy="cardSearchPanelHeader">
+			<div class="dialogContent">
+				<header><h2 id="cardSearchPanelHeader">Card Search</h2></header>
+				<form method="dialog" class="dialogScrollArea">
+				<div class="optionListingItem">
+					<label id="cardSearchNameLabel" for="cardSearchNameInput">Card Name:</label>
+					<input id="cardSearchNameInput" type="text" autocomplete="off" placeholder="Search by card name">
+				</div>
+				<div class="optionListingItem">
+					<label id="cardSearchIdLabel" for="cardSearchIdInput">Card ID:</label>
+					<input id="cardSearchIdInput" type="text" autocomplete="off" placeholder="Search by card ID">
+				</div>
+				<div class="optionListingItem" role="group" aria-labelledBy="cardSearchAttackLabel">
+					<span id="cardSearchAttackLabel">Attack:</span>
+					<input id="cardSearchAttackMinInput" type="number" size="5" autocomplete="off" aria-label="Minimum">
+					<span class="cardSearchMinus">-</span>
+					<input id="cardSearchAttackMaxInput" type="number" size="5" autocomplete="off" aria-label="Maximum">
+				</div>
+				<div class="optionListingItem" role="group" aria-labelledBy="cardSearchDefenseLabel">
+					<span id="cardSearchDefenseLabel">Defense:</span>
+					<input id="cardSearchDefenseMinInput" type="number" size="5" autocomplete="off" aria-label="Minimum">
+					<span class="cardSearchMinus">-</span>
+					<input id="cardSearchDefenseMaxInput" type="number" size="5" autocomplete="off" aria-label="Maximum">
+				</div>
+				<div class="optionListingItem">
+					<label id="cardSearchTextLabel" for="cardSearchTextInput">Text Box:</label>
+					<input id="cardSearchTextInput" type="text" autocomplete="off" placeholder="Search the text box of the card">
+				</div>
+				<div class="optionListingItem">
+					<label id="cardSearchTypeLabel" for="cardSearchTypeInput">Types:</label>
+					<select multiple id="cardSearchTypeInput" size="10" autocomplete="off">
+						<option value="Angel">Angel</option>
+						<option value="Armor">Armor</option>
+						<option value="Beast">Beast</option>
+						<option value="Bird">Bird</option>
+						<option value="Book">Book</option>
+						<option value="Boundary">Boundary</option>
+						<option value="Bug">Bug</option>
+						<option value="Chain">Chain</option>
+						<option value="Curse">Curse</option>
+						<option value="Dark">Dark</option>
+						<option value="Demon">Demon</option>
+						<option value="Dragon">Dragon</option>
+						<option value="Earth">Earth</option>
+						<option value="Electric">Electric</option>
+						<option value="Figure">Figure</option>
+						<option value="Fire">Fire</option>
+						<option value="Fish">Fish</option>
+						<option value="Ghost">Ghost</option>
+						<option value="Gravity">Gravity</option>
+						<option value="Ice">Ice</option>
+						<option value="Illusion">Illusion</option>
+						<option value="Katana">Katana</option>
+						<option value="Landmine">Landmine</option>
+						<option value="Light">Light</option>
+						<option value="Machine">Machine</option>
+						<option value="Mage">Mage</option>
+						<option value="Medicine">Medicine</option>
+						<option value="Myth">Myth</option>
+						<option value="Plant">Plant</option>
+						<option value="Psychic">Psychic</option>
+						<option value="Rock">Rock</option>
+						<option value="Samurai">Samurai</option>
+						<option value="Shield">Shield</option>
+						<option value="Spirit">Spirit</option>
+						<option value="Structure">Structure</option>
+						<option value="Sword">Sword</option>
+						<option value="Warrior">Warrior</option>
+						<option value="Water">Water</option>
+						<option value="Wind">Wind</option>
+						<option value="typeless">typeless</option>
+					</select>
+				</div>
+				<div class="optionListingItem">
+					<label id="cardSearchCharacterLabel" for="cardSearchIdInput">Characters:</label>
+					<input id="cardSearchCharacterInput" type="text" autocomplete="off" placeholder="Search by visible characters" title="Separate multiple characters with commas. (i.e. Iruyanka, Cheering Angel)"></div>
+				<div class="optionListingItem">
+					<label id="cardSearchDeckLimitLabel" for="cardSearchDeckLimitInput">Deck Limit:</label>
+					<select id="cardSearchDeckLimitInput" autocomplete="off">
+						<option value="">any</option>
+						<option value="3">3</option>
+						<option value="less">less</option>
+						<option value="more">more</option>
+						<option value="inf">∞</option>
+					</select>
+				</div>
+				<div class="optionListingItem">
+					<label id="cardSearchSortLabel" for="cardSearchSortInput">Sort by </label>
+					<select id="cardSearchSortInput" autocomplete="off">
+						<option value="">relevancy</option>
+						<option value="level">level</option>
+						<option value="name">name</option>
+						<option value="releaseDate">release date</option>
+						<option value="cardID">card ID</option>
+						<option value="attack">attack</option>
+						<option value="defense">defense</option>
+					</select>
+				</div>
+				<button id="cardSearchSearchBtn">Search</button>
+			</form>
 			</div>
-			<div class="optionListingItem">
-				<label id="cardSearchIdLabel" for="cardSearchIdInput">Card ID:</label><input id="cardSearchIdInput" type="text" autocomplete="off" placeholder="Search by card ID.">
-			</div>
-			<div class="optionListingItem">
-				<span id="cardSearchAttackLabel">Attack:</span><input id="cardSearchAttackMinInput" type="number" size="5" autocomplete="off"><span class="cardSearchMinus">-</span><input id="cardSearchAttackMaxInput" type="number" size="5" autocomplete="off">
-			</div>
-			<div class="optionListingItem">
-				<span id="cardSearchDefenseLabel">Defense:</span><input id="cardSearchDefenseMinInput" type="number" size="5" autocomplete="off"><span class="cardSearchMinus">-</span><input id="cardSearchDefenseMaxInput" type="number" size="5" autocomplete="off">
-			</div>
-			<div class="optionListingItem">
-				<label id="cardSearchTextLabel" for="cardSearchTextInput">Text Box:</label><input id="cardSearchTextInput" type="text" autocomplete="off" placeholder="Search the text box of the card.">
-			</div>
-			<div class="optionListingItem">
-				<label id="cardSearchTypeLabel" for="cardSearchTypeInput">Types:</label>
-				<select multiple id="cardSearchTypeInput" size="10" autocomplete="off">
-					<option value="Angel">Angel</option>
-					<option value="Armor">Armor</option>
-					<option value="Beast">Beast</option>
-					<option value="Bird">Bird</option>
-					<option value="Book">Book</option>
-					<option value="Boundary">Boundary</option>
-					<option value="Bug">Bug</option>
-					<option value="Chain">Chain</option>
-					<option value="Curse">Curse</option>
-					<option value="Dark">Dark</option>
-					<option value="Demon">Demon</option>
-					<option value="Dragon">Dragon</option>
-					<option value="Earth">Earth</option>
-					<option value="Electric">Electric</option>
-					<option value="Figure">Figure</option>
-					<option value="Fire">Fire</option>
-					<option value="Fish">Fish</option>
-					<option value="Ghost">Ghost</option>
-					<option value="Gravity">Gravity</option>
-					<option value="Ice">Ice</option>
-					<option value="Illusion">Illusion</option>
-					<option value="Katana">Katana</option>
-					<option value="Landmine">Landmine</option>
-					<option value="Light">Light</option>
-					<option value="Machine">Machine</option>
-					<option value="Mage">Mage</option>
-					<option value="Medicine">Medicine</option>
-					<option value="Myth">Myth</option>
-					<option value="Plant">Plant</option>
-					<option value="Psychic">Psychic</option>
-					<option value="Rock">Rock</option>
-					<option value="Samurai">Samurai</option>
-					<option value="Shield">Shield</option>
-					<option value="Spirit">Spirit</option>
-					<option value="Structure">Structure</option>
-					<option value="Sword">Sword</option>
-					<option value="Warrior">Warrior</option>
-					<option value="Water">Water</option>
-					<option value="Wind">Wind</option>
-					<option value="typeless">typeless</option>
-				</select>
-			</div>
-			<div class="optionListingItem">
-				<label id="cardSearchCharacterLabel" for="cardSearchIdInput">Characters:</label><input id="cardSearchCharacterInput" type="text" autocomplete="off" placeholder="Search by visible characters" title="Separate multiple characters with commas. (i.e. Iruyanka, Cheering Angel)"></div>
-			<div class="optionListingItem">
-				<label id="cardSearchDeckLimitLabel" for="cardSearchDeckLimitInput">Deck Limit:</label>
-				<select id="cardSearchDeckLimitInput" autocomplete="off">
-					<option value="">any</option>
-					<option value="3">3</option>
-					<option value="less">less</option>
-					<option value="more">more</option>
-					<option value="inf">∞</option>
-				</select>
-			</div>
-			<div class="optionListingItem">
-				<label id="cardSearchSortLabel" for="cardSearchSortInput">Sort by </label>
-				<select id="cardSearchSortInput" autocomplete="off">
-					<option value="">relevancy</option>
-					<option value="level">level</option>
-					<option value="name">name</option>
-					<option value="releaseDate">release date</option>
-					<option value="cardID">card ID</option>
-					<option value="attack">attack</option>
-					<option value="defense">defense</option>
-				</select>
-			</div>
-			<button id="cardSearchSearchBtn">Search</button>
-		</div>
+		</dialog>
 		
 		<!--deck panel-->
-		<div id="deckCreationPanel" class="overlayBox">
-			<header id="deckCreationPanelHeader">Deck Overview</header>
-			<div id="deckMakerMainArea">
+		<dialog id="deckCreationPanel" aria-labelledBy="deckCreationPanelHeader">
+			<div id="deckCreationPanelInner" class="dialogContent">
+				<header><h2 id="deckCreationPanelHeader">Deck Overview</h2></header>
+				<div id="deckMakerMainArea">
+					<section aria-labelledBy="deckCardListHeader">
+						<header><h3 id="deckCardListHeader">Card List</h3></header>
+						<div class="deckCreatorScrollArea">
+							<div id="deckCreatorCardList" class="cardList">
+								<img id="deckCreatorCardListPlaceholder" src="images/cardHidden.png" alt="">
+							</div>
+						</div>
+					</section>
+					<section id="deckCreatorDetailsPanel" aria-labelledBy="deckDetailsHeader">
+						<header><h3 id="deckDetailsHeader">Details</h3></header>
+						<div class="deckCreatorScrollArea">
+							<div class="optionListingItem">
+								<label for="deckMakerDetailsNameInput" id="deckMakerDetailsName">Deck Name:</label><input id="deckMakerDetailsNameInput" type="text" autocomplete="off" placeholder="New Deck">
+							</div>
+							<div class="optionListingItem">
+								<label for="deckMakerDetailsPartnerSelect" id="deckMakerDetailsPartner">Partner:</label>
+								<select id="deckMakerDetailsPartnerSelect">
+									<option value="">no partner selected</option>
+								</select>
+							</div>
+							<div class="optionListingItem">
+								<label for="deckMakerDetailsDescriptionInput" id="deckMakerDetailsDescription">Description:</label><textarea id="deckMakerDetailsDescriptionInput" autocomplete="off" rows="5"></textarea>
+							</div>
+							<hr>
+							<div class="optionListingItem">
+								<span id="deckMakerDetailsCardTotal">Card Total:</span><span id="deckMakerDetailsCardTotalValue">0</span>
+							</div>
+							<div class="optionListingItem">
+								<span id="deckMakerDetailsUnitCount">Units:</span><span id="deckMakerDetailsUnitCountValue">0 (0.00%)</span>
+							</div>
+							<div class="optionListingItem">
+								<span id="deckMakerDetailsSpellCount">Spells:</span><span id="deckMakerDetailsSpellCountValue">0 (0.00%)</span>
+							</div>
+							<div class="optionListingItem">
+								<span id="deckMakerDetailsItemCount">Items:</span><span id="deckMakerDetailsItemCountValue">0 (0.00%)</span>
+							</div>
+							<hr>
+							<section aria-labelledBy="levelDistributionTitle">
+								<h4 id="levelDistributionTitle">Level Distribution:</h4><br>
+								<div id="deckMakerLevelDistribution">
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+									<div><div></div><div></div><div></div></div>
+								</div>
+								<div id="deckMakerLevelDistributionLabels">
+									<span>0</span>
+									<span>1</span>
+									<span>2</span>
+									<span>3</span>
+									<span>4</span>
+									<span>5</span>
+									<span>6</span>
+									<span>7</span>
+									<span>8</span>
+									<span>9</span>
+									<span>10</span>
+									<span>11</span>
+									<span>12</span>
+								</div>
+							</section>
+							<hr>
+							<section aria-labelledBy="deckWarningsTitle">
+								<h4 id="deckWarningsTitle">Warnings:</h4><br>
+								<div id="deckWarnings">
+									<div id="cardMinWarning" class="warning">A deck must have at least 30 cards.<br></div>
+									<div id="cardMaxWarning" class="warning">A deck must have at most 50 cards.<br></div>
+									<div id="unitWarning" class="warning">A deck needs to have a unit.<br></div>
+									<div id="tokenWarning" class="warning">A deck may not contain any Tokens.<br></div>
+									<div id="partnerWarning" class="lightWarning">To export as .deck, you must select a partner.<br></div>
+								</div>
+								<hr>
+							</section>
+							<section aria-labelledBy="deckOptionsTitle">
+								<h4 id="deckOptionsTitle">Options:</h4><br>
+								<div id="deckMakerOptionButtons">
+									<!-- autocomplete must be off for some of these so that they always starts disabled. -->
+									<button id="dotDeckExportBtn" disabled autocomplete="off">Export (.deck)</button>
+									<input id="deckMakerImportInput" type="file">
+									<button id="deckMakerImportBtn">Import Deck</button>
+									<button id="startingHandGenBtn" disabled autocomplete="off">Draw Starting Hand</button>
+								</div>
+							</section>
+						</div>
+					</section>
+				</div>
 				<div>
-					<header id="deckCardListHeader">Card List</header>
-					<div class="deckCreatorScrollArea">
-						<div id="deckCreatorCardList" class="cardList">
-							<img id="deckCreatorCardListPlaceholder" src="images/cardHidden.png" alt="">
-						</div>
-					</div>
-				</div>
-				<div id="deckCreatorDetailsPanel">
-					<header id="deckDetailsHeader">Details</header>
-					<div class="deckCreatorScrollArea">
-						<div class="optionListingItem">
-							<label for="deckMakerDetailsNameInput" id="deckMakerDetailsName">Deck Name:</label><input id="deckMakerDetailsNameInput" type="text" autocomplete="off" placeholder="New Deck">
-						</div>
-						<div class="optionListingItem">
-							<label for="deckMakerDetailsPartnerSelect" id="deckMakerDetailsPartner">Partner:</label>
-							<select id="deckMakerDetailsPartnerSelect">
-								<option value="">no partner selected</option>
-							</select>
-						</div>
-						<div class="optionListingItem">
-							<label for="deckMakerDetailsDescriptionInput" id="deckMakerDetailsDescription">Description:</label><textarea id="deckMakerDetailsDescriptionInput" type="text" autocomplete="off" rows="5"></textarea>
-						</div>
-						<hr>
-						<div class="optionListingItem">
-							<span id="deckMakerDetailsCardTotal">Card Total:</span><span id="deckMakerDetailsCardTotalValue">0</span>
-						</div>
-						<div class="optionListingItem">
-							<span id="deckMakerDetailsUnitCount">Units:</span><span id="deckMakerDetailsUnitCountValue">0 (0.00%)</span>
-						</div>
-						<div class="optionListingItem">
-							<span id="deckMakerDetailsSpellCount">Spells:</span><span id="deckMakerDetailsSpellCountValue">0 (0.00%)</span>
-						</div>
-						<div class="optionListingItem">
-							<span id="deckMakerDetailsItemCount">Items:</span><span id="deckMakerDetailsItemCountValue">0 (0.00%)</span>
-						</div>
-						<hr>
-						<span id="levelDistributionTitle">Level Distribution:</span><br>
-						<div id="deckMakerLevelDistribution">
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-							<div><div></div><div></div><div></div></div>
-						</div>
-						<div id="deckMakerLevelDistributionLabels">
-							<span>0</span>
-							<span>1</span>
-							<span>2</span>
-							<span>3</span>
-							<span>4</span>
-							<span>5</span>
-							<span>6</span>
-							<span>7</span>
-							<span>8</span>
-							<span>9</span>
-							<span>10</span>
-							<span>11</span>
-							<span>12</span>
-						</div>
-						<hr>
-						<span id="deckWarningsTitle">Warnings:</span><br>
-						<div id="deckWarnings">
-							<div id="cardMinWarning" class="warning">A deck must have at least 30 cards.<br></div>
-							<div id="cardMaxWarning" class="warning">A deck must have at most 50 cards.<br></div>
-							<div id="unitWarning" class="warning">A deck needs to have a unit.<br></div>
-							<div id="tokenWarning" class="warning">A deck may not contain any Tokens.<br></div>
-							<div id="partnerWarning" class="lightWarning">To export as .deck, you must select a partner.<br></div>
-						</div>
-						<hr>
-						<span id="deckOptionsTitle">Options:</span><br>
-						<div id="deckMakerOptionButtons">
-							<!-- autocomplete must be off for some of these so that they always starts disabled. -->
-							<button id="dotDeckExportBtn" disabled autocomplete="off">Export (.deck)</button>
-							<input id="deckMakerImportInput" type="file">
-							<button id="deckMakerImportBtn">Import Deck</button>
-							<button id="startingHandGenBtn" disabled autocomplete="off">Draw Starting Hand</button>
-						</div>
-					</div>
+					<header id="recentCardsHeader"><h3><button id="recentCardsHeaderBtn">Recent Cards</button></h3></header>
+					<div id="recentCardsList"></div>
 				</div>
 			</div>
-			<div>
-				<header id="recentCardsHeader">Recent Cards</header>
-				<div id="recentCardsList"></div>
-			</div>
-		</div>
-		
-		
-		<!--div behind card info panel-->
-		<div id="cardInfoOverlayBlocker" class="overlayBlocker"></div>
+		</dialog>
 		
 		<!--card info panel-->
-		<div id="cardInfoPanel" class="overlayBox">
-			<header id="cardInfoCardName">Card Name Here</header>
-			<div id="cardInfoMainArea">
-				<div id="cardInfoImgArea">
-					<img id="cardInfoCardImg" src="" alt=""><br>
-					<span id="cardInfoCardID">CUU00000</span>
-				</div><br>
-				<span id="cardInfoReleaseDateArea"><span id="cardInfoReleaseDateLabel">Released:</span> <span id="cardInfoReleaseDate"></span><br></span>
-				<span id="cardInfoIllustratorArea"><span id="cardInfoIllustratorLabel">Illustrator:</span> <span id="cardInfoIllustrator"></span><br></span>
-				<span id="cardInfoIdeaArea"><span id="cardInfoIdeaLabel">Idea:</span> <span id="cardInfoIdea"></span><br></span>
-				<div id="cardInfoMentionedArea">
-					<span id="cardInfoMentionedHeader">Mentioned Cards:</span>
-					<div id="cardInfoMentionedGrid" class="cardInfoGrid cardList"></div>
+		<dialog id="cardInfoPanel" aria-labelledBy="cardInfoCardName">
+			<div id="cardInfoPanelContent" class="dialogContent">
+				<header><h2 id="cardInfoCardName">Card Name Here</h2></header>
+				<div id="cardInfoMainArea" class="dialogScrollArea">
+					<div id="cardInfoImgArea">
+						<img id="cardInfoCardImg" src="" alt=""><br>
+						<span id="cardInfoCardID">CUU00000</span>
+					</div><br>
+					<span id="cardInfoReleaseDateArea"><span id="cardInfoReleaseDateLabel">Released:</span> <span id="cardInfoReleaseDate"></span><br></span>
+					<span id="cardInfoIllustratorArea"><span id="cardInfoIllustratorLabel">Illustrator:</span> <span id="cardInfoIllustrator"></span><br></span>
+					<span id="cardInfoIdeaArea"><span id="cardInfoIdeaLabel">Idea:</span> <span id="cardInfoIdea"></span><br></span>
+					<div id="cardInfoMentionedArea">
+						<span id="cardInfoMentionedHeader">Mentioned Cards:</span>
+						<div id="cardInfoMentionedGrid" class="cardInfoGrid cardList"></div>
+					</div>
+					<div id="cardInfoMentionedOnArea">
+						<span id="cardInfoMentionedOnHeader">Mentioned On:</span>
+						<div id="cardInfoMentionedOnGrid" class="cardInfoGrid cardList"></div>
+					</div>
+					<div id="cardInfoVisibleArea">
+						<span id="cardInfoVisibleHeader">Visible Cards:</span>
+						<div id="cardInfoVisibleGrid" class="cardInfoGrid cardList"></div>
+					</div>
+					<div id="cardInfoVisibleOnArea">
+						<span id="cardInfoVisibleOnHeader">Appears On:</span>
+						<div id="cardInfoVisibleOnGrid" class="cardInfoGrid cardList"></div>
+					</div>
 				</div>
-				<div id="cardInfoMentionedOnArea">
-					<span id="cardInfoMentionedOnHeader">Mentioned On:</span>
-					<div id="cardInfoMentionedOnGrid" class="cardInfoGrid cardList"></div>
-				</div>
-				<div id="cardInfoVisibleArea">
-					<span id="cardInfoVisibleHeader">Visible Cards:</span>
-					<div id="cardInfoVisibleGrid" class="cardInfoGrid cardList"></div>
-				</div>
-				<div id="cardInfoVisibleOnArea">
-					<span id="cardInfoVisibleOnHeader">Appears On:</span>
-					<div id="cardInfoVisibleOnGrid" class="cardInfoGrid cardList"></div>
-				</div>
+				<button id="cardInfoToDeck">Add Card To Deck</button>
 			</div>
-			<div id="cardInfoToDeck">Add Card To Deck</div>
-		</div>
+		</dialog>
 		
-		<!--div behind starting hand generator-->
-		<div id="startingHandOverlayBlocker" class="overlayBlocker"></div>
+		<!--starting hand generator panel-->
+		<dialog id="startingHandGenerator" aria-labelledBy="handGeneratorTitle">
+			<div class="dialogContent">
+				<header><h2 id="handGeneratorTitle">Starting Hand Generator</h2></header>
+				<div id="startingHandGeneratorCards"></div>
+				<div id="regenerateStartingHand">Redraw</div>
+			</div>
+		</dialog>
 		
-		<div id="startingHandGenerator" class="overlayBox">
-			<header id="handGeneratorTitle">Starting Hand Generator</header>
-			<div id="startingHandGeneratorCards"></div>
-			<div id="regenerateStartingHand">Redraw</div>
-		</div>
-		
+		<!--scripts-->
 		<script src="scripts/localStorageSetup.js"></script>
+		<script src="scripts/dialogs.js"></script>
 		<script src="scripts/deckUtils.js"></script>
 		<script src="deckMaker/script.js"></script>
 		<script src="deckMaker/startingHands.js"></script>

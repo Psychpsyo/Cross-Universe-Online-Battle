@@ -98,6 +98,9 @@
 		"opponentDeck": "Gegnerisches Deck"
 	},
 	
+	"cardAltText": "{#NAME}, level {#LEVEL} {#CARDTYPE},\n{#TYPES},\nEffekte:\n{#EFFECTS}",
+	"unitAltText": "{#NAME}, level {#LEVEL} {#CARDTYPE},\n{#ATK} Angriff, {#DEF} Verteidigung,\n{#TYPES},\nEffekte:\n{#EFFECTS}",
+	
 	"settings": {
 		"title": "Einstellungen",
 		
@@ -286,6 +289,10 @@
 		"deck": "Deck",
 		"search": "Suche",
 		
+		"seachResults": "Suchergebnisse",
+		"unitTokenColumn": "Einheiten-/Tokenspalte",
+		"spellColumn": "Zauberspalte",
+		"itemColumn": "Itemspalte",
 		"units": "Einheiten",
 		"tokens": "Tokens",
 		"standardSpells": "Standard-Zauber",
@@ -296,14 +303,22 @@
 		"equipableItems": "Ausrüstbare Items",
 		
 		"searchMenu": {
+			"title": "Kartensuche",
 			"search": "Suchen",
 			"cardName": "Kartenname:",
+			"cardNamePlaceholder": "Suche nach Kartenname",
 			"cardId": "Karten-ID:",
+			"cardIdPlaceholder": "Suche nach Karten-ID",
 			"attack": "Angriff:",
 			"defense": "Verteidigung:",
+			"atkDefMinimum": "Minimum",
+			"atkDefMaximum": "Maximum",
 			"textBox": "Textbox:",
+			"textBoxPlaceholder": "Suche nach Kartentext",
 			"types": "Typen:",
 			"characters": "Charaktere:",
+			"charactersPlaceholder": "Suche nach Charakteren",
+			"charactersMouseover": "Trenne mehrere Charaktere mit Kommas. (z.B. Iruyanka, Cheering Angel)",
 			"deckLimit": "Deck-Limit:",
 			"deckLimitAny": "egal",
 			"deckLimitThree": "3",

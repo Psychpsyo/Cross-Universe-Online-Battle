@@ -75,6 +75,11 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	document.getElementById("deckMakerDeckButton").textContent = locale["deckMaker"]["deck"];
 	document.getElementById("deckMakerSearchButton").textContent = locale["deckMaker"]["search"];
 	
+	document.getElementById("deckMakerPanels").setAttribute("aria-label", locale["deckMaker"]["searchResults"]);
+	document.getElementById("deckMakerUnits").setAttribute("aria-label", locale["deckMaker"]["unitTokenColumn"]);
+	document.getElementById("deckMakerSpells").setAttribute("aria-label", locale["deckMaker"]["spellColumn"]);
+	document.getElementById("deckMakerItems").setAttribute("aria-label", locale["deckMaker"]["itemColumn"]);
+	
 	document.getElementById("unitHeader").textContent = locale["deckMaker"]["units"];
 	document.getElementById("tokenHeader").textContent = locale["deckMaker"]["tokens"];
 	document.getElementById("standardSpellHeader").textContent = locale["deckMaker"]["standardSpells"];
@@ -88,7 +93,7 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	document.getElementById("deckCreationPanelHeader").textContent = locale["deckMaker"]["deckMenu"]["title"];
 	document.getElementById("deckCardListHeader").textContent = locale["deckMaker"]["deckMenu"]["cardListTitle"];
 	document.getElementById("deckDetailsHeader").textContent = locale["deckMaker"]["deckMenu"]["detailsTitle"];
-	document.getElementById("recentCardsHeader").textContent = locale["deckMaker"]["deckMenu"]["recentCardsTitle"];
+	document.getElementById("recentCardsHeaderBtn").textContent = locale["deckMaker"]["deckMenu"]["recentCardsTitle"];
 	
 	document.getElementById("deckMakerDetailsName").textContent = locale["deckMaker"]["deckMenu"]["name"];
 	document.getElementById("deckMakerDetailsDescription").textContent = locale["deckMaker"]["deckMenu"]["description"];
@@ -115,14 +120,24 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	document.getElementById("startingHandGenBtn").textContent = locale["deckMaker"]["deckMenu"]["drawStartingHand"];
 	
 	//search panel
+	document.getElementById("cardSearchPanelHeader").textContent = locale["deckMaker"]["searchMenu"]["title"];
 	document.getElementById("cardSearchSearchBtn").textContent = locale["deckMaker"]["searchMenu"]["search"];
 	document.getElementById("cardSearchNameLabel").textContent = locale["deckMaker"]["searchMenu"]["cardName"];
+	document.getElementById("cardSearchNameInput").placeholder = locale["deckMaker"]["searchMenu"]["cardNamePlaceholder"];
 	document.getElementById("cardSearchIdLabel").textContent = locale["deckMaker"]["searchMenu"]["cardId"];
+	document.getElementById("cardSearchIdInput").placeholder = locale["deckMaker"]["searchMenu"]["cardIdPlaceholder"];
 	document.getElementById("cardSearchAttackLabel").textContent = locale["deckMaker"]["searchMenu"]["attack"];
+	document.getElementById("cardSearchAttackMinInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMinimum"]);
+	document.getElementById("cardSearchAttackMaxInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMaximum"]);
 	document.getElementById("cardSearchDefenseLabel").textContent = locale["deckMaker"]["searchMenu"]["defense"];
+	document.getElementById("cardSearchDefenseMinInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMinimum"]);
+	document.getElementById("cardSearchDefenseMaxInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMaximum"]);
 	document.getElementById("cardSearchTextLabel").textContent = locale["deckMaker"]["searchMenu"]["textBox"];
+	document.getElementById("cardSearchTextInput").placeholder = locale["deckMaker"]["searchMenu"]["textBoxPlaceholder"];
 	document.getElementById("cardSearchTypeLabel").textContent = locale["deckMaker"]["searchMenu"]["types"];
 	document.getElementById("cardSearchCharacterLabel").textContent = locale["deckMaker"]["searchMenu"]["characters"];
+	document.getElementById("cardSearchCharacterInput").placeholder = locale["deckMaker"]["searchMenu"]["charactersPlaceholder"];
+	document.getElementById("cardSearchCharacterInput").title = locale["deckMaker"]["searchMenu"]["charactersMouseover"];
 	document.getElementById("cardSearchDeckLimitLabel").textContent = locale["deckMaker"]["searchMenu"]["deckLimit"];
 	document.getElementById("cardSearchSortLabel").textContent = locale["deckMaker"]["searchMenu"]["sortBy"];
 	
@@ -197,6 +212,34 @@ async function getCardInfo(cardId) {
 	return cardInfoCache[cardId];
 }
 
+function cardToAltText(card) {
+	return locale[(card.cardType == "unit" || card.cardType == "unit")? "unitAltText" : "cardAltText"]
+		.replace("{#NAME}", card.name)
+		.replace("{#LEVEL}", card.level == -1? locale["cardDetailsQuestionMark"] : card.level)
+		.replace("{#CARDTYPE}", locale[card.cardType + "CardDetailType"])
+		.replace("{#ATK}", card.attack == -1? locale["cardDetailsQuestionMark"] : card.attack)
+		.replace("{#DEF}", card.defense == -1? locale["cardDetailsQuestionMark"] : card.defense)
+		.replace("{#TYPES}", card.types.length > 0? card.types.map(type => locale["type" + type]).join(locale["typeSeparator"]) : locale["typeless"])
+		.replace("{#EFFECTS}", card.effectsPlain);
+}
+
+function createCardButton(card, lazyLoading) {
+	let cardButton = document.createElement("button");
+	cardButton.classList.add("cardButton");
+	cardButton.dataset.cardID = card.cardID;
+	let cardImg = document.createElement("img");
+	if (lazyLoading) {
+		cardImg.loading = "lazy";
+	}
+	cardImg.src = linkFromCardId(card.cardID);
+	cardImg.alt = cardToAltText(card);
+	cardButton.addEventListener("click", async function() {
+		showCardInfo(await getCardInfo(this.dataset.cardID));
+	});
+	cardButton.appendChild(cardImg);
+	return cardButton;
+}
+
 function searchCards(query) {
 	//clear current card lists:
 	Array.from(document.getElementsByClassName("deckMakerGrid")).forEach(list => {
@@ -209,17 +252,9 @@ function searchCards(query) {
 	fetch("https://crossuniverse.net/cardInfo", {method: "POST", body: JSON.stringify(query)})
 	.then(response => response.text())
 	.then(response => {
-		document.getElementById("cardInfoPanel").style.display = "none";
-		document.getElementById("cardSearchPanel").style.display = "none";
-		document.getElementById("mainOverlayBlocker").style.display = "none";
 		JSON.parse(response).forEach(card => {
-			let cardImg = document.createElement("img");
-			cardImg.loading = "lazy";
-			cardImg.src = linkFromCardId(card.cardID);
-			cardImg.addEventListener("click", function() {
-				showCardInfo(cardIdFromLink(this.src));
-			});
-			document.getElementById(card.cardType + "Grid").appendChild(cardImg);
+			cardInfoCache[card.cardID] = card;
+			document.getElementById(card.cardType + "Grid").appendChild(createCardButton(card, true));
 		});
 	});
 }
@@ -231,29 +266,19 @@ async function fillCardResultGrid(cardList, grid) {
 		}
 		
 		cardList.forEach(async cardId => {
-			let cardImg = document.createElement("img");
-			cardImg.src = linkFromCardId(cardId);
-			cardImg.addEventListener("click", function() {
-				showCardInfo(cardIdFromLink(this.src));
-			});
-			document.getElementById("cardInfo" + grid + "Grid").appendChild(cardImg);
-			let cardInfo = await getCardInfo(cardId);
-			cardImg.alt = cardInfo.name;
+			document.getElementById("cardInfo" + grid + "Grid").appendChild(createCardButton(await getCardInfo(cardId), false));
 		});
 		document.getElementById("cardInfo" + grid + "Area").style.display = "block";
 	}
 }
 
-async function showCardInfo(cardID) {
+async function showCardInfo(cardInfo) {
 	//fill in basic card info
-	document.getElementById("cardInfoCardImg").src = linkFromCardId(cardID);
-	document.getElementById("cardInfoCardID").textContent = "CU" + cardID;
-	cardInfoToDeck.dataset.cardID = cardID;
+	document.getElementById("cardInfoCardImg").src = linkFromCardId(cardInfo.cardID);
+	document.getElementById("cardInfoCardID").textContent = "CU" + cardInfo.cardID;
+	cardInfoToDeck.dataset.cardID = cardInfo.cardID;
 	
-	// name is --- until data from server arrives
-	document.getElementById("cardInfoCardName").innerHTML = "---";
-	
-	//hide all info bits (they get re-enabled later, if that info arrives)
+	//hide all info bits (they get re-enabled later, if relevant to the card)
 	document.getElementById("cardInfoReleaseDateArea").style.display = "none";
 	document.getElementById("cardInfoIllustratorArea").style.display = "none";
 	document.getElementById("cardInfoIdeaArea").style.display = "none";
@@ -262,12 +287,6 @@ async function showCardInfo(cardID) {
 	document.getElementById("cardInfoVisibleArea").style.display = "none";
 	document.getElementById("cardInfoVisibleOnArea").style.display = "none";
 	
-	//enable card info display
-	document.getElementById("cardInfoPanel").style.display = "block";
-	document.getElementById("cardInfoOverlayBlocker").style.display = "block";
-	
-	//load card data
-	let cardInfo = await getCardInfo(cardID);
 	//fill in name
 	if (cardInfo.nameFurigana) {
 		let cardNameFurigana = cardInfo.name;
@@ -311,6 +330,12 @@ async function showCardInfo(cardID) {
 	fillCardResultGrid(cardInfo.mentionedOn, "MentionedOn");
 	fillCardResultGrid(cardInfo.visibleCards, "Visible");
 	fillCardResultGrid(cardInfo.visibleOn, "VisibleOn");
+	
+	
+	//enable card info display
+	if (!cardInfoPanel.open) {
+		cardInfoPanel.showModal();
+	}
 }
 
 document.getElementById("cardSearchSearchBtn").addEventListener("click", function() {
@@ -344,36 +369,20 @@ document.getElementById("cardSearchSearchBtn").addEventListener("click", functio
 
 //opening the search panel
 document.getElementById("deckMakerSearchButton").addEventListener("click", function() {
-	cardSearchPanel.style.display = "block";
-	mainOverlayBlocker.style.display = "block";
+	cardSearchPanel.showModal();
 });
 //opening the deck creation panel
 document.getElementById("deckMakerDeckButton").addEventListener("click", function() {
-	deckCreationPanel.style.display = "flex";
-	mainOverlayBlocker.style.display = "block";
+	deckCreationPanel.showModal();
 });
 
 //make overlay blocker close any overlays when clicked
 function closeAllDeckMakerOverlays() {
-	deckCreationPanel.style.display = "none";
-	cardSearchPanel.style.display = "none";
-	mainOverlayBlocker.style.display = "none";
-	closeCardInfoPanel();
-	closeStartingHandGenerator();
+	deckCreationPanel.close();
+	cardSearchPanel.close();
+	cardInfoPanel.close();
+	startingHandGenerator.close();
 }
-
-function closeCardInfoPanel() {
-	cardInfoPanel.style.display = "none";
-	cardInfoOverlayBlocker.style.display = "none";
-}
-
-mainOverlayBlocker.addEventListener("click", function() {
-	closeAllDeckMakerOverlays();
-});
-
-cardInfoOverlayBlocker.addEventListener("click", function() {
-	closeCardInfoPanel();
-});
 
 //clicking on parts of an individual card's info to search by those
 document.getElementById("cardInfoReleaseDate").addEventListener("click", function() {
@@ -399,8 +408,7 @@ document.addEventListener("keyup", function(e) {
 				closeAllDeckMakerOverlays();
 			} else {
 				closeAllDeckMakerOverlays();
-				cardSearchPanel.style.display = "block";
-				mainOverlayBlocker.style.display = "block";
+				cardSearchPanel.showModal();
 			}
 			break;
 		}
@@ -411,8 +419,7 @@ document.addEventListener("keyup", function(e) {
 				closeAllDeckMakerOverlays();
 			} else {
 				closeAllDeckMakerOverlays();
-				deckCreationPanel.style.display = "flex";
-				mainOverlayBlocker.style.display = "block";
+				deckCreationPanel.showModal();
 			}
 			break;
 		}
@@ -449,14 +456,7 @@ async function addCardToDeck(cardId) {
 		//need to add the card to the list
 		let cardListElement = document.createElement("div");
 		cardListElement.dataset.cardID = cardId;
-		let cardImage = document.createElement("img");
-		cardImage.src = linkFromCardId(cardId);
-		cardImage.classList.add("deckMakerCardListElementImg");
-		cardImage.addEventListener("click", function() {
-			showCardInfo(cardIdFromLink(this.src));
-		});
-		cardImage.alt = card.name;
-		cardListElement.appendChild(cardImage);
+		cardListElement.appendChild(createCardButton(card));
 		
 		let btnDiv = document.createElement("div");
 		btnDiv.classList.add("deckMakerCardListElementBtns");
@@ -663,8 +663,7 @@ document.getElementById("cardInfoToDeck").addEventListener("click", function() {
 	//don't open deck when holding shift
 	if (!shiftHeld) {
 		closeAllDeckMakerOverlays();
-		deckCreationPanel.style.display = "flex";
-		mainOverlayBlocker.style.display = "block";
+		deckCreationPanel.showModal();
 	}
 });
 
@@ -754,6 +753,6 @@ document.getElementById("dotDeckExportBtn").addEventListener("click", function()
 
 // recent card hiding
 
-recentCardsHeader.addEventListener("click", function() {
+recentCardsHeaderBtn.addEventListener("click", function() {
 	recentCardsList.classList.toggle("shown");
 })
