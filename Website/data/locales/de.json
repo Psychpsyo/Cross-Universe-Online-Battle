@@ -134,6 +134,7 @@
 			"theme": "Theme:",
 			"themes": {
 				"default": "Standard",
+				"light": "Hell",
 				"worldTree": "Der World Tree",
 				"deepSea": "Tiefsee"
 			}

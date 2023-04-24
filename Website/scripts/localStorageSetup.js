@@ -12,34 +12,66 @@ localStorage.setItem("username", localStorage.getItem("username") ?? "");
 // themes
 var themes = {
 	"default": {
+		"backgroundColor": "#333",
 		"background": null,
 		"backgroundY": "center",
 		"fieldDropShadow": false,
 		"shadowColor": "#0005",
-		"textShadow": "none"
+		"dialogBackground": "#000c",
+		"textShadow": "none",
+		"textColor": "#eee",
+		"borderColor": "#eee",
+		"buttonHoverColor": "#fff3"
+	},
+	"light": {
+		"backgroundColor": "white",
+		"background": null,
+		"backgroundY": "center",
+		"fieldDropShadow": false,
+		"shadowColor": "#0002",
+		"dialogBackground": "white",
+		"textShadow": "none",
+		"textColor": "black",
+		"borderColor": "#888",
+		"buttonHoverColor": "#00f3"
 	},
 	"worldTree": {
+		"backgroundColor": "black",
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/ホームページ背景2.jpg",
 		"backgroundY": "top",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
-		"textShadow": "2px 2px 2px black"
+		"dialogBackground": "#000c",
+		"textShadow": "2px 2px 2px black",
+		"textColor": "#eee",
+		"borderColor": "#eee",
+		"buttonHoverColor": "#fff3"
 	},
 	"deepSea": {
+		"backgroundColor": "black",
 		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/6501dd551fcd4880fce262e4993896a8.png",
 		"backgroundY": "10%",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
-		"textShadow": "2px 2px 2px black"
+		"dialogBackground": "#000c",
+		"textShadow": "2px 2px 2px black",
+		"textColor": "#eee",
+		"borderColor": "#eee",
+		"buttonHoverColor": "#fff3"
 	}
 }
 function applyTheme(theme) {
 	localStorage.setItem("theme", theme);
+	document.documentElement.style.setProperty("--theme-background-color", themes[theme].backgroundColor);
 	document.documentElement.style.setProperty("--theme-background", "url(" + (themes[theme].background != null? '"' + themes[theme].background + '"' : "") + ")");
 	document.documentElement.style.setProperty("--theme-background-y", themes[theme].backgroundY);
 	document.documentElement.style.setProperty("--theme-field-filter", themes[theme].fieldDropShadow? "drop-shadow(0 0 2vh rgba(0, 0, 0, 0.5))" : "");
 	document.documentElement.style.setProperty("--theme-shadow", themes[theme].shadowColor);
+	document.documentElement.style.setProperty("--theme-dialog-background-color", themes[theme].dialogBackground);
 	document.documentElement.style.setProperty("--theme-text-shadow", themes[theme].textShadow);
+	document.documentElement.style.setProperty("--theme-text-color", themes[theme].textColor);
+	document.documentElement.style.setProperty("--theme-border-color", themes[theme].borderColor);
+	document.documentElement.style.setProperty("--theme-button-hover-color", themes[theme].buttonHoverColor);
 }
 applyTheme(localStorage.getItem("theme") ?? "default");
 

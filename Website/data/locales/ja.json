@@ -134,6 +134,7 @@
 			"theme": "Theme:",
 			"themes": {
 				"default": "Default",
+				"light": "Light",
 				"worldTree": "神聖樹",
 				"deepSea": "Deep Sea"
 			}

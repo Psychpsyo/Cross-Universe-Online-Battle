@@ -243,11 +243,11 @@ function receiveMessage(e) {
 			}
 			
 			updateRoomCodeDisplay();
-			gameDiv.style.display = "block";
+			gameDiv.removeAttribute("hidden");
 			
 			switch (gameModeSelect.value) {
 				case "normal":
-					mainGameArea.style.display = "block";
+					mainGameArea.removeAttribute("hidden");
 					break;
 				case "draft":
 					startDraftGame();

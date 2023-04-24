@@ -36,14 +36,14 @@
 					</span>
 				</main>
 				<nav id="mainNavigation">
-					<a id="rulesButton" href="/rules.html" target="_blank">
+					<a id="rulesButton" class="bigButton" href="/rules.html" target="_blank">
 						Game Rules
 					</a>
-					<a id="settingsButton" href="/settings">
+					<a id="settingsButton" class="bigButton" href="/settings">
 						Settings
 					</a>
-					<a id="deckMakerButton" href="/deckMaker">
-						Open Deck Creator
+					<a id="deckMakerButton" class="bigButton" href="/deckMaker">
+						Deck Creator
 					</a>
 				</nav>
 			</div>
@@ -53,7 +53,7 @@
 		</div>
 		
 		<!--IN-GAME-->
-		<div id="gameDiv">
+		<div id="gameDiv" hidden>
 			<div id="gameFlexBox">
 				<div id="leftPanel">
 					<div id="roomcodeDisplay">
@@ -76,7 +76,7 @@
 							<span id="manaDisplay0">0</span>
 						</div>
 					</div>
-					<div id="gameInteractions">
+					<div id="gameInteractions" hidden>
 						<div>
 							<span id="lifeBtnHeader">Life</span><br>
 							<button id="lifeDown100">-100</button>
@@ -113,29 +113,29 @@
 					</div>
 				</div>
 				
-				<div id="draftGameSetupMenu">
-					<div id="draftMainInfo">Pick a card.</div>
-					<div id="draftCardSelection"></div>
-					<div id="draftInfoBar">
-						<span id="draftPackNumber">Pack --/--</span>
-						<span id="draftCardNumber">0/-- Taken</span>
-					</div>
-					<div id="draftDeckHolder">
-						<div class="draftDeck">
-							<div class="draftDeckTitleBar"><span id="draftDeckOwner0"></span><span id="draftDeckCount0">0/--</span></div>
-							<div id="draftDeckList0" class="draftDeckList"></div>
+				<main id="draftGameSetupMenu" hidden>
+					<div id="draftGameFlexBox">
+						<div id="draftMainInfo">Pick a card.</div>
+						<div id="draftCardSelection"></div>
+						<div id="draftInfoBar">
+							<span id="draftPackNumber">Pack --/--</span>
+							<span id="draftCardNumber">0/-- Taken</span>
 						</div>
-						<div class="draftDeck">
-							<div class="draftDeckTitleBar"><span id="draftDeckOwner1"></span><span id="draftDeckCount1">0/--</span></div>
-							<div id="draftDeckList1" class="draftDeckList"></div>
+						<div id="draftDeckHolder">
+							<div class="draftDeck">
+								<div class="draftDeckTitleBar"><span id="draftDeckOwner0"></span><span id="draftDeckCount0">0/--</span></div>
+								<div id="draftDeckList0" class="draftDeckList"></div>
+							</div>
+							<div class="draftDeck">
+								<div class="draftDeckTitleBar"><span id="draftDeckOwner1"></span><span id="draftDeckCount1">0/--</span></div>
+								<div id="draftDeckList1" class="draftDeckList"></div>
+							</div>
 						</div>
+						<button id="draftStartButton" class="bigButton" hidden>Start Game</button>
 					</div>
-					<div id="draftStartButtonHolder">
-						<button id="draftStartButton">Start Game</button>
-					</div>
-				</div>
+				</main>
 				
-				<div id="mainGameArea">
+				<main id="mainGameArea" hidden>
 					<div id="fieldHolder"> <!-- This is mainly a flexbox for legacy reasons, it serves as a container for the field only. If it ain't broken, don't fix it. -->
 						<div id="field">
 							<div id="playerGrids">
@@ -380,7 +380,7 @@
 					<!--hands-->
 					<div id="hand0" class="hand"></div>
 					<div id="hand1" class="hand" data-card-area="hand1"></div>
-				</div>
+				</main>
 			</div>
 			
 			<!-- This pops up behind the following menus so that clicking off of them doesn't pass through to stuff below -->
@@ -389,7 +389,8 @@
 			<!-- Above the overlay to still be interactable while menus are open -->
 			<div id="cardDetails">
 				<div id="cardDetailsControl">
-					<div id="cardDetailsSwitch">i</div><div id="cardDetailsClose">X</div>
+					<div id="cardDetailsSwitch" class="bigButton">i</div>
+					<div id="cardDetailsClose" class="bigButton">X</div>
 				</div>
 				<div id="cardDetailsText">
 					<div id="cardDetailsName">---</div>
@@ -404,41 +405,47 @@
 			</div>
 			
 			<!--Card Selector-->
-			<div id="cardSelector" class="popupSelectMenu">
-				<header id="cardSelectorTitle"></header>
-				<div class="cardListScrollParent">
-					<div id="cardSelectorGrid" class="cardGrid"></div>
-				</div>
-				<div id="cardSelectorReturnToDeck">Return All to your Deck</div>
-			</div>
+			<dialog id="cardSelector" class="popupSelectMenu">
+				<section class="dialogContent" aria-labelledby="cardSelectorTitle">
+					<header id="cardSelectorTitle"></header>
+					<div class="cardListScrollParent">
+						<div id="cardSelectorGrid" class="cardGrid"></div>
+					</div>
+					<button id="cardSelectorReturnToDeck" class="bigButton">Return All to your Deck</button>
+				</section>
+			</dialog>
 			
 			<!--Deck Selector-->
-			<div id="deckSelector" class="popupSelectMenu">
-				<div id="deckSelectorList">
-					<div id="deckListHeader">
-						<div id="deckSelectorListDefaultBtn" class="deckListButton">
-							<span id="defaultDecksBtn" class="centeredTextDiv buttonLabel">Default</span>
+			<dialog id="deckSelector" class="popupSelectMenu">
+				<section class="dialogContent">
+					<div id="deckSelectorFlex">
+						<div id="deckSelectorList">
+							<div id="deckListHeader">
+								<button id="defaultDecksBtn" class="bigButton">
+									Default
+								</button>
+								<button id="legacyDecksBtn" class="bigButton">
+									Legacy
+								</button>
+							</div>
+							<div id="deckList">
+								<!--decks get filled in by js-->
+							</div>
+							<button id="loadSelectedDeckBtn" class="bigButton">
+								Load Selected Deck
+							</button>
 						</div>
-						<div id="deckSelectorListLegacyBtn" class="deckListButton">
-							<span id="legacyDecksBtn" class="centeredTextDiv buttonLabel">Legacy</span>
+						<div id="deckSelectorRight">
+							<div id="deckSelectorCardGrid" class="cardGrid">
+								<!--cards get filled in by js-->
+							</div>
+							<div id="deckSelectorDescription">
+								<!--description gets filled in by js-->
+							</div>
 						</div>
 					</div>
-					<div id="deckList">
-						<!--decks get filled in by js-->
-					</div>
-					<div id="deckListFooter" class="deckListButton">
-						<span id="loadSelectedDeckBtn" class="centeredTextDiv buttonLabel">Load Selected Deck</span>
-					</div>
-				</div>
-				<div id="deckSelectorRight">
-					<div id="deckSelectorCardGrid" class="cardGrid">
-						<!--cards get filled in by js-->
-					</div>
-					<div id="deckSelectorDescription">
-						<!--description gets filled in by js-->
-					</div>
-				</div>
-			</div>
+				</section>
+			</dialog>
 			
 			<!--Partner Selector-->
 			<div id="partnerSelectQuestion">
@@ -447,12 +454,14 @@
 				<div id="partnerSelectQuestionBtns"><button id="chooseSuggestedPartnerBtn">Use Suggested Partner</button><button id="manualChoosePartnerBtn">Select One From Deck</button></div>
 			</div>
 			
-			<div id="partnerSelectionMenu" class="popupSelectMenu">
-				<header id="selectYourPartnerTitle">Select Your Partner:</header>
-				<div class="cardListScrollParent">
-					<div id="partnerSelectorGrid" class="cardGrid"></div>
-				</div>
-			</div>
+			<dialog id="partnerSelectionMenu" class="popupSelectMenu">
+				<section class="dialogContent" aria-labelledby="selectYourPartnerTitle">
+					<header id="selectYourPartnerTitle">Select Your Partner:</header>
+					<div class="cardListScrollParent">
+						<div id="partnerSelectorGrid" class="cardGrid"></div>
+					</div>
+				</section>
+			</dialog>
 		</div>
 		
 		<!-- 'dependencies' -->

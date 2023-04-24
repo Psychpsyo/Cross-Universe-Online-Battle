@@ -1,11 +1,3 @@
-html {
-	--faded-background: #000B;
-}
-
-#gameDiv {
-	display: none;
-}
-
 #gameFlexBox {
 	display: flex;
 }
@@ -15,7 +7,6 @@ html {
 }
 
 #mainGameArea {
-	display: none;
 	position: relative;
 	flex-grow: 1;
 }
@@ -79,9 +70,8 @@ html {
 	display: flex;
 	align-items: center;
 	
-	background-color: var(--faded-background);
+	background-color: var(--theme-dialog-background-color);
 	box-sizing: border-box;
-	border: 2px #eee solid;
 	border-bottom: none;
 	border-radius: 1em 1em 0px 0px;
 }
@@ -90,40 +80,26 @@ html {
 	right: unset;
 }
 
-#cardDetailsControl > div {
+#cardDetailsControl > * {
 	width: 50%;
-	text-align: center;
 	line-height: 2em;
-	user-select: none;
 }
 
-#cardDetailsControl > div:first-child {
-	border-right: 1px #eee solid;
+#cardDetailsControl > :first-child {
 	border-top-left-radius: 1em;
+	border-right: none;
 }
 
 #cardDetailsControl > div:last-child {
-	border-left: 1px #eee solid;
 	border-top-right-radius: 1em;
-}
-
-#cardDetailsControl > div:first-child:hover {
-	background-color: #fff3;
-}
-#cardDetailsControl > div:last-child:hover {
-	background-color: #f003;
-}
-
-#cardDetailsControl > div {
-	border-left
 }
 
 #cardDetailsText {
 	height: 100%;
 	
-	background-color: var(--faded-background);
+	background-color: var(--theme-dialog-background-color);
 	box-sizing: border-box;
-	border: 2px #eee solid;
+	border: 2px var(--theme-border-color) solid;
 	border-radius: 1em 0 1em 1em;
 	
 	overflow-y: auto;
@@ -133,7 +109,7 @@ html {
 }
 
 #cardDetailsName, #cardDetailsInfo, .cardDetailsEffect {
-	border-bottom: 2px #eee solid;
+	border-bottom: 2px var(--theme-border-color) solid;
 	padding: .25em .5em;
 }
 
@@ -170,17 +146,17 @@ html {
 	height: 100vh;
 	box-sizing: border-box;
 	
-	border-right: 2px #eee solid;
+	border-right: 2px var(--theme-border-color) solid;
 	background-color: var(--theme-shadow);
 }
 
 .leftField #leftPanel {
 	border-right: none;
-	border-left: 2px #eee solid;
+	border-left: 2px var(--theme-border-color) solid;
 }
 
 #roomcodeDisplay {
-	border-bottom: 2px solid #eee;
+	border-bottom: 2px solid var(--theme-border-color);
 	padding: .5em;
 	text-align: center;
 }
@@ -191,7 +167,7 @@ html {
 	text-align: right;
 	white-space: nowrap;
 	padding: .5em;
-	border-bottom: 2px solid #eee;
+	border-bottom: 2px solid var(--theme-border-color);
 }
 
 #infoPanel > div {
@@ -203,10 +179,9 @@ html {
 }
 
 #gameInteractions {
-	display: none;
 	text-align: center;
 	padding: .5em;
-	border-bottom: 2px solid #eee;
+	border-bottom: 2px solid var(--theme-border-color);
 }
 
 #gameInteractions > div:not(:last-child) {
@@ -304,6 +279,7 @@ img[src$="cardBackFrameP1.png"] {
 }
 
 .fieldCardAmountDisplay {
+	color: #eee;
 	position: absolute;
 	text-align: center;
 	left: 0;
@@ -459,7 +435,7 @@ label[for="fileSelectDeckLoader"] {
 }
 
 .sideBox {
-	border: 2px #eee solid;
+	border: 2px var(--theme-border-color) solid;
 	border-radius: .5em;
 	
 	background-color: #0001;
@@ -479,8 +455,8 @@ label[for="fileSelectDeckLoader"] {
 
 #chatBox {
 	flex-grow: 1;
-	border-top: 2px #eee solid;
-	border-bottom: 2px #eee solid;
+	border-top: 2px var(--theme-border-color) solid;
+	border-bottom: 2px var(--theme-border-color) solid;
 	overflow-y: scroll;
 	font-size: .75em;
 	padding: .4em 0;
@@ -519,22 +495,17 @@ label[for="fileSelectDeckLoader"] {
 	border: none;
 	margin: 0;
 	padding: .5em;
-	color: #eeeeee;
+	color: inherit;
 	outline: none;
 	font-size: .75em;
 }
 
 .popupSelectMenu {
-	display: none; /*will be enabled from js*/
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-60%, -50%);
 	width: 60vw;
-	height: 80vh;
-	background-color: var(--faded-background);
-	border: 2px #eee solid;
-	border-radius: 1em;
 	z-index: 100;
 }
 .leftField .popupSelectMenu {
@@ -559,17 +530,14 @@ label[for="fileSelectDeckLoader"] {
 	text-align: center;
 	line-height: 1.5;
 }
-#cardSelector > header, #partnerSelectionMenu > header {
+#cardSelector header, #partnerSelectionMenu header {
 	font-weight: bold;
-}
-
-#cardSelectorTitle, #selectYourPartnerTitle {
 	padding: .3em 0;
-	border-bottom: 2px #eee solid;
+	border-bottom: 2px var(--theme-border-color) solid;
 }
 
-#cardSelector ::-webkit-scrollbar, #partnerSelectionMenu ::-webkit-scrollbar {
-	display: none;
+#cardSelector > *, #partnerSelectionMenu > * {
+	height: 80vh;
 }
 
 #cardSelectorGrid {
@@ -592,15 +560,11 @@ label[for="fileSelectDeckLoader"] {
 	display: none;
 	height: 2em;
 	line-height: 2em;
-	border-top: 2px #eee solid;
-	text-align: center;
-	cursor: default;
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
 	border-bottom-left-radius: 1em;
 	border-bottom-right-radius: 1em;
-}
-
-#cardSelectorReturnToDeck:hover {
-	background-color: #fff3;
 }
 
 .cardGrid img {
@@ -616,8 +580,9 @@ label[for="fileSelectDeckLoader"] {
 }
 
 /*deck selector*/
-#deckSelector {
-	display: none;
+#deckSelectorFlex {
+	display: flex;
+	height: 80vh;
 }
 
 #deckSelectorList {
@@ -637,54 +602,41 @@ label[for="fileSelectDeckLoader"] {
 
 #deckListHeader {
 	display: flex;
-	min-height: 2em;
-	border-bottom: 2px #eee solid;
+	height: 2em;
 	border-top-left-radius: 1em;
 	align-items: stretch;
 }
 
-#deckListHeader > div:first-child {
-	border-top-left-radius: 1em;
-}
-
-#deckListHeader > div:not(:last-child) {
-	border-right: 1px #eee solid;
-}
-
-#deckListHeader > div:not(:first-child) {
-	border-left: 1px #eee solid;
-}
-
-#deckListFooter {
-	min-height: 2em;
-	max-height: 2em;
-	border-top: 2px #eee solid;
-	border-bottom-left-radius: 1em;
-}
-
-.deckListButton {
-	position: relative;
+#deckListHeader > * {
+	border-top: none;
+	border-right: none;
 	flex-grow: 1;
 }
 
-.deckListButton:hover {
-	background-color: #fff3;
+#deckListHeader > :first-child {
+	border-top-left-radius: 1em;
+	border-left: none;
 }
 
-.deckInList {
+#loadSelectedDeckBtn {
+	height: 2em;
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
+	border-bottom-left-radius: 1em;
+}
+
+#deckList > * {
 	padding: .5em .5em;
-	background-color: #000c;
 	line-height: 1em;
-	border-bottom: 1px #eee solid;
-}
-
-.deckInList:hover {
-	background-color: #222c;
+	text-align: left;
+	border-top: none;
+	border-left: none;
+	border-right: none;
 }
 
 .deckCardAmount {
 	font-size: .8em;
-	color: #bbb;
 }
 
 #selectedDeck {
@@ -693,7 +645,7 @@ label[for="fileSelectDeckLoader"] {
 
 #deckSelectorRight {
 	flex-basis: 65%;
-	border-left: 2px #eee solid;
+	border-left: 2px var(--theme-border-color) solid;
 	border-radius: 0 1em 1em 0;
 	display: flex;
 	flex-direction: column;
@@ -718,8 +670,9 @@ label[for="fileSelectDeckLoader"] {
 	height: 30%;
 	padding: .25em .5em;
 	box-sizing: border-box;
-	border-top: 2px solid #eee;
+	border-top: 2px solid var(--theme-border-color);
 	white-space: pre-wrap;
+	text-align: left;
 	font-size: .8em;
 }
 
@@ -731,8 +684,8 @@ label[for="fileSelectDeckLoader"] {
 	transform: translate(-50%, -50%);
 	text-align: center;
 	
-	background-color: var(--faded-background);
-	border: 2px #eee solid;
+	background-color: var(--theme-dialog-background-color);
+	border: 2px var(--theme-border-color) solid;
 	border-radius: 1em;
 	padding: 1em;
 	z-index: 100;
@@ -825,7 +778,7 @@ label[for="fileSelectDeckLoader"] {
 	text-align: center;
 	background-color: black;
 	border-radius: .5em;
-	border: 2px #eee solid;
+	border: 2px var(--theme-border-color) solid;
 }
 
 .counterAddBtn {
@@ -833,7 +786,7 @@ label[for="fileSelectDeckLoader"] {
 	text-align: center;
 	background-color: #aaa;
 	border-radius: .5em;
-	border: 2px #eee solid;
+	border: 2px var(--theme-border-color) solid;
 	font-weight: bold;
 }
 

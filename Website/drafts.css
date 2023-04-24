@@ -1,6 +1,6 @@
-#draftGameSetupMenu {
-	display: none;
-	flex-grow: 1;
+#draftGameFlexBox {
+	display: flex;
+	flex-direction: column;
 	max-width: 70vw;
 }
 
@@ -12,6 +12,7 @@
 }
 
 #draftCardSelection {
+	width: 100%;
 	display: flex;
 	aspect-ratio: 8130 / 1185;
 	background-color: #0004;
@@ -74,8 +75,8 @@
 	box-sizing: border-box;
 }
 
-#draftStartButtonHolder {
-	display: none;
-	text-align: center;
-	font-size: 2em;
+#draftStartButton {
+	border-radius: .5em;
+	padding: .2em .4em;
+	margin: 1em auto;
 }

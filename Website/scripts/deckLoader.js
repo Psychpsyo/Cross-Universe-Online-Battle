@@ -161,7 +161,7 @@ async function addDecksToDeckSelector(deckList) {
 		.then(deck => {
 			officialDecks[currentDeckList][deckID] = deck;
 			deckDiv = document.createElement("div");
-			deckDiv.classList.add("deckInList");
+			deckDiv.classList.add("bigButton");
 			deckDiv.textContent = deck["name"][locale.code] ?? deck["name"]["en"] ?? deck["name"]["ja"] ?? "---";
 			deckDiv.dataset.deck = deckID;
 			
@@ -192,7 +192,7 @@ async function addDecksToDeckSelector(deckList) {
 }
 
 //selecting deck from the deck list
-document.getElementById("deckListFooter").addEventListener("click", function() {
+document.getElementById("loadSelectedDeckBtn").addEventListener("click", function() {
 	if (!document.getElementById("selectedDeck")) {
 		return;
 	}
@@ -226,13 +226,13 @@ fetch("data/deckList.json")
 });
 
 //deck selector deck list buttons
-document.getElementById("deckSelectorListDefaultBtn").addEventListener("click", function() {
+document.getElementById("defaultDecksBtn").addEventListener("click", function() {
 	if (currentDeckList != "default") {
 		currentDeckList = "default";
 		addDecksToDeckSelector("default");
 	}
 });
-document.getElementById("deckSelectorListLegacyBtn").addEventListener("click", function() {
+document.getElementById("legacyDecksBtn").addEventListener("click", function() {
 	if (currentDeckList != "legacy") {
 		currentDeckList = "legacy";
 		addDecksToDeckSelector("legacy");

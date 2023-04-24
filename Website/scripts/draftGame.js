@@ -36,7 +36,7 @@ function startDraftGame() {
 		draftRerollCards();
 	}
 	
-	draftGameSetupMenu.style.display = "block";
+	draftGameSetupMenu.removeAttribute("hidden");
 }
 
 function draftSetPlayer(player) {
@@ -118,7 +118,7 @@ function draftAddToDeck(card, deck) {
 		cardAreas["deck0"].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]));
 		
 		// show start button
-		draftStartButtonHolder.style.display = "block";
+		draftStartButton.removeAttribute("hidden");
 		return;
 	}
 	
@@ -155,10 +155,10 @@ function draftHandleMessage(message) {
 
 draftStartButton.addEventListener("click", function() {
 	// close draft menu
-	draftGameSetupMenu.style.display = "none";
-	mainGameArea.style.display = "block";
+	draftGameSetupMenu.setAttribute("hidden", "");
+	mainGameArea.removeAttribute("hidden");
+	gameInteractions.removeAttribute("hidden");
 	
 	// time to choose a partner
-	document.getElementById("gameInteractions").style.display = "block";
 	openPartnerSelectMenu();
 });

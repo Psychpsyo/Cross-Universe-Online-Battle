@@ -3,7 +3,7 @@
 	top: 0;
 	z-index: 100;
 	
-	background-color: #333;
+	background-color: var(--theme-background-color);
 	background-image: var(--theme-background);
 	background-position-x: center;
 	background-position-y: var(--theme-background-y);
@@ -14,7 +14,7 @@
 header {
 	text-align: center;
 	height: 1.75em;
-	border-bottom: 2px #eee solid;
+	border-bottom: 2px var(--theme-border-color) solid;
 	line-height: 1.75em;
 	background-color: var(--theme-shadow);
 }

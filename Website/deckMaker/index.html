@@ -15,9 +15,9 @@
 	</head>
 	<body>
 		<header id="deckMakerHeader">
-			<button id="deckMakerDeckButton" class="deckMakerTopButton">Deck</button>
+			<button id="deckMakerDeckButton" class="bigButton deckMakerTopButton">Deck</button>
 			<h1 id="deckCreatorTitle">Deck Creator</h1>
-			<button id="deckMakerSearchButton" class="deckMakerTopButton">Search</button>
+			<button id="deckMakerSearchButton" class="bigButton deckMakerTopButton">Search</button>
 		</header>
 		<section id="deckMakerPanels" aria-label="Search Results">
 			<section id="deckMakerUnits" aria-label="Unit/Token Column">
@@ -61,112 +61,112 @@
 		</section>
 		
 		<!--search panel-->
-		<dialog id="cardSearchPanel" aria-labelledBy="cardSearchPanelHeader">
-			<div class="dialogContent">
+		<dialog id="cardSearchPanel">
+			<section class="dialogContent" aria-labelledBy="cardSearchPanelHeader">
 				<header><h2 id="cardSearchPanelHeader">Card Search</h2></header>
 				<form method="dialog" class="dialogScrollArea">
-				<div class="optionListingItem">
-					<label id="cardSearchNameLabel" for="cardSearchNameInput">Card Name:</label>
-					<input id="cardSearchNameInput" type="text" autocomplete="off" placeholder="Search by card name">
-				</div>
-				<div class="optionListingItem">
-					<label id="cardSearchIdLabel" for="cardSearchIdInput">Card ID:</label>
-					<input id="cardSearchIdInput" type="text" autocomplete="off" placeholder="Search by card ID">
-				</div>
-				<div class="optionListingItem" role="group" aria-labelledBy="cardSearchAttackLabel">
-					<span id="cardSearchAttackLabel">Attack:</span>
-					<input id="cardSearchAttackMinInput" type="number" size="5" autocomplete="off" aria-label="Minimum">
-					<span class="cardSearchMinus">-</span>
-					<input id="cardSearchAttackMaxInput" type="number" size="5" autocomplete="off" aria-label="Maximum">
-				</div>
-				<div class="optionListingItem" role="group" aria-labelledBy="cardSearchDefenseLabel">
-					<span id="cardSearchDefenseLabel">Defense:</span>
-					<input id="cardSearchDefenseMinInput" type="number" size="5" autocomplete="off" aria-label="Minimum">
-					<span class="cardSearchMinus">-</span>
-					<input id="cardSearchDefenseMaxInput" type="number" size="5" autocomplete="off" aria-label="Maximum">
-				</div>
-				<div class="optionListingItem">
-					<label id="cardSearchTextLabel" for="cardSearchTextInput">Text Box:</label>
-					<input id="cardSearchTextInput" type="text" autocomplete="off" placeholder="Search the text box of the card">
-				</div>
-				<div class="optionListingItem">
-					<label id="cardSearchTypeLabel" for="cardSearchTypeInput">Types:</label>
-					<select multiple id="cardSearchTypeInput" size="10" autocomplete="off">
-						<option value="Angel">Angel</option>
-						<option value="Armor">Armor</option>
-						<option value="Beast">Beast</option>
-						<option value="Bird">Bird</option>
-						<option value="Book">Book</option>
-						<option value="Boundary">Boundary</option>
-						<option value="Bug">Bug</option>
-						<option value="Chain">Chain</option>
-						<option value="Curse">Curse</option>
-						<option value="Dark">Dark</option>
-						<option value="Demon">Demon</option>
-						<option value="Dragon">Dragon</option>
-						<option value="Earth">Earth</option>
-						<option value="Electric">Electric</option>
-						<option value="Figure">Figure</option>
-						<option value="Fire">Fire</option>
-						<option value="Fish">Fish</option>
-						<option value="Ghost">Ghost</option>
-						<option value="Gravity">Gravity</option>
-						<option value="Ice">Ice</option>
-						<option value="Illusion">Illusion</option>
-						<option value="Katana">Katana</option>
-						<option value="Landmine">Landmine</option>
-						<option value="Light">Light</option>
-						<option value="Machine">Machine</option>
-						<option value="Mage">Mage</option>
-						<option value="Medicine">Medicine</option>
-						<option value="Myth">Myth</option>
-						<option value="Plant">Plant</option>
-						<option value="Psychic">Psychic</option>
-						<option value="Rock">Rock</option>
-						<option value="Samurai">Samurai</option>
-						<option value="Shield">Shield</option>
-						<option value="Spirit">Spirit</option>
-						<option value="Structure">Structure</option>
-						<option value="Sword">Sword</option>
-						<option value="Warrior">Warrior</option>
-						<option value="Water">Water</option>
-						<option value="Wind">Wind</option>
-						<option value="typeless">typeless</option>
-					</select>
-				</div>
-				<div class="optionListingItem">
-					<label id="cardSearchCharacterLabel" for="cardSearchIdInput">Characters:</label>
-					<input id="cardSearchCharacterInput" type="text" autocomplete="off" placeholder="Search by visible characters" title="Separate multiple characters with commas. (i.e. Iruyanka, Cheering Angel)"></div>
-				<div class="optionListingItem">
-					<label id="cardSearchDeckLimitLabel" for="cardSearchDeckLimitInput">Deck Limit:</label>
-					<select id="cardSearchDeckLimitInput" autocomplete="off">
-						<option value="">any</option>
-						<option value="3">3</option>
-						<option value="less">less</option>
-						<option value="more">more</option>
-						<option value="inf">∞</option>
-					</select>
-				</div>
-				<div class="optionListingItem">
-					<label id="cardSearchSortLabel" for="cardSearchSortInput">Sort by </label>
-					<select id="cardSearchSortInput" autocomplete="off">
-						<option value="">relevancy</option>
-						<option value="level">level</option>
-						<option value="name">name</option>
-						<option value="releaseDate">release date</option>
-						<option value="cardID">card ID</option>
-						<option value="attack">attack</option>
-						<option value="defense">defense</option>
-					</select>
-				</div>
-				<button id="cardSearchSearchBtn">Search</button>
-			</form>
-			</div>
+					<div class="optionListingItem">
+						<label id="cardSearchNameLabel" for="cardSearchNameInput">Card Name:</label>
+						<input id="cardSearchNameInput" type="text" autocomplete="off" placeholder="Search by card name">
+					</div>
+					<div class="optionListingItem">
+						<label id="cardSearchIdLabel" for="cardSearchIdInput">Card ID:</label>
+						<input id="cardSearchIdInput" type="text" autocomplete="off" placeholder="Search by card ID">
+					</div>
+					<div class="optionListingItem" role="group" aria-labelledBy="cardSearchAttackLabel">
+						<span id="cardSearchAttackLabel">Attack:</span>
+						<input id="cardSearchAttackMinInput" type="number" size="5" autocomplete="off" aria-label="Minimum">
+						<span class="cardSearchMinus">-</span>
+						<input id="cardSearchAttackMaxInput" type="number" size="5" autocomplete="off" aria-label="Maximum">
+					</div>
+					<div class="optionListingItem" role="group" aria-labelledBy="cardSearchDefenseLabel">
+						<span id="cardSearchDefenseLabel">Defense:</span>
+						<input id="cardSearchDefenseMinInput" type="number" size="5" autocomplete="off" aria-label="Minimum">
+						<span class="cardSearchMinus">-</span>
+						<input id="cardSearchDefenseMaxInput" type="number" size="5" autocomplete="off" aria-label="Maximum">
+					</div>
+					<div class="optionListingItem">
+						<label id="cardSearchTextLabel" for="cardSearchTextInput">Text Box:</label>
+						<input id="cardSearchTextInput" type="text" autocomplete="off" placeholder="Search the text box of the card">
+					</div>
+					<div class="optionListingItem">
+						<label id="cardSearchTypeLabel" for="cardSearchTypeInput">Types:</label>
+						<select multiple id="cardSearchTypeInput" size="10" autocomplete="off">
+							<option value="Angel">Angel</option>
+							<option value="Armor">Armor</option>
+							<option value="Beast">Beast</option>
+							<option value="Bird">Bird</option>
+							<option value="Book">Book</option>
+							<option value="Boundary">Boundary</option>
+							<option value="Bug">Bug</option>
+							<option value="Chain">Chain</option>
+							<option value="Curse">Curse</option>
+							<option value="Dark">Dark</option>
+							<option value="Demon">Demon</option>
+							<option value="Dragon">Dragon</option>
+							<option value="Earth">Earth</option>
+							<option value="Electric">Electric</option>
+							<option value="Figure">Figure</option>
+							<option value="Fire">Fire</option>
+							<option value="Fish">Fish</option>
+							<option value="Ghost">Ghost</option>
+							<option value="Gravity">Gravity</option>
+							<option value="Ice">Ice</option>
+							<option value="Illusion">Illusion</option>
+							<option value="Katana">Katana</option>
+							<option value="Landmine">Landmine</option>
+							<option value="Light">Light</option>
+							<option value="Machine">Machine</option>
+							<option value="Mage">Mage</option>
+							<option value="Medicine">Medicine</option>
+							<option value="Myth">Myth</option>
+							<option value="Plant">Plant</option>
+							<option value="Psychic">Psychic</option>
+							<option value="Rock">Rock</option>
+							<option value="Samurai">Samurai</option>
+							<option value="Shield">Shield</option>
+							<option value="Spirit">Spirit</option>
+							<option value="Structure">Structure</option>
+							<option value="Sword">Sword</option>
+							<option value="Warrior">Warrior</option>
+							<option value="Water">Water</option>
+							<option value="Wind">Wind</option>
+							<option value="typeless">typeless</option>
+						</select>
+					</div>
+					<div class="optionListingItem">
+						<label id="cardSearchCharacterLabel" for="cardSearchIdInput">Characters:</label>
+						<input id="cardSearchCharacterInput" type="text" autocomplete="off" placeholder="Search by visible characters" title="Separate multiple characters with commas. (i.e. Iruyanka, Cheering Angel)"></div>
+					<div class="optionListingItem">
+						<label id="cardSearchDeckLimitLabel" for="cardSearchDeckLimitInput">Deck Limit:</label>
+						<select id="cardSearchDeckLimitInput" autocomplete="off">
+							<option value="">any</option>
+							<option value="3">3</option>
+							<option value="less">less</option>
+							<option value="more">more</option>
+							<option value="inf">∞</option>
+						</select>
+					</div>
+					<div class="optionListingItem">
+						<label id="cardSearchSortLabel" for="cardSearchSortInput">Sort by </label>
+						<select id="cardSearchSortInput" autocomplete="off">
+							<option value="">relevancy</option>
+							<option value="level">level</option>
+							<option value="name">name</option>
+							<option value="releaseDate">release date</option>
+							<option value="cardID">card ID</option>
+							<option value="attack">attack</option>
+							<option value="defense">defense</option>
+						</select>
+					</div>
+					<button id="cardSearchSearchBtn">Search</button>
+				</form>
+			</section>
 		</dialog>
 		
 		<!--deck panel-->
-		<dialog id="deckCreationPanel" aria-labelledBy="deckCreationPanelHeader">
-			<div id="deckCreationPanelInner" class="dialogContent">
+		<dialog id="deckCreationPanel">
+			<section id="deckCreationPanelInner" class="dialogContent" aria-labelledBy="deckCreationPanelHeader">
 				<header><h2 id="deckCreationPanelHeader">Deck Overview</h2></header>
 				<div id="deckMakerMainArea">
 					<section aria-labelledBy="deckCardListHeader">
@@ -265,16 +265,16 @@
 					</section>
 				</div>
 				<div>
-					<header id="recentCardsHeader"><h3><button id="recentCardsHeaderBtn">Recent Cards</button></h3></header>
+					<header id="recentCardsHeader"><h3><button id="recentCardsHeaderBtn" class="bigButton">Recent Cards</button></h3></header>
 					<div id="recentCardsList"></div>
 				</div>
-			</div>
+			</section>
 		</dialog>
 		
 		<!--card info panel-->
-		<dialog id="cardInfoPanel" aria-labelledBy="cardInfoCardName">
-			<section id="cardInfoPanelContent" class="dialogContent" aria-label="Card Info">
-				<header><h2 id="cardInfoCardName">Card Name Here</h2></header>
+		<dialog id="cardInfoPanel" aria-label="Card Info">
+			<section id="cardInfoPanelContent" class="dialogContent" aria-labelledBy="cardInfoCardName">
+				<header><h2 id="cardInfoCardName">---</h2></header>
 				<div id="cardInfoMainArea" class="dialogScrollArea">
 					<section id="cardInfoGeneralSection" aria-label="General Info">
 						<div id="cardInfoImgArea">
@@ -302,17 +302,17 @@
 						<div id="cardInfoVisibleOnGrid" class="cardInfoGrid cardList"></div>
 					</section>
 				</div>
-				<button id="cardInfoToDeck">Add Card To Deck</button>
+				<button id="cardInfoToDeck" class="bigButton">Add Card To Deck</button>
 			</section>
 		</dialog>
 		
 		<!--starting hand generator panel-->
-		<dialog id="startingHandGenerator" aria-labelledBy="handGeneratorTitle">
-			<div class="dialogContent">
+		<dialog id="startingHandGenerator">
+			<section class="dialogContent" aria-labelledBy="handGeneratorTitle">
 				<header><h2 id="handGeneratorTitle">Starting Hand Generator</h2></header>
 				<div id="startingHandGeneratorCards"></div>
 				<div id="regenerateStartingHand">Redraw</div>
-			</div>
+			</section>
 		</dialog>
 		
 		<!--scripts-->
