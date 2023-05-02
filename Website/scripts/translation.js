@@ -78,19 +78,19 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 		});
 		document.querySelectorAll(".fieldLabelDeck").forEach(label => {
 			label.textContent = locale["fieldLabels"]["deck"];
-			if (locale.code == "ja") {
+			if (locale["fieldLabels"]["verticalText"]) {
 				label.classList.add("verticalFieldLabel");
 			}
 		});
 		document.querySelectorAll(".fieldLabelDiscardPile").forEach(label => {
 			label.textContent = locale["fieldLabels"]["discardPile"];
-			if (locale.code == "ja") {
+			if (locale["fieldLabels"]["verticalText"]) {
 				label.classList.add("verticalFieldLabel");
 			}
 		});
 		document.querySelectorAll(".fieldLabelExileZone").forEach(label => {
 			label.textContent = locale["fieldLabels"]["exileZone"];
-			if (locale.code == "ja") {
+			if (locale["fieldLabels"]["verticalText"]) {
 				label.classList.add("verticalFieldLabel");
 			}
 		});

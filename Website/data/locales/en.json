@@ -78,6 +78,7 @@
 	},
 	
 	"fieldLabels": {
+		"verticalText": false,
 		"unitZone": "Unit\nZone",
 		"spellItemZone": "Spell\n&\nItem\nZone",
 		"partnerZone": "Partner\nZone",

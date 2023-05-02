@@ -78,6 +78,7 @@
 	},
 	
 	"fieldLabels": {
+		"verticalText": true,
 		"unitZone": "ユニット\nゾーン",
 		"spellItemZone": "スペル\n＆\nアイテム\nゾーン",
 		"partnerZone": "パートナー\nゾーン",

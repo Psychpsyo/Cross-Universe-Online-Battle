@@ -78,6 +78,7 @@
 	},
 	
 	"fieldLabels": {
+		"verticalText": false,
 		"unitZone": "Einheiten\nZone",
 		"spellItemZone": "Zauber\n&\nItem\nZone",
 		"partnerZone": "Partner\nZone",
