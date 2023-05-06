@@ -64,7 +64,6 @@ h1 {
 	border-radius: .5em;
 	padding: .2em .4em;
 	margin: 0 auto;
-	width: fit-content;
 }
 
 #deckMakerButton, #settingsButton {

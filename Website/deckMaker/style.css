@@ -66,10 +66,12 @@ h1, h2, h3, h4 {
 	text-shadow: var(--theme-text-shadow);
 }
 
+.deckMakerTopButton::before {
+	content: none;
+}
 .deckMakerTopButton {
 	height: 100%;
 	padding: 0 1em;
-	background: none;
 	border-top: none;
 	border-bottom: none;
 }
