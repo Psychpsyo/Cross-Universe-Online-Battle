@@ -60,6 +60,7 @@ textarea {
 	position: relative;
 	border: 2px var(--theme-border-color) solid;
 	background: none;
+	overflow: hidden;
 	
 	font-size: 1em;
 	color: inherit;
