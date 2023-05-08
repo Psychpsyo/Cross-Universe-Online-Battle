@@ -359,7 +359,7 @@
 			"name": "デッキ名：",
 			"namePlaceholder": "New Deck",
 			"description": "説明文：",
-			"partner": "パートナーカード：",
+			"partner": "パートナー：",
 			
 			"cardTotal": "Card Total:",
 			"unitTotal": "ユニット：",
