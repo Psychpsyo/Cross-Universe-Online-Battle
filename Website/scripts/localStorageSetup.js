@@ -2,6 +2,7 @@
 localStorage.setItem("autoClosePreview", localStorage.getItem("autoClosePreview") ?? "false");
 localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("cardBackToggle", localStorage.getItem("cardBackToggle") ?? false);
+localStorage.setItem("customCards", localStorage.getItem("customCards") ?? "[]");
 localStorage.setItem("customFont", localStorage.getItem("customFont") ?? "");
 localStorage.setItem("fieldLabelToggle", localStorage.getItem("fieldLabelToggle") ?? true);
 localStorage.setItem("fieldLeftToggle", localStorage.getItem("fieldLeftToggle") ?? false);
