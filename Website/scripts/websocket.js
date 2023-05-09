@@ -199,13 +199,13 @@ function receiveMessage(e) {
 			break;
 		}
 		case "life": { // set opponent's life
-			life[0] = message;
-			updateLifeDisplay(0);
+			game.players[0].life = message;
+			updateLifeDisplay(game.players[0]);
 			break;
 		}
 		case "mana": { // set opponent's mana
-			mana[0] = message;
-			updateManaDisplay(0);
+			game.players[0].mana = message;
+			updateManaDisplay(game.players[0]);
 			break;
 		}
 		case "hideCursor": { // hide opponent's cursor
@@ -441,10 +441,10 @@ function syncCreateToken(cardId) {
 
 // syncing player values
 function syncLife() {
-	socket.send("[life]" + life[1]);
+	socket.send("[life]" + localPlayer.life);
 }
 function syncMana() {
-	socket.send("[mana]" + mana[1]);
+	socket.send("[mana]" + localPlayer.mana);
 }
 
 // syncing hand and card presenting

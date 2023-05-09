@@ -1,5 +1,9 @@
-let mana = [0, 0];
-let life = [1000, 1000];
+let game = null;
+let localPlayer = null;
+import("/modules/game.js").then(gameModule => {
+	game = new gameModule.Game();
+	localPlayer = game.players[1];
+});
 
 // Areas that cards can go to. These handle card location changes and change the DOM accordingly
 cardAreas = {};

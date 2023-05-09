@@ -1,7 +1,7 @@
-import {render} from "/custom/renderer.js";
+import {renderCard} from "/custom/renderer.js";
 
 function getCard() {
-	return {
+	let card = {
 		"cardType": cardType.value,
 		"name": cardName.value,
 		"level": cardLevel.value == ""? -1 : cardLevel.value,
@@ -10,17 +10,21 @@ function getCard() {
 		"types": [],
 		"effects": []
 	};
+	if (localStorage.getItem("username")) {
+		card.author = localStorage.getItem("username");
+	}
+	return card;
 }
 
-function renderCard() {
-	render(getCard(), cardCanvas, localStorage.getItem("username"));
+function updateCard() {
+	renderCard(getCard(), cardCanvas);
 }
 
-cardName.addEventListener("input", renderCard);
-cardLevel.addEventListener("input", renderCard);
-cardAttack.addEventListener("input", renderCard);
-cardDefense.addEventListener("input", renderCard);
-cardType.addEventListener("input", renderCard);
+cardName.addEventListener("input", updateCard);
+cardLevel.addEventListener("input", updateCard);
+cardAttack.addEventListener("input", updateCard);
+cardDefense.addEventListener("input", updateCard);
+cardType.addEventListener("input", updateCard);
 
 function saveCard() {
 	let cards = JSON.parse(localStorage.getItem("customCards"));
@@ -30,4 +34,4 @@ function saveCard() {
 
 saveButton.addEventListener("click", saveCard);
 
-renderCard();
+updateCard();

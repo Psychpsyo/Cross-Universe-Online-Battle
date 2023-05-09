@@ -28,24 +28,24 @@ function deckToCardList(deck, isOpponentDeck) {
 }
 
 function updateLifeDisplay(player) {
-	let lifeDisplay = document.getElementById("lifeDisplay" + player);
+	let lifeDisplay = document.getElementById("lifeDisplay" + player.index);
 	let lifeDisplayValue = parseInt(lifeDisplay.textContent);
 	
-	if (lifeDisplayValue == life[player]) {
+	if (lifeDisplayValue == player.life) {
 		return;
 	}
 	
-	if (life[player] > lifeDisplayValue) {
-		document.getElementById("lifeDisplay" + player).textContent = lifeDisplayValue + 1;
+	if (player.life > lifeDisplayValue) {
+		lifeDisplay.textContent = lifeDisplayValue + 1;
 	} else {
-		document.getElementById("lifeDisplay" + player).textContent = lifeDisplayValue - 1;
+		lifeDisplay.textContent = lifeDisplayValue - 1;
 	}
 	
 	window.setTimeout(function() {updateLifeDisplay(player);}, 15);
 }
 
 function updateManaDisplay(player) {
-	document.getElementById("manaDisplay" + player).textContent = mana[player];
+	document.getElementById("manaDisplay" + player.index).textContent = player.mana;
 }
 
 //opening a card selector

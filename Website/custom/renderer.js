@@ -44,6 +44,7 @@ let localeStrings = {
 		"continuousItem": "Continuous Item",
 		
 		"ideaCredit": "Idea: ",
+		"tokenNotice": "※Token cards may not be added to decks.",
 		
 		"typeSeparator": ", ",
 		"typePsychic": "Psychic",
@@ -98,6 +99,7 @@ let localeStrings = {
 		"continuousItem": "永続アイテム",
 		
 		"ideaCredit": "原案：",
+		"tokenNotice": "※トークンカードはデッキに入れる事が出来ません。",
 		
 		"typeSeparator": ",",
 		"typePsychic": "PSI",
@@ -217,11 +219,15 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 	};
 }
 
-async function render(card, canvas, ideaCredit) {
+async function renderCard(card, canvas) {
 	let language = localStorage.getItem("language");
 	canvas.width = 813;
 	canvas.height = 1185;
 	let ctx = canvas.getContext("2d");
+	
+	ctx.fillStyle = "#B09F97";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = "black";
 	
 	ctx.drawImage(await backgrounds[card.cardType], 0, 0);
 	
@@ -251,7 +257,7 @@ async function render(card, canvas, ideaCredit) {
 	
 	// write text box
 	fontSize = 28;
-	while (formatEffectText(card.effects, 0, fontSize, true, ctx, 0, 0).text.split("\n").length * (fontSize + lineGap) > (card.cardType == "token"? 245 : (ideaCredit? 248 : 275))) {
+	while (formatEffectText(card.effects, 0, fontSize, true, ctx, 0, 0).text.split("\n").length * (fontSize + lineGap) > (card.cardType == "token"? 245 : (card.author? 248 : 275))) {
 		fontSize--;
 	}
 	ctx.font = fontSize + "px 'Yu Gothic UI'";
@@ -271,20 +277,33 @@ async function render(card, canvas, ideaCredit) {
 		ctx.drawImage(await bracketRightBottom, 701 - bracket.indent * fontSize, 779 + bracket.lastLine * (fontSize + lineGap) - 7);
 	});
 	
+	// write token notice and author (but not both)
+	ctx.textBaseline = "alphabetic";
+	if (card.cardType == "token") {
+		ctx.font = "25px 'Yu Mincho'";
+		ctx.textAlign = "center";
+		ctx.fillText(localeStrings[language]["tokenNotice"], 406, 1045);
+	} else if (card.author) {
+		ctx.font = "23px 'Yu Mincho'";
+		ctx.textAlign = "right";
+		ctx.fillText(localeStrings[language]["ideaCredit"] + card.author, 707, 1048);
+	}
+	
 	// write bottom section
 	ctx.font = "35px 'Yu Gothic UI'";
 	if (card.cardType == "unit" || card.cardType == "token") {
-		ctx.fillText(localeStrings[language]["attack"], 104, 1089);
-		ctx.fillText(localeStrings[language]["defense"], 415, 1089);
+		ctx.textAlign = "left";
+		ctx.fillText(localeStrings[language]["attack"], 104, 1117);
+		ctx.fillText(localeStrings[language]["defense"], 415, 1117);
 		
 		ctx.textAlign = "right";
-		ctx.fillText(card.attack < 0? "？" : card.attack, 392 + (card.attack < 0? 8 : 0), 1089);
-		ctx.fillText("/", 406, 1089);
-		ctx.fillText(card.defense < 0? "？" : card.defense, 708 + (card.defense < 0? 8 : 0), 1089);
+		ctx.fillText(card.attack < 0? "？" : card.attack, 392 + (card.attack < 0? 8 : 0), 1117);
+		ctx.fillText("/", 406, 1117);
+		ctx.fillText(card.defense < 0? "？" : card.defense, 708 + (card.defense < 0? 8 : 0), 1117);
 	} else {
 		ctx.textAlign = "center";
-		ctx.fillText(localeStrings[language][card.cardType], 406, 1089);
+		ctx.fillText(localeStrings[language][card.cardType], 406, 1117);
 	}
 }
 
-export {render};
+export {renderCard};

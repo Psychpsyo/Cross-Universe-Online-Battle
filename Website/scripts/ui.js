@@ -6,55 +6,55 @@ if (localStorage.getItem("fieldLeftToggle") == "true") {
 
 //life changes
 document.getElementById("lifeUp100").addEventListener("click", function() {
-	life[1] += 100;
-	updateLifeDisplay(1);
+	localPlayer.life += 100;
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeUp50").addEventListener("click", function() {
-	life[1] += 50;
-	updateLifeDisplay(1);
+	localPlayer.life += 50;
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeUp1").addEventListener("click", function() {
-	life[1] += 1;
-	updateLifeDisplay(1);
+	localPlayer.life += 1;
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeDown100").addEventListener("click", function() {
-	life[1] = Math.max(life[1] - 100, 0);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.max(localPlayer.life - 100, 0);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeDown50").addEventListener("click", function() {
-	life[1] = Math.max(life[1] - 50, 0);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.max(localPlayer.life - 50, 0);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeDown1").addEventListener("click", function() {
-	life[1] = Math.max(life[1] - 1, 0);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.max(localPlayer.life - 1, 0);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeHalf").addEventListener("click", function() {
-	life[1] = Math.ceil(life[1] / 2);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.ceil(localPlayer.life / 2);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 
 //mana changes
 document.getElementById("manaUp").addEventListener("click", function() {
-	mana[1]++;
-	updateManaDisplay(1);
+	localPlayer.mana++;
+	updateManaDisplay(localPlayer);
 	syncMana();
 });
 document.getElementById("manaFive").addEventListener("click", function() {
-	mana[1] = 5;
-	updateManaDisplay(1);
+	localPlayer.mana = 5;
+	updateManaDisplay(localPlayer);
 	syncMana();
 });
 document.getElementById("manaDown").addEventListener("click", function() {
-	mana[1] = Math.max(mana[1] - 1, 0);
-	updateManaDisplay(1);
+	localPlayer.mana = Math.max(localPlayer.mana - 1, 0);
+	updateManaDisplay(localPlayer);
 	syncMana();
 });
 

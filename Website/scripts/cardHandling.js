@@ -30,12 +30,18 @@ class Card {
 			case "T":
 				this.type = "token";
 				break;
+			case "C":
+				this.type = game.customCards[cardId].data.cardType;
+				break;
 		}
 		this.location = null; // the card area that this card is in right now
 		allCards.push(this);
 	}
 	
 	getImage() {
+		if (this.cardId[0] == "C") {
+			return game.customCards[this.cardId].imageSrc;
+		}
 		return getCardImageFromID(this.cardId);
 	}
 	
