@@ -22,8 +22,8 @@ var deckUtils = {
 		return deck;
 	},
 	
-	//converts an official Cross Universe deck format to my json format (cuDeck is passed in as JS object)
-	toJsonDeck: function(cuDeck) {
+	//converts an official Cross Universe .deck format file to .deckx with respect to the current users selected locale.
+	toDeckx: function(cuDeck) {
 		let jsonDeck = {};
 		
 		//set name

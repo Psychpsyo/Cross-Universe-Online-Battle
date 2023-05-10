@@ -44,9 +44,9 @@ function openPartnerSelectMenu() {
 }
 
 //loading a deck into the actual game
-function loadDeck(deck) {
+async function loadDeck(deck) {
 	loadedDeck = deck;
-	cardAreas["deck1"].setDeck(deck);
+	await cardAreas["deck1"].setDeck(deck);
 	syncDeck();
 	
 	//hide the deck dropzone and show the game interaction section, as well as the partner choice menu
@@ -84,12 +84,12 @@ function finishDeckLoading(partnerId = null) {
 function loadDeckFile(file) {
 	let reader = new FileReader();
 	reader.onload = function(e) {
-		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it
-		loadDeck(this.fileName.endsWith(".deck")? deckUtils.toJsonDeck(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
+		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it to deckx
+		loadDeck(this.fileName.endsWith(".deck")? deckUtils.toDeckX(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
 	};
 	
 	reader.fileName = file["name"];
-	if (reader.fileName.endsWith(".deck") || reader.fileName.endsWith(".json")) { //validate file format
+	if (reader.fileName.endsWith(".deck") || reader.fileName.endsWith(".deckx")) { //validate file format
 		reader.readAsText(file);
 	}
 }
@@ -156,7 +156,7 @@ async function addDecksToDeckSelector(deckList) {
 	currentDeckList = deckList;
 	
 	for (const deckID of officialDecks[deckList]) {
-		await fetch("data/decks/" + deckID + ".json")
+		await fetch("data/decks/" + deckID + ".deckx")
 		.then(response => response.json())
 		.then(deck => {
 			officialDecks[currentDeckList][deckID] = deck;

@@ -419,8 +419,8 @@ class deckCardArea extends cardArea {
 	
 	// general deck related functions
 	// sets the deck up from a json deck
-	setDeck(deck) {
-		this.cards = deckToCardList(deck, this.playerIndex == 0);
+	async setDeck(deck) {
+		this.cards = await deckToCardList(deck, this.playerIndex == 0);
 		this.cards.forEach(card => {
 			card.location = this;
 		});

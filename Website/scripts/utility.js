@@ -17,13 +17,21 @@ function setCardBackForPlayer(player, backLink) {
 setCardBackForPlayer(1, localStorage.getItem("cardBack"));
 
 // turns a deck into a list of Card objects
-function deckToCardList(deck, isOpponentDeck) {
+async function deckToCardList(deck, isOpponentDeck) {
 	cardList = [];
-	deck.cards.forEach(card => {
-		for (let i = 0; i < card.amount; i++) {
-			cardList.push(new Card(isOpponentDeck, card.id, deck));
+	for (const card of deck.cards) {
+		let cardId = card.id;
+		if (card.id.startsWith("C")) {
+			cardId = await game.enterCustomCard(deck.customs[parseInt(card.id.substr(1)) - 1], isOpponentDeck? game.players[0] : localPlayer);
+			if (deck.suggestedPartner == card.id) {
+				deck.suggestedPartner = cardId;
+			}
 		}
-	});
+		
+		for (let i = 0; i < card.amount; i++) {
+			cardList.push(new Card(isOpponentDeck, cardId, deck));
+		}
+	}
 	return cardList;
 }
 
