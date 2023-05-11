@@ -33,6 +33,9 @@ let myCursorX = 0;
 let myCursorY = 0;
 let oppCursorX = 0;
 let oppCursorY = 0;
+let oppCursorTargetX = 0;
+let oppCursorTargetY = 0;
+
 
 // constants
 let TOKEN_COUNT = 28;
