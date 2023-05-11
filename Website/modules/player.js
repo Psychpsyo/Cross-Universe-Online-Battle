@@ -1,7 +1,6 @@
 // This module exports the Player class which holds all data relevant to one player in a game.
 // TODO: migrate missing data from global variables into this file.
 import {Card} from "/modules/card.js";
-import {Zone} from "/modules/zone.js";
 
 export class Player {
 	constructor(game) {
@@ -11,7 +10,6 @@ export class Player {
 		this.mana = 0;
 		this.life = 1000;
 		
-		this.nextCardId = this.index + 1;
 		this.nextCustomCardId = this.index + 1;
 	}
 	
@@ -33,11 +31,8 @@ export class Player {
 			for (let i = 0; i < card.amount; i++) {
 				let card = await new Card(this.game, cardId);
 				// TODO: The deck card area will at some point be merged into this class and IDs for cards will be phased out.
-				card.id = this.nextCardId;
-				this.nextCardId += this.game.players.length;
 				cardAreas["deck" + this.index].cards.push(card);
 				card.location = cardAreas["deck" + this.index];
-				allCards.push(card);
 			}
 		}
 		cardAreas["deck" + this.index].updateVisual();

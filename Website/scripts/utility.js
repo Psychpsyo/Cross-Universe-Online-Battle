@@ -3,10 +3,6 @@ function getCardImageFromID(cardId) {
 	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
 }
 
-function getCardById(id) {
-	return allCards.find(card => card.id == id);
-}
-
 function setCardBackForPlayer(player, backLink) {
 	// check if opponent card back should show
 	if (player == 0 && localStorage.getItem("cardBackToggle") == "true") {

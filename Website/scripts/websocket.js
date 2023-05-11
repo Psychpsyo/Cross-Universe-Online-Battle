@@ -82,10 +82,8 @@ function receiveMessage(e) {
 				await opponentDeckPromise;
 				let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
 				message = message.substr(2);
-				cardOrder = message.split("|");
-				cardOrder.forEach(id => {
-					deck.cards.push(deck.cards.splice(deck.cards.findIndex(card => {return card.id == cardIdToLocal(id)}), 1)[0]);
-				});
+				let order = message.split("|").map(i => parseInt(i));
+				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
 				putChatMessage(locale[deck.playerIndex == 1? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 			})();
 			break;
@@ -142,56 +140,32 @@ function receiveMessage(e) {
 			break;
 		}
 		case "deckTop": { // opponent sent their held card to the top of a deck
-			let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
-			let cardId = cardIdToLocal(message.substr(message.indexOf("|") + 1));
-			let card = getCardById(cardId);
-			if (card != opponentHeldCard) {
-				let cardIndex = cardArea.cards.findIndex(card => {return card.id == cardId});
-				card.location.grabCard(cardIndex);
-			} else {
-				opponentHeldCard = null;
-			}
+			let deck = cardAreas[cardAreaToLocal("deck" + message)];
 			
-			deck.cards.push(card);
-			card.location?.dragFinish(card);
-			card.location = deck;
-			card = null;
+			deck.cards.push(opponentHeldCard);
+			opponentHeldCard.location?.dragFinish(opponentHeldCard);
+			opponentHeldCard.location = deck;
+			opponentHeldCard = null;
 			deck.updateVisual();
 			break;
 		}
 		case "deckBottom": { // opponent sent their held card to the bottom of a deck
-			let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
-			let cardId = cardIdToLocal(message.substr(message.indexOf("|") + 1));
-			let card = getCardById(cardId);
-			if (card != opponentHeldCard) {
-				let cardIndex = cardArea.cards.findIndex(card => {return card.id == cardId});
-				card.location.grabCard(cardIndex);
-			} else {
-				opponentHeldCard = null;
-			}
+			let deck = cardAreas[cardAreaToLocal("deck" + message)];
 			
-			deck.cards.unshift(card);
-			card.location?.dragFinish(card);
-			card.location = deck;
-			card = null;
+			deck.cards.unshift(opponentHeldCard);
+			opponentHeldCard.location?.dragFinish(opponentHeldCard);
+			opponentHeldCard.location = deck;
+			opponentHeldCard = null;
 			deck.updateVisual();
 			break;
 		}
 		case "deckShuffle": { // opponent shuffles their held card into a deck
-			let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
-			let cardId = cardIdToLocal(message.substr(message.indexOf("|") + 1));
-			let card = getCardById(cardId);
-			if (card != opponentHeldCard) {
-				let cardIndex = cardArea.cards.findIndex(card => {return card.id == cardId});
-				card.location.grabCard(cardIndex);
-			} else {
-				opponentHeldCard = null;
-			}
+			let deck = cardAreas[cardAreaToLocal("deck" + message)];
 			
-			deck.cards.push(card); // the [deckOrder] message will arrive right after this one.
-			card.location?.dragFinish(card);
-			card.location = deck;
-			card = null;
+			deck.cards.push(opponentHeldCard); // the [deckOrder] message will arrive right after this one.
+			opponentHeldCard.location?.dragFinish(opponentHeldCard);
+			opponentHeldCard.location = deck;
+			opponentHeldCard = null;
 			deck.updateVisual();
 			break;
 		}
@@ -410,10 +384,10 @@ function syncPartnerChoice(partnerPosInDeck) {
 function syncRevealPartner() {
 	socket.send("[revealPartner]");
 }
-function syncDeckOrder(deck) {
+function syncDeckOrder(deck, order) {
 	let message = "[deckOrder]" + deck.playerIndex;
-	deck.cards.forEach(card => {
-		message += "|" + card.id;
+	order.forEach(index => {
+		message += "|" + index;
 	});
 	socket.send(message);
 }
@@ -428,13 +402,13 @@ function syncDrop(cardArea) {
 
 // ...to decks
 function syncDeckTop(deck, card) {
-	socket.send("[deckTop]" + deck.playerIndex + "|" + card.id);
+	socket.send("[deckTop]" + deck.playerIndex);
 }
 function syncDeckBottom(deck, card) {
-	socket.send("[deckBottom]" + deck.playerIndex + "|" + card.id);
+	socket.send("[deckBottom]" + deck.playerIndex);
 }
 function syncDeckShuffleIn(deck, card) {
-	socket.send("[deckShuffle]" + deck.playerIndex + "|" + card.id);
+	socket.send("[deckShuffle]" + deck.playerIndex);
 }
 function syncDeckCancel() {
 	socket.send("[deckCancel]");

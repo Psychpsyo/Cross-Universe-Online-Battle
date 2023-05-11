@@ -25,10 +25,6 @@ import("/modules/game.js").then(async gameModule => {
 // Areas that cards can go to. These handle card location changes and change the DOM accordingly
 let cardAreas = {};
 
-// all cards currently in the game.
-// TODO: refactor this away.
-let allCards = [];
-
 let socket = null;
 let roomcode = "";
 let roomCodeShown = false;

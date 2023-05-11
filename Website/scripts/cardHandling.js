@@ -347,17 +347,20 @@ class deckCardArea extends cardArea {
 	}
 	
 	// general deck related functions
-	// Fisher-Yates shuffle
 	shuffle() {
-		let i = this.cards.length;
-		while (i != 0) {
+		let order = [];
+		for (var i = 0; i < this.cards.length; i++) {
+			order.push(i);
+		}
+		// Fisher-Yates shuffle
+		for (let i = order.length - 1; i >= 0; i--) {
 			// pick a random element and swap it with the current element
 			let rand = Math.floor(Math.random() * i);
-			i--;
 			
-			[this.cards[i], this.cards[rand]] = [this.cards[rand], this.cards[i]];
+			[order[i], order[rand]] = [order[rand], order[i]];
 		}
-		syncDeckOrder(this);
+		this.cards.sort((a, b) => order.indexOf(this.cards.indexOf(a)) - order.indexOf(this.cards.indexOf(b)));
+		syncDeckOrder(this, order);
 		putChatMessage(locale[this.playerIndex == 1? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
 	
@@ -621,20 +624,13 @@ class tokenCardsArea extends cardArea {
 		if (this.createdToken) {
 			return this.createdToken;
 		}
-		let token = new Card(game, this.cards[cardIndex].cardId);
-		syncCreateToken(token.cardId);
-		token.id = localPlayer.nextCardId;
-		localPlayer.nextCardId += game.players.length;
-		allCards.push(token);
-		return token;
+		syncCreateToken(this.cards[cardIndex].cardId);
+		return new Card(game, this.cards[cardIndex].cardId);
 	}
 	
 	// creates token cards when the opponent asks for them
 	createOpponentToken(cardId) {
 		this.createdToken = new Card(game, cardId);
-		this.createdToken.id = game.players[0].nextCardId;
-		game.players[0].nextCardId += game.players.length;
-		allCards.push(this.createdToken);
 	}
 	
 	getLocalizedName() {
