@@ -85,7 +85,7 @@ function loadDeckFile(file) {
 	let reader = new FileReader();
 	reader.onload = function(e) {
 		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it to deckx
-		loadDeck(this.fileName.endsWith(".deck")? deckUtils.toDeckX(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
+		loadDeck(this.fileName.endsWith(".deck")? deckUtils.toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
 	};
 	
 	reader.fileName = file["name"];
