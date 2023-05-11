@@ -74,7 +74,8 @@
 		"discard1": "Dein Ablagestapel:",
 		"exile0": "Exil deines Gegners:",
 		"exile1": "Dein Exil:",
-		"returnAllToDeck": "Alle zurück ins Deck mischen"
+		
+		"returnAllToDeck": "Alle zurück in dein Deck mischen"
 	},
 	
 	"fieldLabels": {
