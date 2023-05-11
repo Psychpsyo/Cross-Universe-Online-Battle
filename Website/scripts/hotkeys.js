@@ -91,8 +91,9 @@ document.addEventListener("keydown", function(e) {
 		if (cardIndex == 0) {
 			cardIndex = 10;
 		}
-		if (cardIndex <= document.getElementById("hand1").childElementCount) {
-			previewCard(getCardById(hand1.childNodes.item(cardIndex - 1).dataset.cardId).cardId);
+		cardIndex -= 1;
+		if (cardIndex < cardAreas["hand1"].cards.length) {
+			previewCard(cardAreas["hand1"].cards[cardIndex]);
 		}
 		return;
 	}

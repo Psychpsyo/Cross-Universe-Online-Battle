@@ -193,47 +193,40 @@ cardDetailsSwitch.addEventListener("click", function(e) {
 cardDetailsClose.addEventListener("click", closeCardPreview);
 
 // previews a card
-function previewCard(cardId) {
-	if (!cardId) {
-		return;
-	}
-	
+function previewCard(card) {
 	// if the already shown card was clicked again
-	if (cardDetails.dataset.currentCard == cardId) {
+	if (cardDetails.dataset.currentCard == card.cardId) {
 		closeCardPreview();
 		return;
 	}
-	cardDetails.dataset.currentCard = cardId;
+	cardDetails.dataset.currentCard = card.cardId;
 	
 	// set the image preview
-	cardDetailsImage.style.backgroundImage = "url(" + getCardImageFromID(cardId) + ")";
+	cardDetailsImage.style.backgroundImage = "url(" + card.getImage() + ")";
 	
-	// load card data and set the text preview
-	fetch("https://crossuniverse.net/cardInfo/?cardID=" + cardId + "&lang=" + (locale.warnings.includes("noCards")? "en" : locale.code))
-	.then(response => {
-		return response.json();
-	}).then(cardData => {
-		// general info
-		cardDetailsName.textContent = cardData.name + ("variant" in cardData? (localStorage.getItem("language") == "ja"? "" : " ") + cardData.variant : "");
-		cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", cardData.level == -1? locale["cardDetailsQuestionMark"] : cardData.level).replace("{#CARDTYPE}", locale[cardData.cardType + "CardDetailType"]);
-		if (cardData.types.length > 0) {
-			cardDetailsTypes.textContent = locale["cardDetailsTypes"] + cardData.types.map(type => locale["type" + type]).join(locale["typeSeparator"]);
-		} else {
-			cardDetailsTypes.textContent = locale["typeless"];
-		}
-		
-		// attack & defense
-		if (cardData.cardType == "unit" || cardData.cardType == "token") {
-			cardDetailsAttackDefense.style.display = "flex";
-			cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (cardData.attack == -1? locale["cardDetailsQuestionMark"] : cardData.attack);
-			cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (cardData.defense == -1? locale["cardDetailsQuestionMark"] : cardData.defense);
-		} else {
-			cardDetailsAttackDefense.style.display = "none";
-		}
-		
-		// effects
-		cardDetailsEffectList.innerHTML = "";
-		cardData.effects.forEach(effect => {
+	// set the text preview
+	// general info
+	cardDetailsName.textContent = card.getName();
+	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? locale["cardDetailsQuestionMark"] : card.getLevel()).replace("{#CARDTYPE}", locale[card.getCardType() + "CardDetailType"]);
+	if (card.getTypes().length > 0) {
+		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["type" + type]).join(locale["typeSeparator"]);
+	} else {
+		cardDetailsTypes.textContent = locale["typeless"];
+	}
+	
+	// attack & defense
+	if (card.getCardType() == "unit" || card.getCardType() == "token") {
+		cardDetailsAttackDefense.style.display = "flex";
+		cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (card.getAttack() == -1? locale["cardDetailsQuestionMark"] : card.getAttack());
+		cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (card.getDefense() == -1? locale["cardDetailsQuestionMark"] : card.getDefense());
+	} else {
+		cardDetailsAttackDefense.style.display = "none";
+	}
+	
+	// effects
+	cardDetailsEffectList.innerHTML = "";
+	if (!card.cardId.startsWith("C")) {
+		game.cardData[card.cardId].effects.forEach(effect => {
 			let effectDiv = document.createElement("div");
 			effectDiv.classList.add("cardDetailsEffect");
 			
@@ -270,8 +263,8 @@ function previewCard(cardId) {
 			
 			cardDetailsEffectList.appendChild(effectDiv);
 		});
-		
-		cardDetails.style.setProperty("--side-distance", ".5em");
-		cardDetailsImage.dataset.open = true;
-	});
+	}
+	
+	cardDetails.style.setProperty("--side-distance", ".5em");
+	cardDetailsImage.dataset.open = true;
 }

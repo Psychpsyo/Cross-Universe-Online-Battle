@@ -54,6 +54,9 @@ function cardAreaToLocal(cardArea) {
 	return cardAreaMirrorTable[cardArea];
 }
 
+// this makes sure the opponent deck is only modified once it has actually been loaded.
+let opponentDeckPromise = null;
+
 // receiving messages
 function receiveMessage(e) {
 	let message = e.data;
@@ -71,25 +74,30 @@ function receiveMessage(e) {
 		}
 		case "deck": { // initially syncs the opponent deck.
 			opponentDeck = JSON.parse(message);
-			cardAreas["deck0"].setDeck(opponentDeck);
+			opponentDeckPromise = game.players[0].setDeck(opponentDeck);
 			break;
 		}
 		case "deckOrder": { // opponent shuffled a deck
-			let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
-			message = message.substr(2);
-			cardOrder = message.split("|");
-			cardOrder.forEach(id => {
-				deck.cards.push(deck.cards.splice(deck.cards.findIndex(card => {return card.id == cardIdToLocal(id)}), 1)[0]);
-			});
-			putChatMessage(locale[deck.playerIndex == 1? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
+			(async() => {
+				await opponentDeckPromise;
+				let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
+				message = message.substr(2);
+				cardOrder = message.split("|");
+				cardOrder.forEach(id => {
+					deck.cards.push(deck.cards.splice(deck.cards.findIndex(card => {return card.id == cardIdToLocal(id)}), 1)[0]);
+				});
+				putChatMessage(locale[deck.playerIndex == 1? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
+			})();
 			break;
 		}
 		case "choosePartner": { // opponent selected their partner
-			field2.src = "images/cardBackFrameP0.png";
-			let partnerPosInDeck = cardAreas["deck0"].cards.findIndex(card => {return card.id == cardIdToLocal(message)});
-			opponentPartner = cardAreas["deck0"].cards.splice(partnerPosInDeck, 1)[0];
-			cardAreas["deck0"].updateVisual();
-			doSelectStartingPlayer();
+			(async() => {
+				await opponentDeckPromise;
+				field2.src = "images/cardBackFrameP0.png";
+				opponentPartner = cardAreas["deck0"].cards.splice(message, 1)[0];
+				cardAreas["deck0"].updateVisual();
+				doSelectStartingPlayer();
+			})();
 			break;
 		}
 		case "revealPartner": { // opponent revealed their partner
@@ -105,10 +113,10 @@ function receiveMessage(e) {
 		}
 		case "grabbedCard": { // opponent picked up a card
 			let cardArea = cardAreas[cardAreaToLocal(message.substr(0, message.indexOf("|")))];
-			let cardId = cardIdToLocal(message.substr(message.indexOf("|") + 1));
+			let cardIndex = message.substr(message.indexOf("|") + 1);
 			
-			let hiddenGrab = cardArea.isGrabHidden(cardId)
-			opponentHeldCard = cardArea.grabCard(cardId);
+			let hiddenGrab = cardArea.isGrabHidden(cardIndex)
+			opponentHeldCard = cardArea.grabCard(cardIndex);
 			opponentCursor.src = hiddenGrab? "images/cardBackFrameP0.png" : opponentHeldCard.getImage();
 			break;
 		}
@@ -138,7 +146,8 @@ function receiveMessage(e) {
 			let cardId = cardIdToLocal(message.substr(message.indexOf("|") + 1));
 			let card = getCardById(cardId);
 			if (card != opponentHeldCard) {
-				card.location.grabCard(cardId);
+				let cardIndex = cardArea.cards.findIndex(card => {return card.id == cardId});
+				card.location.grabCard(cardIndex);
 			} else {
 				opponentHeldCard = null;
 			}
@@ -155,7 +164,8 @@ function receiveMessage(e) {
 			let cardId = cardIdToLocal(message.substr(message.indexOf("|") + 1));
 			let card = getCardById(cardId);
 			if (card != opponentHeldCard) {
-				card.location.grabCard(cardId);
+				let cardIndex = cardArea.cards.findIndex(card => {return card.id == cardId});
+				card.location.grabCard(cardIndex);
 			} else {
 				opponentHeldCard = null;
 			}
@@ -172,7 +182,8 @@ function receiveMessage(e) {
 			let cardId = cardIdToLocal(message.substr(message.indexOf("|") + 1));
 			let card = getCardById(cardId);
 			if (card != opponentHeldCard) {
-				card.location.grabCard(cardId);
+				let cardIndex = cardArea.cards.findIndex(card => {return card.id == cardId});
+				card.location.grabCard(cardIndex);
 			} else {
 				opponentHeldCard = null;
 			}
@@ -271,7 +282,7 @@ function receiveMessage(e) {
 		}
 		case "revealCard": { // opponent revealed a presented card
 			let cardDiv = presentedCards0.children.item(parseInt(message));
-			cardDiv.src = cardAreas["presentedCards0"].cards.find(card => {return card.id == cardDiv.dataset.cardId}).getImage();
+			cardDiv.src = cardAreas["presentedCards0"].cards[cardDiv.dataset.cardIndex].getImage();
 			cardDiv.dataset.shown = true;
 			break;
 		}
@@ -393,8 +404,8 @@ function syncDeck() {
 	message += JSON.stringify(loadedDeck);
 	socket.send(message);
 }
-function syncPartnerChoice() {
-	socket.send("[choosePartner]" + loadedPartner.id);
+function syncPartnerChoice(partnerPosInDeck) {
+	socket.send("[choosePartner]" + partnerPosInDeck);
 }
 function syncRevealPartner() {
 	socket.send("[revealPartner]");
@@ -408,8 +419,8 @@ function syncDeckOrder(deck) {
 }
 
 // grabbing & dropping cards...
-function syncGrab(cardArea, cardId) {
-	socket.send("[grabbedCard]" + cardArea + "|" + cardId);
+function syncGrab(cardArea, cardIndex) {
+	socket.send("[grabbedCard]" + cardArea + "|" + cardIndex);
 }
 function syncDrop(cardArea) {
 	socket.send("[droppedCard]" + cardArea);

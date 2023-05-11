@@ -1,69 +1,10 @@
-// used to keep track of local card IDs allocated by both the local player (P1, even) and the opponent (P0, odd)
-// ID0 is left unallocated.
-let nextP0CardId = 1;
-let nextP1CardId = 2;
-let allCards = [];
-
-// card object
-class Card {
-	constructor(fromOpponent, cardId, deck = null, giveId = true) {
-		if (giveId) {
-			if (fromOpponent) {
-				this.id = nextP0CardId;
-				nextP0CardId += 2;
-			} else {
-				this.id = nextP1CardId;
-				nextP1CardId += 2;
-			}
-		}
-		this.cardId = cardId;
-		switch (cardId[0]) {
-			case "U":
-				this.type = "unit";
-				break;
-			case "S":
-				this.type = "spell";
-				break;
-			case "I":
-				this.type = "item";
-				break;
-			case "T":
-				this.type = "token";
-				break;
-			case "C":
-				this.type = game.customCards[cardId].data.cardType;
-				break;
-		}
-		this.location = null; // the card area that this card is in right now
-		allCards.push(this);
-	}
-	
-	getImage() {
-		if (this.cardId[0] == "C") {
-			return game.customCards[this.cardId].imageSrc;
-		}
-		return getCardImageFromID(this.cardId);
-	}
-	
-	static sort(a, b) {
-		if (a.cardId < b.cardId) {
-			return -1;
-		}
-		if (a.cardId > b.cardId) {
-			return 1;
-		}
-		return 0;
-	}
-}
-
-function getCardById(id) {
-	return allCards.find(card => card.id == id);
-}
+import {Card} from "/modules/card.js";
 
 class cardArea {
 	constructor(name, handleGrab=true, handleDrop=true) {
 		this.name = name;
 		cardAreas[this.name] = this;
+		this.cards = [];
 		
 		// add event listeners
 		if (handleGrab) {
@@ -75,7 +16,7 @@ class cardArea {
 	}
 	
 	// call this to grab a card with a certain ID from the area. Returns the card (or null if grabbing failed).
-	grabCard(cardId) {
+	grabCard(cardIndex) {
 		return null;
 	}
 	// call this when a card is moved into an area, returns true if the card was successfully moved there
@@ -105,32 +46,29 @@ class fieldCardArea extends cardArea {
 		super("field" + fieldIndex);
 		
 		this.fieldSlot = document.getElementById("field" + fieldIndex);
-		this.card = null;
 		this.isDragSource = false;
 		this.allowTokens = true;
 		
 		// event handler for inspecting the card in here
 		this.fieldSlot.addEventListener("click", function(e) {
-			if (cardAreas[this.id]?.card) {
-				previewCard(cardAreas[this.id].card.cardId);
+			if (cardAreas[this.id].cards[0]) {
+				previewCard(cardAreas[this.id].cards[0]);
 				e.stopPropagation();
 			}
 		});
 	}
 	
 	// cardArea interface functions
-	grabCard(cardId) {
-		if (this.card && !this.isDragSource && !this.isFaceDown()) {
-			let retVal = this.card;
-			this.card = null;
+	grabCard(cardIndex) {
+		if (this.cards.length > 0 && !this.isDragSource && !this.isFaceDown()) {
 			this.setDragSource(true);
-			return retVal;
+			return this.cards.pop();
 		}
 		return null;
 	}
 	dropCard(card) {
-		if (!this.card && !this.isDragSource && !this.isFaceDown()) {
-			this.card = card;
+		if (this.cards.length == 0 && !this.isDragSource && !this.isFaceDown()) {
+			this.cards.push(card);
 			card.location?.dragFinish(card);
 			card.location = this;
 			this.fieldSlot.src = card.getImage();
@@ -150,7 +88,7 @@ class fieldCardArea extends cardArea {
 		return false;
 	}
 	returnCard(card) {
-		this.card = card;
+		this.cards.push(card);
 		this.setDragSource(false);
 	}
 	dragFinish(card) {
@@ -160,7 +98,7 @@ class fieldCardArea extends cardArea {
 	}
 	
 	clear() {
-		this.card = null;
+		this.cards = [];
 		this.fieldSlot.src = "images/cardHidden.png";
 		this.setDragSource(false);
 		this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
@@ -185,16 +123,12 @@ class fieldCardArea extends cardArea {
 class myHandCardArea extends cardArea {
 	constructor() {
 		super("hand1", false);
-		
-		this.cards = [];
 	}
 	
-	grabCard(cardId) {
-		let cardIndex = this.cards.findIndex(card => {return card.id == cardId});
-		if (cardIndex >= 0) {
-			let removedCard = this.cards.splice(cardIndex, 1)[0];
-			this.getFromElement(cardId).classList.add("dragSource");
-			return removedCard;
+	grabCard(cardIndex) {
+		if (cardIndex >= 0 && !Array.from(hand1.children)[cardIndex].classList.contains("dragSource")) {
+			Array.from(hand1.children)[cardIndex].classList.add("dragSource");
+			return this.cards[cardIndex];
 		}
 		return null;
 	}
@@ -207,11 +141,11 @@ class myHandCardArea extends cardArea {
 		let newCard = document.createElement("img");
 		newCard.src = card.getImage();
 		newCard.classList.add("card");
-		newCard.dataset.cardId = card.id;
+		newCard.dataset.cardIndex = this.cards.length - 1;
 		newCard.dataset.cardArea = "hand1";
 		newCard.addEventListener("dragstart", grabHandler);
 		newCard.addEventListener("click", function(e) {
-			previewCard(getCardById(this.dataset.cardId).cardId);
+			previewCard(cardAreas["hand1"].cards[parseInt(this.dataset.cardIndex)]);
 			e.stopPropagation();
 		});
 		hand1.appendChild(newCard);
@@ -220,22 +154,22 @@ class myHandCardArea extends cardArea {
 		return true;
 	}
 	returnCard(card) {
-		this.cards.push(card);
-		this.getFromElement(card.id).classList.remove("dragSource");
+		let cardIndex = this.cards.findIndex(c => c == card);
+		Array.from(hand1.children)[cardIndex].classList.remove("dragSource");
 	}
 	dragFinish(card) {
-		this.getFromElement(card.id).remove();
+		let cardIndex = this.cards.findIndex(c => c == card);
+		this.cards.splice(cardIndex, 1)[0];
+		Array.from(hand1.children)[cardIndex].remove();
 		hand1.style.setProperty("--card-count", "" + hand1.childElementCount);
+		Array.from(hand1.children).forEach((elem, i) => {
+			elem.dataset.cardIndex = i;
+		});
 	}
 	clear() {
 		this.cards = [];
 		hand1.innerHTML = "";
 		hand1.style.setProperty("--card-count", "0");
-	}
-	
-	// gets the img element in hand that corresponds to a cardId
-	getFromElement(cardId) {
-		return Array.from(hand1.children).find(elem => {return elem.dataset.cardId == cardId});
 	}
 }
 
@@ -243,8 +177,6 @@ class myHandCardArea extends cardArea {
 class pileCardArea extends cardArea {
 	constructor(type, playerIndex) {
 		super(type + playerIndex);
-		
-		this.cards = [];
 		this.playerIndex = playerIndex;
 		this.type = type;
 		
@@ -254,9 +186,8 @@ class pileCardArea extends cardArea {
 		});
 	}
 	
-	grabCard(cardId) {
-		let cardIndex = this.cards.findIndex(card => {return card.id == cardId});
-		if (cardIndex != -1 && cardIndex < this.cards.length) {
+	grabCard(cardIndex) {
+		if (cardIndex >= 0 && cardIndex < this.cards.length) {
 			let removedCard = this.cards.splice(cardIndex, 1)[0];
 			this.updateDOM();
 			return removedCard;
@@ -282,7 +213,7 @@ class pileCardArea extends cardArea {
 	// called whenever the contents of the pile are changed
 	updateDOM() {
 		document.getElementById(this.type + this.playerIndex).src = this.cards[this.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
-		document.getElementById(this.type + this.playerIndex).dataset.cardId = this.cards[this.cards.length - 1]?.id;
+		document.getElementById(this.type + this.playerIndex).dataset.cardIndex = this.cards.length - 1;
 		document.getElementById(this.type + this.playerIndex + "CardCount").textContent = this.cards.length > 0? this.cards.length : "";
 	}
 	
@@ -304,7 +235,6 @@ class deckCardArea extends cardArea {
 		super("deck" + playerIndex, false)
 		
 		this.playerIndex = playerIndex;
-		this.cards = [];
 		this.droppingCard = null;
 		
 		// event handlers for dropping to deck
@@ -347,15 +277,14 @@ class deckCardArea extends cardArea {
 				cardAreas["deck1"].shuffle();
 			});
 			document.getElementById("deckSearchBtn").addEventListener("click", function() {
-				openCardSelect(cardAreas["deck1"], true);
+				openCardSelect(cardAreas["deck1"]);
 				document.getElementById("deckHoverBtns1").style.display = "none"; //workaround for bug in (at least) Firefox where mouseleave does not fire when element is covered by another. (in this case the card selector)
 			});
 		}
 	}
 	
-	grabCard(cardId) {
-		let cardIndex = this.cards.findIndex(card => {return card.id == cardId});
-		if (cardIndex != -1 && cardIndex < this.cards.length) {
+	grabCard(cardIndex) {
+		if (cardIndex >= 0 && cardIndex < this.cards.length) {
 			let removedCard = this.cards.splice(cardIndex, 1)[0];
 			this.updateVisual();
 			return removedCard;
@@ -418,15 +347,6 @@ class deckCardArea extends cardArea {
 	}
 	
 	// general deck related functions
-	// sets the deck up from a json deck
-	async setDeck(deck) {
-		this.cards = await deckToCardList(deck, this.playerIndex == 0);
-		this.cards.forEach(card => {
-			card.location = this;
-		});
-		this.updateVisual();
-	}
-	
 	// Fisher-Yates shuffle
 	shuffle() {
 		let i = this.cards.length;
@@ -474,19 +394,15 @@ class deckCardArea extends cardArea {
 class myPresentedCardsArea extends cardArea {
 	constructor() {
 		super("presentedCards1", false);
-		
-		this.cards = [];
 		this.isDragSource = false;
 	}
 	
-	grabCard(cardId) {
+	grabCard(cardIndex) {
 		if (!this.isDragSource) {
-			let cardIndex = this.cards.findIndex(card => {return card.id == cardId});
 			if (cardIndex >= 0) {
-				let removedCard = this.cards.splice(cardIndex, 1)[0];
 				presentedCards1.classList.add("presentedCardsDragSource");
 				this.isDragSource = true;
-				return removedCard;
+				return this.cards[cardIndex];
 			}
 		}
 		return null;
@@ -501,10 +417,10 @@ class myPresentedCardsArea extends cardArea {
 		let cardImg = document.createElement("img")
 		let revealBtn = document.createElement("button");
 		
-		cardImg.dataset.cardId = card.id;
+		cardImg.dataset.cardIndex = this.cards.length - 1;
 		cardImg.src = card.getImage();
 		cardImg.addEventListener("click", function(e) {
-			previewCard(getCardById(this.dataset.cardId).cardId);
+			previewCard(cardAreas["presentedCards1"].cards[parseInt(this.dataset.cardIndex)]);
 			e.stopPropagation();
 		});
 		// make card grabbable
@@ -534,14 +450,18 @@ class myPresentedCardsArea extends cardArea {
 		return true;
 	}
 	returnCard(card) {
-		this.cards.push(card);
 		presentedCards1.classList.remove("presentedCardsDragSource");
 		this.isDragSource = false;
 	}
 	dragFinish(card) {
-		Array.from(presentedCards1.children).find(elem => {return elem.firstChild.dataset.cardId == card.id}).remove();
+		let cardIndex = this.cards.findIndex(c => c == card);
+		this.cards.splice(cardIndex, 1)[0];
+		Array.from(presentedCards1.children)[cardIndex].remove();
 		presentedCards1.classList.remove("presentedCardsDragSource");
 		this.isDragSource = false;
+		Array.from(presentedCards1.children).forEach((elem, i) => {
+			elem.firstChild.dataset.cardIndex = i;
+		});
 	}
 	clear() {
 		this.cards = [];
@@ -552,17 +472,13 @@ class myPresentedCardsArea extends cardArea {
 class opponentHandCardArea extends cardArea {
 	constructor() {
 		super("hand0", false, false);
-		
-		this.cards = [];
 		this.hidden = true;
 	}
 	
-	grabCard(cardId) {
-		let cardIndex = this.cards.findIndex(card => {return card.id == cardId});
-		if (cardIndex >= 0) {
-			let removedCard = this.cards.splice(cardIndex, 1)[0];
-			this.getFromElement(cardId).classList.add("dragSource");
-			return removedCard;
+	grabCard(cardIndex) {
+		if (cardIndex >= 0 && !Array.from(hand0.children)[cardIndex].classList.contains("dragSource")) {
+			Array.from(hand0.children)[cardIndex].classList.add("dragSource");
+			return this.cards[cardIndex];
 		}
 		return null;
 	}
@@ -575,10 +491,10 @@ class opponentHandCardArea extends cardArea {
 		let newCard = document.createElement("img");
 		newCard.src = this.hidden? "images/cardBackFrameP0.png" : card.getImage();
 		newCard.classList.add("card");
-		newCard.dataset.cardId = card.id;
+		newCard.dataset.cardIndex = this.cards.length - 1;
 		newCard.addEventListener("click", function(e) {
 			if (!cardAreas["hand0"].hidden) {
-				previewCard(getCardById(this.dataset.cardId).cardId);
+				previewCard(cardAreas["hand0"].cards[parseInt(this.dataset.cardIndex)]);
 				e.stopPropagation();
 			}
 		});
@@ -590,12 +506,17 @@ class opponentHandCardArea extends cardArea {
 		return true;
 	}
 	returnCard(card) {
-		this.cards.push(card);
-		this.getFromElement(card.id).classList.remove("dragSource");
+		let cardIndex = this.cards.findIndex(c => c == card);
+		Array.from(hand0.children)[cardIndex].classList.remove("dragSource");
 	}
 	dragFinish(card) {
-		this.getFromElement(card.id).remove();
+		let cardIndex = this.cards.findIndex(c => c == card);
+		this.cards.splice(cardIndex, 1)[0];
+		Array.from(hand0.children)[cardIndex].remove();
 		hand0.style.setProperty("--card-count", "" + hand0.childElementCount);
+		Array.from(hand0.children).forEach((elem, i) => {
+			elem.dataset.cardIndex = i;
+		});
 	}
 	clear() {
 		this.cards = [];
@@ -616,28 +537,20 @@ class opponentHandCardArea extends cardArea {
 	showCards() {
 		this.hidden = false;
 		Array.from(document.getElementById("hand0").children).forEach(img => {
-			img.src = this.cards.find(card => {return card.id == img.dataset.cardId}).getImage();
+			img.src = this.cards[parseInt(img.dataset.cardIndex)].getImage();
 		});
 		document.getElementById("hand0").classList.add("shown");
-	}
-	
-	// gets the img element in hand that corresponds to a cardId
-	getFromElement(cardId) {
-		return Array.from(hand0.children).find(elem => {return elem.dataset.cardId == cardId});
 	}
 }
 
 class opponentPresentedCardsArea extends cardArea {
 	constructor() {
 		super("presentedCards0", false, false);
-		
-		this.cards = [];
 	}
 	
-	grabCard(cardId) {
-		let cardIndex = this.cards.findIndex(card => {return card.id == cardId});
-		this.getFromElement(cardId).classList.add("dragSource");
-		return this.cards.splice(cardIndex, 1)[0];
+	grabCard(cardIndex) {
+		Array.from(presentedCards0.children)[cardIndex].classList.add("dragSource");
+		return this.cards[cardIndex];
 	}
 	dropCard(card) {
 		this.cards.push(card);
@@ -648,13 +561,13 @@ class opponentPresentedCardsArea extends cardArea {
 		let cardImg = document.createElement("img")
 		cardImg.src = "images/cardBackFrameP0.png";
 		cardImg.dataset.shown = false;
-		cardImg.dataset.cardId = card.id;
+		cardImg.dataset.cardIndex = this.cards.length - 1;
 		cardImg.addEventListener("dragstart", function(e) {
 			e.preventDefault();
 		});
 		cardImg.addEventListener("click", function(e) {
 			if (this.dataset.shown == "true") {
-				previewCard(getCardById(this.dataset.cardId).cardId);
+				previewCard(cardAreas["presentedCards0"].cards[parseInt(this.dataset.cardIndex)]);
 				e.stopPropagation();
 			}
 		});
@@ -663,12 +576,18 @@ class opponentPresentedCardsArea extends cardArea {
 		return true;
 	}
 	returnCard(card) {
-		this.cards.push(card);
-		this.getFromElement(card.id).classList.remove("dragSource");
+		let cardIndex = this.cards.findIndex(c => c == card);
+		Array.from(presentedCards0.children)[cardIndex].classList.remove("dragSource");
 		this.isDragSource = false;
 	}
 	dragFinish(card) {
-		this.getFromElement(card.id).remove();
+		let cardIndex = this.cards.findIndex(c => c == card);
+		this.cards.splice(cardIndex, 1)[0];
+		Array.from(presentedCards0.children)[cardIndex].remove();
+		presentedCards0.classList.remove("presentedCardsDragSource");
+		Array.from(presentedCards0.children).forEach((elem, i) => {
+			elem.dataset.cardIndex = i;
+		});
 		this.isDragSource = false;
 	}
 	clear() {
@@ -676,8 +595,8 @@ class opponentPresentedCardsArea extends cardArea {
 		presentedCards0.innerHTML = "";
 	}
 	
-	isGrabHidden(cardId) {
-		return this.getFromElement(cardId).dataset.shown == "false";
+	isGrabHidden(cardIndex) {
+		return Array.from(presentedCards0.children)[cardIndex].dataset.shown == "false";
 	}
 	
 	// gets the img element in hand that corresponds to a cardId
@@ -690,18 +609,6 @@ class tokenCardsArea extends cardArea {
 	constructor(type, playerIndex) {
 		super("tokens", false, false);
 		
-		this.cards = [];
-		for (let i = TOKEN_COUNT; i > 0; i--) {
-			let tokenId = "T" + ("" + i).padStart(5, "0");
-			this.cards.push({
-				"id": tokenId,
-				"cardId": tokenId,
-				"getImage": function() {
-					return getCardImageFromID(this.cardId);
-				}
-			});
-		}
-		
 		this.createdToken = null;
 		
 		// event handler to open the token list
@@ -710,18 +617,24 @@ class tokenCardsArea extends cardArea {
 		});
 	}
 	
-	grabCard(cardId) {
-		if (("" + cardId).startsWith("T")) {
-			syncCreateToken(cardId);
-			return new Card(false, cardId);
-		} else {
+	grabCard(cardIndex) {
+		if (this.createdToken) {
 			return this.createdToken;
 		}
+		let token = new Card(game, this.cards[cardIndex].cardId);
+		syncCreateToken(token.cardId);
+		token.id = localPlayer.nextCardId;
+		localPlayer.nextCardId += game.players.length;
+		allCards.push(token);
+		return token;
 	}
 	
 	// creates token cards when the opponent asks for them
 	createOpponentToken(cardId) {
-		this.createdToken = new Card(true, cardId);
+		this.createdToken = new Card(game, cardId);
+		this.createdToken.id = game.players[0].nextCardId;
+		game.players[0].nextCardId += game.players.length;
+		allCards.push(this.createdToken);
 	}
 	
 	getLocalizedName() {
@@ -730,17 +643,18 @@ class tokenCardsArea extends cardArea {
 }
 
 // universal grab and drop handlers for dragging cards around
-function grabHandler(e) {
+window.grabHandler = function(e) {
 	e.preventDefault();
 	if (canGrab) {
-		heldCard = cardAreas[this.dataset.cardArea].grabCard(this.dataset.cardId);
+		let cardIndex = this.dataset.cardIndex;
+		heldCard = cardAreas[this.dataset.cardArea].grabCard(cardIndex);
 		if (heldCard) {
 			dragCard.src = heldCard.getImage();
-			syncGrab(this.dataset.cardArea, heldCard.id);
+			syncGrab(this.dataset.cardArea, cardIndex);
 		}
 	}
 }
-function dropHandler() {
+window.dropHandler = function() {
 	if (heldCard) {
 		if (heldCard.type == "token" && !cardAreas[this.dataset.cardArea].allowTokens) {
 			heldCard.location?.dragFinish(heldCard);

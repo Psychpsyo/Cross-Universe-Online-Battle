@@ -3,6 +3,10 @@ function getCardImageFromID(cardId) {
 	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
 }
 
+function getCardById(id) {
+	return allCards.find(card => card.id == id);
+}
+
 function setCardBackForPlayer(player, backLink) {
 	// check if opponent card back should show
 	if (player == 0 && localStorage.getItem("cardBackToggle") == "true") {
@@ -15,25 +19,6 @@ function setCardBackForPlayer(player, backLink) {
 	cardBackRule.style.backgroundImage = "url('" + backLink + "'), url('/images/cardBack.png')";
 }
 setCardBackForPlayer(1, localStorage.getItem("cardBack"));
-
-// turns a deck into a list of Card objects
-async function deckToCardList(deck, isOpponentDeck) {
-	cardList = [];
-	for (const card of deck.cards) {
-		let cardId = card.id;
-		if (card.id.startsWith("C")) {
-			cardId = await game.enterCustomCard(deck.customs[parseInt(card.id.substr(1)) - 1], isOpponentDeck? game.players[0] : localPlayer);
-			if (deck.suggestedPartner == card.id) {
-				deck.suggestedPartner = cardId;
-			}
-		}
-		
-		for (let i = 0; i < card.amount; i++) {
-			cardList.push(new Card(isOpponentDeck, cardId, deck));
-		}
-	}
-	return cardList;
-}
 
 function updateLifeDisplay(player) {
 	let lifeDisplay = document.getElementById("lifeDisplay" + player.index);
@@ -57,16 +42,15 @@ function updateManaDisplay(player) {
 }
 
 //opening a card selector
-function openCardSelect(cardArea, sortList=false) {
+function openCardSelect(cardArea) {
 	//add cards
 	cardSelectorGrid.innerHTML = "";
-	(sortList? [...cardArea.cards].sort(Card.sort) : cardArea.cards).forEach(function(card) {
+	// TODO: replace this with the actual sort function from Card once everything is converted to modules
+	cardArea.cards.forEach((card, i) => {
 		cardImg = document.createElement("img");
 		cardImg.src = card.getImage();
-		cardImg.dataset.cardId = card.id;
+		cardImg.dataset.cardIndex = i;
 		cardImg.dataset.cardArea = cardArea.name;
-		// This exists because Tokens that get displayed in here are fake temporary cards and do not have proper IDs.
-		cardImg.dataset.cardCuId = card.cardId;
 		
 		cardImg.addEventListener("dragstart", grabHandler);
 		cardImg.addEventListener("dragstart", function() {
@@ -74,7 +58,7 @@ function openCardSelect(cardArea, sortList=false) {
 			overlayBackdrop.style.display = "none";
 		});
 		cardImg.addEventListener("click", function(e) {
-			previewCard(this.dataset.cardCuId);
+			previewCard(cardAreas[this.dataset.cardArea].cards[this.dataset.cardIndex]);
 			e.stopPropagation();
 		});
 		cardSelectorGrid.insertBefore(cardImg, cardSelectorGrid.firstChild);

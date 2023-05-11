@@ -65,9 +65,12 @@ function draftOpenNewPack() {
 			let card = document.createElement("img");
 			card.dataset.cardId = draftCurrentBooster.pop();
 			card.src = getCardImageFromID(card.dataset.cardId);
-			card.addEventListener("click", function() {
+			card.addEventListener("click", async function() {
 				if (shiftHeld || ctrlHeld || altHeld) {
-					previewCard(this.dataset.cardId);
+					await game.registerCard(this.dataset.cardId);
+					await import("/modules/card.js").then(async cardModule => {
+						previewCard(new cardModule.Card(game, this.dataset.cardId));
+					});
 					return;
 				}
 				
@@ -96,16 +99,20 @@ function draftOpenNewPack() {
 }
 
 // adds a card to deck and switches which player is taking a card
-function draftAddToDeck(card, deck) {
+async function draftAddToDeck(card, deck) {
 	let deckCard = document.createElement("img");
 	deckCard.dataset.cardId = card.dataset.cardId;
 	deckCard.src = card.src;
-	deckCard.addEventListener("click", function() {
-		previewCard(this.dataset.cardId);
-	});
 	document.getElementById("draftDeckList" + deck).appendChild(deckCard);
 	document.getElementById("draftDeckCount" + deck).textContent = document.getElementById("draftDeckList" + deck).childElementCount + "/" + draftFormat.deckSize;
 	card.src = "images/cardHidden.png";
+	
+	await game.registerCard(card.dataset.cardId);
+	deckCard.addEventListener("click", async function() {
+		await import("/modules/card.js").then(async cardModule => {
+			previewCard(new cardModule.Card(game, this.dataset.cardId));
+		});
+	});
 	
 	// check if all cards have been taken.
 	if (draftDeckList0.childElementCount == draftFormat.deckSize && draftDeckList1.childElementCount == draftFormat.deckSize) {
@@ -114,8 +121,9 @@ function draftAddToDeck(card, deck) {
 		draftMainInfo.textContent = locale["draft"]["finished"];
 		
 		// load decks
-		cardAreas["deck1"].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]));
-		cardAreas["deck0"].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]));
+		
+		opponentDeckPromise = game.players[0].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]));
+		await Promise.all([opponentDeckPromise, game.players[1].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]))]);
 		
 		// show start button
 		draftStartButton.removeAttribute("hidden");

@@ -19,24 +19,24 @@ function openPartnerSelectMenu() {
 	}
 	
 	//add cards
-	for (card of cardAreas["deck1"].cards) {
+	cardAreas["deck1"].cards.forEach((card, i) => {
 		//check if card is a unit (eligible as a partner)
 		if (card.type == "unit") {
 			cardImg = document.createElement("img");
 			cardImg.src = card.getImage();
-			cardImg.dataset.cardId = card.cardId;
+			cardImg.dataset.cardIndex = i;
 			cardImg.addEventListener("click", function() {
 				if (shiftHeld) {
-					previewCard(this.dataset.cardId);
+					previewCard(cardAreas["deck1"].cards[this.dataset.cardIndex]);
 				} else {
 					document.getElementById("partnerSelectionMenu").style.display = "none";
-					finishDeckLoading(this.dataset.cardId);
+					finishDeckLoading(this.dataset.cardIndex);
 					overlayBackdrop.style.display = "none";
 				}
 			});
 			document.getElementById("partnerSelectorGrid").appendChild(cardImg)
 		}
-	}
+	});
 	document.getElementById("partnerSelectionMenu").style.display = "flex";
 	
 	//scroll to top
@@ -46,8 +46,8 @@ function openPartnerSelectMenu() {
 //loading a deck into the actual game
 async function loadDeck(deck) {
 	loadedDeck = deck;
-	await cardAreas["deck1"].setDeck(deck);
 	syncDeck();
+	await localPlayer.setDeck(deck);
 	
 	//hide the deck dropzone and show the game interaction section, as well as the partner choice menu
 	document.getElementById("deckDropzone").style.display = "none";
@@ -65,14 +65,14 @@ async function loadDeck(deck) {
 }
 
 // called after partner selection
-function finishDeckLoading(partnerId = null) {
-	partnerId = partnerId ?? loadedDeck["suggestedPartner"];
+function finishDeckLoading(partnerPosInDeck = -1) {
 	document.getElementById("field17").src = "images/cardBackFrameP1.png";
-	
-	let partnerPosInDeck = cardAreas["deck1"].cards.findIndex(card => {return card.cardId == partnerId});
+	if (partnerPosInDeck == -1) {
+		partnerPosInDeck = cardAreas["deck1"].cards.findIndex(card => {return card.cardId == loadedDeck["suggestedPartner"]});
+	}
 	loadedPartner = cardAreas["deck1"].cards.splice(partnerPosInDeck, 1)[0];
 	
-	syncPartnerChoice();
+	syncPartnerChoice(partnerPosInDeck);
 	
 	//shuffle the just loaded deck
 	cardAreas["deck1"].shuffle();
@@ -137,8 +137,11 @@ function loadDeckPreview(deck) {
 		}
 		
 		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
-		cardImg.addEventListener("click", function(e) {
-			previewCard(this.dataset.cardId);
+		cardImg.addEventListener("click", async function(e) {
+			await game.registerCard(this.dataset.cardId);
+			await import("/modules/card.js").then(async cardModule => {
+				previewCard(new cardModule.Card(game, this.dataset.cardId));
+			});
 			e.stopPropagation();
 		});
 	});

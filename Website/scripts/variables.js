@@ -1,12 +1,33 @@
 let game = null;
 let localPlayer = null;
-import("/modules/game.js").then(gameModule => {
+import("/modules/game.js").then(async gameModule => {
 	game = new gameModule.Game();
-	localPlayer = game.players[1];
+	import("/modules/card.js").then(async cardModule => {
+		await fetch("https://crossuniverse.net/cardInfo", {
+			method: "POST",
+			body: JSON.stringify({
+				"cardTypes": ["token"],
+				"language": localStorage.getItem("language")
+			})
+		})
+		.then(response => response.json())
+		.then(response => {
+			response.forEach(card => {
+				card.imageSrc = getCardImageFromID(card.cardID);
+				game.cardData[card.cardID] = card;
+				cardAreas["tokens"].cards.push(new cardModule.Card(game, card.cardID));
+			});
+		});
+		localPlayer = game.players[1];
+	});
 });
 
 // Areas that cards can go to. These handle card location changes and change the DOM accordingly
-cardAreas = {};
+let cardAreas = {};
+
+// all cards currently in the game.
+// TODO: refactor this away.
+let allCards = [];
 
 let socket = null;
 let roomcode = "";
@@ -37,6 +58,3 @@ let myCursorX = 0;
 let myCursorY = 0;
 let oppCursorX = 0;
 let oppCursorY = 0;
-
-// constants
-let TOKEN_COUNT = 28;

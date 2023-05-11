@@ -1,24 +1,35 @@
-// This file defines the Game class which holds all data relevant to a single Cross Universe game.
+// This module exports the Game class which holds all data relevant to a single Cross Universe game.
 // TODO: migrate data from global variables into this class
 import {Player} from "/modules/player.js";
 import {renderCard} from "/custom/renderer.js";
+import {Card} from "/modules/card.js";
 
 export class Game {
 	constructor() {
-		this.customCards = {};
-		this.players = [new Player(0), new Player(1)];
+		this.cardData = {};
+		this.players = [];
+		this.players.push(new Player(this));
+		this.players.push(new Player(this));
 	}
 	
-	async enterCustomCard(cardData, player) {
+	async registerCard(cardId) {
+		if (!this.cardData[cardId]) {
+			return fetch("https://crossuniverse.net/cardInfo/?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId)
+			.then(response => response.json())
+			.then(response => {
+				response.imageSrc = getCardImageFromID(cardId);
+				this.cardData[cardId] = response;
+			});
+		}
+	}
+	
+	async registerCustomCard(cardData, player) {
 		let canvas = document.createElement("canvas");
 		await renderCard(cardData, canvas);
-		document.body.appendChild(canvas);
-		let cardId = "C" + String(player.lastCustomCard).padStart(5, "0");
-		this.customCards[cardId] = {
-			"data": cardData,
-			"imageSrc": canvas.toDataURL()
-		}
-		player.lastCustomCard += this.players.length;
+		cardData.imageSrc = canvas.toDataURL();
+		let cardId = "C" + String(player.nextCustomCardId).padStart(5, "0");
+		this.cardData[cardId] = cardData;
+		player.nextCustomCardId += this.players.length;
 		return cardId;
 	}
 }
