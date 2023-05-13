@@ -40,8 +40,13 @@
 	"yourDeckShuffled": "Deck shuffled.",
 	"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 	
-	"chat": "チャット",
-	"chatEnterMessage": "Enter Message...",
+	"chat": {
+		"title": "チャット",
+		"enterMessage": "Enter Message...",
+		"you": "自分",
+		"opponent": "相手",
+		"colon": "："
+	},
 	"life": "Lp",
 	"mana": "魔力",
 	
@@ -74,6 +79,7 @@
 		"discard1": "自分の捨て山：",
 		"exile0": "相手の隔離：",
 		"exile1": "自分の隔離：",
+		
 		"returnAllToDeck": "Return All to your Deck"
 	},
 	
@@ -359,7 +365,7 @@
 			"name": "デッキ名：",
 			"namePlaceholder": "New Deck",
 			"description": "説明文：",
-			"partner": "パートナーカード：",
+			"partner": "パートナー：",
 			
 			"cardTotal": "Card Total:",
 			"unitTotal": "ユニット：",

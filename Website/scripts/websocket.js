@@ -66,9 +66,9 @@ function receiveMessage(e) {
 	switch (command) {
 		case "chat": { // incoming chat message
 			if (!opponentName || opponentName == "") {
-				putChatMessage("OPP: " + message);
+				putChatMessage(locale["chat"]["opponent"] + locale["chat"]["colon"] + message);
 			} else {
-				putChatMessage(opponentName + ": " + message);
+				putChatMessage(opponentName + locale["chat"]["colon"] + message);
 			}
 			break;
 		}
@@ -194,16 +194,17 @@ function receiveMessage(e) {
 			break;
 		}
 		case "hideCursor": { // hide opponent's cursor
-			opponentCursor.style.display = "none";
+			opponentCursor.setAttribute("hidden", "");
 			break;
 		}
 		case "placeCursor": { // move the opponent's cursor somewhere on the field
-			let fieldRect = document.getElementById("field").getBoundingClientRect();
-			oppCursorX = message.substr(0, message.indexOf("|")) * -1;
-			oppCursorY = 1 - message.substr(message.indexOf("|") + 1);
-			opponentCursor.style.left = (oppCursorX * fieldRect.height + fieldRect.width / 2) + "px";
-			opponentCursor.style.top = oppCursorY * fieldRect.height + "px";
-			opponentCursor.style.display = "block";
+			oppCursorTargetX = message.substr(0, message.indexOf("|")) * -1;
+			oppCursorTargetY = 1 - message.substr(message.indexOf("|") + 1);
+			if (opponentCursor.hidden) {
+				opponentCursor.removeAttribute("hidden");
+				oppCursorX = oppCursorTargetX;
+				oppCursorY = oppCursorTargetY;
+			}
 			break;
 		}
 		case "hideHand": { // opponent hid their hand

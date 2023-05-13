@@ -136,7 +136,7 @@
 				</main>
 				
 				<main id="mainGameArea" hidden>
-					<div id="fieldHolder"> <!-- This is mainly a flexbox for legacy reasons, it serves as a container for the field only. If it ain't broken, don't fix it. -->
+					<div id="fieldHolder">
 						<div id="field">
 							<div id="playerGrids">
 								<div id="p1Grid" class="playerGrid">
@@ -371,7 +371,7 @@
 							<div id="presentedCards1" class="presentedCards" data-card-area="presentedCards1"></div>
 							
 							<!--opponent mouse cursor, parented under field as it needs to be positioned relative to the field height.-->
-							<img id="opponentCursor" class="dragCard p1Card" src="images/opponentCursor.png" alt="">
+							<img id="opponentCursor" class="dragCard p1Card" src="images/opponentCursor.png" alt="" hidden>
 							<!--follows mouse cursor and is the currently held card-->
 							<img id="dragCard" class="dragCard" src="images/cardHidden.png" alt="">
 						</div>

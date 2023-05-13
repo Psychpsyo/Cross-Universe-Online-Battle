@@ -40,8 +40,13 @@
 	"yourDeckShuffled": "Deck gemischt.",
 	"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
 	
-	"chat": "Chat",
-	"chatEnterMessage": "Nachricht Schreiben...",
+	"chat": {
+		"title": "Chat",
+		"enterMessage": "Nachricht schreiben...",
+		"you": "Du: ",
+		"opponent": "GEGNER: ",
+		"colon": ": "
+	},
 	"life": "Leben",
 	"mana": "Mana",
 	
@@ -74,7 +79,8 @@
 		"discard1": "Dein Ablagestapel:",
 		"exile0": "Exil deines Gegners:",
 		"exile1": "Dein Exil:",
-		"returnAllToDeck": "Alle zurück ins Deck mischen"
+		
+		"returnAllToDeck": "Alle zurück in dein Deck mischen"
 	},
 	
 	"fieldLabels": {

@@ -21,6 +21,16 @@ function animate(currentTime) {
 	let delta = currentTime - lastFrame;
 	lastFrame = currentTime;
 	
+	// opponent cursor movement / smoothing
+	if (!opponentCursor.hidden) {
+		oppCursorX += (oppCursorTargetX - oppCursorX) / 5;
+		oppCursorY += (oppCursorTargetY - oppCursorY) / 5;
+	}
+	let fieldRect = document.getElementById("field").getBoundingClientRect();
+	opponentCursor.style.left = (oppCursorX * fieldRect.height + fieldRect.width / 2) + "px";
+	opponentCursor.style.top = oppCursorY * fieldRect.height + "px";
+	
+	// animate cards
 	let myCursorXVel = myCursorX - lastMyCursorX;
 	let myCursorYVel =  lastMyCursorY - myCursorY;
 	let oppCursorXVel = oppCursorX - lastOppCursorX;

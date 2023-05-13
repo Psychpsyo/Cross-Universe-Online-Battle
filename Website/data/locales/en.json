@@ -40,8 +40,13 @@
 	"yourDeckShuffled": "Deck shuffled.",
 	"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 	
-	"chat": "Chat",
-	"chatEnterMessage": "Enter Message...",
+	"chat": {
+		"title": "Chat",
+		"enterMessage": "Enter Message...",
+		"you": "You",
+		"opponent": "Opponent",
+		"colon": ": "
+	},
 	"life": "Life",
 	"mana": "Mana",
 	
@@ -74,6 +79,7 @@
 		"discard1": "Your Discard Pile:",
 		"exile0": "Opponent's Exile Zone:",
 		"exile1": "Your Exile Zone:",
+		
 		"returnAllToDeck": "Return All to your Deck"
 	},
 	
