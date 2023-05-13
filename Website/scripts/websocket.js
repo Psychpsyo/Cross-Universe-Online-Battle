@@ -235,7 +235,9 @@ function receiveMessage(e) {
 					mainGameArea.removeAttribute("hidden");
 					break;
 				case "draft":
-					startDraftGame();
+					import("/modules/draftState.js").then(async draftModule => {
+						gameState = new draftModule.DraftState();
+					});
 					break;
 			}
 			break;
@@ -304,7 +306,7 @@ function receiveMessage(e) {
 			break;
 		}
 		case "draft": {
-			draftHandleMessage(message);
+			gameState.receiveMessage(message);
 			break;
 		}
 		default: {

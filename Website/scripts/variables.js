@@ -22,6 +22,8 @@ import("/modules/game.js").then(async gameModule => {
 	});
 });
 
+let gameState = null;
+
 // Areas that cards can go to. These handle card location changes and change the DOM accordingly
 let cardAreas = {};
 
