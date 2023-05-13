@@ -215,39 +215,6 @@ function receiveMessage(e) {
 			cardAreas["hand0"].showCards();
 			break;
 		}
-		case "playerFound": { // another player entered the roomcode
-			roomCodeEntry.style.display = "none";
-			// reset the waiting indicator
-			waitingForOpponentSpan.style.display = "none";
-			roomCodeInputFieldSpan.style.display = "inline";
-			// send your own username and card back if you have any
-			if (localStorage.getItem("username") !== "") {
-				socket.send("[username]" + localStorage.getItem("username"));
-			}
-			if (localStorage.getItem("cardBack") !== "") {
-				socket.send("[cardBack]" + localStorage.getItem("cardBack"));
-			}
-			
-			updateRoomCodeDisplay();
-			gameDiv.removeAttribute("hidden");
-			
-			switch (gameModeSelect.value) {
-				case "normal":
-					mainGameArea.removeAttribute("hidden");
-					break;
-				case "draft":
-					import("/modules/draftState.js").then(async draftModule => {
-						gameState = new draftModule.DraftState();
-					});
-					break;
-			}
-			break;
-		}
-		case "youAre": { // Indicates if this client is player 0 or 1.
-			// TODO: This message is currently just sent by the server for simplicity but who is player 0 or 1 should really be negotiated by the clients in some form of initial handshake.
-			youAre = parseInt(message);
-			break;
-		}
 		case "dice": { // opponent rolled a dice with /dice in chat
 			putChatMessage(locale["cardActions"]["I00040"]["opponentRoll"].replace("{#RESULT}", message), "notice");
 			break;
@@ -293,25 +260,14 @@ function receiveMessage(e) {
 			document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
 			break;
 		}
-		case "username": {
-			opponentName = message;
-			draftDeckOwner1.textContent = opponentName;
-			break;
-		}
-		case "cardBack": {
-			setCardBackForPlayer(0, message);
-			break;
-		}
 		case "createToken": {
 			cardAreas.tokens.createOpponentToken(message);
 			break;
 		}
-		case "draft": {
-			gameState.receiveMessage(message);
-			break;
-		}
 		default: {
-			console.log("Received unknown message:\n" + message);
+			if (!gameState?.receiveMessage(command, message)) {
+				console.log("Received unknown message:\n" + message);
+			}
 		}
 	}
 }
@@ -325,21 +281,9 @@ function connect() {
 			roomcode = document.getElementById("roomCodeInputField").value;
 		}
 		
-		socket = new WebSocket("wss://battle.crossuniverse.net:443/ws");
-		socket.addEventListener("open", function (event) {
-			socket.send("[roomcode]" + roomcode + gameModeSelect.value.repeat(10));
+		import("/modules/initState.js").then(initModule => {
+			gameState = new initModule.InitState();
 		});
-		
-		socket.addEventListener("message", receiveMessage);
-		
-		// hide input field and show waiting indicator
-		roomCodeInputFieldSpan.setAttribute("hidden", "");
-		waitingForOpponentSpan.removeAttribute("hidden");
-		// refresh the "Waiting for Opponent" text so screen readers read it out.
-		setTimeout(() => {
-			trWaitingForOpponent.textContent = locale["waitingForOpponent"];
-			cancelWaitingBtn.focus();
-		}, 100);
 	}
 }
 // pressing enter in the roomcode entry field to connect

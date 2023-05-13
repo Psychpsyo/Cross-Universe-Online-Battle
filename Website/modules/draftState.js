@@ -1,4 +1,4 @@
-import {Gamestate} from "/modules/gamestate.js";
+import {Gamestate} from "/modules/gameState.js";
 import {Card} from "/modules/card.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
@@ -34,21 +34,19 @@ export class DraftState extends Gamestate {
 		}
 		draftGameSetupMenu.removeAttribute("hidden");
 	}
-	receiveMessage(message) {
-		let command = message.substring(1, message.indexOf("]"));
-		message = message.substring(message.indexOf("]") + 1);
-		
+	receiveMessage(command, message) {
 		switch (command) {
 			case "picked": {
 				this.addToDeck(draftCardSelection.childNodes.item(message), 1);
-				break;
+				return true;
 			}
 			case "reroll": {
 				this.currentBooster = message.split("|");
 				this.openNewPack();
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	setPlayer(player) {
@@ -63,7 +61,7 @@ export class DraftState extends Gamestate {
 			this.currentBooster.push(cardPool[Math.floor(Math.random() * cardPool.length)]);
 		}
 		
-		socket.send("[draft][reroll]" + this.currentBooster.join("|"));
+		socket.send("[reroll]" + this.currentBooster.join("|"));
 		this.openNewPack();
 	}
 	
@@ -94,7 +92,7 @@ export class DraftState extends Gamestate {
 					}
 					
 					// sync this to the opponent first, since this element may get destroyed by draftAddToDeck if that triggers a reroll.
-					socket.send("[draft][picked]" + Array.from(this.parentElement.childNodes).indexOf(this));
+					socket.send("[picked]" + Array.from(this.parentElement.childNodes).indexOf(this));
 					gameState.addToDeck(this, 0);
 				});
 				card.addEventListener("dragstart", function(e) {
