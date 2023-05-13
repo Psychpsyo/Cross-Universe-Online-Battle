@@ -96,9 +96,9 @@ document.getElementById("chatInput").addEventListener("keyup", function(e) {
 	if (e.code == "Enter" && this.value != "") {
 		socket.send("[chat]" + this.value);
 		if (localStorage.getItem("username") !== "") {
-			putChatMessage(localStorage.getItem("username") + ": " + this.value);
+			putChatMessage(localStorage.getItem("username") + locale["chat"]["colon"] + this.value);
 		} else {
-			putChatMessage("YOU: " + this.value);
+			putChatMessage(locale["chat"]["you"] + locale["chat"]["colon"] + this.value);
 		}
 		
 		this.value = "";

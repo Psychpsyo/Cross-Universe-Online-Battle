@@ -40,8 +40,13 @@
 	"yourDeckShuffled": "Deck shuffled.",
 	"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 	
-	"chat": "チャット",
-	"chatEnterMessage": "Enter Message...",
+	"chat": {
+		"title": "チャット",
+		"enterMessage": "Enter Message...",
+		"you": "自分",
+		"opponent": "相手",
+		"colon": "："
+	},
 	"life": "Lp",
 	"mana": "魔力",
 	

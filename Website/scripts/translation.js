@@ -36,8 +36,8 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	document.getElementById("revealPartnerBtn").textContent = locale["revealPartner"];
 	document.getElementById("startingPlayerSelect").textContent = locale["selectStartingPlayer"];
 	
-	document.getElementById("chatHeader").textContent = locale["chat"];
-	document.getElementById("chatInput").placeholder = locale["chatEnterMessage"];
+	document.getElementById("chatHeader").textContent = locale["chat"]["title"];
+	document.getElementById("chatInput").placeholder = locale["chat"]["enterMessage"];
 	document.getElementById("roomCodeDisplayTitle").textContent = locale["roomCode"];
 	document.getElementById("roomCodeHider").textContent = locale["roomCodeHide"];
 	

@@ -40,8 +40,13 @@
 	"yourDeckShuffled": "Deck shuffled.",
 	"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 	
-	"chat": "Chat",
-	"chatEnterMessage": "Enter Message...",
+	"chat": {
+		"title": "Chat",
+		"enterMessage": "Enter Message...",
+		"you": "You",
+		"opponent": "Opponent",
+		"colon": ": "
+	},
 	"life": "Life",
 	"mana": "Mana",
 	

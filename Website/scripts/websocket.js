@@ -63,9 +63,9 @@ function receiveMessage(e) {
 	switch (command) {
 		case "chat": { // incoming chat message
 			if (!opponentName || opponentName == "") {
-				putChatMessage("OPP: " + message);
+				putChatMessage(locale["chat"]["opponent"] + locale["chat"]["colon"] + message);
 			} else {
-				putChatMessage(opponentName + ": " + message);
+				putChatMessage(opponentName + locale["chat"]["colon"] + message);
 			}
 			break;
 		}

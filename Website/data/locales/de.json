@@ -40,8 +40,13 @@
 	"yourDeckShuffled": "Deck gemischt.",
 	"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
 	
-	"chat": "Chat",
-	"chatEnterMessage": "Nachricht Schreiben...",
+	"chat": {
+		"title": "Chat",
+		"enterMessage": "Nachricht schreiben...",
+		"you": "Du: ",
+		"opponent": "GEGNER: ",
+		"colon": ": "
+	},
 	"life": "Leben",
 	"mana": "Mana",
 	
