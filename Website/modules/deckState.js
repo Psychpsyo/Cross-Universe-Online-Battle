@@ -3,6 +3,16 @@ import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
 import {Card} from "/modules/card.js";
 
+let officialDecks = [];
+fetch("data/deckList.json")
+.then(response => response.json())
+.then(decks => {
+	officialDecks = decks;
+});
+
+let currentDeckList = "default";
+
+
 function loadDeckFile(file) {
 	let reader = new FileReader();
 	reader.onload = function(e) {

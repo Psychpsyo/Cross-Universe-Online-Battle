@@ -145,13 +145,13 @@ document.getElementById("roomCodeHider").addEventListener("click", function () {
 
 //showing/hiding your hand
 function hideHand() {
-	syncHandHide();
+	socket.send("[hideHand]");
 	document.getElementById("showHandBtn").textContent = locale["actionsShowHand"];
 	document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
 	document.getElementById("hand1").classList.remove("shown");
 }
 function showHand() {
-	syncHandReveal();
+	socket.send("[showHand]");
 	document.getElementById("showHandBtn").textContent = locale["actionsHideHand"];
 	document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
 	document.getElementById("hand1").classList.add("shown");

@@ -38,6 +38,10 @@ button, input, select, textarea {
 	font-family: inherit;
 }
 
+button:disabled {
+	color: #222;
+}
+
 textarea {
 	resize: none;
 }

@@ -148,10 +148,6 @@ function syncDraw() {
 function syncShowDeckTop(deck) {
 	socket.send("[showDeckTop]" + deck.playerIndex);
 }
-// creating a token
-function syncCreateToken(cardId) {
-	socket.send("[createToken]" + cardId);
-}
 
 // syncing player values
 function syncLife() {
@@ -159,23 +155,6 @@ function syncLife() {
 }
 function syncMana() {
 	socket.send("[mana]" + localPlayer.mana);
-}
-
-// syncing hand and card presenting
-function syncHandReveal() {
-	socket.send("[showHand]");
-}
-
-function syncHandHide() {
-	socket.send("[hideHand]");
-}
-
-function syncCardReveal(cardIndex) {
-	socket.send("[revealCard]" + cardIndex);
-}
-
-function syncCardUnreveal(cardIndex) {
-	socket.send("[unrevealCard]" + cardIndex);
 }
 
 // syncing counters

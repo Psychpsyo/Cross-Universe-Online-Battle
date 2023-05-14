@@ -1,6 +1,8 @@
 import {GameState} from "/modules/gameState.js";
 import {DraftState} from "/modules/draftState.js";
 import {DeckState} from "/modules/deckState.js";
+import {Game} from "/modules/game.js";
+import {Card} from "/modules/card.js";
 
 function setCardBackForPlayer(player, backLink) {
 	let rightSheet = Array.from(document.styleSheets).filter(function(sheet) {return sheet.href.endsWith("game.css")})[0];
@@ -14,6 +16,8 @@ export class InitState extends GameState {
 		super();
 		
 		this.opponentReady = false;
+		
+		// set up socket
 		socket = new WebSocket("wss://battle.crossuniverse.net:443/ws");
 		socket.addEventListener("open", function (event) {
 			socket.send("[roomcode]" + roomcode + gameModeSelect.value);
@@ -42,8 +46,12 @@ export class InitState extends GameState {
 					setCardBackForPlayer(1, localStorage.getItem("cardBack"));
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
-				socket.send("[ready]");
-				this.checkReadyConditions();
+				
+				this.initGame().then(() => {
+					socket.send("[ready]");
+					this.checkReadyConditions();
+				});
+				
 				return true;
 			}
 			case "youAre": { // Indicates if this client is player 0 or 1.
@@ -71,8 +79,29 @@ export class InitState extends GameState {
 		return false;
 	}
 	
+	async initGame() {
+		game = new Game();
+		localPlayer = game.players[1];
+		return fetch("https://crossuniverse.net/cardInfo", {
+			method: "POST",
+			body: JSON.stringify({
+				"cardTypes": ["token"],
+				"language": localStorage.getItem("language")
+			})
+		})
+		.then(response => response.json())
+		.then(response => {
+			response.forEach(card => {
+				card.imageSrc = getCardImageFromID(card.cardID);
+				game.cardData[card.cardID] = card;
+				cardAreas["tokens"].cards.push(new cardModule.Card(game, card.cardID));
+			});
+			this.gameSetup = true;
+		});
+	}
+	
 	checkReadyConditions() {
-		if (this.opponentReady && youAre !== null) {
+		if (this.opponentReady && this.gameSetup && youAre !== null) {
 			updateRoomCodeDisplay();
 			
 			// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)

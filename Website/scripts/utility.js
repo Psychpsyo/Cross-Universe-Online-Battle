@@ -28,7 +28,6 @@ function updateManaDisplay(player) {
 function openCardSelect(cardArea) {
 	//add cards
 	cardSelectorGrid.innerHTML = "";
-	// TODO: replace this with the actual sort function from Card once everything is converted to modules
 	cardArea.cards.forEach((card, i) => {
 		cardImg = document.createElement("img");
 		cardImg.src = card.getImage();

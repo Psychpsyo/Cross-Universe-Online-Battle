@@ -1,4 +1,5 @@
 import {Card} from "/modules/card.js";
+import {cardActions} from "/modules/cardActions.js";
 
 class cardArea {
 	constructor(name, handleGrab=true, handleDrop=true) {
@@ -437,11 +438,11 @@ class myPresentedCardsArea extends cardArea {
 			if (this.dataset.shown == "true") {
 				this.dataset.shown = false;
 				this.textContent = locale["presentReveal"];
-				syncCardUnreveal(Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
+				socket.send("[revealCard]" + Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
 			} else {
 				this.dataset.shown = true;
 				this.textContent = locale["presentHide"];
-				syncCardReveal(Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
+				socket.send("[unrevealCard]" + Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
 			}
 		});
 		
@@ -624,7 +625,7 @@ class tokenCardsArea extends cardArea {
 		if (this.createdToken) {
 			return this.createdToken;
 		}
-		syncCreateToken(this.cards[cardIndex].cardId);
+		socket.send("[createToken]" + this.cards[cardIndex].cardId);
 		return new Card(game, this.cards[cardIndex].cardId);
 	}
 	
