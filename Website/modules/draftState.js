@@ -18,6 +18,7 @@ export class DraftState extends GameState {
 		this.pressedReady = false;
 		this.opponentReady = false;
 		
+		draftStartButton.textContent = locale["draft"]["startGame"];
 		draftDeckOwner0.textContent = localStorage.getItem("username");
 		if (draftDeckOwner0.textContent == "") {
 			draftDeckOwner0.textContent = locale["draft"]["yourDeck"];
@@ -154,8 +155,10 @@ export class DraftState extends GameState {
 			draftMainInfo.textContent = locale["draft"]["finished"];
 			
 			// load decks
-			opponentDeckPromise = game.players[0].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]));
-			await Promise.all([opponentDeckPromise, game.players[1].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]))]);
+			await Promise.all([
+				game.players[0].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"])),
+				game.players[1].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]))
+			]);
 			
 			// show start button
 			draftStartButton.removeAttribute("hidden");

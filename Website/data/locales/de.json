@@ -25,15 +25,27 @@
 	"infoLife": "Leben:",
 	"infoMana": "Mana:",
 	
-	"dropYourDeck": "Deck per Drag & drop hier ablegen.",
-	"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+	"deckSelect": {
+		"chooseYourDeck": "Wähle dein Deck.",
+		"loadingDeck": "Deck wird geladen...",
+		"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
+		"dropYourDeck": "Deck per Drag & drop hier ablegen.",
+		"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+		
+		"deckListDefault": "Default",
+		"deckListLegacy": "Legacy",
+		"deckListLoadSelected": "Gewähltes Deck laden",
+		"deckListCardAmount": "{#CARDS} Karten"
+	},
 	
-	"deckListDefault": "Default",
-	"deckListLegacy": "Legacy",
-	"deckListLoadSelected": "Gewähltes Deck laden",
-	"deckListCardAmount": "{#CARDS} Karten",
+	"partnerSelect": {
+		"useSuggestedQuestion": "Möchtest du den empfohlenen Partner für dieses Deck verwenden oder selber einen wählen?",
+		"useSuggested": "Empfohlenen wählen",
+		"selectManually": "Selbst wählen",
+		"waitingForOpponent": "Warte darauf, dass dein Gegner einen Partner wählt...",
+		"revealPartner": "Partner aufdecken"
+	},
 	
-	"revealPartner": "Partner aufdecken",
 	"selectStartingPlayer": "Startspieler auswählen",
 	"youStart": "Du bist zuerst dran.",
 	"opponentStarts": "Dein Gegner ist zuerst dran.",

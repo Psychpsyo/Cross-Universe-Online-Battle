@@ -25,15 +25,27 @@
 	"infoLife": "Life:",
 	"infoMana": "Mana:",
 	
-	"dropYourDeck": "Drag & drop your deck here.",
-	"useOfficialDeck": "Or choose one of the official ones.",
+	"deckSelect": {
+		"chooseYourDeck": "Choose your deck.",
+		"loadingDeck": "Loading deck...",
+		"waitingForOpponent": "Waiting for opponent to choose their deck...",
+		"dropYourDeck": "Drag & drop your deck here.",
+		"useOfficialDeck": "Or choose one of the official ones.",
+		
+		"deckListDefault": "Default",
+		"deckListLegacy": "Legacy",
+		"deckListLoadSelected": "Load Selected Deck",
+		"deckListCardAmount": "{#CARDS} cards"
+	},
 	
-	"deckListDefault": "Default",
-	"deckListLegacy": "Legacy",
-	"deckListLoadSelected": "Load Selected Deck",
-	"deckListCardAmount": "{#CARDS} cards",
+	"partnerSelect": {
+		"useSuggestedQuestion": "Do you want to use the suggested partner for this deck or select one yourself?",
+		"useSuggested": "Use Suggested Partner",
+		"selectManually": "Select One From Deck",
+		"waitingForOpponent": "Waiting for opponent to choose their partner...",
+		"revealPartner": "Reveal Partner"
+	},
 	
-	"revealPartner": "Reveal Partner",
 	"selectStartingPlayer": "Select Starting Player",
 	"youStart": "You go first.",
 	"opponentStarts": "Your opponent goes first.",

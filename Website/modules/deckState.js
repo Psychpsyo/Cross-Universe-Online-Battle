@@ -70,7 +70,7 @@ async function addDecksToDeckSelector(deckList) {
 			
 			let cardAmountSubtitle = document.createElement("span");
 			cardAmountSubtitle.classList.add("deckCardAmount");
-			cardAmountSubtitle.textContent = locale["deckListCardAmount"].replace("{#CARDS}", deckUtils.countDeckCards(deck));
+			cardAmountSubtitle.textContent = locale["deckSelect"]["deckListCardAmount"].replace("{#CARDS}", deckUtils.countDeckCards(deck));
 			
 			deckDiv.addEventListener("click", function() {
 				if (document.getElementById("selectedDeck")) {
@@ -95,6 +95,9 @@ async function addDecksToDeckSelector(deckList) {
 export class DeckState extends GameState {
 	constructor() {
 		super();
+		
+		this.ready = false;
+		this.opponentReady = false;
 		
 		//loading custom decks from file
 		document.getElementById("deckDropzone").addEventListener("drop", function(e) {
@@ -150,6 +153,13 @@ export class DeckState extends GameState {
 		});
 		
 		// show game area
+		dropDeckHereLabel.textContent = locale["deckSelect"]["dropYourDeck"];
+		deckSelectSpan.textContent = locale["deckSelect"]["useOfficialDeck"];
+		defaultDecksBtn.textContent = locale["deckSelect"]["deckListDefault"];
+		legacyDecksBtn.textContent = locale["deckSelect"]["deckListLegacy"];
+		loadSelectedDeckBtn.textContent = locale["deckSelect"]["deckListLoadSelected"];
+		mainGameBlackout.textContent = locale["deckSelect"]["chooseYourDeck"];
+		
 		mainGameArea.removeAttribute("hidden");
 	}
 	
@@ -157,8 +167,13 @@ export class DeckState extends GameState {
 		switch (command) {
 			case "deck": {
 				game.players[0].setDeck(JSON.parse(message)).then(() => {
-					gameState.startGame();
+					gameState.checkReadyConditions();
 				});
+				return true;
+			}
+			case "ready": {
+				this.opponentReady = true;
+				this.checkReadyConditions();
 				return true;
 			}
 		}
@@ -172,14 +187,22 @@ export class DeckState extends GameState {
 		
 		// sync and load the deck
 		socket.send("[deck]" + JSON.stringify(deck));
+		mainGameBlackout.textContent = locale["deckSelect"]["loadingDeck"];
 		await localPlayer.setDeck(deck);
+		mainGameBlackout.textContent = locale["deckSelect"]["waitingForOpponent"];
 		
-		this.startGame();
+		this.checkReadyConditions();
 	}
 	
-	startGame() {
+	checkReadyConditions() {
 		if (!game.players.find(player => player.deck == null)) {
-			gameState = new BoardState();
+			if (!this.ready) {
+				socket.send("[ready]");
+				this.ready = true;
+			}
+			if (this.opponentReady) {
+				gameState = new BoardState();
+			}
 		}
 	}
 }

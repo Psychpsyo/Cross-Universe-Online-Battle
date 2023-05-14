@@ -113,13 +113,15 @@ document.getElementById("chatInput").addEventListener("keydown", function(e) {
 });
 
 //closing the card selector when clicking off of it
-overlayBackdrop.addEventListener("click", function(e) {
+overlayBackdrop.addEventListener("click", function() {
 	// does not work for partner select menu
 	if (window.getComputedStyle(partnerSelectionMenu).display != "none") {
 		return;
 	}
 	cardSelector.style.display = "none";
-	deckSelector.style.display = "none";
+	if (typeof deckSelector !== "undefined") {
+		deckSelector.style.display = "none";
+	}
 	overlayBackdrop.style.display = "none";
 });
 

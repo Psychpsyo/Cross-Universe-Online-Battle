@@ -44,10 +44,6 @@ fetch("data/deckList.json")
 
 let currentDeckList = "default";
 
-// decks and partner choices for both players
-let loadedPartner = null;
-let opponentPartner = null;
-
 let youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and partner selection, as far as the board is concerned, the local player is always player 1.)
 
 let canGrab = true; //whether or not cards can be grabbed. (only used when dropping a card onto the deck)

@@ -25,15 +25,27 @@
 	"infoLife": "Lp：",
 	"infoMana": "魔力：",
 	
-	"dropYourDeck": "デッキをドラック＆ドロップしてください。",
-	"useOfficialDeck": "もしくは、公式デッキを選択してください。",
+	"deckSelect": {
+		"chooseYourDeck": "Choose your deck.",
+		"loadingDeck": "Loading deck...",
+		"waitingForOpponent": "Waiting for opponent to choose their deck...",
+		"dropYourDeck": "デッキをドラック＆ドロップしてください。",
+		"useOfficialDeck": "もしくは、公式デッキを選択してください。",
+		
+		"deckListDefault": "参考デッキ",
+		"deckListLegacy": "過去のデッキ",
+		"deckListLoadSelected": "選択したデッキを配置する",
+		"deckListCardAmount": "{#CARDS}枚"
+	},
 	
-	"deckListDefault": "参考デッキ",
-	"deckListLegacy": "過去のデッキ",
-	"deckListLoadSelected": "選択したデッキを配置する",
-	"deckListCardAmount": "{#CARDS}枚",
+	"partnerSelect": {
+		"useSuggestedQuestion": "Do you want to use the suggested partner for this deck or select one yourself?",
+		"useSuggested": "Use Suggested Partner",
+		"selectManually": "Select One From Deck",
+		"waitingForOpponent": "Waiting for opponent to choose their partner...",
+		"revealPartner": "Reveal Partner"
+	},
 	
-	"revealPartner": "Reveal Partner",
 	"selectStartingPlayer": "Select Starting Player",
 	"youStart": "You go first.",
 	"opponentStarts": "Your opponent goes first.",

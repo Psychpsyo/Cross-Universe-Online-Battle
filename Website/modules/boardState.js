@@ -61,8 +61,11 @@ function animateCursors(currentTime) {
 }
 
 function doSelectStartingPlayer() {
-	if (youAre === 0 && cardAreas["field2"].isFaceDown() && cardAreas["field17"].isFaceDown()) {
-		startingPlayerSelect.style.display = "block";
+	if (cardAreas["field2"].isFaceDown() && cardAreas["field17"].isFaceDown()) {
+		if (youAre === 0) {
+			startingPlayerSelect.style.display = "block";
+		}
+		mainGameBlackout.remove();
 	}
 }
 
@@ -88,7 +91,7 @@ function openPartnerSelectMenu() {
 					previewCard(cardAreas["deck1"].cards[this.dataset.cardIndex]);
 				} else {
 					document.getElementById("partnerSelectionMenu").style.display = "none";
-					selectPartnerFromDeck(this.dataset.cardIndex);
+					gameState.getPartnerFromDeck(this.dataset.cardIndex);
 					overlayBackdrop.style.display = "none";
 				}
 			});
@@ -101,26 +104,16 @@ function openPartnerSelectMenu() {
 	document.getElementById("partnerSelectorGrid").parentNode.scrollTop = 0;
 }
 
-// called after partner selection
-function selectPartnerFromDeck(partnerPosInDeck = -1) {
-	document.getElementById("field17").src = "images/cardBackFrameP1.png";
-	if (partnerPosInDeck == -1) {
-		partnerPosInDeck = cardAreas["deck1"].cards.findIndex(card => {return card.cardId == game.players[localPlayer.index].deck["suggestedPartner"]});
-	}
-	loadedPartner = cardAreas["deck1"].cards.splice(partnerPosInDeck, 1)[0];
-	
-	syncPartnerChoice(partnerPosInDeck);
-	
-	//shuffle the just loaded deck
-	cardAreas["deck1"].shuffle();
-	cardAreas["deck1"].updateVisual();
-	
-	doSelectStartingPlayer();
-}
 
 export class BoardState extends GameState {
 	constructor() {
 		super();
+		
+		this.chosenPartners = [];
+		for (let i = 0; i < game.players.length; i++) {
+			this.chosenPartners.push(null);
+		}
+		
 		// remove draft game section and deck drop zone since they are not needed anymore
 		draftGameSetupMenu.remove();
 		
@@ -128,7 +121,7 @@ export class BoardState extends GameState {
 		document.getElementById("field").addEventListener("mouseleave", function() {
 			socket.send("[hideCursor]");
 		});
-		document.getElementById("field").addEventListener("mousemove", function(e) {
+		document.getElementById("field").addEventListener("mousemove", function() {
 			// check if the normalized cursor position is within the bounds of the visual field
 			if (Math.abs(myCursorX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
 				socket.send("[placeCursor]" + myCursorX + "|" + myCursorY);
@@ -140,6 +133,7 @@ export class BoardState extends GameState {
 		animateCursors();
 		
 		// show game area
+		mainGameBlackout.textContent = "";
 		mainGameArea.removeAttribute("hidden");
 		gameInteractions.removeAttribute("hidden");
 		
@@ -150,14 +144,14 @@ export class BoardState extends GameState {
 				
 				document.getElementById("chooseSuggestedPartnerBtn").addEventListener("click", function() {
 					document.getElementById("partnerSelectQuestion").remove();
-					selectPartnerFromDeck();
+					gameState.getPartnerFromDeck();
 				});
 				document.getElementById("manualChoosePartnerBtn").addEventListener("click", function() {
 					document.getElementById("partnerSelectQuestion").remove();
 					openPartnerSelectMenu();
 				});
 			} else {
-				selectPartnerFromDeck();
+				this.getPartnerFromDeck();
 			}
 		} else {
 			openPartnerSelectMenu();
@@ -166,8 +160,8 @@ export class BoardState extends GameState {
 		document.getElementById("revealPartnerBtn").addEventListener("click", function() {
 			document.getElementById("partnerRevealButtonDiv").style.display = "none";
 			field17.src = "images/cardHidden.png";
-			cardAreas["field17"].dropCard(loadedPartner);
-			syncRevealPartner();
+			cardAreas["field17"].dropCard(gameState.chosenPartners[1]);
+			socket.send("[revealPartner]");
 		});
 	}
 	receiveMessage(command, message) {
@@ -182,14 +176,14 @@ export class BoardState extends GameState {
 			}
 			case "choosePartner": { // opponent selected their partner
 				field2.src = "images/cardBackFrameP0.png";
-				opponentPartner = cardAreas["deck0"].cards.splice(message, 1)[0];
+				this.chosenPartners[0] = cardAreas["deck0"].cards.splice(message, 1)[0];
 				cardAreas["deck0"].updateVisual();
 				doSelectStartingPlayer();
 				return true;
 			}
 			case "revealPartner": { // opponent revealed their partner
 				field2.src = "images/cardHidden.png";
-				cardAreas["field2"].dropCard(opponentPartner);
+				cardAreas["field2"].dropCard(this.chosenPartners[0]);
 				return true;
 			}
 			case "selectPlayer": { // opponent chose the starting player (at random)
@@ -215,7 +209,7 @@ export class BoardState extends GameState {
 					} else if (cardArea.startsWith("deck")) { // if the card was dropped to deck, don't call the drop function to not prompt the local player with the options
 						// return early if the opponent dropped to deck, so that opponentHeldCard does not get cleared.
 						opponentCursor.src = "images/opponentCursor.png";
-						return;
+						return true;
 					} else {
 						if (!cardAreas[cardArea].dropCard(opponentHeldCard)) {
 							opponentHeldCard.location?.returnCard(opponentHeldCard);
@@ -350,5 +344,23 @@ export class BoardState extends GameState {
 			}
 		}
 		return false;
+	}
+	
+	// called after partner selection
+	getPartnerFromDeck(partnerPosInDeck = -1) {
+		mainGameBlackout.textContent = locale["partnerSelect"]["waitingForOpponent"];
+		document.getElementById("field17").src = "images/cardBackFrameP1.png";
+		if (partnerPosInDeck == -1) {
+			partnerPosInDeck = cardAreas["deck1"].cards.findIndex(card => {return card.cardId == game.players[localPlayer.index].deck["suggestedPartner"]});
+		}
+		this.chosenPartners[1] = cardAreas["deck1"].cards.splice(partnerPosInDeck, 1)[0];
+		
+		socket.send("[choosePartner]" + partnerPosInDeck);
+		
+		//shuffle the just loaded deck
+		cardAreas["deck1"].shuffle();
+		cardAreas["deck1"].updateVisual();
+		
+		doSelectStartingPlayer();
 	}
 }

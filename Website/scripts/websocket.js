@@ -113,12 +113,6 @@ document.getElementById("cancelWaitingBtn").addEventListener("click", function()
 // Functions to sync various parts of gameplay
 
 // initial setup
-function syncPartnerChoice(partnerPosInDeck) {
-	socket.send("[choosePartner]" + partnerPosInDeck);
-}
-function syncRevealPartner() {
-	socket.send("[revealPartner]");
-}
 function syncDeckOrder(deck, order) {
 	let message = "[deckOrder]" + deck.playerIndex;
 	order.forEach(index => {

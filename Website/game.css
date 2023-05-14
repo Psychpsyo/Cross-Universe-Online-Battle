@@ -833,3 +833,18 @@ label[for="fileSelectDeckLoader"] {
 	writing-mode: vertical-lr;
 	font-size: 2.5vh;
 }
+
+
+#mainGameBlackout {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #0008;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: bold;
+	z-index: 90;
+}
