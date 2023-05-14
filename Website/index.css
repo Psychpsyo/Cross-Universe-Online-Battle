@@ -67,10 +67,12 @@ textarea {
 	text-align: center;
 	text-decoration: none;
 	
-	cursor: pointer;
 	user-select: none;
 }
-.bigButton:hover {
+.bigButton:enabled {
+	cursor: pointer;
+}
+.bigButton:hover:enabled {
 	background-color: var(--theme-button-hover-color);
 }
 

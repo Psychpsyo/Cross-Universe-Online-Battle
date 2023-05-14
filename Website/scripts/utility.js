@@ -3,19 +3,6 @@ function getCardImageFromID(cardId) {
 	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
 }
 
-function setCardBackForPlayer(player, backLink) {
-	// check if opponent card back should show
-	if (player == 0 && localStorage.getItem("cardBackToggle") == "true") {
-		return;
-	}
-	
-	let rightSheet = Array.from(document.styleSheets).filter(function(sheet) {return sheet.href.endsWith("game.css")})[0];
-	//this matches the very specific rule that applies to all places where there's face down cards of the specified player.
-	let cardBackRule = Array.from(rightSheet.rules).filter(rule => rule.selectorText == "img[src$=\"cardBackFrameP" + player + ".png\"]")[0];
-	cardBackRule.style.backgroundImage = "url('" + backLink + "'), url('/images/cardBack.png')";
-}
-setCardBackForPlayer(1, localStorage.getItem("cardBack"));
-
 function updateLifeDisplay(player) {
 	let lifeDisplay = document.getElementById("lifeDisplay" + player.index);
 	let lifeDisplayValue = parseInt(lifeDisplay.textContent);
@@ -77,12 +64,6 @@ cardSelectorReturnToDeck.addEventListener("click", function() {
 	cardSelector.style.display = "none";
 	overlayBackdrop.style.display = "none";
 });
-
-function doSelectStartingPlayer() {
-	if (youAre === 0 && cardAreas["field2"].isFaceDown() && cardAreas["field17"].isFaceDown()) {
-		startingPlayerSelect.style.display = "block";
-	}
-}
 
 //track shift key
 document.addEventListener("keydown", function(e) {

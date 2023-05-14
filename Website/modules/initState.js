@@ -1,7 +1,15 @@
-import {Gamestate} from "/modules/gameState.js";
+import {GameState} from "/modules/gameState.js";
 import {DraftState} from "/modules/draftState.js";
+import {DeckState} from "/modules/deckState.js";
 
-export class InitState extends Gamestate {
+function setCardBackForPlayer(player, backLink) {
+	let rightSheet = Array.from(document.styleSheets).filter(function(sheet) {return sheet.href.endsWith("game.css")})[0];
+	//this matches the very specific rule that applies to all places where there's face down cards of the specified player.
+	let cardBackRule = Array.from(rightSheet.rules).filter(rule => rule.selectorText == "img[src$=\"cardBackFrameP" + player + ".png\"]")[0];
+	cardBackRule.style.backgroundImage = "url('" + backLink + "'), url('/images/cardBack.png')";
+}
+
+export class InitState extends GameState {
 	constructor() {
 		super();
 		
@@ -25,16 +33,17 @@ export class InitState extends Gamestate {
 	
 	receiveMessage(command, message) {
 		switch (command) {
-			case "playerFound": { // another player entered the roomcode
-				roomCodeEntry.setAttribute("hidden", "");
+			case "playerFound": { // another player entered the roomcode (Note: This is sent by the server, not the other client.)
 				// send your own username and card back if you have any
 				if (localStorage.getItem("username") !== "") {
 					socket.send("[username]" + localStorage.getItem("username"));
 				}
 				if (localStorage.getItem("cardBack") !== "") {
+					setCardBackForPlayer(1, localStorage.getItem("cardBack"));
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
 				socket.send("[ready]");
+				this.checkReadyConditions();
 				return true;
 			}
 			case "youAre": { // Indicates if this client is player 0 or 1.
@@ -44,12 +53,13 @@ export class InitState extends Gamestate {
 				return true;
 			}
 			case "username": {
-				window.opponentName = message;
-				draftDeckOwner1.textContent = opponentName;
+				opponentName = message;
 				return true;
 			}
 			case "cardBack": {
-				setCardBackForPlayer(0, message);
+				if (localStorage.getItem("cardBackToggle") == "false") {
+					setCardBackForPlayer(0, message);
+				}
 				return true;
 			}
 			case "ready": {
@@ -64,20 +74,29 @@ export class InitState extends Gamestate {
 	checkReadyConditions() {
 		if (this.opponentReady && youAre !== null) {
 			updateRoomCodeDisplay();
-			gameDiv.removeAttribute("hidden");
+			
+			// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
+			document.getElementById("gameDiv").addEventListener("dragover", function(e) {
+				e.preventDefault();
+			});
+			document.getElementById("gameDiv").addEventListener("drop", function(e) {
+				e.preventDefault();
+			});
 			
 			switch (gameModeSelect.value) {
 				case "normal": {
-					mainGameArea.removeAttribute("hidden");
+					gameState = new DeckState();
 					break;
 				}
 				case "draft": {
-					import("/modules/draftState.js").then(draftModule => {
-						gameState = new draftModule.DraftState();
-					});
+					gameState = new DraftState();
 					break;
 				}
 			}
+			
+			// main screen is no longer needed
+			roomCodeEntry.remove();
+			gameDiv.removeAttribute("hidden");
 		}
 	}
 }

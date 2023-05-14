@@ -13,10 +13,6 @@ document.getElementById("roomCodeRefresh").addEventListener("click", function() 
 	roomCodeInputField.setAttribute("aria-live", "polite");
 });
 
-function cardIdToLocal(cardId) {
-	cardId = parseInt(cardId);
-	return cardId + (cardId % 2? 1 : -1);
-}
 var cardAreaMirrorTable = {
 	"deck0": "deck1",
 	"deck1": "deck0",
@@ -54,9 +50,6 @@ function cardAreaToLocal(cardArea) {
 	return cardAreaMirrorTable[cardArea];
 }
 
-// this makes sure the opponent deck is only modified once it has actually been loaded.
-let opponentDeckPromise = null;
-
 // receiving messages
 function receiveMessage(e) {
 	let message = e.data;
@@ -72,201 +65,14 @@ function receiveMessage(e) {
 			}
 			break;
 		}
-		case "deck": { // initially syncs the opponent deck.
-			opponentDeck = JSON.parse(message);
-			opponentDeckPromise = game.players[0].setDeck(opponentDeck);
-			break;
-		}
-		case "deckOrder": { // opponent shuffled a deck
-			(async() => {
-				await opponentDeckPromise;
-				let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
-				message = message.substr(2);
-				let order = message.split("|").map(i => parseInt(i));
-				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
-				putChatMessage(locale[deck.playerIndex == 1? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
-			})();
-			break;
-		}
-		case "choosePartner": { // opponent selected their partner
-			(async() => {
-				await opponentDeckPromise;
-				field2.src = "images/cardBackFrameP0.png";
-				opponentPartner = cardAreas["deck0"].cards.splice(message, 1)[0];
-				cardAreas["deck0"].updateVisual();
-				doSelectStartingPlayer();
-			})();
-			break;
-		}
-		case "revealPartner": { // opponent revealed their partner
-			field2.src = "images/cardHidden.png";
-			cardAreas["field2"].dropCard(opponentPartner);
-			break;
-		}
-		case "selectPlayer": { // opponent chose the starting player (at random)
-			startingPlayerSelect.style.display = "none";
-			putChatMessage(message == "true"? locale["opponentStarts"] : locale["youStart"], "notice");
-			partnerRevealButtonDiv.style.display = "block";
-			break;
-		}
-		case "grabbedCard": { // opponent picked up a card
-			let cardArea = cardAreas[cardAreaToLocal(message.substr(0, message.indexOf("|")))];
-			let cardIndex = message.substr(message.indexOf("|") + 1);
-			
-			let hiddenGrab = cardArea.isGrabHidden(cardIndex)
-			opponentHeldCard = cardArea.grabCard(cardIndex);
-			opponentCursor.src = hiddenGrab? "images/cardBackFrameP0.png" : opponentHeldCard.getImage();
-			break;
-		}
-		case "droppedCard": { // opponent dropped a card
-			if (message != "") {
-				let cardArea = cardAreaToLocal(message);
-				if (opponentHeldCard.type == "token" && !cardAreas[cardArea].allowTokens) { // no tokens allowed, this'll just vanish the card
-					opponentHeldCard.location?.dragFinish(opponentHeldCard);
-				} else if (cardArea.startsWith("deck")) { // if the card was dropped to deck, don't call the drop function to not prompt the local player with the options
-					// return early if the opponent dropped to deck, so that opponentHeldCard does not get cleared.
-					opponentCursor.src = "images/opponentCursor.png";
-					return;
-				} else {
-					if (!cardAreas[cardArea].dropCard(opponentHeldCard)) {
-						opponentHeldCard.location?.returnCard(opponentHeldCard);
-					}
-				}
-			} else {
-				opponentHeldCard.location?.returnCard(opponentHeldCard);
-			}
-			opponentHeldCard = null;
-			opponentCursor.src = "images/opponentCursor.png";
-			break;
-		}
-		case "deckTop": { // opponent sent their held card to the top of a deck
-			let deck = cardAreas[cardAreaToLocal("deck" + message)];
-			
-			deck.cards.push(opponentHeldCard);
-			opponentHeldCard.location?.dragFinish(opponentHeldCard);
-			opponentHeldCard.location = deck;
-			opponentHeldCard = null;
-			deck.updateVisual();
-			break;
-		}
-		case "deckBottom": { // opponent sent their held card to the bottom of a deck
-			let deck = cardAreas[cardAreaToLocal("deck" + message)];
-			
-			deck.cards.unshift(opponentHeldCard);
-			opponentHeldCard.location?.dragFinish(opponentHeldCard);
-			opponentHeldCard.location = deck;
-			opponentHeldCard = null;
-			deck.updateVisual();
-			break;
-		}
-		case "deckShuffle": { // opponent shuffles their held card into a deck
-			let deck = cardAreas[cardAreaToLocal("deck" + message)];
-			
-			deck.cards.push(opponentHeldCard); // the [deckOrder] message will arrive right after this one.
-			opponentHeldCard.location?.dragFinish(opponentHeldCard);
-			opponentHeldCard.location = deck;
-			opponentHeldCard = null;
-			deck.updateVisual();
-			break;
-		}
-		case "deckCancel": { // opponent cancelled dropping their held card into a deck
-			opponentHeldCard.location?.returnCard(opponentHeldCard);
-			opponentHeldCard = null;
-			break;
-		}
-		case "drawCard": { // opponent drew a card
-			cardAreas["deck0"].draw();
-			break;
-		}
-		case "showDeckTop": { // opponent presented a card
-			let deck = cardAreas[cardAreaToLocal("deck" + message[0])];
-			deck.showTop(0);
-			break;
-		}
-		case "life": { // set opponent's life
-			game.players[0].life = message;
-			updateLifeDisplay(game.players[0]);
-			break;
-		}
-		case "mana": { // set opponent's mana
-			game.players[0].mana = message;
-			updateManaDisplay(game.players[0]);
-			break;
-		}
-		case "hideCursor": { // hide opponent's cursor
-			opponentCursor.setAttribute("hidden", "");
-			break;
-		}
-		case "placeCursor": { // move the opponent's cursor somewhere on the field
-			oppCursorTargetX = message.substr(0, message.indexOf("|")) * -1;
-			oppCursorTargetY = 1 - message.substr(message.indexOf("|") + 1);
-			if (opponentCursor.hidden) {
-				opponentCursor.removeAttribute("hidden");
-				oppCursorX = oppCursorTargetX;
-				oppCursorY = oppCursorTargetY;
-			}
-			break;
-		}
-		case "hideHand": { // opponent hid their hand
-			cardAreas["hand0"].hideCards();
-			break;
-		}
-		case "showHand": { // opponent revealed their hand
-			cardAreas["hand0"].showCards();
-			break;
-		}
-		case "dice": { // opponent rolled a dice with /dice in chat
-			putChatMessage(locale["cardActions"]["I00040"]["opponentRoll"].replace("{#RESULT}", message), "notice");
-			break;
-		}
 		case "quit": { // opponent quit the game (or crashed)
 			socket.close();
 			location.reload();
 			break;
 		}
-		case "revealCard": { // opponent revealed a presented card
-			let cardDiv = presentedCards0.children.item(parseInt(message));
-			cardDiv.src = cardAreas["presentedCards0"].cards[cardDiv.dataset.cardIndex].getImage();
-			cardDiv.dataset.shown = true;
-			break;
-		}
-		case "unrevealCard": { // opponent hid a presented card
-			let cardDiv = presentedCards0.children.item(parseInt(message));
-			cardDiv.src = "images/cardBackFrameP0.png";
-			cardDiv.dataset.shown = false;
-			break;
-		}
-		case "counterAdd": {
-			addCounter(message);
-			break;
-		}
-		case "counterIncrease": {
-			let slotIndex = message.substr(0, message.indexOf("|"));
-			let counterIndex = message.substr(message.indexOf("|") + 1);
-			let counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
-			counter.innerHTML = parseInt(counter.innerHTML) + 1;
-			break;
-		}
-		case "counterDecrease": {
-			let slotIndex = message.substr(0, message.indexOf("|"));
-			let counterIndex = message.substr(message.indexOf("|") + 1);
-			let counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
-			counter.innerHTML = parseInt(counter.innerHTML) - 1;
-			break;
-		}
-		case "counterRemove": {
-			let slotIndex = message.substr(0, message.indexOf("|"));
-			let counterIndex = message.substr(message.indexOf("|") + 1);
-			document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
-			break;
-		}
-		case "createToken": {
-			cardAreas.tokens.createOpponentToken(message);
-			break;
-		}
 		default: {
 			if (!gameState?.receiveMessage(command, message)) {
-				console.log("Received unknown message:\n" + message);
+				console.log("Received unknown message:\nCommand: " + command + "\nMessage: " + message);
 			}
 		}
 	}
@@ -303,28 +109,10 @@ document.getElementById("cancelWaitingBtn").addEventListener("click", function()
 	roomCodeInputField.focus();
 });
 
-// sending cursor updates
-document.getElementById("field").addEventListener("mouseleave", function() {
-	socket.send("[hideCursor]");
-});
-document.getElementById("field").addEventListener("mousemove", function(e) {
-	// check if the normalized cursor position is within the bounds of the visual field
-	if (Math.abs(myCursorX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
-		socket.send("[placeCursor]" + myCursorX + "|" + myCursorY);
-	} else {
-		socket.send("[hideCursor]");
-	}
-});
-
 
 // Functions to sync various parts of gameplay
 
 // initial setup
-function syncDeck() {
-	let message = "[deck]";
-	message += JSON.stringify(loadedDeck);
-	socket.send(message);
-}
 function syncPartnerChoice(partnerPosInDeck) {
 	socket.send("[choosePartner]" + partnerPosInDeck);
 }

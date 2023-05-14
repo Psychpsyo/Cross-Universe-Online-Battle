@@ -5,7 +5,7 @@
 	"enterRoomcode": "Raum-Code:",
 	"rerollRoomcode": "Zufälligen Raum-Code generieren",
 	"connectToRoom": "Verbinden",
-	"waitingForOpponent": "Warte auf den Gegner...",
+	"waitingForOpponent": "Warte auf Gegner...",
 	"cancelWaiting": "Abbrechen",
 	"rulesButton": "Spielregeln",
 	"rulesLink": "https://crossuniverse.net/rules",
@@ -100,6 +100,7 @@
 		"amountTaken": "{#CURRENT}/{#TOTAL} genommen",
 		"finished": "Draft beendet. Ihr könnt das Spiel nun starten.",
 		"startGame": "Spiel Starten",
+		"waitingForOpponent": "Warte auf Gegner...",
 		"deckName": "Draft Deck",
 		"yourDeck": "Dein Deck",
 		"opponentDeck": "Gegnerisches Deck"

@@ -100,6 +100,7 @@
 		"amountTaken": "{#CURRENT}/{#TOTAL} Taken",
 		"finished": "Draft finished. You can start the game now.",
 		"startGame": "Start Game",
+		"waitingForOpponent": "Waiting for Opponent...",
 		"deckName": "Draft Deck",
 		"yourDeck": "Your Deck",
 		"opponentDeck": "Opponent Deck"

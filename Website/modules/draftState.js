@@ -1,11 +1,12 @@
-import {Gamestate} from "/modules/gameState.js";
+import {GameState} from "/modules/gameState.js";
+import {BoardState} from "/modules/boardState.js";
 import {Card} from "/modules/card.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();
 basicFormat.packCount = Math.ceil(basicFormat.deckSize * 2 / basicFormat.cardPicks);
 
-export class DraftState extends Gamestate {
+export class DraftState extends GameState {
 	constructor() {
 		super();
 		this.format = basicFormat;
@@ -14,12 +15,14 @@ export class DraftState extends Gamestate {
 		this.packsOpened = 0;
 		this.currentPlayer = 0;
 		
-		deckDropzone.style.display = "none";
+		this.pressedReady = false;
+		this.opponentReady = false;
+		
 		draftDeckOwner0.textContent = localStorage.getItem("username");
 		if (draftDeckOwner0.textContent == "") {
 			draftDeckOwner0.textContent = locale["draft"]["yourDeck"];
 		}
-		draftDeckOwner1.textContent = locale["draft"]["opponentDeck"];
+		draftDeckOwner1.textContent = opponentName ?? locale["draft"]["opponentDeck"];
 		draftDeckCount0.textContent = "0/" + this.format.deckSize;
 		draftDeckCount1.textContent = "0/" + this.format.deckSize;
 		
@@ -32,6 +35,18 @@ export class DraftState extends Gamestate {
 		if (youAre === 0) {
 			this.rerollCards();
 		}
+		
+		draftStartButton.addEventListener("click", function() {
+			socket.send("[ready]");
+			gameState.pressedReady = true;
+			draftStartButton.textContent = locale["draft"]["waitingForOpponent"];
+			draftStartButton.setAttribute("disabled", "");
+			gameState.checkReadyConditions();
+		});
+		
+		// deck selection elements won't be needed
+		deckSelector.remove();
+		deckDropzone.remove();
 		draftGameSetupMenu.removeAttribute("hidden");
 	}
 	receiveMessage(command, message) {
@@ -45,8 +60,19 @@ export class DraftState extends Gamestate {
 				this.openNewPack();
 				return true;
 			}
+			case "ready": {
+				this.opponentReady = true;
+				this.checkReadyConditions();
+				return true;
+			}
 		}
 		return false;
+	}
+	
+	checkReadyConditions() {
+		if (this.pressedReady && this.opponentReady) {
+			gameState = new BoardState();
+		}
 	}
 	
 	setPlayer(player) {
@@ -149,13 +175,3 @@ export class DraftState extends Gamestate {
 		this.setPlayer(this.currentPlayer + 1);
 	}
 }
-
-draftStartButton.addEventListener("click", function() {
-	// close draft menu
-	draftGameSetupMenu.setAttribute("hidden", "");
-	mainGameArea.removeAttribute("hidden");
-	gameInteractions.removeAttribute("hidden");
-	
-	// time to choose a partner
-	openPartnerSelectMenu();
-});
