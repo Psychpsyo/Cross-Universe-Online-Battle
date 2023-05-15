@@ -2,15 +2,6 @@ html {
 	overflow: hidden;
 }
 
-#deckMakerHeader {
-	text-align: center;
-	height: 1.75em;
-	border-bottom: 2px var(--theme-border-color) solid;
-	line-height: 1.75em;
-	font-weight: bold;
-	background-color: var(--theme-shadow);
-}
-
 h1, h2, h3, h4 {
 	all: unset;
 }
