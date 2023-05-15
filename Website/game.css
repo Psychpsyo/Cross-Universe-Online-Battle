@@ -90,7 +90,7 @@
 	border-right: none;
 }
 
-#cardDetailsControl > div:last-child {
+#cardDetailsControl > :last-child {
 	border-top-right-radius: 1em;
 }
 
