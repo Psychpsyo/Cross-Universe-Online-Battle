@@ -211,7 +211,7 @@ function previewCard(card) {
 	cardDetailsName.textContent = card.getName();
 	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? locale["cardDetailsQuestionMark"] : card.getLevel()).replace("{#CARDTYPE}", locale[card.getCardType() + "CardDetailType"]);
 	if (card.getTypes().length > 0) {
-		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["type" + type]).join(locale["typeSeparator"]);
+		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	} else {
 		cardDetailsTypes.textContent = locale["typeless"];
 	}

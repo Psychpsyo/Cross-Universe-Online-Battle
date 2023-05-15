@@ -30,8 +30,10 @@ export class InitState extends GameState {
 		waitingForOpponentSpan.removeAttribute("hidden");
 		// refresh the "Waiting for Opponent" text so screen readers read it out.
 		setTimeout(() => {
-			trWaitingForOpponent.textContent = locale["waitingForOpponent"];
-			cancelWaitingBtn.focus();
+			if (typeof trWaitingForOpponent !== undefined) {
+				trWaitingForOpponent.textContent = locale["waitingForOpponent"];
+				cancelWaitingBtn.focus();
+			}
 		}, 100);
 	}
 	
@@ -94,7 +96,7 @@ export class InitState extends GameState {
 			response.forEach(card => {
 				card.imageSrc = getCardImageFromID(card.cardID);
 				game.cardData[card.cardID] = card;
-				cardAreas["tokens"].cards.push(new cardModule.Card(game, card.cardID));
+				cardAreas["tokens"].cards.push(new Card(game, card.cardID));
 			});
 			this.gameSetup = true;
 		});

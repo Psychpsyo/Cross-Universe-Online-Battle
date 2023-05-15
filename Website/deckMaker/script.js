@@ -17,50 +17,6 @@ fetch("data/contestWinnerTags.json")
 // load locale files
 let locale = {};
 
-//used to sort japanese type list by Gojuon
-let jpTypesHiragana = {
-	"Angel": "てんし",
-	"Armor": "よろい",
-	"Beast": "けもの",
-	"Bird": "とり",
-	"Book": "しょもつ",
-	"Boundary": "けっかい",
-	"Bug": "むし",
-	"Chain": "くさり",
-	"Curse": "のろい",
-	"Dark": "やみ",
-	"Demon": "あっき",
-	"Dragon": "どらごん",
-	"Earth": "ち",
-	"Electric": "いかづち",
-	"Figure": "にんぎょう",
-	"Fire": "ほのお",
-	"Fish": "さかな",
-	"Ghost": "しりょう",
-	"Gravity": "じゅうりょく",
-	"Ice": "こおり",
-	"Illusion": "げんそう",
-	"Katana": "かたな",
-	"Landmine": "じらい",
-	"Light": "ひかり",
-	"Machine": "きかい",
-	"Mage": "まじゅつし",
-	"Medicine": "くすり",
-	"Myth": "しんわ",
-	"Plant": "しょくぶつ",
-	"Psychic": "ぴーえすあい",
-	"Rock": "がんせき",
-	"Samurai": "さむらい",
-	"Shield": "たて",
-	"Spirit": "せいれい",
-	"Structure": "けんぞうぶつ",
-	"Sword": "けん",
-	"Warrior": "せんし",
-	"Water": "みず",
-	"Wind": "かぜ",
-	"typeless": "ん"
-}
-
 // load locale and translate page
 document.documentElement.lang = localStorage.getItem("language");
 fetch("../data/locales/" + localStorage.getItem("language") + ".json")
@@ -142,13 +98,10 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	document.getElementById("cardSearchDeckLimitLabel").textContent = locale["deckMaker"]["searchMenu"]["deckLimit"];
 	document.getElementById("cardSearchSortLabel").textContent = locale["deckMaker"]["searchMenu"]["sortBy"];
 	
-	//sort the types alphabetically or by Gojuon
+	//sort the types alphabetically
 	let sortedOptions = Array.from(document.getElementById("cardSearchTypeInput").children).sort(function(a, b) {
-		if (localStorage.getItem("language") == "ja") {
-			return jpTypesHiragana[a.value] > jpTypesHiragana[b.value]? 1 : 0;
-		} else {
-			return a.value > b.value? 1 : 0;
-		}
+		let typeSortNames = locale["optional"]["typeSortNames"] ?? locale["types"];
+		return a.value === "typeless" || typeSortNames[a.value] > typeSortNames[b.value]? 1 : 0;
 	});
 	
 	sortedOptions.forEach(typeOption => {
@@ -157,7 +110,7 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	
 	//label the types
 	Array.from(document.getElementById("cardSearchTypeInput").children).forEach(typeOption => {
-		typeOption.innerHTML = typeOption.value == "typeless"? locale["typeless"] : locale["type" + typeOption.value];
+		typeOption.innerHTML = typeOption.value == "typeless"? locale["typeless"] : locale["types"][typeOption.value];
 	});
 	
 	//card info panel
@@ -222,7 +175,7 @@ function cardToAltText(card) {
 		.replace("{#CARDTYPE}", locale[card.cardType + "CardDetailType"])
 		.replace("{#ATK}", card.attack == -1? locale["cardDetailsQuestionMark"] : card.attack)
 		.replace("{#DEF}", card.defense == -1? locale["cardDetailsQuestionMark"] : card.defense)
-		.replace("{#TYPES}", card.types.length > 0? card.types.map(type => locale["type" + type]).join(locale["typeSeparator"]) : locale["typeless"])
+		.replace("{#TYPES}", card.types.length > 0? card.types.map(type => locale["types"][type]).join(locale["typeSeparator"]) : locale["typeless"])
 		.replace("{#EFFECTS}", card.effectsPlain);
 }
 
