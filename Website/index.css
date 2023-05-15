@@ -56,6 +56,7 @@ a {
 }
 
 #mainHeaderHolder > header > h1 {
+	all: unset;
 	font-weight: bold;
 }
 

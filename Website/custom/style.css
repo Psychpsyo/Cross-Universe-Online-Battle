@@ -1,0 +1,79 @@
+body {
+	max-height: 100vh;
+	overflow: hidden;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+}
+
+main {
+	display: flex;
+	min-height: 0;
+	align-items: stretch;
+}
+
+#editorSection {
+	flex-grow: 1;
+}
+
+#savedCardsSection {
+	overflow-y: scroll;
+	background-color: var(--theme-shadow);
+	border-left: 2px var(--theme-border-color) solid;
+}
+
+#savedCardsList {
+	all: unset;
+	display: block;
+	width: 10em;
+	padding: .5em;
+	line-height: 0;
+}
+
+.listCard {
+	position: relative;
+	max-width: 100%;
+	aspect-ratio: 813 / 1185;
+	z-index: 0; /* create stacking context (in combination with position: relative) */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: end;
+}
+
+.listCard canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -10;
+}
+
+.listCard button {
+	display: none;
+	margin-bottom: .75em;
+	width: 75%;
+	background-color: #0008;
+	transition: background-color .1s;
+	color: #eee;
+	border: none;
+	border-radius: 1em;
+	font-size: 1em;
+}
+
+.listCard:hover button {
+	display: block;
+}
+
+.listCard button:hover {
+	background-color: #4448;
+}
+
+.listCard button:active {
+	background-color: #0008;
+}
+
+.listCard:not(:last-child) {
+	margin-bottom: .5em;
+}

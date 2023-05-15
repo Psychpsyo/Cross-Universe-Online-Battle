@@ -5,10 +5,6 @@ main {
 	background-color: var(--theme-shadow);
 }
 
-h1 {
-	all: unset;
-}
-
 section {
 	padding-bottom: 2.5em;
 }

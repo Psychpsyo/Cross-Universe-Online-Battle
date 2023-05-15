@@ -9,28 +9,40 @@
 		
 		<link rel="icon" type="image/png" href="../images/favicon.png">
 		
-		<!-- <link rel="stylesheet" href="../index.css"> -->
+		<link rel="stylesheet" href="index.css">
+		<link rel="stylesheet" href="/custom/style.css">
 	</head>
 	<body>
-		<label for="cardName">Name:</label> <input type="text" id="cardName"><br>
-		<label for="cardLevel">Level:</label> <input type="number" id="cardLevel" min="-1" value="-1"><br>
-		<label for="cardAttack">Attack:</label> <input type="number" id="cardAttack" min="-1" value="-1"><br>
-		<label for="cardDefense">Defense:</label> <input type="number" id="cardDefense" min="-1" value="-1"><br>
-		<label for="cardType">Card Type:</label> <select id="cardType">
-			<option value="unit">Unit</option>
-			<option value="standardSpell">Standard Spell</option>
-			<option value="continuousSpell">Continuous Spell</option>
-			<option value="enchantSpell">Enchant Spell</option>
-			<option value="standardItem">Standard Item</option>
-			<option value="continuousItem">Continuous Item</option>
-			<option value="equipableItem">Equipable Item</option>
-			<option value="token">Token</option>
-		</select><br>
-		<button id="saveButton">Save Card</button><br>
-		<br>
-		
-		<canvas id="cardCanvas"></canvas>
-		
+		<div id="mainHeaderHolder">
+			<header><h1 id="title">Custom Cards</h1></header>
+		</div>
+		<main>
+			<section id="editorSection">
+				<label for="cardName">Name:</label> <input type="text" id="cardName"><br>
+				<label for="cardLevel">Level:</label> <input type="number" id="cardLevel" min="-1" value="-1"><br>
+				<label for="cardAttack">Attack:</label> <input type="number" id="cardAttack" min="-1" value="-1"><br>
+				<label for="cardDefense">Defense:</label> <input type="number" id="cardDefense" min="-1" value="-1"><br>
+				<label for="cardType">Card Type:</label> <select id="cardType">
+					<option value="unit">Unit</option>
+					<option value="standardSpell">Standard Spell</option>
+					<option value="continuousSpell">Continuous Spell</option>
+					<option value="enchantSpell">Enchant Spell</option>
+					<option value="standardItem">Standard Item</option>
+					<option value="continuousItem">Continuous Item</option>
+					<option value="equipableItem">Equipable Item</option>
+					<option value="token">Token</option>
+				</select><br>
+				<button id="saveButton">Save Card</button><br>
+				<br>
+				
+				<canvas id="cardCanvas"></canvas>
+			</section>
+			<section id="savedCardsSection">
+				<ul id="savedCardsList">
+					
+				</ul>
+			</section>
+		</main>
 		<script src="/scripts/localStorageSetup.js"></script>
 		<script src="/custom/index.js" type="module"></script>
 	</body>

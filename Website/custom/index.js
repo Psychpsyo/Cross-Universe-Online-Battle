@@ -4,12 +4,14 @@ function getCard() {
 	let card = {
 		"cardType": cardType.value,
 		"name": cardName.value,
-		"level": cardLevel.value == ""? -1 : cardLevel.value,
-		"attack": cardAttack.value,
-		"defense": cardDefense.value,
+		"level": cardLevel.value == ""? -1 : cardLevel.value
 		"types": [],
 		"effects": []
 	};
+	if (cardType.value == "unit" || cardType.value == "token") {
+		card.attack = cardAttack.value;
+		card.defense = cardDefense.value;
+	}
 	if (localStorage.getItem("username")) {
 		card.author = localStorage.getItem("username");
 	}
@@ -35,3 +37,22 @@ function saveCard() {
 saveButton.addEventListener("click", saveCard);
 
 updateCard();
+
+JSON.parse(localStorage.getItem("customCards")).forEach(card => {
+	let listCard = document.createElement("div");
+	listCard.classList.add("listCard")
+	
+	let canvas = document.createElement("canvas");
+	renderCard(card, canvas);
+	
+	let editButton = document.createElement("button");
+	editButton.textContent = "Edit";
+	
+	let deleteButton = document.createElement("button");
+	deleteButton.textContent = "Delete";
+	
+	listCard.appendChild(canvas);
+	listCard.appendChild(editButton);
+	listCard.appendChild(deleteButton);
+	savedCardsList.appendChild(listCard);
+});
