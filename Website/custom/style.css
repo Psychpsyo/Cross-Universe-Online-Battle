@@ -14,12 +14,32 @@ main {
 
 #editorSection {
 	flex-grow: 1;
+	min-width: 0;
+	display: flex;
+	padding: .5em;
+	gap: .75em;
+}
+
+#inputFields {
+	flex-grow: 1;
+	min-width: 0;
+}
+
+#inputFields > div {
+	display: flex;
+	justify-content: space-between;
+	padding: .25em;
+}
+
+#inputFields > div:nth-child(odd) {
+	background-color: var(--theme-shadow);
 }
 
 #savedCardsSection {
 	overflow-y: scroll;
 	background-color: var(--theme-shadow);
 	border-left: 2px var(--theme-border-color) solid;
+	min-width: fit-content;
 }
 
 #savedCardsList {
@@ -51,11 +71,12 @@ main {
 }
 
 .listCard button {
-	display: none;
 	margin-bottom: .75em;
 	width: 75%;
+	filter: opacity(0);
 	background-color: #0008;
-	transition: background-color .1s;
+	transition-property: background-color, filter;
+	transition-duration: .1s, .35s;
 	color: #eee;
 	border: none;
 	border-radius: 1em;
@@ -63,7 +84,7 @@ main {
 }
 
 .listCard:hover button {
-	display: block;
+	filter: opacity(1);
 }
 
 .listCard button:hover {

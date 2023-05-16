@@ -475,6 +475,37 @@
 		"Bird": "Bird"
 	},
 	
+	"customCards": {
+		"title": "Custom Karten",
+		"cardName": "Name:",
+		"cardLevel": "Level:",
+		"cardAttack": "Angriff:",
+		"cardDefense": "Verteidigung:",
+		"cardType": "Art:",
+		"save": "Karte Speichern",
+		"createNew": "Neu Erstellen",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"unsavedChanges": "Es gibt ungespeicherte Änderungen.\nWenn du fortführst, werden diese verloren gehen.",
+		"reallyDelete": "Möchtest du '{#CARDNAME}' wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.\n'{#CARDNAME}' wird für immer verloren sein.",
+		"doesntExist": "Die gewählte Karte existiert nicht mehr und konnte deshalf nicht geladen werden.",
+		
+		"renderer": {
+			"attack": "Attack:",
+			"defense": "Defense:",
+			
+			"standardSpell": "Standard Spell",
+			"enchantSpell": "Enchant Spell",
+			"continuousSpell": "Continuous Spell",
+			"standardItem": "Standard Item",
+			"equipableItem": "Equipable Item",
+			"continuousItem": "Continuous Item",
+			
+			"ideaCredit": "Idee: ",
+			"tokenNotice": "※Token cards may not be added to decks."
+		}
+	},
+	
 	"cardActions": {
 		"I00040": {
 			"roll": "Würfeln",

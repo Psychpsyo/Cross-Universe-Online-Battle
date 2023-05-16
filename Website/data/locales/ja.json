@@ -475,6 +475,40 @@
 		"Bird": "鳥"
 	},
 	
+	"customCards": {
+		"title": "Custom Cards",
+		
+		"cardName": "名前：",
+		"cardLevel": "レベル：",
+		"cardAttack": "攻撃力：",
+		"cardDefense": "防御力：",
+		"cardType": "種類：",
+		
+		"save": null,
+		"createNew": null,
+		"edit": null,
+		"delete": null,
+		
+		"unsavedChanges": null,
+		"reallyDelete": null,
+		"doesntExist": null,
+		
+		"renderer": {
+			"attack": "攻撃力",
+			"defense": "防御力",
+			
+			"standardSpell": "通常スペル",
+			"enchantSpell": "付与スペル",
+			"continuousSpell": "永続スペル",
+			"standardItem": "通常アイテム",
+			"equipableItem": "装備アイテム",
+			"continuousItem": "永続アイテム",
+			
+			"ideaCredit": "原案：",
+			"tokenNotice": "※トークンカードはデッキに入れる事が出来ません。"
+		}
+	},
+	
 	"cardActions": {
 		"I00040": {
 			"roll": "振る",

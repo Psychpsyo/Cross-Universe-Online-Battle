@@ -1,3 +1,5 @@
+import {locale} from "/modules/locale.js";
+
 function loadImage(imageUrl) {
 	return new Promise((resolve, reject) => {
 		let img = new Image();
@@ -29,120 +31,6 @@ let bracketRightMiddle = loadImage("/custom/images/bracketRightMiddle.png");
 let bracketRightBottom = loadImage("/custom/images/bracketRightBottom.png");
 
 const lineGap = 3;
-
-// TODO: load these from regular locale files!
-let localeStrings = {
-	"en": {
-		"attack": "Attack:",
-		"defense": "Defense:",
-		
-		"standardSpell": "Standard Spell",
-		"enchantSpell": "Enchant Spell",
-		"continuousSpell": "Continuous Spell",
-		"standardItem": "Standard Item",
-		"equipableItem": "Equipable Item",
-		"continuousItem": "Continuous Item",
-		
-		"ideaCredit": "Idea: ",
-		"tokenNotice": "※Token cards may not be added to decks.",
-		
-		"typeSeparator": ", ",
-		"typePsychic": "Psychic",
-		"typeDragon": "Dragon",
-		"typeFigure": "Figure",
-		"typeSamurai": "Samurai",
-		"typeLight": "Light",
-		"typeKatana": "Katana",
-		"typeSword": "Sword",
-		"typeCurse": "Curse",
-		"typeEarth": "Earth",
-		"typeLandmine": "Landmine",
-		"typeAngel": "Angel",
-		"typeRock": "Rock",
-		"typeIllusion": "Illusion",
-		"typeStructure": "Structure",
-		"typeDemon": "Demon",
-		"typeWarrior": "Warrior",
-		"typeBook": "Book",
-		"typePlant": "Plant",
-		"typeMachine": "Machine",
-		"typeGhost": "Ghost",
-		"typeWater": "Water",
-		"typeIce": "Ice",
-		"typeFire": "Fire",
-		"typeBeast": "Beast",
-		"typeShield": "Shield",
-		"typeMyth": "Myth",
-		"typeSpirit": "Spirit",
-		"typeBoundary": "Boundary",
-		"typeMedicine": "Medicine",
-		"typeBug": "Bug",
-		"typeGravity": "Gravity",
-		"typeChain": "Chain",
-		"typeArmor": "Armor",
-		"typeDark": "Dark",
-		"typeElectric": "Electric",
-		"typeWind": "Wind",
-		"typeMage": "Mage",
-		"typeFish": "Fish",
-		"typeBird": "Bird"
-	},
-	"ja": {
-		"attack": "攻撃力",
-		"defense": "防御力",
-		
-		"standardSpell": "通常スペル",
-		"enchantSpell": "付与スペル",
-		"continuousSpell": "永続スペル",
-		"standardItem": "通常アイテム",
-		"equipableItem": "装備アイテム",
-		"continuousItem": "永続アイテム",
-		
-		"ideaCredit": "原案：",
-		"tokenNotice": "※トークンカードはデッキに入れる事が出来ません。",
-		
-		"typeSeparator": ",",
-		"typePsychic": "PSI",
-		"typeDragon": "ドラゴン",
-		"typeFigure": "人形",
-		"typeSamurai": "侍",
-		"typeLight": "光",
-		"typeKatana": "刀",
-		"typeSword": "剣",
-		"typeCurse": "呪い",
-		"typeEarth": "地",
-		"typeLandmine": "地雷",
-		"typeAngel": "天使",
-		"typeRock": "岩石",
-		"typeIllusion": "幻想",
-		"typeStructure": "建造物",
-		"typeDemon": "悪鬼",
-		"typeWarrior": "戦士",
-		"typeBook": "書物",
-		"typePlant": "植物",
-		"typeMachine": "機械",
-		"typeGhost": "死霊",
-		"typeWater": "水",
-		"typeIce": "氷",
-		"typeFire": "炎",
-		"typeBeast": "獣",
-		"typeShield": "盾",
-		"typeMyth": "神話",
-		"typeSpirit": "精霊",
-		"typeBoundary": "結界",
-		"typeMedicine": "薬",
-		"typeBug": "虫",
-		"typeGravity": "重力",
-		"typeChain": "鎖",
-		"typeArmor": "鎧",
-		"typeDark": "闇",
-		"typeElectric": "雷",
-		"typeWind": "風",
-		"typeMage": "魔術師",
-		"typeFish": "魚",
-		"typeBird": "鳥"
-	}
-}
 
 // Recursively formats the effect tree from a card's data to a string with proper new lines and indentation.
 // fontSize is used to determine when line breaks should be inserted
@@ -246,7 +134,7 @@ async function renderCard(card, canvas) {
 	ctx.fillText(card.name, 108, 135);
 	
 	// write type
-	let typeString = card.types.map(type => localeStrings[language]["type" + type]).join(localeStrings[language]["typeSeparator"]);
+	let typeString = card.types.map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	fontSize = 49;
 	while (ctx.measureText(typeString).width > 597) {
 		fontSize--;
@@ -282,19 +170,19 @@ async function renderCard(card, canvas) {
 	if (card.cardType == "token") {
 		ctx.font = "25px 'Yu Mincho'";
 		ctx.textAlign = "center";
-		ctx.fillText(localeStrings[language]["tokenNotice"], 406, 1045);
+		ctx.fillText(locale["customCards"]["renderer"]["tokenNotice"], 406, 1045);
 	} else if (card.author) {
 		ctx.font = "23px 'Yu Mincho'";
 		ctx.textAlign = "right";
-		ctx.fillText(localeStrings[language]["ideaCredit"] + card.author, 707, 1048);
+		ctx.fillText(locale["customCards"]["renderer"]["ideaCredit"] + card.author, 707, 1048);
 	}
 	
 	// write bottom section
 	ctx.font = "35px 'Yu Gothic UI'";
 	if (card.cardType == "unit" || card.cardType == "token") {
 		ctx.textAlign = "left";
-		ctx.fillText(localeStrings[language]["attack"], 104, 1117);
-		ctx.fillText(localeStrings[language]["defense"], 415, 1117);
+		ctx.fillText(locale["customCards"]["renderer"]["attack"], 104, 1117);
+		ctx.fillText(locale["customCards"]["renderer"]["defense"], 415, 1117);
 		
 		ctx.textAlign = "right";
 		ctx.fillText(card.attack < 0? "？" : card.attack, 392 + (card.attack < 0? 8 : 0), 1117);
@@ -302,7 +190,7 @@ async function renderCard(card, canvas) {
 		ctx.fillText(card.defense < 0? "？" : card.defense, 708 + (card.defense < 0? 8 : 0), 1117);
 	} else {
 		ctx.textAlign = "center";
-		ctx.fillText(localeStrings[language][card.cardType], 406, 1117);
+		ctx.fillText(locale["customCards"]["renderer"][card.cardType], 406, 1117);
 	}
 }
 

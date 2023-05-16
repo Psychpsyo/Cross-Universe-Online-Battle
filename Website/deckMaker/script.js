@@ -702,11 +702,7 @@ document.getElementById("dotDeckExportBtn").addEventListener("click", function()
 	let downloadElement = document.createElement("a");
 	downloadElement.href = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(deckObject));
 	downloadElement.download = deckObject.Name + ".deck";
-	downloadElement.style.display = "none";
-	
-	document.body.appendChild(downloadElement);
 	downloadElement.click();
-	downloadElement.remove();
 });
 
 // recent card hiding

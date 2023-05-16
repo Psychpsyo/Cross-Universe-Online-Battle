@@ -475,6 +475,40 @@
 		"Bird": "Bird"
 	},
 	
+	"customCards": {
+		"title": "Custom Cards",
+		
+		"cardName": "Name:",
+		"cardLevel": "Level:",
+		"cardAttack": "Attack:",
+		"cardDefense": "Defense:",
+		"cardType": "Card Type:",
+		
+		"save": "Save Card",
+		"createNew": "Create New",
+		"edit": "Edit",
+		"delete": "Delete",
+		
+		"unsavedChanges": "You currently have unsaved changes.\nIf you proceed, those changes will be lost.",
+		"reallyDelete": "Do you really want to delete '{#CARDNAME}'?\nThis action cannot be undone.\n'{#CARDNAME}' will be gone forever.",
+		"doesntExist": "The selected card doesn't exist anymore and couldn't be loaded.",
+		
+		"renderer": {
+			"attack": "Attack:",
+			"defense": "Defense:",
+			
+			"standardSpell": "Standard Spell",
+			"enchantSpell": "Enchant Spell",
+			"continuousSpell": "Continuous Spell",
+			"standardItem": "Standard Item",
+			"equipableItem": "Equipable Item",
+			"continuousItem": "Continuous Item",
+			
+			"ideaCredit": "Idea: ",
+			"tokenNotice": "※Token cards may not be added to decks."
+		}
+	},
+	
 	"cardActions": {
 		"I00040": {
 			"roll": "Roll",
