@@ -346,7 +346,7 @@
 			"deckLimitLess": "less",
 			"deckLimitMore": "more",
 			"deckLimitInfinite": "∞",
-			"sortBy": "Sort by",
+			"sortBy": "Sort by:",
 			"sortByRelevancy": "relevancy",
 			"sortByLevel": "level",
 			"sortByName": "name",

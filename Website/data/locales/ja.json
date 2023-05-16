@@ -122,78 +122,78 @@
 	"unitAltText": "{#NAME}、レベル{#LEVEL}{#CARDTYPE}、\n{#ATK}攻撃力、{#DEF}防御力、\n{#TYPES}、\n効果：\n{#EFFECTS}",
 	
 	"settings": {
-		"title": "Settings",
+		"title": null,
 		
 		"general": {
-			"title": "General",
+			"title": null,
 			"language": "言語：",
 			"languageWarnings": {
-				"incomplete": "This language might be incomplete. Click here to help out.",
-				"noRules": "The game rules are not available in this language.",
-				"noCards": "The cards are not available in this language. English cards will be shown.",
-				"partialCards": "Not all cards are available in this language. Missing cards will be in English."
+				"incomplete": null,
+				"noRules": null,
+				"noCards": null,
+				"partialCards": null
 			},
-			"languageWarningName": "Note:",
-			"partnerChoice": "Always give Partner Choice",
-			"autoClosePreview": "Close Card Preview When Clicking off of It"
+			"languageWarningName": null,
+			"partnerChoice": null,
+			"autoClosePreview": null
 		},
 		
 		"profile": {
-			"title": "Profile",
-			"username": "Your Username:",
-			"usernamePlaceholder": "No username set.",
-			"cardBackLink": "Custom Card Back Link:",
-			"cardBackLinkPlaceholder": "No card back set."
+			"title": null,
+			"username": null,
+			"usernamePlaceholder": null,
+			"cardBackLink": null,
+			"cardBackLinkPlaceholder": null
 		},
 		
 		"customization": {
-			"title": "Customization",
-			"fieldLabels": "Show Field Labels",
-			"disableCardBacks": "Disable Opponent Card Backs",
-			"leftField": "Place Field on The Left Side of your Screen",
-			"theme": "Theme:",
+			"title": null,
+			"fieldLabels": null,
+			"disableCardBacks": null,
+			"leftField": null,
+			"theme": null,
 			"themes": {
-				"default": "Default",
-				"light": "Light",
+				"default": null,
+				"light": null,
 				"worldTree": "神聖樹",
-				"deepSea": "Deep Sea"
+				"deepSea": null
 			}
 		},
 		
 		"accessibility": {
-			"title": "Accessibility",
+			"title": null,
 			"font": "フォント：",
 			"fonts": {
-				"default": "Default",
+				"default": null,
 				"atkinsonHyperlegible": "Atkinson Hyperlegible",
 				"openDyslexic": "OpenDyslexic",
 				"comicSans": "Comic Sans",
-				"custom": "Custom"
+				"custom": null
 			},
-			"customFont": "Custom Font Name:",
-			"customFontPlaceholder": "No custom font selected."
+			"customFont": null,
+			"customFontPlaceholder": null
 		},
 		
 		"hotkeys": {
-			"title": "Hotkeys",
-			"resetHotkeys": "Reset Hotkeys",
-			"pressKey": "Press Key",
+			"title": null,
+			"resetHotkeys": null,
+			"pressKey": null,
 			"keyCtrl": "Ctrl",
 			"keyShift": "Shift",
 			"keyAlt": "Alt",
-			"showYourDiscardPile": "Show Your Discard Pile:",
-			"showOpponentDiscardPile": "Show Opponent Discard Pile:",
-			"showYourExileZone": "Show Your Exile Zone:",
-			"showOpponentExileZone": "Show Opponent Exile Zone:",
-			"searchYourDeck": "Search Your Deck:",
-			"tokenSelector": "Open Token Selector:",
-			"showField": "Show Field:",
-			"destroyGrabbedToken": "Destroy Grabbed Token:",
-			"writeChatMessage": "Write Chat Message:",
-			"drawCard": "Draw Card:",
-			"shuffleDeck": "Shuffle Your Deck:",
-			"showDeckTop": "View Top Card of Deck:",
-			"previewHandCard": "Preview Hand Cards:",
+			"showYourDiscardPile": null,
+			"showOpponentDiscardPile": null,
+			"showYourExileZone": null,
+			"showOpponentExileZone": null,
+			"searchYourDeck": null,
+			"tokenSelector": null,
+			"showField": null,
+			"destroyGrabbedToken": null,
+			"writeChatMessage": null,
+			"drawCard": null,
+			"shuffleDeck": null,
+			"showDeckTop": null,
+			"previewHandCard": null,
 			
 			"keys": {
 				"KeyA": "A",
@@ -252,10 +252,10 @@
 				"End": "End",
 				"PageDown": "PgDown",
 				
-				"ArrowLeft": "Left",
-				"ArrowRight": "Right",
-				"ArrowUp": "Up",
-				"ArrowDown": "Down",
+				"ArrowLeft": null,
+				"ArrowRight": null,
+				"ArrowUp": null,
+				"ArrowDown": null,
 				
 				"Numpad0": "Num0",
 				"Numpad1": "Num1",
@@ -306,14 +306,14 @@
 	},
 	
 	"deckMaker": {
-		"title": "Deck Creator",
+		"title": null,
 		"deck": "デッキ",
 		"search": "サーチ",
 		
-		"searchResults": "Search Results",
-		"unitTokenColumn": "Unit/Token Column",
-		"spellColumn": "Spell Column",
-		"itemColumn": "Item Column",
+		"searchResults": null,
+		"unitTokenColumn": null,
+		"spellColumn": null,
+		"itemColumn": null,
 		"units": "ユニット",
 		"tokens": "トークン",
 		"standardSpells": "通常スペル",
@@ -327,83 +327,83 @@
 			"title": "カードサーチ",
 			"search": "サーチ",
 			"cardName": "カード名：",
-			"cardNamePlaceholder": "Search by card name",
+			"cardNamePlaceholder": null,
 			"cardId": "カードID：",
-			"cardIdPlaceholder": "Search by card ID",
+			"cardIdPlaceholder": null,
 			"attack": "攻撃力：",
 			"defense": "防御力：",
-			"atkDefMinimum": "Minimum",
-			"atkDefMaximum": "Maximum",
-			"textBox": "Text Box：",
-			"textBoxPlaceholder": "Search the text box of the card",
+			"atkDefMinimum": null,
+			"atkDefMaximum": null,
+			"textBox": null,
+			"textBoxPlaceholder": null,
 			"types": "タイプ：",
-			"characters": "Characters：",
-			"charactersPlaceholder": "Search by visible characters",
-			"charactersMouseover": "Separate multiple characters with commas. (i.e. Iruyanka, Cheering Angel)",
-			"deckLimit": "Deck Limit：",
-			"deckLimitAny": "any",
+			"characters": null,
+			"charactersPlaceholder": null,
+			"charactersMouseover": null,
+			"deckLimit": null,
+			"deckLimitAny": null,
 			"deckLimitThree": "3",
-			"deckLimitLess": "less",
-			"deckLimitMore": "more",
+			"deckLimitLess": null,
+			"deckLimitMore": null,
 			"deckLimitInfinite": "∞",
-			"sortBy": "Sort by",
-			"sortByRelevancy": "relevancy",
+			"sortBy": null,
+			"sortByRelevancy": null,
 			"sortByLevel": "レベル",
 			"sortByName": "名前",
-			"sortByReleaseDate": "release date",
+			"sortByReleaseDate": null,
 			"sortByCardId": "カードID",
 			"sortByAttack": "攻撃力",
 			"sortByDefense": "防御力"
 		},
 		
 		"cardInfo": {
-			"title": "Card Info",
-			"generalSection": "General Info",
-			"released": "Released：",
+			"title": null,
+			"generalSection": null,
+			"released": null,
 			"illustrator": "イラストレイター：",
 			"idea": "原案：",
-			"mentionedCards": "Mentioned Cards：",
-			"mentionedOn": "Mentioned On：",
-			"visibleCards": "Visible Cards：",
-			"visibleOn": "Appears On：",
-			"toDeck": "Add Card To Deck"
+			"mentionedCards": null,
+			"mentionedOn": null,
+			"visibleCards": null,
+			"visibleOn": null,
+			"toDeck": null
 		},
 		
 		"deckMenu": {
-			"title": "Deck Overview",
-			"cardListTitle": "Card List",
-			"detailsTitle": "Details",
-			"recentCardsTitle": "Recent Cards",
+			"title": null,
+			"cardListTitle": null,
+			"detailsTitle": null,
+			"recentCardsTitle": null,
 			
 			"name": "デッキ名：",
-			"namePlaceholder": "New Deck",
+			"namePlaceholder": null,
 			"description": "説明文：",
 			"partner": "パートナー：",
 			
-			"cardTotal": "Card Total:",
+			"cardTotal": null,
 			"unitTotal": "ユニット：",
 			"spellTotal": "スペル：",
 			"itemTotal": "アイテム：",
 			
 			"warnings": {
-				"title": "Warnings:",
-				"cardMinimum": "A deck must have at least 30 cards.",
-				"cardMaximum": "A deck must have at most 50 cards.",
-				"needsUnit": "A deck needs to have a unit.",
-				"noTokens": "A deck may not contain any Tokens.",
-				"noPartner": "To export as .deck, you must select a partner."
+				"title": null,
+				"cardMinimum": null,
+				"cardMaximum": null,
+				"needsUnit": null,
+				"noTokens": null,
+				"noPartner": null
 			},
 			
-			"levelDistribution": "Level Distribution:",
-			"options": "Options",
-			"exportDeck": "Export (.deck)",
-			"importDeck": "Import Deck",
-			"drawStartingHand": "Draw Starting Hand"
+			"levelDistribution": null,
+			"options": null,
+			"exportDeck": null,
+			"importDeck": null,
+			"drawStartingHand": null
 		},
 		
 		"startingHandGenerator": {
-			"title": "Starting Hand Generator",
-			"redraw": "Redraw"
+			"title": null,
+			"redraw": null
 		}
 	},
 	
@@ -476,7 +476,7 @@
 	},
 	
 	"customCards": {
-		"title": "Custom Cards",
+		"title": null,
 		
 		"cardName": "名前：",
 		"cardLevel": "レベル：",

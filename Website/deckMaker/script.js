@@ -1,138 +1,115 @@
+import {generateStartingHand} from "/deckMaker/startingHands.js";
+import {locale} from "/modules/locale.js";
+
 let shiftHeld = false;
-//load illustrator tags
-let illustratorTags = {};
-fetch("data/illustratorTags.json")
-.then(response => response.text())
-.then(response => {
-	illustratorTags = JSON.parse(response);
-});
-//load contest winner tags
-let contestWinnerTags = {};
-fetch("data/contestWinnerTags.json")
-.then(response => response.text())
-.then(response => {
-	contestWinnerTags = JSON.parse(response);
+//load illustrator & contest winner tags
+let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
+let contestWinnerTags = await fetch("data/contestWinnerTags.json").then(async response => await response.json());
+
+// translate page
+// main section
+document.getElementById("deckCreatorTitle").textContent = locale["deckMaker"]["title"];
+document.getElementById("deckMakerDeckButton").textContent = locale["deckMaker"]["deck"];
+document.getElementById("deckMakerSearchButton").textContent = locale["deckMaker"]["search"];
+
+document.getElementById("deckMakerPanels").setAttribute("aria-label", locale["deckMaker"]["searchResults"]);
+document.getElementById("deckMakerUnits").setAttribute("aria-label", locale["deckMaker"]["unitTokenColumn"]);
+document.getElementById("deckMakerSpells").setAttribute("aria-label", locale["deckMaker"]["spellColumn"]);
+document.getElementById("deckMakerItems").setAttribute("aria-label", locale["deckMaker"]["itemColumn"]);
+
+document.getElementById("unitHeader").textContent = locale["deckMaker"]["units"];
+document.getElementById("tokenHeader").textContent = locale["deckMaker"]["tokens"];
+document.getElementById("standardSpellHeader").textContent = locale["deckMaker"]["standardSpells"];
+document.getElementById("continuousSpellHeader").textContent = locale["deckMaker"]["continuousSpells"];
+document.getElementById("enchantSpellHeader").textContent = locale["deckMaker"]["enchantSpells"];
+document.getElementById("standardItemHeader").textContent = locale["deckMaker"]["standardItems"];
+document.getElementById("continuousItemHeader").textContent = locale["deckMaker"]["continuousItems"];
+document.getElementById("equipableItemHeader").textContent = locale["deckMaker"]["equipableItems"];
+
+// deck menu
+document.getElementById("deckCreationPanelHeader").textContent = locale["deckMaker"]["deckMenu"]["title"];
+document.getElementById("deckCardListHeader").textContent = locale["deckMaker"]["deckMenu"]["cardListTitle"];
+document.getElementById("deckDetailsHeader").textContent = locale["deckMaker"]["deckMenu"]["detailsTitle"];
+document.getElementById("recentCardsHeaderBtn").textContent = locale["deckMaker"]["deckMenu"]["recentCardsTitle"];
+
+document.getElementById("deckMakerDetailsName").textContent = locale["deckMaker"]["deckMenu"]["name"];
+document.getElementById("deckMakerDetailsNameInput").placeholder = locale["deckMaker"]["deckMenu"]["namePlaceholder"];
+document.getElementById("deckMakerDetailsDescription").textContent = locale["deckMaker"]["deckMenu"]["description"];
+document.getElementById("deckMakerDetailsPartner").textContent = locale["deckMaker"]["deckMenu"]["partner"];
+
+document.getElementById("deckMakerDetailsCardTotal").textContent = locale["deckMaker"]["deckMenu"]["cardTotal"];
+document.getElementById("deckMakerDetailsUnitCount").textContent = locale["deckMaker"]["deckMenu"]["unitTotal"];
+document.getElementById("deckMakerDetailsSpellCount").textContent = locale["deckMaker"]["deckMenu"]["spellTotal"];
+document.getElementById("deckMakerDetailsItemCount").textContent = locale["deckMaker"]["deckMenu"]["itemTotal"];
+
+document.getElementById("levelDistributionTitle").textContent = locale["deckMaker"]["deckMenu"]["levelDistribution"];
+
+document.getElementById("deckWarningsTitle").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["title"];
+document.getElementById("cardMinWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["cardMinimum"];
+document.getElementById("cardMaxWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["cardMaximum"];
+document.getElementById("unitWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["needsUnit"];
+document.getElementById("tokenWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["noTokens"];
+document.getElementById("partnerWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["noPartner"];
+
+// starting hand
+document.getElementById("deckOptionsTitle").textContent = locale["deckMaker"]["deckMenu"]["options"];
+document.getElementById("dotDeckExportBtn").textContent = locale["deckMaker"]["deckMenu"]["exportDeck"];
+document.getElementById("deckMakerImportBtn").textContent = locale["deckMaker"]["deckMenu"]["importDeck"];
+document.getElementById("startingHandGenBtn").textContent = locale["deckMaker"]["deckMenu"]["drawStartingHand"];
+
+//search panel
+document.getElementById("cardSearchPanelHeader").textContent = locale["deckMaker"]["searchMenu"]["title"];
+document.getElementById("cardSearchSearchBtn").textContent = locale["deckMaker"]["searchMenu"]["search"];
+document.getElementById("cardSearchNameLabel").textContent = locale["deckMaker"]["searchMenu"]["cardName"];
+document.getElementById("cardSearchNameInput").placeholder = locale["deckMaker"]["searchMenu"]["cardNamePlaceholder"];
+document.getElementById("cardSearchIdLabel").textContent = locale["deckMaker"]["searchMenu"]["cardId"];
+document.getElementById("cardSearchIdInput").placeholder = locale["deckMaker"]["searchMenu"]["cardIdPlaceholder"];
+document.getElementById("cardSearchAttackLabel").textContent = locale["deckMaker"]["searchMenu"]["attack"];
+document.getElementById("cardSearchAttackMinInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMinimum"]);
+document.getElementById("cardSearchAttackMaxInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMaximum"]);
+document.getElementById("cardSearchDefenseLabel").textContent = locale["deckMaker"]["searchMenu"]["defense"];
+document.getElementById("cardSearchDefenseMinInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMinimum"]);
+document.getElementById("cardSearchDefenseMaxInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMaximum"]);
+document.getElementById("cardSearchTextLabel").textContent = locale["deckMaker"]["searchMenu"]["textBox"];
+document.getElementById("cardSearchTextInput").placeholder = locale["deckMaker"]["searchMenu"]["textBoxPlaceholder"];
+document.getElementById("cardSearchTypeLabel").textContent = locale["deckMaker"]["searchMenu"]["types"];
+document.getElementById("cardSearchCharacterLabel").textContent = locale["deckMaker"]["searchMenu"]["characters"];
+document.getElementById("cardSearchCharacterInput").placeholder = locale["deckMaker"]["searchMenu"]["charactersPlaceholder"];
+document.getElementById("cardSearchCharacterInput").title = locale["deckMaker"]["searchMenu"]["charactersMouseover"];
+document.getElementById("cardSearchDeckLimitLabel").textContent = locale["deckMaker"]["searchMenu"]["deckLimit"];
+document.getElementById("cardSearchSortLabel").textContent = locale["deckMaker"]["searchMenu"]["sortBy"];
+
+//sort the types alphabetically
+let sortedOptions = Array.from(document.getElementById("cardSearchTypeInput").children).sort(function(a, b) {
+	let typeSortNames = locale["optional"]["typeSortNames"] ?? locale["types"];
+	return a.value === "typeless" || typeSortNames[a.value] > typeSortNames[b.value]? 1 : 0;
 });
 
-// load locale files
-let locale = {};
-
-// load locale and translate page
-document.documentElement.lang = localStorage.getItem("language");
-fetch("../data/locales/" + localStorage.getItem("language") + ".json")
-.then(response => {
-	return response.json()
-})
-.then(jsonData => {
-	locale = jsonData;
-	
-	// main section
-	document.getElementById("deckCreatorTitle").textContent = locale["deckMaker"]["title"];
-	document.getElementById("deckMakerDeckButton").textContent = locale["deckMaker"]["deck"];
-	document.getElementById("deckMakerSearchButton").textContent = locale["deckMaker"]["search"];
-	
-	document.getElementById("deckMakerPanels").setAttribute("aria-label", locale["deckMaker"]["searchResults"]);
-	document.getElementById("deckMakerUnits").setAttribute("aria-label", locale["deckMaker"]["unitTokenColumn"]);
-	document.getElementById("deckMakerSpells").setAttribute("aria-label", locale["deckMaker"]["spellColumn"]);
-	document.getElementById("deckMakerItems").setAttribute("aria-label", locale["deckMaker"]["itemColumn"]);
-	
-	document.getElementById("unitHeader").textContent = locale["deckMaker"]["units"];
-	document.getElementById("tokenHeader").textContent = locale["deckMaker"]["tokens"];
-	document.getElementById("standardSpellHeader").textContent = locale["deckMaker"]["standardSpells"];
-	document.getElementById("continuousSpellHeader").textContent = locale["deckMaker"]["continuousSpells"];
-	document.getElementById("enchantSpellHeader").textContent = locale["deckMaker"]["enchantSpells"];
-	document.getElementById("standardItemHeader").textContent = locale["deckMaker"]["standardItems"];
-	document.getElementById("continuousItemHeader").textContent = locale["deckMaker"]["continuousItems"];
-	document.getElementById("equipableItemHeader").textContent = locale["deckMaker"]["equipableItems"];
-	
-	// deck menu
-	document.getElementById("deckCreationPanelHeader").textContent = locale["deckMaker"]["deckMenu"]["title"];
-	document.getElementById("deckCardListHeader").textContent = locale["deckMaker"]["deckMenu"]["cardListTitle"];
-	document.getElementById("deckDetailsHeader").textContent = locale["deckMaker"]["deckMenu"]["detailsTitle"];
-	document.getElementById("recentCardsHeaderBtn").textContent = locale["deckMaker"]["deckMenu"]["recentCardsTitle"];
-	
-	document.getElementById("deckMakerDetailsName").textContent = locale["deckMaker"]["deckMenu"]["name"];
-	document.getElementById("deckMakerDetailsNameInput").placeholder = locale["deckMaker"]["deckMenu"]["namePlaceholder"];
-	document.getElementById("deckMakerDetailsDescription").textContent = locale["deckMaker"]["deckMenu"]["description"];
-	document.getElementById("deckMakerDetailsPartner").textContent = locale["deckMaker"]["deckMenu"]["partner"];
-	
-	document.getElementById("deckMakerDetailsCardTotal").textContent = locale["deckMaker"]["deckMenu"]["cardTotal"];
-	document.getElementById("deckMakerDetailsUnitCount").textContent = locale["deckMaker"]["deckMenu"]["unitTotal"];
-	document.getElementById("deckMakerDetailsSpellCount").textContent = locale["deckMaker"]["deckMenu"]["spellTotal"];
-	document.getElementById("deckMakerDetailsItemCount").textContent = locale["deckMaker"]["deckMenu"]["itemTotal"];
-	
-	document.getElementById("levelDistributionTitle").textContent = locale["deckMaker"]["deckMenu"]["levelDistribution"];
-	
-	document.getElementById("deckWarningsTitle").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["title"];
-	document.getElementById("cardMinWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["cardMinimum"];
-	document.getElementById("cardMaxWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["cardMaximum"];
-	document.getElementById("unitWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["needsUnit"];
-	document.getElementById("tokenWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["noTokens"];
-	document.getElementById("partnerWarning").textContent = locale["deckMaker"]["deckMenu"]["warnings"]["noPartner"];
-	
-	// starting hand
-	document.getElementById("deckOptionsTitle").textContent = locale["deckMaker"]["deckMenu"]["options"];
-	document.getElementById("dotDeckExportBtn").textContent = locale["deckMaker"]["deckMenu"]["exportDeck"];
-	document.getElementById("deckMakerImportBtn").textContent = locale["deckMaker"]["deckMenu"]["importDeck"];
-	document.getElementById("startingHandGenBtn").textContent = locale["deckMaker"]["deckMenu"]["drawStartingHand"];
-	
-	//search panel
-	document.getElementById("cardSearchPanelHeader").textContent = locale["deckMaker"]["searchMenu"]["title"];
-	document.getElementById("cardSearchSearchBtn").textContent = locale["deckMaker"]["searchMenu"]["search"];
-	document.getElementById("cardSearchNameLabel").textContent = locale["deckMaker"]["searchMenu"]["cardName"];
-	document.getElementById("cardSearchNameInput").placeholder = locale["deckMaker"]["searchMenu"]["cardNamePlaceholder"];
-	document.getElementById("cardSearchIdLabel").textContent = locale["deckMaker"]["searchMenu"]["cardId"];
-	document.getElementById("cardSearchIdInput").placeholder = locale["deckMaker"]["searchMenu"]["cardIdPlaceholder"];
-	document.getElementById("cardSearchAttackLabel").textContent = locale["deckMaker"]["searchMenu"]["attack"];
-	document.getElementById("cardSearchAttackMinInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMinimum"]);
-	document.getElementById("cardSearchAttackMaxInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMaximum"]);
-	document.getElementById("cardSearchDefenseLabel").textContent = locale["deckMaker"]["searchMenu"]["defense"];
-	document.getElementById("cardSearchDefenseMinInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMinimum"]);
-	document.getElementById("cardSearchDefenseMaxInput").setAttribute("aria-label", locale["deckMaker"]["searchMenu"]["atkDefMaximum"]);
-	document.getElementById("cardSearchTextLabel").textContent = locale["deckMaker"]["searchMenu"]["textBox"];
-	document.getElementById("cardSearchTextInput").placeholder = locale["deckMaker"]["searchMenu"]["textBoxPlaceholder"];
-	document.getElementById("cardSearchTypeLabel").textContent = locale["deckMaker"]["searchMenu"]["types"];
-	document.getElementById("cardSearchCharacterLabel").textContent = locale["deckMaker"]["searchMenu"]["characters"];
-	document.getElementById("cardSearchCharacterInput").placeholder = locale["deckMaker"]["searchMenu"]["charactersPlaceholder"];
-	document.getElementById("cardSearchCharacterInput").title = locale["deckMaker"]["searchMenu"]["charactersMouseover"];
-	document.getElementById("cardSearchDeckLimitLabel").textContent = locale["deckMaker"]["searchMenu"]["deckLimit"];
-	document.getElementById("cardSearchSortLabel").textContent = locale["deckMaker"]["searchMenu"]["sortBy"];
-	
-	//sort the types alphabetically
-	let sortedOptions = Array.from(document.getElementById("cardSearchTypeInput").children).sort(function(a, b) {
-		let typeSortNames = locale["optional"]["typeSortNames"] ?? locale["types"];
-		return a.value === "typeless" || typeSortNames[a.value] > typeSortNames[b.value]? 1 : 0;
-	});
-	
-	sortedOptions.forEach(typeOption => {
-		document.getElementById("cardSearchTypeInput").appendChild(typeOption);
-	});
-	
-	//label the types
-	Array.from(document.getElementById("cardSearchTypeInput").children).forEach(typeOption => {
-		typeOption.innerHTML = typeOption.value == "typeless"? locale["typeless"] : locale["types"][typeOption.value];
-	});
-	
-	//card info panel
-	document.getElementById("cardInfoPanelContent").setAttribute("aria-label", locale["deckMaker"]["cardInfo"]["title"]);
-	document.getElementById("cardInfoGeneralSection").setAttribute("aria-label", locale["deckMaker"]["cardInfo"]["generalSection"]);
-	document.getElementById("cardInfoReleaseDateLabel").textContent = locale["deckMaker"]["cardInfo"]["released"];
-	document.getElementById("cardInfoIllustratorLabel").textContent = locale["deckMaker"]["cardInfo"]["illustrator"];
-	document.getElementById("cardInfoIdeaLabel").textContent = locale["deckMaker"]["cardInfo"]["idea"];
-	document.getElementById("cardInfoMentionedHeader").textContent = locale["deckMaker"]["cardInfo"]["mentionedCards"];
-	document.getElementById("cardInfoMentionedOnHeader").textContent = locale["deckMaker"]["cardInfo"]["mentionedOn"];
-	document.getElementById("cardInfoVisibleHeader").textContent = locale["deckMaker"]["cardInfo"]["visibleCards"];
-	document.getElementById("cardInfoVisibleOnHeader").textContent = locale["deckMaker"]["cardInfo"]["visibleOn"];
-	document.getElementById("cardInfoToDeck").textContent = locale["deckMaker"]["cardInfo"]["toDeck"];
-	
-	// starting hand generator
-	document.getElementById("handGeneratorTitle").textContent = locale["deckMaker"]["startingHandGenerator"]["title"];
-	document.getElementById("regenerateStartingHand").textContent = locale["deckMaker"]["startingHandGenerator"]["redraw"];
-	
-	
-	document.documentElement.lang = localStorage.getItem("language");
-	document.documentElement.removeAttribute("aria-busy");
+sortedOptions.forEach(typeOption => {
+	document.getElementById("cardSearchTypeInput").appendChild(typeOption);
 });
+
+//label the types
+Array.from(document.getElementById("cardSearchTypeInput").children).forEach(typeOption => {
+	typeOption.innerHTML = typeOption.value == "typeless"? locale["typeless"] : locale["types"][typeOption.value];
+});
+
+//card info panel
+document.getElementById("cardInfoPanelContent").setAttribute("aria-label", locale["deckMaker"]["cardInfo"]["title"]);
+document.getElementById("cardInfoGeneralSection").setAttribute("aria-label", locale["deckMaker"]["cardInfo"]["generalSection"]);
+document.getElementById("cardInfoReleaseDateLabel").textContent = locale["deckMaker"]["cardInfo"]["released"];
+document.getElementById("cardInfoIllustratorLabel").textContent = locale["deckMaker"]["cardInfo"]["illustrator"];
+document.getElementById("cardInfoIdeaLabel").textContent = locale["deckMaker"]["cardInfo"]["idea"];
+document.getElementById("cardInfoMentionedHeader").textContent = locale["deckMaker"]["cardInfo"]["mentionedCards"];
+document.getElementById("cardInfoMentionedOnHeader").textContent = locale["deckMaker"]["cardInfo"]["mentionedOn"];
+document.getElementById("cardInfoVisibleHeader").textContent = locale["deckMaker"]["cardInfo"]["visibleCards"];
+document.getElementById("cardInfoVisibleOnHeader").textContent = locale["deckMaker"]["cardInfo"]["visibleOn"];
+document.getElementById("cardInfoToDeck").textContent = locale["deckMaker"]["cardInfo"]["toDeck"];
+
+
+document.documentElement.lang = locale["code"];
+document.documentElement.removeAttribute("aria-busy");
+
 
 //track shift key
 document.addEventListener("keydown", function(e) {
@@ -299,7 +276,7 @@ async function showCardInfo(cardInfo) {
 document.getElementById("cardSearchSearchBtn").addEventListener("click", function() {
 	let query = {types: []};
 	
-	query.language = localStorage.getItem("language");
+	query.language = (locale.warnings.includes("noCards")? "en" : locale.code);
 	query.name = document.getElementById("cardSearchNameInput").value;
 	query.textbox = document.getElementById("cardSearchTextInput").value;
 	query.characters = document.getElementById("cardSearchCharacterInput").value;

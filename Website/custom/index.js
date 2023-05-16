@@ -19,6 +19,9 @@ document.getElementById("cardTypeLabel").textContent = locale["customCards"]["ca
 document.getElementById("saveButton").textContent = locale["customCards"]["save"];
 document.getElementById("createNewButton").textContent = locale["customCards"]["createNew"];
 
+document.documentElement.lang = locale["code"];
+document.documentElement.removeAttribute("aria-busy");
+
 // editing current card
 function getCard() {
 	let card = {
