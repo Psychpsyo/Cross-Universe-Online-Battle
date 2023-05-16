@@ -39,7 +39,7 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 	let text = "";
 	let bracketList = [];
 	content.forEach((child, i) => {
-		if (i > 0) {
+		if (i > 0 || (child.type != "text" && !blockParent)) {
 			text += "\n" + "　".repeat(indent);
 		}
 		switch(child.type) {
@@ -57,7 +57,6 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 				if (!blockParent) {
 					text = text.slice(0, -1);
 				}
-				console.log(text);
 				let bracket = {
 					"indent": blockParent? indent : indent - 2,
 					"firstLine": lineCount + text.split("\n").length - 1
@@ -136,6 +135,7 @@ async function renderCard(card, canvas) {
 	// write type
 	let typeString = card.types.map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	fontSize = 49;
+	ctx.font = fontSize + "px 'Yu Mincho'";
 	while (ctx.measureText(typeString).width > 597) {
 		fontSize--;
 		ctx.font = fontSize + "px 'Yu Mincho'";
@@ -145,10 +145,11 @@ async function renderCard(card, canvas) {
 	
 	// write text box
 	fontSize = 28;
+	ctx.font = fontSize + "px 'Yu Gothic UI'";
 	while (formatEffectText(card.effects, 0, fontSize, true, ctx, 0, 0).text.split("\n").length * (fontSize + lineGap) > (card.cardType == "token"? 245 : (card.author? 248 : 275))) {
 		fontSize--;
+		ctx.font = fontSize + "px 'Yu Gothic UI'";
 	}
-	ctx.font = fontSize + "px 'Yu Gothic UI'";
 	ctx.textBaseline = "top";
 	let effects = formatEffectText(card.effects, 0, fontSize, true, ctx, 0, 0);
 	effects.text.split("\n").forEach((line, i) => {

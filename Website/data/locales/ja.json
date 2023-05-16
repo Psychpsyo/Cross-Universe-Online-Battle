@@ -412,7 +412,6 @@
 	"cardDetailsTypes": "タイプ：",
 	"cardDetailsEffects": "効果：",
 	"cardDetailsInfoString": "Lv{#LEVEL}　{#CARDTYPE}",
-	"cardDetailsQuestionMark": "？",
 	"unitCardDetailType": "ユニット",
 	"tokenCardDetailType": "トークン",
 	"standardSpellCardDetailType": "通常スペル",
@@ -485,9 +484,12 @@
 		"cardType": "種類：",
 		
 		"save": null,
+		"saveCopy": null,
 		"createNew": null,
 		"edit": null,
 		"delete": null,
+		"downloadImage": null,
+		"downloadCard": null,
 		
 		"unsavedChanges": null,
 		"reallyDelete": null,

@@ -412,7 +412,6 @@
 	"cardDetailsTypes": "Types: ",
 	"cardDetailsEffects": "Effects: ",
 	"cardDetailsInfoString": "Lv{#LEVEL} {#CARDTYPE}",
-	"cardDetailsQuestionMark": "?",
 	"unitCardDetailType": "Unit",
 	"tokenCardDetailType": "Token",
 	"standardSpellCardDetailType": "Standard Spell",
@@ -485,12 +484,15 @@
 		"cardType": "Card Type:",
 		
 		"save": "Save Card",
+		"saveCopy": "Save as Copy",
 		"createNew": "Create New",
 		"edit": "Edit",
 		"delete": "Delete",
+		"downloadImage": "Download (.png)",
+		"downloadCard": "Download (.card)",
 		
 		"unsavedChanges": "You currently have unsaved changes.\nIf you proceed, those changes will be lost.",
-		"reallyDelete": "Do you really want to delete '{#CARDNAME}'?\nThis action cannot be undone.\n'{#CARDNAME}' will be gone forever.",
+		"reallyDelete": "Do you really want to delete '{#CARDNAME}'?\nThis action cannot be undone. '{#CARDNAME}' will be gone forever.",
 		"doesntExist": "The selected card doesn't exist anymore and couldn't be loaded.",
 		
 		"renderer": {

@@ -9,31 +9,34 @@ document.getElementById("title").textContent = locale["customCards"]["title"];
 
 document.getElementById("cardNameLabel").textContent = locale["customCards"]["cardName"];
 document.getElementById("cardLevelLabel").textContent = locale["customCards"]["cardLevel"];
-document.getElementById("cardLevel").placeholder = locale["cardDetailsQuestionMark"];
+document.getElementById("cardLevel").placeholder = "?";
 document.getElementById("cardAttackLabel").textContent = locale["customCards"]["cardAttack"];
-document.getElementById("cardAttack").placeholder = locale["cardDetailsQuestionMark"];
+document.getElementById("cardAttack").placeholder = "?";
 document.getElementById("cardDefenseLabel").textContent = locale["customCards"]["cardDefense"];
-document.getElementById("cardDefense").placeholder = locale["cardDetailsQuestionMark"];
+document.getElementById("cardDefense").placeholder = "?";
 document.getElementById("cardTypeLabel").textContent = locale["customCards"]["cardType"];
 
 document.getElementById("saveButton").textContent = locale["customCards"]["save"];
+document.getElementById("saveCopyButton").textContent = locale["customCards"]["saveCopy"];
 document.getElementById("createNewButton").textContent = locale["customCards"]["createNew"];
+document.getElementById("downloadImageButton").textContent = locale["customCards"]["downloadImage"];
+document.getElementById("downloadCardButton").textContent = locale["customCards"]["downloadCard"];
 
 document.documentElement.lang = locale["code"];
 document.documentElement.removeAttribute("aria-busy");
 
-// editing current card
+// basic utilities
 function getCard() {
 	let card = {
 		"cardType": cardType.value,
 		"name": cardName.value,
 		"level": cardLevel.value == ""? -1 : cardLevel.value,
 		"types": [],
-		"effects": []
+		"effects": parseEffectsList()
 	};
 	if (cardType.value == "unit" || cardType.value == "token") {
-		card.attack = cardAttack.value;
-		card.defense = cardDefense.value;
+		card.attack = cardAttack.value === ""? -1 : cardAttack.value;
+		card.defense = cardDefense.value === ""? -1 : cardDefense.value;
 	}
 	if (localStorage.getItem("username")) {
 		card.author = localStorage.getItem("username");
@@ -63,26 +66,78 @@ function blankSlate() {
 	});
 }
 
-// saving and loading card from and to localStorage
-function saveCard() {
-	let cards = JSON.parse(localStorage.getItem("customCards")).filter(card => card.uuid != currentlyEditing);
-	let savedCard = {
-		"uuid": currentlyEditing,
-		"lastChange": new Date().getTime(),
-		"data": getCard()
-	};
-	cards.push(savedCard);
-	localStorage.setItem("customCards", JSON.stringify(cards));
-	reloadCardList();
+// editing current card
+function createContentArea() {
+	let holderDiv = document.createElement("div");
+	let textArea = document.createElement("textarea");
+	textArea.placeholder = "...";
+	textArea.autocomplete = "off";
+	textArea.addEventListener("input", function() {
+		updateCard(true);
+		this.style.height = "0";
+		this.style.height = this.scrollHeight + "px";
+	});
+	
+	holderDiv.appendChild(textArea);
+	return holderDiv;
 }
 
-function loadCard(card) {
-	cardName.value = card.name;
-	cardLevel.value = card.level == -1? "" : card.level;
-	cardAttack.value = (card.attack == -1? "" : card.attack) ?? "";
-	cardDefense.value = (card.defense == -1? "" : card.defense) ?? "";
-	cardType.value = card.cardType;
-	updateCard(false);
+function createContentButtons() {
+	let buttonArea = document.createElement("div");
+	let effectButton = document.createElement("button");
+	effectButton.textContent = "●：";
+	effectButton.addEventListener("click", function() {
+		this.parentElement.parentElement.firstChild.appendChild(createEffectSection("effect"));
+		updateCard(true);
+	});
+	let bracketsButton = document.createElement("button");
+	bracketsButton.textContent = "［］";
+	bracketsButton.addEventListener("click", function() {
+		this.parentElement.parentElement.firstChild.appendChild(createEffectSection("brackets"));
+		updateCard(true);
+	});
+	let deleteButton = document.createElement("button");
+	deleteButton.classList.add("effectEditorDeleteBtn");
+	deleteButton.textContent = "X";
+	deleteButton.addEventListener("click", function() {
+		this.parentElement.parentElement.remove();
+		updateCard(true);
+	});
+	buttonArea.appendChild(effectButton);
+	buttonArea.appendChild(bracketsButton);
+	buttonArea.appendChild(deleteButton);
+	return buttonArea;
+}
+
+function createEffectSection(type) {
+	let section = document.createElement("div");
+	section.classList.add(type + "EditSection");
+	
+	section.appendChild(createContentArea());
+	section.appendChild(createContentButtons());
+	
+	return section;
+}
+
+effectEditor.appendChild(createContentArea());
+effectEditor.appendChild(createContentButtons());
+
+function parseEffectsList(root = effectEditor.firstChild) {
+	let list = [];
+	Array.from(root.children).forEach(elem => {
+		let object = {};
+		if (elem.nodeName == "TEXTAREA") {
+			object.type = "text";
+			object.content = elem.value;
+		} else {
+			object.type = elem.classList.contains("effectEditSection")? "bullet" : "brackets";
+			object.content = parseEffectsList(elem.firstChild);
+		}
+		if (elem.value != "") {
+			list.push(object);
+		}
+	});
+	return list;
 }
 
 cardName.addEventListener("input", function() {updateCard(true)});
@@ -92,6 +147,10 @@ cardDefense.addEventListener("input", function() {updateCard(true)});
 cardType.addEventListener("input", function() {updateCard(true)});
 
 saveButton.addEventListener("click", saveCard);
+saveCopyButton.addEventListener("click", function() {
+	currentlyEditing = window.crypto.randomUUID();
+	saveCard();
+});
 createNewButton.addEventListener("click", blankSlate);
 downloadImageButton.addEventListener("click", function() {
 	let downloadElement = document.createElement("a");
@@ -107,7 +166,6 @@ downloadCardButton.addEventListener("click", function() {
 	downloadElement.click();
 });
 
-blankSlate();
 updateCard(false);
 reloadCardList();
 
@@ -162,4 +220,26 @@ function generateListCard(card) {
 	listCard.appendChild(editButton);
 	listCard.appendChild(deleteButton);
 	return listCard;
+}
+
+// saving and loading card from and to localStorage
+function saveCard() {
+	let cards = JSON.parse(localStorage.getItem("customCards")).filter(card => card.uuid != currentlyEditing);
+	let savedCard = {
+		"uuid": currentlyEditing,
+		"lastChange": new Date().getTime(),
+		"data": getCard()
+	};
+	cards.push(savedCard);
+	localStorage.setItem("customCards", JSON.stringify(cards));
+	reloadCardList();
+}
+
+function loadCard(card) {
+	cardName.value = card.name;
+	cardLevel.value = card.level == -1? "" : card.level;
+	cardAttack.value = (card.attack == -1? "" : card.attack) ?? "";
+	cardDefense.value = (card.defense == -1? "" : card.defense) ?? "";
+	cardType.value = card.cardType;
+	updateCard(false);
 }

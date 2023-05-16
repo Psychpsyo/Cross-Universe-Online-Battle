@@ -209,7 +209,7 @@ function previewCard(card) {
 	// set the text preview
 	// general info
 	cardDetailsName.textContent = card.getName();
-	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? locale["cardDetailsQuestionMark"] : card.getLevel()).replace("{#CARDTYPE}", locale[card.getCardType() + "CardDetailType"]);
+	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", locale[card.getCardType() + "CardDetailType"]);
 	if (card.getTypes().length > 0) {
 		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	} else {
@@ -219,8 +219,8 @@ function previewCard(card) {
 	// attack & defense
 	if (card.getCardType() == "unit" || card.getCardType() == "token") {
 		cardDetailsAttackDefense.style.display = "flex";
-		cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (card.getAttack() == -1? locale["cardDetailsQuestionMark"] : card.getAttack());
-		cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (card.getDefense() == -1? locale["cardDetailsQuestionMark"] : card.getDefense());
+		cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (card.getAttack() == -1? "?" : card.getAttack());
+		cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (card.getDefense() == -1? "?" : card.getDefense());
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}

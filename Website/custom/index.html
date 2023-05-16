@@ -19,11 +19,11 @@
 		<main>
 			<section id="editorSection">
 				<div id="inputFields">
-					<div><label for="cardName" id="cardNameLabel">Name:</label><input type="text" id="cardName"></div>
-					<div><label for="cardLevel" id="cardLevelLabel">Level:</label><input type="number" id="cardLevel" min="0" value="" placeholder="?"></div>
-					<div><label for="cardAttack" id="cardAttackLabel">Attack:</label><input type="number" id="cardAttack" min="0" value="" placeholder="?"></div>
-					<div><label for="cardDefense" id="cardDefenseLabel">Defense:</label><input type="number" id="cardDefense" min="0" value="" placeholder="?"></div>
-					<div><label for="cardType" id="cardTypeLabel">Card Type:</label><select id="cardType">
+					<div class="inputRow"><label for="cardName" id="cardNameLabel">Name:</label><input type="text" id="cardName" autocomplete="off"></div>
+					<div class="inputRow"><label for="cardLevel" id="cardLevelLabel">Level:</label><input type="number" id="cardLevel" min="0" value="" placeholder="?" autocomplete="off"></div>
+					<div class="inputRow"><label for="cardAttack" id="cardAttackLabel">Attack:</label><input type="number" id="cardAttack" min="0" value="" placeholder="?" autocomplete="off"></div>
+					<div class="inputRow"><label for="cardDefense" id="cardDefenseLabel">Defense:</label><input type="number" id="cardDefense" min="0" value="" placeholder="?" autocomplete="off"></div>
+					<div class="inputRow"><label for="cardType" id="cardTypeLabel">Card Type:</label><select id="cardType" autocomplete="off">
 						<option value="unit">Unit</option>
 						<option value="standardSpell">Standard Spell</option>
 						<option value="continuousSpell">Continuous Spell</option>
@@ -33,10 +33,14 @@
 						<option value="equipableItem">Equipable Item</option>
 						<option value="token">Token</option>
 					</select></div>
-					<div><div>
-						<button id="saveButton">Save Card</button> <button id="createNewButton">Create New</button><br>
+					<div>
+						<span>Abilities:</span>
+						<div id="effectEditor"></div>
+					</div>
+					<div>
+						<button id="saveButton">Save Card</button> <button id="saveCopyButton">Save as Copy</button> <button id="createNewButton">Create New</button><br>
 						<button id="downloadImageButton">Download (.png)</button> <button id="downloadCardButton">Download (.card)</button>
-					</div></div>
+					</div>
 				</div>
 				
 				<canvas id="cardCanvas"></canvas>

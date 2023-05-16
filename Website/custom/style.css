@@ -26,9 +26,12 @@ main {
 }
 
 #inputFields > div {
+	padding: .25em;
+}
+
+.inputRow {
 	display: flex;
 	justify-content: space-between;
-	padding: .25em;
 }
 
 #inputFields > div:nth-child(odd) {
@@ -97,4 +100,62 @@ main {
 
 .listCard:not(:last-child) {
 	margin-bottom: .5em;
+}
+
+/* Card Effect Editor */
+#effectEditor textarea {
+	margin: 0;
+	height: 0;
+	min-height: 2rem;
+	background-color: var(--theme-shadow);
+	color: inherit;
+	border: none;
+	font-size: inherit;
+	line-height: 1em;
+	width: 100%;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+#effectEditor > :last-child > .effectEditorDeleteBtn {
+	display: none;
+}
+
+.effectEditSection {
+	position: relative;
+	margin-left: 2em;
+}
+.effectEditSection > div > .effectEditSection {
+	margin-left: 1em;
+}
+.effectEditSection::before {
+	content: "●：";
+	position: absolute;
+	top: 0;
+	left: -2em;
+}
+
+.bracketsEditSection {
+	position: relative;
+	margin: 0 1em;
+}
+.bracketsEditSection::before, .bracketsEditSection::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	height: calc(100% - .5em);
+	width: .5em;
+	box-sizing: border-box;
+	margin: .25em 0;
+	border: 2px solid white;
+}
+.effectEditSection > div > .bracketsEditSection {
+	margin-left: -1em;
+}
+.bracketsEditSection::before {
+	left: -.75em;
+	border-right: none;
+}
+.bracketsEditSection::after {
+	right: -.75em;
+	border-left: none;
 }

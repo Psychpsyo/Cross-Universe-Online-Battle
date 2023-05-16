@@ -412,7 +412,6 @@
 	"cardDetailsTypes": "Typen: ",
 	"cardDetailsEffects": "Effekte: ",
 	"cardDetailsInfoString": "Lv{#LEVEL} {#CARDTYPE}",
-	"cardDetailsQuestionMark": "?",
 	"unitCardDetailType": "Einheit",
 	"tokenCardDetailType": "Token",
 	"standardSpellCardDetailType": "Standard-Zauber",
@@ -482,12 +481,17 @@
 		"cardAttack": "Angriff:",
 		"cardDefense": "Verteidigung:",
 		"cardType": "Art:",
-		"save": "Karte Speichern",
-		"createNew": "Neu Erstellen",
+		
+		"save": "Karte speichern",
+		"saveCopy": "Als Kopie speichern",
+		"createNew": "Neu erstellen",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
+		"downloadImage": "Herunterladen (.png)",
+		"downloadCard": "Herunterladen (.card)",
+		
 		"unsavedChanges": "Es gibt ungespeicherte Änderungen.\nWenn du fortführst, werden diese verloren gehen.",
-		"reallyDelete": "Möchtest du '{#CARDNAME}' wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.\n'{#CARDNAME}' wird für immer verloren sein.",
+		"reallyDelete": "Möchtest du '{#CARDNAME}' wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden. '{#CARDNAME}' wird für immer verloren sein.",
 		"doesntExist": "Die gewählte Karte existiert nicht mehr und konnte deshalf nicht geladen werden.",
 		
 		"renderer": {
