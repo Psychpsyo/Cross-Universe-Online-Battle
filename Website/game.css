@@ -234,14 +234,15 @@
 
 img[src$="cardBackFrameP0.png"], img[src$="cardBackFrameP1.png"] {
 	background-size: cover;
+	background-position: center;
 }
 
 img[src$="cardBackFrameP0.png"] {
-	background-image: url(""), url("/images/cardBack.png");
+	background-image: var(--p0-card-back), url("/images/cardBack.png");
 }
 
 img[src$="cardBackFrameP1.png"] {
-	background-image: url(""), url("/images/cardBack.png");
+	background-image: var(--p1-card-back), url("/images/cardBack.png");
 }
 
 .fieldCardContainer {

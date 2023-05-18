@@ -3,13 +3,7 @@ import {DraftState} from "/modules/draftState.js";
 import {DeckState} from "/modules/deckState.js";
 import {Game} from "/modules/game.js";
 import {Card} from "/modules/card.js";
-
-function setCardBackForPlayer(player, backLink) {
-	let rightSheet = Array.from(document.styleSheets).filter(function(sheet) {return sheet.href.endsWith("game.css")})[0];
-	//this matches the very specific rule that applies to all places where there's face down cards of the specified player.
-	let cardBackRule = Array.from(rightSheet.rules).filter(rule => rule.selectorText == "img[src$=\"cardBackFrameP" + player + ".png\"]")[0];
-	cardBackRule.style.backgroundImage = "url('" + backLink + "'), url('/images/cardBack.png')";
-}
+import {stopEffect} from "/modules/levitationEffect.js";
 
 export class InitState extends GameState {
 	constructor() {
@@ -44,8 +38,8 @@ export class InitState extends GameState {
 				if (localStorage.getItem("username") !== "") {
 					socket.send("[username]" + localStorage.getItem("username"));
 				}
+				document.documentElement.style.setProperty("--p0-card-back", "url('')");
 				if (localStorage.getItem("cardBack") !== "") {
-					setCardBackForPlayer(1, localStorage.getItem("cardBack"));
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
 				
@@ -68,7 +62,7 @@ export class InitState extends GameState {
 			}
 			case "cardBack": {
 				if (localStorage.getItem("cardBackToggle") == "false") {
-					setCardBackForPlayer(0, message);
+					document.documentElement.style.setProperty("--p0-card-back", "url('" + message + "')");
 				}
 				return true;
 			}
@@ -126,6 +120,7 @@ export class InitState extends GameState {
 			}
 			
 			// main screen is no longer needed
+			stopEffect();
 			roomCodeEntry.remove();
 			gameDiv.removeAttribute("hidden");
 		}

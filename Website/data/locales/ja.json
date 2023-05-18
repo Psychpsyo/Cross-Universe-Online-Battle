@@ -157,7 +157,8 @@
 				"light": null,
 				"worldTree": "神聖樹",
 				"deepSea": null
-			}
+			},
+			"mainMenuCards": null
 		},
 		
 		"accessibility": {

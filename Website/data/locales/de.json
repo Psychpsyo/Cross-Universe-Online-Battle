@@ -157,7 +157,8 @@
 				"light": "Hell",
 				"worldTree": "Der World Tree",
 				"deepSea": "Tiefsee"
-			}
+			},
+			"mainMenuCards": "Zeige schwebende Karten im Hauptmenü"
 		},
 		
 		"accessibility": {

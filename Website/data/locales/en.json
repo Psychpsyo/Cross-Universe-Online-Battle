@@ -157,7 +157,8 @@
 				"light": "Light",
 				"worldTree": "The World Tree",
 				"deepSea": "Deep Sea"
-			}
+			},
+			"mainMenuCards": "Show Floating Cards in Main Menu"
 		},
 		
 		"accessibility": {

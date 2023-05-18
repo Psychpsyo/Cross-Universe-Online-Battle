@@ -99,6 +99,7 @@ function setLanguage(language) {
 		Array.from(themeSelector.children).forEach(theme => {
 			theme.textContent = locale["settings"]["customization"]["themes"][theme.value];
 		});
+		menuCardsToggle.textContent = locale["settings"]["customization"]["mainMenuCards"];
 		
 		accessibilityHeading.textContent = locale["settings"]["accessibility"]["title"];
 		fontSelectorLabel.textContent = locale["settings"]["accessibility"]["font"];
@@ -143,6 +144,7 @@ fieldLabelToggle.checked = localStorage.getItem("fieldLabelToggle") === "true";
 cardBackToggle.checked = localStorage.getItem("cardBackToggle") === "true";
 fieldLeftToggle.checked = localStorage.getItem("fieldLeftToggle") === "true";
 themeSelector.value = localStorage.getItem("theme");
+menuCardsToggle.checked = localStorage.getItem("mainMenuCards") === "true";
 
 fontSelector.value = localStorage.getItem("font");
 updateCustomFontInputDiv();
@@ -179,6 +181,9 @@ cardBackToggle.addEventListener("change", function() {
 });
 themeSelector.addEventListener("change", function() {
 	applyTheme(this.value);
+});
+menuCardsToggle.addEventListener("change", function() {
+	localStorage.setItem("mainMenuCards", this.checked);
 });
 
 fontSelector.addEventListener("change", function() {

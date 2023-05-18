@@ -12,10 +12,12 @@
 		<link rel="stylesheet" href="entryPage.css">
 		<link rel="stylesheet" href="game.css">
 		<link rel="stylesheet" href="drafts.css">
+		<link rel="stylesheet" href="styles/levitationEffect.css">
 	</head>
 	<body>
 		<!--MAIN PAGE-->
 		<div id="roomCodeEntry">
+			<div id="levitatingCards"></div>
 			<div id="centerDiv">
 				<img id="mainLogo" src="/images/logo.png" alt="">
 				<main id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
@@ -477,5 +479,6 @@
 		<script src="scripts/ui.js"></script>
 		<script src="scripts/websocket.js"></script>
 		<script src="scripts/hotkeys.js"></script>
+		<script src="modules/main.js", type="module"></script>
 	</body>
 </html>
