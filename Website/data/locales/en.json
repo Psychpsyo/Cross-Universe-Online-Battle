@@ -25,15 +25,27 @@
 	"infoLife": "Life:",
 	"infoMana": "Mana:",
 	
-	"dropYourDeck": "Drag & drop your deck here.",
-	"useOfficialDeck": "Or choose one of the official ones.",
+	"deckSelect": {
+		"chooseYourDeck": "Choose your deck.",
+		"loadingDeck": "Loading deck...",
+		"waitingForOpponent": "Waiting for opponent to choose their deck...",
+		"dropYourDeck": "Drag & drop your deck here.",
+		"useOfficialDeck": "Or choose one of the official ones.",
+		
+		"deckListDefault": "Default",
+		"deckListLegacy": "Legacy",
+		"deckListLoadSelected": "Load Selected Deck",
+		"deckListCardAmount": "{#CARDS} cards"
+	},
 	
-	"deckListDefault": "Default",
-	"deckListLegacy": "Legacy",
-	"deckListLoadSelected": "Load Selected Deck",
-	"deckListCardAmount": "{#CARDS} cards",
+	"partnerSelect": {
+		"useSuggestedQuestion": "Do you want to use the suggested partner for this deck or select one yourself?",
+		"useSuggested": "Use Suggested Partner",
+		"selectManually": "Select One From Deck",
+		"waitingForOpponent": "Waiting for the opponent to choose their partner...",
+		"revealPartner": "Reveal Partner"
+	},
 	
-	"revealPartner": "Reveal Partner",
 	"selectStartingPlayer": "Select Starting Player",
 	"youStart": "You go first.",
 	"opponentStarts": "Your opponent goes first.",
@@ -100,6 +112,7 @@
 		"amountTaken": "{#CURRENT}/{#TOTAL} Taken",
 		"finished": "Draft finished. You can start the game now.",
 		"startGame": "Start Game",
+		"waitingForOpponent": "Waiting for Opponent...",
 		"deckName": "Draft Deck",
 		"yourDeck": "Your Deck",
 		"opponentDeck": "Opponent Deck"
@@ -333,7 +346,7 @@
 			"deckLimitLess": "less",
 			"deckLimitMore": "more",
 			"deckLimitInfinite": "∞",
-			"sortBy": "Sort by",
+			"sortBy": "Sort by:",
 			"sortByRelevancy": "relevancy",
 			"sortByLevel": "level",
 			"sortByName": "name",
@@ -399,7 +412,6 @@
 	"cardDetailsTypes": "Types: ",
 	"cardDetailsEffects": "Effects: ",
 	"cardDetailsInfoString": "Lv{#LEVEL} {#CARDTYPE}",
-	"cardDetailsQuestionMark": "?",
 	"unitCardDetailType": "Unit",
 	"tokenCardDetailType": "Token",
 	"standardSpellCardDetailType": "Standard Spell",
@@ -419,46 +431,85 @@
 	"subEffectClosingBracket": "］",
 	
 	"typeSeparator": ", ",
-	"typePsychic": "Psychic",
-	"typeDragon": "Dragon",
-	"typeFigure": "Figure",
-	"typeSamurai": "Samurai",
-	"typeLight": "Light",
-	"typeKatana": "Katana",
-	"typeSword": "Sword",
-	"typeCurse": "Curse",
-	"typeEarth": "Earth",
-	"typeLandmine": "Landmine",
-	"typeAngel": "Angel",
-	"typeRock": "Rock",
-	"typeIllusion": "Illusion",
-	"typeStructure": "Structure",
-	"typeDemon": "Demon",
-	"typeWarrior": "Warrior",
-	"typeBook": "Book",
-	"typePlant": "Plant",
-	"typeMachine": "Machine",
-	"typeGhost": "Ghost",
-	"typeWater": "Water",
-	"typeIce": "Ice",
-	"typeFire": "Fire",
-	"typeBeast": "Beast",
-	"typeShield": "Shield",
-	"typeMyth": "Myth",
-	"typeSpirit": "Spirit",
-	"typeBoundary": "Boundary",
-	"typeMedicine": "Medicine",
-	"typeBug": "Bug",
-	"typeGravity": "Gravity",
-	"typeChain": "Chain",
-	"typeArmor": "Armor",
-	"typeDark": "Dark",
-	"typeElectric": "Electric",
-	"typeWind": "Wind",
-	"typeMage": "Mage",
-	"typeFish": "Fish",
-	"typeBird": "Bird",
 	"typeless": "typeless",
+	"types": {
+		"Psychic": "Psychic",
+		"Dragon": "Dragon",
+		"Figure": "Figure",
+		"Samurai": "Samurai",
+		"Light": "Light",
+		"Katana": "Katana",
+		"Sword": "Sword",
+		"Curse": "Curse",
+		"Earth": "Earth",
+		"Landmine": "Landmine",
+		"Angel": "Angel",
+		"Rock": "Rock",
+		"Illusion": "Illusion",
+		"Structure": "Structure",
+		"Demon": "Demon",
+		"Warrior": "Warrior",
+		"Book": "Book",
+		"Plant": "Plant",
+		"Machine": "Machine",
+		"Ghost": "Ghost",
+		"Water": "Water",
+		"Ice": "Ice",
+		"Fire": "Fire",
+		"Beast": "Beast",
+		"Shield": "Shield",
+		"Myth": "Myth",
+		"Spirit": "Spirit",
+		"Boundary": "Boundary",
+		"Medicine": "Medicine",
+		"Bug": "Bug",
+		"Gravity": "Gravity",
+		"Chain": "Chain",
+		"Armor": "Armor",
+		"Dark": "Dark",
+		"Electric": "Electric",
+		"Wind": "Wind",
+		"Mage": "Mage",
+		"Fish": "Fish",
+		"Bird": "Bird"
+	},
+	
+	"customCards": {
+		"title": "Custom Cards",
+		
+		"cardName": "Name:",
+		"cardLevel": "Level:",
+		"cardAttack": "Attack:",
+		"cardDefense": "Defense:",
+		"cardType": "Card Type:",
+		
+		"save": "Save Card",
+		"saveCopy": "Save as Copy",
+		"createNew": "Create New",
+		"edit": "Edit",
+		"delete": "Delete",
+		"downloadImage": "Download (.png)",
+		"downloadCard": "Download (.card)",
+		
+		"unsavedChanges": "You currently have unsaved changes.\nIf you proceed, those changes will be lost.",
+		"reallyDelete": "Do you really want to delete '{#CARDNAME}'?\nThis action cannot be undone. '{#CARDNAME}' will be gone forever.",
+		"doesntExist": "The selected card doesn't exist anymore and couldn't be loaded.",
+		
+		"renderer": {
+			"attack": "Attack:",
+			"defense": "Defense:",
+			
+			"standardSpell": "Standard Spell",
+			"enchantSpell": "Enchant Spell",
+			"continuousSpell": "Continuous Spell",
+			"standardItem": "Standard Item",
+			"equipableItem": "Equipable Item",
+			"continuousItem": "Continuous Item",
+			
+			"ideaCredit": "Idea: ",
+			"tokenNotice": "※Token cards may not be added to decks."
+		}
+	},
 	
 	"cardActions": {
 		"I00040": {
@@ -466,5 +517,7 @@
 			"yourRoll": "You rolled Fate's Dice. It showed a {#RESULT}.",
 			"opponentRoll": "Your opponent rolled Fate's Dice. It showed a {#RESULT}."
 		}
-	}
+	},
+	
+	"optional": {}
 }

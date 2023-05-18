@@ -1,3 +1,5 @@
+import {reloadLocale, locale} from "/modules/locale.js";
+
 // hotkey helper functions
 // these convert between the ids of the hotkeys' button elements and the the name for the hotkey
 function idToHotkey(id) {
@@ -59,18 +61,10 @@ function updateCustomFontInputDiv() {
 }
 
 // translation
-let locale = {};
 function setLanguage(language) {
 	localStorage.setItem("language", language);
 	
-	document.documentElement.lang = language;
-	fetch("../data/locales/" + language + ".json")
-	.then(response => {
-		return response.json()
-	})
-	.then(jsonData => {
-		locale = jsonData;
-		
+	reloadLocale().then(function() {
 		languageWarnings.innerHTML = "";
 		languageSelectorDiv.style.marginBottom = 0;
 		if (locale.warnings.length > 0) {
@@ -132,7 +126,7 @@ function setLanguage(language) {
 		
 		relabelAllHotkeys();
 		
-		document.documentElement.lang = localStorage.getItem("language");
+		document.documentElement.lang = locale["code"];
 		document.documentElement.removeAttribute("aria-busy");
 	});
 }

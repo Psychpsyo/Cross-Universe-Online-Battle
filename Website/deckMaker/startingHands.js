@@ -1,8 +1,13 @@
+import {locale} from "/modules/locale.js";
+
+document.getElementById("handGeneratorTitle").textContent = locale["deckMaker"]["startingHandGenerator"]["title"];
+document.getElementById("regenerateStartingHand").textContent = locale["deckMaker"]["startingHandGenerator"]["redraw"];
+
 startingHandGenBtn.addEventListener("click", function() {
 	startingHandGenerator.showModal();
 	generateStartingHand();
 });
-function generateStartingHand() {
+export function generateStartingHand() {
 	startingHandGeneratorCards.innerHTML = "";
 	let cards = [...deckList];
 	for (let i = 0; i < 5;i++) {

@@ -380,6 +380,7 @@
 					<!--hands-->
 					<div id="hand0" class="hand"></div>
 					<div id="hand1" class="hand" data-card-area="hand1"></div>
+					<div id="mainGameBlackout"></div>
 				</main>
 			</div>
 			
@@ -389,8 +390,8 @@
 			<!-- Above the overlay to still be interactable while menus are open -->
 			<div id="cardDetails">
 				<div id="cardDetailsControl">
-					<div id="cardDetailsSwitch" class="bigButton">i</div>
-					<div id="cardDetailsClose" class="bigButton">X</div>
+					<button id="cardDetailsSwitch" class="bigButton">i</button>
+					<button id="cardDetailsClose" class="bigButton">X</button>
 				</div>
 				<div id="cardDetailsText">
 					<div id="cardDetailsName">---</div>
@@ -472,14 +473,9 @@
 		<script src="scripts/translation.js"></script>
 		<script src="scripts/variables.js"></script>
 		<script src="scripts/utility.js"></script>
-		<script src="scripts/cardHandling.js"></script>
-		<script src="scripts/deckLoader.js"></script>
+		<script src="scripts/cardHandling.js", type="module"></script>
 		<script src="scripts/ui.js"></script>
 		<script src="scripts/websocket.js"></script>
 		<script src="scripts/hotkeys.js"></script>
-		<script src="scripts/gameloop.js"></script>
-		<script src="scripts/cardActions.js"></script>
-		
-		<script src="scripts/draftGame.js"></script>
 	</body>
 </html>

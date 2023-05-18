@@ -1,3 +1,7 @@
+#draftGameSetupMenu {
+	flex-grow: 1;
+}
+
 #draftGameFlexBox {
 	display: flex;
 	flex-direction: column;
