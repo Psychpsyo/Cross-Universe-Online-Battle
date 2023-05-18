@@ -7,25 +7,6 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 .then(jsonData => {
 	locale = jsonData;
 	
-	roomCodeInputTitle.textContent = locale["roomCodeInputTitle"];
-	document.getElementById("roomCodeInputLabel").textContent = locale["enterRoomcode"];
-	document.getElementById("roomCodeRefresh").setAttribute("aria-label", locale["rerollRoomcode"]);
-	
-	document.getElementById("gameModeSelectorLabel").textContent = locale["gamemode"];
-	document.getElementById("gameModeNormalOption").textContent = locale["gamemodes"]["normal"];
-	document.getElementById("gameModeDraftOption").textContent = locale["gamemodes"]["draft"];
-	
-	document.getElementById("connectBtn").textContent = locale["connectToRoom"];
-	document.getElementById("trWaitingForOpponent").textContent = locale["waitingForOpponent"];
-	document.getElementById("cancelWaitingBtn").textContent = locale["cancelWaiting"];
-	document.getElementById("unofficialNotice").innerHTML = locale["unofficialNotice"];
-	document.getElementById("rulesButton").textContent = locale["rulesButton"];
-	// set rules button target
-	document.getElementById("rulesButton").href = locale["rulesLink"];
-	
-	document.getElementById("settingsButton").textContent = locale["settingsButton"];
-	document.getElementById("deckMakerButton").textContent = locale["deckCreatorButton"];
-	
 	// in-game
 	document.getElementById("revealPartnerBtn").textContent = locale["partnerSelect"]["revealPartner"];
 	document.getElementById("startingPlayerSelect").textContent = locale["selectStartingPlayer"];
@@ -89,7 +70,4 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 			}
 		});
 	}
-	
-	document.documentElement.lang = localStorage.getItem("language");
-	document.documentElement.removeAttribute("aria-busy");
 });

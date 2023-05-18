@@ -1,24 +1,26 @@
 {
 	"warnings": ["incomplete"],
 	"code": "ja",
-	"roomCodeInputTitle": "Connect through Battle ID",
-	"enterRoomcode": "対戦ID：",
-	"rerollRoomcode": "Generate random room code",
-	"connectToRoom": "接続",
-	"waitingForOpponent": "承認待ち",
-	"cancelWaiting": "キャンセル",
-	"rulesButton": "ゲームのルール",
-	"rulesLink": "https://crossuniverse.jp/%e2%97%86%e2%97%86%e2%97%86%e3%82%af%e3%83%ad%e3%82%b9%e3%83%a6%e3%83%8b%e3%83%90%e3%83%bc%e3%82%b9%e3%81%a8%e3%81%af%e2%97%86%e2%97%86%e2%97%86/",
-	"unofficialNotice": "クロスユニバースのファンサイトです。公式はこちらへ。（<a href=\"https://www.crossuniverse.jp\">https://crossuniverse.jp/</a>）",
-	
-	"gamemode": "ゲームモード：",
-	"gamemodes": {
-		"normal": "ノーマル",
-		"draft": "ドラフト"
+	"mainMenu": {
+		"roomCodeInputTitle": "Connect through Battle ID",
+		"enterRoomcode": "対戦ID：",
+		"rerollRoomcode": "Generate random room code",
+		"connectToRoom": "接続",
+		"waitingForOpponent": "承認待ち",
+		"cancelWaiting": "キャンセル",
+		"rulesButton": "ゲームのルール",
+		"rulesLink": "https://crossuniverse.jp/%e2%97%86%e2%97%86%e2%97%86%e3%82%af%e3%83%ad%e3%82%b9%e3%83%a6%e3%83%8b%e3%83%90%e3%83%bc%e3%82%b9%e3%81%a8%e3%81%af%e2%97%86%e2%97%86%e2%97%86/",
+		"unofficialNotice": "クロスユニバースのファンサイトです。公式はこちらへ。（<a href=\"https://www.crossuniverse.jp\">https://crossuniverse.jp/</a>）",
+		
+		"gamemode": "ゲームモード：",
+		"gamemodes": {
+			"normal": "ノーマル",
+			"draft": "ドラフト"
+		},
+		
+		"settingsButton": "Settings",
+		"deckCreatorButton": "Deck Creator"
 	},
-	
-	"settingsButton": "Settings",
-	"deckCreatorButton": "Deck Creator",
 	
 	"infoYou": "自分",
 	"infoOpponent": "相手",

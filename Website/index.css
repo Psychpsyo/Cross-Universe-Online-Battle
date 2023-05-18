@@ -109,6 +109,9 @@ textarea {
 .bigButton:hover:enabled {
 	background-color: var(--theme-button-hover-color);
 }
+.bigButton:disabled {
+	color: inherit;
+}
 
 
 /* dialogs */

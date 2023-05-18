@@ -1,6 +1,7 @@
 import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
 import {Card} from "/modules/card.js";
+import {locale} from "/modules/locale.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();
@@ -18,12 +19,12 @@ export class DraftState extends GameState {
 		this.pressedReady = false;
 		this.opponentReady = false;
 		
-		draftStartButton.textContent = locale["draft"]["startGame"];
+		draftStartButton.textContent = locale.draft.startGame;
 		draftDeckOwner0.textContent = localStorage.getItem("username");
 		if (draftDeckOwner0.textContent == "") {
-			draftDeckOwner0.textContent = locale["draft"]["yourDeck"];
+			draftDeckOwner0.textContent = locale.draft.yourDeck;
 		}
-		draftDeckOwner1.textContent = opponentName ?? locale["draft"]["opponentDeck"];
+		draftDeckOwner1.textContent = opponentName ?? locale.draft.opponentDeck;
 		draftDeckCount0.textContent = "0/" + this.format.deckSize;
 		draftDeckCount1.textContent = "0/" + this.format.deckSize;
 		
@@ -40,7 +41,7 @@ export class DraftState extends GameState {
 		draftStartButton.addEventListener("click", function() {
 			socket.send("[ready]");
 			gameState.pressedReady = true;
-			draftStartButton.textContent = locale["draft"]["waitingForOpponent"];
+			draftStartButton.textContent = locale.draft.waitingForOpponent;
 			draftStartButton.setAttribute("disabled", "");
 			gameState.checkReadyConditions();
 		});
@@ -78,7 +79,7 @@ export class DraftState extends GameState {
 	
 	setPlayer(player) {
 		this.currentPlayer = player % 2;
-		draftMainInfo.textContent = this.currentPlayer == youAre? locale["draft"]["yourTurn"] : locale["draft"]["opponentsTurn"];
+		draftMainInfo.textContent = this.currentPlayer == youAre? locale.draft.yourTurn : locale.draft.opponentsTurn;
 	}
 	
 	// rerolls the current pack and syncs that order to the other player
@@ -129,8 +130,8 @@ export class DraftState extends GameState {
 			}.bind(this), (i + 1) * 50);
 		}
 		
-		draftPackNumber.textContent = locale["draft"]["packNumber"].replace("{#CURRENT}", this.packsOpened).replace("{#TOTAL}", this.format.packCount);
-		draftCardNumber.textContent = locale["draft"]["amountTaken"].replace("{#CURRENT}", "0").replace("{#TOTAL}", this.format.cardPicks);
+		draftPackNumber.textContent = locale.draft.packNumber.replace("{#CURRENT}", this.packsOpened).replace("{#TOTAL}", this.format.packCount);
+		draftCardNumber.textContent = locale.draft.amountTaken.replace("{#CURRENT}", "0").replace("{#TOTAL}", this.format.cardPicks);
 	}
 	
 	// adds a card to deck and switches which player is taking a card
@@ -152,12 +153,12 @@ export class DraftState extends GameState {
 		if (draftDeckList0.childElementCount == this.format.deckSize && draftDeckList1.childElementCount == this.format.deckSize) {
 			// disable card picking
 			this.currentPlayer = -1;
-			draftMainInfo.textContent = locale["draft"]["finished"];
+			draftMainInfo.textContent = locale.draft.finished;
 			
 			// load decks
 			await Promise.all([
-				game.players[0].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"])),
-				game.players[1].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale["draft"]["deckName"]))
+				game.players[0].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName)),
+				game.players[1].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName))
 			]);
 			
 			// show start button
@@ -173,7 +174,7 @@ export class DraftState extends GameState {
 				this.rerollCards();
 			}
 		} else {
-			draftCardNumber.textContent = locale["draft"]["amountTaken"].replace("{#CURRENT}", this.takenCards).replace("{#TOTAL}", this.format.cardPicks);
+			draftCardNumber.textContent = locale.draft.amountTaken.replace("{#CURRENT}", this.takenCards).replace("{#TOTAL}", this.format.cardPicks);
 		}
 		this.setPlayer(this.currentPlayer + 1);
 	}

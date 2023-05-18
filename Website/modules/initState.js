@@ -25,7 +25,7 @@ export class InitState extends GameState {
 		// refresh the "Waiting for Opponent" text so screen readers read it out.
 		setTimeout(() => {
 			if (typeof trWaitingForOpponent !== undefined) {
-				trWaitingForOpponent.textContent = locale["waitingForOpponent"];
+				trWaitingForOpponent.textContent = locale.mainMenu.waitingForOpponent;
 				cancelWaitingBtn.focus();
 			}
 		}, 100);

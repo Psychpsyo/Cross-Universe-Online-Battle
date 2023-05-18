@@ -1,24 +1,26 @@
 {
 	"warnings": [],
 	"code": "en",
-	"roomCodeInputTitle": "Connect through Room Code",
-	"enterRoomcode": "Room Code:",
-	"rerollRoomcode": "Generate random room code",
-	"connectToRoom": "Connect",
-	"waitingForOpponent": "Waiting for Opponent...",
-	"cancelWaiting": "Cancel",
-	"rulesButton": "Game Rules",
-	"rulesLink": "https://crossuniverse.net/rules",
-	"unofficialNotice": "This site is an unofficial, fan-made implementation of Cross Universe. Visit the official page at <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
-	
-	"gamemode": "Gamemode:",
-	"gamemodes": {
-		"normal": "Normal",
-		"draft": "Draft"
+	"mainMenu": {
+		"roomCodeInputTitle": "Connect through Room Code",
+		"enterRoomcode": "Room Code:",
+		"rerollRoomcode": "Generate random room code",
+		"connectToRoom": "Connect",
+		"waitingForOpponent": "Waiting for Opponent...",
+		"cancelWaiting": "Cancel",
+		"rulesButton": "Game Rules",
+		"rulesLink": "https://crossuniverse.net/rules",
+		"unofficialNotice": "This site is an unofficial, fan-made implementation of Cross Universe. Visit the official page at <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
+		
+		"gamemode": "Gamemode:",
+		"gamemodes": {
+			"normal": "Normal",
+			"draft": "Draft"
+		},
+		
+		"settingsButton": "Settings",
+		"deckCreatorButton": "Deck Creator"
 	},
-	
-	"settingsButton": "Settings",
-	"deckCreatorButton": "Deck Creator",
 	
 	"infoYou": "You",
 	"infoOpponent": "Opponent",

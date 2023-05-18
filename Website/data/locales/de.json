@@ -1,24 +1,26 @@
 {
 	"warnings": ["noRules", "noCards"],
 	"code": "de",
-	"roomCodeInputTitle": "Mit Raum-Code verbinden",
-	"enterRoomcode": "Raum-Code:",
-	"rerollRoomcode": "Zufälligen Raum-Code generieren",
-	"connectToRoom": "Verbinden",
-	"waitingForOpponent": "Warte auf Gegner...",
-	"cancelWaiting": "Abbrechen",
-	"rulesButton": "Spielregeln",
-	"rulesLink": "https://crossuniverse.net/rules",
-	"unofficialNotice": "Diese Seite ist eine Fan-gemachte, unoffizielle Cross Universe Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
-	
-	"gamemode": "Spielmodus:",
-	"gamemodes": {
-		"normal": "Normal",
-		"draft": "Draft"
+	"mainMenu": {
+		"roomCodeInputTitle": "Mit Raum-Code verbinden",
+		"enterRoomcode": "Raum-Code:",
+		"rerollRoomcode": "Zufälligen Raum-Code generieren",
+		"connectToRoom": "Verbinden",
+		"waitingForOpponent": "Warte auf Gegner...",
+		"cancelWaiting": "Abbrechen",
+		"rulesButton": "Spielregeln",
+		"rulesLink": "https://crossuniverse.net/rules",
+		"unofficialNotice": "Diese Seite ist eine Fan-gemachte, unoffizielle Cross Universe Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
+		
+		"gamemode": "Spielmodus:",
+		"gamemodes": {
+			"normal": "Normal",
+			"draft": "Draft"
+		},
+		
+		"settingsButton": "Einstellungen",
+		"deckCreatorButton": "Deck Editor"
 	},
-	
-	"settingsButton": "Einstellungen",
-	"deckCreatorButton": "Deck Editor",
 	
 	"infoYou": "Du",
 	"infoOpponent": "Gegner",
@@ -148,9 +150,9 @@
 		
 		"customization": {
 			"title": "Display & Themes",
-			"fieldLabels": "Feldbeschriftung Zeigen",
-			"disableCardBacks": "Gegnerische Kartenrücken Deaktivieren",
-			"leftField": "Feld links auf dem Bildschirm Platzieren",
+			"fieldLabels": "Feldbeschriftung zeigen",
+			"disableCardBacks": "Gegnerische Kartenrücken deaktivieren",
+			"leftField": "Feld links auf dem Bildschirm platzieren",
 			"theme": "Theme:",
 			"themes": {
 				"default": "Standard",
@@ -177,24 +179,24 @@
 		
 		"hotkeys": {
 			"title": "Hotkeys",
-			"resetHotkeys": "Hotkeys Zurücksetzen",
-			"pressKey": "Taste Drücken",
+			"resetHotkeys": "Hotkeys zurücksetzen",
+			"pressKey": "Taste drücken",
 			"keyCtrl": "Strg",
 			"keyShift": "Shift",
 			"keyAlt": "Alt",
-			"showYourDiscardPile": "Eigenen Ablagestapel Zeigen:",
-			"showOpponentDiscardPile": "Gegnerischen Ablagestapel Zeigen:",
-			"showYourExileZone": "Eigenes Exil Zeigen:",
-			"showOpponentExileZone": "Gegnerisches Exil Zeigen:",
-			"searchYourDeck": "Dein Deck Durchsuchen:",
-			"tokenSelector": "Token-Menü Öffnen:",
-			"showField": "Feld Zeigen:",
-			"destroyGrabbedToken": "Gehaltenes Token Zerstören:",
-			"writeChatMessage": "Chat-Nachricht Schreiben:",
-			"drawCard": "Karte Ziehen:",
-			"shuffleDeck": "Eigenes Deck Mischen:",
-			"showDeckTop": "Oberste Karte im Deck Zeigen:",
-			"previewHandCard": "Handkarten Anzeigen:",
+			"showYourDiscardPile": "Eigenen Ablagestapel zeigen:",
+			"showOpponentDiscardPile": "Gegnerischen Ablagestapel zeigen:",
+			"showYourExileZone": "Eigenes Exil zeigen:",
+			"showOpponentExileZone": "Gegnerisches Exil zeigen:",
+			"searchYourDeck": "Dein Deck durchsuchen:",
+			"tokenSelector": "Token-Menü öffnen:",
+			"showField": "Feld zeigen:",
+			"destroyGrabbedToken": "Gehaltenes Token zerstören:",
+			"writeChatMessage": "Chat-Nachricht schreiben:",
+			"drawCard": "Karte ziehen:",
+			"shuffleDeck": "Eigenes Deck mischen:",
+			"showDeckTop": "Oberste Karte im Deck zeigen:",
+			"previewHandCard": "Handkarten anzeigen:",
 			
 			"keys": {
 				"KeyA": "A",
@@ -395,7 +397,7 @@
 				"noPartner": "To export as .deck, you must select a partner."
 			},
 			
-			"levelDistribution": "Leve-Verteilung:",
+			"levelDistribution": "Level-Verteilung:",
 			"options": "Optionen",
 			"exportDeck": "Exportieren (.deck)",
 			"importDeck": "Deck Importieren",
