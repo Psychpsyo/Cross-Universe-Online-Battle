@@ -5,24 +5,21 @@ let currentlyEditing = window.crypto.randomUUID();
 let unsavedChanges = false;
 
 // translate UI
-document.getElementById("title").textContent = locale["customCards"]["title"];
+document.getElementById("title").textContent = locale.customCards.title;
 
-document.getElementById("cardNameLabel").textContent = locale["customCards"]["cardName"];
-document.getElementById("cardLevelLabel").textContent = locale["customCards"]["cardLevel"];
-document.getElementById("cardLevel").placeholder = "?";
-document.getElementById("cardAttackLabel").textContent = locale["customCards"]["cardAttack"];
-document.getElementById("cardAttack").placeholder = "?";
-document.getElementById("cardDefenseLabel").textContent = locale["customCards"]["cardDefense"];
-document.getElementById("cardDefense").placeholder = "?";
-document.getElementById("cardTypeLabel").textContent = locale["customCards"]["cardType"];
+cardNameLabel.textContent = locale.customCards.cardName;
+cardLevelLabel.textContent = locale.customCards.cardLevel;
+cardAttackLabel.textContent = locale.customCards.cardAttack;
+cardDefenseLabel.textContent = locale.customCards.cardDefense;
+cardTypeLabel.textContent = locale.customCards.cardType;
 
-document.getElementById("saveButton").textContent = locale["customCards"]["save"];
-document.getElementById("saveCopyButton").textContent = locale["customCards"]["saveCopy"];
-document.getElementById("createNewButton").textContent = locale["customCards"]["createNew"];
-document.getElementById("downloadImageButton").textContent = locale["customCards"]["downloadImage"];
-document.getElementById("downloadCardButton").textContent = locale["customCards"]["downloadCard"];
+saveButton.textContent = locale.customCards.save;
+saveCopyButton.textContent = locale.customCards.saveCopy;
+createNewButton.textContent = locale.customCards.createNew;
+downloadImageButton.textContent = locale.customCards.downloadImage;
+downloadCardButton.textContent = locale.customCards.downloadCard;
 
-document.documentElement.lang = locale["code"];
+document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 
 // basic utilities
@@ -52,7 +49,7 @@ function updateCard(unsavedChange) {
 }
 
 function blankSlate() {
-	if (unsavedChanges && !confirm(locale["customCards"]["unsavedChanges"])) {
+	if (unsavedChanges && !confirm(locale.customCards.unsavedChanges)) {
 		return;
 	}
 	loadCard({
@@ -188,9 +185,9 @@ function generateListCard(card) {
 	
 	let editButton = document.createElement("button");
 	editButton.dataset.cardUuid = card.uuid;
-	editButton.textContent = locale["customCards"]["edit"];
+	editButton.textContent = locale.customCards.edit;
 	editButton.addEventListener("click", function() {
-		if (unsavedChanges && !confirm(locale["customCards"]["unsavedChanges"])) {
+		if (unsavedChanges && !confirm(locale.customCards.unsavedChanges)) {
 			return;
 		}
 		let card = JSON.parse(localStorage.getItem("customCards")).find(card => card.uuid == this.dataset.cardUuid);
@@ -198,18 +195,18 @@ function generateListCard(card) {
 			loadCard(card.data);
 			currentlyEditing = this.dataset.cardUuid;
 		} else {
-			alert(locale["customCards"]["doesntExist"]);
+			alert(locale.customCards.doesntExist);
 			this.closest(".listCard").remove();
 		}
 	});
 	
 	let deleteButton = document.createElement("button");
 	deleteButton.dataset.cardUuid = card.uuid;
-	deleteButton.textContent = locale["customCards"]["delete"];
+	deleteButton.textContent = locale.customCards.delete;
 	deleteButton.addEventListener("click", function() {
 		let cards = JSON.parse(localStorage.getItem("customCards"));
 		let card = cards.find(card => card.uuid == this.dataset.cardUuid).data;
-		if (confirm(locale["customCards"]["reallyDelete"].replaceAll("{#CARDNAME}", card.name))) {
+		if (confirm(locale.customCards.reallyDelete.replaceAll("{#CARDNAME}", card.name))) {
 			cards = cards.filter(card => card.uuid != this.dataset.cardUuid);
 			localStorage.setItem("customCards", JSON.stringify(cards));
 			this.closest(".listCard").remove();
