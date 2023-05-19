@@ -114,6 +114,15 @@ export class InitState extends GameState {
 				e.preventDefault();
 			});
 			
+			// prevent user from accidently leaving the site
+			window.unloadWarning = new AbortController();
+			window.addEventListener("beforeunload", function(e) {
+				if (lifeDisplay0.textContent > 0 && lifeDisplay1.textContent > 0) {
+					e.preventDefault();
+					e.returnValue = "";
+				}
+			}, {"signal": unloadWarning.signal});
+			
 			switch (gameModeSelect.value) {
 				case "normal": {
 					gameState = new DeckState();

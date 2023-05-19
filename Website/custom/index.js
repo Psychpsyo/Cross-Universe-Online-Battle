@@ -41,11 +41,19 @@ function getCard() {
 	return card;
 }
 
-function updateCard(unsavedChange) {
+function beforeUnloadListener(e) {
+	e.preventDefault();
+	e.returnValue = "";
+}
+
+function updateCard(unsaved) {
 	renderCard(getCard(), cardCanvas);
-	if (unsavedChange) {
-		unsavedChanges = true;
+	if (unsaved && !unsavedChanges) {
+		window.addEventListener("beforeunload", beforeUnloadListener);
+	} else if (!unsaved) {
+		window.removeEventListener("beforeunload", beforeUnloadListener);
 	}
+	unsavedChanges = unsaved;
 }
 
 function blankSlate() {

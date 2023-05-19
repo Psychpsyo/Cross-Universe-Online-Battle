@@ -67,6 +67,7 @@ function receiveMessage(e) {
 		}
 		case "quit": { // opponent quit the game (or crashed)
 			socket.close();
+			unloadWarning.abort();
 			location.reload();
 			break;
 		}
