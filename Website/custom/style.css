@@ -103,28 +103,20 @@ main {
 }
 
 /* Card Effect Editor */
-#effectEditor textarea {
-	margin: 0;
-	height: 0;
+#effectEditor {
 	min-height: 2rem;
 	background-color: var(--theme-shadow);
-	color: inherit;
-	border: none;
-	font-size: inherit;
-	line-height: 1em;
-	width: 100%;
-	overflow: hidden;
 	box-sizing: border-box;
-}
-#effectEditor > :last-child > .effectEditorDeleteBtn {
-	display: none;
+	padding: 5px;
+	overflow-wrap: break-word;
 }
 
 .effectEditSection {
 	position: relative;
 	margin-left: 2em;
+	min-height: 2rem;
 }
-.effectEditSection > div > .effectEditSection {
+.effectEditSection > .effectEditSection {
 	margin-left: 1em;
 }
 .effectEditSection::before {
@@ -137,6 +129,7 @@ main {
 .bracketsEditSection {
 	position: relative;
 	margin: 0 1em;
+	min-height: 2rem;
 }
 .bracketsEditSection::before, .bracketsEditSection::after {
 	content: "";
@@ -148,7 +141,7 @@ main {
 	margin: .25em 0;
 	border: 2px solid white;
 }
-.effectEditSection > div > .bracketsEditSection {
+.effectEditSection > .bracketsEditSection {
 	margin-left: -1em;
 }
 .bracketsEditSection::before {

@@ -481,6 +481,7 @@
 		"cardAttack": "Angriff:",
 		"cardDefense": "Verteidigung:",
 		"cardType": "Art:",
+		"cardAbilities": "Fähigkeiten:",
 		
 		"save": "Karte speichern",
 		"saveCopy": "Als Kopie speichern",

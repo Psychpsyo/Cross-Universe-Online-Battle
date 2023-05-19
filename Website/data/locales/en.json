@@ -482,6 +482,7 @@
 		"cardAttack": "Attack:",
 		"cardDefense": "Defense:",
 		"cardType": "Card Type:",
+		"cardAbilities": "Abilities:",
 		
 		"save": "Save Card",
 		"saveCopy": "Save as Copy",
