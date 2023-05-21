@@ -7,33 +7,8 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 .then(jsonData => {
 	locale = jsonData;
 	
-	roomCodeInputTitle.textContent = locale["roomCodeInputTitle"];
-	document.getElementById("roomCodeInputLabel").textContent = locale["enterRoomcode"];
-	document.getElementById("roomCodeRefresh").setAttribute("aria-label", locale["rerollRoomcode"]);
-	
-	document.getElementById("gameModeSelectorLabel").textContent = locale["gamemode"];
-	document.getElementById("gameModeNormalOption").textContent = locale["gamemodes"]["normal"];
-	document.getElementById("gameModeDraftOption").textContent = locale["gamemodes"]["draft"];
-	
-	document.getElementById("connectBtn").textContent = locale["connectToRoom"];
-	document.getElementById("trWaitingForOpponent").textContent = locale["waitingForOpponent"];
-	document.getElementById("cancelWaitingBtn").textContent = locale["cancelWaiting"];
-	document.getElementById("unofficialNotice").innerHTML = locale["unofficialNotice"];
-	document.getElementById("rulesButton").textContent = locale["rulesButton"];
-	// set rules button target
-	document.getElementById("rulesButton").href = locale["rulesLink"];
-	
-	document.getElementById("settingsButton").textContent = locale["settingsButton"];
-	document.getElementById("deckMakerButton").textContent = locale["deckCreatorButton"];
-	
 	// in-game
-	document.getElementById("dropDeckHereLabel").textContent = locale["dropYourDeck"];
-	document.getElementById("deckSelectSpan").textContent = locale["useOfficialDeck"];
-	document.getElementById("defaultDecksBtn").textContent = locale["deckListDefault"];
-	document.getElementById("legacyDecksBtn").textContent = locale["deckListLegacy"];
-	document.getElementById("loadSelectedDeckBtn").textContent = locale["deckListLoadSelected"];
-	
-	document.getElementById("revealPartnerBtn").textContent = locale["revealPartner"];
+	document.getElementById("revealPartnerBtn").textContent = locale["partnerSelect"]["revealPartner"];
 	document.getElementById("startingPlayerSelect").textContent = locale["selectStartingPlayer"];
 	
 	document.getElementById("chatHeader").textContent = locale["chat"]["title"];
@@ -95,10 +70,4 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 			}
 		});
 	}
-	
-	// draft game
-	document.getElementById("draftStartButton").textContent = locale["draft"]["startGame"];
-	
-	document.documentElement.lang = localStorage.getItem("language");
-	document.documentElement.removeAttribute("aria-busy");
 });

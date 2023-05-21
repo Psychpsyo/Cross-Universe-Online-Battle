@@ -6,55 +6,55 @@ if (localStorage.getItem("fieldLeftToggle") == "true") {
 
 //life changes
 document.getElementById("lifeUp100").addEventListener("click", function() {
-	life[1] += 100;
-	updateLifeDisplay(1);
+	localPlayer.life += 100;
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeUp50").addEventListener("click", function() {
-	life[1] += 50;
-	updateLifeDisplay(1);
+	localPlayer.life += 50;
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeUp1").addEventListener("click", function() {
-	life[1] += 1;
-	updateLifeDisplay(1);
+	localPlayer.life += 1;
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeDown100").addEventListener("click", function() {
-	life[1] = Math.max(life[1] - 100, 0);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.max(localPlayer.life - 100, 0);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeDown50").addEventListener("click", function() {
-	life[1] = Math.max(life[1] - 50, 0);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.max(localPlayer.life - 50, 0);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeDown1").addEventListener("click", function() {
-	life[1] = Math.max(life[1] - 1, 0);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.max(localPlayer.life - 1, 0);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 document.getElementById("lifeHalf").addEventListener("click", function() {
-	life[1] = Math.ceil(life[1] / 2);
-	updateLifeDisplay(1);
+	localPlayer.life = Math.ceil(localPlayer.life / 2);
+	updateLifeDisplay(localPlayer);
 	syncLife();
 });
 
 //mana changes
 document.getElementById("manaUp").addEventListener("click", function() {
-	mana[1]++;
-	updateManaDisplay(1);
+	localPlayer.mana++;
+	updateManaDisplay(localPlayer);
 	syncMana();
 });
 document.getElementById("manaFive").addEventListener("click", function() {
-	mana[1] = 5;
-	updateManaDisplay(1);
+	localPlayer.mana = 5;
+	updateManaDisplay(localPlayer);
 	syncMana();
 });
 document.getElementById("manaDown").addEventListener("click", function() {
-	mana[1] = Math.max(mana[1] - 1, 0);
-	updateManaDisplay(1);
+	localPlayer.mana = Math.max(localPlayer.mana - 1, 0);
+	updateManaDisplay(localPlayer);
 	syncMana();
 });
 
@@ -113,13 +113,15 @@ document.getElementById("chatInput").addEventListener("keydown", function(e) {
 });
 
 //closing the card selector when clicking off of it
-overlayBackdrop.addEventListener("click", function(e) {
+overlayBackdrop.addEventListener("click", function() {
 	// does not work for partner select menu
 	if (window.getComputedStyle(partnerSelectionMenu).display != "none") {
 		return;
 	}
 	cardSelector.style.display = "none";
-	deckSelector.style.display = "none";
+	if (typeof deckSelector !== "undefined") {
+		deckSelector.style.display = "none";
+	}
 	overlayBackdrop.style.display = "none";
 });
 
@@ -143,13 +145,13 @@ document.getElementById("roomCodeHider").addEventListener("click", function () {
 
 //showing/hiding your hand
 function hideHand() {
-	syncHandHide();
+	socket.send("[hideHand]");
 	document.getElementById("showHandBtn").textContent = locale["actionsShowHand"];
 	document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
 	document.getElementById("hand1").classList.remove("shown");
 }
 function showHand() {
-	syncHandReveal();
+	socket.send("[showHand]");
 	document.getElementById("showHandBtn").textContent = locale["actionsHideHand"];
 	document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
 	document.getElementById("hand1").classList.add("shown");
@@ -193,47 +195,40 @@ cardDetailsSwitch.addEventListener("click", function(e) {
 cardDetailsClose.addEventListener("click", closeCardPreview);
 
 // previews a card
-function previewCard(cardId) {
-	if (!cardId) {
-		return;
-	}
-	
+function previewCard(card) {
 	// if the already shown card was clicked again
-	if (cardDetails.dataset.currentCard == cardId) {
+	if (cardDetails.dataset.currentCard == card.cardId) {
 		closeCardPreview();
 		return;
 	}
-	cardDetails.dataset.currentCard = cardId;
+	cardDetails.dataset.currentCard = card.cardId;
 	
 	// set the image preview
-	cardDetailsImage.style.backgroundImage = "url(" + getCardImageFromID(cardId) + ")";
+	cardDetailsImage.style.backgroundImage = "url(" + card.getImage() + ")";
 	
-	// load card data and set the text preview
-	fetch("https://crossuniverse.net/cardInfo/?cardID=" + cardId + "&lang=" + (locale.warnings.includes("noCards")? "en" : locale.code))
-	.then(response => {
-		return response.json();
-	}).then(cardData => {
-		// general info
-		cardDetailsName.textContent = cardData.name + ("variant" in cardData? (localStorage.getItem("language") == "ja"? "" : " ") + cardData.variant : "");
-		cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", cardData.level == -1? locale["cardDetailsQuestionMark"] : cardData.level).replace("{#CARDTYPE}", locale[cardData.cardType + "CardDetailType"]);
-		if (cardData.types.length > 0) {
-			cardDetailsTypes.textContent = locale["cardDetailsTypes"] + cardData.types.map(type => locale["type" + type]).join(locale["typeSeparator"]);
-		} else {
-			cardDetailsTypes.textContent = locale["typeless"];
-		}
-		
-		// attack & defense
-		if (cardData.cardType == "unit" || cardData.cardType == "token") {
-			cardDetailsAttackDefense.style.display = "flex";
-			cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (cardData.attack == -1? locale["cardDetailsQuestionMark"] : cardData.attack);
-			cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (cardData.defense == -1? locale["cardDetailsQuestionMark"] : cardData.defense);
-		} else {
-			cardDetailsAttackDefense.style.display = "none";
-		}
-		
-		// effects
-		cardDetailsEffectList.innerHTML = "";
-		cardData.effects.forEach(effect => {
+	// set the text preview
+	// general info
+	cardDetailsName.textContent = card.getName();
+	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", locale[card.getCardType() + "CardDetailType"]);
+	if (card.getTypes().length > 0) {
+		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["types"][type]).join(locale["typeSeparator"]);
+	} else {
+		cardDetailsTypes.textContent = locale["typeless"];
+	}
+	
+	// attack & defense
+	if (card.getCardType() == "unit" || card.getCardType() == "token") {
+		cardDetailsAttackDefense.style.display = "flex";
+		cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (card.getAttack() == -1? "?" : card.getAttack());
+		cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (card.getDefense() == -1? "?" : card.getDefense());
+	} else {
+		cardDetailsAttackDefense.style.display = "none";
+	}
+	
+	// effects
+	cardDetailsEffectList.innerHTML = "";
+	if (!card.cardId.startsWith("C")) {
+		game.cardData[card.cardId].effects.forEach(effect => {
 			let effectDiv = document.createElement("div");
 			effectDiv.classList.add("cardDetailsEffect");
 			
@@ -270,8 +265,8 @@ function previewCard(cardId) {
 			
 			cardDetailsEffectList.appendChild(effectDiv);
 		});
-		
-		cardDetails.style.setProperty("--side-distance", ".5em");
-		cardDetailsImage.dataset.open = true;
-	});
+	}
+	
+	cardDetails.style.setProperty("--side-distance", ".5em");
+	cardDetailsImage.dataset.open = true;
 }

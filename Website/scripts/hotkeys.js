@@ -2,9 +2,6 @@ let hotkeys = JSON.parse(localStorage.getItem("hotkeys"));
 
 // used for hotkeys that want to open the discard piles, exile zones...
 function showCardArea(area) {
-	if (window.getComputedStyle(deckSelector).display != "none") {
-		return;
-	}
 	if (window.getComputedStyle(cardSelector).display != "none" && cardSelectorTitle.textContent === area.getLocalizedName()) {
 		cardSelector.style.display = "none";
 		overlayBackdrop.style.display = "none";
@@ -13,8 +10,9 @@ function showCardArea(area) {
 	}
 }
 
-document.addEventListener("keydown", function(e) {
-	if (window.getComputedStyle(gameDiv).display === "none" || window.getComputedStyle(draftGameSetupMenu).display !== "none") {
+document.addEventListener("keydown", async function(e) {
+	boardStateModule = await import("/modules/boardState.js");
+	if (!(gameState instanceof boardStateModule.BoardState)) {
 		return;
 	}
 	
@@ -47,7 +45,6 @@ document.addEventListener("keydown", function(e) {
 				}
 				case "showField": {
 					cardSelector.style.display = "none";
-					deckSelector.style.display = "none";
 					overlayBackdrop.style.display = "none";
 					closeCardPreview();
 					break;
@@ -91,15 +88,15 @@ document.addEventListener("keydown", function(e) {
 		if (cardIndex == 0) {
 			cardIndex = 10;
 		}
-		if (cardIndex <= document.getElementById("hand1").childElementCount) {
-			previewCard(getCardById(hand1.childNodes.item(cardIndex - 1).dataset.cardId).cardId);
+		cardIndex -= 1;
+		if (cardIndex < cardAreas["hand1"].cards.length) {
+			previewCard(cardAreas["hand1"].cards[cardIndex]);
 		}
 		return;
 	}
 	
 	if (e.code == "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey) {
 		cardSelector.style.display = "none";
-		deckSelector.style.display = "none";
 		overlayBackdrop.style.display = "none";
 	}
 });

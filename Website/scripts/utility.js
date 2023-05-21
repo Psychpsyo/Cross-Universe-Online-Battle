@@ -3,62 +3,36 @@ function getCardImageFromID(cardId) {
 	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
 }
 
-function setCardBackForPlayer(player, backLink) {
-	// check if opponent card back should show
-	if (player == 0 && localStorage.getItem("cardBackToggle") == "true") {
-		return;
-	}
-	
-	let rightSheet = Array.from(document.styleSheets).filter(function(sheet) {return sheet.href.endsWith("game.css")})[0];
-	//this matches the very specific rule that applies to all places where there's face down cards of the specified player.
-	let cardBackRule = Array.from(rightSheet.rules).filter(rule => rule.selectorText == "img[src$=\"cardBackFrameP" + player + ".png\"]")[0];
-	cardBackRule.style.backgroundImage = "url('" + backLink + "'), url('/images/cardBack.png')";
-}
-setCardBackForPlayer(1, localStorage.getItem("cardBack"));
-
-// turns a deck into a list of Card objects
-function deckToCardList(deck, isOpponentDeck) {
-	cardList = [];
-	deck.cards.forEach(card => {
-		for (let i = 0; i < card.amount; i++) {
-			cardList.push(new Card(isOpponentDeck, card.id, deck));
-		}
-	});
-	return cardList;
-}
-
 function updateLifeDisplay(player) {
-	let lifeDisplay = document.getElementById("lifeDisplay" + player);
+	let lifeDisplay = document.getElementById("lifeDisplay" + player.index);
 	let lifeDisplayValue = parseInt(lifeDisplay.textContent);
 	
-	if (lifeDisplayValue == life[player]) {
+	if (lifeDisplayValue == player.life) {
 		return;
 	}
 	
-	if (life[player] > lifeDisplayValue) {
-		document.getElementById("lifeDisplay" + player).textContent = lifeDisplayValue + 1;
+	if (player.life > lifeDisplayValue) {
+		lifeDisplay.textContent = lifeDisplayValue + 1;
 	} else {
-		document.getElementById("lifeDisplay" + player).textContent = lifeDisplayValue - 1;
+		lifeDisplay.textContent = lifeDisplayValue - 1;
 	}
 	
 	window.setTimeout(function() {updateLifeDisplay(player);}, 15);
 }
 
 function updateManaDisplay(player) {
-	document.getElementById("manaDisplay" + player).textContent = mana[player];
+	document.getElementById("manaDisplay" + player.index).textContent = player.mana;
 }
 
 //opening a card selector
-function openCardSelect(cardArea, sortList=false) {
+function openCardSelect(cardArea) {
 	//add cards
 	cardSelectorGrid.innerHTML = "";
-	(sortList? [...cardArea.cards].sort(Card.sort) : cardArea.cards).forEach(function(card) {
+	cardArea.cards.forEach((card, i) => {
 		cardImg = document.createElement("img");
 		cardImg.src = card.getImage();
-		cardImg.dataset.cardId = card.id;
+		cardImg.dataset.cardIndex = i;
 		cardImg.dataset.cardArea = cardArea.name;
-		// This exists because Tokens that get displayed in here are fake temporary cards and do not have proper IDs.
-		cardImg.dataset.cardCuId = card.cardId;
 		
 		cardImg.addEventListener("dragstart", grabHandler);
 		cardImg.addEventListener("dragstart", function() {
@@ -66,7 +40,7 @@ function openCardSelect(cardArea, sortList=false) {
 			overlayBackdrop.style.display = "none";
 		});
 		cardImg.addEventListener("click", function(e) {
-			previewCard(this.dataset.cardCuId);
+			previewCard(cardAreas[this.dataset.cardArea].cards[this.dataset.cardIndex]);
 			e.stopPropagation();
 		});
 		cardSelectorGrid.insertBefore(cardImg, cardSelectorGrid.firstChild);
@@ -89,12 +63,6 @@ cardSelectorReturnToDeck.addEventListener("click", function() {
 	cardSelector.style.display = "none";
 	overlayBackdrop.style.display = "none";
 });
-
-function doSelectStartingPlayer() {
-	if (youAre === 0 && cardAreas["field2"].isFaceDown() && cardAreas["field17"].isFaceDown()) {
-		startingPlayerSelect.style.display = "block";
-	}
-}
 
 //track shift key
 document.addEventListener("keydown", function(e) {

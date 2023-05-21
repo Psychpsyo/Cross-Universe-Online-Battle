@@ -90,7 +90,7 @@
 	border-right: none;
 }
 
-#cardDetailsControl > div:last-child {
+#cardDetailsControl > :last-child {
 	border-top-right-radius: 1em;
 }
 
@@ -234,14 +234,15 @@
 
 img[src$="cardBackFrameP0.png"], img[src$="cardBackFrameP1.png"] {
 	background-size: cover;
+	background-position: center;
 }
 
 img[src$="cardBackFrameP0.png"] {
-	background-image: url(""), url("/images/cardBack.png");
+	background-image: var(--p0-card-back), url("/images/cardBack.png");
 }
 
 img[src$="cardBackFrameP1.png"] {
-	background-image: url(""), url("/images/cardBack.png");
+	background-image: var(--p1-card-back), url("/images/cardBack.png");
 }
 
 .fieldCardContainer {
@@ -832,4 +833,19 @@ label[for="fileSelectDeckLoader"] {
 .verticalFieldLabel {
 	writing-mode: vertical-lr;
 	font-size: 2.5vh;
+}
+
+
+#mainGameBlackout {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #0008;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: bold;
+	z-index: 90;
 }

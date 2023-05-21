@@ -32,10 +32,43 @@ a {
 	color: #aaf;
 }
 
+
+/* Header */
+#mainHeaderHolder {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	
+	background-color: var(--theme-background-color);
+	background-image: var(--theme-background);
+	background-position-x: center;
+	background-position-y: var(--theme-background-y);
+	background-size: cover;
+	background-attachment: fixed;
+}
+
+#mainHeaderHolder > header {
+	text-align: center;
+	height: 1.75em;
+	border-bottom: 2px var(--theme-border-color) solid;
+	line-height: 1.75em;
+	background-color: var(--theme-shadow);
+}
+
+#mainHeaderHolder > header > h1 {
+	all: unset;
+	font-weight: bold;
+}
+
+
 /* form controls */
 button, input, select, textarea {
 	font-size: .6em;
 	font-family: inherit;
+}
+
+button:disabled {
+	color: #222;
 }
 
 textarea {
@@ -61,18 +94,25 @@ textarea {
 	border: 2px var(--theme-border-color) solid;
 	background: none;
 	overflow: clip;
+	padding: 0;
 	
 	font-size: 1em;
 	color: inherit;
 	text-align: center;
 	text-decoration: none;
 	
-	cursor: pointer;
 	user-select: none;
 }
-.bigButton:hover {
+.bigButton:enabled {
+	cursor: pointer;
+}
+.bigButton:hover:enabled {
 	background-color: var(--theme-button-hover-color);
 }
+.bigButton:disabled {
+	color: inherit;
+}
+
 
 /* dialogs */
 dialog {

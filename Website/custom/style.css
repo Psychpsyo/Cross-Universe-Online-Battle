@@ -1,0 +1,175 @@
+body {
+	max-height: 100vh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+main {
+	display: flex;
+	min-height: 0;
+	align-items: stretch;
+}
+
+#editorSection {
+	flex-grow: 1;
+	min-width: 0;
+	display: flex;
+	padding: .5em;
+	gap: .75em;
+}
+
+#inputFields {
+	flex-grow: 1;
+	min-width: 0;
+}
+
+#inputFieldHolder {
+	background-color: var(--theme-shadow);
+}
+
+#inputFieldHolder > div {
+	padding: .25em;
+}
+
+.inputRow {
+	display: flex;
+	justify-content: space-between;
+}
+
+#inputFieldHolder > div:nth-child(odd) {
+	background-color: rgba(0, 0, 0, 0.25);
+}
+
+#savedCardsSection {
+	overflow-y: scroll;
+	background-color: var(--theme-shadow);
+	border-left: 2px var(--theme-border-color) solid;
+	min-width: fit-content;
+}
+
+#savedCardsList {
+	all: unset;
+	position: relative;
+	display: block;
+	width: 10em;
+	padding: .5em;
+	line-height: 0;
+}
+#savedCardsList:empty::before {
+	content: attr(data-message);
+	line-height: normal;
+	text-align: center;
+	position: absolute;
+	top: 50vh;
+	left: 0;
+	transform: translateY(-50%);
+	filter: opacity(75%);
+}
+
+.listCard {
+	position: relative;
+	max-width: 100%;
+	aspect-ratio: 813 / 1185;
+	z-index: 0; /* create stacking context (in combination with position: relative) */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: end;
+}
+
+.listCard canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -10;
+}
+
+.listCard button {
+	margin-bottom: .75em;
+	width: 75%;
+	filter: opacity(0);
+	background-color: #0008;
+	transition-property: background-color, filter;
+	transition-duration: .1s, .35s;
+	color: #eee;
+	border: none;
+	border-radius: 1em;
+	font-size: 1em;
+}
+
+.listCard:hover button {
+	filter: opacity(1);
+}
+
+.listCard button:hover {
+	background-color: #4448;
+}
+
+.listCard button:active {
+	background-color: #0008;
+}
+
+.listCard:not(:last-child) {
+	margin-bottom: .5em;
+}
+
+/* Card Effect Editor */
+#effectEditor {
+	background-color: var(--theme-shadow);
+	box-sizing: border-box;
+	padding: 5px;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+#effectEditor:empty::before {
+	content: "...";
+	cursor: text;
+	filter: opacity(75%);
+}
+
+.editSection {
+	display: flow-root;
+	position: relative;
+}
+
+.bulletEditSection {
+	margin-left: 2em;
+}
+.bulletEditSection > .bulletEditSection {
+	margin-left: 1em;
+}
+.bulletEditSection::before {
+	content: "●：";
+	position: absolute;
+	top: 0;
+	left: -2em;
+}
+
+.bracketsEditSection {
+	margin: 0 1em;
+}
+.bracketsEditSection::before, .bracketsEditSection::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	height: calc(100% - .5em);
+	width: .5em;
+	box-sizing: border-box;
+	margin: .25em 0;
+	border: 2px solid white;
+}
+.bulletEditSection > .bracketsEditSection {
+	margin-left: -1em;
+}
+.bracketsEditSection::before {
+	left: -.75em;
+	border-right: none;
+}
+.bracketsEditSection::after {
+	right: -.75em;
+	border-left: none;
+}

@@ -1,39 +1,53 @@
 {
 	"warnings": ["noRules", "noCards"],
 	"code": "de",
-	"roomCodeInputTitle": "Mit Raum-Code verbinden",
-	"enterRoomcode": "Raum-Code:",
-	"rerollRoomcode": "Zufälligen Raum-Code generieren",
-	"connectToRoom": "Verbinden",
-	"waitingForOpponent": "Warte auf den Gegner...",
-	"cancelWaiting": "Abbrechen",
-	"rulesButton": "Spielregeln",
-	"rulesLink": "https://crossuniverse.net/rules",
-	"unofficialNotice": "Diese Seite ist eine Fan-gemachte, unoffizielle Cross Universe Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
-	
-	"gamemode": "Spielmodus:",
-	"gamemodes": {
-		"normal": "Normal",
-		"draft": "Draft"
+	"mainMenu": {
+		"roomCodeInputTitle": "Mit Raum-Code verbinden",
+		"enterRoomcode": "Raum-Code:",
+		"rerollRoomcode": "Zufälligen Raum-Code generieren",
+		"connectToRoom": "Verbinden",
+		"waitingForOpponent": "Warte auf Gegner...",
+		"cancelWaiting": "Abbrechen",
+		"rulesButton": "Spielregeln",
+		"rulesLink": "https://crossuniverse.net/rules",
+		"unofficialNotice": "Diese Seite ist eine Fan-gemachte, unoffizielle Cross Universe Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
+		
+		"gamemode": "Spielmodus:",
+		"gamemodes": {
+			"normal": "Normal",
+			"draft": "Draft"
+		},
+		
+		"settingsButton": "Einstellungen",
+		"deckCreatorButton": "Deck Editor"
 	},
-	
-	"settingsButton": "Einstellungen",
-	"deckCreatorButton": "Deck Editor",
 	
 	"infoYou": "Du",
 	"infoOpponent": "Gegner",
 	"infoLife": "Leben:",
 	"infoMana": "Mana:",
 	
-	"dropYourDeck": "Deck per Drag & drop hier ablegen.",
-	"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+	"deckSelect": {
+		"chooseYourDeck": "Wähle dein Deck.",
+		"loadingDeck": "Deck wird geladen...",
+		"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
+		"dropYourDeck": "Deck per Drag & drop hier ablegen.",
+		"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+		
+		"deckListDefault": "Default",
+		"deckListLegacy": "Legacy",
+		"deckListLoadSelected": "Gewähltes Deck laden",
+		"deckListCardAmount": "{#CARDS} Karten"
+	},
 	
-	"deckListDefault": "Default",
-	"deckListLegacy": "Legacy",
-	"deckListLoadSelected": "Gewähltes Deck laden",
-	"deckListCardAmount": "{#CARDS} Karten",
+	"partnerSelect": {
+		"useSuggestedQuestion": "Möchtest du den empfohlenen Partner für dieses Deck verwenden oder selber einen wählen?",
+		"useSuggested": "Empfohlenen wählen",
+		"selectManually": "Selbst wählen",
+		"waitingForOpponent": "Warte darauf, dass dein Gegner einen Partner wählt...",
+		"revealPartner": "Partner aufdecken"
+	},
 	
-	"revealPartner": "Partner aufdecken",
 	"selectStartingPlayer": "Startspieler auswählen",
 	"youStart": "Du bist zuerst dran.",
 	"opponentStarts": "Dein Gegner ist zuerst dran.",
@@ -100,6 +114,7 @@
 		"amountTaken": "{#CURRENT}/{#TOTAL} genommen",
 		"finished": "Draft beendet. Ihr könnt das Spiel nun starten.",
 		"startGame": "Spiel Starten",
+		"waitingForOpponent": "Warte auf Gegner...",
 		"deckName": "Draft Deck",
 		"yourDeck": "Dein Deck",
 		"opponentDeck": "Gegnerisches Deck"
@@ -135,16 +150,17 @@
 		
 		"customization": {
 			"title": "Display & Themes",
-			"fieldLabels": "Feldbeschriftung Zeigen",
-			"disableCardBacks": "Gegnerische Kartenrücken Deaktivieren",
-			"leftField": "Feld links auf dem Bildschirm Platzieren",
+			"fieldLabels": "Feldbeschriftung zeigen",
+			"disableCardBacks": "Gegnerische Kartenrücken deaktivieren",
+			"leftField": "Feld links auf dem Bildschirm platzieren",
 			"theme": "Theme:",
 			"themes": {
 				"default": "Standard",
 				"light": "Hell",
 				"worldTree": "Der World Tree",
 				"deepSea": "Tiefsee"
-			}
+			},
+			"mainMenuCards": "Zeige schwebende Karten im Hauptmenü"
 		},
 		
 		"accessibility": {
@@ -163,24 +179,24 @@
 		
 		"hotkeys": {
 			"title": "Hotkeys",
-			"resetHotkeys": "Hotkeys Zurücksetzen",
-			"pressKey": "Taste Drücken",
+			"resetHotkeys": "Hotkeys zurücksetzen",
+			"pressKey": "Taste drücken",
 			"keyCtrl": "Strg",
 			"keyShift": "Shift",
 			"keyAlt": "Alt",
-			"showYourDiscardPile": "Eigenen Ablagestapel Zeigen:",
-			"showOpponentDiscardPile": "Gegnerischen Ablagestapel Zeigen:",
-			"showYourExileZone": "Eigenes Exil Zeigen:",
-			"showOpponentExileZone": "Gegnerisches Exil Zeigen:",
-			"searchYourDeck": "Dein Deck Durchsuchen:",
-			"tokenSelector": "Token-Menü Öffnen:",
-			"showField": "Feld Zeigen:",
-			"destroyGrabbedToken": "Gehaltenes Token Zerstören:",
-			"writeChatMessage": "Chat-Nachricht Schreiben:",
-			"drawCard": "Karte Ziehen:",
-			"shuffleDeck": "Eigenes Deck Mischen:",
-			"showDeckTop": "Oberste Karte im Deck Zeigen:",
-			"previewHandCard": "Handkarten Anzeigen:",
+			"showYourDiscardPile": "Eigenen Ablagestapel zeigen:",
+			"showOpponentDiscardPile": "Gegnerischen Ablagestapel zeigen:",
+			"showYourExileZone": "Eigenes Exil zeigen:",
+			"showOpponentExileZone": "Gegnerisches Exil zeigen:",
+			"searchYourDeck": "Dein Deck durchsuchen:",
+			"tokenSelector": "Token-Menü öffnen:",
+			"showField": "Feld zeigen:",
+			"destroyGrabbedToken": "Gehaltenes Token zerstören:",
+			"writeChatMessage": "Chat-Nachricht schreiben:",
+			"drawCard": "Karte ziehen:",
+			"shuffleDeck": "Eigenes Deck mischen:",
+			"showDeckTop": "Oberste Karte im Deck zeigen:",
+			"previewHandCard": "Handkarten anzeigen:",
 			
 			"keys": {
 				"KeyA": "A",
@@ -333,7 +349,7 @@
 			"deckLimitLess": "weniger",
 			"deckLimitMore": "mehr",
 			"deckLimitInfinite": "∞",
-			"sortBy": "Sortiere nach",
+			"sortBy": "Sortiere nach:",
 			"sortByRelevancy": "Relevanz",
 			"sortByLevel": "Level",
 			"sortByName": "Name",
@@ -381,7 +397,7 @@
 				"noPartner": "To export as .deck, you must select a partner."
 			},
 			
-			"levelDistribution": "Leve-Verteilung:",
+			"levelDistribution": "Level-Verteilung:",
 			"options": "Optionen",
 			"exportDeck": "Exportieren (.deck)",
 			"importDeck": "Deck Importieren",
@@ -399,7 +415,6 @@
 	"cardDetailsTypes": "Typen: ",
 	"cardDetailsEffects": "Effekte: ",
 	"cardDetailsInfoString": "Lv{#LEVEL} {#CARDTYPE}",
-	"cardDetailsQuestionMark": "?",
 	"unitCardDetailType": "Einheit",
 	"tokenCardDetailType": "Token",
 	"standardSpellCardDetailType": "Standard-Zauber",
@@ -419,46 +434,94 @@
 	"subEffectClosingBracket": "］",
 	
 	"typeSeparator": ", ",
-	"typePsychic": "Psychic",
-	"typeDragon": "Dragon",
-	"typeFigure": "Figure",
-	"typeSamurai": "Samurai",
-	"typeLight": "Light",
-	"typeKatana": "Katana",
-	"typeSword": "Sword",
-	"typeCurse": "Curse",
-	"typeEarth": "Earth",
-	"typeLandmine": "Landmine",
-	"typeAngel": "Angel",
-	"typeRock": "Rock",
-	"typeIllusion": "Illusion",
-	"typeStructure": "Structure",
-	"typeDemon": "Demon",
-	"typeWarrior": "Warrior",
-	"typeBook": "Book",
-	"typePlant": "Plant",
-	"typeMachine": "Machine",
-	"typeGhost": "Ghost",
-	"typeWater": "Water",
-	"typeIce": "Ice",
-	"typeFire": "Fire",
-	"typeBeast": "Beast",
-	"typeShield": "Shield",
-	"typeMyth": "Myth",
-	"typeSpirit": "Spirit",
-	"typeBoundary": "Boundary",
-	"typeMedicine": "Medicine",
-	"typeBug": "Bug",
-	"typeGravity": "Gravity",
-	"typeChain": "Chain",
-	"typeArmor": "Armor",
-	"typeDark": "Dark",
-	"typeElectric": "Electric",
-	"typeWind": "Wind",
-	"typeMage": "Mage",
-	"typeFish": "Fish",
-	"typeBird": "Bird",
 	"typeless": "typenlos",
+	"types": {
+		"Psychic": "Psychic",
+		"Dragon": "Dragon",
+		"Figure": "Figure",
+		"Samurai": "Samurai",
+		"Light": "Light",
+		"Katana": "Katana",
+		"Sword": "Sword",
+		"Curse": "Curse",
+		"Earth": "Earth",
+		"Landmine": "Landmine",
+		"Angel": "Angel",
+		"Rock": "Rock",
+		"Illusion": "Illusion",
+		"Structure": "Structure",
+		"Demon": "Demon",
+		"Warrior": "Warrior",
+		"Book": "Book",
+		"Plant": "Plant",
+		"Machine": "Machine",
+		"Ghost": "Ghost",
+		"Water": "Water",
+		"Ice": "Ice",
+		"Fire": "Fire",
+		"Beast": "Beast",
+		"Shield": "Shield",
+		"Myth": "Myth",
+		"Spirit": "Spirit",
+		"Boundary": "Boundary",
+		"Medicine": "Medicine",
+		"Bug": "Bug",
+		"Gravity": "Gravity",
+		"Chain": "Chain",
+		"Armor": "Armor",
+		"Dark": "Dark",
+		"Electric": "Electric",
+		"Wind": "Wind",
+		"Mage": "Mage",
+		"Fish": "Fish",
+		"Bird": "Bird",
+		"Ninja": "Ninja",
+		"NinjaTool": "Ninja Tool",
+		"Ninjutsu": "Ninjutsu"
+	},
+	
+	"customCards": {
+		"title": "Custom Karten",
+		
+		"cardName": "Name:",
+		"cardLevel": "Level:",
+		"cardTypes": "Typen:",
+		"cardAttack": "Angriff:",
+		"cardDefense": "Verteidigung:",
+		"cardType": "Art:",
+		"cardAbilities": "Fähigkeiten:",
+		
+		"possibleTypes": "Mögliche Typen sind:\n{#TYPES}",
+		"possibleTypesSeperator": ", ",
+		
+		"save": "Karte speichern",
+		"saveCopy": "Als Kopie speichern",
+		"createNew": "Neu erstellen",
+		"downloadImage": "Herunterladen (.png)",
+		"downloadCard": "Herunterladen (.card)",
+		"noSavedCards": "Du hast noch keine Karten gespeichert.",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		
+		"unsavedChanges": "Es gibt ungespeicherte Änderungen.\nWenn du fortführst, werden diese verloren gehen.",
+		"reallyDelete": "Möchtest du '{#CARDNAME}' wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden. '{#CARDNAME}' wird für immer verloren sein.",
+		"doesntExist": "Die gewählte Karte existiert nicht mehr und konnte deshalf nicht geladen werden.",
+		
+		"renderer": {
+			"attack": "Attack:",
+			"defense": "Defense:",
+			
+			"standardSpell": "Standard Spell",
+			"enchantSpell": "Enchant Spell",
+			"continuousSpell": "Continuous Spell",
+			"standardItem": "Standard Item",
+			"equipableItem": "Equipable Item",
+			"continuousItem": "Continuous Item",
+			
+			"ideaCredit": "Idee: ",
+			"tokenNotice": "※Token cards may not be added to decks."
+		}
+	},
 	
 	"cardActions": {
 		"I00040": {
@@ -466,5 +529,7 @@
 			"yourRoll": "Du hast Fate's Dice geworfen. Es war eine {#RESULT}.",
 			"opponentRoll": "Dein Gegner hat Fate's Dice geworfen. Es war eine {#RESULT}."
 		}
-	}
+	},
+	
+	"optional": {}
 }

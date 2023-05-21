@@ -22,8 +22,8 @@ var deckUtils = {
 		return deck;
 	},
 	
-	//converts an official Cross Universe deck format to my json format (cuDeck is passed in as JS object)
-	toJsonDeck: function(cuDeck) {
+	// Converts an official Cross Universe .deck format file to .deckx with respect to the current user-selected locale.
+	toDeckx: function(cuDeck) {
 		let jsonDeck = {};
 		
 		//set name
@@ -54,7 +54,7 @@ var deckUtils = {
 		return jsonDeck;
 	},
 	
-	//count cards in a json deck
+	//count cards in a .deckx
 	countDeckCards: function(deck) {
 		let total = 0;
 		deck.cards.forEach(card => {
@@ -63,7 +63,7 @@ var deckUtils = {
 		return total;
 	},
 	
-	// converts a json deck to a list of card ID strings. (U00161, I00045...)
+	// converts a .deckx to a list of card ID strings. (U00161, I00045...)
 	deckToCardIdList: function(deck) {
 		cardList = [];
 		deck.cards.forEach(card => {
