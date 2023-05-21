@@ -16,7 +16,7 @@ cancelWaitingBtn.textContent = locale.mainMenu.cancelWaiting;
 unofficialNotice.innerHTML = locale.mainMenu.unofficialNotice;
 rulesButton.textContent = locale.mainMenu.rulesButton;
 
-rulesButton.href = locale.rulesLink;
+rulesButton.href = locale.mainMenu.rulesLink;
 
 settingsButton.textContent = locale.mainMenu.settingsButton;
 deckMakerButton.textContent = locale.mainMenu.deckCreatorButton;
