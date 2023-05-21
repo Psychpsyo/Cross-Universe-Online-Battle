@@ -77,23 +77,6 @@ function blankSlate() {
 }
 
 // editing current card
-effectEditNewBullet.addEventListener("click", function() {
-	let effect = document.createElement("div");
-	effect.classList.add("effectEditSection");
-	effectEditor.appendChild(effect);
-	updateCard(true);
-});
-effectEditNewBrackets.addEventListener("click", function() {
-	let brackets = document.createElement("div");
-	brackets.classList.add("bracketsEditSection");
-	effectEditor.appendChild(brackets);
-	updateCard(true);
-});
-effectEditor.addEventListener("input", function() {
-	
-	updateCard(true);
-});
-
 function parseEffectsList(root = effectEditor) {
 	let list = [];
 	Array.from(root.childNodes).forEach(elem => {
@@ -103,7 +86,7 @@ function parseEffectsList(root = effectEditor) {
 				object.type = "text";
 				object.content = elem.textContent.trim();
 			}
-		} else if (elem.classList.contains("effectEditSection")) {
+		} else if (elem.classList.contains("bulletEditSection")) {
 			object.type = "bullet";
 			object.content = parseEffectsList(elem);
 		} else if (elem.classList.contains("bracketsEditSection")) {
@@ -122,6 +105,91 @@ cardLevel.addEventListener("input", function() {updateCard(true)});
 cardAttack.addEventListener("input", function() {updateCard(true)});
 cardDefense.addEventListener("input", function() {updateCard(true)});
 cardType.addEventListener("input", function() {updateCard(true)});
+
+// effect editor
+effectEditor.addEventListener("input", function() {updateCard(true)});
+if (!effectEditor.isContentEditable) {
+	effectEditor.contentEditable = "true";
+	function typeNode(node) {
+		let selection = window.getSelection();
+		for (let i = 0; i < selection.rangeCount; i++) {
+			let range = selection.getRangeAt(i);
+			range.deleteContents();
+			range.insertNode(node);
+			range.collapse();
+		}
+	}
+	effectEditor.addEventListener("paste", function(e) {
+		e.preventDefault();
+		typeNode(document.createTextNode(e.clipboardData.getData("text/plain")));
+	});
+	effectEditor.addEventListener("beforeinput", function(e) {
+		if (e.inputType == "insertParagraph") {
+			e.preventDefault();
+			typeNode(document.createTextNode("\n"));
+		}
+	});
+	effectEditor.addEventListener("drop", function(e) {
+		e.preventDefault();
+		let droppedText = e.dataTransfer.getData("text");
+		if (droppedText) {
+			typeNode(document.createTextNode(droppedText));
+		}
+	});
+}
+function createEffectSection(type) {
+	let section = document.createElement("div");
+	section.classList.add("editSection");
+	section.classList.add(type + "EditSection");
+	return section;
+}
+function insertEffectSection(type) {
+	let selection = window.getSelection();
+	let totalInsertions = 0;
+	for (let i = 0; i < selection.rangeCount; i++) {
+		let range = selection.getRangeAt(i);
+		// check if we're inside the effect editor
+		let rangeContainer = range.commonAncestorContainer;
+		if (rangeContainer.nodeName == "#text") {
+			rangeContainer = rangeContainer.parentElement;
+		}
+		if (rangeContainer.closest("#effectEditor") === null) {
+			continue;
+		}
+		// insert the section
+		let section = createEffectSection(type);
+		
+		if (range.endContainer === range.startContainer) {
+			range.surroundContents(section);
+		} else {
+			range.insertNode(section);
+		}
+		if (section.childNodes.length == 0) {
+			section.appendChild(document.createElement("br"));
+		}
+		range.selectNodeContents(section);
+		range.collapse();
+		totalInsertions++;
+	}
+	if (totalInsertions == 0) {
+		let section = createEffectSection(type);
+		section.appendChild(document.createElement("br"));
+		effectEditor.appendChild(section);
+		selection.removeAllRanges();
+		let range = new Range();
+		range.selectNodeContents(section);
+		range.collapse();
+		selection.addRange(range);
+	}
+}
+effectEditNewBullet.addEventListener("click", function() {
+	insertEffectSection("bullet");
+	updateCard(true);
+});
+effectEditNewBrackets.addEventListener("click", function() {
+	insertEffectSection("brackets");
+	updateCard(true);
+});
 
 saveButton.addEventListener("click", saveCard);
 saveCopyButton.addEventListener("click", function() {
@@ -219,29 +287,22 @@ function loadCard(card) {
 	cardDefense.value = (card.defense == -1? "" : card.defense) ?? "";
 	cardType.value = card.cardType;
 	
+	effectEditor.innerHTML = "";
 	loadCardEffects(card.effects, effectEditor);
 	
 	updateCard(false);
 }
 
 function loadCardEffects(list, toElem) {
-	console.log(list);
 	list.forEach(effect => {
 		switch (effect.type) {
 			case "text": {
 				toElem.appendChild(document.createTextNode(effect.content));
 				break;
 			}
-			case "bullet": {
-				let bullet = document.createElement("div");
-				bullet.classList.add("effectEditSection");
-				toElem.appendChild(bullet);
-				loadCardEffects(effect.content, bullet);
-				break;
-			}
+			case "bullet":
 			case "brackets": {
-				let brackets = document.createElement("div");
-				brackets.classList.add("bracketsEditSection");
+				let brackets = createEffectSection(effect.type);
 				toElem.appendChild(brackets);
 				loadCardEffects(effect.content, brackets);
 				break;

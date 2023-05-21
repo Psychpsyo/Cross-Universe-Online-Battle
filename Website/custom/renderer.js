@@ -48,7 +48,7 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 					text = text.slice(0, -1);
 				}
 				text += "●：";
-				let childResult = formatEffectText(child.content, indent + 2, fontSize, false, ctx, bracketCount, lineCount + text.split("\n").length - 1);
+				let childResult = formatEffectText(child.content, indent + (blockParent? 2 : 1), fontSize, false, ctx, bracketCount, lineCount + text.split("\n").length - 1);
 				text += childResult.text;
 				bracketList.push(...childResult.brackets);
 				break;

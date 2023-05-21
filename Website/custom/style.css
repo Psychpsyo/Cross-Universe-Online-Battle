@@ -104,22 +104,25 @@ main {
 
 /* Card Effect Editor */
 #effectEditor {
-	min-height: 2rem;
 	background-color: var(--theme-shadow);
 	box-sizing: border-box;
 	padding: 5px;
+	white-space: pre-wrap;
 	overflow-wrap: break-word;
 }
 
-.effectEditSection {
+.editSection {
+	display: flow-root;
 	position: relative;
-	margin-left: 2em;
-	min-height: 2rem;
 }
-.effectEditSection > .effectEditSection {
+
+.bulletEditSection {
+	margin-left: 2em;
+}
+.bulletEditSection > .bulletEditSection {
 	margin-left: 1em;
 }
-.effectEditSection::before {
+.bulletEditSection::before {
 	content: "●：";
 	position: absolute;
 	top: 0;
@@ -127,9 +130,7 @@ main {
 }
 
 .bracketsEditSection {
-	position: relative;
 	margin: 0 1em;
-	min-height: 2rem;
 }
 .bracketsEditSection::before, .bracketsEditSection::after {
 	content: "";
@@ -141,7 +142,7 @@ main {
 	margin: .25em 0;
 	border: 2px solid white;
 }
-.effectEditSection > .bracketsEditSection {
+.bulletEditSection > .bracketsEditSection {
 	margin-left: -1em;
 }
 .bracketsEditSection::before {
