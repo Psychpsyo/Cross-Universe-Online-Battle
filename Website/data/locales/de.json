@@ -471,17 +471,24 @@
 		"Wind": "Wind",
 		"Mage": "Mage",
 		"Fish": "Fish",
-		"Bird": "Bird"
+		"Bird": "Bird",
+		"Ninja": "Ninja",
+		"NinjaTool": "Ninja Tool",
+		"Ninjutsu": "Ninjutsu"
 	},
 	
 	"customCards": {
 		"title": "Custom Karten",
 		"cardName": "Name:",
 		"cardLevel": "Level:",
+		"cardTypes": "Typen:",
 		"cardAttack": "Angriff:",
 		"cardDefense": "Verteidigung:",
 		"cardType": "Art:",
 		"cardAbilities": "Fähigkeiten:",
+		
+		"possibleTypes": "Mögliche Typen sind:\n{#TYPES}",
+		"possibleTypesSeperator": ", ",
 		
 		"save": "Karte speichern",
 		"saveCopy": "Als Kopie speichern",
