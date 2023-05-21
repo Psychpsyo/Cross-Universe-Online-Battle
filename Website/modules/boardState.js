@@ -342,6 +342,14 @@ export class BoardState extends GameState {
 				cardAreas.tokens.createOpponentToken(message);
 				return true;
 			}
+			case "returnAllToDeck": {
+				let pileArea = cardAreas[cardAreaToLocal(message)];
+				while (pileArea.cards.length > 0) {
+					cardAreas["deck0"].cards.push(pileArea.cards.pop());
+				}
+				pileArea.updateDOM();
+				return true;
+			}
 		}
 		return false;
 	}

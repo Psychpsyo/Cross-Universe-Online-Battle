@@ -223,8 +223,9 @@ class pileCardArea extends cardArea {
 	}
 	
 	returnAllToDeck() {
+		socket.send("[returnAllToDeck]" + this.name);
 		while (this.cards.length > 0) {
-			cardAreas["deck1"].dropToTop(this.cards.pop());
+			cardAreas["deck1"].cards.push(this.cards.pop());
 		}
 		cardAreas["deck1"].shuffle();
 		this.updateDOM();
@@ -438,11 +439,11 @@ class myPresentedCardsArea extends cardArea {
 			if (this.dataset.shown == "true") {
 				this.dataset.shown = false;
 				this.textContent = locale["presentReveal"];
-				socket.send("[revealCard]" + Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
+				socket.send("[unrevealCard]" + Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
 			} else {
 				this.dataset.shown = true;
 				this.textContent = locale["presentHide"];
-				socket.send("[unrevealCard]" + Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
+				socket.send("[revealCard]" + Array.from(this.parentElement.parentElement.children).indexOf(this.parentElement));
 			}
 		});
 		
