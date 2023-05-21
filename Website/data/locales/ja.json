@@ -494,10 +494,11 @@
 		"save": null,
 		"saveCopy": null,
 		"createNew": null,
-		"edit": null,
-		"delete": null,
 		"downloadImage": null,
 		"downloadCard": null,
+		"noSavedCards": null,
+		"edit": null,
+		"delete": null,
 		
 		"unsavedChanges": null,
 		"reallyDelete": null,

@@ -46,10 +46,20 @@ main {
 
 #savedCardsList {
 	all: unset;
+	position: relative;
 	display: block;
 	width: 10em;
 	padding: .5em;
 	line-height: 0;
+}
+#savedCardsList:empty::before {
+	content: attr(data-message);
+	line-height: normal;
+	text-align: center;
+	position: absolute;
+	top: 50vh;
+	left: 0;
+	transform: translateY(-50%);
 }
 
 .listCard {

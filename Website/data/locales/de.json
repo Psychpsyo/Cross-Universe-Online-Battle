@@ -493,10 +493,11 @@
 		"save": "Karte speichern",
 		"saveCopy": "Als Kopie speichern",
 		"createNew": "Neu erstellen",
-		"edit": "Bearbeiten",
-		"delete": "Löschen",
 		"downloadImage": "Herunterladen (.png)",
 		"downloadCard": "Herunterladen (.card)",
+		"noSavedCards": "Du hast noch keine Karten gespeichert.",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
 		
 		"unsavedChanges": "Es gibt ungespeicherte Änderungen.\nWenn du fortführst, werden diese verloren gehen.",
 		"reallyDelete": "Möchtest du '{#CARDNAME}' wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden. '{#CARDNAME}' wird für immer verloren sein.",

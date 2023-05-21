@@ -26,6 +26,8 @@ createNewButton.textContent = locale.customCards.createNew;
 downloadImageButton.textContent = locale.customCards.downloadImage;
 downloadCardButton.textContent = locale.customCards.downloadCard;
 
+savedCardsList.dataset.message = locale.customCards.noSavedCards;
+
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 
