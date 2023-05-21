@@ -223,11 +223,15 @@ class pileCardArea extends cardArea {
 	}
 	
 	returnAllToDeck() {
+		if (this.cards.length == 0) {
+			return;
+		}
 		socket.send("[returnAllToDeck]" + this.name);
 		while (this.cards.length > 0) {
 			cardAreas["deck1"].cards.push(this.cards.pop());
 		}
 		cardAreas["deck1"].shuffle();
+		cardAreas["deck1"].updateVisual();
 		this.updateDOM();
 	}
 }

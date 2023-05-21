@@ -348,6 +348,7 @@ export class BoardState extends GameState {
 					cardAreas["deck0"].cards.push(pileArea.cards.pop());
 				}
 				pileArea.updateDOM();
+				cardAreas["deck0"].updateVisual();
 				return true;
 			}
 		}
