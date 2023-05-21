@@ -129,6 +129,7 @@ cardType.addEventListener("input", function() {updateCard(true)});
 
 // effect editor
 if (!effectEditor.isContentEditable) {
+	// Workarounds for browsers that don't yet support contenteditable="plaintext-only" (Firefox)
 	effectEditor.contentEditable = "true";
 	function typeNode(node) {
 		let selection = window.getSelection();
@@ -155,6 +156,11 @@ if (!effectEditor.isContentEditable) {
 		if (droppedText) {
 			typeNode(document.createTextNode(droppedText));
 		}
+	});
+	effectEditor.addEventListener("input", function(e) {
+		if (this.childElementCount == 1 && this.firstChild.nodeName == "BR") {
+			this.innerHTML = "";
+		};
 	});
 }
 function createEffectSection(type) {

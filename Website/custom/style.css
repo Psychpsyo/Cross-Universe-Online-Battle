@@ -24,7 +24,11 @@ main {
 	min-width: 0;
 }
 
-#inputFields > div {
+#inputFieldHolder {
+	background-color: var(--theme-shadow);
+}
+
+#inputFieldHolder > div {
 	padding: .25em;
 }
 
@@ -33,8 +37,8 @@ main {
 	justify-content: space-between;
 }
 
-#inputFields > div:nth-child(odd) {
-	background-color: var(--theme-shadow);
+#inputFieldHolder > div:nth-child(odd) {
+	background-color: rgba(0, 0, 0, 0.25);
 }
 
 #savedCardsSection {
@@ -60,6 +64,7 @@ main {
 	top: 50vh;
 	left: 0;
 	transform: translateY(-50%);
+	filter: opacity(75%);
 }
 
 .listCard {
@@ -118,6 +123,12 @@ main {
 	padding: 5px;
 	white-space: pre-wrap;
 	overflow-wrap: break-word;
+}
+
+#effectEditor:empty::before {
+	content: "...";
+	cursor: text;
+	filter: opacity(75%);
 }
 
 .editSection {
