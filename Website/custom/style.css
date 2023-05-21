@@ -2,7 +2,6 @@ body {
 	max-height: 100vh;
 	overflow: hidden;
 	display: flex;
-	flex: 1;
 	flex-direction: column;
 }
 
@@ -25,7 +24,11 @@ main {
 	min-width: 0;
 }
 
-#inputFields > div {
+#inputFieldHolder {
+	background-color: var(--theme-shadow);
+}
+
+#inputFieldHolder > div {
 	padding: .25em;
 }
 
@@ -34,8 +37,8 @@ main {
 	justify-content: space-between;
 }
 
-#inputFields > div:nth-child(odd) {
-	background-color: var(--theme-shadow);
+#inputFieldHolder > div:nth-child(odd) {
+	background-color: rgba(0, 0, 0, 0.25);
 }
 
 #savedCardsSection {
@@ -47,10 +50,21 @@ main {
 
 #savedCardsList {
 	all: unset;
+	position: relative;
 	display: block;
 	width: 10em;
 	padding: .5em;
 	line-height: 0;
+}
+#savedCardsList:empty::before {
+	content: attr(data-message);
+	line-height: normal;
+	text-align: center;
+	position: absolute;
+	top: 50vh;
+	left: 0;
+	transform: translateY(-50%);
+	filter: opacity(75%);
 }
 
 .listCard {
@@ -103,31 +117,32 @@ main {
 }
 
 /* Card Effect Editor */
-#effectEditor textarea {
-	margin: 0;
-	height: 0;
-	min-height: 2rem;
+#effectEditor {
 	background-color: var(--theme-shadow);
-	color: inherit;
-	border: none;
-	font-size: inherit;
-	line-height: 1em;
-	width: 100%;
-	overflow: hidden;
 	box-sizing: border-box;
-}
-#effectEditor > :last-child > .effectEditorDeleteBtn {
-	display: none;
+	padding: 5px;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
 }
 
-.effectEditSection {
+#effectEditor:empty::before {
+	content: "...";
+	cursor: text;
+	filter: opacity(75%);
+}
+
+.editSection {
+	display: flow-root;
 	position: relative;
+}
+
+.bulletEditSection {
 	margin-left: 2em;
 }
-.effectEditSection > div > .effectEditSection {
+.bulletEditSection > .bulletEditSection {
 	margin-left: 1em;
 }
-.effectEditSection::before {
+.bulletEditSection::before {
 	content: "●：";
 	position: absolute;
 	top: 0;
@@ -135,7 +150,6 @@ main {
 }
 
 .bracketsEditSection {
-	position: relative;
 	margin: 0 1em;
 }
 .bracketsEditSection::before, .bracketsEditSection::after {
@@ -148,7 +162,7 @@ main {
 	margin: .25em 0;
 	border: 2px solid white;
 }
-.effectEditSection > div > .bracketsEditSection {
+.bulletEditSection > .bracketsEditSection {
 	margin-left: -1em;
 }
 .bracketsEditSection::before {

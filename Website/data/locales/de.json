@@ -474,24 +474,34 @@
 		"Wind": "Wind",
 		"Mage": "Mage",
 		"Fish": "Fish",
-		"Bird": "Bird"
+		"Bird": "Bird",
+		"Ninja": "Ninja",
+		"NinjaTool": "Ninja Tool",
+		"Ninjutsu": "Ninjutsu"
 	},
 	
 	"customCards": {
 		"title": "Custom Karten",
+		
 		"cardName": "Name:",
 		"cardLevel": "Level:",
+		"cardTypes": "Typen:",
 		"cardAttack": "Angriff:",
 		"cardDefense": "Verteidigung:",
 		"cardType": "Art:",
+		"cardAbilities": "Fähigkeiten:",
+		
+		"possibleTypes": "Mögliche Typen sind:\n{#TYPES}",
+		"possibleTypesSeperator": ", ",
 		
 		"save": "Karte speichern",
 		"saveCopy": "Als Kopie speichern",
 		"createNew": "Neu erstellen",
-		"edit": "Bearbeiten",
-		"delete": "Löschen",
 		"downloadImage": "Herunterladen (.png)",
 		"downloadCard": "Herunterladen (.card)",
+		"noSavedCards": "Du hast noch keine Karten gespeichert.",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
 		
 		"unsavedChanges": "Es gibt ungespeicherte Änderungen.\nWenn du fortführst, werden diese verloren gehen.",
 		"reallyDelete": "Möchtest du '{#CARDNAME}' wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden. '{#CARDNAME}' wird für immer verloren sein.",

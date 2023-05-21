@@ -48,20 +48,22 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 					text = text.slice(0, -1);
 				}
 				text += "●：";
-				let childResult = formatEffectText(child.content, indent + 2, fontSize, false, ctx, bracketCount, lineCount + text.split("\n").length - 1);
+				let childResult = formatEffectText(child.content, indent + (blockParent? 2 : 1), fontSize, false, ctx, bracketCount, lineCount + text.split("\n").length - 1);
 				text += childResult.text;
 				bracketList.push(...childResult.brackets);
 				break;
 			}
 			case "brackets": {
 				if (!blockParent) {
-					text = text.slice(0, -1);
+					text = text.slice(0, -2);
 				}
+				text += "　";
+				let myIndent = blockParent? indent : indent - 2;
 				let bracket = {
-					"indent": blockParent? indent : indent - 2,
+					"indent": myIndent,
 					"firstLine": lineCount + text.split("\n").length - 1
 				}
-				let childResult = formatEffectText(child.content, indent - 1, fontSize, true, ctx, bracketCount + 1, lineCount + text.split("\n").length - 1);
+				let childResult = formatEffectText(child.content, myIndent + 1, fontSize, true, ctx, bracketCount + 1, lineCount + text.split("\n").length - 1);
 				text += childResult.text;
 				bracket.lastLine = lineCount + text.split("\n").length;
 				bracketList.push(bracket);
@@ -69,33 +71,24 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 				break;
 			}
 			case "text": {
-				let contentString = "　".repeat(indent) + child.content;
-				// place additional newlines and indents
-				let lastNewLine = 0
-				let currentPosition = 0
-				while (currentPosition != -1) {
-					let nextBreak = contentString.indexOf("\n", currentPosition + 1);
-					let nextSpace = contentString.indexOf(" ", currentPosition + 1);
-					let target = Math.min(nextSpace, nextBreak)
-					if (nextSpace == -1) {
-						target = nextBreak;
-					} else if (nextBreak == -1) {
-						target = nextSpace;
+				let contentString = "";
+				child.content.split("\n").forEach(line => {
+					line = "　".repeat(indent) + line;
+					
+					let lastNewLine = 0;
+					let currentPosition = 0;
+					while (currentPosition != -1) {
+						let nextSpace = line.indexOf(" ", currentPosition + 1);
+						if (lastNewLine != currentPosition && ctx.measureText(nextSpace == -1? line.substring(lastNewLine) : line.substring(lastNewLine, nextSpace)).width > 640 - bracketCount * fontSize) {
+							lastNewLine = currentPosition;
+							line = line.substring(0, lastNewLine) + "\n" + "　".repeat(indent) + line.substring(lastNewLine + 1);
+						}
+						currentPosition = line.indexOf(" ", currentPosition + 1);
 					}
-					if (ctx.measureText(target == -1? contentString.substring(lastNewLine) : contentString.substring(lastNewLine, target)).width > 640 - bracketCount * fontSize) {
-						lastNewLine = currentPosition;
-						contentString = contentString.substring(0, currentPosition) + "\n" + "　".repeat(indent) + contentString.substring(currentPosition + 1);
-						nextBreak = contentString.indexOf("\n", currentPosition + 1);
-						nextSpace = contentString.indexOf(" ", currentPosition + 1);
-					}
-					// Are we about to skip a line break with currentPosition?
-					if (nextSpace > nextBreak && nextBreak != -1) {
-						lastNewLine = nextBreak;
-						contentString = contentString.substring(0, lastNewLine + 1) + "　".repeat(indent) + contentString.substring(lastNewLine + 1);
-					}
-					currentPosition = contentString.indexOf(" ", currentPosition + 1);
-				}
-				text += contentString.substring(indent);
+					contentString += "\n" + line;
+				});
+				
+				text += contentString.substring(indent + 1);
 				break;
 			}
 		}

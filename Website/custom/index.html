@@ -5,8 +5,6 @@
 		<base href="../">
 		<title>Custom Card Maker</title>
 		
-		<meta name=”robots” content=”noindex”>
-		
 		<link rel="icon" type="image/png" href="../images/favicon.png">
 		
 		<link rel="stylesheet" href="index.css">
@@ -14,32 +12,36 @@
 	</head>
 	<body>
 		<div id="mainHeaderHolder">
-			<header><h1 id="title">Custom Cards</h1></header>
+			<header><h1 id="title"></h1></header>
 		</div>
 		<main>
 			<section id="editorSection">
 				<div id="inputFields">
-					<div class="inputRow"><label for="cardName" id="cardNameLabel">Name:</label><input type="text" id="cardName" autocomplete="off"></div>
-					<div class="inputRow"><label for="cardLevel" id="cardLevelLabel">Level:</label><input type="number" id="cardLevel" min="0" value="" placeholder="?" autocomplete="off"></div>
-					<div class="inputRow"><label for="cardAttack" id="cardAttackLabel">Attack:</label><input type="number" id="cardAttack" min="0" value="" placeholder="?" autocomplete="off"></div>
-					<div class="inputRow"><label for="cardDefense" id="cardDefenseLabel">Defense:</label><input type="number" id="cardDefense" min="0" value="" placeholder="?" autocomplete="off"></div>
-					<div class="inputRow"><label for="cardType" id="cardTypeLabel">Card Type:</label><select id="cardType" autocomplete="off">
-						<option value="unit">Unit</option>
-						<option value="standardSpell">Standard Spell</option>
-						<option value="continuousSpell">Continuous Spell</option>
-						<option value="enchantSpell">Enchant Spell</option>
-						<option value="standardItem">Standard Item</option>
-						<option value="continuousItem">Continuous Item</option>
-						<option value="equipableItem">Equipable Item</option>
-						<option value="token">Token</option>
-					</select></div>
-					<div>
-						<span>Abilities:</span>
-						<div id="effectEditor"></div>
-					</div>
-					<div>
-						<button id="saveButton">Save Card</button> <button id="saveCopyButton">Save as Copy</button> <button id="createNewButton">Create New</button><br>
-						<button id="downloadImageButton">Download (.png)</button> <button id="downloadCardButton">Download (.card)</button>
+					<div id="inputFieldHolder">
+						<div class="inputRow"><label for="cardType" id="cardTypeLabel"></label><select id="cardType" autocomplete="off">
+							<option value="unit"></option>
+							<option value="standardSpell"></option>
+							<option value="continuousSpell"></option>
+							<option value="enchantSpell"></option>
+							<option value="standardItem"></option>
+							<option value="continuousItem"></option>
+							<option value="equipableItem"></option>
+							<option value="token"></option>
+						</select></div>
+						<div class="inputRow"><label for="cardName" id="cardNameLabel"></label><input type="text" id="cardName" autocomplete="off"></div>
+						<div class="inputRow"><label for="cardLevel" id="cardLevelLabel"></label><input type="number" id="cardLevel" min="0" placeholder="?" autocomplete="off"></div>
+						<div class="inputRow"><label for="cardTypes" id="cardTypesLabel"></label><input type="text" id="cardTypes" autocomplete="off"></div>
+						<div>
+							<span id="cardAbilitiesLabel"></span>
+							<div id="effectEditor" contenteditable="plaintext-only" aria-labelledby="cardAbilitiesLabel"></div>
+							<button id="effectEditNewBullet">●：</button> <button id="effectEditNewBrackets">［］</button>
+						</div>
+						<div class="inputRow"><label for="cardAttack" id="cardAttackLabel"></label><input type="number" id="cardAttack" min="0" placeholder="?" autocomplete="off"></div>
+						<div class="inputRow"><label for="cardDefense" id="cardDefenseLabel"></label><input type="number" id="cardDefense" min="0" placeholder="?" autocomplete="off"></div>
+						<div>
+							<button id="saveButton"></button> <button id="saveCopyButton"></button> <button id="createNewButton"></button><br>
+							<button id="downloadImageButton"></button> <button id="downloadCardButton"></button>
+						</div>
 					</div>
 				</div>
 				

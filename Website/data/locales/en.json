@@ -474,7 +474,10 @@
 		"Wind": "Wind",
 		"Mage": "Mage",
 		"Fish": "Fish",
-		"Bird": "Bird"
+		"Bird": "Bird",
+		"Ninja": "Ninja",
+		"NinjaTool": "Ninja Tool",
+		"Ninjutsu": "Ninjutsu"
 	},
 	
 	"customCards": {
@@ -482,17 +485,23 @@
 		
 		"cardName": "Name:",
 		"cardLevel": "Level:",
+		"cardTypes": "Types:",
 		"cardAttack": "Attack:",
 		"cardDefense": "Defense:",
 		"cardType": "Card Type:",
+		"cardAbilities": "Abilities:",
+		
+		"possibleTypes": "Possible types are:\n{#TYPES}",
+		"possibleTypesSeperator": ", ",
 		
 		"save": "Save Card",
 		"saveCopy": "Save as Copy",
 		"createNew": "Create New",
-		"edit": "Edit",
-		"delete": "Delete",
 		"downloadImage": "Download (.png)",
 		"downloadCard": "Download (.card)",
+		"noSavedCards": "You haven't saved any cards yet.",
+		"edit": "Edit",
+		"delete": "Delete",
 		
 		"unsavedChanges": "You currently have unsaved changes.\nIf you proceed, those changes will be lost.",
 		"reallyDelete": "Do you really want to delete '{#CARDNAME}'?\nThis action cannot be undone. '{#CARDNAME}' will be gone forever.",

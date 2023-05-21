@@ -5,33 +5,40 @@ let currentlyEditing = window.crypto.randomUUID();
 let unsavedChanges = false;
 
 // translate UI
-document.getElementById("title").textContent = locale["customCards"]["title"];
+document.getElementById("title").textContent = locale.customCards.title;
 
-document.getElementById("cardNameLabel").textContent = locale["customCards"]["cardName"];
-document.getElementById("cardLevelLabel").textContent = locale["customCards"]["cardLevel"];
-document.getElementById("cardLevel").placeholder = "?";
-document.getElementById("cardAttackLabel").textContent = locale["customCards"]["cardAttack"];
-document.getElementById("cardAttack").placeholder = "?";
-document.getElementById("cardDefenseLabel").textContent = locale["customCards"]["cardDefense"];
-document.getElementById("cardDefense").placeholder = "?";
-document.getElementById("cardTypeLabel").textContent = locale["customCards"]["cardType"];
+cardNameLabel.textContent = locale.customCards.cardName;
+cardLevelLabel.textContent = locale.customCards.cardLevel;
+cardTypesLabel.textContent = locale.customCards.cardTypes;
+cardAbilitiesLabel.textContent = locale.customCards.cardAbilities;
+cardAttackLabel.textContent = locale.customCards.cardAttack;
+cardDefenseLabel.textContent = locale.customCards.cardDefense;
+cardTypeLabel.textContent = locale.customCards.cardType;
+Array.from(cardType.children).forEach(elem => {
+	elem.textContent = locale[elem.value + "CardDetailType"];
+});
 
-document.getElementById("saveButton").textContent = locale["customCards"]["save"];
-document.getElementById("saveCopyButton").textContent = locale["customCards"]["saveCopy"];
-document.getElementById("createNewButton").textContent = locale["customCards"]["createNew"];
-document.getElementById("downloadImageButton").textContent = locale["customCards"]["downloadImage"];
-document.getElementById("downloadCardButton").textContent = locale["customCards"]["downloadCard"];
+cardTypes.title = locale.customCards.possibleTypes.replace("{#TYPES}", Object.values(locale.types).map(val => val.replace(" ", "_")).join(locale.customCards.possibleTypesSeperator))
 
-document.documentElement.lang = locale["code"];
+saveButton.textContent = locale.customCards.save;
+saveCopyButton.textContent = locale.customCards.saveCopy;
+createNewButton.textContent = locale.customCards.createNew;
+downloadImageButton.textContent = locale.customCards.downloadImage;
+downloadCardButton.textContent = locale.customCards.downloadCard;
+
+savedCardsList.dataset.message = locale.customCards.noSavedCards;
+
+document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 
 // basic utilities
 function getCard() {
+	effectEditor.normalize();
 	let card = {
 		"cardType": cardType.value,
 		"name": cardName.value,
 		"level": cardLevel.value == ""? -1 : cardLevel.value,
-		"types": [],
+		"types": parseTypesList(),
 		"effects": parseEffectsList()
 	};
 	if (cardType.value == "unit" || cardType.value == "token") {
@@ -43,16 +50,61 @@ function getCard() {
 	}
 	return card;
 }
+function parseTypesList() {
+	let types = cardTypes.value.replace(/[,，\s]+/g, " ").split(" ");
+	let finalTypes = [];
+	types.forEach(type => {
+		for (const key in locale.types) {
+			if (locale.types[key].toLowerCase().replace(" ", "_") == type.toLowerCase()) {
+				if (!finalTypes.includes(key)) {
+					finalTypes.push(key);
+				}
+				return;
+			}
+		}
+	});
+	return finalTypes;
+}
+function parseEffectsList(root = effectEditor) {
+	let list = [];
+	Array.from(root.childNodes).forEach(elem => {
+		let object = {};
+		if (elem.nodeName == "#text") {
+			if (elem.textContent.trim() != "") {
+				object.type = "text";
+				object.content = elem.textContent.trim();
+			}
+		} else if (elem.classList.contains("bulletEditSection")) {
+			object.type = "bullet";
+			object.content = parseEffectsList(elem);
+		} else if (elem.classList.contains("bracketsEditSection")) {
+			object.type = "brackets";
+			object.content = parseEffectsList(elem);
+		}
+		if (object.type) {
+			list.push(object);
+		}
+	});
+	return list;
+}
 
-function updateCard(unsavedChange) {
+function beforeUnloadListener(e) {
+	e.preventDefault();
+	e.returnValue = "";
+}
+
+function updateCard(unsaved) {
 	renderCard(getCard(), cardCanvas);
-	if (unsavedChange) {
-		unsavedChanges = true;
+	if (unsaved && !unsavedChanges) {
+		window.addEventListener("beforeunload", beforeUnloadListener);
+	} else if (!unsaved) {
+		window.removeEventListener("beforeunload", beforeUnloadListener);
 	}
+	unsavedChanges = unsaved;
 }
 
 function blankSlate() {
-	if (unsavedChanges && !confirm(locale["customCards"]["unsavedChanges"])) {
+	if (unsavedChanges && !confirm(locale.customCards.unsavedChanges)) {
 		return;
 	}
 	loadCard({
@@ -67,84 +119,103 @@ function blankSlate() {
 }
 
 // editing current card
-function createContentArea() {
-	let holderDiv = document.createElement("div");
-	let textArea = document.createElement("textarea");
-	textArea.placeholder = "...";
-	textArea.autocomplete = "off";
-	textArea.addEventListener("input", function() {
-		updateCard(true);
-		this.style.height = "0";
-		this.style.height = this.scrollHeight + "px";
-	});
-	
-	holderDiv.appendChild(textArea);
-	return holderDiv;
-}
-
-function createContentButtons() {
-	let buttonArea = document.createElement("div");
-	let effectButton = document.createElement("button");
-	effectButton.textContent = "●：";
-	effectButton.addEventListener("click", function() {
-		this.parentElement.parentElement.firstChild.appendChild(createEffectSection("effect"));
-		updateCard(true);
-	});
-	let bracketsButton = document.createElement("button");
-	bracketsButton.textContent = "［］";
-	bracketsButton.addEventListener("click", function() {
-		this.parentElement.parentElement.firstChild.appendChild(createEffectSection("brackets"));
-		updateCard(true);
-	});
-	let deleteButton = document.createElement("button");
-	deleteButton.classList.add("effectEditorDeleteBtn");
-	deleteButton.textContent = "X";
-	deleteButton.addEventListener("click", function() {
-		this.parentElement.parentElement.remove();
-		updateCard(true);
-	});
-	buttonArea.appendChild(effectButton);
-	buttonArea.appendChild(bracketsButton);
-	buttonArea.appendChild(deleteButton);
-	return buttonArea;
-}
-
-function createEffectSection(type) {
-	let section = document.createElement("div");
-	section.classList.add(type + "EditSection");
-	
-	section.appendChild(createContentArea());
-	section.appendChild(createContentButtons());
-	
-	return section;
-}
-
-effectEditor.appendChild(createContentArea());
-effectEditor.appendChild(createContentButtons());
-
-function parseEffectsList(root = effectEditor.firstChild) {
-	let list = [];
-	Array.from(root.children).forEach(elem => {
-		let object = {};
-		if (elem.nodeName == "TEXTAREA") {
-			object.type = "text";
-			object.content = elem.value;
-		} else {
-			object.type = elem.classList.contains("effectEditSection")? "bullet" : "brackets";
-			object.content = parseEffectsList(elem.firstChild);
-		}
-		if (elem.value != "") {
-			list.push(object);
-		}
-	});
-	return list;
-}
-
 cardName.addEventListener("input", function() {updateCard(true)});
 cardLevel.addEventListener("input", function() {updateCard(true)});
+cardTypes.addEventListener("input", function() {updateCard(true)});
+effectEditor.addEventListener("input", function() {updateCard(true)});
 cardAttack.addEventListener("input", function() {updateCard(true)});
 cardDefense.addEventListener("input", function() {updateCard(true)});
 cardType.addEventListener("input", function() {updateCard(true)});
+
+// effect editor
+if (!effectEditor.isContentEditable) {
+	// Workarounds for browsers that don't yet support contenteditable="plaintext-only" (Firefox)
+	effectEditor.contentEditable = "true";
+	function typeNode(node) {
+		let selection = window.getSelection();
+		for (let i = 0; i < selection.rangeCount; i++) {
+			let range = selection.getRangeAt(i);
+			range.deleteContents();
+			range.insertNode(node);
+			range.collapse();
+		}
+	}
+	effectEditor.addEventListener("paste", function(e) {
+		e.preventDefault();
+		typeNode(document.createTextNode(e.clipboardData.getData("text/plain")));
+	});
+	effectEditor.addEventListener("beforeinput", function(e) {
+		if (e.inputType == "insertParagraph") {
+			e.preventDefault();
+			typeNode(document.createTextNode("\n"));
+		}
+	});
+	effectEditor.addEventListener("drop", function(e) {
+		e.preventDefault();
+		let droppedText = e.dataTransfer.getData("text");
+		if (droppedText) {
+			typeNode(document.createTextNode(droppedText));
+		}
+	});
+	effectEditor.addEventListener("input", function(e) {
+		if (this.childElementCount == 1 && this.firstChild.nodeName == "BR") {
+			this.innerHTML = "";
+		};
+	});
+}
+function createEffectSection(type) {
+	let section = document.createElement("div");
+	section.classList.add("editSection");
+	section.classList.add(type + "EditSection");
+	return section;
+}
+function insertEffectSection(type) {
+	let selection = window.getSelection();
+	let totalInsertions = 0;
+	for (let i = 0; i < selection.rangeCount; i++) {
+		let range = selection.getRangeAt(i);
+		// check if we're inside the effect editor
+		let rangeContainer = range.commonAncestorContainer;
+		if (rangeContainer.nodeName == "#text") {
+			rangeContainer = rangeContainer.parentElement;
+		}
+		if (rangeContainer.closest("#effectEditor") === null) {
+			continue;
+		}
+		// insert the section
+		let section = createEffectSection(type);
+		
+		if (range.endContainer === range.startContainer) {
+			range.surroundContents(section);
+		} else {
+			range.insertNode(section);
+		}
+		if (section.childNodes.length == 0) {
+			section.appendChild(document.createElement("br"));
+		}
+		range.selectNodeContents(section);
+		range.collapse();
+		totalInsertions++;
+	}
+	if (totalInsertions == 0) {
+		let section = createEffectSection(type);
+		section.appendChild(document.createElement("br"));
+		effectEditor.appendChild(section);
+		selection.removeAllRanges();
+		let range = new Range();
+		range.selectNodeContents(section);
+		range.collapse();
+		selection.addRange(range);
+	}
+}
+effectEditNewBullet.addEventListener("click", function() {
+	insertEffectSection("bullet");
+	updateCard(true);
+});
+effectEditNewBrackets.addEventListener("click", function() {
+	insertEffectSection("brackets");
+	updateCard(true);
+});
 
 saveButton.addEventListener("click", saveCard);
 saveCopyButton.addEventListener("click", function() {
@@ -188,9 +259,9 @@ function generateListCard(card) {
 	
 	let editButton = document.createElement("button");
 	editButton.dataset.cardUuid = card.uuid;
-	editButton.textContent = locale["customCards"]["edit"];
+	editButton.textContent = locale.customCards.edit;
 	editButton.addEventListener("click", function() {
-		if (unsavedChanges && !confirm(locale["customCards"]["unsavedChanges"])) {
+		if (unsavedChanges && !confirm(locale.customCards.unsavedChanges)) {
 			return;
 		}
 		let card = JSON.parse(localStorage.getItem("customCards")).find(card => card.uuid == this.dataset.cardUuid);
@@ -198,18 +269,18 @@ function generateListCard(card) {
 			loadCard(card.data);
 			currentlyEditing = this.dataset.cardUuid;
 		} else {
-			alert(locale["customCards"]["doesntExist"]);
+			alert(locale.customCards.doesntExist);
 			this.closest(".listCard").remove();
 		}
 	});
 	
 	let deleteButton = document.createElement("button");
 	deleteButton.dataset.cardUuid = card.uuid;
-	deleteButton.textContent = locale["customCards"]["delete"];
+	deleteButton.textContent = locale.customCards.delete;
 	deleteButton.addEventListener("click", function() {
 		let cards = JSON.parse(localStorage.getItem("customCards"));
 		let card = cards.find(card => card.uuid == this.dataset.cardUuid).data;
-		if (confirm(locale["customCards"]["reallyDelete"].replaceAll("{#CARDNAME}", card.name))) {
+		if (confirm(locale.customCards.reallyDelete.replaceAll("{#CARDNAME}", card.name))) {
 			cards = cards.filter(card => card.uuid != this.dataset.cardUuid);
 			localStorage.setItem("customCards", JSON.stringify(cards));
 			this.closest(".listCard").remove();
@@ -241,5 +312,27 @@ function loadCard(card) {
 	cardAttack.value = (card.attack == -1? "" : card.attack) ?? "";
 	cardDefense.value = (card.defense == -1? "" : card.defense) ?? "";
 	cardType.value = card.cardType;
+	
+	effectEditor.innerHTML = "";
+	loadCardEffects(card.effects, effectEditor);
+	
 	updateCard(false);
+}
+
+function loadCardEffects(list, toElem) {
+	list.forEach(effect => {
+		switch (effect.type) {
+			case "text": {
+				toElem.appendChild(document.createTextNode(effect.content));
+				break;
+			}
+			case "bullet":
+			case "brackets": {
+				let brackets = createEffectSection(effect.type);
+				toElem.appendChild(brackets);
+				loadCardEffects(effect.content, brackets);
+				break;
+			}
+		}
+	});
 }

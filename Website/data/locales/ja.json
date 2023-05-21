@@ -474,7 +474,10 @@
 		"Wind": "風",
 		"Mage": "魔術師",
 		"Fish": "魚",
-		"Bird": "鳥"
+		"Bird": "鳥",
+		"Ninja": "忍者",
+		"NinjaTool": "忍具",
+		"Ninjutsu": "忍法"
 	},
 	
 	"customCards": {
@@ -482,17 +485,23 @@
 		
 		"cardName": "名前：",
 		"cardLevel": "レベル：",
+		"cardTypes": "タイプ：",
 		"cardAttack": "攻撃力：",
 		"cardDefense": "防御力：",
 		"cardType": "種類：",
+		"cardAbilities": "能力：",
+		
+		"possibleTypes": null,
+		"possibleTypesSeperator": "，",
 		
 		"save": null,
 		"saveCopy": null,
 		"createNew": null,
-		"edit": null,
-		"delete": null,
 		"downloadImage": null,
 		"downloadCard": null,
+		"noSavedCards": null,
+		"edit": null,
+		"delete": null,
 		
 		"unsavedChanges": null,
 		"reallyDelete": null,
