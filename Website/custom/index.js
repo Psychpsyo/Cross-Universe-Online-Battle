@@ -188,9 +188,17 @@ function insertEffectSection(type) {
 		let section = createEffectSection(type);
 		
 		if (range.endContainer === range.startContainer) {
+			if (range.endContainer.childElementCount == 1 && range.endContainer.firstChild.nodeName == "BR") {
+				range.endContainer.firstChild.remove();
+			}
 			range.surroundContents(section);
 		} else {
 			range.insertNode(section);
+		}
+		// insert relevant safety-newlines
+		section.parentElement.normalize();
+		if (section.parentElement != effectEditor && section == section.parentElement.firstChild) {
+			section.parentElement.insertBefore(document.createElement("br"), section);
 		}
 		if (section.childNodes.length == 0) {
 			section.appendChild(document.createElement("br"));
