@@ -7,7 +7,7 @@ startingHandGenBtn.addEventListener("click", function() {
 	startingHandGenerator.showModal();
 	generateStartingHand();
 });
-export function generateStartingHand() {
+export function generateStartingHand(deckList) {
 	startingHandGeneratorCards.innerHTML = "";
 	let cards = [...deckList];
 	for (let i = 0; i < 5;i++) {

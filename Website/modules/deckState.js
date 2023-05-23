@@ -4,6 +4,7 @@ import {BoardState} from "/modules/boardState.js";
 import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
+import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
 
 let officialDecks = [];
 fetch("data/deckList.json")
@@ -19,7 +20,7 @@ function loadDeckFile(file) {
 	let reader = new FileReader();
 	reader.onload = function(e) {
 		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it to deckx
-		gameState.loadDeck(this.fileName.endsWith(".deck")? deckUtils.toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
+		gameState.loadDeck(this.fileName.endsWith(".deck")? toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
 	};
 	
 	reader.fileName = file["name"];
@@ -39,7 +40,7 @@ function loadDeckPreview(deck) {
 	
 	//add the cards
 	let partnerAdded = false;
-	deckUtils.deckToCardIdList(officialDecks[currentDeckList][deck]).forEach(cardId => {
+	deckToCardIdList(officialDecks[currentDeckList][deck]).forEach(cardId => {
 		let cardImg = document.createElement("img");
 		cardImg.src = getCardImageFromID(cardId);
 		cardImg.dataset.cardId = cardId;
@@ -82,7 +83,7 @@ async function addDecksToDeckSelector(deckList) {
 			
 			let cardAmountSubtitle = document.createElement("span");
 			cardAmountSubtitle.classList.add("deckCardAmount");
-			cardAmountSubtitle.textContent = locale.deckSelect.deckListCardAmount.replace("{#CARDS}", deckUtils.countDeckCards(deck));
+			cardAmountSubtitle.textContent = locale.deckSelect.deckListCardAmount.replace("{#CARDS}", countDeckCards(deck));
 			
 			deckDiv.addEventListener("click", function() {
 				if (document.getElementById("selectedDeck")) {
