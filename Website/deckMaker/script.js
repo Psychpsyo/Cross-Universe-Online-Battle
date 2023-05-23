@@ -141,7 +141,7 @@ window.addEventListener("blur", function(e) {
 });
 
 // gets a card's link from its ID
-function linkFromCardId(cardId) {
+window.linkFromCardId = function(cardId) {
 	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
 }
 // gets a card's ID from a link to its image
@@ -387,7 +387,7 @@ document.addEventListener("keyup", function(e) {
 });
 
 //editing the work-in-progress deck
-let deckList = [];
+window.deckList = [];
 
 async function addCardToDeck(cardId) {
 	let card = await getCardInfo(cardId);
