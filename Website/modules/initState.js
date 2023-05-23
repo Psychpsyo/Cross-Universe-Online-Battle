@@ -4,20 +4,16 @@ import {DeckState} from "/modules/deckState.js";
 import {Game} from "/modules/game.js";
 import {Card} from "/modules/card.js";
 import {stopEffect} from "/modules/levitationEffect.js";
+import {socket, connectTo} from "/modules/netcode.js";
 
 export class InitState extends GameState {
-	constructor() {
+	constructor(roomcode, gameMode) {
 		super();
 		
+		this.gameMode = gameMode;
 		this.opponentReady = false;
 		
-		// set up socket
-		socket = new WebSocket("wss://battle.crossuniverse.net:443/ws");
-		socket.addEventListener("open", function (event) {
-			socket.send("[roomcode]" + roomcode + gameModeSelect.value);
-		});
-		
-		socket.addEventListener("message", receiveMessage);
+		connectTo(roomcode + gameMode);
 		
 		// hide input field and show waiting indicator
 		roomCodeInputFieldSpan.setAttribute("hidden", "");
@@ -98,8 +94,6 @@ export class InitState extends GameState {
 	
 	checkReadyConditions() {
 		if (this.opponentReady && this.gameSetup && youAre !== null) {
-			updateRoomCodeDisplay();
-			
 			// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
 			document.getElementById("gameDiv").addEventListener("dragover", function(e) {
 				e.preventDefault();
@@ -117,7 +111,7 @@ export class InitState extends GameState {
 				}
 			}, {"signal": unloadWarning.signal});
 			
-			switch (gameModeSelect.value) {
+			switch (this.gameMode) {
 				case "normal": {
 					gameState = new DeckState();
 					break;
@@ -128,10 +122,39 @@ export class InitState extends GameState {
 				}
 			}
 			
+			// make chat functional
+			document.getElementById("chatInput").addEventListener("keyup", function(e) {
+				if (e.code == "Enter" && this.value != "") {
+					socket.send("[chat]" + this.value);
+					if (localStorage.getItem("username") !== "") {
+						putChatMessage(localStorage.getItem("username") + locale["chat"]["colon"] + this.value);
+					} else {
+						putChatMessage(locale["chat"]["you"] + locale["chat"]["colon"] + this.value);
+					}
+					
+					this.value = "";
+				}
+				if (e.code == "Escape") {
+					this.blur();
+				}
+			});
+			
+			document.getElementById("chatInput").addEventListener("keydown", function(e) {
+				e.stopPropagation();
+			});
+			
 			// main screen is no longer needed
 			stopEffect();
 			roomCodeEntry.remove();
 			gameDiv.removeAttribute("hidden");
 		}
+	}
+	
+	cancel() {
+		socket.close();
+		waitingForOpponentSpan.setAttribute("hidden", "");
+		roomCodeInputFieldSpan.removeAttribute("hidden");
+		roomCodeInputField.focus();
+		gameState = null;
 	}
 }

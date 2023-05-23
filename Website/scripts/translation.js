@@ -13,8 +13,6 @@ fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 	
 	document.getElementById("chatHeader").textContent = locale["chat"]["title"];
 	document.getElementById("chatInput").placeholder = locale["chat"]["enterMessage"];
-	document.getElementById("roomCodeDisplayTitle").textContent = locale["roomCode"];
-	document.getElementById("roomCodeHider").textContent = locale["roomCodeHide"];
 	
 	document.getElementById("youInfoText").textContent = locale["infoYou"];
 	document.getElementById("opponentInfoText").textContent = locale["infoOpponent"];

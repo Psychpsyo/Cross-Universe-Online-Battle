@@ -1,5 +1,6 @@
 // This module exports the board state which is the main game state where the players actually play.
 import {GameState} from "/modules/gameState.js";
+import {socket, cardAreaToLocal} from "/modules/netcode.js";
 
 let myCursorX = 0;
 let myCursorY = 0;
@@ -24,6 +25,125 @@ document.addEventListener("mousemove", function(e) {
 	dragCard.style.left = myCursorX * fieldRect.height + fieldRect.width / 2 + "px";
 	dragCard.style.top = myCursorY * fieldRect.height + "px";
 });
+
+//disable right-click on field
+document.getElementById("field").addEventListener("contextmenu", function (e) {e.preventDefault();});
+
+//showing/hiding your hand
+function hideHand() {
+	socket.send("[hideHand]");
+	document.getElementById("showHandBtn").textContent = locale["actionsShowHand"];
+	document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
+	document.getElementById("hand1").classList.remove("shown");
+}
+function showHand() {
+	socket.send("[showHand]");
+	document.getElementById("showHandBtn").textContent = locale["actionsHideHand"];
+	document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
+	document.getElementById("hand1").classList.add("shown");
+}
+document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
+
+//life changes
+document.getElementById("lifeUp100").addEventListener("click", function() {
+	localPlayer.life += 100;
+	updateLifeDisplay(localPlayer);
+	socket.send("[life]" + localPlayer.life);
+});
+document.getElementById("lifeUp50").addEventListener("click", function() {
+	localPlayer.life += 50;
+	updateLifeDisplay(localPlayer);
+	socket.send("[life]" + localPlayer.life);
+});
+document.getElementById("lifeUp1").addEventListener("click", function() {
+	localPlayer.life += 1;
+	updateLifeDisplay(localPlayer);
+	socket.send("[life]" + localPlayer.life);
+});
+document.getElementById("lifeDown100").addEventListener("click", function() {
+	localPlayer.life = Math.max(localPlayer.life - 100, 0);
+	updateLifeDisplay(localPlayer);
+	socket.send("[life]" + localPlayer.life);
+});
+document.getElementById("lifeDown50").addEventListener("click", function() {
+	localPlayer.life = Math.max(localPlayer.life - 50, 0);
+	updateLifeDisplay(localPlayer);
+	socket.send("[life]" + localPlayer.life);
+});
+document.getElementById("lifeDown1").addEventListener("click", function() {
+	localPlayer.life = Math.max(localPlayer.life - 1, 0);
+	updateLifeDisplay(localPlayer);
+	socket.send("[life]" + localPlayer.life);
+});
+document.getElementById("lifeHalf").addEventListener("click", function() {
+	localPlayer.life = Math.ceil(localPlayer.life / 2);
+	updateLifeDisplay(localPlayer);
+	socket.send("[life]" + localPlayer.life);
+});
+
+//mana changes
+document.getElementById("manaUp").addEventListener("click", function() {
+	localPlayer.mana++;
+	updateManaDisplay(localPlayer);
+	socket.send("[mana]" + localPlayer.mana);
+});
+document.getElementById("manaFive").addEventListener("click", function() {
+	localPlayer.mana = 5;
+	updateManaDisplay(localPlayer);
+	socket.send("[mana]" + localPlayer.mana);
+});
+document.getElementById("manaDown").addEventListener("click", function() {
+	localPlayer.mana = Math.max(localPlayer.mana - 1, 0);
+	updateManaDisplay(localPlayer);
+	socket.send("[mana]" + localPlayer.mana);
+});
+
+//adding counters
+// adds a counter to the specified field slot
+function addCounter(slotIndex) {
+	let counter = document.createElement("div");
+	counter.classList.add("counter");
+	counter.textContent = "1";
+	//prevent middle click default actions
+	counter.addEventListener("mousedown", function (e) {e.preventDefault();})
+	//edit the counter
+	counter.addEventListener("click", function(e) {
+		this.textContent = parseInt(this.textContent) + 1;
+		let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substr(5));
+		let counterIndex = Array.from(this.parentElement.children).indexOf(this);
+		socket.send("[counterIncrease]" + fieldSlot + "|" + counterIndex);
+	});
+	counter.addEventListener("auxclick", function(e) {
+		let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substr(5));
+		let counterIndex = Array.from(this.parentElement.children).indexOf(this);
+		switch (e.button) {
+			case 1:
+				this.remove();
+				socket.send("[counterRemove]" + fieldSlot + "|" + counterIndex);
+				break;
+			case 2:
+				if (parseInt(this.textContent) == 0) {
+					this.remove();
+					socket.send("[counterRemove]" + fieldSlot + "|" + counterIndex);
+				} else {
+					this.textContent = parseInt(this.textContent) - 1;
+					socket.send("[counterDecrease]" + fieldSlot + "|" + counterIndex);
+				}
+				break;
+		}
+		e.preventDefault();
+	});
+	
+	document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").prepend(counter);
+}
+// event listeners to add counters and sync those additions.
+for (let btn of Array.from(document.getElementsByClassName("counterAddBtn"))) {
+	btn.addEventListener("click", function() {
+		let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substr(5));
+		addCounter(fieldSlot);
+		socket.send("[counterAdd]" + fieldSlot);
+	});
+}
 
 function animateCursors(currentTime) {
 	let delta = currentTime - lastFrame;
@@ -68,6 +188,19 @@ function doSelectStartingPlayer() {
 		mainGameBlackout.remove();
 	}
 }
+
+
+// selecting starting player
+document.getElementById("startingPlayerSelect").addEventListener("click", function() {
+	document.getElementById("startingPlayerSelect").style.display = "none";
+	let startingPlayer = Math.random() > .5;
+	putChatMessage(startingPlayer? locale["youStart"] : locale["opponentStarts"], "notice");
+	socket.send("[selectPlayer]" + startingPlayer);
+	partnerRevealButtonDiv.style.display = "block";
+});
+
+
+
 
 //opening the partner select menu
 function openPartnerSelectMenu() {
@@ -315,25 +448,25 @@ export class BoardState extends GameState {
 				return true;
 			}
 			case "counterAdd": {
-				addCounter(message);
+				addCounter(19 - message);
 				return true;
 			}
 			case "counterIncrease": {
-				let slotIndex = message.substr(0, message.indexOf("|"));
+				let slotIndex = 19 - message.substr(0, message.indexOf("|"));
 				let counterIndex = message.substr(message.indexOf("|") + 1);
 				let counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
 				counter.innerHTML = parseInt(counter.innerHTML) + 1;
 				return true;
 			}
 			case "counterDecrease": {
-				let slotIndex = message.substr(0, message.indexOf("|"));
+				let slotIndex = 19 - message.substr(0, message.indexOf("|"));
 				let counterIndex = message.substr(message.indexOf("|") + 1);
 				let counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
 				counter.innerHTML = parseInt(counter.innerHTML) - 1;
 				return true;
 			}
 			case "counterRemove": {
-				let slotIndex = message.substr(0, message.indexOf("|"));
+				let slotIndex = 19 - message.substr(0, message.indexOf("|"));
 				let counterIndex = message.substr(message.indexOf("|") + 1);
 				document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
 				return true;

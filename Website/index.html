@@ -50,9 +50,6 @@
 		<div id="gameDiv" hidden>
 			<div id="gameFlexBox">
 				<div id="leftPanel">
-					<div id="roomcodeDisplay">
-						<span id="roomCodeDisplayTitle">Room Code: </span><span id="theRoomCode"></span> [<span id="roomCodeHider" class="clickableText">hide</span>]
-					</div>
 					<div id="infoPanel">
 						<div>
 							<br>
@@ -103,7 +100,7 @@
 					<div id="chat" class="sideBox">
 						<header id="chatHeader">Chat</header>
 						<div id="chatBox"></div>
-						<input id="chatInput" placeholder="Enter Message...">
+						<input id="chatInput" placeholder="Enter Message..." autocomplete="off">
 					</div>
 				</div>
 				
@@ -461,7 +458,6 @@
 		
 		<!-- 'dependencies' -->
 		<script src="scripts/localStorageSetup.js"></script>
-		<script src="scripts/deckUtils.js"></script>
 		
 		<!--Mostly main-game relates scripts-->
 		<script src="scripts/translation.js"></script>
@@ -469,7 +465,6 @@
 		<script src="scripts/utility.js"></script>
 		<script src="scripts/cardHandling.js", type="module"></script>
 		<script src="scripts/ui.js"></script>
-		<script src="scripts/websocket.js"></script>
 		<script src="scripts/hotkeys.js"></script>
 		<script src="modules/main.js", type="module"></script>
 	</body>

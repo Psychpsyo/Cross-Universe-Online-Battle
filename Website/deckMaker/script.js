@@ -1,5 +1,6 @@
 import {generateStartingHand} from "/deckMaker/startingHands.js";
 import {locale} from "/modules/locale.js";
+import {toDeckx} from "/modules/deckUtils.js";
 
 let shiftHeld = false;
 //load illustrator & contest winner tags
@@ -517,7 +518,7 @@ async function recalculateDeckStats() {
 	}
 	
 	for (const cardID of deckList) {
-		card = await getCardInfo(cardID);
+		let card = await getCardInfo(cardID);
 		//max necessary to catch the Lvl? Token that is denoted as -1 in the dataset
 		levelDist[Math.max(0, card.level)].total++;
 		switch (cardID[0]) {
@@ -638,7 +639,7 @@ document.getElementById("deckMakerImportInput").addEventListener("change", funct
 	let reader = new FileReader();
 	reader.onload = async function(e) {
 		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it
-		let loadedDeck = this.fileName.endsWith(".deck")? deckUtils.toJsonDeck(JSON.parse(e.target.result)) : JSON.parse(e.target.result);
+		let loadedDeck = this.fileName.endsWith(".deck")? toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result);
 		
 		//quick fix for loading card description
 		if (this.fileName.endsWith(".deck")) {

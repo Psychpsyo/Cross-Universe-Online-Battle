@@ -139,6 +139,7 @@ if (!effectEditor.isContentEditable) {
 			range.insertNode(node);
 			range.collapse();
 		}
+		updateCard(true);
 	}
 	effectEditor.addEventListener("paste", function(e) {
 		e.preventDefault();

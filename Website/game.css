@@ -155,12 +155,6 @@
 	border-left: 2px var(--theme-border-color) solid;
 }
 
-#roomcodeDisplay {
-	border-bottom: 2px solid var(--theme-border-color);
-	padding: .5em;
-	text-align: center;
-}
-
 #infoPanel {
 	display: flex;
 	justify-content: center;

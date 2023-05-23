@@ -2,6 +2,8 @@ import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
 import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
+import {socket} from "/modules/netcode.js";
+import {deckFromCardList} from "/modules/deckUtils.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();
@@ -157,8 +159,8 @@ export class DraftState extends GameState {
 			
 			// load decks
 			await Promise.all([
-				game.players[0].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName)),
-				game.players[1].setDeck(deckUtils.deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName))
+				game.players[0].setDeck(deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName)),
+				game.players[1].setDeck(deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName))
 			]);
 			
 			// show start button

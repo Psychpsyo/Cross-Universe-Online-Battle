@@ -1,5 +1,6 @@
 import {Card} from "/modules/card.js";
 import {cardActions} from "/modules/cardActions.js";
+import {socket} from "/modules/netcode.js";
 
 class cardArea {
 	constructor(name, handleGrab=true, handleDrop=true) {
@@ -267,7 +268,7 @@ class deckCardArea extends cardArea {
 		});
 		document.getElementById("showTopBtn" + playerIndex).addEventListener("click", function() {
 			cardAreas["deck" + playerIndex].showTop(1);
-			syncShowDeckTop(cardAreas["deck" + playerIndex]);
+			socket.send("[showDeckTop]" + playerIndex);
 		});
 		document.getElementById(this.name).addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -277,7 +278,7 @@ class deckCardArea extends cardArea {
 		if (playerIndex == 1) {
 			document.getElementById("drawBtn").addEventListener("click", function() {
 				cardAreas["deck1"].draw();
-				syncDraw();
+				socket.send("[drawCard]");
 			});
 			document.getElementById("shuffleBtn").addEventListener("click", function() {
 				cardAreas["deck1"].shuffle();
@@ -322,27 +323,27 @@ class deckCardArea extends cardArea {
 		card.location?.dragFinish(card);
 		card.location = this;
 		this.dropDone();
-		syncDeckTop(this, card);
+		socket.send("[deckTop]" + this.playerIndex);
 	}
 	dropToBottom(card) {
 		this.cards.unshift(card);
 		card.location?.dragFinish(card);
 		card.location = this;
 		this.dropDone();
-		syncDeckBottom(this, card);
+		socket.send("[deckBottom]" + this.playerIndex);
 	}
 	shuffleIn(card) {
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
-		syncDeckShuffleIn(this, card);
+		socket.send("[deckShuffle]" + this.playerIndex);
 		this.shuffle();
 		this.dropDone();
 	}
 	cancelDrop() {
 		this.droppingCard.location?.returnCard(this.droppingCard);
 		this.dropDone();
-		syncDeckCancel();
+		socket.send("[deckCancel]");
 	}
 	// called by the above functions
 	dropDone() {
@@ -366,7 +367,7 @@ class deckCardArea extends cardArea {
 			[order[i], order[rand]] = [order[rand], order[i]];
 		}
 		this.cards.sort((a, b) => order.indexOf(this.cards.indexOf(a)) - order.indexOf(this.cards.indexOf(b)));
-		syncDeckOrder(this, order);
+		socket.send("[deckOrder]" + this.playerIndex + "|" + order.join("|"));
 		putChatMessage(locale[this.playerIndex == 1? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
 	
@@ -652,7 +653,7 @@ window.grabHandler = function(e) {
 		heldCard = cardAreas[this.dataset.cardArea].grabCard(cardIndex);
 		if (heldCard) {
 			dragCard.src = heldCard.getImage();
-			syncGrab(this.dataset.cardArea, cardIndex);
+			socket.send("[grabbedCard]" + this.dataset.cardArea + "|" + cardIndex);
 		}
 	}
 }
@@ -665,7 +666,7 @@ window.dropHandler = function() {
 		}
 		heldCard = null;
 		dragCard.src = "images/cardHidden.png";
-		syncDrop(this.dataset.cardArea);
+		socket.send("[droppedCard]" + this.dataset.cardArea);
 	}
 }
 
@@ -691,6 +692,6 @@ document.addEventListener("mouseup", function() {
 		heldCard.location?.returnCard(heldCard);
 		heldCard = null;
 		dragCard.src = "images/cardHidden.png";
-		syncDrop("");
+		socket.send("[droppedCard]");
 	}
 });
