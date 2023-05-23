@@ -665,9 +665,7 @@ document.getElementById("deckMakerImportInput").addEventListener("change", funct
 	};
 	
 	reader.fileName = this.files[0]["name"];
-	if (reader.fileName.endsWith(".deck") || reader.fileName.endsWith(".json")) { //validate file format
-		reader.readAsText(this.files[0]);
-	}
+	reader.readAsText(this.files[0]);
 });
 
 //deck export

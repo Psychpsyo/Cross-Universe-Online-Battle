@@ -24,9 +24,7 @@ function loadDeckFile(file) {
 	};
 	
 	reader.fileName = file["name"];
-	if (reader.fileName.endsWith(".deck") || reader.fileName.endsWith(".deckx")) { //validate file format
-		reader.readAsText(file);
-	}
+	reader.readAsText(file);
 }
 
 //loading card list in the deck selector

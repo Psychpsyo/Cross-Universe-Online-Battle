@@ -494,6 +494,7 @@
 		"createNew": "Neu erstellen",
 		"downloadImage": "Herunterladen (.png)",
 		"downloadCard": "Herunterladen (.card)",
+		"importCard": ".card-Datei importieren",
 		"noSavedCards": "Du hast noch keine Karten gespeichert.",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",

@@ -25,6 +25,7 @@ saveCopyButton.textContent = locale.customCards.saveCopy;
 createNewButton.textContent = locale.customCards.createNew;
 downloadImageButton.textContent = locale.customCards.downloadImage;
 downloadCardButton.textContent = locale.customCards.downloadCard;
+importCardButton.textContent = locale.customCards.importCard;
 
 savedCardsList.dataset.message = locale.customCards.noSavedCards;
 
@@ -237,6 +238,42 @@ downloadCardButton.addEventListener("click", function() {
 	downloadElement.download = card.name + ".card";
 	downloadElement.click();
 });
+importCardButton.addEventListener("click", () => {
+	if (unsavedChanges && !confirm(locale.customCards.unsavedChanges)) {
+		return;
+	}
+	importCardInput.click();
+});
+importCardInput.addEventListener("input", function() {
+	let reader = new FileReader();
+	reader.onload = async function(e) {
+		// the raw loaded json data
+		let loadedCard = JSON.parse(e.target.result);
+		
+		// will be sanitized into this
+		let card = {
+			"cardType": loadedCard.cardType ?? "unit",
+			"name": loadedCard.name ?? "",
+			"level": loadedCard.level ?? -1
+		};
+		if (card.cardType == "unit" || card.cardType == "token") {
+			card.attack = loadedCard.attack ?? -1;
+			card.defense = loadedCard.defense ?? -1;
+		}
+		card.types = [];
+		if (Array.isArray(loadedCard.types)) {
+			for (const type of loadedCard.types) {
+				if (type in locale.types) {
+					card.types.push(type);
+				}
+			}
+		}
+		card.effects = loadedCard.effects ?? [];
+		
+		loadCard(card);
+	};
+	reader.readAsText(this.files[0]);
+});
 
 updateCard(false);
 reloadCardList();
@@ -313,6 +350,8 @@ function loadCard(card) {
 	cardAttack.value = (card.attack == -1? "" : card.attack) ?? "";
 	cardDefense.value = (card.defense == -1? "" : card.defense) ?? "";
 	cardType.value = card.cardType;
+	
+	cardTypes.value = card.types.map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	
 	effectEditor.innerHTML = "";
 	loadCardEffects(card.effects, effectEditor);
