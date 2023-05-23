@@ -64,11 +64,6 @@
 	"life": "Lp",
 	"mana": "魔力",
 	
-	"roomCode": "対戦ID：",
-	"roomCodeShow": "表示する",
-	"roomCodeHide": "非表示にする",
-	"roomCodeHidden": "非表示中",
-	
 	"deckDraw": "ドロー",
 	"deckShuffle": "シャッフル",
 	"deckSearch": "サーチ",

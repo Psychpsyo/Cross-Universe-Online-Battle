@@ -64,11 +64,6 @@
 	"life": "Leben",
 	"mana": "Mana",
 	
-	"roomCode": "Raum-Code: ",
-	"roomCodeShow": "zeigen",
-	"roomCodeHide": "verbergen",
-	"roomCodeHidden": "verborgen",
-	
 	"deckDraw": "Ziehen",
 	"deckShuffle": "Mischen",
 	"deckSearch": "Suchen",

@@ -3,61 +3,6 @@ if (localStorage.getItem("fieldLeftToggle") == "true") {
 	document.documentElement.classList.add("leftField");
 }
 
-
-//life changes
-document.getElementById("lifeUp100").addEventListener("click", function() {
-	localPlayer.life += 100;
-	updateLifeDisplay(localPlayer);
-	syncLife();
-});
-document.getElementById("lifeUp50").addEventListener("click", function() {
-	localPlayer.life += 50;
-	updateLifeDisplay(localPlayer);
-	syncLife();
-});
-document.getElementById("lifeUp1").addEventListener("click", function() {
-	localPlayer.life += 1;
-	updateLifeDisplay(localPlayer);
-	syncLife();
-});
-document.getElementById("lifeDown100").addEventListener("click", function() {
-	localPlayer.life = Math.max(localPlayer.life - 100, 0);
-	updateLifeDisplay(localPlayer);
-	syncLife();
-});
-document.getElementById("lifeDown50").addEventListener("click", function() {
-	localPlayer.life = Math.max(localPlayer.life - 50, 0);
-	updateLifeDisplay(localPlayer);
-	syncLife();
-});
-document.getElementById("lifeDown1").addEventListener("click", function() {
-	localPlayer.life = Math.max(localPlayer.life - 1, 0);
-	updateLifeDisplay(localPlayer);
-	syncLife();
-});
-document.getElementById("lifeHalf").addEventListener("click", function() {
-	localPlayer.life = Math.ceil(localPlayer.life / 2);
-	updateLifeDisplay(localPlayer);
-	syncLife();
-});
-
-//mana changes
-document.getElementById("manaUp").addEventListener("click", function() {
-	localPlayer.mana++;
-	updateManaDisplay(localPlayer);
-	syncMana();
-});
-document.getElementById("manaFive").addEventListener("click", function() {
-	localPlayer.mana = 5;
-	updateManaDisplay(localPlayer);
-	syncMana();
-});
-document.getElementById("manaDown").addEventListener("click", function() {
-	localPlayer.mana = Math.max(localPlayer.mana - 1, 0);
-	updateManaDisplay(localPlayer);
-	syncMana();
-});
-
 //chat box
 allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 function putChatMessage(message, type) {
@@ -92,26 +37,6 @@ function putChatMessage(message, type) {
 	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight
 }
 
-document.getElementById("chatInput").addEventListener("keyup", function(e) {
-	if (e.code == "Enter" && this.value != "") {
-		socket.send("[chat]" + this.value);
-		if (localStorage.getItem("username") !== "") {
-			putChatMessage(localStorage.getItem("username") + locale["chat"]["colon"] + this.value);
-		} else {
-			putChatMessage(locale["chat"]["you"] + locale["chat"]["colon"] + this.value);
-		}
-		
-		this.value = "";
-	}
-	if (e.code == "Escape") {
-		this.blur();
-	}
-});
-
-document.getElementById("chatInput").addEventListener("keydown", function(e) {
-	e.stopPropagation();
-});
-
 //closing the card selector when clicking off of it
 overlayBackdrop.addEventListener("click", function() {
 	// does not work for partner select menu
@@ -123,52 +48,6 @@ overlayBackdrop.addEventListener("click", function() {
 		deckSelector.style.display = "none";
 	}
 	overlayBackdrop.style.display = "none";
-});
-
-//hiding/unhiding roomcode
-function updateRoomCodeDisplay() {
-	if (roomCodeShown) {
-		document.getElementById("theRoomCode").textContent = roomcode;
-		document.getElementById("theRoomCode").style.fontStyle = "normal";
-		document.getElementById("roomCodeHider").textContent = locale["roomCodeHide"];
-	} else {
-		document.getElementById("theRoomCode").textContent = locale["roomCodeHidden"];
-		document.getElementById("theRoomCode").style.fontStyle = "italic";
-		document.getElementById("roomCodeHider").textContent = locale["roomCodeShow"];
-	}
-}
-
-document.getElementById("roomCodeHider").addEventListener("click", function () {
-	roomCodeShown = !roomCodeShown;
-	updateRoomCodeDisplay();
-});
-
-//showing/hiding your hand
-function hideHand() {
-	socket.send("[hideHand]");
-	document.getElementById("showHandBtn").textContent = locale["actionsShowHand"];
-	document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
-	document.getElementById("hand1").classList.remove("shown");
-}
-function showHand() {
-	socket.send("[showHand]");
-	document.getElementById("showHandBtn").textContent = locale["actionsHideHand"];
-	document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
-	document.getElementById("hand1").classList.add("shown");
-}
-
-document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
-
-//disable right-click on field
-document.getElementById("field").addEventListener("contextmenu", function (e) {e.preventDefault();});
-
-// selecting starting player
-document.getElementById("startingPlayerSelect").addEventListener("click", function() {
-	document.getElementById("startingPlayerSelect").style.display = "none";
-	let startingPlayer = Math.random() > .5;
-	putChatMessage(startingPlayer? locale["youStart"] : locale["opponentStarts"], "notice");
-	socket.send("[selectPlayer]" + startingPlayer);
-	partnerRevealButtonDiv.style.display = "block";
 });
 
 // card preview

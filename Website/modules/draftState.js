@@ -2,6 +2,7 @@ import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
 import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
+import {socket} from "/modules/netcode.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();

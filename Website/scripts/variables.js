@@ -5,10 +5,6 @@ let gameState = null;
 // Areas that cards can go to. These handle card location changes and change the DOM accordingly
 let cardAreas = {};
 
-let socket = null;
-let roomcode = "";
-let roomCodeShown = false;
-
 let shiftHeld = false;
 let ctrlHeld = false;
 let altHeld = false;
