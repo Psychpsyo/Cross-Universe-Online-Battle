@@ -33,7 +33,7 @@ class cardArea {
 	clear() {}
 	
 	// whether or not a card, when grabbed, should be hidden from the opponent
-	isGrabHidden(cardId) {
+	isGrabHidden(cardIndex) {
 		return false;
 	}
 	
@@ -94,13 +94,6 @@ class fieldCardArea extends cardArea {
 		this.setDragSource(false);
 	}
 	dragFinish(card) {
-		this.fieldSlot.src = "images/cardHidden.png";
-		this.setDragSource(false);
-		this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
-	}
-	
-	clear() {
-		this.cards = [];
 		this.fieldSlot.src = "images/cardHidden.png";
 		this.setDragSource(false);
 		this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
@@ -168,11 +161,6 @@ class myHandCardArea extends cardArea {
 			elem.dataset.cardIndex = i;
 		});
 	}
-	clear() {
-		this.cards = [];
-		hand1.innerHTML = "";
-		hand1.style.setProperty("--card-count", "0");
-	}
 }
 
 // This is discard piles and exile zones since they work the same way
@@ -205,10 +193,6 @@ class pileCardArea extends cardArea {
 	}
 	returnCard(card) {
 		this.cards.push(card);
-		this.updateDOM();
-	}
-	clear() {
-		this.cards = [];
 		this.updateDOM();
 	}
 	
@@ -310,10 +294,6 @@ class deckCardArea extends cardArea {
 	}
 	returnCard(card) {
 		this.cards.push(card);
-		this.updateVisual();
-	}
-	clear() {
-		this.cards = [];
 		this.updateVisual();
 	}
 	
@@ -490,10 +470,6 @@ class myPresentedCardsArea extends cardArea {
 			elem.firstChild.dataset.cardIndex = i;
 		});
 	}
-	clear() {
-		this.cards = [];
-		presentedCards1.innerHTML = "";
-	}
 }
 
 class opponentHandCardArea extends cardArea {
@@ -544,12 +520,6 @@ class opponentHandCardArea extends cardArea {
 		Array.from(hand0.children).forEach((elem, i) => {
 			elem.dataset.cardIndex = i;
 		});
-	}
-	clear() {
-		this.cards = [];
-		hand0.innerHTML = "";
-		hand0.style.setProperty("--card-count", "0");
-		this.hidden = true;
 	}
 	
 	// hiding and revealing the hand
@@ -617,10 +587,6 @@ class opponentPresentedCardsArea extends cardArea {
 		});
 		this.isDragSource = false;
 	}
-	clear() {
-		this.cards = [];
-		presentedCards0.innerHTML = "";
-	}
 	
 	isGrabHidden(cardIndex) {
 		return Array.from(presentedCards0.children)[cardIndex].dataset.shown == "false";
@@ -674,7 +640,7 @@ window.grabHandler = function(e) {
 export function grabCard(player, cardArea, cardIndex) {
 	let grabbedCard = cardArea.grabCard(cardIndex);
 	if (grabbedCard) {
-		cardDrags[player.index].set(grabbedCard);
+		cardDrags[player.index].set(grabbedCard, cardArea.isGrabHidden(cardIndex));
 	}
 }
 window.dropHandler = function() {

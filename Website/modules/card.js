@@ -19,15 +19,8 @@ export class Card {
 		} 
 		this.location = null; // the card area that this card is in right now
 	}
-	isHidden() {
-		return false;
-	}
 	getImage() {
-		if (this.isHidden()) {
-			return "images/cardBackFrameP" + this.owner.index + ".png";
-		} else {
-			return this.owner.game.cardData[this.cardId].imageSrc;
-		}
+		return this.owner.game.cardData[this.cardId].imageSrc;
 	}
 	getCardTypes() {
 		return this.baseCardTypes;

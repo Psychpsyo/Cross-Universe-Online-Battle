@@ -31,10 +31,10 @@ class CardDrag {
 		}
 	}
 	
-	set(card) {
+	set(card, hidden) {
 		if (card) {
 			this.card = card;
-			this.imgElem.src = card.getImage();
+			this.imgElem.src = hidden? "images/cardBackFrameP" + this.player.index + ".png" : card.getImage();
 		}
 	}
 	
