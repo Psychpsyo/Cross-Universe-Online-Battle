@@ -29,7 +29,7 @@ export class Player {
 			}
 			
 			for (let i = 0; i < card.amount; i++) {
-				let card = await new Card(this.game, cardId);
+				let card = await new Card(this, cardId);
 				// TODO: The deck card area will at some point be merged into this class.
 				cardAreas["deck" + this.index].cards.push(card);
 				card.location = cardAreas["deck" + this.index];

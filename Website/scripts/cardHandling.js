@@ -649,12 +649,12 @@ class tokenCardsArea extends cardArea {
 			return this.createdToken;
 		}
 		socket.send("[createToken]" + this.cards[cardIndex].cardId);
-		return new Card(game, this.cards[cardIndex].cardId);
+		return new Card(localPlayer, this.cards[cardIndex].cardId);
 	}
 	
 	// creates token cards when the opponent asks for them
 	createOpponentToken(cardId) {
-		this.createdToken = new Card(game, cardId);
+		this.createdToken = new Card(game.players[0], cardId);
 	}
 	
 	getLocalizedName() {
@@ -685,7 +685,7 @@ window.dropHandler = function() {
 }
 export function dropCard(player, cardArea) {
 	let heldCard = cardDrags[player.index].card;
-	if (heldCard.type == "token" && !cardArea.allowTokens) {
+	if (heldCard.getCardTypes().includes("token") && !cardArea.allowTokens) {
 		heldCard.location?.dragFinish(heldCard);
 	} else if (!cardArea || !cardArea.dropCard(player, heldCard)) {
 		heldCard.location?.returnCard(heldCard);
@@ -731,7 +731,7 @@ export function uiInit() {
 		response.forEach(card => {
 			card.imageSrc = getCardImageFromID(card.cardID);
 			game.cardData[card.cardID] = card;
-			cardAreas["tokens"].cards.push(new Card(game, card.cardID));
+			cardAreas["tokens"].cards.push(new Card(localPlayer, card.cardID));
 		});
 	});
 }

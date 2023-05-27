@@ -225,7 +225,7 @@ function openPartnerSelectMenu() {
 	//add cards
 	cardAreas["deck1"].cards.forEach((card, i) => {
 		//check if card is a unit (eligible as a partner)
-		if (card.type == "unit") {
+		if (card.getCardTypes().contains("unit")) {
 			let cardImg = document.createElement("img");
 			cardImg.src = card.getImage();
 			cardImg.dataset.cardIndex = i;

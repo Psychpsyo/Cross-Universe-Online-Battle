@@ -88,7 +88,17 @@ function previewCard(card) {
 	// set the text preview
 	// general info
 	cardDetailsName.textContent = card.getName();
-	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", locale[card.getCardType() + "CardDetailType"]);
+	let cardTypes = [...card.getCardTypes()];
+	if (cardTypes.includes("token")) {
+		cardTypes.splice(cardTypes.indexOf("unit"), 1);
+	}
+	if (cardTypes.includes("spell")) {
+		cardTypes.splice(cardTypes.indexOf("spell"), 1);
+	}
+	if (cardTypes.includes("item")) {
+		cardTypes.splice(cardTypes.indexOf("item"), 1);
+	}
+	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
 	if (card.getTypes().length > 0) {
 		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	} else {
@@ -96,7 +106,7 @@ function previewCard(card) {
 	}
 	
 	// attack & defense
-	if (card.getCardType() == "unit" || card.getCardType() == "token") {
+	if (card.getCardTypes().includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
 		cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (card.getAttack() == -1? "?" : card.getAttack());
 		cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (card.getDefense() == -1? "?" : card.getDefense());
