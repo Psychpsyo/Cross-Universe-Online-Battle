@@ -361,10 +361,7 @@
 							<div id="presentedCards0" class="presentedCards"></div>
 							<div id="presentedCards1" class="presentedCards" data-card-area="presentedCards1"></div>
 							
-							<!--opponent mouse cursor, parented under field as it needs to be positioned relative to the field height.-->
-							<img id="opponentCursor" class="dragCard p1Card" src="images/opponentCursor.png" alt="" hidden>
-							<!--follows mouse cursor and is the currently held card-->
-							<img id="dragCard" class="dragCard" src="images/cardHidden.png" alt="">
+							<div id="draggedCardImages"></div>
 						</div>
 					</div>
 					
@@ -463,7 +460,6 @@
 		<script src="scripts/translation.js"></script>
 		<script src="scripts/variables.js"></script>
 		<script src="scripts/utility.js"></script>
-		<script src="scripts/cardHandling.js", type="module"></script>
 		<script src="scripts/ui.js"></script>
 		<script src="scripts/hotkeys.js"></script>
 		<script src="modules/main.js", type="module"></script>

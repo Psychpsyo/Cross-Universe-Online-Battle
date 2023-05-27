@@ -302,17 +302,15 @@ img[src$="cardBackFrameP1.png"] {
 .dragCard {
 	position: absolute;
 	max-width: 12vh;
-	transform: translate(-50%,-50%) perspective(300px) rotateX(45deg);
 	transition: transform 0.3s ease-out;
 	
 	pointer-events: none;
 	user-select: none;
-	z-index: 95;
+	z-index: 90;
 }
 
-#opponentCursor {
-	transform: translate(-50%, -50%) rotate(180deg);
-	z-index: 90;
+#yourCursor {
+	z-index: 95;
 }
 
 .dragSource {

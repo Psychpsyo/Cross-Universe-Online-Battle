@@ -22,7 +22,7 @@ class cardArea {
 		return null;
 	}
 	// call this when a card is moved into an area, returns true if the card was successfully moved there
-	dropCard(card) {
+	dropCard(player, card) {
 		return false;
 	}
 	// returns the card to the area after an unsuccessful drag
@@ -68,7 +68,7 @@ class fieldCardArea extends cardArea {
 		}
 		return null;
 	}
-	dropCard(card) {
+	dropCard(player, card) {
 		if (this.cards.length == 0 && !this.isDragSource && !this.isFaceDown()) {
 			this.cards.push(card);
 			card.location?.dragFinish(card);
@@ -134,7 +134,7 @@ class myHandCardArea extends cardArea {
 		}
 		return null;
 	}
-	dropCard(card) {
+	dropCard(player, card) {
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
@@ -196,7 +196,7 @@ class pileCardArea extends cardArea {
 		}
 		return null;
 	}
-	dropCard(card) {
+	dropCard(player, card) {
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
@@ -242,24 +242,26 @@ class deckCardArea extends cardArea {
 		super("deck" + playerIndex, false)
 		
 		this.playerIndex = playerIndex;
-		this.droppingCard = null;
+		this.droppingCards = [null, null];
 		
 		// event handlers for dropping to deck
 		document.getElementById("deckTopBtn" + playerIndex).addEventListener("click", function() {
-			this.dropToTop(this.droppingCard);
+			this.dropToTop(localPlayer);
 		}.bind(this));
 		document.getElementById("deckBottomBtn" + playerIndex).addEventListener("click", function() {
-			this.dropToBottom(this.droppingCard);
+			this.dropToBottom(localPlayer);
 		}.bind(this));
 		document.getElementById("deckShuffleInBtn" + playerIndex).addEventListener("click", function() {
-			this.shuffleIn(this.droppingCard);
+			this.shuffleIn(localPlayer);
 		}.bind(this));
-		document.getElementById("deckCancelBtn" + playerIndex).addEventListener("click", this.cancelDrop.bind(this));
+		document.getElementById("deckCancelBtn" + playerIndex).addEventListener("click", function() {
+			this.cancelDrop(localPlayer);
+		}.bind(this));
 		
 		// event handlers for hovering the deck
 		document.getElementById(this.name).addEventListener("mouseover", function() {
 			let deck = cardAreas["deck" + playerIndex];
-			if (deck.cards.length > 0 && !deck.droppingCard && !heldCard) {
+			if (deck.cards.length > 0 && !cardDrags[localPlayer.index].card && !heldCard) {
 				document.getElementById("deckHoverBtns" + playerIndex).style.display = "block";
 			}
 		});
@@ -298,10 +300,12 @@ class deckCardArea extends cardArea {
 		}
 		return null;
 	}
-	dropCard(card) {
-		this.droppingCard = card;
-		document.getElementById("deckDropOptions" + this.playerIndex).style.display = "block";
-		canGrab = false;
+	dropCard(player, card) {
+		this.droppingCards[player.index] = card;
+		if (player === localPlayer) {
+			document.getElementById("deckDropOptions" + this.playerIndex).style.display = "block";
+			canGrab = false;
+		}
 		return true;
 	}
 	returnCard(card) {
@@ -318,39 +322,52 @@ class deckCardArea extends cardArea {
 	}
 	
 	// all the options for when a card is dropped to deck:
-	dropToTop(card) {
+	dropToTop(player) {
+		let card = this.droppingCards[player.index];
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
-		this.dropDone();
-		socket.send("[deckTop]" + this.playerIndex);
+		this.dropDone(player);
+		if (player === localPlayer) {
+			socket.send("[deckTop]" + this.playerIndex);
+		}
 	}
-	dropToBottom(card) {
+	dropToBottom(player) {
+		let card = this.droppingCards[player.index];
 		this.cards.unshift(card);
 		card.location?.dragFinish(card);
 		card.location = this;
-		this.dropDone();
-		socket.send("[deckBottom]" + this.playerIndex);
+		this.dropDone(player);
+		if (player === localPlayer) {
+			socket.send("[deckBottom]" + this.playerIndex);
+		}
 	}
-	shuffleIn(card) {
+	shuffleIn(player) {
+		let card = this.droppingCards[player.index];
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
-		socket.send("[deckShuffle]" + this.playerIndex);
-		this.shuffle();
-		this.dropDone();
+		if (player === localPlayer) {
+			socket.send("[deckShuffle]" + this.playerIndex);
+			this.shuffle();
+		}
+		this.dropDone(player);
 	}
-	cancelDrop() {
-		this.droppingCard.location?.returnCard(this.droppingCard);
-		this.dropDone();
-		socket.send("[deckCancel]");
+	cancelDrop(player) {
+		this.droppingCards[player.index].location?.returnCard(this.droppingCards[player.index]);
+		this.dropDone(player);
+		if (player === localPlayer) {
+			socket.send("[deckCancel]" + this.playerIndex);
+		}
 	}
 	// called by the above functions
-	dropDone() {
-		this.droppingCard = null;
-		document.getElementById("deckDropOptions" + this.playerIndex).style.display = "none";
+	dropDone(player) {
+		this.droppingCards[player.index] = null;
 		this.updateVisual();
-		canGrab = true;
+		if (player === localPlayer) {
+			document.getElementById("deckDropOptions" + this.playerIndex).style.display = "none";
+			canGrab = true;
+		}
 	}
 	
 	// general deck related functions
@@ -378,7 +395,7 @@ class deckCardArea extends cardArea {
 		}
 		
 		let drawnCard = this.cards.pop();
-		cardAreas["hand" + this.playerIndex].dropCard(drawnCard);
+		cardAreas["hand" + this.playerIndex].dropCard(localPlayer, drawnCard);
 		this.updateVisual();
 	}
 	
@@ -389,7 +406,7 @@ class deckCardArea extends cardArea {
 		}
 		
 		let shownCard = this.cards.pop();
-		cardAreas["presentedCards" + player].dropCard(shownCard);
+		cardAreas["presentedCards" + player].dropCard(localPlayer, shownCard);
 		this.updateVisual();
 		return true;
 	}
@@ -417,7 +434,7 @@ class myPresentedCardsArea extends cardArea {
 		}
 		return null;
 	}
-	dropCard(card) {
+	dropCard(player, card) {
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
@@ -492,7 +509,7 @@ class opponentHandCardArea extends cardArea {
 		}
 		return null;
 	}
-	dropCard(card) {
+	dropCard(player, card) {
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
@@ -562,7 +579,7 @@ class opponentPresentedCardsArea extends cardArea {
 		Array.from(presentedCards0.children)[cardIndex].classList.add("dragSource");
 		return this.cards[cardIndex];
 	}
-	dropCard(card) {
+	dropCard(player, card) {
 		this.cards.push(card);
 		card.location?.dragFinish(card);
 		card.location = this;
@@ -650,48 +667,71 @@ window.grabHandler = function(e) {
 	e.preventDefault();
 	if (canGrab) {
 		let cardIndex = this.dataset.cardIndex;
-		heldCard = cardAreas[this.dataset.cardArea].grabCard(cardIndex);
-		if (heldCard) {
-			dragCard.src = heldCard.getImage();
-			socket.send("[grabbedCard]" + this.dataset.cardArea + "|" + cardIndex);
-		}
+		grabCard(localPlayer, cardAreas[this.dataset.cardArea], cardIndex);
+		socket.send("[grabbedCard]" + this.dataset.cardArea + "|" + cardIndex);
+	}
+}
+export function grabCard(player, cardArea, cardIndex) {
+	let grabbedCard = cardArea.grabCard(cardIndex);
+	if (grabbedCard) {
+		cardDrags[player.index].set(grabbedCard);
 	}
 }
 window.dropHandler = function() {
-	if (heldCard) {
-		if (heldCard.type == "token" && !cardAreas[this.dataset.cardArea].allowTokens) {
-			heldCard.location?.dragFinish(heldCard);
-		} else if (!cardAreas[this.dataset.cardArea].dropCard(heldCard)) {
-			heldCard.location?.returnCard(heldCard);
-		}
-		heldCard = null;
-		dragCard.src = "images/cardHidden.png";
+	if (cardDrags[localPlayer.index].card) {
+		dropCard(localPlayer, cardAreas[this.dataset.cardArea]);
 		socket.send("[droppedCard]" + this.dataset.cardArea);
 	}
 }
+export function dropCard(player, cardArea) {
+	let heldCard = cardDrags[player.index].card;
+	if (heldCard.type == "token" && !cardArea.allowTokens) {
+		heldCard.location?.dragFinish(heldCard);
+	} else if (!cardArea || !cardArea.dropCard(player, heldCard)) {
+		heldCard.location?.returnCard(heldCard);
+	}
+	cardDrags[player.index].clear();
+}
 
 // create all the cardAreas
-for (let i = 0; i < 20; i++) {
-	new fieldCardArea(i);
-}
-new myHandCardArea();
-new opponentHandCardArea();
-new pileCardArea("discard", 0);
-new pileCardArea("discard", 1);
-new pileCardArea("exile", 0);
-new pileCardArea("exile", 1);
+// TODO: move this into init once it is no longer needed by Player.setDeck()
 new deckCardArea(0);
 new deckCardArea(1);
-new myPresentedCardsArea();
-new opponentPresentedCardsArea();
-new tokenCardsArea();
-
-// dropping cards off in nowhere
-document.addEventListener("mouseup", function() {
-	if (heldCard) {
-		heldCard.location?.returnCard(heldCard);
-		heldCard = null;
-		dragCard.src = "images/cardHidden.png";
-		socket.send("[droppedCard]");
+export function uiInit() {
+	for (let i = 0; i < 20; i++) {
+		new fieldCardArea(i);
 	}
-});
+	new myHandCardArea();
+	new opponentHandCardArea();
+	new pileCardArea("discard", 0);
+	new pileCardArea("discard", 1);
+	new pileCardArea("exile", 0);
+	new pileCardArea("exile", 1);
+	new myPresentedCardsArea();
+	new opponentPresentedCardsArea();
+	new tokenCardsArea();
+	
+	// dropping cards off in nowhere
+	document.addEventListener("mouseup", function() {
+		if (cardDrags[localPlayer.index].card) {
+			dropCard(localPlayer, null);
+			socket.send("[droppedCard]");
+		}
+	});
+	
+	fetch("https://crossuniverse.net/cardInfo", {
+		method: "POST",
+		body: JSON.stringify({
+			"cardTypes": ["token"],
+			"language": localStorage.getItem("language")
+		})
+	})
+	.then(response => response.json())
+	.then(response => {
+		response.forEach(card => {
+			card.imageSrc = getCardImageFromID(card.cardID);
+			game.cardData[card.cardID] = card;
+			cardAreas["tokens"].cards.push(new Card(game, card.cardID));
+		});
+	});
+}

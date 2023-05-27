@@ -30,7 +30,7 @@ export class Player {
 			
 			for (let i = 0; i < card.amount; i++) {
 				let card = await new Card(this.game, cardId);
-				// TODO: The deck card area will at some point be merged into this class and IDs for cards will be phased out.
+				// TODO: The deck card area will at some point be merged into this class.
 				cardAreas["deck" + this.index].cards.push(card);
 				card.location = cardAreas["deck" + this.index];
 			}

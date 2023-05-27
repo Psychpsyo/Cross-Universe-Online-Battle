@@ -39,10 +39,10 @@ export class InitState extends GameState {
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
 				
-				this.initGame().then(() => {
-					socket.send("[ready]");
-					this.checkReadyConditions();
-				});
+				game = new Game();
+				localPlayer = game.players[1];
+				socket.send("[ready]");
+				this.checkReadyConditions();
 				
 				return true;
 			}
@@ -71,29 +71,8 @@ export class InitState extends GameState {
 		return false;
 	}
 	
-	async initGame() {
-		game = new Game();
-		localPlayer = game.players[1];
-		return fetch("https://crossuniverse.net/cardInfo", {
-			method: "POST",
-			body: JSON.stringify({
-				"cardTypes": ["token"],
-				"language": localStorage.getItem("language")
-			})
-		})
-		.then(response => response.json())
-		.then(response => {
-			response.forEach(card => {
-				card.imageSrc = getCardImageFromID(card.cardID);
-				game.cardData[card.cardID] = card;
-				cardAreas["tokens"].cards.push(new Card(game, card.cardID));
-			});
-			this.gameSetup = true;
-		});
-	}
-	
 	checkReadyConditions() {
-		if (this.opponentReady && this.gameSetup && youAre !== null) {
+		if (this.opponentReady && youAre !== null) {
 			// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
 			document.getElementById("gameDiv").addEventListener("dragover", function(e) {
 				e.preventDefault();

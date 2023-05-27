@@ -1,6 +1,7 @@
 // This module exports the board state which is the main game state where the players actually play.
 import {GameState} from "/modules/gameState.js";
 import {socket, cardAreaToLocal} from "/modules/netcode.js";
+import {uiInit, grabCard, dropCard} from "/scripts/cardHandling.js";
 
 let myCursorX = 0;
 let myCursorY = 0;
@@ -14,17 +15,40 @@ let lastMyCursorY = 0;
 let lastOppCursorX = 0;
 let lastOppCursorY = 0;
 
+window.cardDrags = [];
 let lastFrame = 0;
 
-// measure when the mouse moves
-document.addEventListener("mousemove", function(e) {
-	let fieldRect = document.getElementById("field").getBoundingClientRect();
-	myCursorX = (e.clientX - fieldRect.left - fieldRect.width / 2) / fieldRect.height;
-	myCursorY = (e.clientY - fieldRect.top) / fieldRect.height;
+class CardDrag {
+	constructor(player) {
+		this.posX = 0;
+		this.posY = 0;
+		this.lastX = 0;
+		this.lastY = 0;
+		this.targetX = 0;
+		this.targetY = 0;
+		this.imgElem = document.createElement("img");
+		this.imgElem.classList.add("dragCard");
+		if (player == localPlayer) {
+			this.imgElem.id = "yourCursor";
+		}
+		draggedCardImages.appendChild(this.imgElem);
+		this.player = player;
+		this.card = null;
+		this.source = null;
+	}
 	
-	dragCard.style.left = myCursorX * fieldRect.height + fieldRect.width / 2 + "px";
-	dragCard.style.top = myCursorY * fieldRect.height + "px";
-});
+	set(card) {
+		if (card) {
+			this.card = card;
+			this.imgElem.src = card.getImage();
+		}
+	}
+	
+	clear() {
+		this.imgElem.src = "images/cardHidden.png";
+		this.card = null;
+	}
+}
 
 //disable right-click on field
 document.getElementById("field").addEventListener("contextmenu", function (e) {e.preventDefault();});
@@ -149,33 +173,23 @@ function animateCursors(currentTime) {
 	let delta = currentTime - lastFrame;
 	lastFrame = currentTime;
 	
-	// opponent cursor movement / smoothing
-	if (!opponentCursor.hidden) {
-		oppCursorX += (oppCursorTargetX - oppCursorX) / 5;
-		oppCursorY += (oppCursorTargetY - oppCursorY) / 5;
-	}
 	let fieldRect = document.getElementById("field").getBoundingClientRect();
-	opponentCursor.style.left = (oppCursorX * fieldRect.height + fieldRect.width / 2) + "px";
-	opponentCursor.style.top = oppCursorY * fieldRect.height + "px";
-	
-	// animate cards
-	let myCursorXVel = myCursorX - lastMyCursorX;
-	let myCursorYVel =  lastMyCursorY - myCursorY;
-	let oppCursorXVel = oppCursorX - lastOppCursorX;
-	let oppCursorYVel = lastOppCursorY - oppCursorY;
-	
-	dragCard.style.transform = "translate(-50%,-50%) perspective(300px) rotateY(" + (myCursorXVel > 0? Math.min(Math.PI / 3, myCursorXVel * 100) : Math.max(Math.PI / -3, myCursorXVel * 100)) + "rad) rotateX(" + (myCursorYVel > 0? Math.min(Math.PI / 3, myCursorYVel * 100) : Math.max(Math.PI / -3, myCursorYVel * 100)) + "rad)";
-	
-	if (opponentCursor.src.endsWith("images/opponentCursor.png")) {
-		opponentCursor.style.transform = "translate(-50%,-50%) rotate(180deg)";
-	} else {
-		opponentCursor.style.transform = "translate(-50%,-50%) perspective(300px) rotateY(" + (oppCursorXVel > 0? Math.min(Math.PI / 3, oppCursorXVel * 100) : Math.max(Math.PI / -3, oppCursorXVel * 100)) + "rad) rotateX(" + (oppCursorYVel > 0? Math.min(Math.PI / 3, oppCursorYVel * 100) : Math.max(Math.PI / -3, oppCursorYVel * 100)) + "rad) rotateZ(180deg)";
+	for (let drag of cardDrags) {
+		drag.posX += (drag.targetX - drag.posX) / 5;
+		drag.posY += (drag.targetY - drag.posY) / 5;
+		
+		drag.imgElem.style.left = (drag.posX * fieldRect.height + fieldRect.width / 2) + "px";
+		drag.imgElem.style.top = drag.posY * fieldRect.height + "px";
+		
+		let velX = drag.posX - drag.lastX;
+		let velY = drag.lastY - drag.posY;
+		
+		let flipped = drag.player.index % 2 == 0;
+		drag.imgElem.style.transform = "translate(-50%,-50%) perspective(300px) rotateY(" + (velX > 0? Math.min(Math.PI / 3, velX * 100) : Math.max(Math.PI / -3, velX * 100)) + "rad) rotateX(" + (velY > 0? Math.min(Math.PI / 3, velY * 100) : Math.max(Math.PI / -3, velY * 100)) + "rad)" + (flipped? " rotateZ(180deg)" : "");
+		
+		drag.lastX = drag.posX;
+		drag.lastY = drag.posY;
 	}
-	
-	lastMyCursorX = myCursorX;
-	lastMyCursorY = myCursorY;
-	lastOppCursorX = oppCursorX;
-	lastOppCursorY = oppCursorY;
 	
 	requestAnimationFrame(animateCursors);
 }
@@ -198,8 +212,6 @@ document.getElementById("startingPlayerSelect").addEventListener("click", functi
 	socket.send("[selectPlayer]" + startingPlayer);
 	partnerRevealButtonDiv.style.display = "block";
 });
-
-
 
 
 //opening the partner select menu
@@ -251,17 +263,29 @@ export class BoardState extends GameState {
 		draftGameSetupMenu.remove();
 		
 		// setup cursor movement
+		for (const player of game.players) {
+			cardDrags.push(new CardDrag(player));
+		}
+		document.addEventListener("mousemove", function(e) {
+			let fieldRect = document.getElementById("field").getBoundingClientRect();
+			cardDrags[1].targetX = (e.clientX - fieldRect.left - fieldRect.width / 2) / fieldRect.height;
+			cardDrags[1].targetY = (e.clientY - fieldRect.top) / fieldRect.height;
+			cardDrags[1].posX = cardDrags[1].targetX;
+			cardDrags[1].posY = cardDrags[1].targetY;
+		});
 		document.getElementById("field").addEventListener("mouseleave", function() {
 			socket.send("[hideCursor]");
 		});
 		document.getElementById("field").addEventListener("mousemove", function() {
 			// check if the normalized cursor position is within the bounds of the visual field
-			if (Math.abs(myCursorX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
-				socket.send("[placeCursor]" + myCursorX + "|" + myCursorY);
+			if (Math.abs(cardDrags[1].posX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
+				socket.send("[placeCursor]" + cardDrags[1].posX + "|" + cardDrags[1].posY);
 			} else {
 				socket.send("[hideCursor]");
 			}
 		});
+		uiInit();
+		
 		lastFrame = performance.now();
 		animateCursors();
 		
@@ -293,7 +317,7 @@ export class BoardState extends GameState {
 		document.getElementById("revealPartnerBtn").addEventListener("click", function() {
 			document.getElementById("partnerRevealButtonDiv").style.display = "none";
 			field17.src = "images/cardHidden.png";
-			cardAreas["field17"].dropCard(gameState.chosenPartners[1]);
+			cardAreas["field17"].dropCard(localPlayer, gameState.chosenPartners[1]);
 			socket.send("[revealPartner]");
 		});
 	}
@@ -316,7 +340,7 @@ export class BoardState extends GameState {
 			}
 			case "revealPartner": { // opponent revealed their partner
 				field2.src = "images/cardHidden.png";
-				cardAreas["field2"].dropCard(this.chosenPartners[0]);
+				cardAreas["field2"].dropCard(game.players[0], this.chosenPartners[0]);
 				return true;
 			}
 			case "selectPlayer": { // opponent chose the starting player (at random)
@@ -328,66 +352,35 @@ export class BoardState extends GameState {
 			case "grabbedCard": { // opponent picked up a card
 				let cardArea = cardAreas[cardAreaToLocal(message.substr(0, message.indexOf("|")))];
 				let cardIndex = message.substr(message.indexOf("|") + 1);
-				
-				let hiddenGrab = cardArea.isGrabHidden(cardIndex)
-				opponentHeldCard = cardArea.grabCard(cardIndex);
-				opponentCursor.src = hiddenGrab? "images/cardBackFrameP0.png" : opponentHeldCard.getImage();
+				grabCard(game.players[0], cardArea, cardIndex);
 				return true;
 			}
 			case "droppedCard": { // opponent dropped a card
+				let cardArea = null;
 				if (message != "") {
-					let cardArea = cardAreaToLocal(message);
-					if (opponentHeldCard.type == "token" && !cardAreas[cardArea].allowTokens) { // no tokens allowed, this'll just vanish the card
-						opponentHeldCard.location?.dragFinish(opponentHeldCard);
-					} else if (cardArea.startsWith("deck")) { // if the card was dropped to deck, don't call the drop function to not prompt the local player with the options
-						// return early if the opponent dropped to deck, so that opponentHeldCard does not get cleared.
-						opponentCursor.src = "images/opponentCursor.png";
-						return true;
-					} else {
-						if (!cardAreas[cardArea].dropCard(opponentHeldCard)) {
-							opponentHeldCard.location?.returnCard(opponentHeldCard);
-						}
-					}
-				} else {
-					opponentHeldCard.location?.returnCard(opponentHeldCard);
+					cardArea = cardAreas[cardAreaToLocal(message)];
 				}
-				opponentHeldCard = null;
-				opponentCursor.src = "images/opponentCursor.png";
+				dropCard(game.players[0], cardArea);
 				return true;
 			}
 			case "deckTop": { // opponent sent their held card to the top of a deck
 				let deck = cardAreas[cardAreaToLocal("deck" + message)];
-				
-				deck.cards.push(opponentHeldCard);
-				opponentHeldCard.location?.dragFinish(opponentHeldCard);
-				opponentHeldCard.location = deck;
-				opponentHeldCard = null;
-				deck.updateVisual();
+				deck.dropToTop(game.players[0]);
 				return true;
 			}
 			case "deckBottom": { // opponent sent their held card to the bottom of a deck
 				let deck = cardAreas[cardAreaToLocal("deck" + message)];
-				
-				deck.cards.unshift(opponentHeldCard);
-				opponentHeldCard.location?.dragFinish(opponentHeldCard);
-				opponentHeldCard.location = deck;
-				opponentHeldCard = null;
-				deck.updateVisual();
+				deck.dropToBottom(game.players[0]);
 				return true;
 			}
 			case "deckShuffle": { // opponent shuffles their held card into a deck
 				let deck = cardAreas[cardAreaToLocal("deck" + message)];
-				
-				deck.cards.push(opponentHeldCard); // the [deckOrder] message will arrive right after this one.
-				opponentHeldCard.location?.dragFinish(opponentHeldCard);
-				opponentHeldCard.location = deck;
-				opponentHeldCard = null;
-				deck.updateVisual();
+				deck.shuffleIn(game.players[0]);
 				return true;
 			}
 			case "deckCancel": { // opponent cancelled dropping their held card into a deck
-				opponentHeldCard.location?.returnCard(opponentHeldCard);
-				opponentHeldCard = null;
+				let deck = cardAreas[cardAreaToLocal("deck" + message)];
+				deck.cancelDrop(game.players[0]);
 				return true;
 			}
 			case "drawCard": { // opponent drew a card
@@ -410,16 +403,16 @@ export class BoardState extends GameState {
 				return true;
 			}
 			case "hideCursor": { // hide opponent's cursor
-				opponentCursor.setAttribute("hidden", "");
+				cardDrags[0].imgElem.setAttribute("hidden", "");
 				return true;
 			}
 			case "placeCursor": { // move the opponent's cursor somewhere on the field
-				oppCursorTargetX = message.substr(0, message.indexOf("|")) * -1;
-				oppCursorTargetY = 1 - message.substr(message.indexOf("|") + 1);
-				if (opponentCursor.hidden) {
-					opponentCursor.removeAttribute("hidden");
-					oppCursorX = oppCursorTargetX;
-					oppCursorY = oppCursorTargetY;
+				cardDrags[0].targetX = message.substr(0, message.indexOf("|")) * -1;
+				cardDrags[0].targetY = 1 - message.substr(message.indexOf("|") + 1);
+				if (cardDrags[0].imgElem.hidden) {
+					cardDrags[0].imgElem.removeAttribute("hidden");
+					cardDrags[0].posX = cardDrags[0].targetX;
+					cardDrags[0].posY = cardDrags[0].targetY;
 				}
 				return true;
 			}

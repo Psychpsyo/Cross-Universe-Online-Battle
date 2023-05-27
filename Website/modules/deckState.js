@@ -5,6 +5,7 @@ import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
+import "/scripts/cardHandling.js"; // TODO: Remove this, it is only still here because the deck setup still relies on the cardAreas in cardHandling.js
 
 let officialDecks = [];
 fetch("data/deckList.json")
