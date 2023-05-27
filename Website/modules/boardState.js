@@ -3,38 +3,32 @@ import {GameState} from "/modules/gameState.js";
 import {socket, cardAreaToLocal} from "/modules/netcode.js";
 import {uiInit, grabCard, dropCard} from "/scripts/cardHandling.js";
 
-let myCursorX = 0;
-let myCursorY = 0;
-let oppCursorX = 0;
-let oppCursorY = 0;
-let oppCursorTargetX = 0;
-let oppCursorTargetY = 0;
-// used to track the speed of the cursors
-let lastMyCursorX = 0;
-let lastMyCursorY = 0;
-let lastOppCursorX = 0;
-let lastOppCursorY = 0;
-
 window.cardDrags = [];
 let lastFrame = 0;
 
 class CardDrag {
 	constructor(player) {
+		this.player = player;
+		this.card = null;
+		this.source = null;
 		this.posX = 0;
 		this.posY = 0;
 		this.lastX = 0;
 		this.lastY = 0;
 		this.targetX = 0;
 		this.targetY = 0;
+		
 		this.imgElem = document.createElement("img");
 		this.imgElem.classList.add("dragCard");
-		if (player == localPlayer) {
-			this.imgElem.id = "yourCursor";
-		}
 		draggedCardImages.appendChild(this.imgElem);
-		this.player = player;
-		this.card = null;
-		this.source = null;
+		if (player == localPlayer) {
+			this.imgElem.id = "yourDragCard";
+		} else {
+			this.cursorElem = document.createElement("img");
+			this.cursorElem.classList.add("dragCard");
+			this.cursorElem.src = "images/opponentCursor.png";
+			draggedCardImages.appendChild(this.cursorElem);
+		}
 	}
 	
 	set(card) {
@@ -180,6 +174,10 @@ function animateCursors(currentTime) {
 		
 		drag.imgElem.style.left = (drag.posX * fieldRect.height + fieldRect.width / 2) + "px";
 		drag.imgElem.style.top = drag.posY * fieldRect.height + "px";
+		if (drag.player !== localPlayer) {
+			drag.cursorElem.style.left = drag.imgElem.style.left;
+			drag.cursorElem.style.top = drag.imgElem.style.top;
+		}
 		
 		let velX = drag.posX - drag.lastX;
 		let velY = drag.lastY - drag.posY;
@@ -404,6 +402,7 @@ export class BoardState extends GameState {
 			}
 			case "hideCursor": { // hide opponent's cursor
 				cardDrags[0].imgElem.setAttribute("hidden", "");
+				cardDrags[0].cursorElem.setAttribute("hidden", "");
 				return true;
 			}
 			case "placeCursor": { // move the opponent's cursor somewhere on the field
@@ -411,6 +410,7 @@ export class BoardState extends GameState {
 				cardDrags[0].targetY = 1 - message.substr(message.indexOf("|") + 1);
 				if (cardDrags[0].imgElem.hidden) {
 					cardDrags[0].imgElem.removeAttribute("hidden");
+					cardDrags[0].cursorElem.removeAttribute("hidden");
 					cardDrags[0].posX = cardDrags[0].targetX;
 					cardDrags[0].posY = cardDrags[0].targetY;
 				}

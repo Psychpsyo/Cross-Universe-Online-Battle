@@ -309,7 +309,7 @@ img[src$="cardBackFrameP1.png"] {
 	z-index: 90;
 }
 
-#yourCursor {
+#yourDragCard {
 	z-index: 95;
 }
 
