@@ -17,10 +17,11 @@ export class Card {
 		} else if (["standardItem", "continuousItem", "equipableItem"].includes(mainType)) {
 			this.baseCardTypes.push("item");
 		} 
-		this.location = null; // the card area that this card is in right now
+		this.location = null;
+		this.hidden = true;
 	}
 	getImage() {
-		return this.owner.game.cardData[this.cardId].imageSrc;
+		return this.hidden? "images/cardBackFrameP" + this.owner.index + ".png" : this.owner.game.cardData[this.cardId].imageSrc;
 	}
 	getCardTypes() {
 		return this.baseCardTypes;

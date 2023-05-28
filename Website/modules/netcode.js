@@ -1,41 +1,10 @@
 export let roomcode = "";
 export let socket = null;
 
-let cardAreaMirrorTable = {
-	"deck0": "deck1",
-	"deck1": "deck0",
-	"hand0": "hand1",
-	"hand1": "hand0",
-	"discard0": "discard1",
-	"discard1": "discard0",
-	"exile0": "exile1",
-	"exile1": "exile0",
-	"presentedCards0": "presentedCards1",
-	"presentedCards1": "presentedCards0",
-	"tokens": "tokens",
-	"field0": "field19",
-	"field1": "field18",
-	"field2": "field17",
-	"field3": "field16",
-	"field4": "field15",
-	"field5": "field14",
-	"field6": "field13",
-	"field7": "field12",
-	"field8": "field11",
-	"field9": "field10",
-	"field10": "field9",
-	"field11": "field8",
-	"field12": "field7",
-	"field13": "field6",
-	"field14": "field5",
-	"field15": "field4",
-	"field16": "field3",
-	"field17": "field2",
-	"field18": "field1",
-	"field19": "field0"
-};
-export function cardAreaToLocal(cardArea) {
-	return cardAreaMirrorTable[cardArea];
+export function zoneToLocal(name) {
+	let playerIndex = (parseInt(name.substr(name.length - 1)) + 1) % 2;
+	name = name.substr(0, name.length - 1);
+	return game.zones[name + playerIndex];
 }
 
 export function connectTo(targetRoomcode) {

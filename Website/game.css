@@ -163,13 +163,19 @@
 	padding: .5em;
 	border-bottom: 2px solid var(--theme-border-color);
 }
-
 #infoPanel > div {
 	min-width: 4vw;
 }
-
 #infoPanel > :not(:last-child) {
 	margin-right: 2vw;
+}
+.lifeUp {
+	font-weight: bold;
+	color: #0f0;
+}
+.lifeDown {
+	font-weight: bold;
+	color: #f00;
 }
 
 #gameInteractions {
@@ -303,6 +309,7 @@ img[src$="cardBackFrameP1.png"] {
 	position: absolute;
 	max-width: 12vh;
 	transition: transform 0.3s ease-out;
+	transform: translate(-50%, -50%);
 	
 	pointer-events: none;
 	user-select: none;

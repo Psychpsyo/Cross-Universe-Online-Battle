@@ -75,6 +75,9 @@ cardDetailsClose.addEventListener("click", closeCardPreview);
 
 // previews a card
 function previewCard(card) {
+	if (!card?.cardId || card.hidden) {
+		return;
+	}
 	// if the already shown card was clicked again
 	if (cardDetails.dataset.currentCard == card.cardId) {
 		closeCardPreview();
