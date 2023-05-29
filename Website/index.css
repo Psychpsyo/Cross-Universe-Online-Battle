@@ -115,9 +115,9 @@ textarea {
 
 
 /* dialogs */
-dialog {
+.centerDialog {
 	max-height: fit-content;
-	overflow: hidden;
+	overflow: visible;
 	
 	text-align: center;
 	color: inherit;
@@ -136,11 +136,11 @@ dialog {
 	width: 100%;
 }
 
-::backdrop {
+.centerDialog::backdrop {
 	background-color: rgba(1, 1, 1, .5);
 }
 
-dialog header {
+.centerDialog header {
 	border-bottom: 2px solid var(--theme-border-color);
 	padding: .3em .5em;
 	text-align: center;

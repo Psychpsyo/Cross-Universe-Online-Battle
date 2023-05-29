@@ -16,7 +16,7 @@ export class Zone {
 	// returns the index at which the card was inserted.
 	add(card, index) {
 		if (this.size > -1 && this.cards[index] !== null) {
-			return -1;
+			return this.cards[index] === card? index : -1;
 		}
 		if (this.size == -1 && card.location === this && this.cards.indexOf(card) < index) {
 			index--;

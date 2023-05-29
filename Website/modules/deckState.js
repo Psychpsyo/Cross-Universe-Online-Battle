@@ -16,6 +16,15 @@ fetch("data/deckList.json")
 let currentDeckList = "default";
 
 
+function openDeckSelect() {
+	deckSelector.showModal();
+	deckSelector.appendChild(cardDetails);
+}
+function closeDeckSelect() {
+	gameFlexBox.appendChild(cardDetails);
+	deckSelector.close();
+}
+
 function loadDeckFile(file) {
 	let reader = new FileReader();
 	reader.onload = function(e) {
@@ -52,7 +61,7 @@ function loadDeckPreview(deck) {
 		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
 		cardImg.addEventListener("click", async function(e) {
 			await game.registerCard(this.dataset.cardId);
-			previewCard(new Card(game, this.dataset.cardId));
+			previewCard(new Card(localPlayer, this.dataset.cardId, false));
 			e.stopPropagation();
 		});
 	});
@@ -131,13 +140,19 @@ export class DeckState extends GameState {
 		});
 		
 		// selecting deck from the deck list
+		deckSelector.addEventListener("click", function(e) {
+			if (e.target == document.getElementById("deckSelector")) {
+				closeDeckSelect();
+			}
+		});
+		
 		document.getElementById("loadSelectedDeckBtn").addEventListener("click", function() {
 			if (!document.getElementById("selectedDeck")) {
 				return;
 			}
 			
+			closeDeckSelect();
 			gameState.loadDeck(officialDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
-			overlayBackdrop.style.display = "none";
 		});
 		
 		// opening the deck selector
@@ -145,9 +160,7 @@ export class DeckState extends GameState {
 			e.stopPropagation();
 			currentDeckList = "default";
 			addDecksToDeckSelector(currentDeckList);
-			
-			deckSelector.style.display = "flex";
-			overlayBackdrop.style.display = "block";
+			openDeckSelect();
 		});
 		// deck selector deck list buttons
 		document.getElementById("defaultDecksBtn").addEventListener("click", function() {

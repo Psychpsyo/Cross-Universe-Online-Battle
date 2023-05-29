@@ -13,12 +13,12 @@ document.getElementById("startingPlayerSelect").addEventListener("click", functi
 	partnerRevealButtonDiv.style.display = "block";
 });
 
+partnerSelectionMenu.addEventListener("cancel", function(e) {
+	e.preventDefault();
+});
 
 //opening the partner select menu
 function openPartnerSelectMenu() {
-	// unhide backdrop
-	overlayBackdrop.style.display = "block";
-	
 	//clear partner selector
 	if (document.getElementById("partnerSelectorGrid").firstChild) {
 		document.getElementById("partnerSelectorGrid").innerHTML = "";
@@ -27,23 +27,29 @@ function openPartnerSelectMenu() {
 	//add cards
 	localPlayer.deckZone.cards.forEach((card, i) => {
 		//check if card is a unit (eligible as a partner)
-		if (card.getCardTypes().contains("unit")) {
+		if (card.getCardTypes().includes("unit")) {
 			let cardImg = document.createElement("img");
+			card.hidden = false;
 			cardImg.src = card.getImage();
 			cardImg.dataset.cardIndex = i;
-			cardImg.addEventListener("click", function() {
+			cardImg.addEventListener("click", function(e) {
 				if (shiftHeld) {
+					e.stopPropagation();
 					previewCard(localPlayer.deckZone.cards[this.dataset.cardIndex]);
 				} else {
-					document.getElementById("partnerSelectionMenu").style.display = "none";
+					for (let card of localPlayer.deckZone.cards) {
+						card.hidden = true;
+					}
+					gameFlexBox.appendChild(cardDetails);
+					partnerSelectionMenu.close();
 					gameState.getPartnerFromDeck(this.dataset.cardIndex);
-					overlayBackdrop.style.display = "none";
 				}
 			});
 			document.getElementById("partnerSelectorGrid").appendChild(cardImg)
 		}
 	});
-	document.getElementById("partnerSelectionMenu").style.display = "flex";
+	partnerSelectionMenu.showModal();
+	partnerSelectionMenu.appendChild(cardDetails);
 	
 	//scroll to top
 	document.getElementById("partnerSelectorGrid").parentNode.scrollTop = 0;
@@ -119,18 +125,6 @@ export class BoardState extends GameState {
 				startingPlayerSelect.style.display = "none";
 				putChatMessage(message == "true"? locale["opponentStarts"] : locale["youStart"], "notice");
 				partnerRevealButtonDiv.style.display = "block";
-				return true;
-			}
-			case "revealCard": { // opponent revealed a presented card
-				//let cardDiv = presentedCards0.children.item(parseInt(message));
-				//cardDiv.src = cardAreas["presentedCards0"].cards[cardDiv.dataset.cardIndex].getImage();
-				//cardDiv.dataset.shown = true;
-				return true;
-			}
-			case "unrevealCard": { // opponent hid a presented card
-				//let cardDiv = presentedCards0.children.item(parseInt(message));
-				//cardDiv.src = "images/cardBackFrameP0.png";
-				//cardDiv.dataset.shown = false;
 				return true;
 			}
 			case "createToken": {

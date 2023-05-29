@@ -108,7 +108,7 @@ export class DraftState extends GameState {
 				card.addEventListener("click", async function() {
 					if (shiftHeld || ctrlHeld || altHeld) {
 						await game.registerCard(this.dataset.cardId);
-						previewCard(new Card(game, this.dataset.cardId));
+						previewCard(new Card(localPlayer, this.dataset.cardId, false));
 						return;
 					}
 					
@@ -148,7 +148,7 @@ export class DraftState extends GameState {
 		game.registerCard(card.dataset.cardId);
 		deckCard.addEventListener("click", async function() {
 			await game.registerCard(card.dataset.cardId);
-			previewCard(new Card(game, this.dataset.cardId));
+			previewCard(new Card(localPlayer, this.dataset.cardId, false));
 		});
 		
 		// check if all cards have been taken.

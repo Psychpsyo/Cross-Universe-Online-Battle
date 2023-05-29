@@ -109,7 +109,7 @@ Array.from(cardSearchTypeInput.children).forEach(typeOption => {
 });
 
 //card info panel
-cardInfoPanelContent.setAttribute("aria-label", locale.deckMaker.cardInfo.title);
+cardInfoPanel.setAttribute("aria-label", locale.deckMaker.cardInfo.title);
 cardInfoGeneralSection.setAttribute("aria-label", locale.deckMaker.cardInfo.generalSection);
 cardInfoReleaseDateLabel.textContent = locale.deckMaker.cardInfo.released;
 cardInfoIllustratorLabel.textContent = locale.deckMaker.cardInfo.illustrator;
@@ -124,8 +124,16 @@ cardInfoToDeck.textContent = locale.deckMaker.cardInfo.toDeck;
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 
+// make dialogs work
+Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
+	elem.addEventListener("click", function(e) {
+		if (e.target === elem) {
+			elem.close();
+		}
+	});
+});
 
-//track shift key
+// track shift key
 document.addEventListener("keydown", function(e) {
 	if (e.key === "Shift") {
 		shiftHeld = true;

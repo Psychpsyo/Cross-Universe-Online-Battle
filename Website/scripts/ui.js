@@ -37,24 +37,10 @@ function putChatMessage(message, type) {
 	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight
 }
 
-//closing the card selector when clicking off of it
-overlayBackdrop.addEventListener("click", function() {
-	// does not work for partner select menu
-	if (window.getComputedStyle(partnerSelectionMenu).display != "none") {
-		return;
-	}
-	cardSelector.style.display = "none";
-	if (typeof deckSelector !== "undefined") {
-		deckSelector.style.display = "none";
-	}
-	overlayBackdrop.style.display = "none";
-});
-
 // card preview
 function closeCardPreview() {
 	cardDetails.style.setProperty("--side-distance", "-50vh");
 	cardDetails.dataset.currentCard = "";
-	cardDetailsImage.dataset.open = false;
 }
 
 document.addEventListener("click", function() {
@@ -72,6 +58,7 @@ cardDetailsSwitch.addEventListener("click", function(e) {
 	e.stopPropagation();
 });
 cardDetailsClose.addEventListener("click", closeCardPreview);
+cardDetails.show();
 
 // previews a card
 function previewCard(card) {
@@ -160,5 +147,4 @@ function previewCard(card) {
 	}
 	
 	cardDetails.style.setProperty("--side-distance", ".5em");
-	cardDetailsImage.dataset.open = true;
 }

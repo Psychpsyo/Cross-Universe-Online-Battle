@@ -83,7 +83,7 @@
 	
 	"cardSelector": {
 		"tokens": "トークン：",
-		"yourDeck": "自分のデッキ：",
+		"deck1": "自分のデッキ：",
 		"discard0": "相手の捨て山：",
 		"discard1": "自分の捨て山：",
 		"exile0": "相手の隔離：",

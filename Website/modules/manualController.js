@@ -51,7 +51,7 @@ export class ManualController extends InteractionController {
 				this.deckCancelDrop(game.players[0]);
 				return true;
 			}
-			case "showDeckTop": { // opponent presented a card
+			case "deckShowTop": { // opponent presented a card
 				this.deckShowTop(game.players[0], zoneToLocal("deck" + message));
 				return true;
 			}
@@ -132,11 +132,14 @@ export class ManualController extends InteractionController {
 			
 			generalUI.removeCard(source, sourceIndex);
 			generalUI.insertCard(zone, insertedIndex);
-			this.playerInfos[player.index].clearHeld();
 		}
+		this.playerInfos[player.index].clearHeld();
 	}
 	
 	deckDraw(player) {
+		if (player.deckZone.cards.length == 0) {
+			return;
+		}
 		if (player === localPlayer) {
 			socket.send("[drawCard]");
 		}
@@ -195,13 +198,25 @@ export class ManualController extends InteractionController {
 		this.playerInfos[player.index].clearHeld();
 	}
 	deckShowTop(player, deckZone) {
-		
+		if (deckZone.cards.length == 0) {
+			return;
+		}
+		if (player === localPlayer) {
+			socket.send("[deckShowTop]" + deckZone.player.index);
+		}
+		let card = deckZone.cards[deckZone.cards.length - 1];
+		let insertedIndex = player.presentedZone.add(card, player.presentedZone.cards.length);
+		if (player == localPlayer) {
+			card.hidden = false;
+		}
+		generalUI.removeCard(deckZone, deckZone.cards.length);
+		generalUI.insertCard(player.presentedZone, insertedIndex);
 	}
 	returnAllToDeck(zone) {
 		while (zone.cards.length > 0) {
 			zone.player.deckZone.add(zone.cards[0], 0);
 			generalUI.removeCard(zone, 0);
-			generalUI.insertCard(zone.player.deck, 0);
+			generalUI.insertCard(zone.player.deckZone, 0);
 		}
 		if (zone.player === localPlayer) {
 			socket.send("[returnAllToDeck]" + cardSelectorZone.name);

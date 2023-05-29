@@ -1,7 +1,7 @@
 // This module exports the Card class which represents a specific card in a Game.
 
 export class Card {
-	constructor(player, cardId) {
+	constructor(player, cardId, hidden) {
 		if (!game.cardData[cardId]) {
 			throw "Can't create card with unregistered ID '" + cardId + "'!";
 		}
@@ -18,7 +18,7 @@ export class Card {
 			this.baseCardTypes.push("item");
 		} 
 		this.location = null;
-		this.hidden = true;
+		this.hidden = hidden;
 	}
 	getImage() {
 		return this.hidden? "images/cardBackFrameP" + this.owner.index + ".png" : this.owner.game.cardData[this.cardId].imageSrc;

@@ -62,6 +62,16 @@ export function init() {
 		}
 	});
 	
+	cardSelector.addEventListener("click", function(e) {
+		if (e.target === cardSelector) {
+			closeCardSelect();
+		}
+	});
+	cardSelector.addEventListener("cancel", function(e) {
+		e.preventDefault();
+		closeCardSelect();
+	});
+	
 	lastFrame = performance.now();
 	animate();
 }
@@ -100,6 +110,18 @@ export function receiveMessage(command, message) {
 				uiPlayers[0].posX = uiPlayers[0].targetX;
 				uiPlayers[0].posY = uiPlayers[0].targetY;
 			}
+			return true;
+		}
+		case "revealCard": { // opponent revealed a presented card
+			let index = parseInt(message);
+			game.players[0].presentedZone.cards[index].hidden = false;
+			updateCard(game.players[0].presentedZone, index);
+			return true;
+		}
+		case "unrevealCard": { // opponent hid a presented card
+			let index = parseInt(message);
+			game.players[0].presentedZone.cards[index].hidden = true;
+			updateCard(game.players[0].presentedZone, index);
 			return true;
 		}
 		default: {
@@ -145,7 +167,9 @@ export function insertCard(zone, index) {
 	});
 	
 	if (zone.name.startsWith("hand")) {
-		new handCardSlot(zone, index, document.getElementById(zone.name));
+		new handCardSlot(zone, index);
+	} else if (zone.name.startsWith("presented")) {
+		new presentedCardSlot(zone, index);
 	}
 }
 export function makeDragSource(zone, index) {
@@ -201,13 +225,15 @@ class fieldCardSlot extends uiCardSlot {
 			e.preventDefault();
 			grabCard(localPlayer, zone, index);
 		});
+		this.fieldSlot.addEventListener("click", function(e) {
+			if (zone.cards[index]) {
+				e.stopPropagation();
+				previewCard(zone.cards[index]);
+			}
+		});
 		this.fieldSlot.addEventListener("mouseup", function(e) {
 			e.stopPropagation();
 			dropCard(localPlayer, zone, index);
-		});
-		this.fieldSlot.addEventListener("click", function(e) {
-			e.stopPropagation();
-			previewCard(zone.cards[index]);
 		});
 	}
 	
@@ -241,23 +267,27 @@ class fieldCardSlot extends uiCardSlot {
 }
 
 class handCardSlot extends uiCardSlot {
-	constructor(zone, index, handElem) {
+	constructor(zone, index) {
 		super(zone, index);
 		
-		this.handElem = handElem;
+		this.handElem = document.getElementById("hand" + zone.player.index);
 		this.cardElem = document.createElement("img");
 		this.cardElem.src = zone.cards[index].getImage();
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
-			grabCard(localPlayer, zone, this.index);
+			grabCard(localPlayer, this.zone, this.index);
 		}.bind(this));
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
 			previewCard(zone.cards[this.index]);
 		}.bind(this));
-		handElem.appendChild(this.cardElem);
-		handElem.style.setProperty("--card-count", "" + handElem.childElementCount);
+		if (this.handElem.childElementCount > index) {
+			this.handElem.insertBefore(this.cardElem, this.handElem.childNodes[index]);
+		} else {
+			this.handElem.appendChild(this.cardElem);
+		}
+		this.handElem.style.setProperty("--card-count", "" + this.handElem.childElementCount);
 	}
 	
 	makeDragSource() {
@@ -302,13 +332,12 @@ class pileCardSlot extends uiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
 		
-		document.getElementById(this.zone.name).addEventListener("click", function(e) {
-			e.stopPropagation();
-			openCardSelect(this.zone);
-		}.bind(this));
 		document.getElementById(this.zone.name).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, this.zone, this.zone.cards.length - 1);
+		}.bind(this));
+		document.getElementById(this.zone.name).addEventListener("click", function() {
+			openCardSelect(this.zone);
 		}.bind(this));
 		document.getElementById(this.zone.name).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
@@ -325,6 +354,61 @@ class pileCardSlot extends uiCardSlot {
 	}
 }
 
+class presentedCardSlot extends uiCardSlot {
+	constructor(zone, index) {
+		super(zone, index);
+		
+		this.isRevealed = false;
+		this.zoneElem = document.getElementById("presentedCards" + zone.player.index);
+		this.cardElem = document.createElement("div");
+		
+		this.cardImg = document.createElement("img")
+		this.cardImg.src = zone.cards[index].getImage();
+		this.cardImg.addEventListener("click", function(e) {
+			e.stopPropagation();
+			previewCard(this.zone.cards[this.index]);
+		}.bind(this));
+		this.cardImg.addEventListener("dragstart", function(e) {
+			e.preventDefault();
+			grabCard(localPlayer, this.zone, this.index);
+		}.bind(this));
+		this.cardElem.appendChild(this.cardImg);
+		
+		if (zone.player === localPlayer) {
+			this.revealBtn = document.createElement("button");
+			this.revealBtn.textContent = locale["presentReveal"];
+			this.revealBtn.addEventListener("click", function() {
+				this.isRevealed = !this.isRevealed;
+				if (this.isRevealed) {
+					socket.send("[revealCard]" + this.index);
+					this.revealBtn.textContent = locale["presentHide"];
+				} else {
+					socket.send("[unrevealCard]" + this.index);
+					this.revealBtn.textContent = locale["presentReveal"];
+				}
+			}.bind(this));
+			this.cardElem.appendChild(this.revealBtn);
+		}
+		this.zoneElem.appendChild(this.cardElem);
+	}
+	
+	makeDragSource() {
+		this.cardElem.classList.add("dragSource");
+	}
+	clearDragSource() {
+		this.cardElem.classList.remove("dragSource");
+	}
+	update() {
+		console.log(this.zone);
+		console.log(this.index);
+		this.cardImg.src = this.zone.cards[this.index].getImage();
+	}
+	remove() {
+		super.remove();
+		this.cardElem.remove();
+	}
+}
+
 class cardSelectorSlot extends uiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
@@ -335,8 +419,7 @@ class cardSelectorSlot extends uiCardSlot {
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, zone, this.index);
-			cardSelector.style.display = "none";
-			overlayBackdrop.style.display = "none";
+			closeCardSelect();
 		}.bind(this));
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
@@ -362,21 +445,33 @@ class cardSelectorSlot extends uiCardSlot {
 }
 
 export function openCardSelect(zone) {
-	while (cardSelectorSlots.length > 0) {
-		cardSelectorSlots[0].remove();
-	}
-	
+	cardSelectorZone = zone;
 	for (let i = 0; i < zone.cards.length; i++) {
+		zone.cards[i].hidden = false;
 		cardSelectorSlots.push(new cardSelectorSlot(zone, i));
 	}
 	
 	//show selector
 	cardSelectorTitle.textContent = zone.getLocalizedName();
 	cardSelectorReturnToDeck.style.display = (zone.name == "discard1" || zone.name == "exile1")? "block" : "none";
-	overlayBackdrop.style.display = "block";
-	cardSelector.style.display = "flex";
+	cardSelector.showModal();
+	cardSelector.appendChild(cardDetails);
 	
 	cardSelectorGrid.parentNode.scrollTop = 0;
+}
+
+export function closeCardSelect() {
+	if (cardSelectorZone.name.startsWith("deck")) {
+		for (let card of cardSelectorZone.cards) {
+			card.hidden = true;
+		}
+	}
+	cardSelectorZone = null;
+	while (cardSelectorSlots.length > 0) {
+		cardSelectorSlots[0].remove();
+	}
+	gameFlexBox.appendChild(cardDetails);
+	cardSelector.close();
 }
 
 // held cards
@@ -415,11 +510,17 @@ class UiPlayer {
 		if (card) {
 			this.dragCardElem.src = card.getImage();
 			this.dragging = true;
+			if (this.player === localPlayer) {
+				document.documentElement.classList.add("isDragging");
+			}
 		}
 	}
 	clearDrag() {
 		this.dragCardElem.src = "images/cardHidden.png";
 		this.dragging = false;
+		if (this.player === localPlayer) {
+			document.documentElement.classList.remove("isDragging");
+		}
 	}
 	
 	setLife(value) {

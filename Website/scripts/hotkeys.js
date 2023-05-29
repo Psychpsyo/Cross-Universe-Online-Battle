@@ -1,12 +1,11 @@
 let hotkeys = JSON.parse(localStorage.getItem("hotkeys"));
 
 // used for hotkeys that want to open the discard piles, exile zones...
-function showCardArea(area) {
-	if (window.getComputedStyle(cardSelector).display != "none" && cardSelectorTitle.textContent === area.getLocalizedName()) {
-		cardSelector.style.display = "none";
-		overlayBackdrop.style.display = "none";
+function showCardArea(zone) {
+	if (window.getComputedStyle(cardSelector).display != "none" && cardSelectorTitle.textContent === zone.getLocalizedName()) {
+		closeCardSelect();
 	} else {
-		openCardSelect(area, true);
+		openCardSelect(zone, true);
 	}
 }
 
@@ -20,42 +19,42 @@ document.addEventListener("keydown", async function(e) {
 		if (hotkey.keyCode === e.code && hotkey.ctrl === e.ctrlKey && hotkey.shift === e.shiftKey && hotkey.alt === e.altKey) {
 			switch(name) {
 				case "showYourDiscard": {
-					showCardArea(cardAreas["discard1"]);
+					showCardArea(localPlayer.discardPile);
 					break;
 				}
 				case "showOpponentDiscard": {
-					showCardArea(cardAreas["discard0"]);
+					showCardArea(game.players[0].discardPile);
 					break;
 				}
 				case "showYourExile": {
-					showCardArea(cardAreas["exile1"]);
+					showCardArea(localPlayer.exileZone);
 					break;
 				}
 				case "showOpponentExile": {
-					showCardArea(cardAreas["exile0"]);
+					showCardArea(game.players[0].exileZone);
 					break;
 				}
 				case "showDeck": {
-					showCardArea(cardAreas["deck1"]);
+					showCardArea(localPlayer.deckZone);
 					break;
 				}
 				case "selectToken": {
-					showCardArea(cardAreas["tokens"]);
+					//showCardArea(cardAreas["tokens"]); // TODO: Tokens
 					break;
 				}
 				case "showField": {
-					cardSelector.style.display = "none";
-					overlayBackdrop.style.display = "none";
+					closeCardSelect();
 					closeCardPreview();
 					break;
 				}
 				case "destroyToken": {
-					if (heldCard?.type == "token") {
-						heldCard.location?.dragFinish(heldCard);
-						heldCard = null;
-						dragCard.src = "images/cardHidden.png";
-						syncDrop("discard1");
-					}
+					// TODO: Tokens
+					//if (heldCard?.type == "token") {
+					//	heldCard.location?.dragFinish(heldCard);
+					//	heldCard = null;
+					//	dragCard.src = "images/cardHidden.png";
+					//	syncDrop("discard1");
+					//}
 					break;
 				}
 				case "chat": {
@@ -64,19 +63,15 @@ document.addEventListener("keydown", async function(e) {
 					break;
 				}
 				case "drawCard": {
-					if (cardAreas["deck1"].draw()) {
-						syncDraw();
-					}
+					gameState.controller.deckDraw(localPlayer);
 					break;
 				}
 				case "shuffleDeck": {
-					cardAreas["deck1"].shuffle();
+					gameState.controller.deckShuffle(localPlayer.deckZone);
 					break;
 				}
 				case "showDeckTop": {
-					if (cardAreas["deck1"].showTop(1)) {
-						syncShowDeckTop(cardAreas["deck1"]);
-					}
+					gameState.controller.deckShowTop(localPlayer, player.deckZone);
 					break;
 				}
 			}
@@ -89,14 +84,9 @@ document.addEventListener("keydown", async function(e) {
 			cardIndex = 10;
 		}
 		cardIndex -= 1;
-		if (cardIndex < cardAreas["hand1"].cards.length) {
-			previewCard(cardAreas["hand1"].cards[cardIndex]);
+		if (cardIndex < localPlayer.handZone.length) {
+			previewCard(localPlayer.handZone.cards[cardIndex]);
 		}
 		return;
-	}
-	
-	if (e.code == "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey) {
-		cardSelector.style.display = "none";
-		overlayBackdrop.style.display = "none";
 	}
 });

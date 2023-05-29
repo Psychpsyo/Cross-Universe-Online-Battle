@@ -2,7 +2,7 @@
 
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
-import {openCardSelect, cardSelectorZone} from "/modules/generalUI.js";
+import {openCardSelect, cardSelectorZone, closeCardSelect} from "/modules/generalUI.js";
 
 export function init() {
 	//showing/hiding your hand
@@ -69,13 +69,15 @@ export function init() {
 	// returns all cards from the card selector to your deck and closes the selector
 	cardSelectorReturnToDeck.addEventListener("click", function() {
 		gameState.controller.returnAllToDeck(cardSelectorZone);
-		cardSelector.style.display = "none";
-		overlayBackdrop.style.display = "none";
+		closeCardSelect();
 	});
 	
 	// deck options
 	document.getElementById("drawBtn").addEventListener("click", function() {
 		gameState.controller.deckDraw(localPlayer);
+		if (localPlayer.deckZone.cards.length == 0) {
+			document.getElementById("deckHoverBtns1").style.display = "none";
+		}
 	});
 	document.getElementById("shuffleBtn").addEventListener("click", function() {
 		gameState.controller.deckShuffle(localPlayer.deckZone);
@@ -115,6 +117,9 @@ export function init() {
 		});
 		document.getElementById("showTopBtn" + player.index).addEventListener("click", function() {
 			gameState.controller.deckShowTop(localPlayer, player.deckZone);
+			if (player.deckZone.cards.length == 0) {
+				document.getElementById("deckHoverBtns" + player.index).style.display = "none";
+			}
 		});
 	});
 }

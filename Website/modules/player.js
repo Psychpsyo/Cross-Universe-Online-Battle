@@ -39,7 +39,7 @@ export class Player {
 			}
 			
 			for (let i = 0; i < card.amount; i++) {
-				let card = await new Card(this, cardId);
+				let card = await new Card(this, cardId, true);
 				this.deckZone.cards.push(card);
 				card.location = this.deckZone;
 			}
