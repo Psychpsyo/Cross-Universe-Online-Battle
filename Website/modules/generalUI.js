@@ -413,8 +413,6 @@ class presentedCardSlot extends uiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		console.log(this.zone);
-		console.log(this.index);
 		this.cardImg.src = this.zone.cards[this.index].getImage();
 	}
 	remove() {
@@ -473,7 +471,6 @@ export function openCardSelect(zone) {
 	
 	cardSelectorGrid.parentNode.scrollTop = 0;
 }
-
 export function closeCardSelect() {
 	if (cardSelectorZone.name.startsWith("deck")) {
 		for (let card of cardSelectorZone.cards) {
@@ -486,6 +483,13 @@ export function closeCardSelect() {
 	}
 	gameFlexBox.appendChild(cardDetails);
 	cardSelector.close();
+}
+export function toggleCardSelect(zone) {
+	if (cardSelectorZone === zone) {
+		closeCardSelect();
+	} else {
+		openCardSelect(zone);
+	}
 }
 
 // held cards

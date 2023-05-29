@@ -188,11 +188,11 @@ export class ManualController extends InteractionController {
 	hotkeyPressed(name) {
 		switch(name) {
 			case "showDeck": {
-				gameState.showCardArea(localPlayer.deckZone);
+				generalUI.toggleCardSelect(localPlayer.deckZone);
 				break;
 			}
 			case "selectToken": {
-				gameState.showCardArea(gameState.controller.tokenZone);
+				generalUI.toggleCardSelect(this.tokenZone);
 				break;
 			}
 			case "destroyToken": {
@@ -295,13 +295,17 @@ export class ManualController extends InteractionController {
 		generalUI.insertCard(player.presentedZone, insertedIndex);
 	}
 	returnAllToDeck(zone) {
+		if (zone.cards.length == 0) {
+			return;
+		}
 		while (zone.cards.length > 0) {
+			zone.cards[0].hidden = true;
 			zone.player.deckZone.add(zone.cards[0], 0);
 			generalUI.removeCard(zone, 0);
 			generalUI.insertCard(zone.player.deckZone, 0);
 		}
 		if (zone.player === localPlayer) {
-			socket.send("[returnAllToDeck]" + cardSelectorZone.name);
+			socket.send("[returnAllToDeck]" + generalUI.cardSelectorZone.name);
 			this.deckShuffle(localPlayer.deckZone);
 		}
 	}

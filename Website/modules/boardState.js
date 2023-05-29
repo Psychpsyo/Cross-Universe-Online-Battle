@@ -140,19 +140,19 @@ export class BoardState extends GameState {
 	hotkeyPressed(name) {
 		switch(name) {
 			case "showYourDiscard": {
-				this.showCardArea(localPlayer.discardPile);
+				ui.toggleCardSelect(localPlayer.discardPile);
 				break;
 			}
 			case "showOpponentDiscard": {
-				this.showCardArea(game.players[0].discardPile);
+				ui.toggleCardSelect(game.players[0].discardPile);
 				break;
 			}
 			case "showYourExile": {
-				this.showCardArea(localPlayer.exileZone);
+				ui.toggleCardSelect(localPlayer.exileZone);
 				break;
 			}
 			case "showOpponentExile": {
-				this.showCardArea(game.players[0].exileZone);
+				ui.toggleCardSelect(game.players[0].exileZone);
 				break;
 			}
 			case "showField": {
@@ -163,13 +163,6 @@ export class BoardState extends GameState {
 			default: {
 				this.controller.hotkeyPressed(name);
 			}
-		}
-	}
-	showCardArea(zone) {
-		if (cardSelectorZone === zone) {
-			closeCardSelect();
-		} else {
-			openCardSelect(zone);
 		}
 	}
 	
