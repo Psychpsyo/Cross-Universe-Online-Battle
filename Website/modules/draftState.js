@@ -105,8 +105,9 @@ export class DraftState extends GameState {
 				let card = document.createElement("img");
 				card.dataset.cardId = this.currentBooster.pop();
 				card.src = getCardImageFromID(card.dataset.cardId);
-				card.addEventListener("click", async function() {
+				card.addEventListener("click", async function(e) {
 					if (shiftHeld || ctrlHeld || altHeld) {
+						e.stopPropagation();
 						await game.registerCard(this.dataset.cardId);
 						previewCard(new Card(localPlayer, this.dataset.cardId, false));
 						return;
@@ -146,7 +147,8 @@ export class DraftState extends GameState {
 		card.src = "images/cardHidden.png";
 		
 		game.registerCard(card.dataset.cardId);
-		deckCard.addEventListener("click", async function() {
+		deckCard.addEventListener("click", async function(e) {
+			e.stopPropagation();
 			await game.registerCard(card.dataset.cardId);
 			previewCard(new Card(localPlayer, this.dataset.cardId, false));
 		});

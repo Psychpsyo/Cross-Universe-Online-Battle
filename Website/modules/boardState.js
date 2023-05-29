@@ -127,10 +127,6 @@ export class BoardState extends GameState {
 				partnerRevealButtonDiv.style.display = "block";
 				return true;
 			}
-			case "createToken": {
-				//cardAreas.tokens.createOpponentToken(message);
-				return true;
-			}
 			default: {
 				let done = ui.receiveMessage(command, message);
 				if (!done) {
@@ -138,6 +134,42 @@ export class BoardState extends GameState {
 				}
 				return done;
 			}
+		}
+	}
+	
+	hotkeyPressed(name) {
+		switch(name) {
+			case "showYourDiscard": {
+				this.showCardArea(localPlayer.discardPile);
+				break;
+			}
+			case "showOpponentDiscard": {
+				this.showCardArea(game.players[0].discardPile);
+				break;
+			}
+			case "showYourExile": {
+				this.showCardArea(localPlayer.exileZone);
+				break;
+			}
+			case "showOpponentExile": {
+				this.showCardArea(game.players[0].exileZone);
+				break;
+			}
+			case "showField": {
+				ui.closeCardSelect();
+				closeCardPreview();
+				break;
+			}
+			default: {
+				this.controller.hotkeyPressed(name);
+			}
+		}
+	}
+	showCardArea(zone) {
+		if (cardSelectorZone === zone) {
+			closeCardSelect();
+		} else {
+			openCardSelect(zone);
 		}
 	}
 	

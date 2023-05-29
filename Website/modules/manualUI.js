@@ -54,6 +54,11 @@ export function init() {
 		gameState.controller.setMana(localPlayer, localPlayer.mana - 1);
 	});
 	
+	// tokens
+	tokenBtn.addEventListener("click", function() {
+		openCardSelect(gameState.controller.tokenZone);
+	});
+	
 	// counters
 	document.getElementById("field").addEventListener("contextmenu", function (e) {e.preventDefault();});
 	

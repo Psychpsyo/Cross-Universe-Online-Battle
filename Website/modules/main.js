@@ -58,6 +58,26 @@ document.getElementById("cancelWaitingBtn").addEventListener("click", function()
 	gameState = null;
 });
 
+// handle hotkeys
+document.addEventListener("keydown", async function(e) {
+	for (const [name, hotkey] of Object.entries(hotkeys)) {
+		if (hotkey.keyCode === e.code && hotkey.ctrl === e.ctrlKey && hotkey.shift === e.shiftKey && hotkey.alt === e.altKey) {
+			switch(name) {
+				case "chat": {
+					if (!gameDiv.hidden) {
+						document.getElementById("chatInput").focus();
+						e.preventDefault();
+					}
+					break;
+				}
+				default: {
+					gameState?.hotkeyPressed(name);
+				}
+			}
+		}
+	}
+});
+
 // set up the background cards effect
 document.documentElement.style.setProperty("--p1-card-back", "url('" + localStorage.getItem("cardBack") + "')");
 if (localStorage.getItem("mainMenuCards") == "true") {

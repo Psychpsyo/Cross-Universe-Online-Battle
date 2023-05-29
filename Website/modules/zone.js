@@ -21,13 +21,15 @@ export class Zone {
 		if (this.size == -1 && card.location === this && this.cards.indexOf(card) < index) {
 			index--;
 		}
-		card.location.remove(card);
+		card.location?.remove(card);
 		if (this.allowTokens || !card.getCardTypes().includes("token")) {
 			if (this.size == -1) {
 				this.cards.splice(index, 0, card);
 			} else {
 				this.cards[index] = card;
 			}
+		} else {
+			index = -1;
 		}
 		card.location = this;
 		return index;
@@ -43,6 +45,6 @@ export class Zone {
 	}
 	
 	getLocalizedName() {
-		return locale["cardSelector"][this.name];
+		return locale.cardSelector[this.name];
 	}
 }

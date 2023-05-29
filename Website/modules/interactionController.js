@@ -11,4 +11,6 @@ export class InteractionController {
 	
 	grabCard(player, zone, index) {}
 	dropCard(player, zone, index) {}
+	
+	hotkeyPressed(name) {}
 }

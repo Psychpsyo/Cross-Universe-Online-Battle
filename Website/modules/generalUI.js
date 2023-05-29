@@ -62,6 +62,20 @@ export function init() {
 		}
 	});
 	
+	document.addEventListener("keydown", function(e) {
+		if (e.code.startsWith("Digit") && !e.shiftKey && !e.altKey && !e.ctrlKey) {
+			let cardIndex = e.code.substr(5);
+			if (cardIndex == 0) {
+				cardIndex = 10;
+			}
+			cardIndex -= 1;
+			if (cardIndex < localPlayer.handZone.cards.length) {
+				previewCard(localPlayer.handZone.cards[cardIndex]);
+			}
+			return;
+		}
+	});
+	
 	cardSelector.addEventListener("click", function(e) {
 		if (e.target === cardSelector) {
 			closeCardSelect();
