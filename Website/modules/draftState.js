@@ -1,6 +1,6 @@
 import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
-import {Card} from "/modules/card.js";
+import {Card} from "/rulesEngine/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {deckFromCardList} from "/modules/deckUtils.js";

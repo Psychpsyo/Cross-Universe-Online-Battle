@@ -1,8 +1,8 @@
 // This module exports the Game class which holds all data relevant to a single Cross Universe game.
 // TODO: migrate data from global variables into this class
-import {Player} from "/modules/player.js";
 import {renderCard} from "/custom/renderer.js";
-import {Card} from "/modules/card.js";
+import {Player} from "./player.js";
+import {Card} from "./card.js";
 
 export class Game {
 	constructor() {

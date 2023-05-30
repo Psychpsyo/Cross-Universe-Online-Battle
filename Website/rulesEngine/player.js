@@ -1,7 +1,7 @@
 // This module exports the Player class which holds all data relevant to one player in a game.
 
-import {Card} from "/modules/card.js";
-import {Zone} from "/modules/zone.js";
+import {Card} from "./card.js";
+import {Zone} from "./zone.js";
 
 export class Player {
 	constructor(game) {

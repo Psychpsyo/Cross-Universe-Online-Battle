@@ -1,7 +1,7 @@
 // This module exports the DeckState class which is the state at the beginning of a (non-draft) match where players select their decks.
 import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
-import {Card} from "/modules/card.js";
+import {Card} from "/rulesEngine/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";

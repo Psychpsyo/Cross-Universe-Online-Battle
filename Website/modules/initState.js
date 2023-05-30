@@ -1,8 +1,7 @@
 import {GameState} from "/modules/gameState.js";
 import {DraftState} from "/modules/draftState.js";
 import {DeckState} from "/modules/deckState.js";
-import {Game} from "/modules/game.js";
-import {Card} from "/modules/card.js";
+import {Game} from "/rulesEngine/game.js";
 import {stopEffect} from "/modules/levitationEffect.js";
 import {socket, connectTo} from "/modules/netcode.js";
 import {putChatMessage} from "/modules/generalUI.js";

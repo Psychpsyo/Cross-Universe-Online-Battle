@@ -1,6 +1,5 @@
 // This module exports the base class for any interaction controller, sitting between the UI and the game object.
-// This is to allow switching between a manual simulator and an automatic one later on.
-import {Game} from "/modules/game.js";
+// This is to allow switching between a manual simulator and an automatic one.
 
 export class InteractionController {
 	constructor() {}
