@@ -20,7 +20,6 @@ export class Player {
 		this.partnerZone = new Zone("partner" + this.index, 1, this, true);
 		this.discardPile = new Zone("discard" + this.index, -1, this, false);
 		this.exileZone = new Zone("exile" + this.index, -1, this, false);
-		this.presentedZone = new Zone("presented" + this.index, -1, this, false);
 	}
 	
 	async setDeck(deck) {

@@ -2,7 +2,7 @@
 
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
-import {openCardSelect, cardSelectorZone, closeCardSelect} from "/modules/gameUI.js";
+import * as gameUI from "/modules/gameUI.js";
 import {putChatMessage} from "/modules/generalUI.js";
 
 export function init() {
@@ -57,7 +57,7 @@ export function init() {
 	
 	// tokens
 	tokenBtn.addEventListener("click", function() {
-		openCardSelect(gameState.controller.tokenZone);
+		gameUI.openCardSelect(gameState.controller.tokenZone);
 	});
 	
 	// counters
@@ -74,8 +74,8 @@ export function init() {
 	
 	// returns all cards from the card selector to your deck and closes the selector
 	cardSelectorReturnToDeck.addEventListener("click", function() {
-		gameState.controller.returnAllToDeck(cardSelectorZone);
-		closeCardSelect();
+		gameState.controller.returnAllToDeck(gameUI.cardSelectorZone);
+		gameUI.closeCardSelect();
 	});
 	
 	// deck options
@@ -89,7 +89,7 @@ export function init() {
 		gameState.controller.deckShuffle(localPlayer.deckZone);
 	});
 	document.getElementById("deckSearchBtn").addEventListener("click", function() {
-		openCardSelect(localPlayer.deckZone);
+		gameUI.openCardSelect(localPlayer.deckZone);
 		document.getElementById("deckHoverBtns1").style.display = "none"; //workaround for bug in Firefox (at least) where mouseleave does not fire when element is covered by another. (in this case the card selector)
 	});
 	
@@ -158,6 +158,18 @@ export function receiveMessage(command, message) {
 			let slotIndex = 19 - message.substr(0, message.indexOf("|"));
 			let counterIndex = message.substr(message.indexOf("|") + 1);
 			document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
+			return true;
+		}
+		case "revealCard": { // opponent revealed a presented card
+			let index = parseInt(message);
+			gameState.controller.playerInfos[0].presentedZone.cards[index].hidden = false;
+			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
+			return true;
+		}
+		case "unrevealCard": { // opponent hid a presented card
+			let index = parseInt(message);
+			gameState.controller.playerInfos[0].presentedZone.cards[index].hidden = true;
+			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
 			return true;
 		}
 		default: {

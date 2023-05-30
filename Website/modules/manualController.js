@@ -43,8 +43,8 @@ export class ManualController extends InteractionController {
 		
 		this.opponentHandShown = false;
 		this.playerInfos = [];
-		for (let i = 0; i < game.players.length; i++) {
-			this.playerInfos.push(new ManualPlayerInfo(i));
+		for (const player of game.players) {
+			this.playerInfos.push(new ManualPlayerInfo(player));
 		}
 		
 		manualUI.init();
@@ -174,7 +174,7 @@ export class ManualController extends InteractionController {
 			if (insertedIndex != -1) {
 				if (zone === game.players[0].handZone) {
 					card.hidden = !this.opponentHandShown;
-				} else if (zone.name.startsWith("deck") || zone === game.players[0].presentedZone) {
+				} else if (zone.name.startsWith("deck") || zone === this.playerInfos[0].presentedZone) {
 					card.hidden = true;
 				} else {
 					card.hidden = false;
@@ -288,12 +288,13 @@ export class ManualController extends InteractionController {
 			socket.send("[deckShowTop]" + deckZone.player.index);
 		}
 		let card = deckZone.cards[deckZone.cards.length - 1];
-		let insertedIndex = player.presentedZone.add(card, player.presentedZone.cards.length);
+		let presentedZone = this.playerInfos[player.index].presentedZone;
+		let insertedIndex = presentedZone.add(card, presentedZone.cards.length);
 		if (player == localPlayer) {
 			card.hidden = false;
 		}
 		gameUI.removeCard(deckZone, deckZone.cards.length);
-		gameUI.insertCard(player.presentedZone, insertedIndex);
+		gameUI.insertCard(presentedZone, insertedIndex);
 	}
 	returnAllToDeck(zone) {
 		if (zone.cards.length == 0) {
@@ -336,17 +337,18 @@ export class ManualController extends InteractionController {
 }
 
 class ManualPlayerInfo {
-	constructor(index) {
-		this.index = index;
+	constructor(player) {
+		this.player = player;
 		this.heldCard = null;
+		this.presentedZone = new Zone("presented" + player.index, -1, player, false);
 	}
 	
 	setHeld(card) {
 		this.heldCard = card;
-		gameUI.uiPlayers[this.index].setDrag(card);
+		gameUI.uiPlayers[this.player.index].setDrag(card);
 	}
 	clearHeld() {
 		this.heldCard = null;
-		gameUI.uiPlayers[this.index].clearDrag();
+		gameUI.uiPlayers[this.player.index].clearDrag();
 	}
 }

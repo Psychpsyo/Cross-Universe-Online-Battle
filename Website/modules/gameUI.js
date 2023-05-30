@@ -36,9 +36,12 @@ export function init() {
 			e.stopPropagation();
 			dropCard(localPlayer, player.handZone, player.handZone.cards.length);
 		});
+		
+		// presented cards (only used during manual play)
 		document.getElementById("presentedCards" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
-			dropCard(localPlayer, player.presentedZone, player.presentedZone.cards.length);
+			let presentedZone = gameState.controller.playerInfos[player.index].presentedZone;
+			dropCard(localPlayer, presentedZone, presentedZone.cards.length);
 		});
 	});
 	
@@ -129,18 +132,6 @@ export function receiveMessage(command, message) {
 				uiPlayers[0].posX = uiPlayers[0].targetX;
 				uiPlayers[0].posY = uiPlayers[0].targetY;
 			}
-			return true;
-		}
-		case "revealCard": { // opponent revealed a presented card
-			let index = parseInt(message);
-			game.players[0].presentedZone.cards[index].hidden = false;
-			updateCard(game.players[0].presentedZone, index);
-			return true;
-		}
-		case "unrevealCard": { // opponent hid a presented card
-			let index = parseInt(message);
-			game.players[0].presentedZone.cards[index].hidden = true;
-			updateCard(game.players[0].presentedZone, index);
 			return true;
 		}
 		default: {
@@ -373,6 +364,7 @@ class pileCardSlot extends uiCardSlot {
 	}
 }
 
+// technically only needed for manual games but manualUI.js can't easily create these on its own so it's here for now.
 class presentedCardSlot extends uiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
