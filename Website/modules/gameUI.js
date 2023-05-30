@@ -467,6 +467,9 @@ class cardSelectorSlot extends uiCardSlot {
 }
 
 export function openCardSelect(zone) {
+	if (cardSelector.open) {
+		closeCardSelect();
+	}
 	cardSelectorZone = zone;
 	for (let i = 0; i < zone.cards.length; i++) {
 		zone.cards[i].hidden = false;

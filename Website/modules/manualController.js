@@ -5,7 +5,7 @@ import {locale} from "/modules/locale.js";
 import {Zone} from "/modules/zone.js";
 import {Card} from "/modules/card.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
-import * as generalUI from "/modules/generalUI.js";
+import * as gameUI from "/modules/gameUI.js";
 import * as manualUI from "/modules/manualUI.js";
 
 class tokenZone {
@@ -98,7 +98,7 @@ export class ManualController extends InteractionController {
 				document.getElementById("hand0").classList.add("shown");
 				for (let i = 0; i < game.players[0].handZone.cards.length; i++) {
 					game.players[0].handZone.cards[i].hidden = false;
-					generalUI.updateCard(game.players[0].handZone, i);
+					gameUI.updateCard(game.players[0].handZone, i);
 				}
 				return true;
 			}
@@ -107,7 +107,7 @@ export class ManualController extends InteractionController {
 				document.getElementById("hand0").classList.remove("shown");
 				for (let i = 0; i < game.players[0].handZone.cards.length; i++) {
 					game.players[0].handZone.cards[i].hidden = true;
-					generalUI.updateCard(game.players[0].handZone, i);
+					gameUI.updateCard(game.players[0].handZone, i);
 				}
 				return true;
 			}
@@ -133,7 +133,7 @@ export class ManualController extends InteractionController {
 			}
 		}
 		this.playerInfos[player.index].setHeld(zone.cards[index]);
-		generalUI.makeDragSource(zone, index, player);
+		gameUI.makeDragSource(zone, index, player);
 		return true;
 	}
 	
@@ -145,7 +145,7 @@ export class ManualController extends InteractionController {
 		if (zone != null && zone.name.startsWith("deck") && index == -1) {
 			// When dropping a token, we don't want the UI, we want to just 'drop it to the top' which will make it vanish.
 			if (!card.getCardTypes().includes("token")) {
-				generalUI.uiPlayers[player.index].clearDrag();
+				gameUI.uiPlayers[player.index].clearDrag();
 				if (player === localPlayer) {
 					manualUI.showDeckOptions(zone);
 				}
@@ -157,7 +157,7 @@ export class ManualController extends InteractionController {
 		let source = card.location;
 		let sourceIndex = source? source.cards.indexOf(card) : -1;
 		if (source) {
-			generalUI.clearDragSource(source, sourceIndex, player);
+			gameUI.clearDragSource(source, sourceIndex, player);
 		}
 		
 		if (!zone) {
@@ -168,7 +168,7 @@ export class ManualController extends InteractionController {
 		let insertedIndex = zone.add(card, index);
 		if (card.location === zone) {
 			if (source) {
-				generalUI.removeCard(source, sourceIndex);
+				gameUI.removeCard(source, sourceIndex);
 			}
 			if (insertedIndex != -1) {
 				if (zone === game.players[0].handZone) {
@@ -179,7 +179,7 @@ export class ManualController extends InteractionController {
 					card.hidden = false;
 				}
 				
-				generalUI.insertCard(zone, insertedIndex);
+				gameUI.insertCard(zone, insertedIndex);
 			}
 		}
 		this.playerInfos[player.index].clearHeld();
@@ -188,11 +188,11 @@ export class ManualController extends InteractionController {
 	hotkeyPressed(name) {
 		switch(name) {
 			case "showDeck": {
-				generalUI.toggleCardSelect(localPlayer.deckZone);
+				gameUI.toggleCardSelect(localPlayer.deckZone);
 				break;
 			}
 			case "selectToken": {
-				generalUI.toggleCardSelect(this.tokenZone);
+				gameUI.toggleCardSelect(this.tokenZone);
 				break;
 			}
 			case "destroyToken": {
@@ -230,8 +230,8 @@ export class ManualController extends InteractionController {
 		if (player == localPlayer || this.opponentHandShown) {
 			card.hidden = false;
 		}
-		generalUI.removeCard(player.deckZone, player.deckZone.cards.length);
-		generalUI.insertCard(player.handZone, insertedIndex);
+		gameUI.removeCard(player.deckZone, player.deckZone.cards.length);
+		gameUI.insertCard(player.handZone, insertedIndex);
 	}
 	deckShuffle(deckZone) {
 		let order = [];
@@ -276,7 +276,7 @@ export class ManualController extends InteractionController {
 		let source = card.location;
 		let sourceIndex = source.cards.indexOf(card);
 		
-		generalUI.clearDragSource(source, sourceIndex, player);
+		gameUI.clearDragSource(source, sourceIndex, player);
 		this.playerInfos[player.index].clearHeld();
 	}
 	deckShowTop(player, deckZone) {
@@ -291,8 +291,8 @@ export class ManualController extends InteractionController {
 		if (player == localPlayer) {
 			card.hidden = false;
 		}
-		generalUI.removeCard(deckZone, deckZone.cards.length);
-		generalUI.insertCard(player.presentedZone, insertedIndex);
+		gameUI.removeCard(deckZone, deckZone.cards.length);
+		gameUI.insertCard(player.presentedZone, insertedIndex);
 	}
 	returnAllToDeck(zone) {
 		if (zone.cards.length == 0) {
@@ -301,11 +301,11 @@ export class ManualController extends InteractionController {
 		while (zone.cards.length > 0) {
 			zone.cards[0].hidden = true;
 			zone.player.deckZone.add(zone.cards[0], 0);
-			generalUI.removeCard(zone, 0);
-			generalUI.insertCard(zone.player.deckZone, 0);
+			gameUI.removeCard(zone, 0);
+			gameUI.insertCard(zone.player.deckZone, 0);
 		}
 		if (zone.player === localPlayer) {
-			socket.send("[returnAllToDeck]" + generalUI.cardSelectorZone.name);
+			socket.send("[returnAllToDeck]" + gameUI.cardSelectorZone.name);
 			this.deckShuffle(localPlayer.deckZone);
 		}
 	}
@@ -316,7 +316,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		player.life = value;
-		generalUI.uiPlayers[player.index].setLife(value);
+		gameUI.uiPlayers[player.index].setLife(value);
 		if (player === localPlayer) {
 			socket.send("[life]" + localPlayer.life);
 		}
@@ -327,7 +327,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		player.mana = value;
-		generalUI.uiPlayers[player.index].setMana(value);
+		gameUI.uiPlayers[player.index].setMana(value);
 		if (player === localPlayer) {
 			socket.send("[mana]" + localPlayer.mana);
 		}
@@ -342,10 +342,10 @@ class ManualPlayerInfo {
 	
 	setHeld(card) {
 		this.heldCard = card;
-		generalUI.uiPlayers[this.index].setDrag(card);
+		gameUI.uiPlayers[this.index].setDrag(card);
 	}
 	clearHeld() {
 		this.heldCard = null;
-		generalUI.uiPlayers[this.index].clearDrag();
+		gameUI.uiPlayers[this.index].clearDrag();
 	}
 }

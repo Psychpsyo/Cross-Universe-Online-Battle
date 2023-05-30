@@ -88,18 +88,18 @@ function previewCard(card) {
 	if (cardTypes.includes("item")) {
 		cardTypes.splice(cardTypes.indexOf("item"), 1);
 	}
-	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
+	cardDetailsLevelType.textContent = locale.cardDetailsInfoString.replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
 	if (card.getTypes().length > 0) {
-		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["types"][type]).join(locale["typeSeparator"]);
+		cardDetailsTypes.textContent = locale.cardDetailsTypes + card.getTypes().map(type => locale.types[type]).join(locale.typeSeparator);
 	} else {
-		cardDetailsTypes.textContent = locale["typeless"];
+		cardDetailsTypes.textContent = locale.typeless;
 	}
 	
 	// attack & defense
 	if (card.getCardTypes().includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
-		cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (card.getAttack() == -1? "?" : card.getAttack());
-		cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (card.getDefense() == -1? "?" : card.getDefense());
+		cardDetailsAttack.innerHTML = locale.cardDetailsAttack + (card.getAttack() == -1? "?" : card.getAttack());
+		cardDetailsDefense.innerHTML = locale.cardDetailsDefense + (card.getDefense() == -1? "?" : card.getDefense());
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}
@@ -119,7 +119,7 @@ function previewCard(card) {
 			}
 			
 			let indentCount = 0;
-			let indentChars = ["　", "●", "：", locale["subEffectOpeningBracket"]];
+			let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
 			effect.text.split("\n").forEach(line => {
 				let lineDiv = document.createElement("div");
 				lineDiv.textContent = line;

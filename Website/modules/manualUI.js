@@ -2,7 +2,7 @@
 
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
-import {openCardSelect, cardSelectorZone, closeCardSelect} from "/modules/generalUI.js";
+import {openCardSelect, cardSelectorZone, closeCardSelect} from "/modules/gameUI.js";
 
 export function init() {
 	//showing/hiding your hand

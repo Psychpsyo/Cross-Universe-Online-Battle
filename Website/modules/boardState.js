@@ -2,7 +2,7 @@
 import {GameState} from "/modules/gameState.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {ManualController} from "/modules/manualController.js";
-import * as ui from "/modules/generalUI.js";
+import * as ui from "/modules/gameUI.js";
 
 // selecting starting player
 document.getElementById("startingPlayerSelect").addEventListener("click", function() {
@@ -138,6 +138,9 @@ export class BoardState extends GameState {
 	}
 	
 	hotkeyPressed(name) {
+		if (document.getElementById("mainGameBlackout")) {
+			return;
+		}
 		switch(name) {
 			case "showYourDiscard": {
 				ui.toggleCardSelect(localPlayer.discardPile);
