@@ -1,3 +1,5 @@
+import {putChatMessage} from "/modules/generalUI.js";
+
 export let roomcode = "";
 export let socket = null;
 

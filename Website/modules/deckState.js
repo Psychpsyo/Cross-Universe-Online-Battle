@@ -5,6 +5,7 @@ import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
+import {previewCard} from "/modules/generalUI.js"
 
 let officialDecks = [];
 fetch("data/deckList.json")

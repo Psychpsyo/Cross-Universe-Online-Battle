@@ -1,6 +1,13 @@
 import {locale} from "/modules/locale.js";
 import {startEffect} from "/modules/levitationEffect.js";
 
+// global variables
+window.game = null;
+window.localPlayer = null;
+window.gameState = null;
+window.opponentName = null;
+window.youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and partner selection, as far as the board is concerned, the local player is always player 1.)
+
 // translate main menu
 roomCodeInputTitle.textContent = locale.mainMenu.roomCodeInputTitle;
 roomCodeInputLabel.textContent = locale.mainMenu.enterRoomcode;

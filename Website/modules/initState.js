@@ -5,6 +5,7 @@ import {Game} from "/modules/game.js";
 import {Card} from "/modules/card.js";
 import {stopEffect} from "/modules/levitationEffect.js";
 import {socket, connectTo} from "/modules/netcode.js";
+import {putChatMessage} from "/modules/generalUI.js";
 
 export class InitState extends GameState {
 	constructor(roomcode, gameMode) {
@@ -121,6 +122,11 @@ export class InitState extends GameState {
 			document.getElementById("chatInput").addEventListener("keydown", function(e) {
 				e.stopPropagation();
 			});
+			
+			//position the menu on the right if that option is enabled
+			if (localStorage.getItem("fieldLeftToggle") == "true") {
+				document.documentElement.classList.add("leftField");
+			}
 			
 			// main screen is no longer needed
 			stopEffect();

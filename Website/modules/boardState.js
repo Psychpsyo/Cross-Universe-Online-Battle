@@ -2,6 +2,7 @@
 import {GameState} from "/modules/gameState.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {ManualController} from "/modules/manualController.js";
+import {putChatMessage, previewCard} from "/modules/generalUI.js";
 import * as ui from "/modules/gameUI.js";
 
 // selecting starting player
@@ -33,7 +34,7 @@ function openPartnerSelectMenu() {
 			cardImg.src = card.getImage();
 			cardImg.dataset.cardIndex = i;
 			cardImg.addEventListener("click", function(e) {
-				if (shiftHeld) {
+				if (e.shiftKey || e.ctrlKey || e.altKey) {
 					e.stopPropagation();
 					previewCard(localPlayer.deckZone.cards[this.dataset.cardIndex]);
 				} else {

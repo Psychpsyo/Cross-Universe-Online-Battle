@@ -4,6 +4,7 @@ import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {deckFromCardList} from "/modules/deckUtils.js";
+import {previewCard} from "/modules/generalUI.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();
@@ -106,7 +107,7 @@ export class DraftState extends GameState {
 				card.dataset.cardId = this.currentBooster.pop();
 				card.src = getCardImageFromID(card.dataset.cardId);
 				card.addEventListener("click", async function(e) {
-					if (shiftHeld || ctrlHeld || altHeld) {
+					if (e.shiftKey || e.ctrlKey || e.altKey) {
 						e.stopPropagation();
 						await game.registerCard(this.dataset.cardId);
 						previewCard(new Card(localPlayer, this.dataset.cardId, false));

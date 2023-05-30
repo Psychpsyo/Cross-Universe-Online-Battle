@@ -1,5 +1,6 @@
 import {cardActions} from "/modules/cardActions.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
+import {previewCard} from "/modules/generalUI.js";
 
 let cardSlots = [];
 export let uiPlayers = [];

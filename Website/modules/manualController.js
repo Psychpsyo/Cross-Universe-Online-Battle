@@ -5,6 +5,7 @@ import {locale} from "/modules/locale.js";
 import {Zone} from "/modules/zone.js";
 import {Card} from "/modules/card.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
+import {putChatMessage} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as manualUI from "/modules/manualUI.js";
 

@@ -2,7 +2,6 @@ import {generateStartingHand} from "/deckMaker/startingHands.js";
 import {locale} from "/modules/locale.js";
 import {toDeckx} from "/modules/deckUtils.js";
 
-let shiftHeld = false;
 //load illustrator & contest winner tags
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
 let contestWinnerTags = await fetch("data/contestWinnerTags.json").then(async response => await response.json());
@@ -131,21 +130,6 @@ Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 			elem.close();
 		}
 	});
-});
-
-// track shift key
-document.addEventListener("keydown", function(e) {
-	if (e.key === "Shift") {
-		shiftHeld = true;
-	}
-});
-document.addEventListener("keyup", function(e) {
-	if (e.key === "Shift") {
-		shiftHeld = false;
-	}
-});
-window.addEventListener("blur", function(e) {
-	shiftHeld = false;
 });
 
 // gets a card's link from its ID
@@ -614,11 +598,11 @@ async function addRecentCard(cardId) {
 }
 
 //add card to deck from card detail view and go to deck
-document.getElementById("cardInfoToDeck").addEventListener("click", function() {
+document.getElementById("cardInfoToDeck").addEventListener("click", function(e) {
 	addCardToDeck(this.dataset.cardID);
 	
 	//don't open deck when holding shift
-	if (!shiftHeld) {
+	if (!e.shiftKey) {
 		closeAllDeckMakerOverlays();
 		deckCreationPanel.showModal();
 	}

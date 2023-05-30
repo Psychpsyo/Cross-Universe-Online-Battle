@@ -1,11 +1,6 @@
-//position the menu on the right if that option is enabled
-if (localStorage.getItem("fieldLeftToggle") == "true") {
-	document.documentElement.classList.add("leftField");
-}
-
 //chat box
-allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
-function putChatMessage(message, type) {
+let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
+export function putChatMessage(message, type) {
 	let messageSpan = document.createElement("div");
 	
 	while (message.indexOf(":") != -1) {
@@ -38,11 +33,6 @@ function putChatMessage(message, type) {
 }
 
 // card preview
-function closeCardPreview() {
-	cardDetails.style.setProperty("--side-distance", "-50vh");
-	cardDetails.dataset.currentCard = "";
-}
-
 document.addEventListener("click", function() {
 	if (localStorage.getItem("autoClosePreview") === "true") {
 		closeCardPreview();
@@ -60,8 +50,13 @@ cardDetailsSwitch.addEventListener("click", function(e) {
 cardDetailsClose.addEventListener("click", closeCardPreview);
 cardDetails.show();
 
+export function closeCardPreview() {
+	cardDetails.style.setProperty("--side-distance", "-50vh");
+	cardDetails.dataset.currentCard = "";
+}
+
 // previews a card
-function previewCard(card) {
+export function previewCard(card) {
 	if (!card?.cardId || card.hidden) {
 		return;
 	}
