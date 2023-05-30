@@ -64,7 +64,6 @@ export class BoardState extends GameState {
 		// remove draft game section and deck drop zone since they are not needed anymore
 		draftGameSetupMenu.remove();
 		
-		ui.init();
 		this.controller = new ManualController();
 		
 		// show game area

@@ -5,7 +5,8 @@ import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
-import {previewCard} from "/modules/generalUI.js"
+import {previewCard} from "/modules/generalUI.js";
+import * as gameUI from "/modules/gameUI.js";
 
 let officialDecks = [];
 fetch("data/deckList.json")
@@ -192,6 +193,7 @@ export class DeckState extends GameState {
 		switch (command) {
 			case "deck": {
 				game.players[0].setDeck(JSON.parse(message)).then(() => {
+					gameUI.insertCard(game.players[0].deckZone, 0);
 					gameState.checkReadyConditions();
 				});
 				return true;
@@ -214,6 +216,7 @@ export class DeckState extends GameState {
 		socket.send("[deck]" + JSON.stringify(deck));
 		mainGameBlackout.textContent = locale.deckSelect.loadingDeck;
 		await localPlayer.setDeck(deck);
+		gameUI.insertCard(localPlayer.deckZone, 0);
 		mainGameBlackout.textContent = locale.deckSelect.waitingForOpponent;
 		
 		this.checkReadyConditions();

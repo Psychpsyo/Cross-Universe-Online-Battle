@@ -6,6 +6,7 @@ import {Card} from "/modules/card.js";
 import {stopEffect} from "/modules/levitationEffect.js";
 import {socket, connectTo} from "/modules/netcode.js";
 import {putChatMessage} from "/modules/generalUI.js";
+import * as gameUI from "/modules/gameUI.js";
 
 export class InitState extends GameState {
 	constructor(roomcode, gameMode) {
@@ -101,6 +102,7 @@ export class InitState extends GameState {
 					break;
 				}
 			}
+			gameUI.init();
 			
 			// make chat functional
 			document.getElementById("chatInput").addEventListener("keyup", function(e) {

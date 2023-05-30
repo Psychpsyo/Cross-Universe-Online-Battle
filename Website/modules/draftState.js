@@ -5,6 +5,7 @@ import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {deckFromCardList} from "/modules/deckUtils.js";
 import {previewCard} from "/modules/generalUI.js";
+import * as gameUI from "/modules/gameUI.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();
@@ -165,6 +166,8 @@ export class DraftState extends GameState {
 				game.players[0].setDeck(deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName)),
 				game.players[1].setDeck(deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName))
 			]);
+			gameUI.insertCard(game.players[0].deckZone, 0);
+			gameUI.insertCard(game.players[1].deckZone, 0);
 			
 			// show start button
 			draftStartButton.removeAttribute("hidden");
