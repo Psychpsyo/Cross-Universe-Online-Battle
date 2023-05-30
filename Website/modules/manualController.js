@@ -133,7 +133,7 @@ export class ManualController extends InteractionController {
 			}
 		}
 		this.playerInfos[player.index].setHeld(zone.cards[index]);
-		generalUI.makeDragSource(zone, index);
+		generalUI.makeDragSource(zone, index, player);
 		return true;
 	}
 	
@@ -157,7 +157,7 @@ export class ManualController extends InteractionController {
 		let source = card.location;
 		let sourceIndex = source? source.cards.indexOf(card) : -1;
 		if (source) {
-			generalUI.clearDragSource(source, sourceIndex);
+			generalUI.clearDragSource(source, sourceIndex, player);
 		}
 		
 		if (!zone) {
@@ -173,9 +173,9 @@ export class ManualController extends InteractionController {
 			if (insertedIndex != -1) {
 				if (zone === game.players[0].handZone) {
 					card.hidden = !this.opponentHandShown;
-				} else if (zone.name.startsWith("deck")) {
+				} else if (zone.name.startsWith("deck") || zone === game.players[0].presentedZone) {
 					card.hidden = true;
-				} else if (!zone.name.startsWith("presented")) {
+				} else {
 					card.hidden = false;
 				}
 				
@@ -276,7 +276,7 @@ export class ManualController extends InteractionController {
 		let source = card.location;
 		let sourceIndex = source.cards.indexOf(card);
 		
-		generalUI.clearDragSource(source, sourceIndex);
+		generalUI.clearDragSource(source, sourceIndex, player);
 		this.playerInfos[player.index].clearHeld();
 	}
 	deckShowTop(player, deckZone) {

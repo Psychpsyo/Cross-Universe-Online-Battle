@@ -718,7 +718,7 @@ label[for="fileSelectDeckLoader"] {
 }
 
 /*Class for the presented cards tray when it is being grabbed from*/
-.isDragging .presentedCards {
+.presentedCardsDragSource {
 	pointer-events: none;
 	opacity: 35%;
 }

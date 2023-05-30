@@ -35,6 +35,10 @@ export function init() {
 			e.stopPropagation();
 			dropCard(localPlayer, player.handZone, player.handZone.cards.length);
 		});
+		document.getElementById("presentedCards" + player.index).addEventListener("mouseup", function(e) {
+			e.stopPropagation();
+			dropCard(localPlayer, player.presentedZone, player.presentedZone.cards.length);
+		});
 	});
 	
 	// dropping cards off in nowhere
@@ -186,17 +190,17 @@ export function insertCard(zone, index) {
 		new presentedCardSlot(zone, index);
 	}
 }
-export function makeDragSource(zone, index) {
+export function makeDragSource(zone, index, player) {
 	cardSlots.forEach(slot => {
 		if (slot.zone == zone && slot.index == index) {
-			slot.makeDragSource();
+			slot.makeDragSource(player);
 		}
 	});
 }
-export function clearDragSource(zone, index) {
+export function clearDragSource(zone, index, player) {
 	cardSlots.forEach(slot => {
 		if (slot.zone === zone && slot.index == index) {
-			slot.clearDragSource();
+			slot.clearDragSource(player);
 		}
 	});
 }
@@ -222,8 +226,8 @@ export class uiCardSlot {
 		cardSlots.push(this);
 	}
 	
-	makeDragSource() {}
-	clearDragSource() {}
+	makeDragSource(player) {}
+	clearDragSource(player) {}
 	update() {}
 	remove() {
 		cardSlots.splice(cardSlots.indexOf(this), 1);
@@ -251,10 +255,10 @@ class fieldCardSlot extends uiCardSlot {
 		});
 	}
 	
-	makeDragSource() {
+	makeDragSource(player) {
 		this.fieldSlot.classList.add("dragSource");
 	}
-	clearDragSource() {
+	clearDragSource(player) {
 		this.fieldSlot.classList.remove("dragSource");
 	}
 	update() {
@@ -304,10 +308,10 @@ class handCardSlot extends uiCardSlot {
 		this.handElem.style.setProperty("--card-count", "" + this.handElem.childElementCount);
 	}
 	
-	makeDragSource() {
+	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 	}
-	clearDragSource() {
+	clearDragSource(player) {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
@@ -406,11 +410,17 @@ class presentedCardSlot extends uiCardSlot {
 		this.zoneElem.appendChild(this.cardElem);
 	}
 	
-	makeDragSource() {
+	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
+		if (player === localPlayer) {
+			this.zoneElem.classList.add("presentedCardsDragSource");
+		}
 	}
-	clearDragSource() {
+	clearDragSource(player) {
 		this.cardElem.classList.remove("dragSource");
+		if (player === localPlayer) {
+			this.zoneElem.classList.remove("presentedCardsDragSource");
+		}
 	}
 	update() {
 		this.cardImg.src = this.zone.cards[this.index].getImage();
@@ -440,10 +450,10 @@ class cardSelectorSlot extends uiCardSlot {
 		cardSelectorGrid.insertBefore(this.cardElem, cardSelectorGrid.firstChild);
 	}
 	
-	makeDragSource() {
+	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 	}
-	clearDragSource() {
+	clearDragSource(player) {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
@@ -528,17 +538,11 @@ class UiPlayer {
 		if (card) {
 			this.dragCardElem.src = card.getImage();
 			this.dragging = true;
-			if (this.player === localPlayer) {
-				document.documentElement.classList.add("isDragging");
-			}
 		}
 	}
 	clearDrag() {
 		this.dragCardElem.src = "images/cardHidden.png";
 		this.dragging = false;
-		if (this.player === localPlayer) {
-			document.documentElement.classList.remove("isDragging");
-		}
 	}
 	
 	setLife(value) {
