@@ -1,11 +1,6 @@
-//position the menu on the right if that option is enabled
-if (localStorage.getItem("fieldLeftToggle") == "true") {
-	document.documentElement.classList.add("leftField");
-}
-
 //chat box
-allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
-function putChatMessage(message, type) {
+let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
+export function putChatMessage(message, type) {
 	let messageSpan = document.createElement("div");
 	
 	while (message.indexOf(":") != -1) {
@@ -37,26 +32,7 @@ function putChatMessage(message, type) {
 	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight
 }
 
-//closing the card selector when clicking off of it
-overlayBackdrop.addEventListener("click", function() {
-	// does not work for partner select menu
-	if (window.getComputedStyle(partnerSelectionMenu).display != "none") {
-		return;
-	}
-	cardSelector.style.display = "none";
-	if (typeof deckSelector !== "undefined") {
-		deckSelector.style.display = "none";
-	}
-	overlayBackdrop.style.display = "none";
-});
-
 // card preview
-function closeCardPreview() {
-	cardDetails.style.setProperty("--side-distance", "-50vh");
-	cardDetails.dataset.currentCard = "";
-	cardDetailsImage.dataset.open = false;
-}
-
 document.addEventListener("click", function() {
 	if (localStorage.getItem("autoClosePreview") === "true") {
 		closeCardPreview();
@@ -72,9 +48,18 @@ cardDetailsSwitch.addEventListener("click", function(e) {
 	e.stopPropagation();
 });
 cardDetailsClose.addEventListener("click", closeCardPreview);
+cardDetails.show();
+
+export function closeCardPreview() {
+	cardDetails.style.setProperty("--side-distance", "-50vh");
+	cardDetails.dataset.currentCard = "";
+}
 
 // previews a card
-function previewCard(card) {
+export function previewCard(card) {
+	if (!card?.cardId || card.hidden) {
+		return;
+	}
 	// if the already shown card was clicked again
 	if (cardDetails.dataset.currentCard == card.cardId) {
 		closeCardPreview();
@@ -88,18 +73,28 @@ function previewCard(card) {
 	// set the text preview
 	// general info
 	cardDetailsName.textContent = card.getName();
-	cardDetailsLevelType.textContent = locale["cardDetailsInfoString"].replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", locale[card.getCardType() + "CardDetailType"]);
+	let cardTypes = [...card.getCardTypes()];
+	if (cardTypes.includes("token")) {
+		cardTypes.splice(cardTypes.indexOf("unit"), 1);
+	}
+	if (cardTypes.includes("spell")) {
+		cardTypes.splice(cardTypes.indexOf("spell"), 1);
+	}
+	if (cardTypes.includes("item")) {
+		cardTypes.splice(cardTypes.indexOf("item"), 1);
+	}
+	cardDetailsLevelType.textContent = locale.cardDetailsInfoString.replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
 	if (card.getTypes().length > 0) {
-		cardDetailsTypes.textContent = locale["cardDetailsTypes"] + card.getTypes().map(type => locale["types"][type]).join(locale["typeSeparator"]);
+		cardDetailsTypes.textContent = locale.cardDetailsTypes + card.getTypes().map(type => locale.types[type]).join(locale.typeSeparator);
 	} else {
-		cardDetailsTypes.textContent = locale["typeless"];
+		cardDetailsTypes.textContent = locale.typeless;
 	}
 	
 	// attack & defense
-	if (card.getCardType() == "unit" || card.getCardType() == "token") {
+	if (card.getCardTypes().includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
-		cardDetailsAttack.innerHTML = locale["cardDetailsAttack"] + (card.getAttack() == -1? "?" : card.getAttack());
-		cardDetailsDefense.innerHTML = locale["cardDetailsDefense"] + (card.getDefense() == -1? "?" : card.getDefense());
+		cardDetailsAttack.innerHTML = locale.cardDetailsAttack + (card.getAttack() == -1? "?" : card.getAttack());
+		cardDetailsDefense.innerHTML = locale.cardDetailsDefense + (card.getDefense() == -1? "?" : card.getDefense());
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}
@@ -119,7 +114,7 @@ function previewCard(card) {
 			}
 			
 			let indentCount = 0;
-			let indentChars = ["　", "●", "：", locale["subEffectOpeningBracket"]];
+			let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
 			effect.text.split("\n").forEach(line => {
 				let lineDiv = document.createElement("div");
 				lineDiv.textContent = line;
@@ -147,5 +142,4 @@ function previewCard(card) {
 	}
 	
 	cardDetails.style.setProperty("--side-distance", ".5em");
-	cardDetailsImage.dataset.open = true;
 }

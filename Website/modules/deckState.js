@@ -5,6 +5,8 @@ import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
+import {previewCard} from "/modules/generalUI.js";
+import * as gameUI from "/modules/gameUI.js";
 
 let officialDecks = [];
 fetch("data/deckList.json")
@@ -16,6 +18,15 @@ fetch("data/deckList.json")
 let currentDeckList = "default";
 
 
+function openDeckSelect() {
+	deckSelector.showModal();
+	deckSelector.appendChild(cardDetails);
+}
+function closeDeckSelect() {
+	gameFlexBox.appendChild(cardDetails);
+	deckSelector.close();
+}
+
 function loadDeckFile(file) {
 	let reader = new FileReader();
 	reader.onload = function(e) {
@@ -24,9 +35,7 @@ function loadDeckFile(file) {
 	};
 	
 	reader.fileName = file["name"];
-	if (reader.fileName.endsWith(".deck") || reader.fileName.endsWith(".deckx")) { //validate file format
-		reader.readAsText(file);
-	}
+	reader.readAsText(file);
 }
 
 //loading card list in the deck selector
@@ -54,7 +63,7 @@ function loadDeckPreview(deck) {
 		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
 		cardImg.addEventListener("click", async function(e) {
 			await game.registerCard(this.dataset.cardId);
-			previewCard(new Card(game, this.dataset.cardId));
+			previewCard(new Card(localPlayer, this.dataset.cardId, false));
 			e.stopPropagation();
 		});
 	});
@@ -133,13 +142,19 @@ export class DeckState extends GameState {
 		});
 		
 		// selecting deck from the deck list
+		deckSelector.addEventListener("click", function(e) {
+			if (e.target == document.getElementById("deckSelector")) {
+				closeDeckSelect();
+			}
+		});
+		
 		document.getElementById("loadSelectedDeckBtn").addEventListener("click", function() {
 			if (!document.getElementById("selectedDeck")) {
 				return;
 			}
 			
+			closeDeckSelect();
 			gameState.loadDeck(officialDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
-			overlayBackdrop.style.display = "none";
 		});
 		
 		// opening the deck selector
@@ -147,9 +162,7 @@ export class DeckState extends GameState {
 			e.stopPropagation();
 			currentDeckList = "default";
 			addDecksToDeckSelector(currentDeckList);
-			
-			deckSelector.style.display = "flex";
-			overlayBackdrop.style.display = "block";
+			openDeckSelect();
 		});
 		// deck selector deck list buttons
 		document.getElementById("defaultDecksBtn").addEventListener("click", function() {
@@ -180,6 +193,7 @@ export class DeckState extends GameState {
 		switch (command) {
 			case "deck": {
 				game.players[0].setDeck(JSON.parse(message)).then(() => {
+					gameUI.insertCard(game.players[0].deckZone, 0);
 					gameState.checkReadyConditions();
 				});
 				return true;
@@ -202,6 +216,7 @@ export class DeckState extends GameState {
 		socket.send("[deck]" + JSON.stringify(deck));
 		mainGameBlackout.textContent = locale.deckSelect.loadingDeck;
 		await localPlayer.setDeck(deck);
+		gameUI.insertCard(localPlayer.deckZone, 0);
 		mainGameBlackout.textContent = locale.deckSelect.waitingForOpponent;
 		
 		this.checkReadyConditions();

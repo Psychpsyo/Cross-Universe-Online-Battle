@@ -41,6 +41,10 @@ main {
 	background-color: rgba(0, 0, 0, 0.25);
 }
 
+#importCardInput {
+	display: none;
+}
+
 #savedCardsSection {
 	overflow-y: scroll;
 	background-color: var(--theme-shadow);
@@ -125,6 +129,10 @@ main {
 	overflow-wrap: break-word;
 }
 
+#effectEditNewBullet, #effectEditNewBrackets {
+	font-family: "游ゴシック", "YuGothic", sans-serif;
+}
+
 #effectEditor:empty::before {
 	content: "...";
 	cursor: text;
@@ -144,6 +152,7 @@ main {
 }
 .bulletEditSection::before {
 	content: "●：";
+	font-family: "游ゴシック", "YuGothic", sans-serif;
 	position: absolute;
 	top: 0;
 	left: -2em;

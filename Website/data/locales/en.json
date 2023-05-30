@@ -83,7 +83,7 @@
 	
 	"cardSelector": {
 		"tokens": "Tokens:",
-		"yourDeck": "Your Deck:",
+		"deck1": "Your Deck:",
 		"discard0": "Opponent's Discard Pile:",
 		"discard1": "Your Discard Pile:",
 		"exile0": "Opponent's Exile Zone:",
@@ -494,6 +494,7 @@
 		"createNew": "Create New",
 		"downloadImage": "Download (.png)",
 		"downloadCard": "Download (.card)",
+		"importCard": "Import .card",
 		"noSavedCards": "You haven't saved any cards yet.",
 		"edit": "Edit",
 		"delete": "Delete",

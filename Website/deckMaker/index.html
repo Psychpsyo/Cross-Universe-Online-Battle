@@ -63,7 +63,7 @@
 		</section>
 		
 		<!--search panel-->
-		<dialog id="cardSearchPanel">
+		<dialog id="cardSearchPanel" class="centerDialog">
 			<section class="dialogContent" aria-labelledBy="cardSearchPanelHeader">
 				<header><h2 id="cardSearchPanelHeader"></h2></header>
 				<form method="dialog" class="dialogScrollArea">
@@ -167,7 +167,7 @@
 		</dialog>
 		
 		<!--deck panel-->
-		<dialog id="deckCreationPanel">
+		<dialog id="deckCreationPanel" class="centerDialog">
 			<section id="deckCreationPanelInner" class="dialogContent" aria-labelledBy="deckCreationPanelHeader">
 				<header><h2 id="deckCreationPanelHeader"></h2></header>
 				<div id="deckMakerMainArea">
@@ -258,7 +258,7 @@
 								<div id="deckMakerOptionButtons">
 									<!-- autocomplete must be off for some of these so that they always starts disabled. -->
 									<button id="dotDeckExportBtn" disabled autocomplete="off"></button>
-									<input id="deckMakerImportInput" type="file">
+									<input id="deckMakerImportInput" type="file" accept=".deck,.deckx">
 									<button id="deckMakerImportBtn"></button>
 									<button id="startingHandGenBtn" disabled autocomplete="off"></button>
 								</div>
@@ -274,11 +274,11 @@
 		</dialog>
 		
 		<!--card info panel-->
-		<dialog id="cardInfoPanel" aria-label="Card Info">
+		<dialog id="cardInfoPanel" class="centerDialog" aria-label="">
 			<section id="cardInfoPanelContent" class="dialogContent" aria-labelledBy="cardInfoCardName">
 				<header><h2 id="cardInfoCardName"></h2></header>
 				<div id="cardInfoMainArea" class="dialogScrollArea">
-					<section id="cardInfoGeneralSection" aria-label="General Info">
+					<section id="cardInfoGeneralSection" aria-label="">
 						<div id="cardInfoImgArea">
 							<img id="cardInfoCardImg" src="" alt=""><br>
 							<span id="cardInfoCardID"></span>
@@ -309,7 +309,7 @@
 		</dialog>
 		
 		<!--starting hand generator panel-->
-		<dialog id="startingHandGenerator">
+		<dialog id="startingHandGenerator" class="centerDialog">
 			<section class="dialogContent" aria-labelledBy="handGeneratorTitle">
 				<header><h2 id="handGeneratorTitle"></h2></header>
 				<div id="startingHandGeneratorCards"></div>
@@ -319,7 +319,6 @@
 		
 		<!--scripts-->
 		<script src="scripts/localStorageSetup.js"></script>
-		<script src="scripts/dialogs.js"></script>
 		<script src="deckMaker/script.js" type="module"></script>
 	</body>
 </html>

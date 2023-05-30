@@ -4,6 +4,8 @@ import {Card} from "/modules/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {deckFromCardList} from "/modules/deckUtils.js";
+import {previewCard} from "/modules/generalUI.js";
+import * as gameUI from "/modules/gameUI.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();
@@ -105,10 +107,11 @@ export class DraftState extends GameState {
 				let card = document.createElement("img");
 				card.dataset.cardId = this.currentBooster.pop();
 				card.src = getCardImageFromID(card.dataset.cardId);
-				card.addEventListener("click", async function() {
-					if (shiftHeld || ctrlHeld || altHeld) {
+				card.addEventListener("click", async function(e) {
+					if (e.shiftKey || e.ctrlKey || e.altKey) {
+						e.stopPropagation();
 						await game.registerCard(this.dataset.cardId);
-						previewCard(new Card(game, this.dataset.cardId));
+						previewCard(new Card(localPlayer, this.dataset.cardId, false));
 						return;
 					}
 					
@@ -146,9 +149,10 @@ export class DraftState extends GameState {
 		card.src = "images/cardHidden.png";
 		
 		game.registerCard(card.dataset.cardId);
-		deckCard.addEventListener("click", async function() {
+		deckCard.addEventListener("click", async function(e) {
+			e.stopPropagation();
 			await game.registerCard(card.dataset.cardId);
-			previewCard(new Card(game, this.dataset.cardId));
+			previewCard(new Card(localPlayer, this.dataset.cardId, false));
 		});
 		
 		// check if all cards have been taken.
@@ -162,6 +166,8 @@ export class DraftState extends GameState {
 				game.players[0].setDeck(deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName)),
 				game.players[1].setDeck(deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName))
 			]);
+			gameUI.insertCard(game.players[0].deckZone, 0);
+			gameUI.insertCard(game.players[1].deckZone, 0);
 			
 			// show start button
 			draftStartButton.removeAttribute("hidden");

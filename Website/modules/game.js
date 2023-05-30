@@ -7,6 +7,7 @@ import {Card} from "/modules/card.js";
 export class Game {
 	constructor() {
 		this.cardData = {};
+		this.zones = {};
 		this.players = [];
 		this.players.push(new Player(this));
 		this.players.push(new Player(this));

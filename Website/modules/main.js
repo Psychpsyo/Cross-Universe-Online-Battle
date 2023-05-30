@@ -1,6 +1,13 @@
 import {locale} from "/modules/locale.js";
 import {startEffect} from "/modules/levitationEffect.js";
 
+// global variables
+window.game = null;
+window.localPlayer = null;
+window.gameState = null;
+window.opponentName = null;
+window.youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and partner selection, as far as the board is concerned, the local player is always player 1.)
+
 // translate main menu
 roomCodeInputTitle.textContent = locale.mainMenu.roomCodeInputTitle;
 roomCodeInputLabel.textContent = locale.mainMenu.enterRoomcode;
@@ -56,6 +63,26 @@ document.getElementById("connectBtn").addEventListener("click", connect);
 document.getElementById("cancelWaitingBtn").addEventListener("click", function() {
 	gameState.cancel();
 	gameState = null;
+});
+
+// handle hotkeys
+document.addEventListener("keydown", async function(e) {
+	for (const [name, hotkey] of Object.entries(hotkeys)) {
+		if (hotkey.keyCode === e.code && hotkey.ctrl === e.ctrlKey && hotkey.shift === e.shiftKey && hotkey.alt === e.altKey) {
+			switch(name) {
+				case "chat": {
+					if (!gameDiv.hidden) {
+						document.getElementById("chatInput").focus();
+						e.preventDefault();
+					}
+					break;
+				}
+				default: {
+					gameState?.hotkeyPressed(name);
+				}
+			}
+		}
+	}
 });
 
 // set up the background cards effect

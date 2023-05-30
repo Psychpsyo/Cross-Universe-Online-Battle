@@ -1,6 +1,7 @@
 // This module exports the Player class which holds all data relevant to one player in a game.
-// TODO: migrate missing data from global variables into this file.
+
 import {Card} from "/modules/card.js";
+import {Zone} from "/modules/zone.js";
 
 export class Player {
 	constructor(game) {
@@ -11,6 +12,15 @@ export class Player {
 		this.life = 1000;
 		
 		this.nextCustomCardId = this.index + 1;
+		
+		this.deckZone = new Zone("deck" + this.index, -1, this, false);
+		this.handZone = new Zone("hand" + this.index, -1, this, false);
+		this.unitZone = new Zone("unit" + this.index, 5, this, true);
+		this.spellItemZone = new Zone("spellItem" + this.index, 4, this, true);
+		this.partnerZone = new Zone("partner" + this.index, 1, this, true);
+		this.discardPile = new Zone("discard" + this.index, -1, this, false);
+		this.exileZone = new Zone("exile" + this.index, -1, this, false);
+		this.presentedZone = new Zone("presented" + this.index, -1, this, false);
 	}
 	
 	async setDeck(deck) {
@@ -29,13 +39,11 @@ export class Player {
 			}
 			
 			for (let i = 0; i < card.amount; i++) {
-				let card = await new Card(this.game, cardId);
-				// TODO: The deck card area will at some point be merged into this class and IDs for cards will be phased out.
-				cardAreas["deck" + this.index].cards.push(card);
-				card.location = cardAreas["deck" + this.index];
+				let card = await new Card(this, cardId, true);
+				this.deckZone.add(card, this.deckZone.cards.length);
+				card.location = this.deckZone;
 			}
 		}
-		cardAreas["deck" + this.index].updateVisual();
 		this.deck = deck;
 	}
 }

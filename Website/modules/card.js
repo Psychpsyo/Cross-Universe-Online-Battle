@@ -1,43 +1,51 @@
 // This module exports the Card class which represents a specific card in a Game.
 
 export class Card {
-	constructor(game, cardId) {
+	constructor(player, cardId, hidden) {
 		if (!game.cardData[cardId]) {
 			throw "Can't create card with unregistered ID '" + cardId + "'!";
 		}
 		
-		this.game = game;
+		this.owner = player;
 		this.cardId = cardId;
-		this.type = game.cardData[cardId].cardType;
-		this.location = null; // the card area that this card is in right now
+		let mainType = player.game.cardData[cardId].cardType;
+		this.baseCardTypes = [mainType];
+		if (mainType == "token") {
+			this.baseCardTypes.push("unit");
+		} else if (["standardSpell", "continuousSpell", "enchantSpell"].includes(mainType)) {
+			this.baseCardTypes.push("spell");
+		} else if (["standardItem", "continuousItem", "equipableItem"].includes(mainType)) {
+			this.baseCardTypes.push("item");
+		} 
+		this.location = null;
+		this.hidden = hidden;
 	}
-	
 	getImage() {
-		return this.game.cardData[this.cardId].imageSrc;
+		return this.hidden? "images/cardBackFrameP" + this.owner.index + ".png" : this.owner.game.cardData[this.cardId].imageSrc;
 	}
-	getCardType() {
-		return this.game.cardData[this.cardId].cardType;
+	getCardTypes() {
+		return this.baseCardTypes;
 	}
 	getName() {
-		return this.game.cardData[this.cardId].name;
+		return this.owner.game.cardData[this.cardId].name;
 	}
 	getLevel() {
-		return this.game.cardData[this.cardId].level;
+		return this.owner.game.cardData[this.cardId].level;
 	}
 	getAttack() {
-		if (this.getCardType() == "unit" || this.getCardType() == "token") {
-			return this.game.cardData[this.cardId].attack;
+		if (this.getCardTypes().includes("unit")) {
+			return this.owner.game.cardData[this.cardId].attack;
 		}
 		return 0;
 	}
 	getDefense() {
-		if (this.getCardType() == "unit" || this.getCardType() == "token") {
-			return this.game.cardData[this.cardId].defense;
+		if (this.getCardTypes().includes("unit")) {
+			return this.owner.game.cardData[this.cardId].defense;
 		}
 		return 0;
 	}
 	getTypes() {
-		return this.game.cardData[this.cardId].types;
+		return this.owner.game.cardData[this.cardId].types;
 	}
 	
 	static sort(a, b) {

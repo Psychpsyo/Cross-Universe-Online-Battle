@@ -83,7 +83,7 @@
 	
 	"cardSelector": {
 		"tokens": "Tokens:",
-		"yourDeck": "Dein Deck:",
+		"deck1": "Dein Deck:",
 		"discard0": "Ablagestapel deines Gegners:",
 		"discard1": "Dein Ablagestapel:",
 		"exile0": "Exil deines Gegners:",
@@ -494,6 +494,7 @@
 		"createNew": "Neu erstellen",
 		"downloadImage": "Herunterladen (.png)",
 		"downloadCard": "Herunterladen (.card)",
+		"importCard": ".card-Datei importieren",
 		"noSavedCards": "Du hast noch keine Karten gespeichert.",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",

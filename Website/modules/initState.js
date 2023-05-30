@@ -5,6 +5,8 @@ import {Game} from "/modules/game.js";
 import {Card} from "/modules/card.js";
 import {stopEffect} from "/modules/levitationEffect.js";
 import {socket, connectTo} from "/modules/netcode.js";
+import {putChatMessage} from "/modules/generalUI.js";
+import * as gameUI from "/modules/gameUI.js";
 
 export class InitState extends GameState {
 	constructor(roomcode, gameMode) {
@@ -39,10 +41,10 @@ export class InitState extends GameState {
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
 				
-				this.initGame().then(() => {
-					socket.send("[ready]");
-					this.checkReadyConditions();
-				});
+				game = new Game();
+				localPlayer = game.players[1];
+				socket.send("[ready]");
+				this.checkReadyConditions();
 				
 				return true;
 			}
@@ -71,29 +73,8 @@ export class InitState extends GameState {
 		return false;
 	}
 	
-	async initGame() {
-		game = new Game();
-		localPlayer = game.players[1];
-		return fetch("https://crossuniverse.net/cardInfo", {
-			method: "POST",
-			body: JSON.stringify({
-				"cardTypes": ["token"],
-				"language": localStorage.getItem("language")
-			})
-		})
-		.then(response => response.json())
-		.then(response => {
-			response.forEach(card => {
-				card.imageSrc = getCardImageFromID(card.cardID);
-				game.cardData[card.cardID] = card;
-				cardAreas["tokens"].cards.push(new Card(game, card.cardID));
-			});
-			this.gameSetup = true;
-		});
-	}
-	
 	checkReadyConditions() {
-		if (this.opponentReady && this.gameSetup && youAre !== null) {
+		if (this.opponentReady && youAre !== null) {
 			// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
 			document.getElementById("gameDiv").addEventListener("dragover", function(e) {
 				e.preventDefault();
@@ -121,6 +102,7 @@ export class InitState extends GameState {
 					break;
 				}
 			}
+			gameUI.init();
 			
 			// make chat functional
 			document.getElementById("chatInput").addEventListener("keyup", function(e) {
@@ -142,6 +124,11 @@ export class InitState extends GameState {
 			document.getElementById("chatInput").addEventListener("keydown", function(e) {
 				e.stopPropagation();
 			});
+			
+			//position the menu on the right if that option is enabled
+			if (localStorage.getItem("fieldLeftToggle") == "true") {
+				document.documentElement.classList.add("leftField");
+			}
 			
 			// main screen is no longer needed
 			stopEffect();

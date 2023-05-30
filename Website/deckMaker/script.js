@@ -2,7 +2,6 @@ import {generateStartingHand} from "/deckMaker/startingHands.js";
 import {locale} from "/modules/locale.js";
 import {toDeckx} from "/modules/deckUtils.js";
 
-let shiftHeld = false;
 //load illustrator & contest winner tags
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
 let contestWinnerTags = await fetch("data/contestWinnerTags.json").then(async response => await response.json());
@@ -109,7 +108,7 @@ Array.from(cardSearchTypeInput.children).forEach(typeOption => {
 });
 
 //card info panel
-cardInfoPanelContent.setAttribute("aria-label", locale.deckMaker.cardInfo.title);
+cardInfoPanel.setAttribute("aria-label", locale.deckMaker.cardInfo.title);
 cardInfoGeneralSection.setAttribute("aria-label", locale.deckMaker.cardInfo.generalSection);
 cardInfoReleaseDateLabel.textContent = locale.deckMaker.cardInfo.released;
 cardInfoIllustratorLabel.textContent = locale.deckMaker.cardInfo.illustrator;
@@ -124,20 +123,13 @@ cardInfoToDeck.textContent = locale.deckMaker.cardInfo.toDeck;
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 
-
-//track shift key
-document.addEventListener("keydown", function(e) {
-	if (e.key === "Shift") {
-		shiftHeld = true;
-	}
-});
-document.addEventListener("keyup", function(e) {
-	if (e.key === "Shift") {
-		shiftHeld = false;
-	}
-});
-window.addEventListener("blur", function(e) {
-	shiftHeld = false;
+// make dialogs work
+Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
+	elem.addEventListener("click", function(e) {
+		if (e.target === elem) {
+			elem.close();
+		}
+	});
 });
 
 // gets a card's link from its ID
@@ -606,11 +598,11 @@ async function addRecentCard(cardId) {
 }
 
 //add card to deck from card detail view and go to deck
-document.getElementById("cardInfoToDeck").addEventListener("click", function() {
+document.getElementById("cardInfoToDeck").addEventListener("click", function(e) {
 	addCardToDeck(this.dataset.cardID);
 	
 	//don't open deck when holding shift
-	if (!shiftHeld) {
+	if (!e.shiftKey) {
 		closeAllDeckMakerOverlays();
 		deckCreationPanel.showModal();
 	}
@@ -665,9 +657,7 @@ document.getElementById("deckMakerImportInput").addEventListener("change", funct
 	};
 	
 	reader.fileName = this.files[0]["name"];
-	if (reader.fileName.endsWith(".deck") || reader.fileName.endsWith(".json")) { //validate file format
-		reader.readAsText(this.files[0]);
-	}
+	reader.readAsText(this.files[0]);
 });
 
 //deck export
