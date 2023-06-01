@@ -5,7 +5,7 @@ import {CardValue} from "./cardValue.js";
 export class Card {
 	constructor(player, cardId, hidden) {
 		if (!game.cardData[cardId]) {
-			throw "Can't create card with unregistered ID '" + cardId + "'!";
+			throw new Error("Can't create card with unregistered ID '" + cardId + "'!");
 		}
 		
 		this.owner = player;

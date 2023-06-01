@@ -28,9 +28,9 @@
 	"infoMana": "魔力：",
 	
 	"deckSelect": {
-		"chooseYourDeck": "Choose your deck.",
-		"loadingDeck": "Loading deck...",
-		"waitingForOpponent": "Waiting for opponent to choose their deck...",
+		"chooseYourDeck": null,
+		"loadingDeck": null,
+		"waitingForOpponent": null,
 		"dropYourDeck": "デッキをドラック＆ドロップしてください。",
 		"useOfficialDeck": "もしくは、公式デッキを選択してください。",
 		
@@ -41,18 +41,19 @@
 	},
 	
 	"partnerSelect": {
-		"useSuggestedQuestion": "Do you want to use the suggested partner for this deck or select one yourself?",
-		"useSuggested": "Use Suggested Partner",
-		"selectManually": "Select One From Deck",
-		"waitingForOpponent": "Waiting for the opponent to choose their partner...",
-		"revealPartner": "Reveal Partner"
+		"useSuggestedQuestion": null,
+		"useSuggested": null,
+		"selectManually": null,
+		"popupTitle": null,
+		"waitingForOpponent": null,
+		"revealPartner": null
 	},
 	
-	"selectStartingPlayer": "Select Starting Player",
-	"youStart": "You go first.",
-	"opponentStarts": "Your opponent goes first.",
-	"yourDeckShuffled": "Deck shuffled.",
-	"opponentDeckShuffled": "Your opponent's deck was shuffled.",
+	"selectStartingPlayer": null,
+	"youStart": null,
+	"opponentStarts": null,
+	"yourDeckShuffled": null,
+	"opponentDeckShuffled": null,
 	
 	"chat": {
 		"title": "チャット",
@@ -89,7 +90,7 @@
 		"exile0": "相手の隔離：",
 		"exile1": "自分の隔離：",
 		
-		"returnAllToDeck": "Return All to your Deck"
+		"returnAllToDeck": null
 	},
 	
 	"fieldLabels": {
@@ -103,13 +104,13 @@
 	},
 	
 	"draft": {
-		"yourTurn": "Pick a card.",
-		"opponentsTurn": "Your opponent is picking a card.",
-		"packNumber": "Pack {#CURRENT}/{#TOTAL}",
-		"amountTaken": "{#CURRENT}/{#TOTAL} Taken",
-		"finished": "Draft finished. You can start the game now.",
-		"startGame": "Start Game",
-		"waitingForOpponent": "Waiting for Opponent...",
+		"yourTurn": null,
+		"opponentsTurn": null,
+		"packNumber": null,
+		"amountTaken": null,
+		"finished": null,
+		"startGame": null,
+		"waitingForOpponent": null,
 		"deckName": "ドラフトデッキ",
 		"yourDeck": "自分のデッキ",
 		"opponentDeck": "相手のデッキ"

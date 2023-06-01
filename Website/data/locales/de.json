@@ -44,6 +44,7 @@
 		"useSuggestedQuestion": "Möchtest du den empfohlenen Partner für dieses Deck verwenden oder selber einen wählen?",
 		"useSuggested": "Empfohlenen wählen",
 		"selectManually": "Selbst wählen",
+		"popupTitle": "Wähle deinen Partner:",
 		"waitingForOpponent": "Warte darauf, dass dein Gegner einen Partner wählt...",
 		"revealPartner": "Partner aufdecken"
 	},

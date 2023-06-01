@@ -1,3 +1,4 @@
+import {locale} from "/modules/locale.js";
 import {GameState} from "/modules/gameState.js";
 import {DraftState} from "/modules/draftState.js";
 import {DeckState} from "/modules/deckState.js";

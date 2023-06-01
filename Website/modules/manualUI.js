@@ -6,6 +6,36 @@ import * as gameUI from "/modules/gameUI.js";
 import {putChatMessage} from "/modules/generalUI.js";
 
 export function init() {
+	// translation
+	revealPartnerBtn.textContent = locale.partnerSelect.revealPartner;
+	for (let i = 0; i < 2; i++) {
+		document.getElementById("deckTopBtn"+ i).textContent = locale.deckDropTop;
+		document.getElementById("deckShuffleInBtn" + i).textContent = locale.deckDropShuffle;
+		document.getElementById("deckBottomBtn" + i).textContent = locale.deckDropBottom;
+		document.getElementById("deckCancelBtn" + i).textContent = locale.deckDropCancel;
+		document.getElementById("showTopBtn" + i).textContent = locale.deckShowTop;
+	}
+	
+	drawBtn.textContent = locale.deckDraw;
+	shuffleBtn.textContent = locale.deckShuffle;
+	deckSearchBtn.textContent = locale.deckSearch;
+	
+	lifeBtnHeader.textContent = locale.life;
+	manaBtnHeader.textContent = locale.mana;
+	tokenBtn.textContent = locale.actionsTokens;
+	lifeHalf.textContent = locale.actionsHalf;
+	showHandBtn.textContent = locale.actionsShowHand;
+	
+	cardSelectorReturnToDeck.textContent = locale.cardSelector.returnAllToDeck;
+	
+	// partner reveal button
+	revealPartnerBtn.addEventListener("click", function() {
+		document.getElementById("partnerRevealButtonDiv").style.display = "none";
+		localPlayer.partnerZone.cards[0].hidden = false;
+		gameUI.updateCard(localPlayer.partnerZone, 0);
+		socket.send("[revealPartner]");
+	});
+	
 	//showing/hiding your hand
 	function hideHand() {
 		socket.send("[hideHand]");

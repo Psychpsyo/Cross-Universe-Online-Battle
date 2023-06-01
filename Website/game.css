@@ -693,9 +693,12 @@ label[for="fileSelectDeckLoader"] {
 	gap: 2em;
 }
 
-#partnerSelectorGrid {
+#cardChoiceGrid {
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
+}
+.unselectableCard {
+	filter: grayscale() brightness(.5);
 }
 
 .presentedCards {

@@ -94,6 +94,10 @@ export function init() {
 		closeCardSelect();
 	});
 	
+	cardChoiceMenu.addEventListener("cancel", function(e) {
+		e.preventDefault();
+	});
+	
 	lastFrame = performance.now();
 	animate();
 }
@@ -595,4 +599,47 @@ function animate(currentTime) {
 	}
 	
 	requestAnimationFrame(animate);
+}
+
+// card choice modal (blocking card selector)
+export async function presentCardChoice(cards, title, matchFunction = () => true) {
+	return new Promise((resolve, reject) => {
+		let validOptions = 0;
+		for (const card of cards) {
+			let cardImg = document.createElement("img");
+			cardImg.src = card.getImage();
+			if (matchFunction(card)) {
+				validOptions++;
+				cardImg.dataset.cardZone = card.location.name;
+				cardImg.dataset.cardIndex = card.location.cards.indexOf(card);
+				cardImg.addEventListener("click", function(e) {
+					if (e.shiftKey || e.ctrlKey || e.altKey) {
+						e.stopPropagation();
+						previewCard(game.zones[this.dataset.cardZone].cards[this.dataset.cardIndex]);
+					} else {
+						gameFlexBox.appendChild(cardDetails);
+						cardChoiceMenu.close(this.dataset.cardZone + "|" + this.dataset.cardIndex);
+						cardChoiceGrid.innerHTML = "";
+					}
+				});
+			} else {
+				cardImg.classList.add("unselectableCard");
+			}
+			cardChoiceGrid.appendChild(cardImg);
+		}
+		if (validOptions == 0) {
+			reject(new Error("No valid choices were passed to the card choice dialogue"));
+		}
+		cardChoiceMenu.addEventListener("close", function() {
+			let zone = game.zones[this.returnValue.substr(0, this.returnValue.indexOf("|"))];
+			let index = parseInt(this.returnValue.substr(this.returnValue.indexOf("|") + 1));
+			resolve(zone.cards[index]);
+		});
+		
+		cardChoiceTitle.textContent = title;
+		cardChoiceMenu.showModal();
+		cardChoiceMenu.appendChild(cardDetails);
+		
+		cardChoiceGrid.parentNode.scrollTop = 0;
+	});
 }
