@@ -16,6 +16,7 @@ roomCodeRefresh.setAttribute("aria-label", locale.mainMenu.rerollRoomcode);
 gameModeSelectorLabel.textContent = locale.mainMenu.gamemode;
 gameModeNormalOption.textContent = locale.mainMenu.gamemodes.normal;
 gameModeDraftOption.textContent = locale.mainMenu.gamemodes.draft;
+gameModeNormalAutomaticOption.textContent = locale.mainMenu.gamemodes.normalAutomatic;
 
 connectBtn.textContent = locale.mainMenu.connectToRoom;
 trWaitingForOpponent.textContent = locale.mainMenu.waitingForOpponent;

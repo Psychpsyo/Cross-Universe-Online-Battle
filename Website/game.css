@@ -197,7 +197,6 @@ dialog #cardDetails {
 	padding: .5em;
 	border-bottom: 2px solid var(--theme-border-color);
 }
-
 #gameInteractions > div:not(:last-child) {
 	padding-bottom: .5em;
 }
@@ -553,7 +552,7 @@ label[for="fileSelectDeckLoader"] {
 }
 
 #cardSelectorReturnToDeck {
-	display: none;
+	display: block;
 	height: 2em;
 	line-height: 2em;
 	border-left: none;
@@ -760,26 +759,22 @@ label[for="fileSelectDeckLoader"] {
 	z-index: 5;
 	font-size: .8em;
 }
-
 #p1Grid .counterHolder {
 	flex-direction: column-reverse;
 	bottom: 0;
 	left: 0;
 }
-
 #p2Grid .counterHolder {
 	top: 0;
 	right: 0;
 	flex-direction: column;
 }
-
 .counter {
 	text-align: center;
 	background-color: black;
 	border-radius: .5em;
 	border: 2px var(--theme-border-color) solid;
 }
-
 .counterAddBtn {
 	display: none;
 	text-align: center;
@@ -788,7 +783,6 @@ label[for="fileSelectDeckLoader"] {
 	border: 2px var(--theme-border-color) solid;
 	font-weight: bold;
 }
-
 .fieldCardContainer:hover .counterAddBtn {
 	display: block;
 }
@@ -805,14 +799,6 @@ label[for="fileSelectDeckLoader"] {
 
 .fieldCardContainer:hover .cardActionHolder {
 	display: block;
-}
-
-#startingPlayerSelect {
-	display: none;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
 }
 
 /* field labels */

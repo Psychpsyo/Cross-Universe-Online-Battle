@@ -6,6 +6,8 @@ import * as gameUI from "/modules/gameUI.js";
 import {putChatMessage} from "/modules/generalUI.js";
 
 export function init() {
+	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());
+	
 	// translation
 	revealPartnerBtn.textContent = locale.partnerSelect.revealPartner;
 	for (let i = 0; i < 2; i++) {
@@ -27,6 +29,8 @@ export function init() {
 	showHandBtn.textContent = locale.actionsShowHand;
 	
 	cardSelectorReturnToDeck.textContent = locale.cardSelector.returnAllToDeck;
+	
+	gameInteractions.removeAttribute("hidden");
 	
 	// partner reveal button
 	revealPartnerBtn.addEventListener("click", function() {
@@ -158,6 +162,8 @@ export function init() {
 			}
 		});
 	});
+	
+	document.documentElement.classList.add("manualGame");
 }
 
 export function receiveMessage(command, message) {

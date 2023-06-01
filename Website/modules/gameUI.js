@@ -175,7 +175,7 @@ export function insertCard(zone, index) {
 			if (slot.index >= index) {
 				slot.index++;
 			} else if (slot.index == -1) {
-				slot.update();
+				slot.insert();
 			}
 		}
 	});
@@ -228,6 +228,7 @@ export class uiCardSlot {
 	remove() {
 		cardSlots.splice(cardSlots.indexOf(this), 1);
 	}
+	insert() {}
 }
 
 class fieldCardSlot extends uiCardSlot {
@@ -258,17 +259,19 @@ class fieldCardSlot extends uiCardSlot {
 		this.fieldSlot.classList.remove("dragSource");
 	}
 	update() {
-		this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
 		let card = this.zone.cards[this.index];
 		if (card) {
 			this.fieldSlot.src = card.getImage();
 			// add card action buttons
-			if (card.cardId in cardActions) {
-				for (const [key, value] of Object.entries(cardActions[card.cardId])) {
-					let button = document.createElement("button");
-					button.textContent = locale.cardActions[card.cardId][key];
-					button.addEventListener("click", value);
-					this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);
+			if (!gameState.automatic) {
+				this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
+				if (card.cardId in cardActions) {
+					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
+						let button = document.createElement("button");
+						button.textContent = locale.cardActions[card.cardId][key];
+						button.addEventListener("click", value);
+						this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);
+					}
 				}
 			}
 		} else {
@@ -323,6 +326,7 @@ class handCardSlot extends uiCardSlot {
 class deckCardSlot extends uiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
+		this.cardCount = zone.cards.length;
 		
 		document.getElementById("deck" + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -334,17 +338,27 @@ class deckCardSlot extends uiCardSlot {
 	}
 	
 	update() {
-		document.getElementById("deck" + this.zone.player.index).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
-		document.getElementById("deck" + this.zone.player.index + "CardCount").textContent = this.zone.cards.length > 0? this.zone.cards.length : "";
+		this.cardCount = this.zone.cards.length;
+		this.setVisuals();
 	}
 	remove() {
-		this.update();
+		this.cardCount -= 1;
+		this.setVisuals();
+	}
+	insert() {
+		this.cardCount += 1;
+		this.setVisuals();
+	}
+	setVisuals() {
+		document.getElementById("deck" + this.zone.player.index).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
+		document.getElementById("deck" + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
 
 class pileCardSlot extends uiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
+		this.cardCount = zone.cards.length;
 		
 		document.getElementById(this.zone.name).addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -360,11 +374,20 @@ class pileCardSlot extends uiCardSlot {
 	}
 	
 	update() {
-		document.getElementById(this.zone.name).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
-		document.getElementById(this.zone.name + "CardCount").textContent = this.zone.cards.length > 0? this.zone.cards.length : "";
+		this.cardCount = this.zone.cards.length;
+		this.setVisuals();
 	}
 	remove() {
-		this.update();
+		this.cardCount -= 1;
+		this.setVisuals();
+	}
+	insert() {
+		this.cardCount += 1;
+		this.setVisuals();
+	}
+	setVisuals() {
+		document.getElementById(this.zone.name).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
+		document.getElementById(this.zone.name + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
 
@@ -475,7 +498,11 @@ export function openCardSelect(zone) {
 	
 	//show selector
 	cardSelectorTitle.textContent = zone.getLocalizedName();
-	cardSelectorReturnToDeck.style.display = (zone.name == "discard1" || zone.name == "exile1")? "block" : "none";
+	if (zone.name == "discard1" || zone.name == "exile1") {
+		cardSelectorReturnToDeck?.removeAttribute("hidden");
+	} else {
+		cardSelectorReturnToDeck?.setAttribute("hidden", "");
+	}
 	cardSelector.showModal();
 	cardSelector.appendChild(cardDetails);
 	

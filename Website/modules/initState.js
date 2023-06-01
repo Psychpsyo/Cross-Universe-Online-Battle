@@ -43,6 +43,7 @@ export class InitState extends GameState {
 				
 				game = new Game();
 				localPlayer = game.players[1];
+				game.players[1].isViewable = true;
 				socket.send("[ready]");
 				this.checkReadyConditions();
 				
@@ -94,11 +95,15 @@ export class InitState extends GameState {
 			
 			switch (this.gameMode) {
 				case "normal": {
-					gameState = new DeckState();
+					gameState = new DeckState(false);
 					break;
 				}
 				case "draft": {
 					gameState = new DraftState();
+					break;
+				}
+				case "normalAutomatic": {
+					gameState = new DeckState(true);
 					break;
 				}
 			}

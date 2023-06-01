@@ -1,7 +1,7 @@
 import {ManaSupplyPhase, MainPhase, BattlePhase, EndPhase} from "./phases.js";
 import {createPhaseStartedEvent} from "./events.js";
 
-extends class Turn {
+export class Turn {
 	constructor(player) {
 		this.game = player.game;
 		this.player = player;

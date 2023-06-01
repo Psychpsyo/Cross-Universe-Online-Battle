@@ -6,6 +6,8 @@ export class InteractionController {
 		return false;
 	}
 	
+	async startGame() {}
+	
 	// returns whether or not the card was fully grabbed from the zone
 	grabCard(player, zone, index) {
 		return false;

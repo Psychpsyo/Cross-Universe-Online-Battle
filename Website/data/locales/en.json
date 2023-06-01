@@ -15,7 +15,8 @@
 		"gamemode": "Gamemode:",
 		"gamemodes": {
 			"normal": "Normal",
-			"draft": "Draft"
+			"draft": "Draft",
+			"normalAutomatic": "Automatic"
 		},
 		
 		"settingsButton": "Settings",
@@ -49,10 +50,9 @@
 		"revealPartner": "Reveal Partner"
 	},
 	
-	"selectStartingPlayer": "Select Starting Player",
 	"youStart": "You go first.",
 	"opponentStarts": "Your opponent goes first.",
-	"yourDeckShuffled": "Deck shuffled.",
+	"yourDeckShuffled": "Your deck was shuffled.",
 	"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 	
 	"chat": {

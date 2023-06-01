@@ -115,9 +115,10 @@ async function addDecksToDeckSelector(deckList) {
 }
 
 export class DeckState extends GameState {
-	constructor() {
+	constructor(automatic) {
 		super();
 		
+		this.automatic = automatic;
 		this.ready = false;
 		this.opponentReady = false;
 		
@@ -154,8 +155,8 @@ export class DeckState extends GameState {
 			}
 			
 			closeDeckSelect();
-			gameState.loadDeck(officialDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
-		});
+			this.loadDeck(officialDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
+		}.bind(this));
 		
 		// opening the deck selector
 		document.getElementById("deckSelectSpan").addEventListener("click", function(e) {
@@ -193,7 +194,7 @@ export class DeckState extends GameState {
 		switch (command) {
 			case "deck": {
 				game.players[0].setDeck(JSON.parse(message)).then(() => {
-					gameUI.insertCard(game.players[0].deckZone, 0);
+					gameUI.updateCard(game.players[0].deckZone, -1);
 					gameState.checkReadyConditions();
 				});
 				return true;
@@ -216,7 +217,7 @@ export class DeckState extends GameState {
 		socket.send("[deck]" + JSON.stringify(deck));
 		mainGameBlackout.textContent = locale.deckSelect.loadingDeck;
 		await localPlayer.setDeck(deck);
-		gameUI.insertCard(localPlayer.deckZone, 0);
+		gameUI.updateCard(localPlayer.deckZone, -1);
 		mainGameBlackout.textContent = locale.deckSelect.waitingForOpponent;
 		
 		this.checkReadyConditions();
@@ -229,7 +230,7 @@ export class DeckState extends GameState {
 				this.ready = true;
 			}
 			if (this.opponentReady) {
-				gameState = new BoardState();
+				gameState = new BoardState(this.automatic);
 			}
 		}
 	}

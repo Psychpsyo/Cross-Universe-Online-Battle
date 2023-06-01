@@ -15,11 +15,12 @@
 		"gamemode": "ゲームモード：",
 		"gamemodes": {
 			"normal": "ノーマル",
-			"draft": "ドラフト"
+			"draft": "ドラフト",
+			"normalAutomatic": null
 		},
 		
-		"settingsButton": "Settings",
-		"deckCreatorButton": "Deck Creator"
+		"settingsButton": null,
+		"deckCreatorButton": null
 	},
 	
 	"infoYou": "自分",
@@ -49,7 +50,6 @@
 		"revealPartner": null
 	},
 	
-	"selectStartingPlayer": null,
 	"youStart": null,
 	"opponentStarts": null,
 	"yourDeckShuffled": null,

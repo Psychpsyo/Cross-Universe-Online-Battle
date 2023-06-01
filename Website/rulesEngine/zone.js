@@ -47,4 +47,14 @@ export class Zone {
 	getLocalizedName() {
 		return locale.cardSelector[this.name];
 	}
+	
+	shuffle() {
+		// Fisher-Yates shuffle
+		for (let i = this.cards.length - 1; i >= 0; i--) {
+			// pick a random element and swap it with the current element
+			let rand = this.player.game.rng.nextInt(i);
+			
+			[this.cards[i], this.cards[rand]] = [this.cards[rand], this.cards[i]];
+		}
+	}
 }

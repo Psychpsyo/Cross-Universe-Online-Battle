@@ -52,6 +52,16 @@ export class ManualController extends InteractionController {
 		this.tokenZone = new tokenZone();
 	}
 	
+	async startGame() {
+		if (youAre === 0) {
+			this.deckShuffle(localPlayer.deckZone);
+			let startingPlayer = Math.random() > .5;
+			putChatMessage(startingPlayer? locale.youStart : locale.opponentStarts, "notice");
+			socket.send("[selectPlayer]" + startingPlayer);
+			partnerRevealButtonDiv.style.display = "block";
+		}
+	}
+	
 	receiveMessage(command, message) {
 		switch (command) {
 			case "life": { // set opponent's life
@@ -94,6 +104,14 @@ export class ManualController extends InteractionController {
 				this.returnAllToDeck(zoneToLocal(message));
 				return true;
 			}
+			case "deckOrder": { // opponent shuffled a deck
+				let deck = zoneToLocal("deck" + message[0]);
+				message = message.substr(2);
+				let order = message.split("|").map(i => parseInt(i));
+				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
+				putChatMessage(deck.playerIndex == 1? locale.yourDeckShuffled : locale.opponentDeckShuffled, "notice");
+				return true;
+			}
 			case "showHand": {
 				this.opponentHandShown = true;
 				document.getElementById("hand0").classList.add("shown");
@@ -110,6 +128,12 @@ export class ManualController extends InteractionController {
 					game.players[0].handZone.cards[i].hidden = true;
 					gameUI.updateCard(game.players[0].handZone, i);
 				}
+				return true;
+			}
+			case "selectPlayer": { // opponent chose the starting player (at random)
+				this.deckShuffle(localPlayer.deckZone);
+				putChatMessage(message == "true"? locale.opponentStarts : locale.youStart, "notice");
+				partnerRevealButtonDiv.style.display = "block";
 				return true;
 			}
 			default: {

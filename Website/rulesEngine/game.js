@@ -3,8 +3,9 @@
 import {renderCard} from "/custom/renderer.js";
 import {Player} from "./player.js";
 import {Card} from "./card.js";
+import {Turn} from "./turns.js";
 import {CURandom} from "./random.js";
-import {createStartingPlayerSelectedEvent, createTurnStartedEvent} from "./events.js";
+import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
 
 export class Game {
 	constructor() {
@@ -42,11 +43,44 @@ export class Game {
 		return cardId;
 	}
 	
-	// Iterate over this function after setting the decks of both players
-	* begin(partners) {
+	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
+	* begin() {
+		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
+		let deckShuffledEvents = [];
+		for (const player of this.players) {
+			if (!player.partnerZone.cards[0].cardTypes.get().includes("unit")) {
+				throw new Error("All partner cards must be units!");
+			}
+			player.deckZone.shuffle();
+			deckShuffledEvents.push(createDeckShuffledEvent(player));
+		}
+		yield deckShuffledEvents;
+		
+		// RULES: Randomly decide the first player and the second player.
 		let currentPlayer = this.players[this.rng.nextInt(this.players.length)];
 		yield [createStartingPlayerSelectedEvent(currentPlayer)];
 		
+		// RULES: Draw 5 cards from your deck to your hand.
+		let drawHandEvents = [];
+		for (let player of this.players) {
+			for (let i = 0; i < 5; i++) {
+				player.handZone.add(player.deckZone.cards[player.deckZone.cards.length - 1], player.handZone.cards.length);
+				if (player.isViewable) {
+					player.handZone.cards[player.handZone.cards.length - 1].hidden = false;
+				}
+			}
+			drawHandEvents.push(createCardsDrawnEvent(player, 5));
+		}
+		yield drawHandEvents;
+		
+		// RULES: Both players reveal their partner...
+		let partnerRevealEvents = [];
+		for (let player of this.players) {
+			player.partnerZone.cards[0].hidden = false;
+			partnerRevealEvents.push(createPartnerRevealedEvent(player));
+		}
+		
+		// RULES: ...and continue the game as follows.
 		while (true) {
 			this.turns.push(new Turn(currentPlayer));
 			yield [createTurnStartedEvent()];

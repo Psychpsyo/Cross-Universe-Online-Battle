@@ -11,8 +11,6 @@ export class Player {
 		this.mana = 0;
 		this.life = 1000;
 		
-		this.nextCustomCardId = this.index + 1;
-		
 		this.deckZone = new Zone("deck" + this.index, -1, this, false);
 		this.handZone = new Zone("hand" + this.index, -1, this, false);
 		this.unitZone = new Zone("unit" + this.index, 5, this, true);
@@ -20,6 +18,9 @@ export class Player {
 		this.partnerZone = new Zone("partner" + this.index, 1, this, true);
 		this.discardPile = new Zone("discard" + this.index, -1, this, false);
 		this.exileZone = new Zone("exile" + this.index, -1, this, false);
+		
+		this.isViewable = false; // determines whether or not this player's cards should be visible locally.
+		this.nextCustomCardId = this.index + 1;
 	}
 	
 	async setDeck(deck) {

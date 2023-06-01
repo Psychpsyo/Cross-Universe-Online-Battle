@@ -1,5 +1,5 @@
 
-class Stack {
+export class Stack {
 	constructor(phase, index) {
 		this.phase = phase;
 		this.index = index;

@@ -4,21 +4,15 @@ import {locale} from "/modules/locale.js";
 import {GameState} from "/modules/gameState.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {ManualController} from "/modules/manualController.js";
+import {AutomaticController} from "/modules/automaticController.js";
 import {putChatMessage, previewCard} from "/modules/generalUI.js";
 import * as ui from "/modules/gameUI.js";
 
-// selecting starting player
-document.getElementById("startingPlayerSelect").addEventListener("click", function() {
-	document.getElementById("startingPlayerSelect").style.display = "none";
-	let startingPlayer = Math.random() > .5;
-	putChatMessage(startingPlayer? locale.youStart : locale.opponentStarts, "notice");
-	socket.send("[selectPlayer]" + startingPlayer);
-	partnerRevealButtonDiv.style.display = "block";
-});
-
 export class BoardState extends GameState {
-	constructor() {
+	constructor(automatic) {
 		super();
+		
+		this.automatic = automatic;
 		
 		// remove draft game section and deck drop zone since they are not needed anymore
 		draftGameSetupMenu.remove();
@@ -26,11 +20,13 @@ export class BoardState extends GameState {
 		// show game area
 		mainGameBlackout.textContent = "";
 		mainGameArea.removeAttribute("hidden");
-		gameInteractions.removeAttribute("hidden");
 		
 		// do partner select
 		if (localPlayer.deck.suggestedPartner) {
 			if (localStorage.getItem("partnerChoiceToggle") === "true") {
+				partnerSelectQuestionText.textContent = locale.partnerSelect.useSuggestedQuestion;
+				chooseSuggestedPartnerBtn.textContent = locale.partnerSelect.useSuggested;
+				manualChoosePartnerBtn.textContent = locale.partnerSelect.selectManually;
 				document.getElementById("partnerSelectQuestion").style.display = "block";
 				
 				document.getElementById("chooseSuggestedPartnerBtn").addEventListener("click", function() {
@@ -48,35 +44,21 @@ export class BoardState extends GameState {
 			this.openPartnerSelect();
 		}
 		
-		this.controller = new ManualController();
+		this.controller = automatic? new AutomaticController() : new ManualController();
 	}
 	receiveMessage(command, message) {
 		switch (command) {
-			case "deckOrder": { // opponent shuffled a deck
-				let deck = zoneToLocal("deck" + message[0]);
-				message = message.substr(2);
-				let order = message.split("|").map(i => parseInt(i));
-				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
-				putChatMessage(deck.playerIndex == 1? locale.yourDeckShuffled : locale.opponentDeckShuffled, "notice");
-				return true;
-			}
 			case "choosePartner": { // opponent selected their partner
 			let partnerPosInDeck = parseInt(message);
 				game.players[0].partnerZone.add(game.players[0].deckZone.cards[partnerPosInDeck], 0);
 				ui.removeCard(game.players[0].deckZone, partnerPosInDeck);
 				ui.insertCard(game.players[0].partnerZone, 0);
-				this.doSelectStartingPlayer();
+				this.doStartGame();
 				return true;
 			}
 			case "revealPartner": { // opponent revealed their partner
 				game.players[0].partnerZone.cards[0].hidden = false;
 				ui.updateCard(game.players[0].partnerZone, 0);
-				return true;
-			}
-			case "selectPlayer": { // opponent chose the starting player (at random)
-				startingPlayerSelect.style.display = "none";
-				putChatMessage(message == "true"? locale.opponentStarts : locale.youStart, "notice");
-				partnerRevealButtonDiv.style.display = "block";
 				return true;
 			}
 			default: {
@@ -144,18 +126,13 @@ export class BoardState extends GameState {
 		
 		socket.send("[choosePartner]" + partnerPosInDeck);
 		
-		this.controller.deckShuffle(localPlayer.deckZone);
-		
-		this.doSelectStartingPlayer();
+		this.doStartGame();
 	}
 	
-	doSelectStartingPlayer() {
+	doStartGame() {
 		if (game.players[0].partnerZone.cards[0] && game.players[1].partnerZone.cards[0]) {
-			if (youAre === 0) {
-				startingPlayerSelect.textContent = locale.selectStartingPlayer;
-				startingPlayerSelect.style.display = "block";
-			}
 			mainGameBlackout.remove();
+			this.controller.startGame();
 		}
 	}
 }
