@@ -145,7 +145,7 @@ export class ManualController extends InteractionController {
 		}
 		if (zone != null && zone.name.startsWith("deck") && index == -1) {
 			// When dropping a token, we don't want the UI, we want to just 'drop it to the top' which will make it vanish.
-			if (!card.getCardTypes().includes("token")) {
+			if (!card.cardTypes.get().includes("token")) {
 				gameUI.uiPlayers[player.index].clearDrag();
 				if (player === localPlayer) {
 					manualUI.showDeckOptions(zone);
@@ -198,7 +198,7 @@ export class ManualController extends InteractionController {
 			}
 			case "destroyToken": {
 				let heldCard = this.playerInfos[localPlayer.index].heldCard;
-				if (heldCard && heldCard.getCardTypes().includes("token")) {
+				if (heldCard && heldCard.cardTypes.get().includes("token")) {
 					socket.send("[uiDroppedCard]" + localPlayer.discardPile.name + "|0");
 					this.dropCard(localPlayer, localPlayer.discardPile, 0);
 				}

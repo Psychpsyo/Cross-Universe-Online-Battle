@@ -3,14 +3,22 @@
 import {renderCard} from "/custom/renderer.js";
 import {Player} from "./player.js";
 import {Card} from "./card.js";
+import {CURandom} from "./random.js";
+import {createStartingPlayerSelectedEvent, createTurnStartedEvent} from "./events.js";
 
 export class Game {
 	constructor() {
 		this.cardData = {};
 		this.zones = {};
+		
 		this.players = [];
 		this.players.push(new Player(this));
 		this.players.push(new Player(this));
+		
+		this.turns = [];
+		this.lastTiming = 0;
+		
+		this.rng = new CURandom();
 	}
 	
 	async registerCard(cardId) {
@@ -32,5 +40,22 @@ export class Game {
 		this.cardData[cardId] = cardData;
 		player.nextCustomCardId += this.players.length;
 		return cardId;
+	}
+	
+	// Iterate over this function after setting the decks of both players
+	* begin(partners) {
+		let currentPlayer = this.players[this.rng.nextInt(this.players.length)];
+		yield [createStartingPlayerSelectedEvent(currentPlayer)];
+		
+		while (true) {
+			this.turns.push(new Turn(currentPlayer));
+			yield [createTurnStartedEvent()];
+			yield* this.turns[this.turns.length - 1].run();
+			currentPlayer = this.players[(currentPlayer.index + 1) % this.players.length]
+		}
+	}
+	
+	getTimings() {
+		return this.turns.map(turn => turn.getTimings()).flat();
 	}
 }

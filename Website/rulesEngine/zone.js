@@ -22,7 +22,7 @@ export class Zone {
 			index--;
 		}
 		card.location?.remove(card);
-		if (this.allowTokens || !card.getCardTypes().includes("token")) {
+		if (this.allowTokens || !card.cardTypes.get().includes("token")) {
 			if (this.size == -1) {
 				this.cards.splice(index, 0, card);
 			} else {

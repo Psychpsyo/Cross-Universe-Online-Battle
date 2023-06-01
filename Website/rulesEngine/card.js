@@ -1,5 +1,7 @@
 // This module exports the Card class which represents a specific card in a Game.
 
+import {CardValue} from "./cardValue.js";
+
 export class Card {
 	constructor(player, cardId, hidden) {
 		if (!game.cardData[cardId]) {
@@ -8,44 +10,30 @@ export class Card {
 		
 		this.owner = player;
 		this.cardId = cardId;
-		let mainType = player.game.cardData[cardId].cardType;
-		this.baseCardTypes = [mainType];
-		if (mainType == "token") {
-			this.baseCardTypes.push("unit");
-		} else if (["standardSpell", "continuousSpell", "enchantSpell"].includes(mainType)) {
-			this.baseCardTypes.push("spell");
-		} else if (["standardItem", "continuousItem", "equipableItem"].includes(mainType)) {
-			this.baseCardTypes.push("item");
-		} 
 		this.location = null;
 		this.hidden = hidden;
+		
+		// card values
+		
+		let cardData = player.game.cardData[cardId];
+		let mainCardType = cardData.cardType;
+		let baseCardTypes = [mainCardType];
+		if (mainCardType == "token") {
+			baseCardTypes.push("unit");
+		} else if (["standardSpell", "continuousSpell", "enchantSpell"].includes(mainCardType)) {
+			baseCardTypes.push("spell");
+		} else if (["standardItem", "continuousItem", "equipableItem"].includes(mainCardType)) {
+			baseCardTypes.push("item");
+		}
+		this.cardTypes = new CardValue(baseCardTypes);
+		this.names = new CardValue([cardData.name]);
+		this.level = new CardValue(cardData.level);
+		this.attack = new CardValue(cardData.attack ?? -1);
+		this.defense = new CardValue(cardData.defense ?? -1);
+		this.types = new CardValue([...cardData.types]);
 	}
 	getImage() {
 		return this.hidden? "images/cardBackFrameP" + this.owner.index + ".png" : this.owner.game.cardData[this.cardId].imageSrc;
-	}
-	getCardTypes() {
-		return this.baseCardTypes;
-	}
-	getName() {
-		return this.owner.game.cardData[this.cardId].name;
-	}
-	getLevel() {
-		return this.owner.game.cardData[this.cardId].level;
-	}
-	getAttack() {
-		if (this.getCardTypes().includes("unit")) {
-			return this.owner.game.cardData[this.cardId].attack;
-		}
-		return 0;
-	}
-	getDefense() {
-		if (this.getCardTypes().includes("unit")) {
-			return this.owner.game.cardData[this.cardId].defense;
-		}
-		return 0;
-	}
-	getTypes() {
-		return this.owner.game.cardData[this.cardId].types;
 	}
 	
 	static sort(a, b) {

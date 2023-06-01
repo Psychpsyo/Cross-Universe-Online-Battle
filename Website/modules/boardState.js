@@ -28,7 +28,7 @@ function openPartnerSelectMenu() {
 	//add cards
 	localPlayer.deckZone.cards.forEach((card, i) => {
 		//check if card is a unit (eligible as a partner)
-		if (card.getCardTypes().includes("unit")) {
+		if (card.cardTypes.get().includes("unit")) {
 			let cardImg = document.createElement("img");
 			card.hidden = false;
 			cardImg.src = card.getImage();
