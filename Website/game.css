@@ -63,7 +63,7 @@
 	z-index: 500;
 }
 dialog #cardDetails {
-	right: calc(var(--side-distance) + 20vw + 10%);
+	right: calc(var(--side-distance) - 20vw - 10%);
 }
 .leftField #cardDetails {
 	left: var(--side-distance);
