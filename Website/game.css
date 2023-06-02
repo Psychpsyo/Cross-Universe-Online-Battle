@@ -514,10 +514,11 @@ label[for="fileSelectDeckLoader"] {
 	font-size: .75em;
 }
 
-.popupSelectMenu {
+dialog.popupSelectMenu {
 	transform: translateX(-10%);
 	width: 60vw;
 	z-index: 100;
+	overflow: visible;
 }
 .leftField .popupSelectMenu {
 	transform: translateX(10%);
