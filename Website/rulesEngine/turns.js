@@ -1,4 +1,4 @@
-import {ManaSupplyPhase, MainPhase, BattlePhase, EndPhase} from "./phases.js";
+import {ManaSupplyPhase, DrawPhase, MainPhase, BattlePhase, EndPhase} from "./phases.js";
 import {createPhaseStartedEvent} from "./events.js";
 
 export class Turn {
@@ -10,12 +10,16 @@ export class Turn {
 	
 	* run() {
 		this.phases.push(new ManaSupplyPhase(this));
-		yield [createPhaseStartedEvent(this.phases[this.phases.length - 1])];
+		yield [createPhaseStartedEvent(this.phases[0])];
 		yield* this.phases[0].run();
 		
-		this.phases.push(new MainPhase(this));
-		yield [createPhaseStartedEvent(this.phases[this.phases.length - 1])];
+		this.phases.push(new DrawPhase(this));
+		yield [createPhaseStartedEvent(this.phases[1])];
 		yield* this.phases[1].run();
+		
+		this.phases.push(new MainPhase(this));
+		yield [createPhaseStartedEvent(this.phases[2])];
+		yield* this.phases[2].run();
 		
 		// TOOD: entering the battle phase
 		

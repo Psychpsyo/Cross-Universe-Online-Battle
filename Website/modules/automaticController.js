@@ -43,24 +43,40 @@ export class AutomaticController extends InteractionController {
 	async handleEvent(event) {
 		switch (event.type) {
 			case "deckShuffled": {
-				putChatMessage(event.playerIndex == localPlayer.index? locale.yourDeckShuffled : locale.opponentDeckShuffled, "notice");
+				putChatMessage(event.player == localPlayer.index? locale.yourDeckShuffled : locale.opponentDeckShuffled, "notice");
 				return this.gameSleep();
 			}
 			case "startingPlayerSelected": {
-				putChatMessage(event.playerIndex == localPlayer.index? locale.youStart : locale.opponentStarts, "notice");
+				putChatMessage(event.player == localPlayer.index? locale.youStart : locale.opponentStarts, "notice");
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
-				let player = game.players[event.playerIndex];
+				let player = game.players[event.player];
 				for (let i = event.amount; i > 0; i--) {
 					gameUI.removeCard(player.deckZone, player.deckZone.cards.length + i - 1);
 					gameUI.insertCard(player.handZone, player.handZone.cards.length - i);
 					await this.gameSleep(.5);
 				}
-				return this.gameSleep();
+				return this.gameSleep(.5);
 			}
 			case "partnerRevealed": {
-				gameUI.updateCard(game.players[event.playerIndex].partnerZone, 0);
+				gameUI.updateCard(game.players[event.player].partnerZone, 0);
+				return this.gameSleep();
+			}
+			case "turnStarted": {
+				autoUI.startTurn();
+				return this.gameSleep();
+			}
+			case "phaseStarted": {
+				autoUI.startPhase(event.phaseType);
+				return this.gameSleep();
+			}
+			case "manaChanged": {
+				await gameUI.uiPlayers[event.player].mana.set(event.newValue, false);
+				return this.gameSleep();
+			}
+			default: {
+				console.log(event.type);
 				return this.gameSleep();
 			}
 		}

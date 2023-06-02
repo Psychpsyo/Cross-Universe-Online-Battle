@@ -65,7 +65,7 @@ export class ManualController extends InteractionController {
 	receiveMessage(command, message) {
 		switch (command) {
 			case "life": { // set opponent's life
-				this.setLife(game.players[0], parseInt(message));
+				this.setLife(game.players[0], parseInt(message), false);
 				return true;
 			}
 			case "mana": { // set opponent's mana
@@ -342,7 +342,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		player.life = value;
-		gameUI.uiPlayers[player.index].setLife(value);
+		gameUI.uiPlayers[player.index].life.set(value, false);
 		if (player === localPlayer) {
 			socket.send("[life]" + localPlayer.life);
 		}
@@ -353,7 +353,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		player.mana = value;
-		gameUI.uiPlayers[player.index].setMana(value);
+		gameUI.uiPlayers[player.index].mana.set(value, true);
 		if (player === localPlayer) {
 			socket.send("[mana]" + localPlayer.mana);
 		}

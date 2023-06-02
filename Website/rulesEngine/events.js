@@ -4,7 +4,7 @@ export function createDeckShuffledEvent(player) {
 	return {
 		"nature": "event",
 		"type": "deckShuffled",
-		"playerIndex": player.index
+		"player": player.index
 	}
 }
 
@@ -12,7 +12,7 @@ export function createStartingPlayerSelectedEvent(player) {
 	return {
 		"nature": "event",
 		"type": "startingPlayerSelected",
-		"playerIndex": player.index
+		"player": player.index
 	}
 }
 
@@ -20,7 +20,7 @@ export function createPartnerRevealedEvent(player) {
 	return {
 		"nature": "event",
 		"type": "partnerRevealed",
-		"playerIndex": player.index
+		"player": player.index
 	}
 }
 
@@ -42,7 +42,7 @@ export function createPhaseStartedEvent(phase) {
 	return {
 		"nature": "event",
 		"type": "phaseStarted",
-		"phase": phase.type
+		"phaseType": phase.type
 	}
 }
 
@@ -80,20 +80,11 @@ export function createManaChangedEvent(player) {
 	}
 }
 
-export function createLifeChangedEvent(player) {
-	return {
-		"nature": "event",
-		"type": "lifeChanged",
-		"player": player.index,
-		"newValue": player.life
-	}
-}
-
 export function createCardsDrawnEvent(player, amount) {
 	return {
 		"nature": "event",
 		"type": "cardsDrawn",
-		"playerIndex": player.index,
+		"player": player.index,
 		"amount": amount
 	}
 }

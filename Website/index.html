@@ -11,7 +11,9 @@
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="entryPage.css">
 		<link rel="stylesheet" href="game.css">
-		<link rel="stylesheet" href="drafts.css">
+		<link rel="stylesheet" href="styles/manualGame.css">
+		<link rel="stylesheet" href="styles/automaticGame.css">
+		<link rel="stylesheet" href="styles/drafts.css">
 		<link rel="stylesheet" href="styles/levitationEffect.css">
 	</head>
 	<body>
@@ -90,18 +92,22 @@
 							<button id="showHandBtn"></button>
 						</div>
 					</div>
-					<div id="deckDropzone" class="sideBox">
-						<input id="fileSelectDeckLoader" type="file" accept=".deck,deckx">
-						<label for="fileSelectDeckLoader"></label>
-						<div id="deckDropTextContainer" class="centeredTextDiv">
-							<span id="dropDeckHereLabel"></span><br>
-							<span id="deckSelectSpan" class="clickableText"></span><br>
+					<div id="deckDropzone">
+						<div id="deckDropPanel" class="sideBox">
+							<input id="fileSelectDeckLoader" type="file" accept=".deck,deckx">
+							<label for="fileSelectDeckLoader"></label>
+							<div id="deckDropTextContainer" class="centeredTextDiv">
+								<span id="dropDeckHereLabel"></span><br>
+								<span id="deckSelectSpan" class="clickableText"></span><br>
+							</div>
 						</div>
 					</div>
-					<div id="chat" class="sideBox">
-						<header id="chatHeader"></header>
-						<div id="chatBox"></div>
-						<input id="chatInput" placeholder="Enter Message..." autocomplete="off">
+					<div id="chatHolder">
+						<div id="chat" class="sideBox">
+							<header id="chatHeader"></header>
+							<div id="chatBox"></div>
+							<input id="chatInput" placeholder="Enter Message..." autocomplete="off">
+						</div>
 					</div>
 				</div>
 				
@@ -353,6 +359,18 @@
 										<span id="deck1CardCount" class="fieldCardAmountDisplay"></span>
 									</div>
 								</div>
+							</div>
+							
+							<!--turn phases -->
+							<div id="phaseDisplay" class="automaticOnly" hidden>
+								<ol>
+									<li id="ManaSupplyPhaseIndicator">Mana Supply Phase</li>
+									<li id="DrawPhaseIndicator">Draw Phase</li>
+									<li id="FirstMainPhaseIndicator">Main Phase 1</li>
+									<li id="BattlePhaseIndicator" class="invalid">Battle Phase</li>
+									<li id="SecondMainPhaseIndicator" class="invalid">Main Phase 2</li>
+									<li id="EndPhaseIndicator">End Phase</li>
+								</ol>
 							</div>
 							
 							<!--cards held up by players-->

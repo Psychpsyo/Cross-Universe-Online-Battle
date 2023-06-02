@@ -55,7 +55,9 @@ export class ManaSupplyPhase extends Phase {
 				reduceManaEvents.push(createManaChangedEvent(player));
 			}
 		}
-		yield reduceManaEvents;
+		if (reduceManaEvents.length > 0) {
+			yield reduceManaEvents;
+		}
 		
 		// RULES: Next, the active player gains 5 mana.
 		let turnPlayer = this.turn.player;

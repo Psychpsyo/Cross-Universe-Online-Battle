@@ -79,6 +79,7 @@ export class Game {
 			player.partnerZone.cards[0].hidden = false;
 			partnerRevealEvents.push(createPartnerRevealedEvent(player));
 		}
+		yield partnerRevealEvents;
 		
 		// RULES: ...and continue the game as follows.
 		while (true) {

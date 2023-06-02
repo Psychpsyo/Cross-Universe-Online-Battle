@@ -533,9 +533,9 @@ export function toggleCardSelect(zone) {
 class UiPlayer {
 	constructor(player) {
 		this.player = player;
-		this.life = player.life;
-		this.targetLife = player.life;
-		this.lifeCounter = 0;
+		
+		this.life = new UiValue(player.life, 5, document.getElementById("lifeDisplay" + player.index));
+		this.mana = new UiValue(player.mana, 100, document.getElementById("manaDisplay" + player.index));
 		
 		this.posX = 0;
 		this.posY = 0;
@@ -571,15 +571,44 @@ class UiPlayer {
 		this.dragCardElem.src = "images/cardHidden.png";
 		this.dragging = false;
 	}
+}
+
+class UiValue {
+	constructor(initial, speed, displayElem) {
+		this.value = initial;
+		this.targetValue = initial;
+		this.counter = 0;
+		this.speed = speed;
+		this.displayElem = displayElem;
+	}
 	
-	setLife(value) {
-		if (value != this.life) {
-			this.targetLife = value;
-			document.getElementById("lifeDisplay" + this.player.index).classList.add(value < this.life? "lifeDown" : "lifeUp");
+	async set(value, instant) {
+		if (value != this.value) {
+			this.targetValue = value;
+			if (instant) {
+				this.value = value;
+				this.displayElem.textContent = this.value;
+			} else {
+				this.displayElem.classList.add(value < this.value? "valueDown" : "valueUp");
+				return new Promise(resolve => setTimeout(resolve, Math.abs(this.targetValue - this.value) * this.speed));
+			}
 		}
 	}
-	setMana(value) {
-		document.getElementById("manaDisplay" + this.player.index).textContent = value;
+	
+	animate(delta) {
+		if (this.value != this.targetValue) {
+			this.counter += delta;
+			while (this.counter > this.speed) {
+				this.counter -= this.speed;
+				this.value += Math.sign(this.targetValue - this.value);
+			}
+			this.displayElem.textContent = this.value;
+			
+			if (this.value == this.targetValue) {
+				this.displayElem.classList.remove("valueDown");
+				this.displayElem.classList.remove("valueUp");
+			}
+		}
 	}
 }
 
@@ -609,20 +638,8 @@ function animate(currentTime) {
 		uiPlayer.lastX = uiPlayer.posX;
 		uiPlayer.lastY = uiPlayer.posY;
 		
-		// life displays
-		if (uiPlayer.life != uiPlayer.targetLife) {
-			uiPlayer.lifeCounter += delta;
-			while (uiPlayer.lifeCounter > 5) {
-				uiPlayer.lifeCounter -= 5;
-				uiPlayer.life += Math.sign(uiPlayer.targetLife - uiPlayer.life);
-			}
-			document.getElementById("lifeDisplay" + uiPlayer.player.index).textContent = uiPlayer.life;
-			
-			if (uiPlayer.life == uiPlayer.targetLife) {
-				document.getElementById("lifeDisplay" + uiPlayer.player.index).classList.remove("lifeDown");
-				document.getElementById("lifeDisplay" + uiPlayer.player.index).classList.remove("lifeUp");
-			}
-		}
+		uiPlayer.life.animate(delta);
+		uiPlayer.mana.animate(delta);
 	}
 	
 	requestAnimationFrame(animate);
