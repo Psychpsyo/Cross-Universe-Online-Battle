@@ -56,13 +56,14 @@
 	top: 50%;
 	--side-distance: -50vh;
 	right: var(--side-distance);
+	left: unset;
 	transform: translateY(-50%);
 	transition: right 0.2s ease-out;
 	
 	z-index: 500;
 }
 dialog #cardDetails {
-	right: calc(var(--side-distance) + 20vw + 10%);
+	right: calc(var(--side-distance) - 20vw - 10%);
 }
 .leftField #cardDetails {
 	left: var(--side-distance);
