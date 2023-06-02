@@ -117,7 +117,7 @@ textarea {
 /* dialogs */
 .centerDialog {
 	max-height: fit-content;
-	overflow: visible;
+	overflow: hidden;
 	
 	text-align: center;
 	color: inherit;
