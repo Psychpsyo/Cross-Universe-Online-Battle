@@ -89,11 +89,22 @@ export function createCardsDrawnEvent(player, amount) {
 	}
 }
 
-export function createCardDiscardedEvent(fromZone, fromIndex) {
+export function createCardDiscardedEvent(fromZone, fromIndex, toZone) {
 	return {
 		"nature": "event",
 		"type": "cardDiscarded",
 		"fromZone": fromZone,
-		"fromIndex": fromIndex
+		"fromIndex": fromIndex,
+		"toZone": toZone
+	}
+}
+
+export function createCardDestroyedEvent(fromZone, fromIndex, toZone) {
+	return {
+		"nature": "event",
+		"type": "cardDestroyed",
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone
 	}
 }

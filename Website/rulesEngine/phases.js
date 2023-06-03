@@ -1,6 +1,8 @@
 // This file contains definitions for all phases in the game.
 import {Stack} from "./stacks.js";
 import {createStackCreatedEvent, createManaChangedEvent} from "./events.js";
+import {Timing} from "./timings.js";
+import * as actions from "./actions.js";
 
 // Base class for all phases
 class Phase {
@@ -44,39 +46,43 @@ class StackPhase extends Phase {
 export class ManaSupplyPhase extends Phase {
 	constructor(turn) {
 		super(turn, "manaSupplyPhase");
+		this.timings = [];
 	}
 	
 	* run() {
 		// RULES: First, if any player has more than 5 mana, their mana will be reduced to five.
-		let reduceManaEvents = [];
+		let reduceManaActions = [];
 		for (let player of this.turn.game.players) {
 			if (player.mana > 5) {
-				player.mana = 5;
-				reduceManaEvents.push(createManaChangedEvent(player));
+				reduceManaActions.push(new actions.ChangeManaAction(player, 5 - player.mana));
 			}
 		}
-		if (reduceManaEvents.length > 0) {
-			yield reduceManaEvents;
+		if (reduceManaActions.length > 0) {
+			this.timings.push(new Timing(this.turn.game, reduceManaActions, null));
+			yield* this.timings[this.timings.length - 1].run();
 		}
 		
 		// RULES: Next, the active player gains 5 mana.
 		let turnPlayer = this.turn.player;
-		turnPlayer.mana += 5;
-		yield [createManaChangedEvent(turnPlayer)];
+		this.timings.push(new Timing(this.turn.game, [new actions.ChangeManaAction(turnPlayer, 5)], null));
+		yield* this.timings[this.timings.length - 1].run();
 		
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
 		let partnerLevel = turnPlayer.partnerZone.cards[0].level.get();
 		if (turnPlayer.mana < partnerLevel) {
 			yield [createPlayerLostEvent(turnPlayer)];
+			while (true) {
+				yield [];
+			}
 		} else {
-			turnPlayer.mana -= partnerLevel;
-			yield [createManaChangedEvent(turnPlayer)];
+			this.timings.push(new Timing(this.turn.game, [new actions.ChangeManaAction(turnPlayer, -partnerLevel)], null));
+			yield* this.timings[this.timings.length - 1].run();
 		}
 		
 		// RULES: If they still have more than 5 mana, it will again be reduced to 5.
 		if (turnPlayer.mana > 5) {
-			turnPlayer.mana = 5;
-			yield [createManaChangedEvent(turnPlayer)];
+			this.timings.push(new Timing(this.turn.game, [new actions.ChangeManaAction(turnPlayer, 5 - turnPlayer.mana)], null));
+			yield* this.timings[this.timings.length - 1].run();
 		}
 		
 		// RULES: At the end of the mana supply phase, any player with more than 8 hand cards discards down to 8.
