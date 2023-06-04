@@ -117,6 +117,7 @@ async function addDecksToDeckSelector(deckList) {
 export class DeckState extends GameState {
 	constructor(automatic) {
 		super();
+		gameState = this;
 		
 		this.automatic = automatic;
 		this.ready = false;
@@ -230,7 +231,7 @@ export class DeckState extends GameState {
 				this.ready = true;
 			}
 			if (this.opponentReady) {
-				gameState = new BoardState(this.automatic);
+				new BoardState(this.automatic);
 			}
 		}
 	}

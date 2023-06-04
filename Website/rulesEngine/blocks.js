@@ -47,3 +47,31 @@ export class StandardDraw extends Block {
 		)];
 	}
 }
+
+export class StandardSummon extends Block {
+	constructor(stack, player, unit, zoneSlot) {
+		super(stack, player, "standardSummon");
+		this.unit = unit;
+		this.zoneSlot = zoneSlot;
+		this.costTiming = new Timing(
+			stack.phase.turn.game,
+			[new actions.ChangeManaAction(player, -unit.level.get())],
+			this
+		)
+		this.executionTimings = [new Timing(
+			stack.phase.turn.game,
+			[new actions.SummonAction(player, unit, zoneSlot)],
+			this
+		)];
+	}
+	
+	async* runCost() {
+		let paid = await super.runCost();
+		if (!paid || this.player.unitZone.get(this.zoneSlot) !== null) {
+			return false;
+		}
+		this.player.unitZone.place(this.unit, this.zoneSlot);
+		
+		return true;
+	}
+}

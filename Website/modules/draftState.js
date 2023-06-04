@@ -14,6 +14,8 @@ basicFormat.packCount = Math.ceil(basicFormat.deckSize * 2 / basicFormat.cardPic
 export class DraftState extends GameState {
 	constructor() {
 		super();
+		gameState = this;
+		
 		this.format = basicFormat;
 		this.currentBooster = [];
 		this.takenCards = 0;
@@ -77,7 +79,7 @@ export class DraftState extends GameState {
 	
 	checkReadyConditions() {
 		if (this.pressedReady && this.opponentReady) {
-			gameState = new BoardState();
+			new BoardState();
 		}
 	}
 	

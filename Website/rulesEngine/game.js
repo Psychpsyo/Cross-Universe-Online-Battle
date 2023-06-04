@@ -11,7 +11,6 @@ import {locale} from "/modules/locale.js";
 export class Game {
 	constructor() {
 		this.cardData = {};
-		this.zones = {};
 		
 		this.players = [];
 		this.players.push(new Player(this));

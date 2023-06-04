@@ -2,7 +2,7 @@
 
 import {InteractionController} from "/modules/interactionController.js";
 import {locale} from "/modules/locale.js";
-import {Zone} from "/rulesEngine/zone.js";
+import {Zone} from "/rulesEngine/zones.js";
 import {Card} from "/rulesEngine/card.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {putChatMessage} from "/modules/generalUI.js";
@@ -11,7 +11,7 @@ import * as manualUI from "/modules/manualUI.js";
 
 class tokenZone {
 	constructor() {
-		this.name = "tokens";
+		this.type = "tokens";
 		this.cards = [];
 		
 		fetch("https://crossuniverse.net/cardInfo", {
@@ -46,6 +46,7 @@ export class ManualController extends InteractionController {
 		manualUI.init();
 		
 		this.tokenZone = new tokenZone();
+		gameState.zones["tokens"] = this.tokenZone;
 	}
 	
 	async startGame() {
@@ -163,7 +164,7 @@ export class ManualController extends InteractionController {
 		if (!card) {
 			return;
 		}
-		if (zone != null && zone.name.startsWith("deck") && index == -1) {
+		if (zone != null && zone.type == "deck" && index == -1) {
 			// When dropping a token, we don't want the UI, we want to just 'drop it to the top' which will make it vanish.
 			if (!card.cardTypes.get().includes("token")) {
 				gameUI.uiPlayers[player.index].clearDrag();
@@ -194,7 +195,7 @@ export class ManualController extends InteractionController {
 			if (insertedIndex != -1) {
 				if (zone === game.players[0].handZone) {
 					card.hidden = !this.opponentHandShown;
-				} else if (zone.name.startsWith("deck") || zone === this.playerInfos[0].presentedZone) {
+				} else if (zone.type == "deck" || zone === this.playerInfos[0].presentedZone) {
 					card.hidden = true;
 				} else {
 					card.hidden = false;
@@ -219,7 +220,7 @@ export class ManualController extends InteractionController {
 			case "destroyToken": {
 				let heldCard = this.playerInfos[localPlayer.index].heldCard;
 				if (heldCard && heldCard.cardTypes.get().includes("token")) {
-					socket.send("[uiDroppedCard]" + localPlayer.discardPile.name + "|0");
+					socket.send("[uiDroppedCard]" + gameState.getZoneName(localPlayer.discardPile) + "|0");
 					this.dropCard(localPlayer, localPlayer.discardPile, 0);
 				}
 				break;
@@ -327,7 +328,7 @@ export class ManualController extends InteractionController {
 			gameUI.insertCard(zone.player.deckZone, 0);
 		}
 		if (zone.player === localPlayer) {
-			socket.send("[returnAllToDeck]" + gameUI.cardSelectorZone.name);
+			socket.send("[returnAllToDeck]" + gameState.getZoneName(gameUI.cardSelectorZone));
 			this.deckShuffle(localPlayer.deckZone);
 		}
 	}
@@ -360,7 +361,8 @@ class ManualPlayerInfo {
 	constructor(player) {
 		this.player = player;
 		this.heldCard = null;
-		this.presentedZone = new Zone("presented" + player.index, -1, player, false);
+		this.presentedZone = new Zone(player, "presented");
+		gameState.zones["presented" + player.index] = this.presentedZone;
 	}
 	
 	setHeld(card) {

@@ -48,7 +48,7 @@ randomizeRoomcode();
 export function connect() {
 	// I don't want to import this up-front on pageload since it imports a bunch of other stuff itself.
 	import("/modules/initState.js").then(initModule => {
-		gameState = new initModule.InitState(roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value, gameModeSelect.value);
+		new initModule.InitState(roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value, gameModeSelect.value);
 	});
 }
 // pressing enter in the roomcode entry field to connect

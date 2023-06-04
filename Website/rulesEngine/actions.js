@@ -73,7 +73,7 @@ export class DiscardAction extends Action {
 	}
 	
 	isImpossible() {
-		if (this.card.location.name.startsWith("partner")) {
+		if (this.card.location.type =="partner") {
 			return true;
 		}
 		return false;
@@ -95,7 +95,7 @@ export class DestroyAction extends Action {
 	}
 	
 	isImpossible() {
-		if (this.card.location.name.startsWith("partner")) {
+		if (this.card.location.type == "partner") {
 			return true;
 		}
 		return false;

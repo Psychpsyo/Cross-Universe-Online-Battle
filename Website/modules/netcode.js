@@ -4,9 +4,12 @@ export let roomcode = "";
 export let socket = null;
 
 export function zoneToLocal(name) {
+	if (name == "undefined") {
+		throw new Error("asfasdg");
+	}
 	let playerIndex = (parseInt(name.substr(name.length - 1)) + 1) % 2;
 	name = name.substr(0, name.length - 1);
-	return game.zones[name + playerIndex];
+	return gameState.zones[name + playerIndex];
 }
 
 export function connectTo(targetRoomcode) {

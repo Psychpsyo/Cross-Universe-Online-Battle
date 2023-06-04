@@ -11,6 +11,7 @@ import * as gameUI from "/modules/gameUI.js";
 export class InitState extends GameState {
 	constructor(roomcode, gameMode) {
 		super();
+		gameState = this;
 		
 		this.gameMode = gameMode;
 		this.opponentReady = false;
@@ -95,15 +96,15 @@ export class InitState extends GameState {
 			
 			switch (this.gameMode) {
 				case "normal": {
-					gameState = new DeckState(false);
+					new DeckState(false);
 					break;
 				}
 				case "draft": {
-					gameState = new DraftState();
+					new DraftState();
 					break;
 				}
 				case "normalAutomatic": {
-					gameState = new DeckState(true);
+					new DeckState(true);
 					break;
 				}
 			}

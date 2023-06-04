@@ -11,8 +11,19 @@ import * as ui from "/modules/gameUI.js";
 export class BoardState extends GameState {
 	constructor(automatic) {
 		super();
+		gameState = this;
 		
 		this.automatic = automatic;
+		this.zones = {};
+		for (const player of game.players) {
+			this.zones["deck" + player.index] = player.deckZone;
+			this.zones["hand" + player.index] = player.handZone;
+			this.zones["unit" + player.index] = player.unitZone;
+			this.zones["spellItem" + player.index] = player.spellItemZone;
+			this.zones["partner" + player.index] = player.partnerZone;
+			this.zones["discard" + player.index] = player.discardPile;
+			this.zones["exile" + player.index] = player.exileZone;
+		}
 		
 		// remove draft game section and deck drop zone since they are not needed anymore
 		draftGameSetupMenu.remove();
@@ -63,6 +74,10 @@ export class BoardState extends GameState {
 				return done;
 			}
 		}
+	}
+	
+	getZoneName(zone) {
+		return Object.keys(gameState.zones).find(key => gameState.zones[key] === zone);
 	}
 	
 	hotkeyPressed(name) {

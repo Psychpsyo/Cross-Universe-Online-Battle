@@ -2,6 +2,7 @@ import {cardActions} from "/modules/cardActions.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {previewCard} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
+import {FieldZone} from "/rulesEngine/zones.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -114,7 +115,7 @@ export function init() {
 			}
 			cardIndex -= 1;
 			if (cardIndex < localPlayer.handZone.cards.length) {
-				previewCard(localPlayer.handZone.cards[cardIndex]);
+				previewCard(localPlayer.handZone.get(cardIndex));
 			}
 			return;
 		}
@@ -193,7 +194,7 @@ export function removeCard(zone, index) {
 		if (cardSlots[i].zone === zone) {
 			if (cardSlots[i].index == index) {
 				cardSlots[i].remove();
-			} else if (cardSlots[i].index > index && zone.size == -1) {
+			} else if (cardSlots[i].index > index && !(zone instanceof FieldZone)) {
 				cardSlots[i].index--;
 			} else if (cardSlots[i].index == -1) {
 				cardSlots[i].update();
@@ -202,7 +203,7 @@ export function removeCard(zone, index) {
 	}
 }
 export function insertCard(zone, index) {
-	if (zone.size > -1) {
+	if (zone instanceof FieldZone) {
 		updateCard(zone, index);
 		return;
 	}
@@ -216,10 +217,15 @@ export function insertCard(zone, index) {
 		}
 	});
 	
-	if (zone.name.startsWith("hand")) {
-		new handCardSlot(zone, index);
-	} else if (zone.name.startsWith("presented")) {
-		new presentedCardSlot(zone, index);
+	switch (zone.type) {
+		case "hand": {
+			new handCardSlot(zone, index);
+			break;
+		}
+		case "presented": {
+			new presentedCardSlot(zone, index);
+			break;
+		}
 	}
 }
 export function makeDragSource(zone, index, player) {
@@ -239,13 +245,13 @@ export function clearDragSource(zone, index, player) {
 
 function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
-		socket.send("[uiGrabbedCard]" + zone.name + "|" + index);
+		socket.send("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
 	}
 }
 function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
-			socket.send("[uiDroppedCard]" + (zone? zone.name + "|" + index : ""));
+			socket.send("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
 		}
 		gameState.controller.dropCard(player, zone, index);
 	}
@@ -277,9 +283,9 @@ class fieldCardSlot extends uiCardSlot {
 			grabCard(localPlayer, zone, index);
 		});
 		this.fieldSlot.addEventListener("click", function(e) {
-			if (zone.cards[index]) {
+			if (zone.get(index)) {
 				e.stopPropagation();
-				previewCard(zone.cards[index]);
+				previewCard(zone.get(index));
 			}
 		});
 		this.fieldSlot.addEventListener("mouseup", function(e) {
@@ -295,7 +301,7 @@ class fieldCardSlot extends uiCardSlot {
 		this.fieldSlot.classList.remove("dragSource");
 	}
 	update() {
-		let card = this.zone.cards[this.index];
+		let card = this.zone.get(this.index);
 		if (card) {
 			this.fieldSlot.src = card.getImage();
 			// add card action buttons
@@ -323,9 +329,9 @@ class handCardSlot extends uiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		
-		this.handElem = document.getElementById("hand" + zone.player.index);
+		this.handElem = document.getElementById("hand" + this.zone.player.index);
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.cards[index].getImage();
+		this.cardElem.src = zone.get(index).getImage();
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -333,7 +339,7 @@ class handCardSlot extends uiCardSlot {
 		}.bind(this));
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
-			previewCard(zone.cards[this.index]);
+			previewCard(zone.get(this.index));
 		}.bind(this));
 		if (this.handElem.childElementCount > index) {
 			this.handElem.insertBefore(this.cardElem, this.handElem.childNodes[index]);
@@ -350,7 +356,7 @@ class handCardSlot extends uiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		this.cardElem.src = this.zone.cards[this.index].getImage();
+		this.cardElem.src = this.zone.get(this.index).getImage();
 	}
 	remove() {
 		super.remove();
@@ -386,7 +392,7 @@ class deckCardSlot extends uiCardSlot {
 		this.setVisuals();
 	}
 	setVisuals() {
-		document.getElementById("deck" + this.zone.player.index).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
+		document.getElementById("deck" + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
 		document.getElementById("deck" + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
@@ -396,14 +402,14 @@ class pileCardSlot extends uiCardSlot {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
 		
-		document.getElementById(this.zone.name).addEventListener("dragstart", function(e) {
+		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, this.zone, this.zone.cards.length - 1);
 		}.bind(this));
-		document.getElementById(this.zone.name).addEventListener("click", function() {
+		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("click", function() {
 			openCardSelect(this.zone);
 		}.bind(this));
-		document.getElementById(this.zone.name).addEventListener("mouseup", function(e) {
+		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
 			dropCard(localPlayer, this.zone, this.zone.cards.length);
 		}.bind(this));
@@ -422,8 +428,8 @@ class pileCardSlot extends uiCardSlot {
 		this.setVisuals();
 	}
 	setVisuals() {
-		document.getElementById(this.zone.name).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
-		document.getElementById(this.zone.name + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
+		document.getElementById(this.zone.type + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
+		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
 
@@ -433,14 +439,14 @@ class presentedCardSlot extends uiCardSlot {
 		super(zone, index);
 		
 		this.isRevealed = false;
-		this.zoneElem = document.getElementById("presentedCards" + zone.player.index);
+		this.zoneElem = document.getElementById("presentedCards" + this.zone.player.index);
 		this.cardElem = document.createElement("div");
 		
 		this.cardImg = document.createElement("img")
-		this.cardImg.src = zone.cards[index].getImage();
+		this.cardImg.src = this.zone.get(index).getImage();
 		this.cardImg.addEventListener("click", function(e) {
 			e.stopPropagation();
-			previewCard(this.zone.cards[this.index]);
+			previewCard(this.zone.get(this.index));
 		}.bind(this));
 		this.cardImg.addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -448,7 +454,7 @@ class presentedCardSlot extends uiCardSlot {
 		}.bind(this));
 		this.cardElem.appendChild(this.cardImg);
 		
-		if (zone.player === localPlayer) {
+		if (this.zone.player === localPlayer) {
 			this.revealBtn = document.createElement("button");
 			this.revealBtn.textContent = locale.game.manual.presented.reveal;
 			this.revealBtn.addEventListener("click", function() {
@@ -479,7 +485,7 @@ class presentedCardSlot extends uiCardSlot {
 		}
 	}
 	update() {
-		this.cardImg.src = this.zone.cards[this.index].getImage();
+		this.cardImg.src = this.zone.get(this.index).getImage();
 	}
 	remove() {
 		super.remove();
@@ -492,7 +498,7 @@ class cardSelectorSlot extends uiCardSlot {
 		super(zone, index);
 		
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.cards[index].getImage();
+		this.cardElem.src = zone.get(index).getImage();
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -501,7 +507,7 @@ class cardSelectorSlot extends uiCardSlot {
 		}.bind(this));
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
-			previewCard(zone.cards[this.index]);
+			previewCard(zone.get(this.index));
 		}.bind(this));
 		cardSelectorGrid.insertBefore(this.cardElem, cardSelectorGrid.firstChild);
 	}
@@ -528,14 +534,14 @@ export function openCardSelect(zone) {
 	}
 	cardSelectorZone = zone;
 	for (let i = 0; i < zone.cards.length; i++) {
-		zone.cards[i].hidden = false;
+		zone.get(i).hidden = false;
 		cardSelectorSlots.push(new cardSelectorSlot(zone, i));
 	}
 	
 	//show selector
-	cardSelectorTitle.textContent = locale.game.cardSelector[zone.name];
+	cardSelectorTitle.textContent = locale.game.cardSelector[gameState.getZoneName(zone)];
 	if (document.getElementById("cardSelectorReturnToDeck")) {
-		if (zone.name == "discard1" || zone.name == "exile1") {
+		if ((zone.player === localPlayer) && (zone.type == "discard" || zone.type == "exile")) {
 			cardSelectorReturnToDeck.removeAttribute("hidden");
 		} else {
 			cardSelectorReturnToDeck.setAttribute("hidden", "");
@@ -547,7 +553,7 @@ export function openCardSelect(zone) {
 	cardSelectorGrid.parentNode.scrollTop = 0;
 }
 export function closeCardSelect() {
-	if (cardSelectorZone.name.startsWith("deck")) {
+	if (cardSelectorZone.type =="deck") {
 		for (let card of cardSelectorZone.cards) {
 			card.hidden = true;
 		}
@@ -693,13 +699,11 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 			cardImg.src = cards[i].getImage();
 			if (matchFunction(cards[i])) {
 				validOptions++;
-				cardImg.dataset.cardZone = cards[i].location.name;
-				cardImg.dataset.cardIndex = cards[i].location.cards.indexOf(cards[i]);
 				cardImg.dataset.selectionIndex = i;
 				cardImg.addEventListener("click", function(e) {
 					if (e.shiftKey || e.ctrlKey || e.altKey) {
 						e.stopPropagation();
-						previewCard(game.zones[this.dataset.cardZone].cards[this.dataset.cardIndex]);
+						previewCard(cards[i]);
 					} else {
 						gameFlexBox.appendChild(cardDetails);
 						cardChoiceMenu.close(this.dataset.selectionIndex);
