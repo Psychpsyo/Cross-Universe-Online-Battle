@@ -65,8 +65,9 @@ export class DiscardAction extends Action {
 	}
 	
 	run() {
-		let event = events.createCardDiscardedEvent(this.card.location, this.card.location.cards.indexOf(this.card), card.owner.discardPile);
+		let event = events.createCardDiscardedEvent(this.card.location, this.card.location.cards.indexOf(this.card), this.card.owner.discardPile);
 		this.card.owner.discardPile.add(this.card, this.card.owner.discardPile.cards.length);
+		this.card.hidden = false;
 		this.card = this.card.snapshot();
 		return event;
 	}
@@ -86,8 +87,9 @@ export class DestroyAction extends Action {
 	}
 	
 	run() {
-		let event = events.createCardDestroyedEvent(this.card.location, this.card.location.cards.indexOf(this.card), card.owner.discardPile);
+		let event = events.createCardDestroyedEvent(this.card.location, this.card.location.cards.indexOf(this.card), this.card.owner.discardPile);
 		this.card.owner.discardPile.add(this.card, this.card.owner.discardPile.cards.length);
+		this.card.hidden = false;
 		this.card = this.card.snapshot();
 		return event;
 	}

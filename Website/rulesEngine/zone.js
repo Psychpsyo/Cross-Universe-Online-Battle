@@ -44,12 +44,16 @@ export class Zone {
 		}
 	}
 	
-	shuffle() {
+	async shuffle() {
+		let randomRanges = [];
+		for (let i = this.cards.length - 1; i > 0; i--) {
+			randomRanges.push(i);
+		}
+		let randomValues = await this.player.game.rng.nextInts(randomRanges);
 		// Fisher-Yates shuffle
-		for (let i = this.cards.length - 1; i >= 0; i--) {
+		for (let i = this.cards.length - 1; i > 0; i--) {
 			// pick a random element and swap it with the current element
-			let rand = this.player.game.rng.nextInt(i);
-			
+			let rand = randomValues.shift();
 			[this.cards[i], this.cards[rand]] = [this.cards[rand], this.cards[i]];
 		}
 	}

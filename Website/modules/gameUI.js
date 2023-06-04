@@ -533,10 +533,12 @@ export function openCardSelect(zone) {
 	
 	//show selector
 	cardSelectorTitle.textContent = locale.game.cardSelector[zone.name];
-	if (zone.name == "discard1" || zone.name == "exile1") {
-		cardSelectorReturnToDeck?.removeAttribute("hidden");
-	} else {
-		cardSelectorReturnToDeck?.setAttribute("hidden", "");
+	if (document.getElementById("cardSelectorReturnToDeck")) {
+		if (zone.name == "discard1" || zone.name == "exile1") {
+			cardSelectorReturnToDeck.removeAttribute("hidden");
+		} else {
+			cardSelectorReturnToDeck.setAttribute("hidden", "");
+		}
 	}
 	cardSelector.showModal();
 	cardSelector.appendChild(cardDetails);

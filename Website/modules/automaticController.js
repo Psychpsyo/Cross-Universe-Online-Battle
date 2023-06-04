@@ -3,6 +3,7 @@
 import {InteractionController} from "/modules/interactionController.js";
 import {putChatMessage} from "/modules/generalUI.js";
 import {socket} from "/modules/netcode.js";
+import {DistRandom} from "/modules/distributedRandom.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
 
@@ -15,11 +16,15 @@ export class AutomaticController extends InteractionController {
 		this.opponentEngineInputs = new EventTarget();
 		this.opponentMoves = [];
 		this.waitingForOpponentInput = false;
+		
+		this.gameSpeed = 500;
+		
+		game.rng = new DistRandom();
 	}
 	
 	async startGame() {
 		let updateGenerator = game.begin();
-		let updates = updateGenerator.next();
+		let updates = await updateGenerator.next();
 		
 		while (updates.value.length != 0) {
 			let returnValues;
@@ -43,7 +48,7 @@ export class AutomaticController extends InteractionController {
 					break;
 				}
 			}
-			updates = updateGenerator.next(returnValues);
+			updates = await updateGenerator.next(returnValues);
 		}
 	}
 	
@@ -52,6 +57,14 @@ export class AutomaticController extends InteractionController {
 			case "inputRequestResponse": {
 				this.opponentMoves.push(JSON.parse(message));
 				this.opponentEngineInputs.dispatchEvent(new CustomEvent("input"));
+				return true;
+			}
+			case "distRandValue": {
+				game.rng.importCyphertext(message);
+				return true;
+			}
+			case "distRandKey": {
+				game.rng.importCypherKey(message);
 				return true;
 			}
 		}
@@ -101,6 +114,16 @@ export class AutomaticController extends InteractionController {
 				putChatMessage("Opened stack #" + event.index, "notice");
 				return;
 			}
+			case "cardDiscarded": {
+				gameUI.removeCard(event.fromZone, event.fromIndex);
+				gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
+				return this.gameSleep(.5);
+			}
+			case "cardDestroyed": {
+				gameUI.removeCard(event.fromZone, event.fromIndex);
+				gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
+				return this.gameSleep(.5);
+			}
 			default: {
 				console.log(event.type);
 				return this.gameSleep();
@@ -121,7 +144,7 @@ export class AutomaticController extends InteractionController {
 					resolve(this.opponentMoves.shift());
 					return;
 				}
-				this.opponentEngineInputs.addEventListener("input", function(e) {
+				this.opponentEngineInputs.addEventListener("input", function() {
 					resolve(this.opponentMoves.shift());
 				}.bind(this), {once: true});
 			});
@@ -132,7 +155,7 @@ export class AutomaticController extends InteractionController {
 		}
 		switch (request.type) {
 			case "chooseCards": {
-				response.value = await gameUI.presentCardChoice(request.from, "Select Card(s)", validAmounts = request.validAmounts);
+				response.value = await gameUI.presentCardChoice(request.from, "Select Card(s)", undefined, request.validAmounts);
 				break;
 			}
 			case "pass": {
@@ -162,6 +185,6 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	async gameSleep(duration = 1) {
-		return new Promise(resolve => setTimeout(resolve, 500 * duration));
+		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * duration));
 	}
 }

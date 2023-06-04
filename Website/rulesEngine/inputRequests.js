@@ -15,11 +15,11 @@ export const chooseCards = {
 			throw new Error("Chose invalid amount of cards.");
 		}
 		for (let cardIndex of response) {
-			if (cardIndex >= 0 && cardIndex < request.cards.length) {
+			if (cardIndex < 0 || cardIndex >= request.from.length) {
 				throw new Error("Chose an invalid card index: " + cardIndex);
 			}
 		}
-		return response.map(cardIndex => request.cards[cardIndex]);
+		return response.map(cardIndex => request.from[cardIndex]);
 	}
 }
 

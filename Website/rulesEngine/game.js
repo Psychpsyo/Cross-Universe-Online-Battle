@@ -44,20 +44,24 @@ export class Game {
 	}
 	
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
-	* begin() {
+	async* begin() {
+		let currentPlayer = await this.rng.nextPlayer(this);
+		
 		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
-		let deckShuffledEvents = [];
 		for (const player of this.players) {
 			if (!player.partnerZone.cards[0].cardTypes.get().includes("unit")) {
 				throw new Error("All partner cards must be units!");
 			}
-			player.deckZone.shuffle();
-			deckShuffledEvents.push(createDeckShuffledEvent(player));
 		}
+		
+		let deckShuffledEvents = [];
+		await currentPlayer.deckZone.shuffle();
+		await currentPlayer.next().deckZone.shuffle();
+		deckShuffledEvents.push(createDeckShuffledEvent(currentPlayer));
+		deckShuffledEvents.push(createDeckShuffledEvent(currentPlayer.next()));
 		yield deckShuffledEvents;
 		
 		// RULES: Randomly decide the first player and the second player.
-		let currentPlayer = this.players[this.rng.nextInt(this.players.length)];
 		yield [createStartingPlayerSelectedEvent(currentPlayer)];
 		
 		// RULES: Draw 5 cards from your deck to your hand.

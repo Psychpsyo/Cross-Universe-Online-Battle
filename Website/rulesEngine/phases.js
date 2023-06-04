@@ -94,7 +94,7 @@ export class ManaSupplyPhase extends Phase {
 		let cardChoiceRequests = [];
 		for (let player of this.turn.game.players) {
 			if (player.handZone.cards.length > 8) {
-				cardChoiceRequests.push(requests.chooseCards.create(player, player.handZone.cards, player.handZone.cards.length - 8));
+				cardChoiceRequests.push(requests.chooseCards.create(player, player.handZone.cards, [player.handZone.cards.length - 8]));
 			}
 		}
 		if (cardChoiceRequests.length > 0) {

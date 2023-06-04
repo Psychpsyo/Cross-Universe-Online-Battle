@@ -260,7 +260,7 @@ export class ManualController extends InteractionController {
 			order.push(i);
 		}
 		// Fisher-Yates shuffle
-		for (let i = order.length - 1; i >= 0; i--) {
+		for (let i = order.length - 1; i > 0; i--) {
 			// pick a random element and swap it with the current element
 			let rand = Math.floor(Math.random() * i);
 			

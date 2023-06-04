@@ -461,6 +461,7 @@ label[for="fileSelectDeckLoader"] {
 }
 #chatBox {
 	flex-grow: 1;
+	height: 0;
 	border-top: 2px var(--theme-border-color) solid;
 	border-bottom: 2px var(--theme-border-color) solid;
 	overflow-y: scroll;
