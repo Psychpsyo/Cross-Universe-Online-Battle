@@ -160,6 +160,7 @@ dialog #cardDetails {
 	width: 30vw;
 	height: 100vh;
 	box-sizing: border-box;
+	z-index: 1;
 	
 	border-right: 2px var(--theme-border-color) solid;
 	background-color: var(--theme-shadow);

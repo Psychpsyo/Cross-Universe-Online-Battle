@@ -1,5 +1,6 @@
 // This module exports the controller for the automatic simulator which verifies the cross universe game rules
 
+import {locale} from "/modules/locale.js";
 import {InteractionController} from "/modules/interactionController.js";
 import {putChatMessage} from "/modules/generalUI.js";
 import {socket} from "/modules/netcode.js";

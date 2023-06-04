@@ -12,18 +12,21 @@
 	background-color: #000A;
 	text-align: center;
 	width: 100%;
-	justify-content: space-around;
+	justify-content: center;
 	
 	list-style-type: none;
 }
 
-#phaseDisplay > ol > li {
+#phaseDisplay li {
 	color: #eee;
-	padding: .05em .25em;
+	padding: .05em .2em;
 	background-image: linear-gradient(transparent, transparent, orange);
 	background-size: 100% 200%;
 	background-position: 0% 0%;
 	transition: background-position .25s;
+	white-space: pre;
+	flex-grow: 1;
+	max-width: 6.5em;
 }
 
 #phaseDisplay .current {

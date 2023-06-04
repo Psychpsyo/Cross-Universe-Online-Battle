@@ -108,6 +108,15 @@
 		},
 		
 		"automatic": {
+			"phases": {
+				"manaSupplyPhase": "Mana Supply\nPhase",
+				"drawPhase": "Draw\nPhase",
+				"firstMainPhase": "Main\nPhase 1",
+				"battlePhase": "Battle\nPhase",
+				"secondMainPhase": "Main\nPhase 2",
+				"endPhase": "End\nPhase"
+			},
+			
 			"battlePhase": {
 				"question": "Do you want to enter the battle phase?",
 				"enter": "Enter Battle Phase",

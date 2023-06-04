@@ -1,10 +1,16 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
+import {locale} from "/modules/locale.js";
+
 let currentActivePhase = null;
 let currentTurn = 0;
 
 export function init() {
 	Array.from(document.querySelectorAll(".manualOnly")).forEach(elem => elem.remove());
+	
+	for (const [key, value] of Object.entries(locale.game.automatic.phases)) {
+		document.getElementById(key + "Indicator").textContent = value;
+	}
 	
 	passBtn.addEventListener("click", function() {
 		this.disabled = true;
@@ -18,23 +24,23 @@ export function startPhase(type) {
 	currentActivePhase?.classList.remove("current");
 	switch(type) {
 		case "manaSupplyPhase": {
-			currentActivePhase = ManaSupplyPhaseIndicator;
+			currentActivePhase = manaSupplyPhaseIndicator;
 			break;
 		}
 		case "drawPhase": {
-			currentActivePhase = DrawPhaseIndicator;
+			currentActivePhase = drawPhaseIndicator;
 			break;
 		}
 		case "mainPhase": {
-			currentActivePhase = currentActivePhase == DrawPhaseIndicator? FirstMainPhaseIndicator : SecondMainPhaseIndicator;
+			currentActivePhase = currentActivePhase == drawPhaseIndicator? firstMainPhaseIndicator : secondMainPhaseIndicator;
 			break;
 		}
 		case "battlePhase": {
-			currentActivePhase = BattlePhaseIndicator;
+			currentActivePhase = battlePhaseIndicator;
 			break;
 		}
 		case "endPhase": {
-			currentActivePhase = EndPhaseIndicator;
+			currentActivePhase = endPhaseIndicator;
 			break;
 		}
 	}
@@ -46,8 +52,8 @@ export function startTurn() {
 	currentActivePhase?.classList.remove("current");
 	currentActivePhase = null;
 	if (currentTurn == 2) {
-		BattlePhaseIndicator.classList.remove("invalid");
-		SecondMainPhaseIndicator.classList.remove("invalid");
+		battlePhaseIndicator.classList.remove("invalid");
+		secondMainPhaseIndicator.classList.remove("invalid");
 	}
 }
 

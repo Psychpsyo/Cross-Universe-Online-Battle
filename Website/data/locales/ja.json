@@ -108,6 +108,15 @@
 		},
 		
 		"automatic": {
+			"phases": {
+				"manaSupplyPhase": "魔力\nステップ",
+				"drawPhase": "ドロー\nステップ",
+				"firstMainPhase": "メイン\nステップ 1",
+				"battlePhase": "バトル\nステップ",
+				"secondMainPhase": "メイン\nステップ 2",
+				"endPhase": "エンド\nステップ"
+			},
+			
 			"battlePhase": {
 				"question": null,
 				"enter": null,

@@ -6,6 +6,7 @@ import {Card} from "./card.js";
 import {Turn} from "./turns.js";
 import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
+import {locale} from "/modules/locale.js";
 
 export class Game {
 	constructor() {

@@ -1,14 +1,14 @@
-let locale = {};
+let globalLocale = {};
 
 fetch("../data/locales/" + localStorage.getItem("language") + ".json")
 .then(response => {
 	return response.json()
 })
 .then(jsonData => {
-	locale = jsonData;
+	globalLocale = jsonData;
 });
 
 // getting a card's image link from its ID
 function getCardImageFromID(cardId) {
-	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
+	return "https://crossuniverse.net/images/cards/" + (globalLocale.warnings.includes("noCards")? "en" : globalLocale.code) + "/" + cardId + ".jpg";
 }
