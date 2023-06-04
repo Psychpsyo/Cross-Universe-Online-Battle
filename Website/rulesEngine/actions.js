@@ -18,6 +18,16 @@ export class ChangeManaAction extends Action {
 		this.player.mana += this.amount;
 		return events.createManaChangedEvent(this.player);
 	}
+	
+	isImpossible() {
+		return false;
+	}
+	isPossible() {
+		return !isImpossible();
+	}
+	isFullyPossible() {
+		return isPossible();
+	}
 }
 
 export class DrawAction extends Action {
@@ -53,6 +63,13 @@ export class DiscardAction extends Action {
 		this.card = this.card.snapshot();
 		return event;
 	}
+	
+	isImpossible() {
+		if (this.card.location.name.startsWith("partner")) {
+			return true;
+		}
+		return false;
+	}
 }
 
 export class DestroyAction extends Action {
@@ -66,5 +83,12 @@ export class DestroyAction extends Action {
 		this.card.owner.discardPile.add(this.card, this.card.owner.discardPile.cards.length);
 		this.card = this.card.snapshot();
 		return event;
+	}
+	
+	isImpossible() {
+		if (this.card.location.name.startsWith("partner")) {
+			return true;
+		}
+		return false;
 	}
 }

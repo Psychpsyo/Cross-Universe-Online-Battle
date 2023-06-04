@@ -1,34 +1,42 @@
 import {ManaSupplyPhase, DrawPhase, MainPhase, BattlePhase, EndPhase} from "./phases.js";
 import {createPhaseStartedEvent} from "./events.js";
+import {enterBattlePhase} from "./inputRequests.js";
 
 export class Turn {
 	constructor(player) {
 		this.game = player.game;
 		this.player = player;
 		this.phases = [];
+		this.index = game.turns.length;
 	}
 	
 	* run() {
-		this.phases.push(new ManaSupplyPhase(this));
-		yield [createPhaseStartedEvent(this.phases[0])];
-		yield* this.phases[0].run();
+		yield* this.runPhase(new ManaSupplyPhase(this));
 		
-		this.phases.push(new DrawPhase(this));
-		yield [createPhaseStartedEvent(this.phases[1])];
-		yield* this.phases[1].run();
+		yield* this.runPhase(new DrawPhase(this));
 		
-		this.phases.push(new MainPhase(this));
-		yield [createPhaseStartedEvent(this.phases[2])];
-		yield* this.phases[2].run();
+		yield* this.runPhase(new MainPhase(this));
 		
-		// TOOD: entering the battle phase
+		if (this.index > 0) {
+			let battlePhase = (yield [enterBattlePhase.create(this.player)]).filter(choice => choice !== undefined)[0];
+			battlePhase.value = enterBattlePhase.validate(battlePhase.value);
+			if (battlePhase.value) {
+				yield* this.runPhase(new BattlePhase(this));
+				
+				yield* this.runPhase(new MainPhase(this));
+			}
+		}
 		
-		this.phases.push(new EndPhase(this));
-		yield [createPhaseStartedEvent(this.phases[this.phases.length - 1])];
-		yield* this.phases[this.phases.length - 1].run();
+		yield* this.runPhase(new EndPhase(this));
 	}
 	
 	getTimings() {
 		return this.phases.map(phase => phase.getTimings()).flat();
+	}
+	
+	* runPhase(phase) {
+		this.phases.push(phase);
+		yield [createPhaseStartedEvent(phase)];
+		yield* phase.run();
 	}
 }

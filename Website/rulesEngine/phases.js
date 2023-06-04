@@ -3,6 +3,7 @@ import {Stack} from "./stacks.js";
 import {createStackCreatedEvent, createManaChangedEvent} from "./events.js";
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
+import * as requests from "./inputRequests.js";
 
 // Base class for all phases
 class Phase {
@@ -26,20 +27,24 @@ class StackPhase extends Phase {
 	}
 	
 	* run() {
-		let currentStack = 0;
+		let currentStackIndex = 0;
 		do {
-			currentStack = 0;
+			currentStackIndex = 0;
 			do {
-				currentStack++;
-				this.stacks.push(new Stack(this, currentStack));
+				currentStackIndex++;
+				this.stacks.push(new Stack(this, currentStackIndex));
 				yield [createStackCreatedEvent(this.stacks[this.stacks.length - 1])];
 				yield* this.stacks[this.stacks.length - 1].run();
 			} while (this.stacks[this.stacks.length - 1].blocks.length > 0);
-		} while (currentStack > 1);
+		} while (currentStackIndex > 1);
 	}
 	
 	getTimings() {
 		return this.stacks.map(stack => stack.getTimings()).flat();
+	}
+	
+	getBlockOptions(stack) {
+		return [requests.pass.create(stack.getNextPlayer())];
 	}
 }
 
@@ -70,7 +75,7 @@ export class ManaSupplyPhase extends Phase {
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
 		let partnerLevel = turnPlayer.partnerZone.cards[0].level.get();
 		if (turnPlayer.mana < partnerLevel) {
-			yield [createPlayerLostEvent(turnPlayer)];
+			yield [createPlayerLostEvent(turnPlayer, "partnerCostTooHigh")];
 			while (true) {
 				yield [];
 			}
@@ -86,10 +91,16 @@ export class ManaSupplyPhase extends Phase {
 		}
 		
 		// RULES: At the end of the mana supply phase, any player with more than 8 hand cards discards down to 8.
+		let cardChoiceRequests = [];
 		for (let player of this.turn.game.players) {
 			if (player.handZone.cards.length > 8) {
-				// TODO: implement discards
+				cardChoiceRequests.push(requests.chooseCards.create(player, player.handZone.cards, player.handZone.cards.length - 8));
 			}
+		}
+		if (cardChoiceRequests.length > 0) {
+			let chosenCards = (yield cardChoiceRequests).filter(choice => choice !== undefined).map((choice, i) => requests.chooseCards.validate(choice.value, cardChoiceRequests[i]));
+			this.timings.push(new Timing(this.turn.game, chosenCards.flat().map(card => new actions.DiscardAction(card)), null));
+			yield* this.timings[this.timings.length - 1].run();
 		}
 	}
 }
@@ -97,6 +108,13 @@ export class ManaSupplyPhase extends Phase {
 export class DrawPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "drawPhase");
+	}
+	
+	getBlockOptions(stack) {
+		if (this.stacks.length == 1 && stack.blocks.length == 0) {
+			return [requests.doStandardDraw.create(this.turn.player)];
+		}
+		return super.getBlockOptions();
 	}
 }
 

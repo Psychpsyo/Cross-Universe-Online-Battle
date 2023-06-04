@@ -23,37 +23,98 @@
 		"deckCreatorButton": null
 	},
 	
-	"infoYou": "自分",
-	"infoOpponent": "相手",
-	"infoLife": "Lp：",
-	"infoMana": "魔力：",
-	
-	"deckSelect": {
-		"chooseYourDeck": null,
-		"loadingDeck": null,
-		"waitingForOpponent": null,
-		"dropYourDeck": "デッキをドラック＆ドロップしてください。",
-		"useOfficialDeck": "もしくは、公式デッキを選択してください。",
+	"game": {
+		"youStart": null,
+		"opponentStarts": null,
+		"yourDeckShuffled": null,
+		"opponentDeckShuffled": null,
 		
-		"deckListDefault": "参考デッキ",
-		"deckListLegacy": "過去のデッキ",
-		"deckListLoadSelected": "選択したデッキを配置する",
-		"deckListCardAmount": "{#CARDS}枚"
+		"info": {
+			"you": "自分",
+			"opponent": "相手",
+			"life": "Lp：",
+			"mana": "魔力："
+		},
+		
+		"deckSelect": {
+			"chooseYourDeck": null,
+			"loadingDeck": null,
+			"waitingForOpponent": null,
+			"dropYourDeck": "デッキをドラック＆ドロップしてください。",
+			"useOfficialDeck": "もしくは、公式デッキを選択してください。",
+			
+			"deckListDefault": "参考デッキ",
+			"deckListLegacy": "過去のデッキ",
+			"deckListLoadSelected": "選択したデッキを配置する",
+			"deckListCardAmount": "{#CARDS}枚"
+		},
+		
+		"partnerSelect": {
+			"useSuggestedQuestion": null,
+			"useSuggested": null,
+			"selectManually": null,
+			"popupTitle": null,
+			"waitingForOpponent": null,
+			"revealPartner": null
+		},
+		
+		"cardSelector": {
+			"tokens": "トークン：",
+			"deck1": "自分のデッキ：",
+			"discard0": "相手の捨て山：",
+			"discard1": "自分の捨て山：",
+			"exile0": "相手の隔離：",
+			"exile1": "自分の隔離：",
+			
+			"returnAllToDeck": null
+		},
+		
+		"fieldLabels": {
+			"verticalText": true,
+			"unitZone": "ユニット\nゾーン",
+			"spellItemZone": "スペル\n＆\nアイテム\nゾーン",
+			"partnerZone": "パートナー\nゾーン",
+			"exileZone": "隔離",
+			"discardPile": "捨て山",
+			"deck": "デッキ"
+		},
+		
+		"manual": {
+			"deck": {
+				"draw": "ドロー",
+				"shuffle": "シャッフル",
+				"search": "サーチ",
+				"showTop": "トップ確認",
+				"dropTop": "一番上に戻す",
+				"dropShuffle": "シャッフルする",
+				"dropBottom": "一番下に戻す",
+				"dropCancel": "キャンセル"
+			},
+			
+			"actions": {
+				"life": "Lp",
+				"mana": "魔力",
+				
+				"half": "半分",
+				"tokens": "トークン",
+				"showHand": "手札を公開",
+				"hideHand": "手札を隠す"
+			},
+			
+			"presented": {
+				"reveal": "見せる",
+				"hide": "隠す"
+			}
+		},
+		
+		"automatic": {
+			"battlePhase": {
+				"question": null,
+				"enter": null,
+				"skip": null
+			}
+		}
 	},
-	
-	"partnerSelect": {
-		"useSuggestedQuestion": null,
-		"useSuggested": null,
-		"selectManually": null,
-		"popupTitle": null,
-		"waitingForOpponent": null,
-		"revealPartner": null
-	},
-	
-	"youStart": null,
-	"opponentStarts": null,
-	"yourDeckShuffled": null,
-	"opponentDeckShuffled": null,
 	
 	"chat": {
 		"title": "チャット",
@@ -61,46 +122,6 @@
 		"you": "自分",
 		"opponent": "相手",
 		"colon": "："
-	},
-	"life": "Lp",
-	"mana": "魔力",
-	
-	"deckDraw": "ドロー",
-	"deckShuffle": "シャッフル",
-	"deckSearch": "サーチ",
-	"deckShowTop": "トップ確認",
-	"deckDropTop": "一番上に戻す",
-	"deckDropShuffle": "シャッフルする",
-	"deckDropBottom": "一番下に戻す",
-	"deckDropCancel": "キャンセル",
-	
-	"presentReveal": "見せる",
-	"presentHide": "隠す",
-	
-	"actionsHalf": "半分",
-	"actionsTokens": "トークン",
-	"actionsShowHand": "手札を公開",
-	"actionsHideHand": "手札を隠す",
-	
-	"cardSelector": {
-		"tokens": "トークン：",
-		"deck1": "自分のデッキ：",
-		"discard0": "相手の捨て山：",
-		"discard1": "自分の捨て山：",
-		"exile0": "相手の隔離：",
-		"exile1": "自分の隔離：",
-		
-		"returnAllToDeck": null
-	},
-	
-	"fieldLabels": {
-		"verticalText": true,
-		"unitZone": "ユニット\nゾーン",
-		"spellItemZone": "スペル\n＆\nアイテム\nゾーン",
-		"partnerZone": "パートナー\nゾーン",
-		"exileZone": "隔離",
-		"discardPile": "捨て山",
-		"deck": "デッキ"
 	},
 	
 	"draft": {

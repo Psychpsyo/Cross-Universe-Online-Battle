@@ -46,4 +46,8 @@ export class Player {
 		}
 		this.deck = deck;
 	}
+	
+	next() {
+		return this.game.players[(this.index + 1) % this.game.players.length];
+	}
 }

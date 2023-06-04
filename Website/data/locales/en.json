@@ -23,37 +23,98 @@
 		"deckCreatorButton": "Deck Creator"
 	},
 	
-	"infoYou": "You",
-	"infoOpponent": "Opponent",
-	"infoLife": "Life:",
-	"infoMana": "Mana:",
-	
-	"deckSelect": {
-		"chooseYourDeck": "Choose your deck.",
-		"loadingDeck": "Loading deck...",
-		"waitingForOpponent": "Waiting for opponent to choose their deck...",
-		"dropYourDeck": "Drag & drop your deck here.",
-		"useOfficialDeck": "Or choose one of the official ones.",
+	"game": {
+		"youStart": "You go first.",
+		"opponentStarts": "Your opponent goes first.",
+		"yourDeckShuffled": "Your deck was shuffled.",
+		"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 		
-		"deckListDefault": "Default",
-		"deckListLegacy": "Legacy",
-		"deckListLoadSelected": "Load Selected Deck",
-		"deckListCardAmount": "{#CARDS} cards"
+		"info": {
+			"you": "You",
+			"opponent": "Opponent",
+			"life": "Life:",
+			"mana": "Mana:"
+		},
+		
+		"deckSelect": {
+			"chooseYourDeck": "Choose your deck.",
+			"loadingDeck": "Loading deck...",
+			"waitingForOpponent": "Waiting for opponent to choose their deck...",
+			"dropYourDeck": "Drag & drop your deck here.",
+			"useOfficialDeck": "Or choose one of the official ones.",
+			
+			"deckListDefault": "Default",
+			"deckListLegacy": "Legacy",
+			"deckListLoadSelected": "Load Selected Deck",
+			"deckListCardAmount": "{#CARDS} cards"
+		},
+		
+		"partnerSelect": {
+			"useSuggestedQuestion": "Do you want to use the suggested partner for this deck or select one yourself?",
+			"useSuggested": "Use Suggested Partner",
+			"selectManually": "Select One From Deck",
+			"popupTitle": "Select Your Partner:",
+			"waitingForOpponent": "Waiting for the opponent to choose their partner...",
+			"revealPartner": "Reveal Partner"
+		},
+		
+		"cardSelector": {
+			"tokens": "Tokens:",
+			"deck1": "Your Deck:",
+			"discard0": "Opponent's Discard Pile:",
+			"discard1": "Your Discard Pile:",
+			"exile0": "Opponent's Exile Zone:",
+			"exile1": "Your Exile Zone:",
+			
+			"returnAllToDeck": "Return All to your Deck"
+		},
+		
+		"fieldLabels": {
+			"verticalText": false,
+			"unitZone": "Unit\nZone",
+			"spellItemZone": "Spell\n&\nItem\nZone",
+			"partnerZone": "Partner\nZone",
+			"exileZone": "Exile\nZone",
+			"discardPile": "Discard\nPile",
+			"deck": "Deck"
+		},
+		
+		"manual": {
+			"deck": {
+				"draw": "Draw",
+				"shuffle": "Shuffle",
+				"search": "Search",
+				"showTop": "Show Top",
+				"dropTop": "To Top",
+				"dropShuffle": "Shuffle In",
+				"dropBottom": "To Bottom",
+				"dropCancel": "Cancel"
+			},
+			
+			"actions": {
+				"life": "Life",
+				"mana": "Mana",
+				
+				"half": "Half",
+				"tokens": "Tokens",
+				"showHand": "Reveal Hand",
+				"hideHand": "Hide Hand"
+			},
+			
+			"presented": {
+				"reveal": "Reveal",
+				"hide": "Hide"
+			}
+		},
+		
+		"automatic": {
+			"battlePhase": {
+				"question": "Do you want to enter the battle phase?",
+				"enter": "Enter Battle Phase",
+				"skip": "Skip Battle Phase"
+			}
+		}
 	},
-	
-	"partnerSelect": {
-		"useSuggestedQuestion": "Do you want to use the suggested partner for this deck or select one yourself?",
-		"useSuggested": "Use Suggested Partner",
-		"selectManually": "Select One From Deck",
-		"popupTitle": "Select Your Partner:",
-		"waitingForOpponent": "Waiting for the opponent to choose their partner...",
-		"revealPartner": "Reveal Partner"
-	},
-	
-	"youStart": "You go first.",
-	"opponentStarts": "Your opponent goes first.",
-	"yourDeckShuffled": "Your deck was shuffled.",
-	"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 	
 	"chat": {
 		"title": "Chat",
@@ -61,46 +122,6 @@
 		"you": "You",
 		"opponent": "Opponent",
 		"colon": ": "
-	},
-	"life": "Life",
-	"mana": "Mana",
-	
-	"deckDraw": "Draw",
-	"deckShuffle": "Shuffle",
-	"deckSearch": "Search",
-	"deckShowTop": "Show Top",
-	"deckDropTop": "To Top",
-	"deckDropShuffle": "Shuffle In",
-	"deckDropBottom": "To Bottom",
-	"deckDropCancel": "Cancel",
-	
-	"presentReveal": "Reveal",
-	"presentHide": "Hide",
-	
-	"actionsHalf": "Half",
-	"actionsTokens": "Tokens",
-	"actionsShowHand": "Reveal Hand",
-	"actionsHideHand": "Hide Hand",
-	
-	"cardSelector": {
-		"tokens": "Tokens:",
-		"deck1": "Your Deck:",
-		"discard0": "Opponent's Discard Pile:",
-		"discard1": "Your Discard Pile:",
-		"exile0": "Opponent's Exile Zone:",
-		"exile1": "Your Exile Zone:",
-		
-		"returnAllToDeck": "Return All to your Deck"
-	},
-	
-	"fieldLabels": {
-		"verticalText": false,
-		"unitZone": "Unit\nZone",
-		"spellItemZone": "Spell\n&\nItem\nZone",
-		"partnerZone": "Partner\nZone",
-		"exileZone": "Exile\nZone",
-		"discardPile": "Discard\nPile",
-		"deck": "Deck"
 	},
 	
 	"draft": {

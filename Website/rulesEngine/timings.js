@@ -8,12 +8,15 @@ export class Timing {
 		this.block = block; // block may be null
 	}
 	
-	* run() {
+	* run(asCost = false) {
+		this.actions.filter(action => action.isPossible());
+		
 		let events = [];
 		for (let action of this.actions) {
 			events.push(action.run());
 		}
 		yield events;
+		return this.actions.length;
 	}
 	
 	valueOf() {

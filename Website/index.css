@@ -115,12 +115,15 @@ textarea {
 
 
 /* dialogs */
+dialog {
+	color: inherit;
+}
+
 .centerDialog {
 	max-height: fit-content;
 	overflow: hidden;
 	
 	text-align: center;
-	color: inherit;
 	padding: 0;
 	
 	background-color: var(--theme-dialog-background-color);

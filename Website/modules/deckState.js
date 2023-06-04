@@ -92,7 +92,7 @@ async function addDecksToDeckSelector(deckList) {
 			
 			let cardAmountSubtitle = document.createElement("span");
 			cardAmountSubtitle.classList.add("deckCardAmount");
-			cardAmountSubtitle.textContent = locale.deckSelect.deckListCardAmount.replace("{#CARDS}", countDeckCards(deck));
+			cardAmountSubtitle.textContent = locale.game.deckSelect.deckListCardAmount.replace("{#CARDS}", countDeckCards(deck));
 			
 			deckDiv.addEventListener("click", function() {
 				if (document.getElementById("selectedDeck")) {
@@ -180,12 +180,12 @@ export class DeckState extends GameState {
 		});
 		
 		// show game area
-		dropDeckHereLabel.textContent = locale.deckSelect.dropYourDeck;
-		deckSelectSpan.textContent = locale.deckSelect.useOfficialDeck;
-		defaultDecksBtn.textContent = locale.deckSelect.deckListDefault;
-		legacyDecksBtn.textContent = locale.deckSelect.deckListLegacy;
-		loadSelectedDeckBtn.textContent = locale.deckSelect.deckListLoadSelected;
-		mainGameBlackout.textContent = locale.deckSelect.chooseYourDeck;
+		dropDeckHereLabel.textContent = locale.game.deckSelect.dropYourDeck;
+		deckSelectSpan.textContent = locale.game.deckSelect.useOfficialDeck;
+		defaultDecksBtn.textContent = locale.game.deckSelect.deckListDefault;
+		legacyDecksBtn.textContent = locale.game.deckSelect.deckListLegacy;
+		loadSelectedDeckBtn.textContent = locale.game.deckSelect.deckListLoadSelected;
+		mainGameBlackout.textContent = locale.game.deckSelect.chooseYourDeck;
 		
 		mainGameArea.removeAttribute("hidden");
 	}
@@ -215,10 +215,10 @@ export class DeckState extends GameState {
 		
 		// sync and load the deck
 		socket.send("[deck]" + JSON.stringify(deck));
-		mainGameBlackout.textContent = locale.deckSelect.loadingDeck;
+		mainGameBlackout.textContent = locale.game.deckSelect.loadingDeck;
 		await localPlayer.setDeck(deck);
 		gameUI.updateCard(localPlayer.deckZone, -1);
-		mainGameBlackout.textContent = locale.deckSelect.waitingForOpponent;
+		mainGameBlackout.textContent = locale.game.deckSelect.waitingForOpponent;
 		
 		this.checkReadyConditions();
 	}

@@ -24,19 +24,13 @@ export class BoardState extends GameState {
 		// do partner select
 		if (localPlayer.deck.suggestedPartner) {
 			if (localStorage.getItem("partnerChoiceToggle") === "true") {
-				partnerSelectQuestionText.textContent = locale.partnerSelect.useSuggestedQuestion;
-				chooseSuggestedPartnerBtn.textContent = locale.partnerSelect.useSuggested;
-				manualChoosePartnerBtn.textContent = locale.partnerSelect.selectManually;
-				document.getElementById("partnerSelectQuestion").style.display = "block";
-				
-				document.getElementById("chooseSuggestedPartnerBtn").addEventListener("click", function() {
-					document.getElementById("partnerSelectQuestion").remove();
-					this.getPartnerFromDeck();
-				}.bind(this));
-				document.getElementById("manualChoosePartnerBtn").addEventListener("click", function() {
-					document.getElementById("partnerSelectQuestion").remove();
-					this.openPartnerSelect();
-				}.bind(this));
+				ui.askQuestion(locale.game.partnerSelect.useSuggestedQuestion, locale.game.partnerSelect.useSuggested, locale.game.partnerSelect.selectManually).then(result => {
+					if (result) {
+						this.getPartnerFromDeck();
+					} else {
+						this.openPartnerSelect();
+					}
+				});
 			} else {
 				this.getPartnerFromDeck();
 			}
@@ -107,16 +101,16 @@ export class BoardState extends GameState {
 		for (let card of localPlayer.deckZone.cards) {
 			card.hidden = false;
 		}
-		ui.presentCardChoice(localPlayer.deckZone.cards, locale.partnerSelect.popupTitle, card => card.cardTypes.get().includes("unit") && card.level.get() < 6).then(card => {
+		ui.presentCardChoice(localPlayer.deckZone.cards, locale.game.partnerSelect.popupTitle, card => card.cardTypes.get().includes("unit") && card.level.get() < 6).then(cards => {
 			for (let card of localPlayer.deckZone.cards) {
 				card.hidden = true;
 			}
-			gameState.getPartnerFromDeck(card.location.cards.indexOf(card));
+			gameState.getPartnerFromDeck(cards[0]);
 		});
 	}
 	// called after partner selection
 	getPartnerFromDeck(partnerPosInDeck = -1) {
-		mainGameBlackout.textContent = locale.partnerSelect.waitingForOpponent;
+		mainGameBlackout.textContent = locale.game.partnerSelect.waitingForOpponent;
 		if (partnerPosInDeck == -1) {
 			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == game.players[localPlayer.index].deck["suggestedPartner"]});
 		}

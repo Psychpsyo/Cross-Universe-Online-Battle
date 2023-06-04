@@ -44,10 +44,6 @@ export class Zone {
 		}
 	}
 	
-	getLocalizedName() {
-		return locale.cardSelector[this.name];
-	}
-	
 	shuffle() {
 		// Fisher-Yates shuffle
 		for (let i = this.cards.length - 1; i >= 0; i--) {

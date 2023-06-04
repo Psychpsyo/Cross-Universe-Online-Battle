@@ -86,7 +86,7 @@ export class Game {
 			this.turns.push(new Turn(currentPlayer));
 			yield [createTurnStartedEvent()];
 			yield* this.turns[this.turns.length - 1].run();
-			currentPlayer = this.players[(currentPlayer.index + 1) % this.players.length]
+			currentPlayer = currentPlayer.next();
 		}
 	}
 	

@@ -5,6 +5,12 @@ let currentTurn = 0;
 
 export function init() {
 	Array.from(document.querySelectorAll(".manualOnly")).forEach(elem => elem.remove());
+	
+	passBtn.addEventListener("click", function() {
+		this.disabled = true;
+	});
+	
+	controlPanel.removeAttribute("hidden");
 }
 
 export function startPhase(type) {
@@ -43,4 +49,8 @@ export function startTurn() {
 		BattlePhaseIndicator.classList.remove("invalid");
 		SecondMainPhaseIndicator.classList.remove("invalid");
 	}
+}
+
+export function indicatePass() {
+	passBtn.disabled = false;
 }

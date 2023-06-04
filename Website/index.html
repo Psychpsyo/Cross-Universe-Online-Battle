@@ -10,7 +10,7 @@
 		
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="entryPage.css">
-		<link rel="stylesheet" href="game.css">
+		<link rel="stylesheet" href="styles/game.css">
 		<link rel="stylesheet" href="styles/manualGame.css">
 		<link rel="stylesheet" href="styles/automaticGame.css">
 		<link rel="stylesheet" href="styles/drafts.css">
@@ -92,6 +92,9 @@
 							<button id="showHandBtn"></button>
 						</div>
 					</div>
+					<div id="controlPanel" class="automaticOnly" hidden>
+						<button id="passBtn" autocomplete="off" disabled>PASS</button>
+					</div>
 					<div id="deckDropzone">
 						<div id="deckDropPanel" class="sideBox">
 							<input id="fileSelectDeckLoader" type="file" accept=".deck,deckx">
@@ -106,7 +109,7 @@
 						<div id="chat" class="sideBox">
 							<header id="chatHeader"></header>
 							<div id="chatBox"></div>
-							<input id="chatInput" placeholder="Enter Message..." autocomplete="off">
+							<input id="chatInput" autocomplete="off">
 						</div>
 					</div>
 				</div>
@@ -444,11 +447,11 @@
 			</dialog>
 			
 			<!--Partner Selector-->
-			<div id="partnerSelectQuestion">
-				<span id="partnerSelectQuestionText"></span><br>
+			<dialog id="questionPopup" class="centerDialog">
+				<span id="questionPopupText"></span><br>
 				<br>
-				<div id="partnerSelectQuestionBtns"><button id="chooseSuggestedPartnerBtn"></button><button id="manualChoosePartnerBtn"></button></div>
-			</div>
+				<div id="questionPopupBtns"><button id="questionPopupYesButton"></button><button id="questionPopupNoButton"></button></div>
+			</dialog>
 			
 			<!--Generic Card Choice Dialogue-->
 			<dialog id="cardChoiceMenu" class="centerDialog popupSelectMenu">
@@ -463,10 +466,7 @@
 		
 		<!-- 'dependencies' -->
 		<script src="scripts/localStorageSetup.js"></script>
-		
-		<!--Mostly main-game relates scripts-->
 		<script src="modules/main.js", type="module"></script>
-		<script src="scripts/translation.js"></script>
 		<script src="scripts/utility.js"></script>
 	</body>
 </html>

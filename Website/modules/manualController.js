@@ -11,7 +11,7 @@ import * as manualUI from "/modules/manualUI.js";
 
 class tokenZone {
 	constructor() {
-		this.name = "token";
+		this.name = "tokens";
 		this.cards = [];
 		
 		fetch("https://crossuniverse.net/cardInfo", {
@@ -30,10 +30,6 @@ class tokenZone {
 				this.cards.push(new Card(localPlayer, card.cardID, false));
 			});
 		});
-	}
-	
-	getLocalizedName() {
-		return locale.cardSelector.tokens;
 	}
 }
 
@@ -56,7 +52,7 @@ export class ManualController extends InteractionController {
 		if (youAre === 0) {
 			this.deckShuffle(localPlayer.deckZone);
 			let startingPlayer = Math.random() > .5;
-			putChatMessage(startingPlayer? locale.youStart : locale.opponentStarts, "notice");
+			putChatMessage(startingPlayer? locale.game.youStart : locale.game.opponentStarts, "notice");
 			socket.send("[selectPlayer]" + startingPlayer);
 			partnerRevealButtonDiv.style.display = "block";
 		}
@@ -109,7 +105,7 @@ export class ManualController extends InteractionController {
 				message = message.substr(2);
 				let order = message.split("|").map(i => parseInt(i));
 				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
-				putChatMessage(deck.playerIndex == 1? locale.yourDeckShuffled : locale.opponentDeckShuffled, "notice");
+				putChatMessage(deck.playerIndex == 1? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");
 				return true;
 			}
 			case "showHand": {
@@ -132,7 +128,7 @@ export class ManualController extends InteractionController {
 			}
 			case "selectPlayer": { // opponent chose the starting player (at random)
 				this.deckShuffle(localPlayer.deckZone);
-				putChatMessage(message == "true"? locale.opponentStarts : locale.youStart, "notice");
+				putChatMessage(message == "true"? locale.game.opponentStarts : locale.game.youStart, "notice");
 				partnerRevealButtonDiv.style.display = "block";
 				return true;
 			}
@@ -272,7 +268,7 @@ export class ManualController extends InteractionController {
 		}
 		deckZone.cards.sort((a, b) => order.indexOf(deckZone.cards.indexOf(a)) - order.indexOf(deckZone.cards.indexOf(b)));
 		socket.send("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
-		putChatMessage(locale[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
+		putChatMessage(locale.game[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
 	deckToTop(player, deckZone) {
 		if (player === localPlayer) {

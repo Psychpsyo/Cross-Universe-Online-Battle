@@ -1,4 +1,10 @@
-//chat box
+
+import {locale} from "/modules/locale.js";
+
+chatHeader.textContent = locale.chat.title;
+chatInput.placeholder = locale.chat.enterMessage;
+
+// chat box
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 export function putChatMessage(message, type) {
 	let messageSpan = document.createElement("div");

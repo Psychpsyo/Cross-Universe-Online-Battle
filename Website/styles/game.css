@@ -35,7 +35,7 @@
 	height: 100%;
 	filter: var(--theme-field-filter);
 	
-	background-image: url("images/fieldUnlabeled.jpg");
+	background-image: url("/images/fieldUnlabeled.jpg");
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center;
@@ -653,25 +653,13 @@ dialog.popupSelectMenu {
 	font-size: .8em;
 }
 
-#partnerSelectQuestion {
-	display: none;
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	text-align: center;
-	
-	background-color: var(--theme-dialog-background-color);
-	border: 2px var(--theme-border-color) solid;
-	border-radius: 1em;
+#questionPopup {
 	padding: 1em;
-	z-index: 100;
 }
-
-#partnerSelectQuestionBtns {
+#questionPopupBtns {
 	display: flex;
 	justify-content: center;
-	gap: 2em;
+	gap: 3em;
 }
 
 #cardChoiceGrid {

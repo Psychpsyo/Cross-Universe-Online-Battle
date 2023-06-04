@@ -9,26 +9,26 @@ export function init() {
 	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());
 	
 	// translation
-	revealPartnerBtn.textContent = locale.partnerSelect.revealPartner;
+	revealPartnerBtn.textContent = locale.game.partnerSelect.revealPartner;
 	for (let i = 0; i < 2; i++) {
-		document.getElementById("deckTopBtn"+ i).textContent = locale.deckDropTop;
-		document.getElementById("deckShuffleInBtn" + i).textContent = locale.deckDropShuffle;
-		document.getElementById("deckBottomBtn" + i).textContent = locale.deckDropBottom;
-		document.getElementById("deckCancelBtn" + i).textContent = locale.deckDropCancel;
-		document.getElementById("showTopBtn" + i).textContent = locale.deckShowTop;
+		document.getElementById("deckTopBtn"+ i).textContent = locale.game.manual.deck.dropTop;
+		document.getElementById("deckShuffleInBtn" + i).textContent = locale.game.manual.deck.dropShuffle;
+		document.getElementById("deckBottomBtn" + i).textContent = locale.game.manual.deck.dropBottom;
+		document.getElementById("deckCancelBtn" + i).textContent = locale.game.manual.deck.dropCancel;
+		document.getElementById("showTopBtn" + i).textContent = locale.game.manual.deck.showTop;
 	}
 	
-	drawBtn.textContent = locale.deckDraw;
-	shuffleBtn.textContent = locale.deckShuffle;
-	deckSearchBtn.textContent = locale.deckSearch;
+	drawBtn.textContent = locale.game.manual.deck.draw;
+	shuffleBtn.textContent = locale.game.manual.deck.shuffle;
+	deckSearchBtn.textContent = locale.game.manual.deck.search;
 	
-	lifeBtnHeader.textContent = locale.life;
-	manaBtnHeader.textContent = locale.mana;
-	tokenBtn.textContent = locale.actionsTokens;
-	lifeHalf.textContent = locale.actionsHalf;
-	showHandBtn.textContent = locale.actionsShowHand;
+	lifeBtnHeader.textContent = locale.game.manual.actions.life;
+	manaBtnHeader.textContent = locale.game.manual.actions.mana;
+	tokenBtn.textContent = locale.game.manual.actions.tokens;
+	lifeHalf.textContent = locale.game.manual.actions.half;
+	showHandBtn.textContent = locale.game.manual.actions.showHand;
 	
-	cardSelectorReturnToDeck.textContent = locale.cardSelector.returnAllToDeck;
+	cardSelectorReturnToDeck.textContent = locale.game.cardSelector.returnAllToDeck;
 	
 	gameInteractions.removeAttribute("hidden");
 	
@@ -43,13 +43,13 @@ export function init() {
 	//showing/hiding your hand
 	function hideHand() {
 		socket.send("[hideHand]");
-		document.getElementById("showHandBtn").textContent = locale["actionsShowHand"];
+		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.showHand;
 		document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
 		document.getElementById("hand1").classList.remove("shown");
 	}
 	function showHand() {
 		socket.send("[showHand]");
-		document.getElementById("showHandBtn").textContent = locale["actionsHideHand"];
+		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.hideHand;
 		document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
 		document.getElementById("hand1").classList.add("shown");
 	}
@@ -169,7 +169,7 @@ export function init() {
 export function receiveMessage(command, message) {
 	switch (command) {
 		case "dice": { // opponent rolled a dice with /dice in chat
-			putChatMessage(locale["cardActions"]["I00040"]["opponentRoll"].replace("{#RESULT}", message), "notice");
+			putChatMessage(locale.cardActions.I00040.opponentRoll.replace("{#RESULT}", message), "notice");
 			return true;
 		}
 		case "counterAdd": {
