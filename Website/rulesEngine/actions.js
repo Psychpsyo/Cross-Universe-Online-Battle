@@ -58,6 +58,22 @@ export class DrawAction extends Action {
 	}
 }
 
+export class SummonAction extends Action {
+	constructor(player, unit, unitZoneIndex) {
+		super();
+		this.player = player;
+		this.unit = unit;
+		this.unitZoneIndex = unitZoneIndex;
+	}
+	
+	run() {
+		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.location, this.unit.location?.cards.indexOf(this.unit), this.unitZoneIndex);
+		this.unit.hidden = false;
+		this.player.unitZone.add(this.unit, this.unitZoneIndex);
+		return summonEvent;
+	}
+}
+
 export class DiscardAction extends Action {
 	constructor(card) {
 		super();

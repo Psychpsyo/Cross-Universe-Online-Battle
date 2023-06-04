@@ -13,14 +13,24 @@ export class AutomaticController extends InteractionController {
 		super();
 		
 		autoUI.init();
+		game.rng = new DistRandom();
 		
-		this.opponentEngineInputs = new EventTarget();
+		
+		this.opponentMoveEventTarget = new EventTarget();
 		this.opponentMoves = [];
 		this.waitingForOpponentInput = false;
+		this.playerInfos = [];
+		for (const player of game.players) {
+			this.playerInfos.push(new AutomaticPlayerInfo(player));
+		}
+		this.madeMoveTarget = new EventTarget();
 		
 		this.gameSpeed = 500;
 		
-		game.rng = new DistRandom();
+		this.canStandardSummon = false;
+		this.standardSummonEventTarget = new EventTarget();
+		this.canRetire = false;
+		this.retireEventTarget = new EventTarget();
 	}
 	
 	async startGame() {
@@ -46,6 +56,9 @@ export class AutomaticController extends InteractionController {
 					this.waitingForOpponentInput = false;
 					
 					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
+					
+					this.canStandardSummon = false;
+					this.canRetire = false;
 					break;
 				}
 			}
@@ -57,7 +70,7 @@ export class AutomaticController extends InteractionController {
 		switch (command) {
 			case "inputRequestResponse": {
 				this.opponentMoves.push(JSON.parse(message));
-				this.opponentEngineInputs.dispatchEvent(new CustomEvent("input"));
+				this.opponentMoveEventTarget.dispatchEvent(new CustomEvent("input"));
 				return true;
 			}
 			case "distRandValue": {
@@ -73,9 +86,29 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	grabCard(player, zone, index) {
+		if (this.canStandardSummon && zone === player.handZone && zone.cards[index].cardTypes.get().includes("unit")) {
+			this.playerInfos[player.index].setHeld(zone.cards[index]);
+			gameUI.makeDragSource(zone, index, player);
+			return true;
+		}
 		return false;
 	}
-	dropCard(player, zone, index) {}
+	dropCard(player, zone, index) {
+		let card = this.playerInfos[player.index].heldCard;
+		this.playerInfos[player.index].clearHeld();
+		
+		let source = card.location;
+		let sourceIndex = source? source.cards.indexOf(card) : -1;
+		if (source) {
+			gameUI.clearDragSource(source, sourceIndex, player);
+		}
+		
+		if (this.canStandardSummon && source == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
+			this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: sourceIndex, fieldIndex: index}}));
+			
+			return;
+		}
+	}
 	
 	async handleEvent(event) {
 		switch (event.type) {
@@ -115,6 +148,18 @@ export class AutomaticController extends InteractionController {
 				putChatMessage("Opened stack #" + event.index, "notice");
 				return;
 			}
+			case "cardPlaced": {
+				gameUI.insertCard(event.toZone, event.toIndex);
+				gameUI.removeCard(event.player.handZone, event.fromIndex);
+				return this.gameSleep();
+			}
+			case "cardSummoned": {
+				gameUI.insertCard(event.player.unitZone, event.toIndex);
+				if (event.fromZone) {
+					gameUI.removeCard(event.fromZone, event.fromIndex);
+				}
+				return this.gameSleep();
+			}
 			case "cardDiscarded": {
 				gameUI.removeCard(event.fromZone, event.fromIndex);
 				gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
@@ -145,7 +190,7 @@ export class AutomaticController extends InteractionController {
 					resolve(this.opponentMoves.shift());
 					return;
 				}
-				this.opponentEngineInputs.addEventListener("input", function() {
+				this.opponentMoveEventTarget.addEventListener("input", function() {
 					resolve(this.opponentMoves.shift());
 				}.bind(this), {once: true});
 			});
@@ -161,14 +206,41 @@ export class AutomaticController extends InteractionController {
 			}
 			case "pass": {
 				autoUI.indicatePass();
-				await new Promise(resolve => {
-					passBtn.addEventListener("click", function() {
-						resolve();
+				let passed = await new Promise((resolve, reject) => {
+					passBtn.addEventListener("click", resolve, {once: true});
+					this.madeMoveTarget.addEventListener("move", function() {
+						passBtn.removeEventListener("click", resolve);
+						autoUI.removePass();
+						reject();
 					}, {once: true});
-				});
+				}).then(
+					() => {return true},
+					() => {return false}
+				);
+				if (!passed) {
+					return;
+				}
 				break;
 			}
 			case "doStandardDraw": {
+				break;
+			}
+			case "doStandardSummon": {
+				this.canStandardSummon = true;
+				let summonDetails = await new Promise((resolve, reject) => {
+					this.standardSummonEventTarget.addEventListener("summon", resolve, {once: true});
+					this.madeMoveTarget.addEventListener("move", function() {
+						this.standardSummonEventTarget.removeEventListener("summon", resolve);
+						reject();
+					}.bind(this), {once: true});
+				}).then(
+					(e) => {return e.detail},
+					() => {return null}
+				);
+				if (summonDetails == null) {
+					return;
+				}
+				response.value = summonDetails;
 				break;
 			}
 			case "enterBattlePhase": {
@@ -176,6 +248,7 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 		}
+		this.madeMoveTarget.dispatchEvent(new CustomEvent("move"));
 		socket.send("[inputRequestResponse]" + JSON.stringify(response));
 		return response;
 	}
@@ -187,5 +260,21 @@ export class AutomaticController extends InteractionController {
 	
 	async gameSleep(duration = 1) {
 		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * duration));
+	}
+}
+
+class AutomaticPlayerInfo {
+	constructor(player) {
+		this.player = player;
+		this.heldCard = null;
+	}
+	
+	setHeld(card) {
+		this.heldCard = card;
+		gameUI.uiPlayers[this.player.index].setDrag(card);
+	}
+	clearHeld() {
+		this.heldCard = null;
+		gameUI.uiPlayers[this.player.index].clearDrag();
 	}
 }

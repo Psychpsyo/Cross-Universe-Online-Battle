@@ -31,7 +31,7 @@ export const enterBattlePhase = {
 			"type": "enterBattlePhase"
 		}
 	},
-	validate: function(response) {
+	validate: function(response, request) {
 		return response;
 	}
 }
@@ -45,7 +45,7 @@ export const pass = {
 			"type": "pass"
 		}
 	},
-	validate: function(response) {
+	validate: function(response, request) {
 		return response;
 	}
 }
@@ -58,7 +58,32 @@ export const doStandardDraw = {
 			"type": "doStandardDraw"
 		}
 	},
-	validate: function(response) {
+	validate: function(response, request) {
+		return response;
+	}
+}
+
+export const doStandardSummon = {
+	create: function(player) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "doStandardSummon"
+		}
+	},
+	validate: function(response, request) {
+		if (response.handIndex < 0 || response.handIndex >= request.player.handZone.cards.length) {
+			throw new Error("Supplied out-of-range hand card index for a standard summon.");
+		}
+		if (response.fieldIndex < 0 || response.fieldIndex > 4) {
+			throw new Error("Supplied out-of-range field index for a standard summon.");
+		}
+		if (request.player.unitZone.get(response.fieldIndex)) {
+			throw new Error("Supplied already occupied field index for a standard summon.");
+		}
+		if (!request.player.handZone.cards[response.handIndex].cardTypes.get().includes("unit")) {
+			throw new Error("Tried to standard summon a card that isn't a unit.");
+		}
 		return response;
 	}
 }

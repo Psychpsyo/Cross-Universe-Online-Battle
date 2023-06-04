@@ -12,14 +12,15 @@ export class Stack {
 	
 	async* run() {
 		while (true) {
-			let responses = (yield this.phase.getBlockOptions(this)).filter(choice => choice !== undefined);
+			let inputRequests = this.phase.getBlockOptions(this);
+			let responses = (yield inputRequests).filter(choice => choice !== undefined);
 			
 			if (responses.length != 1) {
 				throw new Error("Incorrect number of responses supplied during block creation. (expected 1, got " + responses.length + " instead)");
 			}
 			
 			let response = responses[0];
-			response.value = requests[response.type].validate(response.value);
+			response.value = requests[response.type].validate(response.value, inputRequests.find(request => request.type == response.type));
 			
 			let nextBlock;
 			switch (response.type) {
@@ -34,6 +35,12 @@ export class Stack {
 				case "doStandardDraw": {
 					nextBlock = new blocks.StandardDraw(this, this.getNextPlayer());
 					break;
+				}
+				case "doStandardSummon": {
+					nextBlock = new blocks.StandardSummon(this, this.getNextPlayer(),
+						this.getNextPlayer().handZone.cards[response.value.handIndex],
+						response.value.fieldIndex
+					);
 				}
 			}
 			if (response.type != "pass") {
@@ -64,5 +71,9 @@ export class Stack {
 			player = this.blocks[this.blocks.length - 1].player.next();
 		}
 		return this.passed? player.next() : player;
+	}
+	
+	canDoNormalActions() {
+		return this.blocks.length == 0 && this.index == 1 && this.getNextPlayer() == this.phase.turn.player;
 	}
 }

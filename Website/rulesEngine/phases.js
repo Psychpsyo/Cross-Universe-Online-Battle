@@ -55,7 +55,6 @@ export class ManaSupplyPhase extends Phase {
 	}
 	
 	async* run() {
-		
 		// RULES: First, if any player has more than 5 mana, their mana will be reduced to five.
 		let reduceManaActions = [];
 		for (let player of this.turn.game.players) {
@@ -123,6 +122,16 @@ export class DrawPhase extends StackPhase {
 export class MainPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "mainPhase");
+	}
+	
+	getBlockOptions(stack) {
+		let options = super.getBlockOptions(stack);
+		if (stack.canDoNormalActions()) {
+			if (!this.turn.standardSummon) {
+				options.push(requests.doStandardSummon.create(this.turn.player));
+			}
+		}
+		return options;
 	}
 }
 

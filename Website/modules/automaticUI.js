@@ -60,3 +60,6 @@ export function startTurn() {
 export function indicatePass() {
 	passBtn.disabled = false;
 }
+export function removePass() {
+	passBtn.disabled = true;
+}

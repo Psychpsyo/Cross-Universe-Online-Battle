@@ -89,6 +89,29 @@ export function createCardsDrawnEvent(player, amount) {
 	}
 }
 
+export function createCardPlacedEvent(player, fromZone, fromIndex, toZone, toIndex) {
+	return {
+		"nature": "event",
+		"type": "cardPlaced",
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"toIndex": toIndex
+	}
+}
+
+export function createCardSummonedEvent(player, fromZone, fromIndex, toIndex) {
+	return {
+		"nature": "event",
+		"type": "cardSummoned",
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toIndex": toIndex
+	}
+}
+
 export function createCardDiscardedEvent(fromZone, fromIndex, toZone) {
 	return {
 		"nature": "event",

@@ -88,9 +88,11 @@ export class FieldZone extends Zone {
 	
 	// This puts a card into the temporary "not in hand, not on field" position that they go to during standard summons / casting / deploying
 	place(card, index) {
-		if (this.cards[index] == null) {
+		if (this.get(index) == null) {
 			this.placed[index] = card;
 		}
+		card.location?.remove(card);
+		card.location = null;
 	}
 	
 	get(index) {

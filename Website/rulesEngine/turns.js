@@ -8,6 +8,9 @@ export class Turn {
 		this.player = player;
 		this.phases = [];
 		this.index = game.turns.length;
+		
+		this.hasStandardSummoned = false;
+		this.hasRetired = false;
 	}
 	
 	async* run() {

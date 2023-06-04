@@ -1,6 +1,7 @@
 
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
+import * as events from "./events.js";
 
 // Base class for all blocks
 class Block {
@@ -49,10 +50,10 @@ export class StandardDraw extends Block {
 }
 
 export class StandardSummon extends Block {
-	constructor(stack, player, unit, zoneSlot) {
+	constructor(stack, player, unit, unitZoneIndex) {
 		super(stack, player, "standardSummon");
 		this.unit = unit;
-		this.zoneSlot = zoneSlot;
+		this.unitZoneIndex = unitZoneIndex;
 		this.costTiming = new Timing(
 			stack.phase.turn.game,
 			[new actions.ChangeManaAction(player, -unit.level.get())],
@@ -60,18 +61,21 @@ export class StandardSummon extends Block {
 		)
 		this.executionTimings = [new Timing(
 			stack.phase.turn.game,
-			[new actions.SummonAction(player, unit, zoneSlot)],
+			[new actions.SummonAction(player, unit, unitZoneIndex)],
 			this
 		)];
 	}
 	
 	async* runCost() {
-		let paid = await super.runCost();
-		if (!paid || this.player.unitZone.get(this.zoneSlot) !== null) {
+		let paid = await (yield* super.runCost());
+		if (!paid) {
 			return false;
 		}
-		this.player.unitZone.place(this.unit, this.zoneSlot);
-		
+		this.unit.hidden = false;
+		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.player.handZone, this.player.handZone.cards.indexOf(this.unit), this.player.unitZone, this.unitZoneIndex);
+		this.player.unitZone.place(this.unit, this.unitZoneIndex);
+		yield [cardPlacedEvent];
+		this.stack.phase.turn.hasStandardSummoned = true;
 		return true;
 	}
 }
