@@ -119,6 +119,7 @@ export class AutomaticController extends InteractionController {
 				this.waitingForOpponentInput = true;
 				if (this.opponentMoves.length > 0) {
 					resolve(this.opponentMoves.shift());
+					return;
 				}
 				this.opponentEngineInputs.addEventListener("input", function(e) {
 					resolve(this.opponentMoves.shift());

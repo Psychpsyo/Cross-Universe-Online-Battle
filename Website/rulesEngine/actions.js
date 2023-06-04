@@ -5,6 +5,16 @@ class Action {
 	// Returns the event that represents this action.
 	// After run() finishes, this class should only hold references to card snapshots, not actual cards so it serves as a record of what it did
 	run() {}
+	
+	isImpossible() {
+		return false;
+	}
+	isPossible() {
+		return !this.isImpossible();
+	}
+	isFullyPossible() {
+		return this.isPossible();
+	}
 }
 
 export class ChangeManaAction extends Action {
@@ -20,13 +30,10 @@ export class ChangeManaAction extends Action {
 	}
 	
 	isImpossible() {
-		return false;
-	}
-	isPossible() {
-		return !isImpossible();
+		return this.player.mana == 0 && this.amount < 0;
 	}
 	isFullyPossible() {
-		return isPossible();
+		return this.player.mana + this.amount >= 0;
 	}
 }
 
@@ -45,7 +52,7 @@ export class DrawAction extends Action {
 			if (this.player.isViewable) {
 				drawCard.hidden = false;
 			}
-			this.cards.push(drawCard.snapshot());
+			this.drawnCards.push(drawCard.snapshot());
 		}
 		return events.createCardsDrawnEvent(this.player, this.amount);
 	}

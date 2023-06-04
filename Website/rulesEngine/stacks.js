@@ -31,7 +31,7 @@ export class Stack {
 					break;
 				}
 				case "doStandardDraw": {
-					this.blocks.push(new blocks.StandardDraw(this.getNextPlayer()))
+					this.blocks.push(new blocks.StandardDraw(this, this.getNextPlayer()))
 					break;
 				}
 			}

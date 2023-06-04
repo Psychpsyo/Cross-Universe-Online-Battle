@@ -111,10 +111,10 @@ export class DrawPhase extends StackPhase {
 	}
 	
 	getBlockOptions(stack) {
-		if (this.stacks.length == 1 && stack.blocks.length == 0) {
+		if (this.turn.index != 0 && this.stacks.length == 1 && stack.blocks.length == 0) {
 			return [requests.doStandardDraw.create(this.turn.player)];
 		}
-		return super.getBlockOptions();
+		return super.getBlockOptions(stack);
 	}
 }
 
