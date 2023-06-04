@@ -10,7 +10,7 @@ export class Stack {
 		this.passed = false;
 	}
 	
-	* run() {
+	async* run() {
 		while (true) {
 			let responses = (yield this.phase.getBlockOptions(this)).filter(choice => choice !== undefined);
 			
@@ -21,6 +21,7 @@ export class Stack {
 			let response = responses[0];
 			response.value = requests[response.type].validate(response.value);
 			
+			let nextBlock;
 			switch (response.type) {
 				case "pass": {
 					if (this.passed) {
@@ -31,12 +32,16 @@ export class Stack {
 					break;
 				}
 				case "doStandardDraw": {
-					this.blocks.push(new blocks.StandardDraw(this, this.getNextPlayer()))
+					nextBlock = new blocks.StandardDraw(this, this.getNextPlayer());
 					break;
 				}
 			}
 			if (response.type != "pass") {
 				this.passed = false;
+				
+				if (await (yield* nextBlock.runCost())) {
+					this.blocks.push(nextBlock);
+				}
 			}
 		}
 	}
@@ -47,7 +52,7 @@ export class Stack {
 		return costTimings.concat(actionTimings);
 	}
 	
-	* executeBlocks() {
+	async* executeBlocks() {
 		for (let i = this.blocks.length - 1; i >= 0; i--) {
 			yield* this.blocks[i].run();
 		}

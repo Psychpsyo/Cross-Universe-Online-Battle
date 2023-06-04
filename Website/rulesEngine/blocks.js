@@ -12,15 +12,20 @@ class Block {
 		this.executionTimings = [];
 	}
 	
-	* runCost() {
-		if (this.costTiming) {
-			yield* this.costTiming.run(true);
+	async* runCost() {
+		if (this.costTiming == null) {
+			return true;
 		}
+		return yield* this.costTiming.run(true);
 	}
 	
-	* run() {
-		for (let timing of this.executionTimings) {
-			yield* timing.run();
+	async* run() {
+		for (let i = 0; i < this.executionTimings.length; i++) {
+			// if a timing can't be done interrupt the block and remove all other queued timings.
+			if (!(yield* this.executionTimings[i].run())) {
+				this.executionTimings.splice(i);
+				break;
+			}
 		}
 	}
 	

@@ -26,7 +26,7 @@ class StackPhase extends Phase {
 		this.stacks = [];
 	}
 	
-	* run() {
+	async* run() {
 		let currentStackIndex = 0;
 		do {
 			currentStackIndex = 0;
@@ -54,7 +54,8 @@ export class ManaSupplyPhase extends Phase {
 		this.timings = [];
 	}
 	
-	* run() {
+	async* run() {
+		
 		// RULES: First, if any player has more than 5 mana, their mana will be reduced to five.
 		let reduceManaActions = [];
 		for (let player of this.turn.game.players) {
@@ -71,6 +72,7 @@ export class ManaSupplyPhase extends Phase {
 		let turnPlayer = this.turn.player;
 		this.timings.push(new Timing(this.turn.game, [new actions.ChangeManaAction(turnPlayer, 5)], null));
 		yield* this.timings[this.timings.length - 1].run();
+		
 		
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
 		let partnerLevel = turnPlayer.partnerZone.cards[0].level.get();

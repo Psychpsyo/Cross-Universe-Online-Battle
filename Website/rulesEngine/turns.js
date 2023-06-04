@@ -10,7 +10,7 @@ export class Turn {
 		this.index = game.turns.length;
 	}
 	
-	* run() {
+	async* run() {
 		yield* this.runPhase(new ManaSupplyPhase(this));
 		
 		yield* this.runPhase(new DrawPhase(this));
@@ -34,7 +34,7 @@ export class Turn {
 		return this.phases.map(phase => phase.getTimings()).flat();
 	}
 	
-	* runPhase(phase) {
+	async* runPhase(phase) {
 		this.phases.push(phase);
 		yield [createPhaseStartedEvent(phase)];
 		yield* phase.run();
