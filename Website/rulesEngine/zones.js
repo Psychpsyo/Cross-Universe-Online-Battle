@@ -31,6 +31,16 @@ export class Zone {
 				}
 			}
 		}
+		card.attackCount = 0;
+		if (this.player.game.currentAttackDeclaration) {
+			if (this.player.game.currentAttackDeclaration.target == card) {
+				this.player.game.currentAttackDeclaration.target = null;
+			}
+			let attackerIndex = this.player.game.currentAttackDeclaration.attackers.indexOf(card);
+			if (attackerIndex != -1) {
+				this.player.game.currentAttackDeclaration.attackers.splice(attackerIndex, 1);
+			}
+		}
 		return index;
 	}
 	

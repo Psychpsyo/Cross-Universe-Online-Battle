@@ -94,7 +94,6 @@ export class Retire extends Block {
 			units.map(unit => new actions.DiscardAction(unit)),
 			this
 		)];
-		
 	}
 	
 	async* runCost() {
@@ -114,6 +113,29 @@ export class Retire extends Block {
 			}
 		}
 		this.executionTimings[0].actions.push(new actions.ChangeManaAction(this.stack.phase.turn.player, gainedMana));
-		yield* super.run()
+		yield* super.run();
+	}
+}
+
+export class AttackDeclaration extends Block {
+	constructor(stack, player, attackers) {
+		super(stack, player);
+		this.attackers = attackers;
+		this.executionTimings = [new Timing(
+			stack.phase.turn.game,
+			new actions.EstablishAttackDeclaration(attackers),
+			this
+		)];
+	}
+}
+
+export class Fight extends Block {
+	constructor(stack, player) {
+		super(stack, player);
+	}
+	
+	async* run() {
+		yield* super.run();
+		this.stack.phase.turn.game.currentAttackDeclaration = null;
 	}
 }

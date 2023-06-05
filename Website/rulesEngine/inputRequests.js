@@ -89,6 +89,61 @@ export const doStandardSummon = {
 	}
 }
 
+export const doAttackDeclaration = {
+	create: function(player, eligibleUnits) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "doAttackDeclaration",
+			"eligibleUnits": eligibleUnits
+		}
+	},
+	validate: function(response, request) {
+		for (let cardIndex of response) {
+			if (cardIndex < 0 || cardIndex >= request.eligibleUnits.length) {
+				throw new Error("Chose an invalid attacker index for attack declaration: " + cardIndex);
+			}
+		}
+		cards = response.map(cardIndex => request.eligibleUnits[cardIndex]);
+		if (cards.length > 1 && cards.find(card => card.location.type == "partner") === undefined) {
+			throw new Error("Tried to peform a combined attack without declaring the partner to attack.");
+		}
+		return cards;
+	}
+}
+
+export const selectAttackTarget = {
+	create: function(player, eligibleUnits) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "selectAttackTarget",
+			"eligibleUnits": eligibleUnits
+		}
+	},
+	validate: function(response, request) {
+		for (let cardIndex of response) {
+			if (cardIndex < 0 || cardIndex >= request.eligibleUnits.length) {
+				throw new Error("Chose an invalid attack target index: " + cardIndex);
+			}
+		}
+		return request.eligibleUnits[response];
+	}
+}
+
+export const doFight = {
+	create: function(player) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "doFight"
+		}
+	},
+	validate: function(response, request) {
+		return response;
+	}
+}
+
 export const doRetire = {
 	create: function(player, eligibleUnits) {
 		return {

@@ -19,7 +19,11 @@ export function init() {
 	});
 	
 	retireBtn.addEventListener("click", clearRetire);
-	retireCancelBtn.addEventListener("click", clearRetire);
+	retireCancelBtn.addEventListener("click", function() {
+		gameState.controller.cancelRetire(localPlayer);
+		clearRetire();
+		indicatePass();
+	});
 	
 	controlPanel.removeAttribute("hidden");
 }
@@ -72,6 +76,7 @@ export function clearPass() {
 export function indicateRetire(amount) {
 	retireBtn.textContent = locale.game.automatic.retire.dropRetire.replaceAll("{#AMOUNT}", amount);
 	retireOptions.style.display = "block";
+	clearPass();
 }
 export function clearRetire() {
 	retireOptions.style.display = "none";

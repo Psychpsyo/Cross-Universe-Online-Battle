@@ -63,7 +63,7 @@ export class Timing {
 		
 		let events = [];
 		for (let action of this.actions) {
-			events.push(action.run());
+			events.push(yield* action.run());
 		}
 		yield events;
 		game.nextTimingIndex++;

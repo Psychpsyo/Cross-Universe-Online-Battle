@@ -4,6 +4,7 @@ import {createStackCreatedEvent, createManaChangedEvent} from "./events.js";
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
+import * as blocks from "./blocks.js";
 
 // Base class for all phases
 class Phase {
@@ -171,10 +172,32 @@ export class BattlePhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "battlePhase");
 	}
+	
+	getBlockOptions(stack) {
+		let options = super.getBlockOptions(stack);
+		if (stack.canDoNormalActions()) {
+			// check for fight
+			if (this.turn.game.currentAttackDeclaration) {
+				return [requests.doFight.create()];
+			}
+			
+			// find eligible attackers
+			let eligibleAttackers = this.turn.player.partnerZone.cards.concat(this.turn.player.unitZone.cards.filter(card => card !== null));
+			eligibleAttackers = eligibleAttackers.filter(card => card.attackCount == 0);
+			if (eligibleAttackers.length > 0) {
+				options.push(requests.doAttackDeclaration.create(this.turn.player, eligibleAttackers));
+			}
+		}
+		return options;
+	}
 }
 
 export class EndPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "endPhase");
+	}
+	
+	getBlockOptions(stack) {
+		return [requests.pass.create(stack.getNextPlayer())];
 	}
 }

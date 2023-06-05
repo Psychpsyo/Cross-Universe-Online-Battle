@@ -17,6 +17,7 @@ export class Game {
 		this.players.push(new Player(this));
 		
 		this.turns = [];
+		this.currentAttackDeclaration = null;
 		this.nextTimingIndex = 1;
 		
 		this.rng = new CURandom();
@@ -90,6 +91,11 @@ export class Game {
 			this.turns.push(new Turn(currentPlayer));
 			yield [createTurnStartedEvent()];
 			yield* this.turns[this.turns.length - 1].run();
+			for (let card of currentPlayer.partnerZone.concat(currentPlayer.unitZone.cards.concat(currentPlayer.spellItemZone.cards))) {
+				if (card) {
+					card.attackCount = 0;
+				}
+			}
 			currentPlayer = currentPlayer.next();
 		}
 	}
@@ -102,5 +108,12 @@ export class Game {
 	}
 	getTimings() {
 		return this.turns.map(turn => turn.getTimings()).flat();
+	}
+}
+
+class AttackDeclaration {
+	constructor(attackers, target) {
+		this.attackers = attackers;
+		this.target = target;
 	}
 }

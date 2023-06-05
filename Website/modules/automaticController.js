@@ -17,7 +17,6 @@ export class AutomaticController extends InteractionController {
 		autoUI.init();
 		game.rng = new DistRandom();
 		
-		
 		this.opponentMoveEventTarget = new EventTarget();
 		this.opponentMoves = [];
 		this.waitingForOpponentInput = false;
@@ -82,25 +81,30 @@ export class AutomaticController extends InteractionController {
 				game.rng.importCypherKey(message);
 				return true;
 			}
+			case "cancelRetire": {
+				this.cancelRetire(game.players[0]);
+				return true;
+			}
 		}
 		return false;
 	}
 	
 	grabCard(player, zone, index) {
 		let card = zone.cards[index];
+		let playerInfo = this.playerInfos[player.index];
 		
 		// for retires
-		if (this.playerInfos[player.index].canRetire.includes(card) && !this.playerInfos[player.index].retiring.includes(card)) {
-			this.playerInfos[player.index].setHeld(zone, index);
+		if (playerInfo.canRetire.includes(card) && !playerInfo.retiring.includes(card)) {
+			playerInfo.setHeld(zone, index);
 			return true;
 		}
-		if (this.playerInfos[player.index].retiring.length > 0) {
+		if (playerInfo.retiring.length > 0) {
 			return false;
 		}
 		
 		// for summons
-		if (this.playerInfos[player.index].canStandardSummon && zone === player.handZone && card.cardTypes.get().includes("unit")) {
-			this.playerInfos[player.index].setHeld(zone, index);
+		if (playerInfo.canStandardSummon && zone === player.handZone && card.cardTypes.get().includes("unit")) {
+			playerInfo.setHeld(zone, index);
 			return true;
 		}
 		
@@ -108,13 +112,14 @@ export class AutomaticController extends InteractionController {
 	}
 	dropCard(player, zone, index) {
 		let card = this.playerInfos[player.index].heldCard;
-		this.playerInfos[player.index].clearHeld();
+		let playerInfo = this.playerInfos[player.index];
+		playerInfo.clearHeld();
 		
 		let source = card.location;
 		let sourceIndex = source? source.cards.indexOf(card) : -1;
 		
 		// summoning
-		if (this.playerInfos[player.index].canStandardSummon && source == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
+		if (playerInfo.canStandardSummon && source == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
 			if (player === localPlayer) {
 				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: sourceIndex, fieldIndex: index}}));
 			}
@@ -122,10 +127,10 @@ export class AutomaticController extends InteractionController {
 		}
 		
 		// retiring
-		if (this.playerInfos[player.index].canRetire.includes(card) && zone === player.discardPile) {
-			this.playerInfos[player.index].retiring.push(card);
+		if (playerInfo.canRetire.includes(card) && zone === player.discardPile) {
+			playerInfo.retiring.push(card);
 			if (player === localPlayer) {
-				autoUI.indicateRetire(this.playerInfos[player.index].retiring.length);
+				autoUI.indicateRetire(playerInfo.retiring.length);
 			}
 			return;
 		}
@@ -286,6 +291,17 @@ export class AutomaticController extends InteractionController {
 				response.value = summonDetails;
 				break;
 			}
+			case "doAttackDeclaration": {
+				// TODO: TODO
+				break;
+			}
+			case "selectAttackTarget": {
+				// TODO: TODO
+				break;
+			}
+			case "doFight": {
+				break;
+			}
 			case "doRetire": {
 				let retired = await new Promise((resolve, reject) => {
 					retireBtn.addEventListener("click", resolve, {once: true});
@@ -322,6 +338,16 @@ export class AutomaticController extends InteractionController {
 	async gameSleep(duration = 1) {
 		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * duration));
 	}
+	
+	cancelRetire(player) {
+		if (player == localPlayer) {
+			socket.send("[cancelRetire]");
+		}
+		for (let card of this.playerInfos[player.index].retiring) {
+			gameUI.clearDragSource(card.location, card.location.cards.indexOf(card), player);
+		}
+		this.playerInfos[player.index].retiring = [];
+	}
 }
 
 class AutomaticPlayerInfo {
@@ -331,6 +357,9 @@ class AutomaticPlayerInfo {
 		this.canStandardSummon = false;
 		this.canRetire = [];
 		this.retiring = [];
+		this.canDeclareToAttack = [];
+		this.declaredAttackers = [];
+		this.declaredAttackTarget = null;
 	}
 	
 	setHeld(zone, index) {
