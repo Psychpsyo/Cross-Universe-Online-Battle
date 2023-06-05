@@ -90,6 +90,8 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	grabCard(player, zone, index) {
+		retireOptions.style.pointerEvents = "none";
+		
 		let card = zone.cards[index];
 		let playerInfo = this.playerInfos[player.index];
 		
@@ -111,17 +113,16 @@ export class AutomaticController extends InteractionController {
 		return false;
 	}
 	dropCard(player, zone, index) {
+		retireOptions.style.pointerEvents = "";
+		
 		let card = this.playerInfos[player.index].heldCard;
 		let playerInfo = this.playerInfos[player.index];
 		playerInfo.clearHeld();
 		
-		let source = card.location;
-		let sourceIndex = source? source.cards.indexOf(card) : -1;
-		
 		// summoning
-		if (playerInfo.canStandardSummon && source == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
+		if (playerInfo.canStandardSummon && card.zone == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
 			if (player === localPlayer) {
-				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: sourceIndex, fieldIndex: index}}));
+				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: card.index, fieldIndex: index}}));
 			}
 			return;
 		}
@@ -135,7 +136,7 @@ export class AutomaticController extends InteractionController {
 			return;
 		}
 		
-		gameUI.clearDragSource(source, sourceIndex, player);
+		gameUI.clearDragSource(card.zone, card.index, player);
 	}
 	
 	async handleEvent(event) {
@@ -167,6 +168,12 @@ export class AutomaticController extends InteractionController {
 			case "phaseStarted": {
 				autoUI.startPhase(event.phase.type);
 				return this.gameSleep();
+			}
+			case "blockCreationAborted": {
+				if (event.block instanceof blocks.StandardSummon) {
+					gameUI.clearDragSource(event.block.unit.zone, event.block.unit.index, event.block.player);
+					return;
+				}
 			}
 			case "manaChanged": {
 				await gameUI.uiPlayers[event.player.index].mana.set(event.newValue, false);
@@ -202,8 +209,8 @@ export class AutomaticController extends InteractionController {
 				// units that got excluded from retires
 				if (event.action instanceof actions.DiscardAction && event.action.timing?.block instanceof blocks.Retire) {
 					gameUI.clearDragSource(
-						event.action.card.location,
-						event.action.card.location.cards.indexOf(event.action.card),
+						event.action.card.zone,
+						event.action.card.index,
 						event.action.timing.block.player
 					);
 				}
@@ -295,10 +302,6 @@ export class AutomaticController extends InteractionController {
 				// TODO: TODO
 				break;
 			}
-			case "selectAttackTarget": {
-				// TODO: TODO
-				break;
-			}
 			case "doFight": {
 				break;
 			}
@@ -344,7 +347,7 @@ export class AutomaticController extends InteractionController {
 			socket.send("[cancelRetire]");
 		}
 		for (let card of this.playerInfos[player.index].retiring) {
-			gameUI.clearDragSource(card.location, card.location.cards.indexOf(card), player);
+			gameUI.clearDragSource(card.zone, card.index, player);
 		}
 		this.playerInfos[player.index].retiring = [];
 	}

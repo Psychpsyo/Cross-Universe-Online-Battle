@@ -19,7 +19,8 @@ class BaseCard {
 		this.attack = attack;
 		this.defense = defense;
 		
-		this.location = null;
+		this.zone = null;
+		this.index = -1;
 		this.attackCount = 0;
 		this.cardRef = this;
 	}
@@ -77,7 +78,9 @@ class SnapshotCard extends BaseCard {
 			new SnapshotValue(card.attack.get(), card.attack.getBase()),
 			new SnapshotValue(card.defense.get(), card.defense.getBase())
 		);
-		this.location = card.location;
+		
+		this.zone = card.zone;
+		this.index = card.index;
 		this.attackCount = card.attackCount;
 		this.cardRef = card;
 	}

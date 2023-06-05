@@ -69,6 +69,10 @@
 			"returnAllToDeck": null
 		},
 		
+		"cardChoice": {
+			"confirm": null
+		},
+		
 		"fieldLabels": {
 			"verticalText": true,
 			"unitZone": "ユニット\nゾーン",

@@ -69,6 +69,10 @@
 			"returnAllToDeck": "Return All to your Deck"
 		},
 		
+		"cardChoice": {
+			"confirm": "Confirm"
+		},
+		
 		"fieldLabels": {
 			"verticalText": false,
 			"unitZone": "Unit\nZone",

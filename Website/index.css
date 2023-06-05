@@ -110,7 +110,8 @@ textarea {
 	background-color: var(--theme-button-hover-color);
 }
 .bigButton:disabled {
-	color: inherit;
+	color: var(--theme-disabled-text-color);
+	background-color: var(--theme-disabled-background-color);
 }
 
 

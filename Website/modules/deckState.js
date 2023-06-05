@@ -57,7 +57,7 @@ function loadDeckPreview(deck) {
 		//make partner card glow
 		if (cardId == officialDecks[currentDeckList][deck]["suggestedPartner"] && !partnerAdded) {
 			partnerAdded = true;
-			cardImg.classList.add("partnerHighlight");
+			cardImg.classList.add("cardHighlight");
 		}
 		
 		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);

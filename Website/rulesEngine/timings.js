@@ -34,7 +34,7 @@ export class Timing {
 	
 	isFullyPossible() {
 		for (let action of this.actions) {
-			if (!action.isFullyPossible) {
+			if (!action.isFullyPossible()) {
 				return false;
 			}
 		}

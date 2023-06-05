@@ -77,7 +77,7 @@ export class StandardSummon extends Block {
 			return false;
 		}
 		this.unit.hidden = false;
-		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.player.handZone, this.player.handZone.cards.indexOf(this.unit), this.player.unitZone, this.unitZoneIndex);
+		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.player.handZone, this.unit.index, this.player.unitZone, this.unitZoneIndex);
 		this.player.unitZone.place(this.unit, this.unitZoneIndex);
 		yield [cardPlacedEvent];
 		this.stack.phase.turn.hasStandardSummoned = this.unit.snapshot();

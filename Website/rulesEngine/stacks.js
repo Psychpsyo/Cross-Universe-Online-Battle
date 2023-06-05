@@ -1,7 +1,7 @@
 
 import * as requests from "./inputRequests.js";
 import * as blocks from "./blocks.js";
-import {createBlockCreatedEvent, createStackStartedEvent, createBlockStartedEvent} from "./events.js"
+import {createBlockCreatedEvent, createBlockCreationAbortedEvent, createStackStartedEvent, createBlockStartedEvent} from "./events.js"
 
 export class Stack {
 	constructor(phase, index) {
@@ -56,6 +56,8 @@ export class Stack {
 				if (await (yield* nextBlock.runCost())) {
 					yield [createBlockCreatedEvent(nextBlock)];
 					this.blocks.push(nextBlock);
+				} else {
+					yield [createBlockCreationAbortedEvent(nextBlock)]
 				}
 			}
 		}

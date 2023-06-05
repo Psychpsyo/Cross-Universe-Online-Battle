@@ -22,6 +22,8 @@ var themes = {
 		"dialogBackground": "#000c",
 		"textShadow": "none",
 		"textColor": "#eee",
+		"disabledTextColor": "#eee8",
+		"disabledBackgroundColor": "#222",
 		"borderColor": "#eee",
 		"buttonHoverColor": "#fff3"
 	},
@@ -33,7 +35,9 @@ var themes = {
 		"shadowColor": "#0002",
 		"dialogBackground": "white",
 		"textShadow": "none",
-		"textColor": "black",
+		"textColor": "#000",
+		"disabledTextColor": "#0008",
+		"disabledBackgroundColor": "#ccc",
 		"borderColor": "#888",
 		"buttonHoverColor": "#00f3"
 	},
@@ -46,6 +50,8 @@ var themes = {
 		"dialogBackground": "#000c",
 		"textShadow": "2px 2px 2px black",
 		"textColor": "#eee",
+		"disabledTextColor": "#eee8",
+		"disabledBackgroundColor": "#222",
 		"borderColor": "#eee",
 		"buttonHoverColor": "#fff3"
 	},
@@ -58,6 +64,8 @@ var themes = {
 		"dialogBackground": "#000c",
 		"textShadow": "2px 2px 2px black",
 		"textColor": "#eee",
+		"disabledTextColor": "#eee8",
+		"disabledBackgroundColor": "#222",
 		"borderColor": "#eee",
 		"buttonHoverColor": "#fff3"
 	}
@@ -72,6 +80,8 @@ function applyTheme(theme) {
 	document.documentElement.style.setProperty("--theme-dialog-background-color", themes[theme].dialogBackground);
 	document.documentElement.style.setProperty("--theme-text-shadow", themes[theme].textShadow);
 	document.documentElement.style.setProperty("--theme-text-color", themes[theme].textColor);
+	document.documentElement.style.setProperty("--theme-disabled-text-color", themes[theme].disabledTextColor);
+	document.documentElement.style.setProperty("--theme-disabled-background-color", themes[theme].disabledBackgroundColor);
 	document.documentElement.style.setProperty("--theme-border-color", themes[theme].borderColor);
 	document.documentElement.style.setProperty("--theme-button-hover-color", themes[theme].buttonHoverColor);
 }

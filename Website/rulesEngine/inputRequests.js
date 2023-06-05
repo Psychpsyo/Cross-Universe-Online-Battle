@@ -105,29 +105,10 @@ export const doAttackDeclaration = {
 			}
 		}
 		cards = response.map(cardIndex => request.eligibleUnits[cardIndex]);
-		if (cards.length > 1 && cards.find(card => card.location.type == "partner") === undefined) {
+		if (cards.length > 1 && cards.find(card => card.zone.type == "partner") === undefined) {
 			throw new Error("Tried to peform a combined attack without declaring the partner to attack.");
 		}
 		return cards;
-	}
-}
-
-export const selectAttackTarget = {
-	create: function(player, eligibleUnits) {
-		return {
-			"nature": "request",
-			"player": player,
-			"type": "selectAttackTarget",
-			"eligibleUnits": eligibleUnits
-		}
-	},
-	validate: function(response, request) {
-		for (let cardIndex of response) {
-			if (cardIndex < 0 || cardIndex >= request.eligibleUnits.length) {
-				throw new Error("Chose an invalid attack target index: " + cardIndex);
-			}
-		}
-		return request.eligibleUnits[response];
 	}
 }
 

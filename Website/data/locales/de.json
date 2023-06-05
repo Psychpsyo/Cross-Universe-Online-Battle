@@ -69,6 +69,10 @@
 			"returnAllToDeck": "Alle zurück in dein Deck mischen"
 		},
 		
+		"cardChoice": {
+			"confirm": "Bestätigen"
+		},
+		
 		"fieldLabels": {
 			"verticalText": false,
 			"unitZone": "Einheiten\nZone",

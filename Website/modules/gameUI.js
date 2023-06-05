@@ -11,10 +11,14 @@ let lastFrame = 0;
 let cardSelectorSlots = [];
 export let cardSelectorZone = null;
 
+let cardChoiceSelected = [];
+
 youInfoText.textContent = locale.game.info.you;
 opponentInfoText.textContent = locale.game.info.opponent;
 lifeInfoText.textContent = locale.game.info.life;
 manaInfoText.textContent = locale.game.info.mana;
+
+cardChoiceConfirm.textContent = locale.game.cardChoice.confirm;
 
 if (localStorage.getItem("fieldLabelToggle") == "true") {
 	document.querySelectorAll(".fieldLabelUnitZone").forEach(label => {
@@ -134,6 +138,12 @@ export function init() {
 	cardChoiceMenu.addEventListener("cancel", function(e) {
 		e.preventDefault();
 	});
+	cardChoiceConfirm.addEventListener("click", function() {
+		gameFlexBox.appendChild(cardDetails);
+		cardChoiceMenu.close(cardChoiceSelected.join("|"));
+		cardChoiceGrid.innerHTML = "";
+		cardChoiceSelected = [];
+	});
 	
 	lastFrame = performance.now();
 	animate();
@@ -246,7 +256,9 @@ export function clearDragSource(zone, index, player) {
 function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
 		socket.send("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
+		return true;
 	}
+	return false;
 }
 function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
@@ -318,6 +330,7 @@ class fieldCardSlot extends uiCardSlot {
 			}
 		} else {
 			this.fieldSlot.src = "images/cardHidden.png";
+			this.clearDragSource(null);
 		}
 	}
 	remove() {
@@ -502,8 +515,9 @@ class cardSelectorSlot extends uiCardSlot {
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
-			grabCard(localPlayer, zone, this.index);
-			closeCardSelect();
+			if (grabCard(localPlayer, zone, this.index)) {
+				closeCardSelect();
+			}
 		}.bind(this));
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
@@ -705,9 +719,20 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 						e.stopPropagation();
 						previewCard(cards[i]);
 					} else {
-						gameFlexBox.appendChild(cardDetails);
-						cardChoiceMenu.close(this.dataset.selectionIndex);
-						cardChoiceGrid.innerHTML = "";
+						if (this.classList.toggle("cardHighlight")) {
+							if (validAmounts.length == 1 && validAmounts[0] == 1 && cardChoiceSelected.length > 0) {
+								for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
+									if (elem != this) {
+										elem.classList.remove("cardHighlight");
+									}
+								}
+								cardChoiceSelected = [];
+							}
+							cardChoiceSelected.push(this.dataset.selectionIndex);
+						} else {
+							cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
+						}
+						cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length);
 					}
 				});
 			} else {
@@ -715,14 +740,15 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 			}
 			cardChoiceGrid.appendChild(cardImg);
 		}
-		if (validOptions == 0) {
-			reject(new Error("No valid choices were passed to the card choice dialogue"));
+		if (validOptions < Math.min(...validAmounts)) {
+			reject(new Error("Not enough valid choices were passed to the card choice dialogue"));
 		}
 		cardChoiceMenu.addEventListener("close", function() {
-			resolve([parseInt(this.returnValue)]);
+			resolve(this.returnValue.split("|").map(val => parseInt(val)));
 		});
 		
 		cardChoiceTitle.textContent = title;
+		cardChoiceConfirm.disabled = true;
 		cardChoiceMenu.showModal();
 		cardChoiceMenu.appendChild(cardDetails);
 		

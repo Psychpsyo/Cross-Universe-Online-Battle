@@ -11,16 +11,17 @@ export class Zone {
 	
 	// returns the index at which the card was inserted.
 	add(card, index) {
-		if (card.location === this && this.cards.indexOf(card) < index) {
+		if (card.zone === this && card.index < index) {
 			index--;
 		}
-		card.location?.remove(card);
+		card.zone?.remove(card);
 		if (!card.cardTypes.get().includes("token")) {
 			this.cards.splice(index, 0, card);
+			this.reindex();
 		} else {
 			index = -1;
 		}
-		card.location = this;
+		card.zone = this;
 		// remove this card from relevant actions
 		let stacks = this.player.game.getStacks();
 		if (stacks.length > 0) {
@@ -45,8 +46,14 @@ export class Zone {
 	}
 	
 	remove(card) {
-		let index = this.cards.findIndex(localCard => localCard == card);
-		this.cards.splice(index, 1);
+		this.cards.splice(card.index, 1);
+		this.reindex();
+	}
+	
+	reindex() {
+		for (let i = 0; i < this.cards.length; i++) {
+			this.cards[i].index = i;
+		}
 	}
 	
 	get(index) {
@@ -71,6 +78,7 @@ export class DeckZone extends Zone {
 			let rand = randomValues.shift();
 			[this.cards[i], this.cards[rand]] = [this.cards[rand], this.cards[i]];
 		}
+		this.reindex();
 	}
 }
 
@@ -97,9 +105,10 @@ export class FieldZone extends Zone {
 				return -1;
 			}
 		}
-		card.location?.remove(card);
+		card.zone?.remove(card);
 		this.cards[index] = card;
-		card.location = this;
+		card.zone = this;
+		card.index = index;
 		return index;
 	}
 	
@@ -113,8 +122,8 @@ export class FieldZone extends Zone {
 		if (this.get(index) == null) {
 			this.placed[index] = card;
 		}
-		card.location?.remove(card);
-		card.location = null;
+		card.zone?.remove(card);
+		card.zone = null;
 	}
 	
 	get(index) {

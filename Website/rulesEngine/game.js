@@ -91,7 +91,7 @@ export class Game {
 			this.turns.push(new Turn(currentPlayer));
 			yield [createTurnStartedEvent()];
 			yield* this.turns[this.turns.length - 1].run();
-			for (let card of currentPlayer.partnerZone.concat(currentPlayer.unitZone.cards.concat(currentPlayer.spellItemZone.cards))) {
+			for (let card of currentPlayer.partnerZone.cards.concat(currentPlayer.unitZone.cards.concat(currentPlayer.spellItemZone.cards))) {
 				if (card) {
 					card.attackCount = 0;
 				}

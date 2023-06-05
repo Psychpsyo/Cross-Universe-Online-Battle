@@ -70,6 +70,14 @@ export function createBlockCreatedEvent(block) {
 	}
 }
 
+export function createBlockCreationAbortedEvent(block) {
+	return {
+		"nature": "event",
+		"type": "blockCreationAborted",
+		"block": block
+	}
+}
+
 export function createBlockStartedEvent(block) {
 	return {
 		"nature": "event",

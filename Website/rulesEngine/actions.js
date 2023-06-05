@@ -72,7 +72,7 @@ export class SummonAction extends Action {
 	}
 	
 	* run() {
-		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.location, this.unit.location?.cards.indexOf(this.unit), this.unitZoneIndex);
+		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.zone, this.unit.index, this.unitZoneIndex);
 		this.unit.hidden = false;
 		this.player.unitZone.add(this.unit, this.unitZoneIndex);
 		this.unit = this.unit.snapshot();
@@ -101,15 +101,15 @@ export class EstablishAttackDeclaration extends Action {
 		}
 		
 		// send selection request
-		let targetSelectRequest = new requests.selectAttackTarget.create(this.player, eligibleUnits);
+		let targetSelectRequest = new requests.chooseCards.create(this.player, eligibleUnits, [1], "selectAttackTarget");
 		let responses = (yield [targetSelectRequest]).filter(choice => choice !== undefined);
 		if (responses.length != 1) {
 			throw new Error("Incorrect number of responses supplied during attack target selection. (expected 1, got " + responses.length + " instead)");
 		}
-		if (responses[0].type != "selectAttackTarget") {
-			throw new Error("Incorrect response type supplied during attack target selection. (expected \"selectAttackTarget\", got \"" + responses[0].type + "\" instead)");
+		if (responses[0].type != "chooseCards") {
+			throw new Error("Incorrect response type supplied during attack target selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
 		}
-		this.attackTarget = requests.selectAttackTarget.validate(responses[0].value, targetSelectRequest);
+		this.attackTarget = requests.chooseCards.validate(responses[0].value, targetSelectRequest);
 		
 		// finish
 		for (let attacker of this.attackers) {
@@ -117,7 +117,7 @@ export class EstablishAttackDeclaration extends Action {
 		}
 		this.attackers = this.attackers.map(attacker => attacker.snapshot());
 		this.attackTarget = this.attackTarget.snapshot();
-		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget.location, this.attackTarget.location.cards.indexOf(this.attackTarget));
+		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget.zone, this.attackTarget.index);
 	}
 }
 
@@ -129,7 +129,7 @@ export class DiscardAction extends Action {
 	
 	* run() {
 		this.card = this.card.snapshot();
-		let event = events.createCardDiscardedEvent(this.card.location, this.card.location.cards.indexOf(this.card.cardRef), this.card.owner.discardPile);
+		let event = events.createCardDiscardedEvent(this.card.zone, this.card.index, this.card.owner.discardPile);
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
 		this.card.cardRef.hidden = false;
 		if (this.timing?.block.type == "retire") {
@@ -139,7 +139,7 @@ export class DiscardAction extends Action {
 	}
 	
 	isImpossible() {
-		if (this.card.location.type == "partner") {
+		if (this.card.zone.type == "partner") {
 			return true;
 		}
 		return false;
@@ -154,14 +154,14 @@ export class DestroyAction extends Action {
 	
 	* run() {
 		this.card = this.card.snapshot();
-		let event = events.createCardDestroyedEvent(this.card.location, this.card.location.cards.indexOf(this.card.cardRef), this.card.owner.discardPile);
+		let event = events.createCardDestroyedEvent(this.card.zone, this.card.index, this.card.owner.discardPile);
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
 		this.card.hidden = false;
 		return event;
 	}
 	
 	isImpossible() {
-		if (this.card.location.type == "partner") {
+		if (this.card.zone.type == "partner") {
 			return true;
 		}
 		return false;

@@ -176,10 +176,8 @@ export class ManualController extends InteractionController {
 			index = zone.cards.length;
 		}
 		
-		let source = card.location;
-		let sourceIndex = source? source.cards.indexOf(card) : -1;
-		if (source) {
-			gameUI.clearDragSource(source, sourceIndex, player);
+		if (card.zone) {
+			gameUI.clearDragSource(source, card.index, player);
 		}
 		
 		if (!zone) {
@@ -188,9 +186,9 @@ export class ManualController extends InteractionController {
 		}
 		
 		let insertedIndex = zone.add(card, index);
-		if (card.location === zone) {
-			if (source) {
-				gameUI.removeCard(source, sourceIndex);
+		if (card.zone === zone) {
+			if (card.zone) {
+				gameUI.removeCard(card.zone, card.index);
 			}
 			if (insertedIndex != -1) {
 				if (zone === game.players[0].handZone) {
@@ -295,10 +293,8 @@ export class ManualController extends InteractionController {
 			socket.send("[deckCancel]");
 		}
 		let card = this.playerInfos[player.index].heldCard;
-		let source = card.location;
-		let sourceIndex = source.cards.indexOf(card);
 		
-		gameUI.clearDragSource(source, sourceIndex, player);
+		gameUI.clearDragSource(card.zone, card.index, player);
 		this.playerInfos[player.index].clearHeld();
 	}
 	deckShowTop(player, deckZone) {

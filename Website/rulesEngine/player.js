@@ -41,7 +41,8 @@ export class Player {
 			for (let i = 0; i < card.amount; i++) {
 				let card = await new Card(this, cardId, true);
 				this.deckZone.add(card, this.deckZone.cards.length);
-				card.location = this.deckZone;
+				card.zone = this.deckZone;
+				card.index = this.deckZone.length - 1;
 			}
 		}
 		this.deck = deck;

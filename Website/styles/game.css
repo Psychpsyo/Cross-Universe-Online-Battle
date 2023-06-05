@@ -548,9 +548,9 @@ dialog.popupSelectMenu {
 	user-select: none;
 }
 
-.partnerHighlight {
-	box-shadow: 0px 0px .25em #9f9;
-	border: solid 1px #9f9;
+.cardHighlight {
+	box-shadow: 0px 0px .25em #ffd686;
+	border: solid 1px #ffd686;
 }
 
 /*deck selector*/
@@ -665,6 +665,16 @@ dialog.popupSelectMenu {
 }
 .unselectableCard {
 	filter: grayscale() brightness(.5);
+}
+
+.cardMenuBottomButton {
+	height: 2em;
+	line-height: 2em;
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
+	border-bottom-left-radius: 1em;
+	border-bottom-right-radius: 1em;
 }
 
 /* field labels */
