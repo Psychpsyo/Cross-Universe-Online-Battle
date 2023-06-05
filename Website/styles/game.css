@@ -273,11 +273,6 @@ img[src$="cardBackFrameP1.png"] {
 	transform: translate(-50%, -50%);
 }
 
-.cardDiv {
-	position: relative;
-	display: inherit;
-}
-
 .cardBtns {
 	display: none;
 	width: 100%;

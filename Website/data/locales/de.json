@@ -121,6 +121,11 @@
 				"question": "Möchtest du die Battle Phase betreten?",
 				"enter": "Battle Phase betreten",
 				"skip": "Battle Phase überspringen"
+			},
+			
+			"retire": {
+				"dropRetire": "Retire (x{#AMOUNT})",
+				"dropCancel": "Abbrechen"
 			}
 		}
 	},

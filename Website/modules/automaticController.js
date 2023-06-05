@@ -7,6 +7,8 @@ import {socket} from "/modules/netcode.js";
 import {DistRandom} from "/modules/distributedRandom.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
+import * as actions from "/rulesEngine/actions.js";
+import * as blocks from "/rulesEngine/blocks.js";
 
 export class AutomaticController extends InteractionController {
 	constructor() {
@@ -27,10 +29,7 @@ export class AutomaticController extends InteractionController {
 		
 		this.gameSpeed = 500;
 		
-		this.canStandardSummon = false;
 		this.standardSummonEventTarget = new EventTarget();
-		this.canRetire = false;
-		this.retireEventTarget = new EventTarget();
 	}
 	
 	async startGame() {
@@ -53,12 +52,14 @@ export class AutomaticController extends InteractionController {
 						playerPromises[request.player.index].push(this.presentInputRequest(request));
 					}
 					let responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
-					this.waitingForOpponentInput = false;
 					
 					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
 					
-					this.canStandardSummon = false;
-					this.canRetire = false;
+					this.waitingForOpponentInput = false;
+					for (let playerInfo of this.playerInfos) {
+						playerInfo.canStandardSummon = false;
+						playerInfo.canRetire = [];
+					}
 					break;
 				}
 			}
@@ -86,11 +87,23 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	grabCard(player, zone, index) {
-		if (this.canStandardSummon && zone === player.handZone && zone.cards[index].cardTypes.get().includes("unit")) {
-			this.playerInfos[player.index].setHeld(zone.cards[index]);
-			gameUI.makeDragSource(zone, index, player);
+		let card = zone.cards[index];
+		
+		// for retires
+		if (this.playerInfos[player.index].canRetire.includes(card) && !this.playerInfos[player.index].retiring.includes(card)) {
+			this.playerInfos[player.index].setHeld(zone, index);
 			return true;
 		}
+		if (this.playerInfos[player.index].retiring.length > 0) {
+			return false;
+		}
+		
+		// for summons
+		if (this.playerInfos[player.index].canStandardSummon && zone === player.handZone && card.cardTypes.get().includes("unit")) {
+			this.playerInfos[player.index].setHeld(zone, index);
+			return true;
+		}
+		
 		return false;
 	}
 	dropCard(player, zone, index) {
@@ -99,15 +112,25 @@ export class AutomaticController extends InteractionController {
 		
 		let source = card.location;
 		let sourceIndex = source? source.cards.indexOf(card) : -1;
-		if (source) {
-			gameUI.clearDragSource(source, sourceIndex, player);
-		}
 		
-		if (this.canStandardSummon && source == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
-			this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: sourceIndex, fieldIndex: index}}));
-			
+		// summoning
+		if (this.playerInfos[player.index].canStandardSummon && source == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
+			if (player === localPlayer) {
+				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: sourceIndex, fieldIndex: index}}));
+			}
 			return;
 		}
+		
+		// retiring
+		if (this.playerInfos[player.index].canRetire.includes(card) && zone === player.discardPile) {
+			this.playerInfos[player.index].retiring.push(card);
+			if (player === localPlayer) {
+				autoUI.indicateRetire(this.playerInfos[player.index].retiring.length);
+			}
+			return;
+		}
+		
+		gameUI.clearDragSource(source, sourceIndex, player);
 	}
 	
 	async handleEvent(event) {
@@ -137,7 +160,7 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "phaseStarted": {
-				autoUI.startPhase(event.phaseType);
+				autoUI.startPhase(event.phase.type);
 				return this.gameSleep();
 			}
 			case "manaChanged": {
@@ -145,7 +168,7 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "stackCreated": {
-				putChatMessage("Opened stack #" + event.index, "notice");
+				putChatMessage("Opened stack #" + event.stack.index, "notice");
 				return;
 			}
 			case "cardPlaced": {
@@ -170,6 +193,16 @@ export class AutomaticController extends InteractionController {
 				gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
 				return this.gameSleep(.5);
 			}
+			case "actionCancelled": {
+				// units that got excluded from retires
+				if (event.action instanceof actions.DiscardAction && event.action.timing?.block instanceof blocks.Retire) {
+					gameUI.clearDragSource(
+						event.action.card.location,
+						event.action.card.location.cards.indexOf(event.action.card),
+						event.action.timing.block.player
+					);
+				}
+			}
 			default: {
 				console.log(event.type);
 				return this.gameSleep();
@@ -178,6 +211,17 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	async presentInputRequest(request) {
+		switch (request.type) {
+			case "doStandardSummon": {
+				this.playerInfos[request.player.index].canStandardSummon = true;
+				break;
+			}
+			case "doRetire": {
+				this.playerInfos[request.player.index].canRetire = request.eligibleUnits;
+				break;
+			}
+		}
+		
 		if (request.player != localPlayer) {
 			// If this is directed at not the local player, we might need to wait for an opponent input.
 			// Only the first input request is allowed to take this, all others can and must reject since the engine wants only one action per player per request.
@@ -210,7 +254,7 @@ export class AutomaticController extends InteractionController {
 					passBtn.addEventListener("click", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						passBtn.removeEventListener("click", resolve);
-						autoUI.removePass();
+						autoUI.clearPass();
 						reject();
 					}, {once: true});
 				}).then(
@@ -226,7 +270,6 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "doStandardSummon": {
-				this.canStandardSummon = true;
 				let summonDetails = await new Promise((resolve, reject) => {
 					this.standardSummonEventTarget.addEventListener("summon", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
@@ -241,6 +284,24 @@ export class AutomaticController extends InteractionController {
 					return;
 				}
 				response.value = summonDetails;
+				break;
+			}
+			case "doRetire": {
+				let retired = await new Promise((resolve, reject) => {
+					retireBtn.addEventListener("click", resolve, {once: true});
+					this.madeMoveTarget.addEventListener("move", function() {
+						retireBtn.removeEventListener("retire", resolve);
+						reject();
+					}, {once: true});
+				}).then(
+					() => {return true},
+					() => {return false}
+				);
+				if (!retired) {
+					return;
+				}
+				response.value = this.playerInfos[localPlayer.index].retiring.map(card => this.playerInfos[localPlayer.index].canRetire.indexOf(card));
+				this.playerInfos[localPlayer.index].retiring = [];
 				break;
 			}
 			case "enterBattlePhase": {
@@ -267,11 +328,15 @@ class AutomaticPlayerInfo {
 	constructor(player) {
 		this.player = player;
 		this.heldCard = null;
+		this.canStandardSummon = false;
+		this.canRetire = [];
+		this.retiring = [];
 	}
 	
-	setHeld(card) {
-		this.heldCard = card;
-		gameUI.uiPlayers[this.player.index].setDrag(card);
+	setHeld(zone, index) {
+		this.heldCard = zone.get(index);
+		gameUI.uiPlayers[this.player.index].setDrag(this.heldCard);
+		gameUI.makeDragSource(zone, index, this.player);
 	}
 	clearHeld() {
 		this.heldCard = null;

@@ -121,6 +121,11 @@
 				"question": "Do you want to enter the battle phase?",
 				"enter": "Enter Battle Phase",
 				"skip": "Skip Battle Phase"
+			},
+			
+			"retire": {
+				"dropRetire": "Retire (x{#AMOUNT})",
+				"dropCancel": "Cancel"
 			}
 		}
 	},

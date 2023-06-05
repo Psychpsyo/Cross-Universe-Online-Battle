@@ -42,7 +42,7 @@ export function createPhaseStartedEvent(phase) {
 	return {
 		"nature": "event",
 		"type": "phaseStarted",
-		"phaseType": phase.type
+		"phase": phase
 	}
 }
 
@@ -50,15 +50,39 @@ export function createStackCreatedEvent(stack) {
 	return {
 		"nature": "event",
 		"type": "stackCreated",
-		"index": stack.index
+		"stack": stack
+	}
+}
+
+export function createStackStartedEvent(stack) {
+	return {
+		"nature": "event",
+		"type": "stackStarted",
+		"stack": stack
 	}
 }
 
 export function createBlockCreatedEvent(block) {
 	return {
 		"nature": "event",
-		"type": "stackCreated",
-		"index": block.type
+		"type": "blockCreated",
+		"block": block
+	}
+}
+
+export function createBlockStartedEvent(block) {
+	return {
+		"nature": "event",
+		"type": "blockStarted",
+		"block": block
+	}
+}
+
+export function createActionCancelledEvent(action) {
+	return {
+		"nature": "event",
+		"type": "actionCancelled",
+		"action": action
 	}
 }
 
@@ -131,3 +155,4 @@ export function createCardDestroyedEvent(fromZone, fromIndex, toZone) {
 		"toZone": toZone
 	}
 }
+

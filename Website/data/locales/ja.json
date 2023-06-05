@@ -121,6 +121,11 @@
 				"question": null,
 				"enter": null,
 				"skip": null
+			},
+			
+			"retire": {
+				"dropRetire": "リターン（×{#AMOUNT}）",
+				"dropCancel": "キャンセル"
 			}
 		}
 	},

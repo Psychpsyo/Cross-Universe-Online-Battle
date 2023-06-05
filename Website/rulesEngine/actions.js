@@ -2,6 +2,10 @@ import * as events from "./events.js";
 
 // Base class for any action in the game.
 class Action {
+	constructor() {
+		this.timing = null; // Is set by the Timing itself
+	}
+	
 	// Returns the event that represents this action.
 	// After run() finishes, this class should only hold references to card snapshots, not actual cards so it serves as a record of what it did
 	run() {}
@@ -70,7 +74,13 @@ export class SummonAction extends Action {
 		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.location, this.unit.location?.cards.indexOf(this.unit), this.unitZoneIndex);
 		this.unit.hidden = false;
 		this.player.unitZone.add(this.unit, this.unitZoneIndex);
+		this.unit = this.unit.snapshot();
 		return summonEvent;
+	}
+	
+	isImpossible() {
+		let slotCard = this.player.unitZone.get(this.unitZoneIndex);
+		return slotCard != null && slotCard != this.unit;
 	}
 }
 
@@ -81,15 +91,18 @@ export class DiscardAction extends Action {
 	}
 	
 	run() {
-		let event = events.createCardDiscardedEvent(this.card.location, this.card.location.cards.indexOf(this.card), this.card.owner.discardPile);
-		this.card.owner.discardPile.add(this.card, this.card.owner.discardPile.cards.length);
-		this.card.hidden = false;
 		this.card = this.card.snapshot();
+		let event = events.createCardDiscardedEvent(this.card.location, this.card.location.cards.indexOf(this.card.cardRef), this.card.owner.discardPile);
+		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
+		this.card.cardRef.hidden = false;
+		if (this.timing?.block.type == "retire") {
+			this.timing.block.stack.phase.turn.hasRetired.push(this.card);
+		}
 		return event;
 	}
 	
 	isImpossible() {
-		if (this.card.location.type =="partner") {
+		if (this.card.location.type == "partner") {
 			return true;
 		}
 		return false;
@@ -103,10 +116,10 @@ export class DestroyAction extends Action {
 	}
 	
 	run() {
-		let event = events.createCardDestroyedEvent(this.card.location, this.card.location.cards.indexOf(this.card), this.card.owner.discardPile);
-		this.card.owner.discardPile.add(this.card, this.card.owner.discardPile.cards.length);
-		this.card.hidden = false;
 		this.card = this.card.snapshot();
+		let event = events.createCardDestroyedEvent(this.card.location, this.card.location.cards.indexOf(this.card.cardRef), this.card.owner.discardPile);
+		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
+		this.card.hidden = false;
 		return event;
 	}
 	

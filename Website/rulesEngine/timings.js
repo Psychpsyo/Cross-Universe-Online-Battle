@@ -1,16 +1,30 @@
 
+import {createActionCancelledEvent} from "./events.js";
+
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
 	constructor(game, actions, block) {
 		this.index = 0;
 		this.actions = actions;
 		this.block = block; // block may be null
+		for (let action of this.actions) {
+			action.timing = this;
+		}
 	}
 	
 	// returns whether or not any substitutions were handled
 	* substitute() {
 		let actionCount = this.actions.length;
-		this.actions.filter(action => action.isPossible());
+		let actionCancelledEvents = []
+		for (let action of this.actions) {
+			if (action.isImpossible()) {
+				actionCancelledEvents.push(createActionCancelledEvent(action));
+			}
+		}
+		if (actionCancelledEvents.length > 0) {
+			yield actionCancelledEvents;
+		}
+		this.actions = this.actions.filter(action => action.isPossible());
 		
 		if (actionCount != this.actions.length) {
 			return true;
@@ -29,13 +43,13 @@ export class Timing {
 	
 	// returns whether or not the timing completed sucessfully
 	async* run(asCost = false) {
-		this.index = game.lastTiming;
+		this.index = game.nextTimingIndex;
 		while (yield* this.substitute()) {}
 		
 		if (asCost) {
 			// empty cost counts as successful completion
 			if (this.actions.length == 0) {
-				game.lastTiming++;
+				game.nextTimingIndex++;
 				return true;
 			}
 			if (!this.isFullyPossible()) {
@@ -52,7 +66,7 @@ export class Timing {
 			events.push(action.run());
 		}
 		yield events;
-		game.lastTiming++;
+		game.nextTimingIndex++;
 		return true;
 	}
 	

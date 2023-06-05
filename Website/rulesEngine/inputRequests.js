@@ -1,13 +1,14 @@
 // input request definitions for passing out of the engine
 
 export const chooseCards = {
-	create: function(player, cards, validAmounts) {
+	create: function(player, cards, validAmounts, reason) {
 		return {
 			"nature": "request",
 			"player": player,
 			"type": "chooseCards",
 			"from": cards,
-			"validAmounts": validAmounts
+			"validAmounts": validAmounts,
+			"reason": reason
 		}
 	},
 	validate: function(response, request) {
@@ -85,5 +86,24 @@ export const doStandardSummon = {
 			throw new Error("Tried to standard summon a card that isn't a unit.");
 		}
 		return response;
+	}
+}
+
+export const doRetire = {
+	create: function(player, eligibleUnits) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "doRetire",
+			"eligibleUnits": eligibleUnits
+		}
+	},
+	validate: function(response, request) {
+		for (let cardIndex of response) {
+			if (cardIndex < 0 || cardIndex >= request.eligibleUnits.length) {
+				throw new Error("Chose an invalid unit retire index: " + cardIndex);
+			}
+		}
+		return response.map(cardIndex => request.eligibleUnits[cardIndex]);
 	}
 }

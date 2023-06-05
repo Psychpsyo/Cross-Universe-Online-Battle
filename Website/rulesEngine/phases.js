@@ -17,6 +17,9 @@ class Phase {
 	getTimings() {
 		return [];
 	}
+	getActions() {
+		return [];
+	}
 }
 
 // Base class for any phase that works with stacks and blocks
@@ -41,6 +44,9 @@ class StackPhase extends Phase {
 	
 	getTimings() {
 		return this.stacks.map(stack => stack.getTimings()).flat();
+	}
+	getActions() {
+		return this.stacks.map(stack => stack.getActions()).flat();
 	}
 	
 	getBlockOptions(stack) {
@@ -95,7 +101,7 @@ export class ManaSupplyPhase extends Phase {
 		let cardChoiceRequests = [];
 		for (let player of this.turn.game.players) {
 			if (player.handZone.cards.length > 8) {
-				cardChoiceRequests.push(requests.chooseCards.create(player, player.handZone.cards, [player.handZone.cards.length - 8]));
+				cardChoiceRequests.push(requests.chooseCards.create(player, player.handZone.cards, [player.handZone.cards.length - 8], "handTooFull"));
 			}
 		}
 		if (cardChoiceRequests.length > 0) {
@@ -103,6 +109,13 @@ export class ManaSupplyPhase extends Phase {
 			this.timings.push(new Timing(this.turn.game, chosenCards.flat().map(card => new actions.DiscardAction(card)), null));
 			yield* this.timings[this.timings.length - 1].run();
 		}
+	}
+	
+	getTimings() {
+		return this.timings;
+	}
+	getActions() {
+		return this.timings.map(timing => timing.actions).flat();
 	}
 }
 
@@ -127,8 +140,27 @@ export class MainPhase extends StackPhase {
 	getBlockOptions(stack) {
 		let options = super.getBlockOptions(stack);
 		if (stack.canDoNormalActions()) {
-			if (!this.turn.standardSummon) {
+			if (this.turn.hasStandardSummoned === null) {
 				options.push(requests.doStandardSummon.create(this.turn.player));
+			}
+			if (this.turn.hasRetired === null) {
+				let eligibleUnits = [];
+				for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
+					if (card) {
+						// RULES: Note that you cannot retire units that have been summoned this turn or the turn before.
+						let recentTurnActions = this.turn.game.turns[this.turn.game.turns.length - 1].getActions();
+						if (this.turn.game.turns.lenght > 1) {
+							recentTurnActions = this.turn.game.turns[this.turn.game.turns.length - 2].getActions().concat(recentTurnActions);
+						}
+						let summons = recentTurnActions.filter(action => action instanceof actions.SummonAction && action.unit.cardRef === card);
+						if (summons.length > 0) {
+							continue;
+						}
+						
+						eligibleUnits.push(card);
+					}
+				}
+				options.push(requests.doRetire.create(this.turn.player, eligibleUnits));
 			}
 		}
 		return options;

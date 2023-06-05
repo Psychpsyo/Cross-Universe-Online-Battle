@@ -76,6 +76,7 @@ class SnapshotCard extends BaseCard {
 			new SnapshotValue(card.attack.get(), card.attack.getBase()),
 			new SnapshotValue(card.defense.get(), card.defense.getBase())
 		);
+		this.location = card.location;
 		this.cardRef = card;
 	}
 }

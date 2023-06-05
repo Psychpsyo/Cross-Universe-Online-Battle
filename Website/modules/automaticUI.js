@@ -12,9 +12,14 @@ export function init() {
 		document.getElementById(key + "Indicator").textContent = value;
 	}
 	
+	retireCancelBtn.textContent = locale.game.automatic.retire.dropCancel;
+	
 	passBtn.addEventListener("click", function() {
 		this.disabled = true;
 	});
+	
+	retireBtn.addEventListener("click", clearRetire);
+	retireCancelBtn.addEventListener("click", clearRetire);
 	
 	controlPanel.removeAttribute("hidden");
 }
@@ -60,6 +65,14 @@ export function startTurn() {
 export function indicatePass() {
 	passBtn.disabled = false;
 }
-export function removePass() {
+export function clearPass() {
 	passBtn.disabled = true;
+}
+
+export function indicateRetire(amount) {
+	retireBtn.textContent = locale.game.automatic.retire.dropRetire.replaceAll("{#AMOUNT}", amount);
+	retireOptions.style.display = "block";
+}
+export function clearRetire() {
+	retireOptions.style.display = "none";
 }

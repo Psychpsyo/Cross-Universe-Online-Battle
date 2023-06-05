@@ -1,6 +1,7 @@
 
 import * as requests from "./inputRequests.js";
 import * as blocks from "./blocks.js";
+import {createBlockCreatedEvent, createStackStartedEvent, createBlockStartedEvent} from "./events.js"
 
 export class Stack {
 	constructor(phase, index) {
@@ -26,6 +27,7 @@ export class Stack {
 			switch (response.type) {
 				case "pass": {
 					if (this.passed) {
+						yield [createStackStartedEvent(this)];
 						yield* this.executeBlocks();
 						return;
 					}
@@ -41,12 +43,18 @@ export class Stack {
 						this.getNextPlayer().handZone.cards[response.value.handIndex],
 						response.value.fieldIndex
 					);
+					break;
+				}
+				case "doRetire": {
+					nextBlock = new blocks.Retire(this, this.getNextPlayer(), response.value);
+					break;
 				}
 			}
 			if (response.type != "pass") {
 				this.passed = false;
 				
 				if (await (yield* nextBlock.runCost())) {
+					yield [createBlockCreatedEvent(nextBlock)];
 					this.blocks.push(nextBlock);
 				}
 			}
@@ -55,12 +63,18 @@ export class Stack {
 	
 	getTimings() {
 		let costTimings = this.blocks.map(block => block.getCostTiming());
-		let actionTimings = [...this.blocks].reverse().map(block => block.getExecutionTimings()).flat();
-		return costTimings.concat(actionTimings);
+		let executionTimings = [...this.blocks].reverse().map(block => block.getExecutionTimings()).flat();
+		return costTimings.concat(executionTimings);
+	}
+	getActions() {
+		let costActions = this.blocks.map(block => block.getCostActions());
+		let executionActions = [...this.blocks].reverse().map(block => block.getExecutionActions()).flat();
+		return costActions.concat(executionActions);
 	}
 	
 	async* executeBlocks() {
 		for (let i = this.blocks.length - 1; i >= 0; i--) {
+			yield [createBlockStartedEvent(this.blocks[i])];
 			yield* this.blocks[i].run();
 		}
 	}

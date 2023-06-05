@@ -1,5 +1,7 @@
 // This module exports zone-related classes which define single zones as per the Cross Universe rules.
 
+import * as blocks from "./blocks.js";
+
 export class Zone {
 	constructor(player, type) {
 		this.player = player;
@@ -19,6 +21,16 @@ export class Zone {
 			index = -1;
 		}
 		card.location = this;
+		// remove this card from relevant actions
+		let stacks = this.player.game.getStacks();
+		if (stacks.length > 0) {
+			if (stacks[stacks.length - 1].blocks[0] instanceof blocks.Retire) {
+				let retire = stacks[stacks.length - 1].blocks[0];
+				if (retire.units.includes(card)) {
+					retire.units.splice(retire.units.indexOf(card), 1);
+				}
+			}
+		}
 		return index;
 	}
 	

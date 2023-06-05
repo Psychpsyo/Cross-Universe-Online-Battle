@@ -17,7 +17,7 @@ export class Game {
 		this.players.push(new Player(this));
 		
 		this.turns = [];
-		this.lastTiming = 0;
+		this.nextTimingIndex = 1;
 		
 		this.rng = new CURandom();
 	}
@@ -94,6 +94,12 @@ export class Game {
 		}
 	}
 	
+	getPhases() {
+		return this.turns.map(turn => turn.phases).flat();
+	}
+	getStacks() {
+		return this.turns.map(turn => turn.getStacks()).flat();
+	}
 	getTimings() {
 		return this.turns.map(turn => turn.getTimings()).flat();
 	}

@@ -9,8 +9,8 @@ export class Turn {
 		this.phases = [];
 		this.index = game.turns.length;
 		
-		this.hasStandardSummoned = false;
-		this.hasRetired = false;
+		this.hasStandardSummoned = null;
+		this.hasRetired = null;
 	}
 	
 	async* run() {
@@ -33,8 +33,14 @@ export class Turn {
 		yield* this.runPhase(new EndPhase(this));
 	}
 	
+	getStacks() {
+		return this.phases.slice(1).map(phase => phase.stacks).flat();
+	}
 	getTimings() {
 		return this.phases.map(phase => phase.getTimings()).flat();
+	}
+	getActions() {
+		return this.phases.map(phase => phase.getActions()).flat();
 	}
 	
 	async* runPhase(phase) {
