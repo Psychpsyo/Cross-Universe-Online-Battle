@@ -723,7 +723,7 @@ dialog.popupSelectMenu {
 	font-weight: bold;
 	white-space: pre;
 	text-align: center;
-	filter: drop-shadow(black 0 0 .15em) drop-shadow(black 0 0 .15em);
+	filter: drop-shadow(black 0 0 .15em);
 }
 
 #mainGameBlackoutContent::first-line {

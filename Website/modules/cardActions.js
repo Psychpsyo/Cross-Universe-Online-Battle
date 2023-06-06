@@ -1,5 +1,6 @@
 // This module exports a list of functions that need to be accessible as buttons on specific cards.
 
+import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {putChatMessage} from "/modules/generalUI.js";
 

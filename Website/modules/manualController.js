@@ -146,12 +146,12 @@ export class ManualController extends InteractionController {
 	
 	// returns whether or not the card was fully grabbed from the zone
 	grabCard(player, zone, index) {
+		if (!zone.cards[index] || (zone.cards[index].hidden && player === localPlayer) || this.playerInfos[player.index].heldCard !== null) {
+			return false;
+		}
 		if (zone == this.tokenZone) {
 			this.playerInfos[player.index].setHeld(new Card(localPlayer, zone.cards[index].cardId, false));
 			socket.send("[grabToken]" + zone.cards[index].cardId);
-			return false;
-		}
-		if (!zone.cards[index] || (zone.cards[index].hidden && player === localPlayer) || this.playerInfos[player.index].heldCard !== null) {
 			return false;
 		}
 		for (const playerInfo of this.playerInfos) {
