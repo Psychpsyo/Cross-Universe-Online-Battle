@@ -5,6 +5,7 @@ import {InteractionController} from "/modules/interactionController.js";
 import {putChatMessage} from "/modules/generalUI.js";
 import {socket} from "/modules/netcode.js";
 import {DistRandom} from "/modules/distributedRandom.js";
+import {shouldAutoPass} from "/modules/autopass.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
 import * as actions from "/rulesEngine/actions.js";
@@ -43,13 +44,26 @@ export class AutomaticController extends InteractionController {
 					break;
 				}
 				case "request": {
+					let localRequests = [];
 					let playerPromises = [];
 					for (let i = 0; i < game.players.length; i++) {
 						playerPromises.push([]);
 					}
 					for (let request of updates.value) {
-						playerPromises[request.player.index].push(this.presentInputRequest(request));
+						if (request.player === localPlayer) {
+							localRequests.push(request);
+						} else {
+							playerPromises[request.player.index].push(this.presentInputRequest(request));
+						}
 					}
+
+					if (shouldAutoPass(localRequests)) {
+						socket.send('[inputRequestResponse]{"type":"pass"}');
+						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve({type: "pass"})}));
+					} else {
+						playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
+					}
+
 					let responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
 					
 					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
@@ -195,10 +209,6 @@ export class AutomaticController extends InteractionController {
 				await gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
 				return this.gameSleep();
 			}
-			case "stackCreated": {
-				putChatMessage("Opened stack #" + event.stack.index, "notice");
-				return;
-			}
 			case "cardPlaced": {
 				gameUI.insertCard(event.toZone, event.toIndex);
 				gameUI.removeCard(event.player.handZone, event.fromIndex);
@@ -230,10 +240,6 @@ export class AutomaticController extends InteractionController {
 						event.action.timing.block.player
 					);
 				}
-			}
-			default: {
-				console.log(event);
-				return this.gameSleep();
 			}
 		}
 	}
@@ -269,7 +275,7 @@ export class AutomaticController extends InteractionController {
 		}
 		
 		let response = {
-			"type": request.type
+			type: request.type
 		}
 		switch (request.type) {
 			case "chooseCards": {

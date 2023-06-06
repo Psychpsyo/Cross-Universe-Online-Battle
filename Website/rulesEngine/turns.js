@@ -42,6 +42,13 @@ export class Turn {
 	getActions() {
 		return this.phases.map(phase => phase.getActions()).flat();
 	}
+
+	currentPhase() {
+		return this.phases[this.phases.length - 1];
+	}
+	currentStack() {
+		return this.currentPhase().currentStack();
+	}
 	
 	async* runPhase(phase) {
 		this.phases.push(phase);

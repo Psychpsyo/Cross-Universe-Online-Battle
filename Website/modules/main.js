@@ -53,7 +53,7 @@ export function connect() {
 }
 // pressing enter in the roomcode entry field to connect
 document.getElementById("roomCodeInputField").addEventListener("keyup", function(e) {
-	if (e.keyCode === 13) {
+	if (e.code == "Enter") {
 		connect();
 	}
 });

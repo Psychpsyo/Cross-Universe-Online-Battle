@@ -4,7 +4,6 @@ import {createStackCreatedEvent, createManaChangedEvent} from "./events.js";
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
-import * as blocks from "./blocks.js";
 
 // Base class for all phases
 class Phase {
@@ -37,10 +36,14 @@ class StackPhase extends Phase {
 			do {
 				currentStackIndex++;
 				this.stacks.push(new Stack(this, currentStackIndex));
-				yield [createStackCreatedEvent(this.stacks[this.stacks.length - 1])];
-				yield* this.stacks[this.stacks.length - 1].run();
-			} while (this.stacks[this.stacks.length - 1].blocks.length > 0);
+				yield [createStackCreatedEvent(this.currentStack())];
+				yield* this.currentStack().run();
+			} while (this.currentStack().blocks.length > 0);
 		} while (currentStackIndex > 1);
+	}
+	
+	getBlockOptions(stack) {
+		return [requests.pass.create(stack.getNextPlayer())];
 	}
 	
 	getTimings() {
@@ -49,9 +52,9 @@ class StackPhase extends Phase {
 	getActions() {
 		return this.stacks.map(stack => stack.getActions()).flat();
 	}
-	
-	getBlockOptions(stack) {
-		return [requests.pass.create(stack.getNextPlayer())];
+
+	currentStack() {
+		return this.stacks[this.stacks.length - 1];
 	}
 }
 

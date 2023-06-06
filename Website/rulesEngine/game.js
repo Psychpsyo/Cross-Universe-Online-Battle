@@ -2,11 +2,11 @@
 // TODO: migrate data from global variables into this class
 import {renderCard} from "/custom/renderer.js";
 import {Player} from "./player.js";
-import {Card} from "./card.js";
 import {Turn} from "./turns.js";
 import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
 import {locale} from "/modules/locale.js";
+import * as phases from "./phases.js";
 
 export class Game {
 	constructor() {
@@ -90,7 +90,7 @@ export class Game {
 		while (true) {
 			this.turns.push(new Turn(currentPlayer));
 			yield [createTurnStartedEvent()];
-			yield* this.turns[this.turns.length - 1].run();
+			yield* this.currentTurn().run();
 			for (let card of currentPlayer.partnerZone.cards.concat(currentPlayer.unitZone.cards.concat(currentPlayer.spellItemZone.cards))) {
 				if (card) {
 					card.attackCount = 0;
@@ -108,6 +108,17 @@ export class Game {
 	}
 	getTimings() {
 		return this.turns.map(turn => turn.getTimings()).flat();
+	}
+
+	currentTurn() {
+		return this.turns[this.turns.length - 1];
+	}
+	currentPhase() {
+		return this.currentTurn().currentPhase();
+	}
+	currentStack() {
+		let currentPhase = this.currentPhase();
+		return !currentPhase instanceof phases.StackPhase? null : currentPhase.currentStack();
 	}
 }
 

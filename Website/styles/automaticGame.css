@@ -16,7 +16,6 @@
 	
 	list-style-type: none;
 }
-
 #phaseDisplay li {
 	color: #eee;
 	padding: .05em .2em;
@@ -28,12 +27,46 @@
 	flex-grow: 1;
 	max-width: 6.5em;
 }
-
 #phaseDisplay .current {
 	background-position: 0% 100%;
 }
-
 #phaseDisplay .invalid {
 	background-color: #0008;
 	color: #eee8;
+}
+
+.turnDisplay {
+	position: absolute;
+	overflow: hidden;
+}
+#yourTurnDisplay {
+	top: 100%;
+	left: 0;
+}
+#opponentTurnDisplay {
+	position: absolute;
+	bottom: 100%;
+	right: 0;
+}
+.turnDisplayLabel {
+	color: #eee;
+	background-color: #000A;
+	transition: transform .35s;
+	transform: translateY(0);
+}
+#yourTurnDisplayLabel {
+	padding-left: .5em;
+	padding-right: 1.5em;
+	clip-path: polygon(0 0, 100% 0, calc(100% - 1em) 100%, 0 100%);
+}
+#yourTurnDisplayLabel.hidden {
+	transform: translateY(-100%);
+}
+#opponentTurnDisplayLabel {
+	padding-right: .5em;
+	padding-left: 1.5em;
+	clip-path: polygon(0 100%, 1em 0, 100% 0, 100% 100%);
+}
+#opponentTurnDisplayLabel.hidden {
+	transform: translateY(100%);
 }

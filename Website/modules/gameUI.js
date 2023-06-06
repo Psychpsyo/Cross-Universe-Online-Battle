@@ -315,7 +315,7 @@ class fieldCardSlot extends uiCardSlot {
 		if (card) {
 			this.fieldSlot.src = card.getImage();
 			// add card action buttons
-			if (!gameState.automatic) {
+			if (!gameState.automatic && !card.hidden) {
 				this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {

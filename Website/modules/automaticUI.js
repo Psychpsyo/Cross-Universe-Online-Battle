@@ -2,8 +2,7 @@
 
 import {locale} from "/modules/locale.js";
 
-let currentActivePhase = null;
-let currentTurn = 0;
+let currentActivePhaseElem = null;
 
 export function init() {
 	Array.from(document.querySelectorAll(".manualOnly")).forEach(elem => elem.remove());
@@ -29,38 +28,51 @@ export function init() {
 }
 
 export function startPhase(type) {
-	phaseDisplay.hidden = false;
-	currentActivePhase?.classList.remove("current");
+	currentActivePhaseElem?.classList.remove("current");
 	switch(type) {
 		case "manaSupplyPhase": {
-			currentActivePhase = manaSupplyPhaseIndicator;
+			currentActivePhaseElem = manaSupplyPhaseIndicator;
 			break;
 		}
 		case "drawPhase": {
-			currentActivePhase = drawPhaseIndicator;
+			currentActivePhaseElem = drawPhaseIndicator;
 			break;
 		}
 		case "mainPhase": {
-			currentActivePhase = currentActivePhase == drawPhaseIndicator? firstMainPhaseIndicator : secondMainPhaseIndicator;
+			currentActivePhaseElem = currentActivePhaseElem == drawPhaseIndicator? firstMainPhaseIndicator : secondMainPhaseIndicator;
 			break;
 		}
 		case "battlePhase": {
-			currentActivePhase = battlePhaseIndicator;
+			currentActivePhaseElem = battlePhaseIndicator;
 			break;
 		}
 		case "endPhase": {
-			currentActivePhase = endPhaseIndicator;
+			currentActivePhaseElem = endPhaseIndicator;
 			break;
 		}
 	}
-	currentActivePhase.classList.add("current");
+	currentActivePhaseElem.classList.add("current");
 }
 
-export function startTurn() {
-	currentTurn++;
-	currentActivePhase?.classList.remove("current");
-	currentActivePhase = null;
-	if (currentTurn == 2) {
+export function startTurn(speed) {
+	phaseDisplay.hidden = false;
+	currentActivePhaseElem?.classList.remove("current");
+	currentActivePhaseElem = null;
+
+	let currentTurn = game.currentTurn();
+	if (currentTurn.player == localPlayer) {
+		opponentTurnDisplayLabel.classList.add("hidden");
+		window.setTimeout(() => {
+			yourTurnDisplayLabel.classList.remove("hidden");
+		}, speed * 1.5);
+	} else {
+		yourTurnDisplayLabel.classList.add("hidden");
+		window.setTimeout(() => {
+			opponentTurnDisplayLabel.classList.remove("hidden");
+		}, speed * 1.5);
+	}
+
+	if (currentTurn.index == 1) {
 		battlePhaseIndicator.classList.remove("invalid");
 		secondMainPhaseIndicator.classList.remove("invalid");
 	}
