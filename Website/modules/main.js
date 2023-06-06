@@ -46,6 +46,17 @@ randomizeRoomcode();
 
 // connecting
 export function connect() {
+	// hide input field and show waiting indicator
+	roomCodeInputFieldSpan.setAttribute("hidden", "");
+	waitingForOpponentSpan.removeAttribute("hidden");
+	// refresh the "Waiting for Opponent" text so screen readers read it out.
+	setTimeout(() => {
+		if (typeof trWaitingForOpponent !== undefined) {
+			trWaitingForOpponent.textContent = locale.mainMenu.waitingForOpponent;
+			cancelWaitingBtn.focus();
+		}
+	}, 100);
+	
 	// I don't want to import this up-front on pageload since it imports a bunch of other stuff itself.
 	import("/modules/initState.js").then(initModule => {
 		new initModule.InitState(roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value, gameModeSelect.value);

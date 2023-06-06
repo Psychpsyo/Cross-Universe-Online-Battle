@@ -17,17 +17,6 @@ export class InitState extends GameState {
 		this.opponentReady = false;
 		
 		connectTo(roomcode + gameMode);
-		
-		// hide input field and show waiting indicator
-		roomCodeInputFieldSpan.hidden = true;
-		waitingForOpponentSpan.hidden = false;
-		// refresh the "Waiting for Opponent" text so screen readers read it out.
-		setTimeout(() => {
-			if (typeof trWaitingForOpponent !== undefined) {
-				trWaitingForOpponent.textContent = locale.mainMenu.waitingForOpponent;
-				cancelWaitingBtn.focus();
-			}
-		}, 100);
 	}
 	
 	receiveMessage(command, message) {
