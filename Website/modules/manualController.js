@@ -31,6 +31,10 @@ class tokenZone {
 			});
 		});
 	}
+
+	get(index) {
+		return this.cards[index];
+	}
 }
 
 export class ManualController extends InteractionController {
@@ -106,6 +110,7 @@ export class ManualController extends InteractionController {
 				message = message.substr(2);
 				let order = message.split("|").map(i => parseInt(i));
 				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
+				deck.reindex();
 				putChatMessage(deck.playerIndex == 1? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");
 				return true;
 			}
@@ -177,7 +182,7 @@ export class ManualController extends InteractionController {
 		}
 		
 		if (card.zone) {
-			gameUI.clearDragSource(source, card.index, player);
+			gameUI.clearDragSource(card.zone, card.index, player);
 		}
 		
 		if (!zone) {
@@ -185,10 +190,12 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		
+		let source = card.zone;
+		let sourceIndex = card.index;
 		let insertedIndex = zone.add(card, index);
 		if (card.zone === zone) {
-			if (card.zone) {
-				gameUI.removeCard(card.zone, card.index);
+			if (source) {
+				gameUI.removeCard(source, sourceIndex);
 			}
 			if (insertedIndex != -1) {
 				if (zone === game.players[0].handZone) {
@@ -266,6 +273,7 @@ export class ManualController extends InteractionController {
 			[order[i], order[rand]] = [order[rand], order[i]];
 		}
 		deckZone.cards.sort((a, b) => order.indexOf(deckZone.cards.indexOf(a)) - order.indexOf(deckZone.cards.indexOf(b)));
+		deckZone.reindex();
 		socket.send("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
 		putChatMessage(locale.game[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}

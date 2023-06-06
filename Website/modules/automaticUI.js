@@ -25,11 +25,11 @@ export function init() {
 		indicatePass();
 	});
 	
-	controlPanel.removeAttribute("hidden");
+	controlPanel.hidden = false;
 }
 
 export function startPhase(type) {
-	phaseDisplay.removeAttribute("hidden");
+	phaseDisplay.hidden = false;
 	currentActivePhase?.classList.remove("current");
 	switch(type) {
 		case "manaSupplyPhase": {
@@ -80,4 +80,36 @@ export function indicateRetire(amount) {
 }
 export function clearRetire() {
 	retireOptions.style.display = "none";
+}
+
+export function playerLost(player) {
+	let displayText = player == localPlayer? locale.game.automatic.gameOver.youLost : locale.game.automatic.gameOver.youWon;
+	displayText += "\n\n";
+	displayText += locale.game.automatic.gameOver[player == localPlayer? "loseReasons" : "winReasons"][player.loseReason];
+	mainGameBlackoutContent.textContent = displayText;
+	mainGameBlackout.classList.remove("hidden");
+}
+export function playerWon(player) {
+	let displayText = player == localPlayer? locale.game.automatic.gameOver.youWon : locale.game.automatic.gameOver.youLost;
+	displayText += "\n\n";
+	displayText += locale.game.automatic.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.winReason];
+	mainGameBlackoutContent.textContent = displayText;
+	mainGameBlackout.classList.remove("hidden");
+}
+export function gameDrawn() {
+	let displayText = locale.game.automatic.gameOver.draw;
+	displayText += "\n\n";
+	let drawReason = "";
+	if (game.players[0].lost && game.players[1].lost) {
+		drawReason = "bothLost";
+	} else if (game.players[0].won && game.players[1].won) {
+		drawReason = "bothWon";
+	} else if (localPlayer.won && localPlayer.lost) {
+		drawReason = "youWonAndLost";
+	} else if (game.players[0].won && game.players[0].lost) {
+		drawReason = "opponentWonAndLost";
+	}
+	displayText += locale.game.automatic.gameOver.drawReasons[drawReason];
+	mainGameBlackoutContent.textContent = displayText;
+	mainGameBlackout.classList.remove("hidden");
 }

@@ -170,16 +170,16 @@ export function receiveMessage(command, message) {
 			return true;
 		}
 		case "hideCursor": { // hide opponent's cursor
-			uiPlayers[0].dragCardElem.setAttribute("hidden", "");
-			uiPlayers[0].cursorElem.setAttribute("hidden", "");
+			uiPlayers[0].dragCardElem.hidden = true;
+			uiPlayers[0].cursorElem.hidden = true;
 			return true;
 		}
 		case "placeCursor": { // move the opponent's cursor somewhere on the field
 			uiPlayers[0].targetX = message.substr(0, message.indexOf("|")) * -1;
 			uiPlayers[0].targetY = 1 - message.substr(message.indexOf("|") + 1);
 			if (uiPlayers[0].dragCardElem.hidden) {
-				uiPlayers[0].dragCardElem.removeAttribute("hidden");
-				uiPlayers[0].cursorElem.removeAttribute("hidden");
+				uiPlayers[0].dragCardElem.hidden = false;
+				uiPlayers[0].cursorElem.hidden = false;
 				uiPlayers[0].posX = uiPlayers[0].targetX;
 				uiPlayers[0].posY = uiPlayers[0].targetY;
 			}
@@ -202,12 +202,10 @@ export function removeCard(zone, index) {
 	// iterates in reverse since the array may be modified during iteration
 	for (let i = cardSlots.length - 1; i >= 0; i--) {
 		if (cardSlots[i].zone === zone) {
-			if (cardSlots[i].index == index) {
+			if (cardSlots[i].index == index || cardSlots[i].index == -1) {
 				cardSlots[i].remove();
 			} else if (cardSlots[i].index > index && !(zone instanceof FieldZone)) {
 				cardSlots[i].index--;
-			} else if (cardSlots[i].index == -1) {
-				cardSlots[i].update();
 			}
 		}
 	}
@@ -515,7 +513,7 @@ class cardSelectorSlot extends uiCardSlot {
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
-			if (grabCard(localPlayer, zone, this.index)) {
+			if (grabCard(localPlayer, zone, this.index) || zone == gameState.controller.tokenZone) {
 				closeCardSelect();
 			}
 		}.bind(this));
@@ -556,9 +554,9 @@ export function openCardSelect(zone) {
 	cardSelectorTitle.textContent = locale.game.cardSelector[gameState.getZoneName(zone)];
 	if (document.getElementById("cardSelectorReturnToDeck")) {
 		if ((zone.player === localPlayer) && (zone.type == "discard" || zone.type == "exile")) {
-			cardSelectorReturnToDeck.removeAttribute("hidden");
+			cardSelectorReturnToDeck.hidden = false;
 		} else {
-			cardSelectorReturnToDeck.setAttribute("hidden", "");
+			cardSelectorReturnToDeck.hidden = true;
 		}
 	}
 	cardSelector.showModal();
@@ -609,12 +607,12 @@ class UiPlayer {
 		if (player == localPlayer) {
 			this.dragCardElem.id = "yourDragCard";
 		} else {
-			this.dragCardElem.setAttribute("hidden", "");
+			this.dragCardElem.hidden = true;
 			
 			this.cursorElem = document.createElement("img");
 			this.cursorElem.classList.add("dragCard");
 			this.cursorElem.src = "images/opponentCursor.png";
-			this.cursorElem.setAttribute("hidden", "");
+			this.cursorElem.hidden = true;
 			draggedCardImages.appendChild(this.cursorElem);
 		}
 	}
@@ -704,7 +702,6 @@ function animate(currentTime) {
 }
 
 // card choice modal (blocking card selector)
-// TODO: Add multi-card selecting
 export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1]) {
 	return new Promise((resolve, reject) => {
 		let validOptions = 0;

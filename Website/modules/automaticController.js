@@ -175,8 +175,24 @@ export class AutomaticController extends InteractionController {
 					return;
 				}
 			}
+			case "playerLost": {
+				await autoUI.playerLost(event.player);
+				return;
+			}
+			case "playerWon": {
+				await autoUI.playerWon(event.player);
+				return;
+			}
+			case "gameDrawn": {
+				await autoUI.gameDrawn();
+				return;
+			}
+			case "damageDealt": {
+				await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+				return this.gameSleep();
+			}
 			case "manaChanged": {
-				await gameUI.uiPlayers[event.player.index].mana.set(event.newValue, false);
+				await gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
 				return this.gameSleep();
 			}
 			case "stackCreated": {
@@ -216,7 +232,7 @@ export class AutomaticController extends InteractionController {
 				}
 			}
 			default: {
-				console.log(event.type);
+				console.log(event);
 				return this.gameSleep();
 			}
 		}
@@ -299,7 +315,30 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "doAttackDeclaration": {
-				// TODO: TODO
+				// TODO: Make this nicer to use. There should be buttons on the cards that do this.
+				let attackers = await new Promise((resolve, reject) => {
+					async function attackButtonClicked() {
+						let validAmounts = [];
+						for (let i = 1; i <= request.eligibleUnits.length; i++) {
+							validAmounts.push(i);
+						}
+						resolve(await gameUI.presentCardChoice(request.eligibleUnits, "Select Attacker(s)", undefined, validAmounts));
+					}
+					attackBtn.addEventListener("click", attackButtonClicked, {once: true});
+					attackBtn.disabled = false;
+					this.madeMoveTarget.addEventListener("move", function() {
+						attackBtn.disabled = true;
+						attackBtn.removeEventListener("click", attackButtonClicked);
+						reject();
+					}, {once: true});
+				}).then(
+					(attackers) => {return attackers},
+					() => {return null}
+				);
+				if (attackers === null) {
+					return;
+				}
+				response.value = attackers;
 				break;
 			}
 			case "doFight": {

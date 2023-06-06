@@ -45,6 +45,14 @@ export class Stack {
 					);
 					break;
 				}
+				case "doAttackDeclaration": {
+					nextBlock = new blocks.AttackDeclaration(this, this.getNextPlayer(), response.value);
+					break;
+				}
+				case "doFight": {
+					nextBlock = new blocks.Fight(this, this.getNextPlayer());
+					break;
+				}
 				case "doRetire": {
 					nextBlock = new blocks.Retire(this, this.getNextPlayer(), response.value);
 					break;

@@ -94,12 +94,35 @@ export function createActionCancelledEvent(action) {
 	}
 }
 
-export function createPlayerLostEvent(player, reason) {
+export function createPlayerWonEvent(player) {
+	return {
+		"nature": "event",
+		"type": "playerWon",
+		"player": player
+	}
+}
+
+export function createPlayerLostEvent(player) {
 	return {
 		"nature": "event",
 		"type": "playerLost",
+		"player": player
+	}
+}
+
+export function createGameDrawnEvent() {
+	return {
+		"nature": "event",
+		"type": "gameDrawn"
+	}
+}
+
+export function createDamageDealtEvent(player, amount) {
+	return {
+		"nature": "event",
+		"type": "damageDealt",
 		"player": player,
-		"reason": reason
+		"amount": amount
 	}
 }
 
@@ -107,8 +130,7 @@ export function createManaChangedEvent(player) {
 	return {
 		"nature": "event",
 		"type": "manaChanged",
-		"player": player,
-		"newValue": player.mana
+		"player": player
 	}
 }
 

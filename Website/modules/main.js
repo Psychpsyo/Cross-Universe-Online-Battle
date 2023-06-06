@@ -52,8 +52,8 @@ export function connect() {
 	});
 }
 // pressing enter in the roomcode entry field to connect
-document.getElementById("roomCodeInputField").addEventListener("keyup", function() {
-	if (event.keyCode === 13) {
+document.getElementById("roomCodeInputField").addEventListener("keyup", function(e) {
+	if (e.keyCode === 13) {
 		connect();
 	}
 });

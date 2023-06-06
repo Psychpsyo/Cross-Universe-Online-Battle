@@ -1,9 +1,10 @@
 
-import {createActionCancelledEvent} from "./events.js";
+import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent} from "./events.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
 	constructor(game, actions, block) {
+		this.game = game;
 		this.index = 0;
 		this.actions = actions;
 		this.block = block; // block may be null
@@ -63,14 +64,47 @@ export class Timing {
 		
 		let events = [];
 		for (let action of this.actions) {
-			events.push(yield* action.run());
+			let event = yield* action.run();
+			if (event) {
+				events.push(event);
+			}
 		}
 		yield events;
 		game.nextTimingIndex++;
+
+		// check win/lose conditions
+		yield* checkGameOver(this.game);
+		
 		return true;
 	}
 	
 	valueOf() {
 		return this.index;
+	}
+}
+
+function* checkGameOver(game) {
+	let gameOverEvents = [];
+	for (let player of game.players) {
+		if (player.lost) {
+			if (player.next().lost || player.won) {
+				gameOverEvents.push(createGameDrawnEvent());
+				break;
+			}
+			gameOverEvents.push(createPlayerLostEvent(player));
+		}
+		if (player.won) {
+			if (player.next().won || player.lost) {
+				gameOverEvents.push(createGameDrawnEvent());
+				break;
+			}
+			gameOverEvents.push(createPlayerLostEvent(player));
+		}
+	}
+	if (gameOverEvents.length > 0) {
+		yield gameOverEvents;
+		while (true) {
+			yield [];
+		}
 	}
 }

@@ -130,6 +130,30 @@
 			"retire": {
 				"dropRetire": "Retire (x{#AMOUNT})",
 				"dropCancel": "Cancel"
+			},
+
+			"gameOver": {
+				"youWon": "You Won!",
+				"youLost": "You Lost!",
+				"draw": "Draw!",
+				"winReasons": {
+					"lifeZero": "Your opponent ran out of life points.",
+					"partnerCostTooHigh": "Your opponent couldn't pay for their partner.",
+					"drawFromEmptyDeck": "Your opponent drew from an empty deck.",
+					"cardEffect": "You won due to the effect of {#CARDNAME}."
+				},
+				"loseReasons": {
+					"lifeZero": "You ran out of life points.",
+					"partnerCostTooHigh": "You couldn't pay for your partner.",
+					"drawFromEmptyDeck": "You drew from an empty deck.",
+					"cardEffect": "Your opponent won due to the effect of {#CARDNAME}."
+				},
+				"drawReasons": {
+					"bothWon": "Both players won.",
+					"bothLost": "Both players lost.",
+					"youWonAndLost": "You won and lost at the same time.",
+					"opponentWonAndLost": "Your opponent won and lost at the same time."
+				}
 			}
 		}
 	},

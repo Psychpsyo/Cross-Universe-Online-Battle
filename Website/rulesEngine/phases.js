@@ -83,7 +83,9 @@ export class ManaSupplyPhase extends Phase {
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
 		let partnerLevel = turnPlayer.partnerZone.cards[0].level.get();
 		if (turnPlayer.mana < partnerLevel) {
-			yield [createPlayerLostEvent(turnPlayer, "partnerCostTooHigh")];
+			turnPlayer.lost = true;
+			turnPlayer.loseReason = "partnerCostTooHigh";
+			yield [createPlayerLostEvent(turnPlayer)];
 			while (true) {
 				yield [];
 			}
@@ -178,7 +180,7 @@ export class BattlePhase extends StackPhase {
 		if (stack.canDoNormalActions()) {
 			// check for fight
 			if (this.turn.game.currentAttackDeclaration) {
-				return [requests.doFight.create()];
+				return [requests.doFight.create(this.turn.player)];
 			}
 			
 			// find eligible attackers

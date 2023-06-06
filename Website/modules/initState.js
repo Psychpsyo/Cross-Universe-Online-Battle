@@ -19,8 +19,8 @@ export class InitState extends GameState {
 		connectTo(roomcode + gameMode);
 		
 		// hide input field and show waiting indicator
-		roomCodeInputFieldSpan.setAttribute("hidden", "");
-		waitingForOpponentSpan.removeAttribute("hidden");
+		roomCodeInputFieldSpan.hidden = true;
+		waitingForOpponentSpan.hidden = false;
 		// refresh the "Waiting for Opponent" text so screen readers read it out.
 		setTimeout(() => {
 			if (typeof trWaitingForOpponent !== undefined) {
@@ -109,7 +109,8 @@ export class InitState extends GameState {
 				}
 			}
 			gameUI.init();
-			
+			gameDiv.hidden = false;
+
 			// make chat functional
 			document.getElementById("chatInput").addEventListener("keyup", function(e) {
 				if (e.code == "Enter" && this.value != "") {
@@ -139,14 +140,14 @@ export class InitState extends GameState {
 			// main screen is no longer needed
 			stopEffect();
 			roomCodeEntry.remove();
-			gameDiv.removeAttribute("hidden");
+			gameDiv.hiden = false;
 		}
 	}
 	
 	cancel() {
 		socket.close();
-		waitingForOpponentSpan.setAttribute("hidden", "");
-		roomCodeInputFieldSpan.removeAttribute("hidden");
+		waitingForOpponentSpan.hidden = true;
+		roomCodeInputFieldSpan.hidden = false;
 		roomCodeInputField.focus();
 		gameState = null;
 	}

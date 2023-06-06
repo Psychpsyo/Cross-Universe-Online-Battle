@@ -130,6 +130,30 @@
 			"retire": {
 				"dropRetire": "リターン（×{#AMOUNT}）",
 				"dropCancel": "キャンセル"
+			},
+
+			"gameOver": {
+				"youWon": null,
+				"youLost": null,
+				"draw": null,
+				"winReasons": {
+					"lifeZero": null,
+					"partnerCostTooHigh": null,
+					"drawFromEmptyDeck": null,
+					"cardEffect": null
+				},
+				"loseReasons": {
+					"lifeZero": null,
+					"partnerCostTooHigh": null,
+					"drawFromEmptyDeck": null,
+					"cardEffect": null
+				},
+				"drawReasons": {
+					"bothWon": null,
+					"bothLost": null,
+					"youWonAndLost": null,
+					"opponentWonAndLost": null
+				}
 			}
 		}
 	},

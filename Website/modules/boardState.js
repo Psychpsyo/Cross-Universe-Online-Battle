@@ -29,8 +29,8 @@ export class BoardState extends GameState {
 		draftGameSetupMenu.remove();
 		
 		// show game area
-		mainGameBlackout.textContent = "";
-		mainGameArea.removeAttribute("hidden");
+		mainGameBlackoutContent.textContent = "";
+		mainGameArea.hidden = false;
 		
 		// do partner select
 		if (localPlayer.deck.suggestedPartner) {
@@ -81,7 +81,7 @@ export class BoardState extends GameState {
 	}
 	
 	hotkeyPressed(name) {
-		if (document.getElementById("mainGameBlackout")) {
+		if (!mainGameBlackout.classList.contains("hidden")) {
 			return;
 		}
 		switch(name) {
@@ -125,7 +125,7 @@ export class BoardState extends GameState {
 	}
 	// called after partner selection
 	getPartnerFromDeck(partnerPosInDeck = -1) {
-		mainGameBlackout.textContent = locale.game.partnerSelect.waitingForOpponent;
+		mainGameBlackoutContent.textContent = locale.game.partnerSelect.waitingForOpponent;
 		if (partnerPosInDeck == -1) {
 			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == game.players[localPlayer.index].deck["suggestedPartner"]});
 		}
@@ -140,7 +140,7 @@ export class BoardState extends GameState {
 	
 	doStartGame() {
 		if (game.players[0].partnerZone.cards[0] && game.players[1].partnerZone.cards[0]) {
-			mainGameBlackout.remove();
+			mainGameBlackout.classList.add("hidden");
 			this.controller.startGame();
 		}
 	}

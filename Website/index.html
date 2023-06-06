@@ -93,7 +93,7 @@
 						</div>
 					</div>
 					<div id="controlPanel" class="automaticOnly" hidden>
-						<button id="passBtn" autocomplete="off" disabled>PASS</button>
+						<button id="passBtn" autocomplete="off" disabled>PASS</button><button id="attackBtn" autocomplete="off" disabled>ATTACK</button>
 					</div>
 					<div id="deckDropzone">
 						<div id="deckDropPanel" class="sideBox">
@@ -391,11 +391,13 @@
 					<!--hands-->
 					<div id="hand0" class="hand"></div>
 					<div id="hand1" class="hand"></div>
-					<div id="mainGameBlackout"></div>
+					<div id="mainGameBlackout">
+						<div id="mainGameBlackoutContent"></div>
+					</div>
 				</main>
 			</div>
 			
-			<!-- Above the overlay to still be interactable while menus are open -->
+			<!-- Pop-in card preview -->
 			<dialog id="cardDetails">
 				<div id="cardDetailsControl">
 					<button id="cardDetailsSwitch" class="bigButton">i</button>

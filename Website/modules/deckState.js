@@ -186,9 +186,9 @@ export class DeckState extends GameState {
 		defaultDecksBtn.textContent = locale.game.deckSelect.deckListDefault;
 		legacyDecksBtn.textContent = locale.game.deckSelect.deckListLegacy;
 		loadSelectedDeckBtn.textContent = locale.game.deckSelect.deckListLoadSelected;
-		mainGameBlackout.textContent = locale.game.deckSelect.chooseYourDeck;
+		mainGameBlackoutContent.textContent = locale.game.deckSelect.chooseYourDeck;
 		
-		mainGameArea.removeAttribute("hidden");
+		mainGameArea.hidden = false;
 	}
 	
 	receiveMessage(command, message) {
@@ -216,10 +216,10 @@ export class DeckState extends GameState {
 		
 		// sync and load the deck
 		socket.send("[deck]" + JSON.stringify(deck));
-		mainGameBlackout.textContent = locale.game.deckSelect.loadingDeck;
+		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
 		await localPlayer.setDeck(deck);
 		gameUI.updateCard(localPlayer.deckZone, -1);
-		mainGameBlackout.textContent = locale.game.deckSelect.waitingForOpponent;
+		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
 		
 		this.checkReadyConditions();
 	}

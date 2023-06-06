@@ -10,6 +10,10 @@ export class Player {
 		this.deck = null;
 		this.mana = 0;
 		this.life = 1000;
+		this.lost = false;
+		this.loseReason = "";
+		this.won = false;
+		this.winReason = "";
 		
 		this.deckZone = new DeckZone(this);
 		this.handZone = new Zone(this, "hand");
@@ -41,8 +45,6 @@ export class Player {
 			for (let i = 0; i < card.amount; i++) {
 				let card = await new Card(this, cardId, true);
 				this.deckZone.add(card, this.deckZone.cards.length);
-				card.zone = this.deckZone;
-				card.index = this.deckZone.length - 1;
 			}
 		}
 		this.deck = deck;

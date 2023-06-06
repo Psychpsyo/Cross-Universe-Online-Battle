@@ -30,7 +30,7 @@ export function init() {
 	
 	cardSelectorReturnToDeck.textContent = locale.game.cardSelector.returnAllToDeck;
 	
-	gameInteractions.removeAttribute("hidden");
+	gameInteractions.hidden = false;
 	
 	// partner reveal button
 	revealPartnerBtn.addEventListener("click", function() {

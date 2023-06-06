@@ -55,7 +55,7 @@ export class DraftState extends GameState {
 		// deck selection elements won't be needed
 		deckSelector.remove();
 		deckDropzone.remove();
-		draftGameSetupMenu.removeAttribute("hidden");
+		draftGameSetupMenu.hidden = false;
 	}
 	receiveMessage(command, message) {
 		switch (command) {
@@ -172,7 +172,7 @@ export class DraftState extends GameState {
 			gameUI.insertCard(game.players[1].deckZone, 0);
 			
 			// show start button
-			draftStartButton.removeAttribute("hidden");
+			draftStartButton.hidden = false;
 			return;
 		}
 		

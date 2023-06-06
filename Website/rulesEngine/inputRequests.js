@@ -104,11 +104,11 @@ export const doAttackDeclaration = {
 				throw new Error("Chose an invalid attacker index for attack declaration: " + cardIndex);
 			}
 		}
-		cards = response.map(cardIndex => request.eligibleUnits[cardIndex]);
-		if (cards.length > 1 && cards.find(card => card.zone.type == "partner") === undefined) {
+		response = response.map(cardIndex => request.eligibleUnits[cardIndex]);
+		if (response.length > 1 && response.find(card => card.zone.type == "partner") === undefined) {
 			throw new Error("Tried to peform a combined attack without declaring the partner to attack.");
 		}
-		return cards;
+		return response;
 	}
 }
 

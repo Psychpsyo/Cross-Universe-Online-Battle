@@ -22,6 +22,7 @@ export class Zone {
 			index = -1;
 		}
 		card.zone = this;
+		
 		// remove this card from relevant actions
 		let stacks = this.player.game.getStacks();
 		if (stacks.length > 0) {
@@ -116,6 +117,8 @@ export class FieldZone extends Zone {
 		let index = this.cards.findIndex(localCard => localCard == card);
 		this.cards[index] = null;
 	}
+	
+	reindex() {} // not needed
 	
 	// This puts a card into the temporary "not in hand, not on field" position that they go to during standard summons / casting / deploying
 	place(card, index) {

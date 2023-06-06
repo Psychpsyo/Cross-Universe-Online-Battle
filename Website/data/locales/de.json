@@ -32,7 +32,7 @@
 		"info": {
 			"you": "Du",
 			"opponent": "Gegner",
-			"life": "Leben:",
+			"life": "LP:",
 			"mana": "Mana:"
 		},
 		
@@ -96,7 +96,7 @@
 			},
 			
 			"actions": {
-				"life": "Leben",
+				"life": "LP",
 				"mana": "Mana",
 				
 				"half": "Halbieren",
@@ -130,6 +130,30 @@
 			"retire": {
 				"dropRetire": "Retire (x{#AMOUNT})",
 				"dropCancel": "Abbrechen"
+			},
+
+			"gameOver": {
+				"youWon": "Gewonnen!",
+				"youLost": "Verloren!",
+				"draw": "Unentschieden!",
+				"winReasons": {
+					"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
+					"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
+					"drawFromEmptyDeck": "Dein Gegner musste vom leeren Deck ziehen.",
+					"cardEffect": "Du hast durch den Effekt von {#CARDNAME} gewonnen."
+				},
+				"loseReasons": {
+					"lifeZero": "Deine LP sind auf 0 gesunken.",
+					"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
+					"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
+					"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
+				},
+				"drawReasons": {
+					"bothWon": "Beide Spieler haben gewonnen.",
+					"bothLost": "Beide Spieler haben verloren.",
+					"youWonAndLost": "Du hast gleichzeitig gewonnen und verloren.",
+					"opponentWonAndLost": "Dein Gegner hat gleichzeitig gewonnen und verloren."
+				}
 			}
 		}
 	},

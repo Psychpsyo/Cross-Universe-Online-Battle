@@ -111,9 +111,30 @@ export class Game {
 	}
 }
 
-class AttackDeclaration {
-	constructor(attackers, target) {
+export class AttackDeclaration {
+	constructor(game, attackers, target) {
+		this.game = game;
 		this.attackers = attackers;
 		this.target = target;
+	}
+	
+	isValid() {
+		if (this.target == null) {
+			return false;
+		}
+		if (this.attackers.length == 0) {
+			return false;
+		}
+		if (this.attackers.length > 1) {
+			let partner = this.attackers.find(unit => unit.zone.type == "partner");
+			if (!partner) {
+				return false;
+			}
+			let unitWithoutPartnerType = this.attackers.find(unit => unit.types.get().filter(type => partner.types.get().includes(type)).length == 0);
+			if (unitWithoutPartnerType) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
