@@ -10,8 +10,10 @@
 		
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="entryPage.css">
-		<link rel="stylesheet" href="game.css">
-		<link rel="stylesheet" href="drafts.css">
+		<link rel="stylesheet" href="styles/game.css">
+		<link rel="stylesheet" href="styles/manualGame.css">
+		<link rel="stylesheet" href="styles/automaticGame.css">
+		<link rel="stylesheet" href="styles/drafts.css">
 		<link rel="stylesheet" href="styles/levitationEffect.css">
 	</head>
 	<body>
@@ -26,15 +28,16 @@
 						<label for="roomCodeInputField" id="roomCodeInputLabel"></label>
 						<span><input id="roomCodeInputField" aria-atomic="true"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
 						<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
-						<select id="gameModeSelect" autocomplete="off">
+						<select id="gameModeSelect">
 							<option id="gameModeNormalOption" value="normal"></option>
 							<option id="gameModeDraftOption" value="draft"></option>
+							<option id="gameModeNormalAutomaticOption" value="normalAutomatic" hidden></option>
 						</select><br>
 						<button id="connectBtn"></button>
 					</span>
 					<span id="waitingForOpponentSpan" hidden>
 						<span id="trWaitingForOpponent" aria-live="polite" aria-atomic="true"></span><br>
-						<button id="cancelWaitingBtn">Cancel</button>
+						<button id="cancelWaitingBtn"></button>
 					</span>
 				</main>
 				<nav id="mainNavigation">
@@ -53,76 +56,83 @@
 					<div id="infoPanel">
 						<div>
 							<br>
-							<span id="lifeInfoText">Life:</span><br>
-							<span id="manaInfoText">Mana:</span>
+							<span id="lifeInfoText"></span><br>
+							<span id="manaInfoText"></span>
 						</div>
 						<div>
-							<span id="youInfoText">You</span><br>
+							<span id="youInfoText"></span><br>
 							<span id="lifeDisplay1">1000</span><br>
 							<span id="manaDisplay1">0</span>
 						</div>
 						<div>
-							<span id="opponentInfoText">Opponent</span><br>
+							<span id="opponentInfoText"></span><br>
 							<span id="lifeDisplay0">1000</span><br>
 							<span id="manaDisplay0">0</span>
 						</div>
 					</div>
-					<div id="gameInteractions" hidden>
+					<div id="gameInteractions" class="manualOnly" hidden>
 						<div>
-							<span id="lifeBtnHeader">Life</span><br>
+							<span id="lifeBtnHeader"></span><br>
 							<button id="lifeDown100">-100</button>
 							<button id="lifeDown50">-50</button>
 							<button id="lifeDown1">-1</button>
-							<button id="lifeHalf">Half</button>
+							<button id="lifeHalf"></button>
 							<button id="lifeUp1">+1</button>
 							<button id="lifeUp50">+50</button>
 							<button id="lifeUp100">+100</button>
 						</div>
 						<div>
-							<span id="manaBtnHeader">Mana</span><br>
+							<span id="manaBtnHeader"></span><br>
 							<button id="manaDown">-</button>
 							<button id="manaFive">5</button>
 							<button id="manaUp">+</button>
 						</div>
 						<div>
-							<button id="tokenBtn">Tokens</button>
-							<button id="showHandBtn">Reveal Hand</button>
+							<button id="tokenBtn"></button>
+							<button id="showHandBtn"></button>
 						</div>
 					</div>
-					<div id="deckDropzone" class="sideBox">
-						<input id="fileSelectDeckLoader" type="file" accept=".deck,deckx">
-						<label for="fileSelectDeckLoader"></label>
-						<div id="deckDropTextContainer" class="centeredTextDiv">
-							<span id="dropDeckHereLabel">Drop your deck here.</span><br>
-							<span id="deckSelectSpan" class="clickableText">Or choose one of the official ones.</span><br>
+					<div id="controlPanel" class="automaticOnly" hidden>
+						<button id="passBtn" autocomplete="off" disabled>PASS</button><button id="attackBtn" autocomplete="off" disabled>ATTACK</button>
+					</div>
+					<div id="deckDropzone">
+						<div id="deckDropPanel" class="sideBox">
+							<input id="fileSelectDeckLoader" type="file" accept=".deck,deckx">
+							<label for="fileSelectDeckLoader"></label>
+							<div id="deckDropTextContainer" class="centeredTextDiv">
+								<span id="dropDeckHereLabel"></span><br>
+								<span id="deckSelectSpan" class="clickableText"></span><br>
+							</div>
 						</div>
 					</div>
-					<div id="chat" class="sideBox">
-						<header id="chatHeader">Chat</header>
-						<div id="chatBox"></div>
-						<input id="chatInput" placeholder="Enter Message..." autocomplete="off">
+					<div id="chatHolder">
+						<div id="chat" class="sideBox">
+							<header id="chatHeader"></header>
+							<div id="chatBox"></div>
+							<input id="chatInput" autocomplete="off">
+						</div>
 					</div>
 				</div>
 				
 				<main id="draftGameSetupMenu" hidden>
 					<div id="draftGameFlexBox">
-						<div id="draftMainInfo">Pick a card.</div>
+						<div id="draftMainInfo"></div>
 						<div id="draftCardSelection"></div>
 						<div id="draftInfoBar">
-							<span id="draftPackNumber">Pack --/--</span>
-							<span id="draftCardNumber">0/-- Taken</span>
+							<span id="draftPackNumber"></span>
+							<span id="draftCardNumber"></span>
 						</div>
 						<div id="draftDeckHolder">
 							<div class="draftDeck">
-								<div class="draftDeckTitleBar"><span id="draftDeckOwner0"></span><span id="draftDeckCount0">0/--</span></div>
+								<div class="draftDeckTitleBar"><span id="draftDeckOwner0"></span><span id="draftDeckCount0"></span></div>
 								<div id="draftDeckList0" class="draftDeckList"></div>
 							</div>
 							<div class="draftDeck">
-								<div class="draftDeckTitleBar"><span id="draftDeckOwner1"></span><span id="draftDeckCount1">0/--</span></div>
+								<div class="draftDeckTitleBar"><span id="draftDeckOwner1"></span><span id="draftDeckCount1"></span></div>
 								<div id="draftDeckList1" class="draftDeckList"></div>
 							</div>
 						</div>
-						<button id="draftStartButton" class="bigButton" hidden>Start Game</button>
+						<button id="draftStartButton" class="bigButton" hidden></button>
 					</div>
 				</main>
 				
@@ -131,57 +141,57 @@
 						<div id="field">
 							<div id="playerGrids">
 								<div id="p1Grid" class="playerGrid">
-									<div class="cardDiv">
+									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelDeck"></div>
 										<img src="images/cardHidden.png" id="deck0" class="card" alt="">
-										<div id="deckDropOptions0" class="cardBtns">
-											<button id="deckTopBtn0">To Top</button><br>
-											<button id="deckShuffleInBtn0">Shuffle In</button><br>
-											<button id="deckBottomBtn0">To Bottom</button><br>
-											<button id="deckCancelBtn0">Cancel</button>
+										<div id="deckDropOptions0" class="cardBtns manualOnly">
+											<button id="deckTopBtn0"></button><br>
+											<button id="deckShuffleInBtn0"></button><br>
+											<button id="deckBottomBtn0"></button><br>
+											<button id="deckCancelBtn0"></button>
 										</div>
-										<div id="deckHoverBtns0" class="cardBtns">
-											<button id="showTopBtn0">Show Top</button>
+										<div id="deckHoverBtns0" class="cardBtns manualOnly">
+											<button id="showTopBtn0"></button>
 										</div>
 										<span id="deck0CardCount" class="fieldCardAmountDisplay"></span>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field0" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field1" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelPartnerZone"></div>
 										<img src="images/cardHidden.png" id="field2" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field3" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field4" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
@@ -193,40 +203,40 @@
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field5" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field6" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field7" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field8" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field9" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
@@ -249,40 +259,40 @@
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field10" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field11" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field12" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field13" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelUnitZone"></div>
 										<img src="images/cardHidden.png" id="field14" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
@@ -290,76 +300,95 @@
 										<div class="fieldLabel fieldLabelDiscardPile"></div>
 										<img src="images/cardHidden.png" id="discard1" class="card" alt="">
 										<span id="discard1CardCount" class="fieldCardAmountDisplay"></span>
+										<div id="retireOptions" class="cardBtns">
+											<button id="retireBtn"></button><br>
+											<button id="retireCancelBtn"></button>
+										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field15" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field16" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelPartnerZone"></div>
 										<img src="images/cardHidden.png" id="field17" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
-										<div id="partnerRevealButtonDiv" class="cardBtns">
-											<button id="revealPartnerBtn">Reveal Partner</button>
+										<div id="partnerRevealButtonDiv" class="cardBtns manualOnly">
+											<button id="revealPartnerBtn"></button>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field18" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelSpellItemZone"></div>
 										<img src="images/cardHidden.png" id="field19" class="card fieldSlot" alt="">
-										<div class="cardActionHolder"></div>
-										<div class="counterHolder">
+										<div class="cardActionHolder manualOnly"></div>
+										<div class="counterHolder manualOnly">
 											<div class="counterAddBtn">+</div>
 										</div>
 									</div>
-									<div class="cardDiv">
+									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelDeck"></div>
 										<img src="images/cardHidden.png" id="deck1" class="card" alt="">
 										<div id="deckDropOptions1" class="cardBtns">
-											<button id="deckTopBtn1">To Top</button><br>
-											<button id="deckShuffleInBtn1">Shuffle In</button><br>
-											<button id="deckBottomBtn1">To Bottom</button><br>
-											<button id="deckCancelBtn1">Cancel</button>
+											<button id="deckTopBtn1"></button><br>
+											<button id="deckShuffleInBtn1"></button><br>
+											<button id="deckBottomBtn1"></button><br>
+											<button id="deckCancelBtn1"></button>
 										</div>
 										<div id="deckHoverBtns1" class="cardBtns">
-											<button id="drawBtn">Draw</button><br>
-											<button id="shuffleBtn">Shuffle</button><br>
-											<button id="deckSearchBtn">Search</button><br>
-											<button id="showTopBtn1">Show Top</button>
+											<button id="drawBtn"></button><br>
+											<button id="shuffleBtn"></button><br>
+											<button id="deckSearchBtn"></button><br>
+											<button id="showTopBtn1"></button>
 										</div>
 										<span id="deck1CardCount" class="fieldCardAmountDisplay"></span>
 									</div>
 								</div>
 							</div>
 							
-							<!--starting player select-->
-							<button id="startingPlayerSelect">Select Starting Player</button>
+							<!--turn phases -->
+							<div id="phaseDisplay" class="automaticOnly" hidden>
+								<ol>
+									<li id="manaSupplyPhaseIndicator"></li>
+									<li id="drawPhaseIndicator"></li>
+									<li id="firstMainPhaseIndicator"></li>
+									<li id="battlePhaseIndicator" class="invalid"></li>
+									<li id="secondMainPhaseIndicator" class="invalid"></li>
+									<li id="endPhaseIndicator"></li>
+								</ol>
+								<div id="yourTurnDisplay" class="turnDisplay">
+									<div id="yourTurnDisplayLabel" class="turnDisplayLabel hidden">Your Turn</div>
+								</div>
+								<div id="opponentTurnDisplay" class="turnDisplay hidden">
+									<div id="opponentTurnDisplayLabel" class="turnDisplayLabel hidden">Opponent's Turn</div>
+								</div>
+							</div>
 							
 							<!--cards held up by players-->
-							<div id="presentedCards0" class="presentedCards"></div>
-							<div id="presentedCards1" class="presentedCards"></div>
+							<div id="presentedCards0" class="presentedCards manualOnly"></div>
+							<div id="presentedCards1" class="presentedCards manualOnly"></div>
 							
 							<div id="draggedCardImages"></div>
 						</div>
@@ -368,11 +397,13 @@
 					<!--hands-->
 					<div id="hand0" class="hand"></div>
 					<div id="hand1" class="hand"></div>
-					<div id="mainGameBlackout"></div>
+					<div id="mainGameBlackout">
+						<div id="mainGameBlackoutContent"></div>
+					</div>
 				</main>
 			</div>
 			
-			<!-- Above the overlay to still be interactable while menus are open -->
+			<!-- Pop-in card preview -->
 			<dialog id="cardDetails">
 				<div id="cardDetailsControl">
 					<button id="cardDetailsSwitch" class="bigButton">i</button>
@@ -397,7 +428,7 @@
 					<div class="cardListScrollParent">
 						<div id="cardSelectorGrid" class="cardGrid"></div>
 					</div>
-					<button id="cardSelectorReturnToDeck" class="bigButton">Return All to your Deck</button>
+					<button id="cardSelectorReturnToDeck" class="bigButton cardMenuBottomButton manualOnly"></button>
 				</section>
 			</dialog>
 			
@@ -407,19 +438,13 @@
 					<div id="deckSelectorFlex">
 						<div id="deckSelectorList">
 							<div id="deckListHeader">
-								<button id="defaultDecksBtn" class="bigButton">
-									Default
-								</button>
-								<button id="legacyDecksBtn" class="bigButton">
-									Legacy
-								</button>
+								<button id="defaultDecksBtn" class="bigButton"></button>
+								<button id="legacyDecksBtn" class="bigButton"></button>
 							</div>
 							<div id="deckList">
 								<!--decks get filled in by js-->
 							</div>
-							<button id="loadSelectedDeckBtn" class="bigButton">
-								Load Selected Deck
-							</button>
+							<button id="loadSelectedDeckBtn" class="bigButton"></button>
 						</div>
 						<div id="deckSelectorRight">
 							<div id="deckSelectorCardGrid" class="cardGrid">
@@ -434,28 +459,27 @@
 			</dialog>
 			
 			<!--Partner Selector-->
-			<div id="partnerSelectQuestion">
-				Do you want to use the suggested partner for this deck or select one yourself?<br>
+			<dialog id="questionPopup" class="centerDialog">
+				<span id="questionPopupText"></span><br>
 				<br>
-				<div id="partnerSelectQuestionBtns"><button id="chooseSuggestedPartnerBtn">Use Suggested Partner</button><button id="manualChoosePartnerBtn">Select One From Deck</button></div>
-			</div>
+				<div id="questionPopupBtns"><button id="questionPopupYesButton"></button><button id="questionPopupNoButton"></button></div>
+			</dialog>
 			
-			<dialog id="partnerSelectionMenu" class="centerDialog popupSelectMenu">
-				<section class="dialogContent" aria-labelledby="selectYourPartnerTitle">
-					<header id="selectYourPartnerTitle">Select Your Partner:</header>
+			<!--Generic Card Choice Dialogue-->
+			<dialog id="cardChoiceMenu" class="centerDialog popupSelectMenu">
+				<section class="dialogContent" aria-labelledby="cardChoiceTitle">
+					<header id="cardChoiceTitle"></header>
 					<div class="cardListScrollParent">
-						<div id="partnerSelectorGrid" class="cardGrid"></div>
+						<div id="cardChoiceGrid" class="cardGrid"></div>
 					</div>
+					<button id="cardChoiceConfirm" class="bigButton cardMenuBottomButton"></button>
 				</section>
 			</dialog>
 		</div>
 		
 		<!-- 'dependencies' -->
 		<script src="scripts/localStorageSetup.js"></script>
-		
-		<!--Mostly main-game relates scripts-->
 		<script src="modules/main.js", type="module"></script>
-		<script src="scripts/translation.js"></script>
 		<script src="scripts/utility.js"></script>
 	</body>
 </html>

@@ -2,20 +2,54 @@
 
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
-import {openCardSelect, cardSelectorZone, closeCardSelect} from "/modules/gameUI.js";
+import * as gameUI from "/modules/gameUI.js";
 import {putChatMessage} from "/modules/generalUI.js";
 
 export function init() {
+	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());
+	
+	// translation
+	revealPartnerBtn.textContent = locale.game.partnerSelect.revealPartner;
+	for (let i = 0; i < 2; i++) {
+		document.getElementById("deckTopBtn"+ i).textContent = locale.game.manual.deck.dropTop;
+		document.getElementById("deckShuffleInBtn" + i).textContent = locale.game.manual.deck.dropShuffle;
+		document.getElementById("deckBottomBtn" + i).textContent = locale.game.manual.deck.dropBottom;
+		document.getElementById("deckCancelBtn" + i).textContent = locale.game.manual.deck.dropCancel;
+		document.getElementById("showTopBtn" + i).textContent = locale.game.manual.deck.showTop;
+	}
+	
+	drawBtn.textContent = locale.game.manual.deck.draw;
+	shuffleBtn.textContent = locale.game.manual.deck.shuffle;
+	deckSearchBtn.textContent = locale.game.manual.deck.search;
+	
+	lifeBtnHeader.textContent = locale.game.manual.actions.life;
+	manaBtnHeader.textContent = locale.game.manual.actions.mana;
+	tokenBtn.textContent = locale.game.manual.actions.tokens;
+	lifeHalf.textContent = locale.game.manual.actions.half;
+	showHandBtn.textContent = locale.game.manual.actions.showHand;
+	
+	cardSelectorReturnToDeck.textContent = locale.game.cardSelector.returnAllToDeck;
+	
+	gameInteractions.hidden = false;
+	
+	// partner reveal button
+	revealPartnerBtn.addEventListener("click", function() {
+		document.getElementById("partnerRevealButtonDiv").style.display = "none";
+		localPlayer.partnerZone.cards[0].hidden = false;
+		gameUI.updateCard(localPlayer.partnerZone, 0);
+		socket.send("[revealPartner]");
+	});
+	
 	//showing/hiding your hand
 	function hideHand() {
 		socket.send("[hideHand]");
-		document.getElementById("showHandBtn").textContent = locale["actionsShowHand"];
+		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.showHand;
 		document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
 		document.getElementById("hand1").classList.remove("shown");
 	}
 	function showHand() {
 		socket.send("[showHand]");
-		document.getElementById("showHandBtn").textContent = locale["actionsHideHand"];
+		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.hideHand;
 		document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
 		document.getElementById("hand1").classList.add("shown");
 	}
@@ -57,7 +91,7 @@ export function init() {
 	
 	// tokens
 	tokenBtn.addEventListener("click", function() {
-		openCardSelect(gameState.controller.tokenZone);
+		gameUI.openCardSelect(gameState.controller.tokenZone);
 	});
 	
 	// counters
@@ -74,8 +108,8 @@ export function init() {
 	
 	// returns all cards from the card selector to your deck and closes the selector
 	cardSelectorReturnToDeck.addEventListener("click", function() {
-		gameState.controller.returnAllToDeck(cardSelectorZone);
-		closeCardSelect();
+		gameState.controller.returnAllToDeck(gameUI.cardSelectorZone);
+		gameUI.closeCardSelect();
 	});
 	
 	// deck options
@@ -89,7 +123,7 @@ export function init() {
 		gameState.controller.deckShuffle(localPlayer.deckZone);
 	});
 	document.getElementById("deckSearchBtn").addEventListener("click", function() {
-		openCardSelect(localPlayer.deckZone);
+		gameUI.openCardSelect(localPlayer.deckZone);
 		document.getElementById("deckHoverBtns1").style.display = "none"; //workaround for bug in Firefox (at least) where mouseleave does not fire when element is covered by another. (in this case the card selector)
 	});
 	
@@ -128,12 +162,14 @@ export function init() {
 			}
 		});
 	});
+	
+	document.documentElement.classList.add("manualGame");
 }
 
 export function receiveMessage(command, message) {
 	switch (command) {
 		case "dice": { // opponent rolled a dice with /dice in chat
-			putChatMessage(locale["cardActions"]["I00040"]["opponentRoll"].replace("{#RESULT}", message), "notice");
+			putChatMessage(locale.cardActions.I00040.opponentRoll.replace("{#RESULT}", message), "notice");
 			return true;
 		}
 		case "counterAdd": {
@@ -158,6 +194,18 @@ export function receiveMessage(command, message) {
 			let slotIndex = 19 - message.substr(0, message.indexOf("|"));
 			let counterIndex = message.substr(message.indexOf("|") + 1);
 			document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
+			return true;
+		}
+		case "revealCard": { // opponent revealed a presented card
+			let index = parseInt(message);
+			gameState.controller.playerInfos[0].presentedZone.cards[index].hidden = false;
+			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
+			return true;
+		}
+		case "unrevealCard": { // opponent hid a presented card
+			let index = parseInt(message);
+			gameState.controller.playerInfos[0].presentedZone.cards[index].hidden = true;
+			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
 			return true;
 		}
 		default: {

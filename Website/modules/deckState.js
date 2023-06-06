@@ -1,7 +1,7 @@
 // This module exports the DeckState class which is the state at the beginning of a (non-draft) match where players select their decks.
 import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
-import {Card} from "/modules/card.js";
+import {Card} from "/rulesEngine/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
@@ -57,7 +57,7 @@ function loadDeckPreview(deck) {
 		//make partner card glow
 		if (cardId == officialDecks[currentDeckList][deck]["suggestedPartner"] && !partnerAdded) {
 			partnerAdded = true;
-			cardImg.classList.add("partnerHighlight");
+			cardImg.classList.add("cardHighlight");
 		}
 		
 		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
@@ -92,7 +92,7 @@ async function addDecksToDeckSelector(deckList) {
 			
 			let cardAmountSubtitle = document.createElement("span");
 			cardAmountSubtitle.classList.add("deckCardAmount");
-			cardAmountSubtitle.textContent = locale.deckSelect.deckListCardAmount.replace("{#CARDS}", countDeckCards(deck));
+			cardAmountSubtitle.textContent = locale.game.deckSelect.deckListCardAmount.replace("{#CARDS}", countDeckCards(deck));
 			
 			deckDiv.addEventListener("click", function() {
 				if (document.getElementById("selectedDeck")) {
@@ -115,9 +115,11 @@ async function addDecksToDeckSelector(deckList) {
 }
 
 export class DeckState extends GameState {
-	constructor() {
+	constructor(automatic) {
 		super();
+		gameState = this;
 		
+		this.automatic = automatic;
 		this.ready = false;
 		this.opponentReady = false;
 		
@@ -154,8 +156,8 @@ export class DeckState extends GameState {
 			}
 			
 			closeDeckSelect();
-			gameState.loadDeck(officialDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
-		});
+			this.loadDeck(officialDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
+		}.bind(this));
 		
 		// opening the deck selector
 		document.getElementById("deckSelectSpan").addEventListener("click", function(e) {
@@ -179,21 +181,21 @@ export class DeckState extends GameState {
 		});
 		
 		// show game area
-		dropDeckHereLabel.textContent = locale.deckSelect.dropYourDeck;
-		deckSelectSpan.textContent = locale.deckSelect.useOfficialDeck;
-		defaultDecksBtn.textContent = locale.deckSelect.deckListDefault;
-		legacyDecksBtn.textContent = locale.deckSelect.deckListLegacy;
-		loadSelectedDeckBtn.textContent = locale.deckSelect.deckListLoadSelected;
-		mainGameBlackout.textContent = locale.deckSelect.chooseYourDeck;
+		dropDeckHereLabel.textContent = locale.game.deckSelect.dropYourDeck;
+		deckSelectSpan.textContent = locale.game.deckSelect.useOfficialDeck;
+		defaultDecksBtn.textContent = locale.game.deckSelect.deckListDefault;
+		legacyDecksBtn.textContent = locale.game.deckSelect.deckListLegacy;
+		loadSelectedDeckBtn.textContent = locale.game.deckSelect.deckListLoadSelected;
+		mainGameBlackoutContent.textContent = locale.game.deckSelect.chooseYourDeck;
 		
-		mainGameArea.removeAttribute("hidden");
+		mainGameArea.hidden = false;
 	}
 	
 	receiveMessage(command, message) {
 		switch (command) {
 			case "deck": {
 				game.players[0].setDeck(JSON.parse(message)).then(() => {
-					gameUI.insertCard(game.players[0].deckZone, 0);
+					gameUI.updateCard(game.players[0].deckZone, -1);
 					gameState.checkReadyConditions();
 				});
 				return true;
@@ -214,10 +216,10 @@ export class DeckState extends GameState {
 		
 		// sync and load the deck
 		socket.send("[deck]" + JSON.stringify(deck));
-		mainGameBlackout.textContent = locale.deckSelect.loadingDeck;
+		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
 		await localPlayer.setDeck(deck);
-		gameUI.insertCard(localPlayer.deckZone, 0);
-		mainGameBlackout.textContent = locale.deckSelect.waitingForOpponent;
+		gameUI.updateCard(localPlayer.deckZone, -1);
+		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
 		
 		this.checkReadyConditions();
 	}
@@ -229,7 +231,7 @@ export class DeckState extends GameState {
 				this.ready = true;
 			}
 			if (this.opponentReady) {
-				gameState = new BoardState();
+				new BoardState(this.automatic);
 			}
 		}
 	}

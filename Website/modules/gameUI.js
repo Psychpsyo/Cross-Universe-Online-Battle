@@ -1,6 +1,8 @@
 import {cardActions} from "/modules/cardActions.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {previewCard} from "/modules/generalUI.js";
+import {locale} from "/modules/locale.js";
+import {FieldZone} from "/rulesEngine/zones.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -8,6 +10,45 @@ let lastFrame = 0;
 
 let cardSelectorSlots = [];
 export let cardSelectorZone = null;
+
+let cardChoiceSelected = [];
+
+youInfoText.textContent = locale.game.info.you;
+opponentInfoText.textContent = locale.game.info.opponent;
+lifeInfoText.textContent = locale.game.info.life;
+manaInfoText.textContent = locale.game.info.mana;
+
+cardChoiceConfirm.textContent = locale.game.cardChoice.confirm;
+
+if (localStorage.getItem("fieldLabelToggle") == "true") {
+	document.querySelectorAll(".fieldLabelUnitZone").forEach(label => {
+		label.textContent = locale.game.fieldLabels.unitZone;
+	});
+	document.querySelectorAll(".fieldLabelSpellItemZone").forEach(label => {
+		label.textContent = locale.game.fieldLabels.spellItemZone;
+	});
+	document.querySelectorAll(".fieldLabelPartnerZone").forEach(label => {
+		label.textContent = locale.game.fieldLabels.partnerZone;
+	});
+	document.querySelectorAll(".fieldLabelDeck").forEach(label => {
+		label.textContent = locale.game.fieldLabels.deck;
+		if (locale.game.fieldLabels.verticalText) {
+			label.classList.add("verticalFieldLabel");
+		}
+	});
+	document.querySelectorAll(".fieldLabelDiscardPile").forEach(label => {
+		label.textContent = locale.game.fieldLabels.discardPile;
+		if (locale.game.fieldLabels.verticalText) {
+			label.classList.add("verticalFieldLabel");
+		}
+	});
+	document.querySelectorAll(".fieldLabelExileZone").forEach(label => {
+		label.textContent = locale.game.fieldLabels.exileZone;
+		if (locale.game.fieldLabels.verticalText) {
+			label.classList.add("verticalFieldLabel");
+		}
+	});
+}
 
 export function init() {
 	new fieldCardSlot(game.players[0].partnerZone, 0, 2);
@@ -36,9 +77,12 @@ export function init() {
 			e.stopPropagation();
 			dropCard(localPlayer, player.handZone, player.handZone.cards.length);
 		});
+		
+		// presented cards (only used during manual play)
 		document.getElementById("presentedCards" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
-			dropCard(localPlayer, player.presentedZone, player.presentedZone.cards.length);
+			let presentedZone = gameState.controller.playerInfos[player.index].presentedZone;
+			dropCard(localPlayer, presentedZone, presentedZone.cards.length);
 		});
 	});
 	
@@ -75,7 +119,7 @@ export function init() {
 			}
 			cardIndex -= 1;
 			if (cardIndex < localPlayer.handZone.cards.length) {
-				previewCard(localPlayer.handZone.cards[cardIndex]);
+				previewCard(localPlayer.handZone.get(cardIndex));
 			}
 			return;
 		}
@@ -89,6 +133,16 @@ export function init() {
 	cardSelector.addEventListener("cancel", function(e) {
 		e.preventDefault();
 		closeCardSelect();
+	});
+	
+	cardChoiceMenu.addEventListener("cancel", function(e) {
+		e.preventDefault();
+	});
+	cardChoiceConfirm.addEventListener("click", function() {
+		gameFlexBox.appendChild(cardDetails);
+		cardChoiceMenu.close(cardChoiceSelected.join("|"));
+		cardChoiceGrid.innerHTML = "";
+		cardChoiceSelected = [];
 	});
 	
 	lastFrame = performance.now();
@@ -116,31 +170,19 @@ export function receiveMessage(command, message) {
 			return true;
 		}
 		case "hideCursor": { // hide opponent's cursor
-			uiPlayers[0].dragCardElem.setAttribute("hidden", "");
-			uiPlayers[0].cursorElem.setAttribute("hidden", "");
+			uiPlayers[0].dragCardElem.hidden = true;
+			uiPlayers[0].cursorElem.hidden = true;
 			return true;
 		}
 		case "placeCursor": { // move the opponent's cursor somewhere on the field
 			uiPlayers[0].targetX = message.substr(0, message.indexOf("|")) * -1;
 			uiPlayers[0].targetY = 1 - message.substr(message.indexOf("|") + 1);
 			if (uiPlayers[0].dragCardElem.hidden) {
-				uiPlayers[0].dragCardElem.removeAttribute("hidden");
-				uiPlayers[0].cursorElem.removeAttribute("hidden");
+				uiPlayers[0].dragCardElem.hidden = false;
+				uiPlayers[0].cursorElem.hidden = false;
 				uiPlayers[0].posX = uiPlayers[0].targetX;
 				uiPlayers[0].posY = uiPlayers[0].targetY;
 			}
-			return true;
-		}
-		case "revealCard": { // opponent revealed a presented card
-			let index = parseInt(message);
-			game.players[0].presentedZone.cards[index].hidden = false;
-			updateCard(game.players[0].presentedZone, index);
-			return true;
-		}
-		case "unrevealCard": { // opponent hid a presented card
-			let index = parseInt(message);
-			game.players[0].presentedZone.cards[index].hidden = true;
-			updateCard(game.players[0].presentedZone, index);
 			return true;
 		}
 		default: {
@@ -160,18 +202,16 @@ export function removeCard(zone, index) {
 	// iterates in reverse since the array may be modified during iteration
 	for (let i = cardSlots.length - 1; i >= 0; i--) {
 		if (cardSlots[i].zone === zone) {
-			if (cardSlots[i].index == index) {
+			if (cardSlots[i].index == index || cardSlots[i].index == -1) {
 				cardSlots[i].remove();
-			} else if (cardSlots[i].index > index && zone.size == -1) {
+			} else if (cardSlots[i].index > index && !(zone instanceof FieldZone)) {
 				cardSlots[i].index--;
-			} else if (cardSlots[i].index == -1) {
-				cardSlots[i].update();
 			}
 		}
 	}
 }
 export function insertCard(zone, index) {
-	if (zone.size > -1) {
+	if (zone instanceof FieldZone) {
 		updateCard(zone, index);
 		return;
 	}
@@ -180,15 +220,20 @@ export function insertCard(zone, index) {
 			if (slot.index >= index) {
 				slot.index++;
 			} else if (slot.index == -1) {
-				slot.update();
+				slot.insert();
 			}
 		}
 	});
 	
-	if (zone.name.startsWith("hand")) {
-		new handCardSlot(zone, index);
-	} else if (zone.name.startsWith("presented")) {
-		new presentedCardSlot(zone, index);
+	switch (zone.type) {
+		case "hand": {
+			new handCardSlot(zone, index);
+			break;
+		}
+		case "presented": {
+			new presentedCardSlot(zone, index);
+			break;
+		}
 	}
 }
 export function makeDragSource(zone, index, player) {
@@ -208,13 +253,15 @@ export function clearDragSource(zone, index, player) {
 
 function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
-		socket.send("[uiGrabbedCard]" + zone.name + "|" + index);
+		socket.send("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
+		return true;
 	}
+	return false;
 }
 function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
-			socket.send("[uiDroppedCard]" + (zone? zone.name + "|" + index : ""));
+			socket.send("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
 		}
 		gameState.controller.dropCard(player, zone, index);
 	}
@@ -233,6 +280,7 @@ export class uiCardSlot {
 	remove() {
 		cardSlots.splice(cardSlots.indexOf(this), 1);
 	}
+	insert() {}
 }
 
 class fieldCardSlot extends uiCardSlot {
@@ -245,9 +293,9 @@ class fieldCardSlot extends uiCardSlot {
 			grabCard(localPlayer, zone, index);
 		});
 		this.fieldSlot.addEventListener("click", function(e) {
-			if (zone.cards[index]) {
+			if (zone.get(index)) {
 				e.stopPropagation();
-				previewCard(zone.cards[index]);
+				previewCard(zone.get(index));
 			}
 		});
 		this.fieldSlot.addEventListener("mouseup", function(e) {
@@ -263,21 +311,24 @@ class fieldCardSlot extends uiCardSlot {
 		this.fieldSlot.classList.remove("dragSource");
 	}
 	update() {
-		this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
-		let card = this.zone.cards[this.index];
+		let card = this.zone.get(this.index);
 		if (card) {
 			this.fieldSlot.src = card.getImage();
 			// add card action buttons
-			if (card.cardId in cardActions) {
-				for (const [key, value] of Object.entries(cardActions[card.cardId])) {
-					let button = document.createElement("button");
-					button.textContent = locale.cardActions[card.cardId][key];
-					button.addEventListener("click", value);
-					this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);
+			if (!gameState.automatic && !card.hidden) {
+				this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
+				if (card.cardId in cardActions) {
+					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
+						let button = document.createElement("button");
+						button.textContent = locale.cardActions[card.cardId][key];
+						button.addEventListener("click", value);
+						this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);
+					}
 				}
 			}
 		} else {
 			this.fieldSlot.src = "images/cardHidden.png";
+			this.clearDragSource(null);
 		}
 	}
 	remove() {
@@ -289,9 +340,9 @@ class handCardSlot extends uiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		
-		this.handElem = document.getElementById("hand" + zone.player.index);
+		this.handElem = document.getElementById("hand" + this.zone.player.index);
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.cards[index].getImage();
+		this.cardElem.src = zone.get(index).getImage();
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -299,7 +350,7 @@ class handCardSlot extends uiCardSlot {
 		}.bind(this));
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
-			previewCard(zone.cards[this.index]);
+			previewCard(zone.get(this.index));
 		}.bind(this));
 		if (this.handElem.childElementCount > index) {
 			this.handElem.insertBefore(this.cardElem, this.handElem.childNodes[index]);
@@ -316,7 +367,7 @@ class handCardSlot extends uiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		this.cardElem.src = this.zone.cards[this.index].getImage();
+		this.cardElem.src = this.zone.get(this.index).getImage();
 	}
 	remove() {
 		super.remove();
@@ -328,6 +379,7 @@ class handCardSlot extends uiCardSlot {
 class deckCardSlot extends uiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
+		this.cardCount = zone.cards.length;
 		
 		document.getElementById("deck" + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -339,53 +391,73 @@ class deckCardSlot extends uiCardSlot {
 	}
 	
 	update() {
-		document.getElementById("deck" + this.zone.player.index).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
-		document.getElementById("deck" + this.zone.player.index + "CardCount").textContent = this.zone.cards.length > 0? this.zone.cards.length : "";
+		this.cardCount = this.zone.cards.length;
+		this.setVisuals();
 	}
 	remove() {
-		this.update();
+		this.cardCount -= 1;
+		this.setVisuals();
+	}
+	insert() {
+		this.cardCount += 1;
+		this.setVisuals();
+	}
+	setVisuals() {
+		document.getElementById("deck" + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
+		document.getElementById("deck" + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
 
 class pileCardSlot extends uiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
+		this.cardCount = zone.cards.length;
 		
-		document.getElementById(this.zone.name).addEventListener("dragstart", function(e) {
+		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, this.zone, this.zone.cards.length - 1);
 		}.bind(this));
-		document.getElementById(this.zone.name).addEventListener("click", function() {
+		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("click", function() {
 			openCardSelect(this.zone);
 		}.bind(this));
-		document.getElementById(this.zone.name).addEventListener("mouseup", function(e) {
+		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
 			dropCard(localPlayer, this.zone, this.zone.cards.length);
 		}.bind(this));
 	}
 	
 	update() {
-		document.getElementById(this.zone.name).src = this.zone.cards[this.zone.cards.length - 1]?.getImage() ?? "images/cardHidden.png";
-		document.getElementById(this.zone.name + "CardCount").textContent = this.zone.cards.length > 0? this.zone.cards.length : "";
+		this.cardCount = this.zone.cards.length;
+		this.setVisuals();
 	}
 	remove() {
-		this.update();
+		this.cardCount -= 1;
+		this.setVisuals();
+	}
+	insert() {
+		this.cardCount += 1;
+		this.setVisuals();
+	}
+	setVisuals() {
+		document.getElementById(this.zone.type + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
+		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
 
+// technically only needed for manual games but manualUI.js can't easily create these on its own so it's here for now.
 class presentedCardSlot extends uiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		
 		this.isRevealed = false;
-		this.zoneElem = document.getElementById("presentedCards" + zone.player.index);
+		this.zoneElem = document.getElementById("presentedCards" + this.zone.player.index);
 		this.cardElem = document.createElement("div");
 		
 		this.cardImg = document.createElement("img")
-		this.cardImg.src = zone.cards[index].getImage();
+		this.cardImg.src = this.zone.get(index).getImage();
 		this.cardImg.addEventListener("click", function(e) {
 			e.stopPropagation();
-			previewCard(this.zone.cards[this.index]);
+			previewCard(this.zone.get(this.index));
 		}.bind(this));
 		this.cardImg.addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -393,17 +465,17 @@ class presentedCardSlot extends uiCardSlot {
 		}.bind(this));
 		this.cardElem.appendChild(this.cardImg);
 		
-		if (zone.player === localPlayer) {
+		if (this.zone.player === localPlayer) {
 			this.revealBtn = document.createElement("button");
-			this.revealBtn.textContent = locale["presentReveal"];
+			this.revealBtn.textContent = locale.game.manual.presented.reveal;
 			this.revealBtn.addEventListener("click", function() {
 				this.isRevealed = !this.isRevealed;
 				if (this.isRevealed) {
 					socket.send("[revealCard]" + this.index);
-					this.revealBtn.textContent = locale["presentHide"];
+					this.revealBtn.textContent = locale.game.manual.presented.hide;
 				} else {
 					socket.send("[unrevealCard]" + this.index);
-					this.revealBtn.textContent = locale["presentReveal"];
+					this.revealBtn.textContent = locale.game.manual.presented.reveal;
 				}
 			}.bind(this));
 			this.cardElem.appendChild(this.revealBtn);
@@ -424,7 +496,7 @@ class presentedCardSlot extends uiCardSlot {
 		}
 	}
 	update() {
-		this.cardImg.src = this.zone.cards[this.index].getImage();
+		this.cardImg.src = this.zone.get(this.index).getImage();
 	}
 	remove() {
 		super.remove();
@@ -437,16 +509,17 @@ class cardSelectorSlot extends uiCardSlot {
 		super(zone, index);
 		
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.cards[index].getImage();
+		this.cardElem.src = zone.get(index).getImage();
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
-			grabCard(localPlayer, zone, this.index);
-			closeCardSelect();
+			if (grabCard(localPlayer, zone, this.index) || zone == gameState.controller.tokenZone) {
+				closeCardSelect();
+			}
 		}.bind(this));
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
-			previewCard(zone.cards[this.index]);
+			previewCard(zone.get(this.index));
 		}.bind(this));
 		cardSelectorGrid.insertBefore(this.cardElem, cardSelectorGrid.firstChild);
 	}
@@ -473,20 +546,26 @@ export function openCardSelect(zone) {
 	}
 	cardSelectorZone = zone;
 	for (let i = 0; i < zone.cards.length; i++) {
-		zone.cards[i].hidden = false;
+		zone.get(i).hidden = false;
 		cardSelectorSlots.push(new cardSelectorSlot(zone, i));
 	}
 	
 	//show selector
-	cardSelectorTitle.textContent = zone.getLocalizedName();
-	cardSelectorReturnToDeck.style.display = (zone.name == "discard1" || zone.name == "exile1")? "block" : "none";
+	cardSelectorTitle.textContent = locale.game.cardSelector[gameState.getZoneName(zone)];
+	if (document.getElementById("cardSelectorReturnToDeck")) {
+		if ((zone.player === localPlayer) && (zone.type == "discard" || zone.type == "exile")) {
+			cardSelectorReturnToDeck.hidden = false;
+		} else {
+			cardSelectorReturnToDeck.hidden = true;
+		}
+	}
 	cardSelector.showModal();
 	cardSelector.appendChild(cardDetails);
 	
 	cardSelectorGrid.parentNode.scrollTop = 0;
 }
 export function closeCardSelect() {
-	if (cardSelectorZone.name.startsWith("deck")) {
+	if (cardSelectorZone.type =="deck") {
 		for (let card of cardSelectorZone.cards) {
 			card.hidden = true;
 		}
@@ -510,9 +589,9 @@ export function toggleCardSelect(zone) {
 class UiPlayer {
 	constructor(player) {
 		this.player = player;
-		this.life = player.life;
-		this.targetLife = player.life;
-		this.lifeCounter = 0;
+		
+		this.life = new UiValue(player.life, 5, document.getElementById("lifeDisplay" + player.index));
+		this.mana = new UiValue(player.mana, 100, document.getElementById("manaDisplay" + player.index));
 		
 		this.posX = 0;
 		this.posY = 0;
@@ -528,12 +607,12 @@ class UiPlayer {
 		if (player == localPlayer) {
 			this.dragCardElem.id = "yourDragCard";
 		} else {
-			this.dragCardElem.setAttribute("hidden", "");
+			this.dragCardElem.hidden = true;
 			
 			this.cursorElem = document.createElement("img");
 			this.cursorElem.classList.add("dragCard");
 			this.cursorElem.src = "images/opponentCursor.png";
-			this.cursorElem.setAttribute("hidden", "");
+			this.cursorElem.hidden = true;
 			draggedCardImages.appendChild(this.cursorElem);
 		}
 	}
@@ -548,15 +627,44 @@ class UiPlayer {
 		this.dragCardElem.src = "images/cardHidden.png";
 		this.dragging = false;
 	}
+}
+
+class UiValue {
+	constructor(initial, speed, displayElem) {
+		this.value = initial;
+		this.targetValue = initial;
+		this.counter = 0;
+		this.speed = speed;
+		this.displayElem = displayElem;
+	}
 	
-	setLife(value) {
-		if (value != this.life) {
-			this.targetLife = value;
-			document.getElementById("lifeDisplay" + this.player.index).classList.add(value < this.life? "lifeDown" : "lifeUp");
+	async set(value, instant) {
+		if (value != this.value) {
+			this.targetValue = value;
+			if (instant) {
+				this.value = value;
+				this.displayElem.textContent = this.value;
+			} else {
+				this.displayElem.classList.add(value < this.value? "valueDown" : "valueUp");
+				return new Promise(resolve => setTimeout(resolve, Math.abs(this.targetValue - this.value) * this.speed));
+			}
 		}
 	}
-	setMana(value) {
-		document.getElementById("manaDisplay" + this.player.index).textContent = value;
+	
+	animate(delta) {
+		if (this.value != this.targetValue) {
+			this.counter += delta;
+			while (this.counter > this.speed) {
+				this.counter -= this.speed;
+				this.value += Math.sign(this.targetValue - this.value);
+			}
+			this.displayElem.textContent = this.value;
+			
+			if (this.value == this.targetValue) {
+				this.displayElem.classList.remove("valueDown");
+				this.displayElem.classList.remove("valueUp");
+			}
+		}
 	}
 }
 
@@ -586,21 +694,79 @@ function animate(currentTime) {
 		uiPlayer.lastX = uiPlayer.posX;
 		uiPlayer.lastY = uiPlayer.posY;
 		
-		// life displays
-		if (uiPlayer.life != uiPlayer.targetLife) {
-			uiPlayer.lifeCounter += delta;
-			while (uiPlayer.lifeCounter > 5) {
-				uiPlayer.lifeCounter -= 5;
-				uiPlayer.life += Math.sign(uiPlayer.targetLife - uiPlayer.life);
-			}
-			document.getElementById("lifeDisplay" + uiPlayer.player.index).textContent = uiPlayer.life;
-			
-			if (uiPlayer.life == uiPlayer.targetLife) {
-				document.getElementById("lifeDisplay" + uiPlayer.player.index).classList.remove("lifeDown");
-				document.getElementById("lifeDisplay" + uiPlayer.player.index).classList.remove("lifeUp");
-			}
-		}
+		uiPlayer.life.animate(delta);
+		uiPlayer.mana.animate(delta);
 	}
 	
 	requestAnimationFrame(animate);
+}
+
+// card choice modal (blocking card selector)
+export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1]) {
+	return new Promise((resolve, reject) => {
+		let validOptions = 0;
+		for (let i = 0; i < cards.length; i++) {
+			let cardImg = document.createElement("img");
+			cardImg.src = cards[i].getImage();
+			if (matchFunction(cards[i])) {
+				validOptions++;
+				cardImg.dataset.selectionIndex = i;
+				cardImg.addEventListener("click", function(e) {
+					if (e.shiftKey || e.ctrlKey || e.altKey) {
+						e.stopPropagation();
+						previewCard(cards[i]);
+					} else {
+						if (this.classList.toggle("cardHighlight")) {
+							if (validAmounts.length == 1 && validAmounts[0] == 1 && cardChoiceSelected.length > 0) {
+								for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
+									if (elem != this) {
+										elem.classList.remove("cardHighlight");
+									}
+								}
+								cardChoiceSelected = [];
+							}
+							cardChoiceSelected.push(this.dataset.selectionIndex);
+						} else {
+							cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
+						}
+						cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length);
+					}
+				});
+			} else {
+				cardImg.classList.add("unselectableCard");
+			}
+			cardChoiceGrid.appendChild(cardImg);
+		}
+		if (validOptions < Math.min(...validAmounts)) {
+			reject(new Error("Not enough valid choices were passed to the card choice dialogue"));
+		}
+		cardChoiceMenu.addEventListener("close", function() {
+			resolve(this.returnValue.split("|").map(val => parseInt(val)));
+		});
+		
+		cardChoiceTitle.textContent = title;
+		cardChoiceConfirm.disabled = true;
+		cardChoiceMenu.showModal();
+		cardChoiceMenu.appendChild(cardDetails);
+		
+		cardChoiceGrid.parentNode.scrollTop = 0;
+	});
+}
+
+export async function askQuestion(question, yesButton, noButton) {
+	questionPopupText.textContent = question;
+	questionPopupYesButton.textContent = yesButton;
+	questionPopupNoButton.textContent = noButton;
+	questionPopup.showModal();
+	
+	return new Promise((resolve, reject) => {
+		questionPopupYesButton.addEventListener("click", function() {
+			questionPopup.close();
+			resolve(true);
+		}, {once: true});
+		questionPopupNoButton.addEventListener("click", function() {
+			questionPopup.close();
+			resolve(false);
+		}, {once: true});
+	});
 }

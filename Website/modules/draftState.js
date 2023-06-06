@@ -1,6 +1,6 @@
 import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
-import {Card} from "/modules/card.js";
+import {Card} from "/rulesEngine/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
 import {deckFromCardList} from "/modules/deckUtils.js";
@@ -14,6 +14,8 @@ basicFormat.packCount = Math.ceil(basicFormat.deckSize * 2 / basicFormat.cardPic
 export class DraftState extends GameState {
 	constructor() {
 		super();
+		gameState = this;
+		
 		this.format = basicFormat;
 		this.currentBooster = [];
 		this.takenCards = 0;
@@ -53,7 +55,7 @@ export class DraftState extends GameState {
 		// deck selection elements won't be needed
 		deckSelector.remove();
 		deckDropzone.remove();
-		draftGameSetupMenu.removeAttribute("hidden");
+		draftGameSetupMenu.hidden = false;
 	}
 	receiveMessage(command, message) {
 		switch (command) {
@@ -77,7 +79,7 @@ export class DraftState extends GameState {
 	
 	checkReadyConditions() {
 		if (this.pressedReady && this.opponentReady) {
-			gameState = new BoardState();
+			new BoardState();
 		}
 	}
 	
@@ -170,7 +172,7 @@ export class DraftState extends GameState {
 			gameUI.insertCard(game.players[1].deckZone, 0);
 			
 			// show start button
-			draftStartButton.removeAttribute("hidden");
+			draftStartButton.hidden = false;
 			return;
 		}
 		

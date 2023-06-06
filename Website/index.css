@@ -110,17 +110,21 @@ textarea {
 	background-color: var(--theme-button-hover-color);
 }
 .bigButton:disabled {
-	color: inherit;
+	color: var(--theme-disabled-text-color);
+	background-color: var(--theme-disabled-background-color);
 }
 
 
 /* dialogs */
+dialog {
+	color: inherit;
+}
+
 .centerDialog {
 	max-height: fit-content;
 	overflow: hidden;
 	
 	text-align: center;
-	color: inherit;
 	padding: 0;
 	
 	background-color: var(--theme-dialog-background-color);

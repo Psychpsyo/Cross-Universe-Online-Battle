@@ -1,8 +1,8 @@
+import {locale} from "/modules/locale.js";
 import {GameState} from "/modules/gameState.js";
 import {DraftState} from "/modules/draftState.js";
 import {DeckState} from "/modules/deckState.js";
-import {Game} from "/modules/game.js";
-import {Card} from "/modules/card.js";
+import {Game} from "/rulesEngine/game.js";
 import {stopEffect} from "/modules/levitationEffect.js";
 import {socket, connectTo} from "/modules/netcode.js";
 import {putChatMessage} from "/modules/generalUI.js";
@@ -11,6 +11,7 @@ import * as gameUI from "/modules/gameUI.js";
 export class InitState extends GameState {
 	constructor(roomcode, gameMode) {
 		super();
+		gameState = this;
 		
 		this.gameMode = gameMode;
 		this.opponentReady = false;
@@ -32,6 +33,7 @@ export class InitState extends GameState {
 				
 				game = new Game();
 				localPlayer = game.players[1];
+				game.players[1].isViewable = true;
 				socket.send("[ready]");
 				this.checkReadyConditions();
 				
@@ -83,16 +85,21 @@ export class InitState extends GameState {
 			
 			switch (this.gameMode) {
 				case "normal": {
-					gameState = new DeckState();
+					new DeckState(false);
 					break;
 				}
 				case "draft": {
-					gameState = new DraftState();
+					new DraftState();
+					break;
+				}
+				case "normalAutomatic": {
+					new DeckState(true);
 					break;
 				}
 			}
 			gameUI.init();
-			
+			gameDiv.hidden = false;
+
 			// make chat functional
 			document.getElementById("chatInput").addEventListener("keyup", function(e) {
 				if (e.code == "Enter" && this.value != "") {
@@ -122,14 +129,14 @@ export class InitState extends GameState {
 			// main screen is no longer needed
 			stopEffect();
 			roomCodeEntry.remove();
-			gameDiv.removeAttribute("hidden");
+			gameDiv.hiden = false;
 		}
 	}
 	
 	cancel() {
 		socket.close();
-		waitingForOpponentSpan.setAttribute("hidden", "");
-		roomCodeInputFieldSpan.removeAttribute("hidden");
+		waitingForOpponentSpan.hidden = true;
+		roomCodeInputFieldSpan.hidden = false;
 		roomCodeInputField.focus();
 		gameState = null;
 	}

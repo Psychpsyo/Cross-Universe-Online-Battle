@@ -1,4 +1,10 @@
-//chat box
+
+import {locale} from "/modules/locale.js";
+
+chatHeader.textContent = locale.chat.title;
+chatInput.placeholder = locale.chat.enterMessage;
+
+// chat box
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 export function putChatMessage(message, type) {
 	let messageSpan = document.createElement("div");
@@ -72,8 +78,8 @@ export function previewCard(card) {
 	
 	// set the text preview
 	// general info
-	cardDetailsName.textContent = card.getName();
-	let cardTypes = [...card.getCardTypes()];
+	cardDetailsName.textContent = card.names.get().join("/");
+	let cardTypes = [...card.cardTypes.get()];
 	if (cardTypes.includes("token")) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);
 	}
@@ -83,18 +89,18 @@ export function previewCard(card) {
 	if (cardTypes.includes("item")) {
 		cardTypes.splice(cardTypes.indexOf("item"), 1);
 	}
-	cardDetailsLevelType.textContent = locale.cardDetailsInfoString.replace("{#LEVEL}", card.getLevel() == -1? "?" : card.getLevel()).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
-	if (card.getTypes().length > 0) {
-		cardDetailsTypes.textContent = locale.cardDetailsTypes + card.getTypes().map(type => locale.types[type]).join(locale.typeSeparator);
+	cardDetailsLevelType.textContent = locale.cardDetailsInfoString.replace("{#LEVEL}", card.level.get() == -1? "?" : card.level.get()).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
+	if (card.types.get().length > 0) {
+		cardDetailsTypes.textContent = locale.cardDetailsTypes + card.types.get().map(type => locale.types[type]).join(locale.typeSeparator);
 	} else {
 		cardDetailsTypes.textContent = locale.typeless;
 	}
 	
 	// attack & defense
-	if (card.getCardTypes().includes("unit")) {
+	if (card.cardTypes.get().includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
-		cardDetailsAttack.innerHTML = locale.cardDetailsAttack + (card.getAttack() == -1? "?" : card.getAttack());
-		cardDetailsDefense.innerHTML = locale.cardDetailsDefense + (card.getDefense() == -1? "?" : card.getDefense());
+		cardDetailsAttack.innerHTML = locale.cardDetailsAttack + (card.attack.get() == -1? "?" : card.attack.get());
+		cardDetailsDefense.innerHTML = locale.cardDetailsDefense + (card.defense.get() == -1? "?" : card.defense.get());
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}

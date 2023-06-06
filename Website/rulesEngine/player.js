@@ -1,7 +1,7 @@
 // This module exports the Player class which holds all data relevant to one player in a game.
 
-import {Card} from "/modules/card.js";
-import {Zone} from "/modules/zone.js";
+import {Card} from "./card.js";
+import {Zone, FieldZone, DeckZone} from "./zones.js";
 
 export class Player {
 	constructor(game) {
@@ -10,17 +10,21 @@ export class Player {
 		this.deck = null;
 		this.mana = 0;
 		this.life = 1000;
+		this.lost = false;
+		this.loseReason = "";
+		this.won = false;
+		this.winReason = "";
 		
+		this.deckZone = new DeckZone(this);
+		this.handZone = new Zone(this, "hand");
+		this.unitZone = new FieldZone(this, "unit", 5);
+		this.spellItemZone = new FieldZone(this, "spellItem", 4);
+		this.partnerZone = new FieldZone(this, "partner", 1);
+		this.discardPile = new Zone(this, "discard");
+		this.exileZone = new Zone(this, "exile");
+		
+		this.isViewable = false; // determines whether or not this player's cards should be visible locally.
 		this.nextCustomCardId = this.index + 1;
-		
-		this.deckZone = new Zone("deck" + this.index, -1, this, false);
-		this.handZone = new Zone("hand" + this.index, -1, this, false);
-		this.unitZone = new Zone("unit" + this.index, 5, this, true);
-		this.spellItemZone = new Zone("spellItem" + this.index, 4, this, true);
-		this.partnerZone = new Zone("partner" + this.index, 1, this, true);
-		this.discardPile = new Zone("discard" + this.index, -1, this, false);
-		this.exileZone = new Zone("exile" + this.index, -1, this, false);
-		this.presentedZone = new Zone("presented" + this.index, -1, this, false);
 	}
 	
 	async setDeck(deck) {
@@ -41,9 +45,12 @@ export class Player {
 			for (let i = 0; i < card.amount; i++) {
 				let card = await new Card(this, cardId, true);
 				this.deckZone.add(card, this.deckZone.cards.length);
-				card.location = this.deckZone;
 			}
 		}
 		this.deck = deck;
+	}
+	
+	next() {
+		return this.game.players[(this.index + 1) % this.game.players.length];
 	}
 }

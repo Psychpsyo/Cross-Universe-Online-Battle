@@ -15,44 +15,148 @@
 		"gamemode": "Spielmodus:",
 		"gamemodes": {
 			"normal": "Normal",
-			"draft": "Draft"
+			"draft": "Draft",
+			"normalAutomatic": "Automatisch"
 		},
 		
 		"settingsButton": "Einstellungen",
 		"deckCreatorButton": "Deck Editor"
 	},
 	
-	"infoYou": "Du",
-	"infoOpponent": "Gegner",
-	"infoLife": "Leben:",
-	"infoMana": "Mana:",
-	
-	"deckSelect": {
-		"chooseYourDeck": "Wähle dein Deck.",
-		"loadingDeck": "Deck wird geladen...",
-		"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
-		"dropYourDeck": "Deck per Drag & drop hier ablegen.",
-		"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+	"game": {
+		"youStart": "Du bist zuerst dran.",
+		"opponentStarts": "Dein Gegner ist zuerst dran.",
+		"yourDeckShuffled": "Dein Deck wurde gemischt.",
+		"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
 		
-		"deckListDefault": "Default",
-		"deckListLegacy": "Legacy",
-		"deckListLoadSelected": "Gewähltes Deck laden",
-		"deckListCardAmount": "{#CARDS} Karten"
+		"info": {
+			"you": "Du",
+			"opponent": "Gegner",
+			"life": "LP:",
+			"mana": "Mana:"
+		},
+		
+		"deckSelect": {
+			"chooseYourDeck": "Wähle dein Deck.",
+			"loadingDeck": "Deck wird geladen...",
+			"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
+			"dropYourDeck": "Deck per Drag & Drop hier ablegen.",
+			"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+			
+			"deckListDefault": "Default",
+			"deckListLegacy": "Legacy",
+			"deckListLoadSelected": "Gewähltes Deck laden",
+			"deckListCardAmount": "{#CARDS} Karten"
+		},
+		
+		"partnerSelect": {
+			"useSuggestedQuestion": "Möchtest du den empfohlenen Partner für dieses Deck verwenden oder selber einen wählen?",
+			"useSuggested": "Empfohlenen wählen",
+			"selectManually": "Selbst wählen",
+			"popupTitle": "Wähle deinen Partner:",
+			"waitingForOpponent": "Warte darauf, dass dein Gegner einen Partner wählt...",
+			"revealPartner": "Partner aufdecken"
+		},
+		
+		"cardSelector": {
+			"tokens": "Tokens:",
+			"deck1": "Dein Deck:",
+			"discard0": "Ablagestapel deines Gegners:",
+			"discard1": "Dein Ablagestapel:",
+			"exile0": "Exil deines Gegners:",
+			"exile1": "Dein Exil:",
+			
+			"returnAllToDeck": "Alle zurück in dein Deck mischen"
+		},
+		
+		"cardChoice": {
+			"confirm": "Bestätigen"
+		},
+		
+		"fieldLabels": {
+			"verticalText": false,
+			"unitZone": "Einheiten\nZone",
+			"spellItemZone": "Zauber\n&\nItem\nZone",
+			"partnerZone": "Partner\nZone",
+			"exileZone": "Exil",
+			"discardPile": "Ablage-\nstapel",
+			"deck": "Deck"
+		},
+		
+		"manual": {
+			"deck": {
+				"draw": "Ziehen",
+				"shuffle": "Mischen",
+				"search": "Suchen",
+				"showTop": "Oberste Zeigen",
+				"dropTop": "Oben Drauf",
+				"dropShuffle": "Reinmischen",
+				"dropBottom": "Unten Drunter",
+				"dropCancel": "Abbrechen"
+			},
+			
+			"actions": {
+				"life": "LP",
+				"mana": "Mana",
+				
+				"half": "Halbieren",
+				"tokens": "Tokens",
+				"showHand": "Handkarten Zeigen",
+				"hideHand": "Handkarten Verbergen"
+			},
+			
+			"presented": {
+				"reveal": "Zeigen",
+				"hide": "Verbergen"
+			}
+		},
+		
+		"automatic": {
+			"phases": {
+				"manaSupplyPhase": "Mana\nSupply Phase",
+				"drawPhase": "Draw\nPhase",
+				"firstMainPhase": "Main\nPhase 1",
+				"battlePhase": "Battle\nPhase",
+				"secondMainPhase": "Main\nPhase 2",
+				"endPhase": "End\nPhase"
+			},
+			
+			"battlePhase": {
+				"question": "Möchtest du die Battle Phase betreten?",
+				"enter": "Battle Phase betreten",
+				"skip": "Battle Phase überspringen"
+			},
+			
+			"retire": {
+				"dropRetire": "Retire (x{#AMOUNT})",
+				"dropCancel": "Abbrechen"
+			},
+
+			"gameOver": {
+				"youWon": "Gewonnen!",
+				"youLost": "Verloren!",
+				"draw": "Unentschieden!",
+				"winReasons": {
+					"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
+					"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
+					"drawFromEmptyDeck": "Dein Gegner musste vom leeren Deck ziehen.",
+					"cardEffect": "Du hast durch den Effekt von {#CARDNAME} gewonnen."
+				},
+				"loseReasons": {
+					"lifeZero": "Deine LP sind auf 0 gesunken.",
+					"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
+					"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
+					"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
+				},
+				"drawReasons": {
+					"bothWon": "Beide Spieler haben gewonnen.",
+					"bothLost": "Beide Spieler haben verloren.",
+					"youWonAndLost": "Du hast gleichzeitig gewonnen und verloren.",
+					"opponentWonAndLost": "Dein Gegner hat gleichzeitig gewonnen und verloren."
+				}
+			}
+		}
 	},
-	
-	"partnerSelect": {
-		"useSuggestedQuestion": "Möchtest du den empfohlenen Partner für dieses Deck verwenden oder selber einen wählen?",
-		"useSuggested": "Empfohlenen wählen",
-		"selectManually": "Selbst wählen",
-		"waitingForOpponent": "Warte darauf, dass dein Gegner einen Partner wählt...",
-		"revealPartner": "Partner aufdecken"
-	},
-	
-	"selectStartingPlayer": "Startspieler auswählen",
-	"youStart": "Du bist zuerst dran.",
-	"opponentStarts": "Dein Gegner ist zuerst dran.",
-	"yourDeckShuffled": "Deck gemischt.",
-	"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
 	
 	"chat": {
 		"title": "Chat",
@@ -60,46 +164,6 @@
 		"you": "Du: ",
 		"opponent": "GEGNER: ",
 		"colon": ": "
-	},
-	"life": "Leben",
-	"mana": "Mana",
-	
-	"deckDraw": "Ziehen",
-	"deckShuffle": "Mischen",
-	"deckSearch": "Suchen",
-	"deckShowTop": "Oberste Zeigen",
-	"deckDropTop": "Oben Drauf",
-	"deckDropShuffle": "Reinmischen",
-	"deckDropBottom": "Unten Drunter",
-	"deckDropCancel": "Abbrechen",
-	
-	"presentReveal": "Zeigen",
-	"presentHide": "Verbergen",
-	
-	"actionsHalf": "Halbieren",
-	"actionsTokens": "Tokens",
-	"actionsShowHand": "Handkarten Zeigen",
-	"actionsHideHand": "Handkarten Verbergen",
-	
-	"cardSelector": {
-		"tokens": "Tokens:",
-		"deck1": "Dein Deck:",
-		"discard0": "Ablagestapel deines Gegners:",
-		"discard1": "Dein Ablagestapel:",
-		"exile0": "Exil deines Gegners:",
-		"exile1": "Dein Exil:",
-		
-		"returnAllToDeck": "Alle zurück in dein Deck mischen"
-	},
-	
-	"fieldLabels": {
-		"verticalText": false,
-		"unitZone": "Einheiten\nZone",
-		"spellItemZone": "Zauber\n&\nItem\nZone",
-		"partnerZone": "Partner\nZone",
-		"exileZone": "Exil",
-		"discardPile": "Ablage-\nstapel",
-		"deck": "Deck"
 	},
 	
 	"draft": {

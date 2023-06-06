@@ -35,7 +35,7 @@
 	height: 100%;
 	filter: var(--theme-field-filter);
 	
-	background-image: url("images/fieldUnlabeled.jpg");
+	background-image: url("/images/fieldUnlabeled.jpg");
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center;
@@ -160,14 +160,17 @@ dialog #cardDetails {
 	width: 30vw;
 	height: 100vh;
 	box-sizing: border-box;
+	z-index: 1;
 	
 	border-right: 2px var(--theme-border-color) solid;
 	background-color: var(--theme-shadow);
 }
-
 .leftField #leftPanel {
 	border-right: none;
 	border-left: 2px var(--theme-border-color) solid;
+}
+#leftPanel > :not(:last-child) {
+	border-bottom: 2px solid var(--theme-border-color);
 }
 
 #infoPanel {
@@ -176,7 +179,6 @@ dialog #cardDetails {
 	text-align: right;
 	white-space: nowrap;
 	padding: .5em;
-	border-bottom: 2px solid var(--theme-border-color);
 }
 #infoPanel > div {
 	min-width: 4vw;
@@ -184,11 +186,11 @@ dialog #cardDetails {
 #infoPanel > :not(:last-child) {
 	margin-right: 2vw;
 }
-.lifeUp {
+.valueUp {
 	font-weight: bold;
 	color: #0f0;
 }
-.lifeDown {
+.valueDown {
 	font-weight: bold;
 	color: #f00;
 }
@@ -196,9 +198,7 @@ dialog #cardDetails {
 #gameInteractions {
 	text-align: center;
 	padding: .5em;
-	border-bottom: 2px solid var(--theme-border-color);
 }
-
 #gameInteractions > div:not(:last-child) {
 	padding-bottom: .5em;
 }
@@ -227,7 +227,7 @@ dialog #cardDetails {
 	grid-row-end: 3;
 }
 
-#hand0 img, #discard0, #exile0, #deck0 {
+#discard0, #exile0, #deck0 {
 	transform: rotate(180deg);
 }
 
@@ -271,11 +271,6 @@ img[src$="cardBackFrameP1.png"] {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-}
-
-.cardDiv {
-	position: relative;
-	display: inherit;
 }
 
 .cardBtns {
@@ -369,24 +364,27 @@ img[src$="cardBackFrameP1.png"] {
 	transition-property: transform;
 	transition-duration: .1s;
 }
+#hand0 .card {
+	transform: rotate(180deg) translateY(0);
+}
 
 #hand1 :first-child {
 	margin-left: .5vw;
 }
-
 #hand1 :last-child {
 	margin-right: .5vw;
 }
-
 #hand0 :first-child {
 	margin-right: .5vw;
 }
-
 #hand0 :last-child {
 	margin-left: .5vw;
 }
 
-.hand .card:hover {
+#hand0.shown .card:hover {
+	transform: rotate(180deg) translateY(-15%);
+}
+#hand1 .card:hover {
 	transform: translateY(-15%);
 }
 
@@ -407,39 +405,36 @@ img[src$="cardBackFrameP1.png"] {
 	background: linear-gradient(var(--theme-shadow) 20%, rgb(42, 72, 130) 50%);
 }
 
-#deckDropzone {
+.sideBox {
+	border: 2px var(--theme-border-color) solid;
+	border-radius: .5em;
+	background-color: #0001;
+}
+#deckDropPanel {
 	position: relative;
 	min-height: 8em;
-	margin: .5em 1em 0;
+	margin: .75em;
 }
-
-.centeredTextDiv {
+#deckDropTextContainer {
 	position: absolute;
 	width: 100%;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	text-align: center;
+	pointer-events: none;
 }
-
 .clickableText {
 	text-decoration: underline;
 	cursor: pointer;
 }
-
 #deckSelectSpan {
 	font-size: .6em;
 	pointer-events: auto;
 }
-
-#deckDropTextContainer {
-	pointer-events: none;
-}
-
 #fileSelectDeckLoader {
 	display: none;
 }
-
 label[for="fileSelectDeckLoader"] {
 	position: absolute;
 	width: 100%;
@@ -448,27 +443,21 @@ label[for="fileSelectDeckLoader"] {
 	cursor: pointer;
 }
 
-.sideBox {
-	border: 2px var(--theme-border-color) solid;
-	border-radius: .5em;
-	
-	background-color: #0001;
+#chatHolder {
+	padding: .75em;
+	flex-grow: 1;
 }
-
-#chatHeader {
-	text-align: center;
-}
-
 #chat {
 	display: flex;
 	flex-direction: column;
-	flex-grow: 1;
-	height: 1em; /* just needs to be defined so that the chat does not overflow. */
-	margin: 1em;
+	height: 100%;
 }
-
+#chatHeader {
+	text-align: center;
+}
 #chatBox {
 	flex-grow: 1;
+	height: 0;
 	border-top: 2px var(--theme-border-color) solid;
 	border-bottom: 2px var(--theme-border-color) solid;
 	overflow-y: scroll;
@@ -478,12 +467,10 @@ label[for="fileSelectDeckLoader"] {
 	word-wrap: break-word;
 	background-color: #0003;
 }
-
 #chatBox > div {
 	padding: 0 .4em;
 	margin: 3px 0px;
 }
-
 #chatBox > .notice {
 	background-color: #2a4882;
 }
@@ -554,17 +541,6 @@ dialog.popupSelectMenu {
 	-ms-overflow-style: none;
 }
 
-#cardSelectorReturnToDeck {
-	display: none;
-	height: 2em;
-	line-height: 2em;
-	border-left: none;
-	border-right: none;
-	border-bottom: none;
-	border-bottom-left-radius: 1em;
-	border-bottom-right-radius: 1em;
-}
-
 .cardGrid img {
 	width: 85%;
 	box-sizing: border-box;
@@ -572,9 +548,9 @@ dialog.popupSelectMenu {
 	user-select: none;
 }
 
-.partnerHighlight {
-	box-shadow: 0px 0px .25em #9f9;
-	border: solid 1px #9f9;
+.cardHighlight {
+	box-shadow: 0px 0px .25em #ffd686;
+	border: solid 1px #ffd686;
 }
 
 /*deck selector*/
@@ -674,144 +650,31 @@ dialog.popupSelectMenu {
 	font-size: .8em;
 }
 
-#partnerSelectQuestion {
-	display: none;
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	text-align: center;
-	
-	background-color: var(--theme-dialog-background-color);
-	border: 2px var(--theme-border-color) solid;
-	border-radius: 1em;
+#questionPopup {
 	padding: 1em;
-	z-index: 100;
 }
-
-#partnerSelectQuestionBtns {
+#questionPopupBtns {
 	display: flex;
 	justify-content: center;
-	gap: 2em;
+	gap: 3em;
 }
 
-#partnerSelectorGrid {
+#cardChoiceGrid {
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
 }
-
-.presentedCards {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	display: flex;
-	justify-content: center;
-	box-sizing: border-box;
-	padding: .5vh 1vh;
-	height: 35%;
-	border-radius: 1vh;
-	background-color: #0005;
-	gap: 1vh;
-	z-index: 75;
+.unselectableCard {
+	filter: grayscale() brightness(.5);
 }
 
-.presentedCards:empty {
-	display: none;
-}
-
-/*Class for the presented cards tray when it is being grabbed from*/
-.presentedCardsDragSource {
-	pointer-events: none;
-	opacity: 35%;
-}
-
-.presentedCards > div {
-	position: relative;
-	width: 16.3vh; /*I hate everything about this. This magic number is calculated from the vh of the field, the 35% vh of the presented cards tray and the aspect ration of a Cross Univserse card. Reason being that I can't absolutely position the 'Reveal' button on these when their display is set to content but when the display isn't set to content, the div becomes massive.*/
-	/* Addendum to the rant above: I have bumped the magic number from 16.81 down to 16.3. This number is now essentially based on nothing but it leaves no gap on the right of the card. */
-}
-
-.presentedCards > div > button {
-	position: absolute;
-	left: 50%;
-	top: 90%;
-	transform: translateX(-50%);
-	width: max-content;
-}
-
-.presentedCards img {
-	height: 100%;
-}
-
-#presentedCards0 {
-	flex-direction: row-reverse;
-	top: 13%;
-}
-#presentedCards1 {
-	top: 52%;
-}
-
-/* counters */
-.counterHolder {
-	position: absolute;
-	display: flex;
-	width: 1.5em;
-	z-index: 5;
-	font-size: .8em;
-}
-
-#p1Grid .counterHolder {
-	flex-direction: column-reverse;
-	bottom: 0;
-	left: 0;
-}
-
-#p2Grid .counterHolder {
-	top: 0;
-	right: 0;
-	flex-direction: column;
-}
-
-.counter {
-	text-align: center;
-	background-color: black;
-	border-radius: .5em;
-	border: 2px var(--theme-border-color) solid;
-}
-
-.counterAddBtn {
-	display: none;
-	text-align: center;
-	background-color: #aaa;
-	border-radius: .5em;
-	border: 2px var(--theme-border-color) solid;
-	font-weight: bold;
-}
-
-.fieldCardContainer:hover .counterAddBtn {
-	display: block;
-}
-
-/* card action buttons */
-.cardActionHolder {
-	display: none;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	z-index: 1;
-}
-
-.fieldCardContainer:hover .cardActionHolder {
-	display: block;
-}
-
-#startingPlayerSelect {
-	display: none;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+.cardMenuBottomButton {
+	height: 2em;
+	line-height: 2em;
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
+	border-bottom-left-radius: 1em;
+	border-bottom-right-radius: 1em;
 }
 
 /* field labels */
@@ -833,17 +696,36 @@ dialog.popupSelectMenu {
 	font-size: 2.5vh;
 }
 
-
 #mainGameBlackout {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: #0008;
+	color: #eee;
+	background-color: #000b;
+	z-index: 90;
+	transition: color 2s, background-color 2.5s;
+}
+
+#mainGameBlackout.hidden {
+	transition: color .5s, background-color .5s;
+	color: transparent;
+	background-color: transparent;
+	pointer-events: none;
+}
+
+#mainGameBlackoutContent {
+	height: 100%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	font-weight: bold;
-	z-index: 90;
+	white-space: pre;
+	text-align: center;
+	filter: drop-shadow(black 0 0 .15em);
+}
+
+#mainGameBlackoutContent::first-line {
+	font-size: 2em;
 }

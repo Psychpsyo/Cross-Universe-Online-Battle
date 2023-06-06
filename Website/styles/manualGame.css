@@ -1,0 +1,100 @@
+/* counters */
+.counterHolder {
+	position: absolute;
+	display: flex;
+	width: 1.5em;
+	z-index: 5;
+	font-size: .8em;
+}
+#p1Grid .counterHolder {
+	flex-direction: column-reverse;
+	bottom: 0;
+	left: 0;
+}
+#p2Grid .counterHolder {
+	top: 0;
+	right: 0;
+	flex-direction: column;
+}
+.counter {
+	text-align: center;
+	background-color: black;
+	border-radius: .5em;
+	border: 2px var(--theme-border-color) solid;
+}
+.counterAddBtn {
+	display: none;
+	text-align: center;
+	background-color: #aaa;
+	border-radius: .5em;
+	border: 2px var(--theme-border-color) solid;
+	font-weight: bold;
+}
+.fieldCardContainer:hover .counterAddBtn {
+	display: block;
+}
+
+/* card action buttons */
+.cardActionHolder {
+	display: none;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1;
+}
+
+.fieldCardContainer:hover .cardActionHolder {
+	display: block;
+}
+
+.presentedCards {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	justify-content: center;
+	box-sizing: border-box;
+	padding: .5vh 1vh;
+	height: 35%;
+	border-radius: 1vh;
+	background-color: #0005;
+	gap: 1vh;
+	z-index: 75;
+}
+
+.presentedCards:empty {
+	display: none;
+}
+
+/* Presented Cards */
+.presentedCardsDragSource {
+	pointer-events: none;
+	opacity: 35%;
+}
+
+.presentedCards > div {
+	position: relative;
+	width: 16.3vh; /*I hate everything about this. This magic number is calculated from the vh of the field, the 35% vh of the presented cards tray and the aspect ration of a Cross Univserse card. Reason being that I can't absolutely position the 'Reveal' button on these when their display is set to content but when the display isn't set to content, the div becomes massive.*/
+	/* Addendum to the rant above: I have bumped the magic number from 16.81 down to 16.3. This number is now essentially based on nothing but it leaves no gap on the right of the card. */
+}
+
+.presentedCards > div > button {
+	position: absolute;
+	left: 50%;
+	top: 90%;
+	transform: translateX(-50%);
+	width: max-content;
+}
+
+.presentedCards img {
+	height: 100%;
+}
+
+#presentedCards0 {
+	flex-direction: row-reverse;
+	top: 13%;
+}
+#presentedCards1 {
+	top: 52%;
+}
