@@ -47,8 +47,8 @@ randomizeRoomcode();
 // connecting
 export function connect() {
 	// hide input field and show waiting indicator
-	roomCodeInputFieldSpan.setAttribute("hidden", "");
-	waitingForOpponentSpan.removeAttribute("hidden");
+	roomCodeInputFieldSpan.hidden = true;
+	waitingForOpponentSpan.hidden = false;
 	// refresh the "Waiting for Opponent" text so screen readers read it out.
 	setTimeout(() => {
 		if (typeof trWaitingForOpponent !== undefined) {
