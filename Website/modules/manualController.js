@@ -59,7 +59,7 @@ export class ManualController extends InteractionController {
 			let startingPlayer = Math.random() > .5;
 			putChatMessage(startingPlayer? locale.game.youStart : locale.game.opponentStarts, "notice");
 			socket.send("[selectPlayer]" + startingPlayer);
-			partnerRevealButtonDiv.style.display = "block";
+			localPartnerButtons.classList.add("visible");
 		}
 	}
 	
@@ -138,7 +138,8 @@ export class ManualController extends InteractionController {
 			case "selectPlayer": { // opponent chose the starting player (at random)
 				this.deckShuffle(localPlayer.deckZone);
 				putChatMessage(message == "true"? locale.game.opponentStarts : locale.game.youStart, "notice");
-				partnerRevealButtonDiv.style.display = "block";
+				revealPartnerBtn.style.display = "block";
+				localPartnerButtons.classList.add("visible");
 				return true;
 			}
 			default: {

@@ -320,14 +320,17 @@ class FieldCardSlot extends UiCardSlot {
 	}
 	update() {
 		let card = this.zone.get(this.index);
+		for (let button of Array.from(this.fieldSlot.parentElement.querySelectorAll(".cardSpecific"))) {
+			button.remove();
+		}
 		if (card) {
 			this.fieldSlot.src = card.getImage();
 			// add card action buttons
 			if (!gameState.automatic && !card.hidden) {
-				this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
 						let button = document.createElement("button");
+						button.classList.add("cardSpecific");
 						button.textContent = locale.cardActions[card.cardId][key];
 						button.addEventListener("click", value);
 						this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);

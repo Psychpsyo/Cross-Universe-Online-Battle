@@ -105,7 +105,7 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	grabCard(player, zone, index) {
-		retireOptions.style.pointerEvents = "none";
+		retireOptions.classList.add("noClick");
 		
 		let card = zone.cards[index];
 		let playerInfo = this.playerInfos[player.index];
@@ -128,7 +128,7 @@ export class AutomaticController extends InteractionController {
 		return false;
 	}
 	dropCard(player, zone, index) {
-		retireOptions.style.pointerEvents = "";
+		retireOptions.classList.remove("noClick");
 		
 		let card = this.playerInfos[player.index].heldCard;
 		let playerInfo = this.playerInfos[player.index];

@@ -34,20 +34,6 @@
 	display: block;
 }
 
-/* card action buttons */
-.cardActionHolder {
-	display: none;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	z-index: 1;
-}
-
-.fieldCardContainer:hover .cardActionHolder {
-	display: block;
-}
-
 .presentedCards {
 	position: absolute;
 	left: 50%;

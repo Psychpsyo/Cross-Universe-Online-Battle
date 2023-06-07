@@ -34,7 +34,8 @@ export function init() {
 	
 	// partner reveal button
 	revealPartnerBtn.addEventListener("click", function() {
-		document.getElementById("partnerRevealButtonDiv").style.display = "none";
+		this.remove();
+		localPartnerButtons.classList.remove("visible");
 		localPlayer.partnerZone.cards[0].hidden = false;
 		gameUI.updateCard(localPlayer.partnerZone, 0);
 		socket.send("[revealPartner]");
