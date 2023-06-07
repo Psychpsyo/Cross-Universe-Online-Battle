@@ -111,6 +111,9 @@ export class ManualController extends InteractionController {
 				let order = message.split("|").map(i => parseInt(i));
 				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
 				deck.reindex();
+				for (let i = 0; i < deck.cards.length; i++) {
+					gameUI.updateCard(deck, i);
+				}
 				putChatMessage(deck.playerIndex == 1? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");
 				return true;
 			}
@@ -274,6 +277,9 @@ export class ManualController extends InteractionController {
 		}
 		deckZone.cards.sort((a, b) => order.indexOf(deckZone.cards.indexOf(a)) - order.indexOf(deckZone.cards.indexOf(b)));
 		deckZone.reindex();
+		for (let i = 0; i < deckZone.cards.length; i++) {
+			gameUI.updateCard(deckZone, i);
+		}
 		socket.send("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
 		putChatMessage(locale.game[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
@@ -332,7 +338,7 @@ export class ManualController extends InteractionController {
 			gameUI.insertCard(zone.player.deckZone, 0);
 		}
 		if (zone.player === localPlayer) {
-			socket.send("[returnAllToDeck]" + gameState.getZoneName(gameUI.cardSelectorZone));
+			socket.send("[returnAllToDeck]" + gameState.getZoneName(zone));
 			this.deckShuffle(localPlayer.deckZone);
 		}
 	}

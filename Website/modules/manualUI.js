@@ -106,12 +106,6 @@ export function init() {
 		});
 	}
 	
-	// returns all cards from the card selector to your deck and closes the selector
-	cardSelectorReturnToDeck.addEventListener("click", function() {
-		gameState.controller.returnAllToDeck(gameUI.cardSelectorZone);
-		gameUI.closeCardSelect();
-	});
-	
 	// deck options
 	document.getElementById("drawBtn").addEventListener("click", function() {
 		gameState.controller.deckDraw(localPlayer);
