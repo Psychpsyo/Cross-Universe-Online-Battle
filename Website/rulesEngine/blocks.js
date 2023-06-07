@@ -62,7 +62,7 @@ class Block {
 export class StandardDraw extends Block {
 	constructor(stack, player) {
 		super(stack, player, arrayTimingGenerator([
-			[new actions.DrawAction(player, 1)]
+			[new actions.Draw(player, 1)]
 		]));
 	}
 }
@@ -70,15 +70,15 @@ export class StandardDraw extends Block {
 export class StandardSummon extends Block {
 	constructor(stack, player, unit, unitZoneIndex) {
 		super(stack, player, arrayTimingGenerator([
-			[new actions.SummonAction(player, unit, unitZoneIndex)]
+			[new actions.Summon(player, unit, unitZoneIndex)]
 		]));
 		this.unit = unit;
 		this.unitZoneIndex = unitZoneIndex;
 		this.costTiming = new Timing(
 			stack.phase.turn.game,
 			[
-				new actions.ChangeManaAction(player, -unit.level.get()),
-				new actions.PlaceAction(player, unit, player.unitZone, unitZoneIndex)
+				new actions.ChangeMana(player, -unit.level.get()),
+				new actions.Place(player, unit, player.unitZone, unitZoneIndex)
 			],
 			this
 		)
@@ -96,16 +96,16 @@ export class StandardSummon extends Block {
 }
 
 async function* retireTimingGenerator(player, units) {
-	let discardTiming = yield units.map(unit => new actions.DiscardAction(unit));
+	let discardTiming = yield units.map(unit => new actions.Discard(unit));
 	
 	let gainedMana = 0;
 	for (const action of discardTiming.actions) {
-		if (action instanceof actions.DiscardAction) {
+		if (action instanceof actions.Discard) {
 			gainedMana += action.card.level.get();
 		}
 	}
 	if (gainedMana > 0) {
-		yield [new actions.ChangeManaAction(player, gainedMana)];
+		yield [new actions.ChangeMana(player, gainedMana)];
 	}
 }
 
@@ -155,9 +155,9 @@ async function* fightTimingGenerator(attackDeclaration) {
 	
 	// RULES: If the Attack is greater the attacker destroys the target.
 	if (totalAttack > attackDeclaration.target.defense.get()) {
-		let actionList = [new actions.DestroyAction(attackDeclaration.target)];
+		let actionList = [new actions.Destroy(attackDeclaration.target)];
 		if (attackDeclaration.target.zone.type == "partner") {
-			actionList.push(new actions.DealDamageAction(attackDeclaration.target.zone.player, totalAttack - attackDeclaration.target.defense.get()));
+			actionList.push(new actions.DealDamage(attackDeclaration.target.zone.player, totalAttack - attackDeclaration.target.defense.get()));
 		}
 		yield actionList;
 	}
@@ -180,9 +180,9 @@ async function* fightTimingGenerator(attackDeclaration) {
 	}
 	
 	if (attackDeclaration.target.attack.get() > counterattackTarget.defense.get()) {
-		let actionList = [new actions.DestroyAction(counterattackTarget)];
+		let actionList = [new actions.Destroy(counterattackTarget)];
 		if (counterattackTarget.zone.type == "partner") {
-			actionList.push(new actions.DealDamageAction(counterattackTarget.zone.player, attackDeclaration.target.attack.get() - counterattackTarget.defense.get()));
+			actionList.push(new actions.DealDamage(counterattackTarget.zone.player, attackDeclaration.target.attack.get() - counterattackTarget.defense.get()));
 		}
 		yield actionList;
 	}

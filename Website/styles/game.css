@@ -275,6 +275,7 @@ img[src$="cardBackFrameP1.png"] {
 
 .cardBtns {
 	display: none;
+	pointer-events: none;
 	width: 100%;
 	position: absolute;
 	top: 50%;
@@ -282,12 +283,23 @@ img[src$="cardBackFrameP1.png"] {
 	transform: translate(-50%, -50%);
 	z-index: 50;
 }
+.cardBtns.visible {
+	display: block;
+}
 .cardBtns > button {
+	pointer-events: all;
 	position: relative;
 	left: 50%;
 	transform: translateX(-50%);
 	white-space: pre;
 }
+.cardBtns.noClick > button {
+	pointer-events: none;
+}
+.fieldCardContainer:hover .cardActionHolder {
+	display: block;
+}
+
 
 .fieldCardAmountDisplay {
 	color: #eee;

@@ -5,7 +5,7 @@ import {InteractionController} from "/modules/interactionController.js";
 import {putChatMessage} from "/modules/generalUI.js";
 import {socket} from "/modules/netcode.js";
 import {DistRandom} from "/modules/distributedRandom.js";
-import {shouldAutoPass} from "/modules/autopass.js";
+import {getAutoResponse} from "/modules/autopass.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
 import * as actions from "/rulesEngine/actions.js";
@@ -57,9 +57,10 @@ export class AutomaticController extends InteractionController {
 						}
 					}
 
-					if (shouldAutoPass(localRequests)) {
-						socket.send('[inputRequestResponse]{"type":"pass"}');
-						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve({type: "pass"})}));
+					let autoResponse = getAutoResponse(localRequests);
+					if (autoResponse) {
+						socket.send("[inputRequestResponse]" + JSON.stringify(autoResponse));
+						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
 					} else {
 						playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
 					}
@@ -104,7 +105,7 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	grabCard(player, zone, index) {
-		retireOptions.style.pointerEvents = "none";
+		retireOptions.classList.add("noClick");
 		
 		let card = zone.cards[index];
 		let playerInfo = this.playerInfos[player.index];
@@ -127,7 +128,7 @@ export class AutomaticController extends InteractionController {
 		return false;
 	}
 	dropCard(player, zone, index) {
-		retireOptions.style.pointerEvents = "";
+		retireOptions.classList.remove("noClick");
 		
 		let card = this.playerInfos[player.index].heldCard;
 		let playerInfo = this.playerInfos[player.index];
@@ -233,7 +234,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "actionCancelled": {
 				// units that got excluded from retires
-				if (event.action instanceof actions.DiscardAction && event.action.timing?.block instanceof blocks.Retire) {
+				if (event.action instanceof actions.Discard && event.action.timing?.block instanceof blocks.Retire) {
 					gameUI.clearDragSource(
 						event.action.card.zone,
 						event.action.card.index,
@@ -279,7 +280,14 @@ export class AutomaticController extends InteractionController {
 		}
 		switch (request.type) {
 			case "chooseCards": {
-				response.value = await gameUI.presentCardChoice(request.from, "Select Card(s)", undefined, request.validAmounts);
+				let title = locale.game.cardChoice.genericTitle;
+				switch (request.reason) {
+					case "handTooFull": {
+						title = locale.game.cardChoice.handDiscard;
+						break;
+					}
+				}
+				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts);
 				break;
 			}
 			case "pass": {

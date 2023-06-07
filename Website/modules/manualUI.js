@@ -34,7 +34,8 @@ export function init() {
 	
 	// partner reveal button
 	revealPartnerBtn.addEventListener("click", function() {
-		document.getElementById("partnerRevealButtonDiv").style.display = "none";
+		this.remove();
+		localPartnerButtons.classList.remove("visible");
 		localPlayer.partnerZone.cards[0].hidden = false;
 		gameUI.updateCard(localPlayer.partnerZone, 0);
 		socket.send("[revealPartner]");
@@ -105,12 +106,6 @@ export function init() {
 			socket.send("[counterAdd]" + fieldSlot);
 		});
 	}
-	
-	// returns all cards from the card selector to your deck and closes the selector
-	cardSelectorReturnToDeck.addEventListener("click", function() {
-		gameState.controller.returnAllToDeck(gameUI.cardSelectorZone);
-		gameUI.closeCardSelect();
-	});
 	
 	// deck options
 	document.getElementById("drawBtn").addEventListener("click", function() {

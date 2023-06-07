@@ -69,7 +69,7 @@ export class ManaSupplyPhase extends Phase {
 		let reduceManaActions = [];
 		for (let player of this.turn.game.players) {
 			if (player.mana > 5) {
-				reduceManaActions.push(new actions.ChangeManaAction(player, 5 - player.mana));
+				reduceManaActions.push(new actions.ChangeMana(player, 5 - player.mana));
 			}
 		}
 		if (reduceManaActions.length > 0) {
@@ -79,7 +79,7 @@ export class ManaSupplyPhase extends Phase {
 		
 		// RULES: Next, the active player gains 5 mana.
 		let turnPlayer = this.turn.player;
-		this.timings.push(new Timing(this.turn.game, [new actions.ChangeManaAction(turnPlayer, 5)], null));
+		this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5)], null));
 		yield* this.timings[this.timings.length - 1].run();
 		
 		
@@ -93,13 +93,13 @@ export class ManaSupplyPhase extends Phase {
 				yield [];
 			}
 		} else {
-			this.timings.push(new Timing(this.turn.game, [new actions.ChangeManaAction(turnPlayer, -partnerLevel)], null));
+			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, -partnerLevel)], null));
 			yield* this.timings[this.timings.length - 1].run();
 		}
 		
 		// RULES: If they still have more than 5 mana, it will again be reduced to 5.
 		if (turnPlayer.mana > 5) {
-			this.timings.push(new Timing(this.turn.game, [new actions.ChangeManaAction(turnPlayer, 5 - turnPlayer.mana)], null));
+			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5 - turnPlayer.mana)], null));
 			yield* this.timings[this.timings.length - 1].run();
 		}
 		
@@ -112,7 +112,7 @@ export class ManaSupplyPhase extends Phase {
 		}
 		if (cardChoiceRequests.length > 0) {
 			let chosenCards = (yield cardChoiceRequests).filter(choice => choice !== undefined).map((choice, i) => requests.chooseCards.validate(choice.value, cardChoiceRequests[i]));
-			this.timings.push(new Timing(this.turn.game, chosenCards.flat().map(card => new actions.DiscardAction(card)), null));
+			this.timings.push(new Timing(this.turn.game, chosenCards.flat().map(card => new actions.Discard(card)), null));
 			yield* this.timings[this.timings.length - 1].run();
 		}
 	}
@@ -158,7 +158,7 @@ export class MainPhase extends StackPhase {
 						if (this.turn.game.turns.lenght > 1) {
 							recentTurnActions = this.turn.game.turns[this.turn.game.turns.length - 2].getActions().concat(recentTurnActions);
 						}
-						let summons = recentTurnActions.filter(action => action instanceof actions.SummonAction && action.unit.cardRef === card);
+						let summons = recentTurnActions.filter(action => action instanceof actions.Summon && action.unit.cardRef === card);
 						if (summons.length > 0) {
 							continue;
 						}

@@ -9,7 +9,7 @@ export let uiPlayers = [];
 let lastFrame = 0;
 
 let cardSelectorSlots = [];
-export let cardSelectorZone = null;
+let cardSelectorMainSlot = null;
 
 let cardChoiceSelected = [];
 
@@ -51,27 +51,27 @@ if (localStorage.getItem("fieldLabelToggle") == "true") {
 }
 
 export function init() {
-	new fieldCardSlot(game.players[0].partnerZone, 0, 2);
-	new fieldCardSlot(game.players[1].partnerZone, 0, 17);
+	new FieldCardSlot(game.players[0].partnerZone, 0, 2);
+	new FieldCardSlot(game.players[1].partnerZone, 0, 17);
 	for (let i = 0; i < 5; i++) {
-		new fieldCardSlot(game.players[0].unitZone, i, 9 - i);
-		new fieldCardSlot(game.players[1].unitZone, i, 10 + i);
+		new FieldCardSlot(game.players[0].unitZone, i, 9 - i);
+		new FieldCardSlot(game.players[1].unitZone, i, 10 + i);
 	}
-	new fieldCardSlot(game.players[0].spellItemZone, 3, 0);
-	new fieldCardSlot(game.players[0].spellItemZone, 2, 1);
-	new fieldCardSlot(game.players[0].spellItemZone, 1, 3);
-	new fieldCardSlot(game.players[0].spellItemZone, 0, 4);
-	new fieldCardSlot(game.players[1].spellItemZone, 0, 15);
-	new fieldCardSlot(game.players[1].spellItemZone, 1, 16);
-	new fieldCardSlot(game.players[1].spellItemZone, 2, 18);
-	new fieldCardSlot(game.players[1].spellItemZone, 3, 19);
+	new FieldCardSlot(game.players[0].spellItemZone, 3, 0);
+	new FieldCardSlot(game.players[0].spellItemZone, 2, 1);
+	new FieldCardSlot(game.players[0].spellItemZone, 1, 3);
+	new FieldCardSlot(game.players[0].spellItemZone, 0, 4);
+	new FieldCardSlot(game.players[1].spellItemZone, 0, 15);
+	new FieldCardSlot(game.players[1].spellItemZone, 1, 16);
+	new FieldCardSlot(game.players[1].spellItemZone, 2, 18);
+	new FieldCardSlot(game.players[1].spellItemZone, 3, 19);
 	
 	game.players.forEach(player => {
 		uiPlayers.push(new UiPlayer(player));
 		
-		new deckCardSlot(player.deckZone);
-		new pileCardSlot(player.discardPile);
-		new pileCardSlot(player.exileZone);
+		new DeckCardSlot(player.deckZone);
+		new PileCardSlot(player.discardPile);
+		new PileCardSlot(player.exileZone);
 		
 		document.getElementById("hand" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
@@ -111,6 +111,7 @@ export function init() {
 		}
 	});
 	
+	// previewing hand cards
 	document.addEventListener("keydown", function(e) {
 		if (e.code.startsWith("Digit") && !e.shiftKey && !e.altKey && !e.ctrlKey) {
 			let cardIndex = e.code.substr(5);
@@ -125,6 +126,8 @@ export function init() {
 		}
 	});
 	
+	// card selector
+	cardSelectorMainSlot = new CardSelectorMainSlot()
 	cardSelector.addEventListener("click", function(e) {
 		if (e.target === cardSelector) {
 			closeCardSelect();
@@ -134,7 +137,12 @@ export function init() {
 		e.preventDefault();
 		closeCardSelect();
 	});
+	cardSelectorReturnToDeck.addEventListener("click", function() {
+		gameState.controller.returnAllToDeck(cardSelectorMainSlot.zone);
+		closeCardSelect();
+	});
 	
+	// card choice menu
 	cardChoiceMenu.addEventListener("cancel", function(e) {
 		e.preventDefault();
 	});
@@ -220,18 +228,18 @@ export function insertCard(zone, index) {
 			if (slot.index >= index) {
 				slot.index++;
 			} else if (slot.index == -1) {
-				slot.insert();
+				slot.insert(index);
 			}
 		}
 	});
 	
 	switch (zone.type) {
 		case "hand": {
-			new handCardSlot(zone, index);
+			new HandCardSlot(zone, index);
 			break;
 		}
 		case "presented": {
-			new presentedCardSlot(zone, index);
+			new PresentedCardSlot(zone, index);
 			break;
 		}
 	}
@@ -267,7 +275,7 @@ function dropCard(player, zone, index) {
 	}
 }
 
-export class uiCardSlot {
+export class UiCardSlot {
 	constructor(zone, index) {
 		this.zone = zone;
 		this.index = index;
@@ -280,10 +288,10 @@ export class uiCardSlot {
 	remove() {
 		cardSlots.splice(cardSlots.indexOf(this), 1);
 	}
-	insert() {}
+	insert(index) {}
 }
 
-class fieldCardSlot extends uiCardSlot {
+class FieldCardSlot extends UiCardSlot {
 	constructor(zone, index, fieldIndex) {
 		super(zone, index);
 		this.fieldSlot = document.getElementById("field" + fieldIndex);
@@ -312,14 +320,17 @@ class fieldCardSlot extends uiCardSlot {
 	}
 	update() {
 		let card = this.zone.get(this.index);
+		for (let button of Array.from(this.fieldSlot.parentElement.querySelectorAll(".cardSpecific"))) {
+			button.remove();
+		}
 		if (card) {
 			this.fieldSlot.src = card.getImage();
 			// add card action buttons
 			if (!gameState.automatic && !card.hidden) {
-				this.fieldSlot.parentElement.querySelector(".cardActionHolder").innerHTML = "";
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
 						let button = document.createElement("button");
+						button.classList.add("cardSpecific");
 						button.textContent = locale.cardActions[card.cardId][key];
 						button.addEventListener("click", value);
 						this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);
@@ -336,7 +347,7 @@ class fieldCardSlot extends uiCardSlot {
 	}
 }
 
-class handCardSlot extends uiCardSlot {
+class HandCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		
@@ -376,7 +387,7 @@ class handCardSlot extends uiCardSlot {
 	}
 }
 
-class deckCardSlot extends uiCardSlot {
+class DeckCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
@@ -398,7 +409,7 @@ class deckCardSlot extends uiCardSlot {
 		this.cardCount -= 1;
 		this.setVisuals();
 	}
-	insert() {
+	insert(index) {
 		this.cardCount += 1;
 		this.setVisuals();
 	}
@@ -408,7 +419,7 @@ class deckCardSlot extends uiCardSlot {
 	}
 }
 
-class pileCardSlot extends uiCardSlot {
+class PileCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
@@ -434,7 +445,7 @@ class pileCardSlot extends uiCardSlot {
 		this.cardCount -= 1;
 		this.setVisuals();
 	}
-	insert() {
+	insert(index) {
 		this.cardCount += 1;
 		this.setVisuals();
 	}
@@ -445,7 +456,7 @@ class pileCardSlot extends uiCardSlot {
 }
 
 // technically only needed for manual games but manualUI.js can't easily create these on its own so it's here for now.
-class presentedCardSlot extends uiCardSlot {
+class PresentedCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		
@@ -504,13 +515,14 @@ class presentedCardSlot extends uiCardSlot {
 	}
 }
 
-class cardSelectorSlot extends uiCardSlot {
+class CardSelectorSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		
 		this.cardElem = document.createElement("img");
 		this.cardElem.src = zone.get(index).getImage();
 		this.cardElem.classList.add("card");
+		this.cardElem.style.order = -index;
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			if (grabCard(localPlayer, zone, this.index) || zone == gameState.controller.tokenZone) {
@@ -531,7 +543,7 @@ class cardSelectorSlot extends uiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		this.cardElem.src = card.getImage();
+		this.cardElem.src = this.zone.get(this.index).getImage();
 	}
 	remove() {
 		super.remove();
@@ -540,14 +552,26 @@ class cardSelectorSlot extends uiCardSlot {
 	}
 }
 
+class CardSelectorMainSlot extends UiCardSlot {
+	constructor() {
+		super(null, -1);
+	}
+	
+	remove() {}
+	insert(index) {
+		this.zone.cards[index].hidden = false;
+		cardSelectorSlots.push(new CardSelectorSlot(this.zone, index));
+	}
+}
+
 export function openCardSelect(zone) {
 	if (cardSelector.open) {
 		closeCardSelect();
 	}
-	cardSelectorZone = zone;
+	cardSelectorMainSlot.zone = zone;
 	for (let i = 0; i < zone.cards.length; i++) {
 		zone.get(i).hidden = false;
-		cardSelectorSlots.push(new cardSelectorSlot(zone, i));
+		cardSelectorSlots.push(new CardSelectorSlot(zone, i));
 	}
 	
 	//show selector
@@ -565,12 +589,12 @@ export function openCardSelect(zone) {
 	cardSelectorGrid.parentNode.scrollTop = 0;
 }
 export function closeCardSelect() {
-	if (cardSelectorZone.type =="deck") {
-		for (let card of cardSelectorZone.cards) {
+	if (cardSelectorMainSlot.zone.type =="deck") {
+		for (let card of cardSelectorMainSlot.zone.cards) {
 			card.hidden = true;
 		}
 	}
-	cardSelectorZone = null;
+	cardSelectorMainSlot.zone = null;
 	while (cardSelectorSlots.length > 0) {
 		cardSelectorSlots[0].remove();
 	}
@@ -578,7 +602,7 @@ export function closeCardSelect() {
 	cardSelector.close();
 }
 export function toggleCardSelect(zone) {
-	if (cardSelectorZone === zone) {
+	if (cardSelectorMainSlot.zone === zone) {
 		closeCardSelect();
 	} else {
 		openCardSelect(zone);
