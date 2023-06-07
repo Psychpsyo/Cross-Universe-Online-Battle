@@ -280,7 +280,14 @@ export class AutomaticController extends InteractionController {
 		}
 		switch (request.type) {
 			case "chooseCards": {
-				response.value = await gameUI.presentCardChoice(request.from, "Select Card(s)", undefined, request.validAmounts);
+				let title = locale.game.cardChoice.genericTitle;
+				switch (request.reason) {
+					case "handTooFull": {
+						title = locale.game.cardChoice.handDiscard;
+						break;
+					}
+				}
+				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts);
 				break;
 			}
 			case "pass": {

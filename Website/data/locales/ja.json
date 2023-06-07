@@ -70,7 +70,9 @@
 		},
 		
 		"cardChoice": {
-			"confirm": null
+			"confirm": null,
+			"genericTitle": null,
+			"handDiscard": null
 		},
 		
 		"fieldLabels": {

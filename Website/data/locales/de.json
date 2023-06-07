@@ -70,7 +70,9 @@
 		},
 		
 		"cardChoice": {
-			"confirm": "Bestätigen"
+			"confirm": "Bestätigen",
+			"genericTitle": "Wähle Karten:",
+			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:"
 		},
 		
 		"fieldLabels": {

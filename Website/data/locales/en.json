@@ -70,7 +70,9 @@
 		},
 		
 		"cardChoice": {
-			"confirm": "Confirm"
+			"confirm": "Confirm",
+			"genericTitle": "Select Card(s):",
+			"handDiscard": "Discard your hand down to 8:"
 		},
 		
 		"fieldLabels": {
