@@ -22,7 +22,7 @@ export class Action {
 	}
 }
 
-export class ChangeManaAction extends Action {
+export class ChangeMana extends Action {
 	constructor(player, amount) {
 		super();
 		this.player = player;
@@ -42,7 +42,7 @@ export class ChangeManaAction extends Action {
 	}
 }
 
-export class DrawAction extends Action {
+export class Draw extends Action {
 	constructor(player, amount) {
 		super();
 		this.player = player;
@@ -69,7 +69,7 @@ export class DrawAction extends Action {
 }
 
 // places a card on the field without moving it there yet.
-export class PlaceAction extends Action {
+export class Place extends Action {
 	constructor(player, card, zone, index) {
 		super();
 		this.player = player;
@@ -92,7 +92,7 @@ export class PlaceAction extends Action {
 	}
 }
 
-export class SummonAction extends Action {
+export class Summon extends Action {
 	constructor(player, unit, unitZoneIndex) {
 		super();
 		this.player = player;
@@ -150,7 +150,7 @@ export class EstablishAttackDeclaration extends Action {
 	}
 }
 
-export class DealDamageAction extends Action {
+export class DealDamage extends Action {
 	constructor(player, amount) {
 		super();
 		this.player = player;
@@ -167,7 +167,7 @@ export class DealDamageAction extends Action {
 	}
 }
 
-export class DiscardAction extends Action {
+export class Discard extends Action {
 	constructor(card) {
 		super();
 		this.card = card;
@@ -192,7 +192,7 @@ export class DiscardAction extends Action {
 	}
 }
 
-export class DestroyAction extends Action {
+export class Destroy extends Action {
 	constructor(card) {
 		super();
 		this.card = card;
