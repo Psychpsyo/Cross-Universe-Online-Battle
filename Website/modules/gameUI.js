@@ -1,6 +1,6 @@
 import {cardActions} from "/modules/cardActions.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
-import {previewCard} from "/modules/generalUI.js";
+import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 import {FieldZone} from "/rulesEngine/zones.js";
 
@@ -151,6 +151,8 @@ export function init() {
 		cardChoiceMenu.close(cardChoiceSelected.join("|"));
 		cardChoiceGrid.innerHTML = "";
 		cardChoiceSelected = [];
+		// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
+		window.setTimeout(closeCardPreview, 0);
 	});
 	
 	lastFrame = performance.now();
@@ -600,6 +602,8 @@ export function closeCardSelect() {
 	}
 	gameFlexBox.appendChild(cardDetails);
 	cardSelector.close();
+	// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
+	window.setTimeout(closeCardPreview, 0);
 }
 export function toggleCardSelect(zone) {
 	if (cardSelectorMainSlot.zone === zone) {
@@ -736,25 +740,22 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 				validOptions++;
 				cardImg.dataset.selectionIndex = i;
 				cardImg.addEventListener("click", function(e) {
-					if (e.shiftKey || e.ctrlKey || e.altKey) {
-						e.stopPropagation();
-						previewCard(cards[i]);
-					} else {
-						if (this.classList.toggle("cardHighlight")) {
-							if (validAmounts.length == 1 && validAmounts[0] == 1 && cardChoiceSelected.length > 0) {
-								for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
-									if (elem != this) {
-										elem.classList.remove("cardHighlight");
-									}
+					e.stopPropagation();
+					previewCard(cards[i]);
+					if (this.classList.toggle("cardHighlight")) {
+						if (validAmounts.length == 1 && validAmounts[0] == 1 && cardChoiceSelected.length > 0) {
+							for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
+								if (elem != this) {
+									elem.classList.remove("cardHighlight");
 								}
-								cardChoiceSelected = [];
 							}
-							cardChoiceSelected.push(this.dataset.selectionIndex);
-						} else {
-							cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
+							cardChoiceSelected = [];
 						}
-						cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length);
+						cardChoiceSelected.push(this.dataset.selectionIndex);
+					} else {
+						cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
 					}
+					cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length);
 				});
 			} else {
 				cardImg.classList.add("unselectableCard");

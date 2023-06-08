@@ -1,6 +1,8 @@
 
 import {locale} from "/modules/locale.js";
 
+let currentPreviewedCard = null;
+
 chatHeader.textContent = locale.chat.title;
 chatInput.placeholder = locale.chat.enterMessage;
 
@@ -58,20 +60,20 @@ cardDetails.show();
 
 export function closeCardPreview() {
 	cardDetails.style.setProperty("--side-distance", "-50vh");
-	cardDetails.dataset.currentCard = "";
+	currentPreviewedCard = null;
 }
 
 // previews a card
-export function previewCard(card) {
+export function previewCard(card, specific = true) {
 	if (!card?.cardId || card.hidden) {
 		return;
 	}
 	// if the already shown card was clicked again
-	if (cardDetails.dataset.currentCard == card.cardId) {
+	if ((currentPreviewedCard == card && specific) || (currentPreviewedCard?.cardId == card.cardId && !specific)) {
 		closeCardPreview();
 		return;
 	}
-	cardDetails.dataset.currentCard = card.cardId;
+	currentPreviewedCard = card;
 	
 	// set the image preview
 	cardDetailsImage.style.backgroundImage = "url(" + card.getImage() + ")";

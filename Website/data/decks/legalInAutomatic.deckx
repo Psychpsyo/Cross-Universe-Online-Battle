@@ -1,0 +1,23 @@
+{
+	"name": {
+		"en": "Legal in Automatic"
+	},
+	"author": {
+		"en": "Psychpsyo"
+	},
+	"description": {
+		"en": "This deck contains only units with no effects so that the automatic simulator can properly handle all of them in its current state.\n\nThis is mainly for testing / debugging its core features."
+	},
+	"cards": [
+		{"id": "U00074", "amount": 3},
+		{"id": "U00034", "amount": 3},
+		{"id": "U00035", "amount": 3},
+		{"id": "U00043", "amount": 3},
+		{"id": "U00045", "amount": 3},
+		{"id": "U00046", "amount": 3},
+		{"id": "U00139", "amount": 3},
+		{"id": "U00217", "amount": 3},
+		{"id": "U00233", "amount": 3},
+		{"id": "U00237", "amount": 3}
+	]
+}
