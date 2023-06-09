@@ -198,7 +198,8 @@
 			},
 			"languageWarningName": null,
 			"partnerChoice": null,
-			"autoClosePreview": null
+			"autoClosePreview": null,
+			"alwaysShowCardButtons": null
 		},
 		
 		"profile": {

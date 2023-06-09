@@ -198,7 +198,8 @@
 			},
 			"languageWarningName": "Achtung:",
 			"partnerChoice": "Immer die Wahl des Partners geben",
-			"autoClosePreview": "Kartenvorschau durch Danebenklicken schließen"
+			"autoClosePreview": "Kartenvorschau durch Danebenklicken schließen",
+			"alwaysShowCardButtons": "Karteninteraktionsbuttons auch ohne hovern zeigen"
 		},
 		
 		"profile": {

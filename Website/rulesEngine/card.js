@@ -7,7 +7,7 @@ class BaseCard {
 		if (!game.cardData[cardId]) {
 			throw new Error("Can't create card with unregistered ID '" + cardId + "'!");
 		}
-		
+
 		this.owner = player;
 		this.cardId = cardId;
 		this.hidden = hidden;
@@ -24,11 +24,21 @@ class BaseCard {
 		this.attackCount = 0;
 		this.cardRef = this;
 	}
-	
+
 	getImage() {
 		return this.hidden? "images/cardBackFrameP" + this.owner.index + ".png" : this.owner.game.cardData[this.cardId].imageSrc;
 	}
-	
+
+	sharesTypeWith(card) {
+		let ownTypes = this.types.get();
+		for (let type of card.types.get()) {
+			if (ownTypes.includes(type)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	static sort(a, b) {
 		if (a.cardId < b.cardId) {
 			return -1;

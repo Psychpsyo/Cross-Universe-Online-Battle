@@ -9,7 +9,6 @@ export function init() {
 	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());
 	
 	// translation
-	revealPartnerBtn.textContent = locale.game.partnerSelect.revealPartner;
 	for (let i = 0; i < 2; i++) {
 		document.getElementById("deckTopBtn"+ i).textContent = locale.game.manual.deck.dropTop;
 		document.getElementById("deckShuffleInBtn" + i).textContent = locale.game.manual.deck.dropShuffle;
@@ -31,15 +30,6 @@ export function init() {
 	cardSelectorReturnToDeck.textContent = locale.game.cardSelector.returnAllToDeck;
 	
 	gameInteractions.hidden = false;
-	
-	// partner reveal button
-	revealPartnerBtn.addEventListener("click", function() {
-		this.remove();
-		localPartnerButtons.classList.remove("visible");
-		localPlayer.partnerZone.cards[0].hidden = false;
-		gameUI.updateCard(localPlayer.partnerZone, 0);
-		socket.send("[revealPartner]");
-	});
 	
 	//showing/hiding your hand
 	function hideHand() {

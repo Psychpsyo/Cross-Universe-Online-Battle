@@ -105,9 +105,18 @@ export const doAttackDeclaration = {
 			}
 		}
 		response = response.map(cardIndex => request.eligibleUnits[cardIndex]);
-		if (response.length > 1 && response.find(card => card.zone.type == "partner") === undefined) {
-			throw new Error("Tried to peform a combined attack without declaring the partner to attack.");
+		if (response.length > 1) {
+			let partner = response.find(card => card.zone.type == "partner");
+			if (!partner) {
+				throw new Error("Tried to peform a combined attack without declaring the partner to attack.");
+			}
+			for (let unit of response) {
+				if (!unit.sharesTypeWith(partner)) {
+					throw new Error("Tried to peform a combined attack where some participants do not share a type with the partner.");
+				}
+			}
 		}
+		
 		return response;
 	}
 }

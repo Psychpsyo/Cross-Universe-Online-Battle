@@ -30,6 +30,9 @@ export class AutomaticController extends InteractionController {
 		this.gameSpeed = 500;
 		
 		this.standardSummonEventTarget = new EventTarget();
+		this.canDeclareToAttack = [];
+		this.unitAttackButtons = [];
+		this.declaredAttackers = [];
 	}
 	
 	async startGame() {
@@ -68,12 +71,20 @@ export class AutomaticController extends InteractionController {
 					let responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
 					
 					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
-					
+
 					this.waitingForOpponentInput = false;
 					for (let playerInfo of this.playerInfos) {
 						playerInfo.canStandardSummon = false;
 						playerInfo.canRetire = [];
 					}
+					for (let button of this.unitAttackButtons) {
+						button.parentElement.classList.remove("visible");
+						button.remove();
+					}
+					this.canDeclareToAttack = [];
+					this.unitAttackButtons = [];
+					this.declaredAttackers = [];
+					attackBtn.disabled = true;
 					break;
 				}
 			}
@@ -329,37 +340,43 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "doAttackDeclaration": {
-				// TODO: Make this nicer to use. There should be buttons on the cards that do this.
-				let attackers = await new Promise((resolve, reject) => {
-					async function attackButtonClicked() {
-						let validAmounts = [];
-						for (let i = 1; i <= request.eligibleUnits.length; i++) {
-							validAmounts.push(i);
-						}
-						resolve(await gameUI.presentCardChoice(request.eligibleUnits, "Select Attacker(s)", undefined, validAmounts));
-					}
-					attackBtn.addEventListener("click", attackButtonClicked, {once: true});
-					attackBtn.disabled = false;
+				this.canDeclareToAttack = request.eligibleUnits;
+
+				for (let i = 0; i < request.eligibleUnits.length; i++) {
+					this.unitAttackButtons.push(gameUI.addFieldButton(
+						request.eligibleUnits[i].zone,
+						request.eligibleUnits[i].index,
+						"Attack",
+						"attackDeclaration",
+						function() {
+							this.toggleAttacker(i);
+						}.bind(this)
+					));
+				}
+
+				let didAttack = await new Promise((resolve, reject) => {
+					attackBtn.addEventListener("click", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						attackBtn.disabled = true;
-						attackBtn.removeEventListener("click", attackButtonClicked);
+						attackBtn.removeEventListener("click", resolve);
 						reject();
 					}, {once: true});
 				}).then(
-					(attackers) => {return attackers},
-					() => {return null}
+					() => {return true},
+					() => {return false}
 				);
-				if (attackers === null) {
+
+				if (!didAttack) {
 					return;
 				}
-				response.value = attackers;
+				response.value = this.declaredAttackers.map(card => this.canDeclareToAttack.indexOf(card));
 				break;
 			}
 			case "doFight": {
 				break;
 			}
 			case "doRetire": {
-				let retired = await new Promise((resolve, reject) => {
+				let didRetire = await new Promise((resolve, reject) => {
 					retireBtn.addEventListener("click", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						retireBtn.removeEventListener("retire", resolve);
@@ -369,7 +386,7 @@ export class AutomaticController extends InteractionController {
 					() => {return true},
 					() => {return false}
 				);
-				if (!retired) {
+				if (!didRetire) {
 					return;
 				}
 				response.value = this.playerInfos[localPlayer.index].retiring.map(card => this.playerInfos[localPlayer.index].canRetire.indexOf(card));
@@ -390,11 +407,11 @@ export class AutomaticController extends InteractionController {
 			
 		}
 	}
-	
+
 	async gameSleep(duration = 1) {
 		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * duration));
 	}
-	
+
 	cancelRetire(player) {
 		if (player == localPlayer) {
 			socket.send("[cancelRetire]");
@@ -403,6 +420,55 @@ export class AutomaticController extends InteractionController {
 			gameUI.clearDragSource(card.zone, card.index, player);
 		}
 		this.playerInfos[player.index].retiring = [];
+	}
+
+	validateAttackButtons() {
+		let declaredPartner = this.declaredAttackers.find(unit => unit.zone.type == "partner");
+		if (declaredPartner) {
+			for (let i = 0; i < this.canDeclareToAttack.length; i++) {
+				if (!this.declaredAttackers.includes(this.canDeclareToAttack[i])) {
+					this.unitAttackButtons[i].disabled = !this.canDeclareToAttack[i].sharesTypeWith(declaredPartner);
+				}
+			}
+		} else {
+			if (this.declaredAttackers.length == 1) {
+				for (let button of this.unitAttackButtons) {
+					button.disabled = true;
+				}
+				let partnerIndex = this.canDeclareToAttack.findIndex(unit => unit.zone.type == "partner");
+				if (partnerIndex != -1) {
+					this.unitAttackButtons[partnerIndex].disabled = !this.canDeclareToAttack[partnerIndex].sharesTypeWith(this.declaredAttackers[0]);
+				}
+				let declaredIndex = this.canDeclareToAttack.indexOf(this.declaredAttackers[0]);
+				this.unitAttackButtons[declaredIndex].disabled = false;
+			} else {
+				this.declaredAttackers = [];
+				for (let button of this.unitAttackButtons) {
+					button.disabled = false;
+				}
+			}
+		}
+	}
+
+	addAttacker(index) {
+		this.declaredAttackers.push(this.canDeclareToAttack[index]);
+		this.unitAttackButtons[index].classList.add("active");
+		this.unitAttackButtons[index].parentElement.classList.add("visible");
+		attackBtn.disabled = false;
+	}
+	removeAttacker(index) {
+		this.declaredAttackers.splice(this.declaredAttackers.indexOf(this.canDeclareToAttack[index]), 1);
+		this.unitAttackButtons[index].classList.remove("active");
+		this.unitAttackButtons[index].parentElement.classList.remove("visible");
+		attackBtn.disabled = this.declaredAttackers.length == 0;
+	}
+	toggleAttacker(index) {
+		if (this.declaredAttackers.includes(this.canDeclareToAttack[index])) {
+			this.removeAttacker(index);
+		} else {
+			this.addAttacker(index);
+		}
+		this.validateAttackButtons();
 	}
 }
 
@@ -413,11 +479,8 @@ class AutomaticPlayerInfo {
 		this.canStandardSummon = false;
 		this.canRetire = [];
 		this.retiring = [];
-		this.canDeclareToAttack = [];
-		this.declaredAttackers = [];
-		this.declaredAttackTarget = null;
 	}
-	
+
 	setHeld(zone, index) {
 		this.heldCard = zone.get(index);
 		gameUI.uiPlayers[this.player.index].setDrag(this.heldCard);

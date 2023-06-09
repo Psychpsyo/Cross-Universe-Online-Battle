@@ -293,10 +293,13 @@ img[src$="cardBackFrameP1.png"] {
 	transform: translateX(-50%);
 	white-space: pre;
 }
+.cardBtns > button.active {
+	background-color: orange;
+}
 .cardBtns.noClick > button {
 	pointer-events: none;
 }
-.fieldCardContainer:hover .cardActionHolder {
+.fieldCardContainer:hover .cardActionHolder, .alwaysShowCardButtons .cardActionHolder {
 	display: block;
 }
 

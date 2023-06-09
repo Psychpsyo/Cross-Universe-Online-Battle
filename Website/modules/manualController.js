@@ -37,6 +37,15 @@ class tokenZone {
 	}
 }
 
+function addPartnerRevealButton() {
+	gameUI.addFieldButton(localPlayer.partnerZone, 0, locale.game.partnerSelect.revealPartner, "revealPartner", function() {
+		gameUI.clearFieldButtons(localPlayer.partnerZone, 0, "revealPartner");
+		localPlayer.partnerZone.cards[0].hidden = false;
+		gameUI.updateCard(localPlayer.partnerZone, 0);
+		socket.send("[revealPartner]");
+	}, true);
+}
+
 export class ManualController extends InteractionController {
 	constructor() {
 		super();
@@ -59,7 +68,7 @@ export class ManualController extends InteractionController {
 			let startingPlayer = Math.random() > .5;
 			putChatMessage(startingPlayer? locale.game.youStart : locale.game.opponentStarts, "notice");
 			socket.send("[selectPlayer]" + startingPlayer);
-			localPartnerButtons.classList.add("visible");
+			addPartnerRevealButton();
 		}
 	}
 	
@@ -138,8 +147,7 @@ export class ManualController extends InteractionController {
 			case "selectPlayer": { // opponent chose the starting player (at random)
 				this.deckShuffle(localPlayer.deckZone);
 				putChatMessage(message == "true"? locale.game.opponentStarts : locale.game.youStart, "notice");
-				revealPartnerBtn.style.display = "block";
-				localPartnerButtons.classList.add("visible");
+				addPartnerRevealButton();
 				return true;
 			}
 			default: {

@@ -198,7 +198,8 @@
 			},
 			"languageWarningName": "Note:",
 			"partnerChoice": "Always give Partner Choice",
-			"autoClosePreview": "Close Card Preview When Clicking off of It"
+			"autoClosePreview": "Close Card Preview When Clicking off of It",
+			"alwaysShowCardButtons": "Show Card Interaction Buttons without Hovering"
 		},
 		
 		"profile": {

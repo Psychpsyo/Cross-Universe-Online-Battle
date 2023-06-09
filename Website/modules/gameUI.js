@@ -50,6 +50,10 @@ if (localStorage.getItem("fieldLabelToggle") == "true") {
 	});
 }
 
+if (localStorage.getItem("alwaysShowCardButtons") == "true") {
+	document.documentElement.classList.add("alwaysShowCardButtons");
+}
+
 export function init() {
 	new FieldCardSlot(game.players[0].partnerZone, 0, 2);
 	new FieldCardSlot(game.players[1].partnerZone, 0, 17);
@@ -277,6 +281,27 @@ function dropCard(player, zone, index) {
 	}
 }
 
+export function addFieldButton(zone, index, label, type, onClick, visible = false) {
+	if (!(zone instanceof FieldZone)) {
+		throw new Error("Can't add field buttons to non-field zones")
+	}
+	for (let slot of cardSlots) {
+		if (slot.zone === zone && slot.index == index) {
+			return slot.addCardButton(label, type, onClick, visible);
+		}
+	}
+}
+export function clearFieldButtons(zone, index, type) {
+	if (!(zone instanceof FieldZone)) {
+		throw new Error("Can't add field buttons to non-field zones")
+	}
+	for (let slot of cardSlots) {
+		if (slot.zone === zone && slot.index == index) {
+			slot.clearCardButtons(type);
+		}
+	}
+}
+
 export class UiCardSlot {
 	constructor(zone, index) {
 		this.zone = zone;
@@ -322,20 +347,14 @@ class FieldCardSlot extends UiCardSlot {
 	}
 	update() {
 		let card = this.zone.get(this.index);
-		for (let button of Array.from(this.fieldSlot.parentElement.querySelectorAll(".cardSpecific"))) {
-			button.remove();
-		}
+		this.clearCardButtons("cardSpecific");
 		if (card) {
 			this.fieldSlot.src = card.getImage();
 			// add card action buttons
 			if (!gameState.automatic && !card.hidden) {
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
-						let button = document.createElement("button");
-						button.classList.add("cardSpecific");
-						button.textContent = locale.cardActions[card.cardId][key];
-						button.addEventListener("click", value);
-						this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);
+						this.addCardButton(locale.cardActions[card.cardId][key], "cardSpecific", value);
 					}
 				}
 			}
@@ -346,6 +365,28 @@ class FieldCardSlot extends UiCardSlot {
 	}
 	remove() {
 		this.update();
+	}
+
+	addCardButton(label, type, onClick, visible = false) {
+		let button = document.createElement("button");
+		button.classList.add(type);
+		button.textContent = label;
+		button.addEventListener("click", onClick);
+		let buttonHolder = this.fieldSlot.parentElement.querySelector(".cardActionHolder");
+		buttonHolder.appendChild(button);
+		if (visible) {
+			buttonHolder.classList.add("visible");
+		}
+		return button;
+	}
+	clearCardButtons(type) {
+		let buttonHolder = this.fieldSlot.parentElement.querySelector(".cardActionHolder");
+		for (let button of Array.from(buttonHolder.querySelectorAll("." + type))) {
+			button.remove();
+		}
+		if (buttonHolder.childElementCount == 0) {
+			buttonHolder.classList.remove("visible");
+		}
 	}
 }
 

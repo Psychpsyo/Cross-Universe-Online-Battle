@@ -84,7 +84,8 @@ function setLanguage(language) {
 		languageSelectorLabel.textContent = locale.settings.general.language;
 		partnerChoiceLabel.textContent = locale.settings.general.partnerChoice;
 		closePreviewToggleLabel.textContent = locale.settings.general.autoClosePreview;
-		
+		alwaysShowCardButtonsToggleLabel.textContent = locale.settings.general.alwaysShowCardButtons;
+
 		profileHeading.textContent = locale.settings.profile.title;
 		usernameLabel.textContent = locale.settings.profile.username;
 		usernameInput.placeholder = locale.settings.profile.usernamePlaceholder;
@@ -136,6 +137,7 @@ function setLanguage(language) {
 languageSelector.value = localStorage.getItem("language");
 partnerChoiceToggle.checked = localStorage.getItem("partnerChoiceToggle") === "true";
 closePreviewToggle.checked = localStorage.getItem("autoClosePreview") === "true";
+alwaysShowCardButtonsToggle.checked = localStorage.getItem("alwaysShowCardButtons") === "true";
 
 usernameInput.value = localStorage.getItem("username");
 customCardBack.value = localStorage.getItem("cardBack");
@@ -161,6 +163,9 @@ partnerChoiceToggle.addEventListener("change", function() {
 });
 closePreviewToggle.addEventListener("change", function() {
 	localStorage.setItem("autoClosePreview", this.checked);
+});
+alwaysShowCardButtonsToggle.addEventListener("change", function() {
+	localStorage.setItem("alwaysShowCardButtons", this.checked);
 });
 
 usernameInput.addEventListener("change", function() {
