@@ -164,8 +164,8 @@ export class DraftState extends GameState {
 			// load decks
 			game.players[0].deck = deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => img.dataset.cardId), locale.draft.deckName);
 			game.players[1].deck = deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => img.dataset.cardId), locale.draft.deckName);
-			game.players[0].setDeck(await cardLoader.deckToCdfList(game.players[0].deck, false));
-			game.players[1].setDeck(await cardLoader.deckToCdfList(game.players[1].deck, false));
+			game.players[0].setDeck(await cardLoader.deckToCdfList(game.players[0].deck, false, game.players[0]));
+			game.players[1].setDeck(await cardLoader.deckToCdfList(game.players[1].deck, false, game.players[1]));
 			gameUI.updateCard(game.players[0].deckZone, -1);
 			gameUI.updateCard(game.players[1].deckZone, -1);
 			

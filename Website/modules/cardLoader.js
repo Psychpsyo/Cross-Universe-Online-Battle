@@ -7,10 +7,6 @@ let cardInfoCache = {};
 let cdfCache = {};
 let nextCustomCardIDs = [1, 2];
 
-function getCardImageFromID(cardId) {
-	return "https://crossuniverse.net/images/cards/" + (globalLocale.warnings.includes("noCards")? "en" : globalLocale.code) + "/" + cardId + ".jpg";
-}
-
 export async function getCardInfo(cardId) {
 	if (!cardInfoCache[cardId]) {
 		const response = await fetch("https://crossuniverse.net/cardInfo/?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId, {cache: "force-cache"});
@@ -25,7 +21,8 @@ export async function registerCustomCard(cardData, player) {
 	await renderCard(cardData, canvas);
 	cardData.imageSrc = canvas.toDataURL();
 	let cardId = "C" + String(nextCustomCardIDs[player.index]).padStart(5, "0");
-	cardData[cardId] = cardData;
+	cardInfoCache[cardId] = cardData;
+	console.log(cardInfoCache);
 	nextCustomCardIDs[player.index] += nextCustomCardIDs.length;
 	return cardId;
 }
@@ -56,7 +53,17 @@ export async function getCardImage(card) {
 	return card.hidden? "images/cardBackFrameP" + card.owner.index + ".png" : (await getCardInfo(card.cardId)).imageSrc;
 }
 
-export async function deckToCdfList(deck, automatic) {
-	let cdfList = await Promise.allSettled(deckToCardIdList(deck).map(cardId => automatic? getCdf(cardId) : getManualCdf(cardId)));
+export async function deckToCdfList(deck, automatic, player) {
+	let deckList = deckToCardIdList(deck);
+	for (let i = 0; i < deckList.length; i++) {
+		if (deckList[i].startsWith("C")) {
+			let oldId = deckList[i];
+			deckList[i] = await registerCustomCard(deck.customs[parseInt(deckList[i].substr(1)) - 1], player);
+			if (deck.suggestedPartner == oldId) {
+				deck.suggestedPartner = deckList[i];
+			}
+		}
+	}
+	let cdfList = await Promise.allSettled(deckList.map(cardId => automatic? getCdf(cardId) : getManualCdf(cardId)));
 	return cdfList.map(promise => promise.value);
 }

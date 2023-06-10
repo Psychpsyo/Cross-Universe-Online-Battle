@@ -204,7 +204,7 @@ export class DeckState extends GameState {
 		switch (command) {
 			case "deck": {
 				let deck = JSON.parse(message);
-				cardLoader.deckToCdfList(deck, this.automatic).then(async (cdfList) => {
+				cardLoader.deckToCdfList(deck, this.automatic, game.players[0]).then(cdfList => {
 					game.players[0].deck = deck;
 					game.players[0].setDeck(cdfList);
 					gameUI.updateCard(game.players[0].deckZone, -1);
@@ -230,7 +230,7 @@ export class DeckState extends GameState {
 		socket.send("[deck]" + JSON.stringify(deck));
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
 		localPlayer.deck = deck;
-		localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic));
+		localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
 		gameUI.updateCard(localPlayer.deckZone, -1);
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
 
