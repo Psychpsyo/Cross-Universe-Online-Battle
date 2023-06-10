@@ -7,6 +7,7 @@ import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
 import {previewCard} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
+import * as cardLoader from "/modules/cardloader.js";
 
 let builtInDecks = [];
 let currentDeckList = "default";
@@ -56,9 +57,8 @@ function loadDeckPreview(deck) {
 
 		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
 		cardImg.addEventListener("click", async function(e) {
-			await game.registerCard(this.dataset.cardId);
-			previewCard(new Card(localPlayer, this.dataset.cardId, false), false);
 			e.stopPropagation();
+			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
 		});
 	});
 	
@@ -203,7 +203,10 @@ export class DeckState extends GameState {
 	receiveMessage(command, message) {
 		switch (command) {
 			case "deck": {
-				game.players[0].setDeck(JSON.parse(message)).then(() => {
+				let deck = JSON.parse(message);
+				cardLoader.deckToCdfList(deck, this.automatic).then(async (cdfList) => {
+					game.players[0].deck = deck;
+					game.players[0].setDeck(cdfList);
 					gameUI.updateCard(game.players[0].deckZone, -1);
 					gameState.checkReadyConditions();
 				});
@@ -226,7 +229,8 @@ export class DeckState extends GameState {
 		// sync and load the deck
 		socket.send("[deck]" + JSON.stringify(deck));
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
-		await localPlayer.setDeck(deck);
+		localPlayer.deck = deck;
+		localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic));
 		gameUI.updateCard(localPlayer.deckZone, -1);
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
 

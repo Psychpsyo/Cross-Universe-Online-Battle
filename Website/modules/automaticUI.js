@@ -175,7 +175,7 @@ export async function attack(units) {
 			slot.classList.remove("attacking");
 		}, 500);
 		animPromises.push(new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 500)));
-		await gameState.controller.gameSleep(.2);
+		await gameState.controller.gameSleep(.3);
 	}
 	return Promise.all(animPromises);
 }

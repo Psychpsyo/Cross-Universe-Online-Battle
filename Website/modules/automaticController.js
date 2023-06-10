@@ -167,7 +167,6 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	async handleEvent(event) {
-		console.log(event);
 		switch (event.type) {
 			case "deckShuffled": {
 				putChatMessage(event.player == localPlayer? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");

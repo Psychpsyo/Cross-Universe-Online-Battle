@@ -3,6 +3,7 @@ import {socket, zoneToLocal} from "/modules/netcode.js";
 import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 import {FieldZone} from "/rulesEngine/zones.js";
+import {getCardImage} from "/modules/cardLoader.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -365,7 +366,7 @@ class FieldCardSlot extends UiCardSlot {
 		let card = this.zone.get(this.index);
 		this.clearCardButtons("cardSpecific");
 		if (card) {
-			this.fieldSlot.src = card.getImage();
+			getCardImage(card).then(img => this.fieldSlot.src = img);
 			// add card action buttons
 			if (!gameState.automatic && !card.hidden) {
 				if (card.cardId in cardActions) {
@@ -412,7 +413,7 @@ class HandCardSlot extends UiCardSlot {
 		
 		this.handElem = document.getElementById("hand" + this.zone.player.index);
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.get(index).getImage();
+		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -437,7 +438,7 @@ class HandCardSlot extends UiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		this.cardElem.src = this.zone.get(this.index).getImage();
+		getCardImage(this.zone.get(this.index)).then(img => this.cardElem.src = img);
 	}
 	remove() {
 		super.remove();
@@ -473,7 +474,7 @@ class DeckCardSlot extends UiCardSlot {
 		this.setVisuals();
 	}
 	setVisuals() {
-		document.getElementById("deck" + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
+		getCardImage(this.zone.get(this.zone.cards.length - 1)).then(img => document.getElementById("deck" + this.zone.player.index).src = img);
 		document.getElementById("deck" + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
@@ -509,7 +510,7 @@ class PileCardSlot extends UiCardSlot {
 		this.setVisuals();
 	}
 	setVisuals() {
-		document.getElementById(this.zone.type + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
+		getCardImage(this.zone.get(this.zone.cards.length - 1)).then(img => document.getElementById(this.zone.type + this.zone.player.index).src = img);
 		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
@@ -523,8 +524,8 @@ class PresentedCardSlot extends UiCardSlot {
 		this.zoneElem = document.getElementById("presentedCards" + this.zone.player.index);
 		this.cardElem = document.createElement("div");
 		
-		this.cardImg = document.createElement("img")
-		this.cardImg.src = this.zone.get(index).getImage();
+		this.cardImg = document.createElement("img");
+		getCardImage(this.zone.get(index)).then(img => this.cardImg.src = img);
 		this.cardImg.addEventListener("click", function(e) {
 			e.stopPropagation();
 			previewCard(this.zone.get(this.index));
@@ -566,7 +567,7 @@ class PresentedCardSlot extends UiCardSlot {
 		}
 	}
 	update() {
-		this.cardImg.src = this.zone.get(this.index).getImage();
+		getCardImage(this.zone.get(this.index)).then(img => this.cardImg.src = img);
 	}
 	remove() {
 		super.remove();
@@ -579,7 +580,7 @@ class CardSelectorSlot extends UiCardSlot {
 		super(zone, index);
 		
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.get(index).getImage();
+		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
 		this.cardElem.classList.add("card");
 		this.cardElem.style.order = -index;
 		this.cardElem.addEventListener("dragstart", function(e) {
@@ -602,7 +603,7 @@ class CardSelectorSlot extends UiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		this.cardElem.src = this.zone.get(this.index).getImage();
+		getCardImage(this.zone.get(this.index)).then(img => this.cardElem.src = img);
 	}
 	remove() {
 		super.remove();
@@ -704,7 +705,7 @@ class UiPlayer {
 	
 	setDrag(card) {
 		if (card) {
-			this.dragCardElem.src = card.getImage();
+			getCardImage(card).then(img => this.dragCardElem.src = img);
 			this.dragging = true;
 		}
 	}
@@ -792,7 +793,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 		let validOptions = 0;
 		for (let i = 0; i < cards.length; i++) {
 			let cardImg = document.createElement("img");
-			cardImg.src = cards[i].getImage();
+			getCardImage(cards[i]).then(img => cardImg.src = img);
 			if (matchFunction(cards[i])) {
 				validOptions++;
 				cardImg.dataset.selectionIndex = i;

@@ -4,10 +4,6 @@ import {CardValue, SnapshotValue} from "./cardValue.js";
 
 class BaseCard {
 	constructor(player, cardId, hidden, cardTypes, names, level, types, attack, defense) {
-		if (!game.cardData[cardId]) {
-			throw new Error("Can't create card with unregistered ID '" + cardId + "'!");
-		}
-
 		this.owner = player;
 		this.cardId = cardId;
 		this.hidden = hidden;
@@ -23,10 +19,6 @@ class BaseCard {
 		this.index = -1;
 		this.attackCount = 0;
 		this.cardRef = this;
-	}
-
-	getImage() {
-		return this.hidden? "images/cardBackFrameP" + this.owner.index + ".png" : this.owner.game.cardData[this.cardId].imageSrc;
 	}
 
 	sharesTypeWith(card) {
@@ -51,27 +43,26 @@ class BaseCard {
 }
 
 export class Card extends BaseCard {
-	constructor(player, cardId, hidden) {
-		let cardData = player.game.cardData[cardId];
-		let mainCardType = cardData.cardType;
-		let baseCardTypes = [mainCardType];
-		if (mainCardType == "token") {
+	constructor(player, cdf, hidden) {
+		let data = parseCdfValues(cdf);
+		let baseCardTypes = [data.cardType];
+		if (data.cardType == "token") {
 			baseCardTypes.push("unit");
-		} else if (["standardSpell", "continuousSpell", "enchantSpell"].includes(mainCardType)) {
+		} else if (["standardSpell", "continuousSpell", "enchantSpell"].includes(data.cardType)) {
 			baseCardTypes.push("spell");
-		} else if (["standardItem", "continuousItem", "equipableItem"].includes(mainCardType)) {
+		} else if (["standardItem", "continuousItem", "equipableItem"].includes(data.cardType)) {
 			baseCardTypes.push("item");
 		}
-		super(player, cardId, hidden,
+		super(player, data.id, hidden,
 			new CardValue(baseCardTypes),
-			new CardValue([cardData.name]),
-			new CardValue(cardData.level),
-			new CardValue([...cardData.types]),
-			new CardValue(cardData.attack ?? -1),
-			new CardValue(cardData.defense ?? -1)
+			new CardValue([data.name ?? data.id]),
+			new CardValue(data.level ?? 0),
+			new CardValue(data.types ?? []),
+			new CardValue(data.attack ?? 0),
+			new CardValue(data.defense ?? 0)
 		);
 	}
-	
+
 	snapshot() {
 		return new SnapshotCard(this);
 	}
@@ -88,10 +79,64 @@ class SnapshotCard extends BaseCard {
 			new SnapshotValue(card.attack.get(), card.attack.getBase()),
 			new SnapshotValue(card.defense.get(), card.defense.getBase())
 		);
-		
+
 		this.zone = card.zone;
 		this.index = card.index;
 		this.attackCount = card.attackCount;
 		this.cardRef = card;
 	}
+}
+
+function parseCdfValues(cdf) {
+	let data = {
+		effects: []
+	};
+	let lines = cdf.split("\n");
+	let inEffect = false;
+	for (let line of lines) {
+		let parts = line.trim().split(/:(.*)/);
+		if (inEffect && parts[0] != "o") {
+			data.effects[data.effects.length - 1] += line;
+			continue;
+		}
+		switch(parts[0]) {
+			case "id": {
+				data.id = parts[1].trim().substring(2);
+				break;
+			}
+			case "cardType": {
+				data.cardType = parts[1].trim();
+				break;
+			}
+			case "name": {
+				data.name = parts[1].trim().substring(2);
+				break;
+			}
+			case "level": {
+				data.level = parseInt(parts[1].trim());
+				break;
+			}
+			case "types": {
+				data.types = parts[1].split(",").map(type => type.trim());
+				break;
+			}
+			case "attack": {
+				data.attack = parseInt(parts[1].trim());
+				break;
+			}
+			case "defense": {
+				data.defense = parseInt(parts[1].trim());
+				break;
+			}
+			case "o": {
+				data.effects.push(parts[1]);
+				inEffect = true;
+				break;
+			}
+			default: {
+				throw new Error("CDF Parser Error: " + parts[0] + " is not a valid card attribute.");
+			}
+		}
+	}
+	return data;
 }

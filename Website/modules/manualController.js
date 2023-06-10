@@ -8,6 +8,7 @@ import {socket, zoneToLocal} from "/modules/netcode.js";
 import {putChatMessage} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as manualUI from "/modules/manualUI.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 class tokenZone {
 	constructor() {
@@ -24,10 +25,7 @@ class tokenZone {
 		.then(response => response.json())
 		.then(response => {
 			response.forEach(card => {
-				// intentionally bypasses registerCard()
-				card.imageSrc = getCardImageFromID(card.cardID);
-				game.cardData[card.cardID] = card;
-				this.cards.push(new Card(localPlayer, card.cardID, false));
+				cardLoader.getManualCdf(card.cardID).then(cdf => this.cards.push(new Card(localPlayer, cdf, false)));
 			});
 		});
 	}
@@ -83,7 +81,7 @@ export class ManualController extends InteractionController {
 				return true;
 			}
 			case "grabToken": {
-				this.playerInfos[0].setHeld(new Card(game.players[0], message, false));
+				cardLoader.getManualCdf(message).then(cdf => this.playerInfos[0].setHeld(new Card(game.players[0], cdf, false)));
 				return true;
 			}
 			case "drawCard": {
@@ -162,7 +160,7 @@ export class ManualController extends InteractionController {
 			return false;
 		}
 		if (zone == this.tokenZone) {
-			this.playerInfos[player.index].setHeld(new Card(localPlayer, zone.cards[index].cardId, false));
+			cardLoader.getManualCdf(zone.cards[index].cardId).then(cdf => this.playerInfos[player.index].setHeld(new Card(localPlayer, cdf, false)));
 			socket.send("[grabToken]" + zone.cards[index].cardId);
 			return false;
 		}

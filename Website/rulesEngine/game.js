@@ -1,17 +1,13 @@
 // This module exports the Game class which holds all data relevant to a single Cross Universe game.
-// TODO: migrate data from global variables into this class
-import {renderCard} from "/custom/renderer.js";
+
 import {Player} from "./player.js";
 import {Turn} from "./turns.js";
 import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
-import {locale} from "/modules/locale.js";
 import * as phases from "./phases.js";
 
 export class Game {
 	constructor() {
-		this.cardData = {};
-		
 		this.players = [];
 		this.players.push(new Player(this));
 		this.players.push(new Player(this));
@@ -21,27 +17,6 @@ export class Game {
 		this.nextTimingIndex = 1;
 		
 		this.rng = new CURandom();
-	}
-	
-	async registerCard(cardId) {
-		if (!this.cardData[cardId]) {
-			return fetch("https://crossuniverse.net/cardInfo/?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId)
-			.then(response => response.json())
-			.then(response => {
-				response.imageSrc = getCardImageFromID(cardId);
-				this.cardData[cardId] = response;
-			});
-		}
-	}
-	
-	async registerCustomCard(cardData, player) {
-		let canvas = document.createElement("canvas");
-		await renderCard(cardData, canvas);
-		cardData.imageSrc = canvas.toDataURL();
-		let cardId = "C" + String(player.nextCustomCardId).padStart(5, "0");
-		this.cardData[cardId] = cardData;
-		player.nextCustomCardId += this.players.length;
-		return cardId;
 	}
 	
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.

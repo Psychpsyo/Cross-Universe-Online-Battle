@@ -6,6 +6,7 @@ import {socket} from "/modules/netcode.js";
 import {deckFromCardList} from "/modules/deckUtils.js";
 import {previewCard} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
 basicFormat = await basicFormat.json();
@@ -112,8 +113,7 @@ export class DraftState extends GameState {
 				card.addEventListener("click", async function(e) {
 					if (e.shiftKey || e.ctrlKey || e.altKey) {
 						e.stopPropagation();
-						await game.registerCard(this.dataset.cardId);
-						previewCard(new Card(localPlayer, this.dataset.cardId, false), false);
+						previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
 						return;
 					}
 					
@@ -150,11 +150,9 @@ export class DraftState extends GameState {
 		document.getElementById("draftDeckCount" + deck).textContent = document.getElementById("draftDeckList" + deck).childElementCount + "/" + this.format.deckSize;
 		card.src = "images/cardHidden.png";
 		
-		game.registerCard(card.dataset.cardId);
 		deckCard.addEventListener("click", async function(e) {
 			e.stopPropagation();
-			await game.registerCard(card.dataset.cardId);
-			previewCard(new Card(localPlayer, this.dataset.cardId, false), false);
+			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
 		});
 		
 		// check if all cards have been taken.
@@ -164,12 +162,12 @@ export class DraftState extends GameState {
 			draftMainInfo.textContent = locale.draft.finished;
 			
 			// load decks
-			await Promise.all([
-				game.players[0].setDeck(deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName)),
-				game.players[1].setDeck(deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => {return img.dataset.cardId}), locale.draft.deckName))
-			]);
-			gameUI.insertCard(game.players[0].deckZone, 0);
-			gameUI.insertCard(game.players[1].deckZone, 0);
+			game.players[0].deck = deckFromCardList(Array.from(draftDeckList1.childNodes).map(img => img.dataset.cardId), locale.draft.deckName);
+			game.players[1].deck = deckFromCardList(Array.from(draftDeckList0.childNodes).map(img => img.dataset.cardId), locale.draft.deckName);
+			game.players[0].setDeck(await cardLoader.deckToCdfList(game.players[0].deck, false));
+			game.players[1].setDeck(await cardLoader.deckToCdfList(game.players[1].deck, false));
+			gameUI.updateCard(game.players[0].deckZone, -1);
+			gameUI.updateCard(game.players[1].deckZone, -1);
 			
 			// show start button
 			draftStartButton.hidden = false;

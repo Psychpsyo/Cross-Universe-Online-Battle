@@ -1,5 +1,6 @@
 
 import {locale} from "/modules/locale.js";
+import {getCardInfo, getCardImage} from "/modules/cardLoader.js";
 
 let currentPreviewedCard = null;
 
@@ -64,7 +65,7 @@ export function closeCardPreview() {
 }
 
 // previews a card
-export function previewCard(card, specific = true) {
+export async function previewCard(card, specific = true) {
 	if (!card?.cardId || card.hidden) {
 		return;
 	}
@@ -74,13 +75,13 @@ export function previewCard(card, specific = true) {
 		return;
 	}
 	currentPreviewedCard = card;
-	
+
 	// set the image preview
-	cardDetailsImage.style.backgroundImage = "url(" + card.getImage() + ")";
-	
+	cardDetailsImage.style.backgroundImage = "url(" + (await getCardImage(card)) + ")";
+
 	// set the text preview
 	// general info
-	cardDetailsName.textContent = card.names.get().join("/");
+	cardDetailsName.textContent = card.names.get().map(async (name) => (await getCardInfo(name)).name).join("/");
 	let cardTypes = [...card.cardTypes.get()];
 	if (cardTypes.includes("token")) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);
@@ -97,7 +98,7 @@ export function previewCard(card, specific = true) {
 	} else {
 		cardDetailsTypes.textContent = locale.typeless;
 	}
-	
+
 	// attack & defense
 	if (card.cardTypes.get().includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
@@ -106,11 +107,11 @@ export function previewCard(card, specific = true) {
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}
-	
+
 	// effects
 	cardDetailsEffectList.innerHTML = "";
 	if (!card.cardId.startsWith("C")) {
-		game.cardData[card.cardId].effects.forEach(effect => {
+		(await getCardInfo(card.cardId)).effects.forEach(effect => {
 			let effectDiv = document.createElement("div");
 			effectDiv.classList.add("cardDetailsEffect");
 			
@@ -120,13 +121,13 @@ export function previewCard(card, specific = true) {
 				effectDiv.appendChild(effectTitle);
 				effectDiv.appendChild(document.createElement("br"));
 			}
-			
+
 			let indentCount = 0;
 			let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
 			effect.text.split("\n").forEach(line => {
 				let lineDiv = document.createElement("div");
 				lineDiv.textContent = line;
-				
+
 				// recalculate indentation if necessary
 				if (indentChars.includes(line[0])) {
 					// recalculate indentation amount
@@ -135,19 +136,19 @@ export function previewCard(card, specific = true) {
 						indentCount++;
 					}
 				}
-				
+
 				// indent the line
 				if (indentCount > 0) {
 					lineDiv.classList.add("cardDetailsIndent");
 					lineDiv.style.setProperty("--indent-amount", indentCount + "em");
 				}
-				
+
 				effectDiv.appendChild(lineDiv);
 			});
 			
 			cardDetailsEffectList.appendChild(effectDiv);
 		});
 	}
-	
+
 	cardDetails.style.setProperty("--side-distance", ".5em");
 }
