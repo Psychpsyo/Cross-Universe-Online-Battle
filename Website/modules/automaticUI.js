@@ -1,6 +1,7 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
 import {locale} from "/modules/locale.js";
+import * as gameUI from "/modules/gameUI.js";
 
 let currentActivePhaseElem = null;
 
@@ -124,4 +125,57 @@ export function gameDrawn() {
 	displayText += locale.game.automatic.gameOver.drawReasons[drawReason];
 	mainGameBlackoutContent.textContent = displayText;
 	mainGameBlackout.classList.remove("hidden");
+}
+
+export function setAttackTarget(target) {
+	let targetOffset;
+	let targetDistance;
+	switch (target.zone) {
+		case game.players[0].partnerZone: {
+			targetOffset = 2;
+			targetDistance = 0;
+			break;
+		}
+		case game.players[0].unitZone: {
+			targetOffset = target.index * -1 + 4;
+			targetDistance = 1;
+			break;
+		}
+		case localPlayer.unitZone: {
+			targetOffset = target.index;
+			targetDistance = 2;
+			break;
+		}
+		case localPlayer.partnerZone: {
+			targetOffset = 2;
+			targetDistance = 3;
+			break;
+		}
+	}
+
+	for (let y = 0; y < 4; y++) {
+		for (let x = 0; x < 5; x++) {
+			let holder = document.getElementById("field" + (y * 5 + x)).parentElement;
+			let offset = targetOffset - x;
+			offset = offset - Math.sign(offset) * .5;
+			holder.style.setProperty("--atk-offset", offset);
+			let distance = Math.abs(targetDistance - y);
+			distance = distance - Math.sign(distance) * .5;
+			holder.style.setProperty("--atk-distance", distance);
+		}
+	}
+}
+
+export async function attack(units) {
+	let animPromises = [];
+	for (let unit of units) {
+		let slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(unit.zone, unit.index)).parentElement;
+		slot.classList.add("attacking");
+		window.setTimeout(function() {
+			slot.classList.remove("attacking");
+		}, 500);
+		animPromises.push(new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 500)));
+		await gameState.controller.gameSleep(.2);
+	}
+	return Promise.all(animPromises);
 }

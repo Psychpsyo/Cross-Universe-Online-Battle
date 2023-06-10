@@ -1,3 +1,28 @@
+@keyframes yourAttack {
+	from {transform: translate3d(-50%, -50%, 0);}
+	to {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% - var(--atk-distance) * 100%), 20vh)}
+}
+@keyframes opponentAttack {
+	from {transform: translate3d(-50%, -50%, 0) rotate(180deg);}
+	to {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% + var(--atk-distance) * 100%), 20vh) rotate(180deg)}
+}
+
+.attacking {
+	z-index: 100;
+}
+.attacking .card {
+	animation-duration: calc(.2s * var(--game-speed));
+	animation-iteration-count: 2;
+	animation-direction: alternate;
+	animation-timing-function: ease-in-out;
+}
+#p0Grid .attacking .card {
+	animation-name: opponentAttack;
+}
+#p1Grid .attacking .card {
+	animation-name: yourAttack;
+}
+
 #phaseDisplay {
 	position: absolute;
 	top: 50%;

@@ -72,7 +72,8 @@
 		"cardChoice": {
 			"confirm": "Confirm",
 			"genericTitle": "Select Card(s):",
-			"handDiscard": "Discard your hand down to 8:"
+			"handDiscard": "Discard your hand down to 8:",
+			"attackTarget": "Select the attack target:"
 		},
 		
 		"fieldLabels": {

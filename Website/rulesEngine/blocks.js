@@ -3,6 +3,7 @@ import {Timing} from "./timings.js";
 import {FieldZone} from "./zones.js";
 import * as game from "./game.js";
 import * as actions from "./actions.js";
+import {createCardsAttackedEvent} from "./events.js";
 
 async function* arrayTimingGenerator(actionArrays) {
 	for (let actionList of actionArrays) {
@@ -34,6 +35,7 @@ class Block {
 			// Needs to first check for updates (events or requests) returned by the timing generator.
 			if (actionList.length == 0 || !(actionList[0] instanceof actions.Action)) {
 				yield actionList;
+				generatorOutput = await this.timingGenerator.next();
 				continue;
 			}
 			let timing = new Timing(this.stack.phase.turn.game, actionList, this);
@@ -152,8 +154,9 @@ async function* fightTimingGenerator(attackDeclaration) {
 	for (const unit of attackDeclaration.attackers) {
 		totalAttack += unit.attack.get();
 	}
-	
+
 	// RULES: If the Attack is greater the attacker destroys the target.
+	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
 	if (totalAttack > attackDeclaration.target.defense.get()) {
 		let actionList = [new actions.Destroy(attackDeclaration.target)];
 		if (attackDeclaration.target.zone.type == "partner") {
@@ -161,12 +164,12 @@ async function* fightTimingGenerator(attackDeclaration) {
 		}
 		yield actionList;
 	}
-	
+
 	// RULES: If the unit wasn't destoyed, a 'counterattack' occurs.
 	if (!(attackDeclaration.target.zone instanceof FieldZone)) {
 		return;
 	}
-	
+
 	let counterattackTarget;
 	if (attackDeclaration.attackers.length == 1) {
 		counterattackTarget = attackDeclaration.attackers[0];
@@ -178,7 +181,8 @@ async function* fightTimingGenerator(attackDeclaration) {
 			}
 		}
 	}
-	
+
+	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
 	if (attackDeclaration.target.attack.get() > counterattackTarget.defense.get()) {
 		let actionList = [new actions.Destroy(counterattackTarget)];
 		if (counterattackTarget.zone.type == "partner") {

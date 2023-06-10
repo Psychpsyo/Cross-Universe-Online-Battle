@@ -169,10 +169,19 @@ export function createCardSummonedEvent(player, fromZone, fromIndex, toIndex) {
 export function createAttackDeclarationEstablishedEvent(player, targetZone, targetIndex) {
 	return {
 		"nature": "event",
-		"type": "cardSummoned",
+		"type": "attackDeclarationEstablished",
 		"player": player,
 		"targetZone": targetZone,
 		"targetIndex": targetIndex
+	}
+}
+
+export function createCardsAttackedEvent(attackers, target) {
+	return {
+		"nature": "event",
+		"type": "cardsAttacked",
+		"attackers": attackers,
+		"target": target
 	}
 }
 

@@ -72,7 +72,8 @@
 		"cardChoice": {
 			"confirm": null,
 			"genericTitle": null,
-			"handDiscard": null
+			"handDiscard": null,
+			"attackTarget": null
 		},
 		
 		"fieldLabels": {

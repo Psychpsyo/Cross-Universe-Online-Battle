@@ -27,7 +27,8 @@ export class AutomaticController extends InteractionController {
 		}
 		this.madeMoveTarget = new EventTarget();
 		
-		this.gameSpeed = 500;
+		this.gameSpeed = 1;
+		document.documentElement.style.setProperty("--game-speed", this.gameSpeed);
 		
 		this.standardSummonEventTarget = new EventTarget();
 		this.canDeclareToAttack = [];
@@ -166,6 +167,7 @@ export class AutomaticController extends InteractionController {
 	}
 	
 	async handleEvent(event) {
+		console.log(event);
 		switch (event.type) {
 			case "deckShuffled": {
 				putChatMessage(event.player == localPlayer? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");
@@ -214,6 +216,9 @@ export class AutomaticController extends InteractionController {
 				return;
 			}
 			case "damageDealt": {
+				if (event.amount == 0) {
+					return;
+				}
 				await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
 				return this.gameSleep();
 			}
@@ -252,6 +257,11 @@ export class AutomaticController extends InteractionController {
 						event.action.timing.block.player
 					);
 				}
+				return;
+			}
+			case "cardsAttacked": {
+				autoUI.setAttackTarget(event.target);
+				return autoUI.attack(event.attackers);
 			}
 		}
 	}
@@ -295,6 +305,10 @@ export class AutomaticController extends InteractionController {
 				switch (request.reason) {
 					case "handTooFull": {
 						title = locale.game.cardChoice.handDiscard;
+						break;
+					}
+					case "selectAttackTarget": {
+						title = locale.game.cardChoice.attackTarget;
 						break;
 					}
 				}
@@ -402,14 +416,9 @@ export class AutomaticController extends InteractionController {
 		socket.send("[inputRequestResponse]" + JSON.stringify(response));
 		return response;
 	}
-	async removeInputRequest(request) {
-		switch (request.type) {
-			
-		}
-	}
 
 	async gameSleep(duration = 1) {
-		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * duration));
+		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * 500 * duration));
 	}
 
 	cancelRetire(player) {

@@ -54,28 +54,44 @@ if (localStorage.getItem("alwaysShowCardButtons") == "true") {
 	document.documentElement.classList.add("alwaysShowCardButtons");
 }
 
-export function init() {
-	new FieldCardSlot(game.players[0].partnerZone, 0, 2);
-	new FieldCardSlot(game.players[1].partnerZone, 0, 17);
-	for (let i = 0; i < 5; i++) {
-		new FieldCardSlot(game.players[0].unitZone, i, 9 - i);
-		new FieldCardSlot(game.players[1].unitZone, i, 10 + i);
+export function fieldSlotIndexFromZone(zone, index) {
+	switch(zone) {
+		case game.players[0].partnerZone: {
+			return 2;
+		}
+		case game.players[1].partnerZone: {
+			return 17;
+		}
+		case game.players[0].unitZone: {
+			return 9 - index;
+		}
+		case game.players[1].unitZone: {
+			return 10 + index;
+		}
+		case game.players[0].spellItemZone: {
+			return [4, 3, 1, 0][index];
+		}
+		case game.players[1].spellItemZone: {
+			return [15, 16, 18, 19][index];
+		}
 	}
-	new FieldCardSlot(game.players[0].spellItemZone, 3, 0);
-	new FieldCardSlot(game.players[0].spellItemZone, 2, 1);
-	new FieldCardSlot(game.players[0].spellItemZone, 1, 3);
-	new FieldCardSlot(game.players[0].spellItemZone, 0, 4);
-	new FieldCardSlot(game.players[1].spellItemZone, 0, 15);
-	new FieldCardSlot(game.players[1].spellItemZone, 1, 16);
-	new FieldCardSlot(game.players[1].spellItemZone, 2, 18);
-	new FieldCardSlot(game.players[1].spellItemZone, 3, 19);
-	
+	return -1;
+}
+
+export function init() {
 	game.players.forEach(player => {
 		uiPlayers.push(new UiPlayer(player));
-		
+
 		new DeckCardSlot(player.deckZone);
 		new PileCardSlot(player.discardPile);
 		new PileCardSlot(player.exileZone);
+		new FieldCardSlot(player.partnerZone, 0);
+		for (let i = 0; i < 5; i++) {
+			new FieldCardSlot(player.unitZone, i);
+		}
+		for (let i = 0; i < 4; i++) {
+			new FieldCardSlot(player.spellItemZone, i);
+		}
 		
 		document.getElementById("hand" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
@@ -319,9 +335,9 @@ export class UiCardSlot {
 }
 
 class FieldCardSlot extends UiCardSlot {
-	constructor(zone, index, fieldIndex) {
+	constructor(zone, index) {
 		super(zone, index);
-		this.fieldSlot = document.getElementById("field" + fieldIndex);
+		this.fieldSlot = document.getElementById("field" + fieldSlotIndexFromZone(zone, index));
 		
 		this.fieldSlot.addEventListener("dragstart", function(e) {
 			e.preventDefault();

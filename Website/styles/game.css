@@ -221,7 +221,7 @@ dialog #cardDetails {
 	grid-template-columns: repeat(7, 1fr);
 }
 
-#p1Grid > :last-child {
+#p0Grid > :last-child {
 	grid-column-start: 7;
 	grid-row-start: 1;
 	grid-row-end: 3;
@@ -231,11 +231,11 @@ dialog #cardDetails {
 	transform: rotate(180deg);
 }
 
-#p1Grid .fieldCardContainer .card {
+#p0Grid .fieldCardContainer .card {
 	transform: translate(-50%, -50%) rotate(180deg);
 }
 
-#p2Grid > :first-child {
+#p1Grid > :first-child {
 	grid-column-start: 1;
 	grid-row-start: 1;
 	grid-row-end: 3;
@@ -264,6 +264,7 @@ img[src$="cardBackFrameP1.png"] {
 	position: relative;
 	width: 100%;
 	min-height: 100%;
+	perspective: 1000px;
 }
 
 .fieldCardContainer .card {
@@ -739,6 +740,7 @@ dialog.popupSelectMenu {
 	white-space: pre;
 	text-align: center;
 	filter: drop-shadow(black 0 0 .15em);
+	user-select: none;
 }
 
 #mainGameBlackoutContent::first-line {

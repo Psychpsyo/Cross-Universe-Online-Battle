@@ -72,7 +72,8 @@
 		"cardChoice": {
 			"confirm": "Bestätigen",
 			"genericTitle": "Wähle Karten:",
-			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:"
+			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:",
+			"attackTarget": "Wähle, wen du angreifst:"
 		},
 		
 		"fieldLabels": {

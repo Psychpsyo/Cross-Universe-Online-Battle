@@ -156,7 +156,7 @@ export class DealDamage extends Action {
 		this.player = player;
 		this.amount = amount;
 	}
-	
+
 	* run() {
 		this.player.life = Math.max(this.player.life - this.amount, 0);
 		if (this.player.life == 0) {
