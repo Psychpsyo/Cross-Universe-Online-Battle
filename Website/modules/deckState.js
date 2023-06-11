@@ -7,7 +7,7 @@ import {socket} from "/modules/netcode.js";
 import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
 import {previewCard} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
-import * as cardLoader from "/modules/cardloader.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 let builtInDecks = [];
 let currentDeckList = "default";

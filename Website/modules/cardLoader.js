@@ -22,7 +22,6 @@ export async function registerCustomCard(cardData, player) {
 	cardData.imageSrc = canvas.toDataURL();
 	let cardId = "C" + String(nextCustomCardIDs[player.index]).padStart(5, "0");
 	cardInfoCache[cardId] = cardData;
-	console.log(cardInfoCache);
 	nextCustomCardIDs[player.index] += nextCustomCardIDs.length;
 	return cardId;
 }
