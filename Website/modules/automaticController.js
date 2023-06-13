@@ -31,11 +31,13 @@ export class AutomaticController extends InteractionController {
 		document.documentElement.style.setProperty("--game-speed", this.gameSpeed);
 		
 		this.standardSummonEventTarget = new EventTarget();
+		this.deployEventTarget = new EventTarget();
+		this.castEventTarget = new EventTarget();
 		this.canDeclareToAttack = [];
 		this.unitAttackButtons = [];
 		this.declaredAttackers = [];
 	}
-	
+
 	async startGame() {
 		let updateGenerator = game.begin();
 		let updates = await updateGenerator.next();
@@ -92,7 +94,7 @@ export class AutomaticController extends InteractionController {
 			updates = await updateGenerator.next(returnValues);
 		}
 	}
-	
+
 	receiveMessage(command, message) {
 		switch (command) {
 			case "inputRequestResponse": {
@@ -115,13 +117,13 @@ export class AutomaticController extends InteractionController {
 		}
 		return false;
 	}
-	
+
 	grabCard(player, zone, index) {
 		retireOptions.classList.add("noClick");
-		
+
 		let card = zone.cards[index];
 		let playerInfo = this.playerInfos[player.index];
-		
+
 		// for retires
 		if (playerInfo.canRetire.includes(card) && !playerInfo.retiring.includes(card)) {
 			playerInfo.setHeld(zone, index);
@@ -130,13 +132,17 @@ export class AutomaticController extends InteractionController {
 		if (playerInfo.retiring.length > 0) {
 			return false;
 		}
-		
-		// for summons
-		if (playerInfo.canStandardSummon && zone === player.handZone && card.cardTypes.get().includes("unit")) {
+
+		// for summoning/casting/deploying
+		if (zone === player.handZone && (
+			(playerInfo.canStandardSummon && card.cardTypes.get().includes("unit")) ||
+			(playerInfo.canDeploy && card.cardTypes.get().includes("item")) ||
+			(playerInfo.canCast && card.cardTypes.get().includes("spell"))
+		)) {
 			playerInfo.setHeld(zone, index);
 			return true;
 		}
-		
+
 		return false;
 	}
 	dropCard(player, zone, index) {
@@ -153,7 +159,21 @@ export class AutomaticController extends InteractionController {
 			}
 			return;
 		}
-		
+		// deploying
+		if (playerInfo.canDeploy && card.zone == player.handZone && zone == player.spellItemZone && !player.spellItemZone.get(index) && card.cardTypes.get().includes("item")) {
+			if (player === localPlayer) {
+				this.deployEventTarget.dispatchEvent(new CustomEvent("deploy", {detail: {handIndex: card.index, fieldIndex: index}}));
+			}
+			return;
+		}
+		// casting
+		if (playerInfo.canCast && card.zone == player.handZone && zone == player.spellItemZone && !player.spellItemZone.get(index) && card.cardTypes.get().includes("spell")) {
+			if (player === localPlayer) {
+				this.castEventTarget.dispatchEvent(new CustomEvent("cast", {detail: {handIndex: card.index, fieldIndex: index}}));
+			}
+			return;
+		}
+
 		// retiring
 		if (playerInfo.canRetire.includes(card) && zone === player.discardPile) {
 			playerInfo.retiring.push(card);
@@ -282,12 +302,20 @@ export class AutomaticController extends InteractionController {
 				this.playerInfos[request.player.index].canStandardSummon = true;
 				break;
 			}
+			case "deployItem": {
+				this.playerInfos[request.player.index].canDeploy = true;
+				break;
+			}
+			case "castSpell": {
+				this.playerInfos[request.player.index].canCast = true;
+				break;
+			}
 			case "doRetire": {
 				this.playerInfos[request.player.index].canRetire = request.eligibleUnits;
 				break;
 			}
 		}
-		
+
 		if (request.player != localPlayer) {
 			// If this is directed at not the local player, we might need to wait for an opponent input.
 			// Only the first input request is allowed to take this, all others can and must reject since the engine wants only one action per player per request.
@@ -305,7 +333,7 @@ export class AutomaticController extends InteractionController {
 				}.bind(this), {once: true});
 			});
 		}
-		
+
 		let response = {
 			type: request.type
 		}
@@ -361,6 +389,40 @@ export class AutomaticController extends InteractionController {
 					return;
 				}
 				response.value = summonDetails;
+				break;
+			}
+			case "deployItem": {
+				let deployDetails = await new Promise((resolve, reject) => {
+					this.deployEventTarget.addEventListener("deploy", resolve, {once: true});
+					this.madeMoveTarget.addEventListener("move", function() {
+						this.deployEventTarget.removeEventListener("deploy", resolve);
+						reject();
+					}.bind(this), {once: true});
+				}).then(
+					(e) => {return e.detail},
+					() => {return null}
+				);
+				if (deployDetails == null) {
+					return;
+				}
+				response.value = deployDetails;
+				break;
+			}
+			case "castSpell": {
+				let castDetails = await new Promise((resolve, reject) => {
+					this.castEventTarget.addEventListener("cast", resolve, {once: true});
+					this.madeMoveTarget.addEventListener("move", function() {
+						this.castEventTarget.removeEventListener("cast", resolve);
+						reject();
+					}.bind(this), {once: true});
+				}).then(
+					(e) => {return e.detail},
+					() => {return null}
+				);
+				if (castDetails == null) {
+					return;
+				}
+				response.value = castDetails;
 				break;
 			}
 			case "doAttackDeclaration": {
@@ -530,6 +592,8 @@ class AutomaticPlayerInfo {
 		this.player = player;
 		this.heldCard = null;
 		this.canStandardSummon = false;
+		this.canDeploy = false;
+		this.canCast = false;
 		this.canRetire = [];
 		this.retiring = [];
 	}

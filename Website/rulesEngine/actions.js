@@ -128,8 +128,54 @@ export class Summon extends Action {
 	}
 
 	isImpossible() {
-		let slotCard = this.player.unitZone.get(this.unitZoneIndex);
+		let slotCard = this.zone.get(this.zoneIndex);
 		return slotCard != null && slotCard != this.unit;
+	}
+}
+
+export class Deploy extends Action {
+	constructor(player, item, zone, zoneIndex) {
+		super();
+		this.player = player;
+		this.item = item;
+		this.zone = zone;
+		this.zoneIndex = zoneIndex;
+	}
+
+	* run() {
+		let deployEvent = events.createCardDeployedEvent(this.player, this.item.zone, this.item.index, this.zone, this.zoneIndex);
+		this.item.hidden = false;
+		this.zone.add(this.item, this.zoneIndex);
+		this.item = this.item.snapshot();
+		return deployEvent;
+	}
+
+	isImpossible() {
+		let slotCard = this.zone.get(this.zoneIndex);
+		return slotCard != null && slotCard != this.item;
+	}
+}
+
+export class Cast extends Action {
+	constructor(player, spell, zone, zoneIndex) {
+		super();
+		this.player = player;
+		this.spell = spell;
+		this.zone = zone;
+		this.zoneIndex = zoneIndex;
+	}
+
+	* run() {
+		let deployEvent = events.createCardCastEvent(this.player, this.spell.zone, this.spell.index, this.zone, this.zoneIndex);
+		this.spell.hidden = false;
+		this.zone.add(this.spell, this.zoneIndex);
+		this.spell = this.spell.snapshot();
+		return deployEvent;
+	}
+
+	isImpossible() {
+		let slotCard = this.zone.get(this.zoneIndex);
+		return slotCard != null && slotCard != this.spell;
 	}
 }
 
@@ -204,7 +250,7 @@ export class Discard extends Action {
 	}
 	
 	isImpossible() {
-		if (this.card.zone.type == "partner") {
+		if (this.card.zone?.type == "partner") {
 			return true;
 		}
 		return false;
@@ -226,7 +272,7 @@ export class Destroy extends Action {
 	}
 	
 	isImpossible() {
-		if (this.card.zone.type == "partner") {
+		if (this.card.zone?.type == "partner") {
 			return true;
 		}
 		return false;

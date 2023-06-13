@@ -44,7 +44,10 @@ class StackPhase extends Phase {
 	}
 	
 	getBlockOptions(stack) {
-		return [requests.pass.create(stack.getNextPlayer())];
+		return [
+			requests.pass.create(stack.getNextPlayer()),
+			requests.castSpell.create(stack.getNextPlayer())
+		];
 	}
 	
 	getTimings() {
@@ -151,6 +154,7 @@ export class MainPhase extends StackPhase {
 			if (this.turn.hasStandardSummoned === null) {
 				options.push(requests.doStandardSummon.create(this.turn.player));
 			}
+			options.push(requests.deployItem.create(this.turn.player));
 			if (this.turn.hasRetired === null) {
 				let eligibleUnits = [];
 				for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
@@ -217,9 +221,5 @@ export class BattlePhase extends StackPhase {
 export class EndPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "endPhase");
-	}
-	
-	getBlockOptions(stack) {
-		return [requests.pass.create(stack.getNextPlayer())];
 	}
 }

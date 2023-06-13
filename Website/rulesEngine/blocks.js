@@ -1,9 +1,10 @@
 
 import {Timing} from "./timings.js";
 import {FieldZone} from "./zones.js";
+import {createCardsAttackedEvent} from "./events.js";
 import * as game from "./game.js";
 import * as actions from "./actions.js";
-import {createCardsAttackedEvent} from "./events.js";
+import * as abilities from "./abilities.js";
 
 async function* arrayTimingGenerator(actionArrays) {
 	for (let actionList of actionArrays) {
@@ -233,5 +234,113 @@ export class AbilityActivation extends Block {
 			this.ability.activationCount++;
 		}
 		return success;
+	}
+}
+
+async function* combinedTimingGenerator() {
+	for (let timingGenerator of arguments) {
+		yield* timingGenerator;
+	}
+}
+
+async function* combinedCostTimingGenerator() {
+	let completeCost = [];
+	for (let timingGenerator of arguments) {
+		for await (let actionList of timingGenerator) {
+			if (actionList[0] instanceof actions.Action) {
+				completeCost = completeCost.concat(actionList);
+				break;
+			}
+			yield actionList;
+		}
+	}
+	yield completeCost;
+}
+
+export class DeployItem extends Block {
+	constructor(stack, player, item, spellItemZoneIndex) {
+		let costTimingGenerators = [arrayTimingGenerator([[
+			new actions.ChangeMana(player, -item.level.get()),
+			new actions.Place(player, item, player.spellItemZone, spellItemZoneIndex)
+		]])];
+		let execTimingGenerators = [
+			arrayTimingGenerator([[new actions.Deploy(player, item, player.spellItemZone, spellItemZoneIndex)]]),
+		];
+		for (let ability of item.abilities.get()) {
+			if (ability instanceof abilities.DeployAbility) {
+				if (ability.cost) {
+					costTimingGenerators.push(abilityCostTimingGenerator(ability, item, player));
+				}
+				if (item.cardTypes.get().includes("standardItem")) {
+					// standard items first activate and are only treated as briefly on the field after
+					execTimingGenerators.shift(abilityTimingGenerator(ability, item, player));
+					// and are then discarded.
+					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(item)]]));
+				} else {
+					execTimingGenerators.push(abilityTimingGenerator(ability, item, player));
+				}
+				// cards only ever have one of these
+				break;
+			}
+		}
+		super(stack, player,
+			combinedTimingGenerator(...execTimingGenerators),
+			combinedCostTimingGenerator(...costTimingGenerators)
+		);
+		this.item = item;
+		this.spellItemZoneIndex = spellItemZoneIndex;
+	}
+	
+	async* runCost() {
+		let paid = await (yield* super.runCost());
+		if (!paid) {
+			return false;
+		}
+		this.item = this.item.snapshot();
+		return true;
+	}
+}
+
+export class CastSpell extends Block {
+	constructor(stack, player, spell, spellItemZoneIndex) {
+		let costTimingGenerators = [arrayTimingGenerator([[
+			new actions.ChangeMana(player, -spell.level.get()),
+			new actions.Place(player, spell, player.spellItemZone, spellItemZoneIndex)
+		]])];
+		let execTimingGenerators = [
+			arrayTimingGenerator([[new actions.Cast(player, spell, player.spellItemZone, spellItemZoneIndex)]]),
+		];
+		for (let ability of spell.abilities.get()) {
+			if (ability instanceof abilities.CastAbility) {
+				if (ability.cost) {
+					costTimingGenerators.push(abilityCostTimingGenerator(ability, spell, player));
+				}
+				if (spell.cardTypes.get().includes("standardSpell")) {
+					// standard spells first activate and are only treated as briefly on the field after
+					execTimingGenerators.shift(abilityTimingGenerator(ability, spell, player));
+					// and are then discarded.
+					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(spell)]]));
+				} else {
+					execTimingGenerators.push(abilityTimingGenerator(ability, spell, player));
+				}
+				// cards only ever have one of these
+				break;
+			}
+		}
+		super(stack, player,
+			combinedTimingGenerator(...execTimingGenerators),
+			combinedCostTimingGenerator(...costTimingGenerators)
+		);
+		this.spell = spell;
+		this.spellItemZoneIndex = spellItemZoneIndex;
+	}
+	
+	async* runCost() {
+		let paid = await (yield* super.runCost());
+		if (!paid) {
+			return false;
+		}
+		this.spell = this.spell.snapshot();
+		return true;
 	}
 }

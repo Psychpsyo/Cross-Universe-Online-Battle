@@ -45,6 +45,20 @@ export class Stack {
 					);
 					break;
 				}
+				case "deployItem": {
+					nextBlock = new blocks.DeployItem(this, this.getNextPlayer(),
+						this.getNextPlayer().handZone.cards[response.value.handIndex],
+						response.value.fieldIndex
+					);
+					break;
+				}
+				case "castSpell": {
+					nextBlock = new blocks.CastSpell(this, this.getNextPlayer(),
+						this.getNextPlayer().handZone.cards[response.value.handIndex],
+						response.value.fieldIndex
+					);
+					break;
+				}
 				case "doAttackDeclaration": {
 					nextBlock = new blocks.AttackDeclaration(this, this.getNextPlayer(), response.value);
 					break;

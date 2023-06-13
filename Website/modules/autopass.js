@@ -63,6 +63,21 @@ function isImportant(request) {
 	if (request.type == "pass") {
 		return false;
 	}
+	if (request.type == "doStandardSummon" &&
+		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("unit"))
+	) {
+		return false;
+	}
+	if (request.type == "deployItem" &&
+		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("item"))
+	) {
+		return false;
+	}
+	if (request.type == "castSpell" &&
+		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("spell"))
+	) {
+		return false;
+	}
 	if (request.type == "doRetire" &&
 		request.eligibleUnits.length == 1 &&
 		request.eligibleUnits[0].zone.type == "partner"

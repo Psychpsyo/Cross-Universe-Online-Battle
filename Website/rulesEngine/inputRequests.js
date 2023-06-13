@@ -89,6 +89,56 @@ export const doStandardSummon = {
 	}
 }
 
+export const deployItem = {
+	create: function(player) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "deployItem"
+		}
+	},
+	validate: function(response, request) {
+		if (response.handIndex < 0 || response.handIndex >= request.player.handZone.cards.length) {
+			throw new Error("Supplied out-of-range hand card index for deploying an item.");
+		}
+		if (response.fieldIndex < 0 || response.fieldIndex > 3) {
+			throw new Error("Supplied out-of-range field index for deploying an item.");
+		}
+		if (request.player.spellItemZone.get(response.fieldIndex)) {
+			throw new Error("Supplied already occupied field index for deploying an item.");
+		}
+		if (!request.player.handZone.cards[response.handIndex].cardTypes.get().includes("item")) {
+			throw new Error("Tried to deploy a card that isn't an item.");
+		}
+		return response;
+	}
+}
+
+export const castSpell = {
+	create: function(player) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "castSpell"
+		}
+	},
+	validate: function(response, request) {
+		if (response.handIndex < 0 || response.handIndex >= request.player.handZone.cards.length) {
+			throw new Error("Supplied out-of-range hand card index for casting a spell.");
+		}
+		if (response.fieldIndex < 0 || response.fieldIndex > 3) {
+			throw new Error("Supplied out-of-range field index for casting a spell.");
+		}
+		if (request.player.spellItemZone.get(response.fieldIndex)) {
+			throw new Error("Supplied already occupied field index for casting a spell.");
+		}
+		if (!request.player.handZone.cards[response.handIndex].cardTypes.get().includes("spell")) {
+			throw new Error("Tried to cast a card that isn't a spell.");
+		}
+		return response;
+	}
+}
+
 export const doAttackDeclaration = {
 	create: function(player, eligibleUnits) {
 		return {
