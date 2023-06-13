@@ -72,7 +72,7 @@ export class Card extends BaseCard {
 
 	endOfTurnReset() {
 		this.attackCount = 0;
-		for (ability of this.abilities) {
+		for (let ability of this.abilities.get()) {
 			if (ability instanceof abilities.OptionalAbility || ability instanceof abilities.FastAbility || ability instanceof abilities.TriggerAbility) {
 				ability.activationCount = 0;
 			}
@@ -151,7 +151,7 @@ function parseCdfValues(cdf) {
 				break;
 			}
 			case "cardType": {
-				if (!["unit", "standardSpell", "continuousSpell", "enchantSpell", "standardItem", "continuousItem", "equipableItem"].includes(parts[1])) {
+				if (!["unit", "token", "standardSpell", "continuousSpell", "enchantSpell", "standardItem", "continuousItem", "equipableItem"].includes(parts[1])) {
 					throw new Error("CDF Parser Error: " + parts[0] + " is an invalid card type.");
 				}
 				data.cardType = parts[1];

@@ -5,6 +5,7 @@ import * as requests from "./inputRequests.js";
 export class Action {
 	constructor() {
 		this.timing = null; // Is set by the Timing itself
+		this.costIndex = -1; // If this is positive, it indicates that this action is to be treated as a cost, together with other actions of the same costIndex
 	}
 	
 	// Returns the event that represents this action.
@@ -39,6 +40,26 @@ export class ChangeMana extends Action {
 	}
 	isFullyPossible() {
 		return this.player.mana + this.amount >= 0;
+	}
+}
+
+export class ChangeLife extends Action {
+	constructor(player, amount) {
+		super();
+		this.player = player;
+		this.amount = amount;
+	}
+	
+	* run() {
+		this.player.life += this.amount;
+		return events.createLifeChangedEvent(this.player);
+	}
+	
+	isImpossible() {
+		return this.amount < 0;
+	}
+	isFullyPossible() {
+		return this.player.life + this.amount >= 0;
 	}
 }
 
@@ -93,21 +114,22 @@ export class Place extends Action {
 }
 
 export class Summon extends Action {
-	constructor(player, unit, unitZoneIndex) {
+	constructor(player, unit, zone, zoneIndex) {
 		super();
 		this.player = player;
 		this.unit = unit;
-		this.unitZoneIndex = unitZoneIndex;
+		this.zone = zone;
+		this.zoneIndex = zoneIndex;
 	}
-	
+
 	* run() {
-		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.zone, this.unit.index, this.unitZoneIndex);
+		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.zone, this.unit.index, this.zone, this.zoneIndex);
 		this.unit.hidden = false;
-		this.player.unitZone.add(this.unit, this.unitZoneIndex);
+		this.zone.add(this.unit, this.zoneIndex);
 		this.unit = this.unit.snapshot();
 		return summonEvent;
 	}
-	
+
 	isImpossible() {
 		let slotCard = this.player.unitZone.get(this.unitZoneIndex);
 		return slotCard != null && slotCard != this.unit;
@@ -131,7 +153,7 @@ export class EstablishAttackDeclaration extends Action {
 		
 		// send selection request
 		let targetSelectRequest = new requests.chooseCards.create(this.player, eligibleUnits, [1], "selectAttackTarget");
-		let responses = (yield [targetSelectRequest]).filter(choice => choice !== undefined);
+		let responses = (yield [targetSelectRequest]);
 		if (responses.length != 1) {
 			throw new Error("Incorrect number of responses supplied during attack target selection. (expected 1, got " + responses.length + " instead)");
 		}

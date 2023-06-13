@@ -221,17 +221,23 @@ export class AutomaticController extends InteractionController {
 				await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
 				return this.gameSleep();
 			}
+			case "lifeChanged": {
+				await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+				return this.gameSleep();
+			}
 			case "manaChanged": {
 				await gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
 				return this.gameSleep();
 			}
 			case "cardPlaced": {
 				gameUI.insertCard(event.toZone, event.toIndex);
-				gameUI.removeCard(event.player.handZone, event.fromIndex);
+				if (event.fromZone) {
+					gameUI.removeCard(event.fromZone, event.fromIndex);
+				}
 				return this.gameSleep();
 			}
 			case "cardSummoned": {
-				gameUI.insertCard(event.player.unitZone, event.toIndex);
+				gameUI.insertCard(event.toZone, event.toIndex);
 				if (event.fromZone) {
 					gameUI.removeCard(event.fromZone, event.fromIndex);
 				}
@@ -437,6 +443,11 @@ export class AutomaticController extends InteractionController {
 					return;
 				}
 				response.value = activated;
+				break;
+			}
+			case "chooseZoneSlot": {
+				// TODO: Let player choose one here.
+				response.value = 0;
 				break;
 			}
 		}

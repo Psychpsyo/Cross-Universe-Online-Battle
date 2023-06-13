@@ -66,9 +66,9 @@ export class Game {
 			this.turns.push(new Turn(currentPlayer));
 			yield [createTurnStartedEvent()];
 			yield* this.currentTurn().run();
-			for (let card of currentPlayer.partnerZone.cards.concat(currentPlayer.unitZone.cards.concat(currentPlayer.spellItemZone.cards))) {
+			for (let card of this.getFieldCards(currentPlayer).concat(this.getFieldCards(currentPlayer.next()))) {
 				if (card) {
-					card.attackCount = 0;
+					card.endOfTurnReset();
 				}
 			}
 			currentPlayer = currentPlayer.next();
@@ -94,6 +94,10 @@ export class Game {
 	currentStack() {
 		let currentPhase = this.currentPhase();
 		return !currentPhase instanceof phases.StackPhase? null : currentPhase.currentStack();
+	}
+
+	getFieldCards(player) {
+		return player.partnerZone.cards.concat(player.unitZone.cards.concat(player.spellItemZone.cards)).filter(card => card != null);
 	}
 }
 

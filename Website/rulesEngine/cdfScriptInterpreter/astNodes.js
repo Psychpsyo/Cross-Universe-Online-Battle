@@ -2,6 +2,7 @@
 
 import * as actions from "../actions.js";
 import * as requests from "../inputRequests.js";
+import {Card} from "../card.js";
 
 class AstNode {
 	async* eval(card, player) {}
@@ -16,7 +17,7 @@ export class ScriptNode extends AstNode {
 	}
 	async* eval(card, player) {
 		for (let step of this.steps) {
-			yield await (yield* step.eval(card, player));
+			yield* step.eval(card, player);
 		}
 	}
 }
@@ -30,11 +31,38 @@ export class FunctionNode extends AstNode {
 	}
 	async* eval(card, player) {
 		switch (this.functionName) {
+			case "DAMAGE": {
+				yield [new actions.DealDamage(await (yield* this.parameters[1].eval(card, player)), await (yield* this.parameters[0].eval(card, player)))];
+				return;
+			}
+			case "DESTROY": {
+				yield (await (yield* this.parameters[0].eval(card, player))).map(card => new actions.Destroy(card));
+				return;
+			}
+			case "DISCARD": {
+				yield (await (yield* this.parameters[0].eval(card, player))).map(card => new actions.Discard(card));
+				return;
+			}
+			case "DRAW": {
+				yield [new actions.Draw(player, await (yield* this.parameters[0].eval(card, player)))];
+				return;
+			}
+			case "EXILE": {
+				yield (await (yield* this.parameters[0].eval(card, player))).map(card => new actions.Exile(card));
+				return;
+			}
+			case "LIFE": {
+				yield [new actions.ChangeLife(player, await (yield* this.parameters[0].eval(card, player)))];
+			}
+			case "MANA": {
+				yield [new actions.ChangeMana(player, await (yield* this.parameters[0].eval(card, player)))];
+				return;
+			}
 			case "SELECT": {
 				let responseCounts = [await (yield* this.parameters[0].eval(card, player))];
 				let eligibleCards = await (yield* this.parameters[1].eval(card, player));
 				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts, "cardEffect");
-				let responses = (yield [selectionRequest]).filter(choice => choice !== undefined);
+				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
 					throw new Error("Incorrect number of responses supplied during card selection. (expected " + responseCounts + ", got " + responses.length + " instead)");
 				}
@@ -43,20 +71,66 @@ export class FunctionNode extends AstNode {
 				}
 				return requests.chooseCards.validate(responses[0].value, selectionRequest);
 			}
-			case "DISCARD": {
-				return (await (yield* this.parameters[0].eval(card, player))).map(card => new actions.Discard(card));
+			case "SUMMON": {
+				let cards = await (yield* this.parameters[0].eval(card, player));
+				let zone = (await (yield* this.parameters[1].eval(card, player)))[0];
+				let payCost = await (yield* this.parameters[2].eval(card, player));
+
+				let costs = [];
+				let targetSlots = [];
+				// TODO: Let the player choose the order these are summoned in.
+				for (let i = 0; i < cards.length; i++) {
+					let availableZoneSlots = [];
+					for (let i = 0; i < zone.cards.length; i++) {
+						if (zone.get(i) === null) {
+							availableZoneSlots.push(i);
+						}
+					}
+					if (availableZoneSlots.length == 0) {
+						break;
+					}
+					let zoneSlotRequest = new requests.chooseZoneSlot.create(player, zone, availableZoneSlots);
+					let zoneSlotResponse = (yield [zoneSlotRequest])[0];
+					targetSlots[i] = requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
+					let placeCost = new actions.Place(player, cards[i], zone, targetSlots[i]);
+					placeCost.costIndex = i;
+					costs.push(placeCost);
+
+					if (payCost) {
+						let manaCost = new actions.ChangeMana(player, -cards[i].level.get());
+						manaCost.costIndex = i;
+						costs.push(manaCost);
+					}
+				}
+				let timing = yield costs;
+				let summons = [];
+				for (let i = 0; i < timing.costCompletions.length; i++) {
+					if (timing.costCompletions[i]) {
+						summons.push(new actions.Summon(player, cards[i], zone, targetSlots[i]));
+					}
+				}
+				yield summons;
+				return;
 			}
-			case "DESTROY": {
-				return (await (yield* this.parameters[0].eval(card, player))).map(card => new actions.Destroy(card));
-			}
-			case "EXILE": {
-				return (await (yield* this.parameters[0].eval(card, player))).map(card => new actions.Exile(card));
-			}
-			case "DRAW": {
-				return [new actions.Draw(player, await (yield* this.parameters[0].eval(card, player)))];
-			}
-			case "DAMAGE": {
-				return [new actions.DealDamage(await (yield* this.parameters[1].eval(card, player)), await (yield* this.parameters[0].eval(card, player)))];
+			case "TOKENS": {
+				let amount = await (yield* this.parameters[0].eval(card, player));
+				let name = await (yield* this.parameters[2].eval(card, player));
+				let level = await (yield* this.parameters[3].eval(card, player));
+				let types = await (yield* this.parameters[4].eval(card, player));
+				let attack = await (yield* this.parameters[5].eval(card, player));
+				let defense = await (yield* this.parameters[6].eval(card, player));
+				let cards = [];
+				for (let i = 0; i < amount; i++) {
+					let cardId = await (yield* this.parameters[1].eval(card, player));
+					cards.push(new Card(player, `id: ${cardId}
+cardType: token
+name: ${name}
+level: ${level}
+types: ${types.join(",")}
+attack: ${attack}
+defense: ${defense}`, false));
+				}
+				return cards;
 			}
 		}
 	}
@@ -99,6 +173,26 @@ export class IntNode extends AstNode {
 	}
 }
 
+export class BoolNode extends AstNode {
+	constructor(value) {
+		super();
+		this.value = value == "yes";
+	}
+	async* eval(card, player) {
+		return this.value;
+	}
+}
+
+export class CardIdNode extends AstNode {
+	constructor(value) {
+		super();
+		this.value = value;
+	}
+	async* eval(card, player) {
+		return this.value;
+	}
+}
+
 export class PlayerNode extends AstNode {
 	constructor(playerKeyword) {
 		super();
@@ -106,6 +200,16 @@ export class PlayerNode extends AstNode {
 	}
 	async* eval(card, player) {
 		return this.playerKeyword == "you"? player : player.next();
+	}
+}
+
+export class TypesNode extends AstNode {
+	constructor(value) {
+		super();
+		this.value = value;
+	}
+	async* eval(card, player) {
+		return this.value;
 	}
 }
 

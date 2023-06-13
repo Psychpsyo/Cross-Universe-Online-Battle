@@ -1,4 +1,10 @@
 let keywordTokenTypes = {
+	from: "from",
+	set: "set",
+	yes: "bool",
+	no: "bool",
+	you: "player",
+	opponent: "player",
 	field: "zoneIdentifier",
 	deck: "zoneIdentifier",
 	discard: "zoneIdentifier",
@@ -34,16 +40,55 @@ let keywordTokenTypes = {
 	standardItem: "cardType",
 	continuousItem: "cardType",
 	enchantItem: "cardType",
-	you: "player",
-	opponent: "player",
-	from: "from",
-	set: "set",
 	APPLY: "function",
 	DAMAGE: "function",
 	DISCARD: "function",
 	DRAW: "function",
 	EXILE: "function",
-	SELECT: "function"
+	LIFE: "function",
+	MANA: "function",
+	SELECT: "function",
+	SUMMON: "function",
+	TOKENS: "function",
+	Angel: "type",
+	Armor: "type",
+	Beast: "type",
+	Bird: "type",
+	Book: "type",
+	Boundary: "type",
+	Bug: "type",
+	Chain: "type",
+	Curse: "type",
+	Dark: "type",
+	Demon: "type",
+	Dragon: "type",
+	Earth: "type",
+	Electric: "type",
+	Figure: "type",
+	Fire: "type",
+	Fish: "type",
+	Ghost: "type",
+	Gravity: "type",
+	Ice: "type",
+	Illusion: "type",
+	Katana: "type",
+	Landmine: "type",
+	Light: "type",
+	Machine: "type",
+	Mage: "type",
+	Medicine: "type",
+	Myth: "type",
+	Plant: "type",
+	Psychic: "type",
+	Rock: "type",
+	Samurai: "type",
+	Shield: "type",
+	Spirit: "type",
+	Structure: "type",
+	Sword: "type",
+	Warrior: "type",
+	Water: "type",
+	Wind: "type"
 }
 
 export function tokenize(code) {
@@ -105,6 +150,11 @@ export function tokenize(code) {
 				pos++;
 				break;
 			}
+			case "-": {
+				tokens.push({type: "minus"});
+				pos++;
+				break;
+			}
 			case "=": {
 				if (code[pos+1] == "!") {
 					tokens.push({type: "comparison", value: "exactEquals"});
@@ -122,7 +172,14 @@ export function tokenize(code) {
 						wordLength++;
 					}
 					let word = code.substr(pos, wordLength);
-					tokens.push({type: keywordTokenTypes[word] ?? "name", value: word});
+					if (keywordTokenTypes[word]) {
+						tokens.push({type: keywordTokenTypes[word], value: word});
+					} else if (word.startsWith("CU")) {
+						wordLength = 8;
+						tokens.push({type: "cardId", value: code.substr(pos, wordLength)});
+					} else {
+						tokens.push({type: "name", value: word});
+					}
 					pos += wordLength;
 					break;
 				}

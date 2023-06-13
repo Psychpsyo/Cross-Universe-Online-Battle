@@ -11,6 +11,7 @@ export class Timing {
 		for (let action of this.actions) {
 			action.timing = this;
 		}
+		this.costCompletions = [];
 	}
 	
 	// returns whether or not any substitutions were handled
@@ -33,9 +34,9 @@ export class Timing {
 		return false;
 	}
 	
-	isFullyPossible() {
+	isFullyPossible(costIndex) {
 		for (let action of this.actions) {
-			if (!action.isFullyPossible()) {
+			if (action.costIndex == costIndex && !action.isFullyPossible()) {
 				return false;
 			}
 		}
@@ -43,21 +44,33 @@ export class Timing {
 	}
 	
 	// returns whether or not the timing completed sucessfully
-	async* run(asCost = false) {
+	async* run() {
 		this.index = game.nextTimingIndex;
+
+		for (let action of this.actions) {
+			if (action.costIndex >= this.costCompletions.length) {
+				this.costCompletions.push(true);
+			}
+		}
+
 		while (yield* this.substitute()) {}
 		
-		if (asCost) {
-			// empty cost counts as successful completion
+		if (this.costCompletions.length > 0) {
+			// empty costs count as successful completion
 			if (this.actions.length == 0) {
 				game.nextTimingIndex++;
 				return true;
 			}
-			if (!this.isFullyPossible()) {
-				return false;
+			for (let i = 0; i < this.costCompletions.length; i++) {
+				this.costCompletions[i] = this.isFullyPossible(i);
+			}
+			for (let i = this.actions.length - 1; i >= 0; i--) {
+				if (!this.costCompletions[this.actions[i].costIndex]) {
+					this.actions.splice(i, 1);
+				}
 			}
 		}
-		// regular, non-cost empty timings are not successful, they interrupt their block.
+		// empty timings are not successful, they interrupt their block or indicate that paying all costs failed.
 		if (this.actions.length == 0) {
 			return false;
 		}

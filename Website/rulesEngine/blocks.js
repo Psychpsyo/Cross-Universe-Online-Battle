@@ -21,12 +21,12 @@ class Block {
 		this.timingGenerator = timingGenerator;
 		this.executionTimings = [];
 	}
-	
+
 	async* runCost() {
 		if (this.costTimingGenerator == null) {
 			return true;
 		}
-		
+
 		let generatorOutput = await this.costTimingGenerator.next();
 		while (true) {
 			let actionList = generatorOutput.value;
@@ -35,10 +35,14 @@ class Block {
 				generatorOutput = await this.costTimingGenerator.next(yield actionList);
 				continue;
 			}
+			for (let action of actionList) {
+				action.costIndex = 0;
+			}
 			this.costTiming = new Timing(this.stack.phase.turn.game, actionList, this);
 			break;
 		}
-		return yield* this.costTiming.run(true);
+
+		return (await (yield* this.costTiming.run()));
 	}
 	
 	async* run() {
@@ -84,13 +88,14 @@ export class StandardDraw extends Block {
 export class StandardSummon extends Block {
 	constructor(stack, player, unit, unitZoneIndex) {
 		super(stack, player,
-		arrayTimingGenerator([
-			[new actions.Summon(player, unit, unitZoneIndex)]
-		]),
-		arrayTimingGenerator([[
-			new actions.ChangeMana(player, -unit.level.get()),
-			new actions.Place(player, unit, player.unitZone, unitZoneIndex)
-		]]));
+			arrayTimingGenerator([
+				[new actions.Summon(player, unit, player.unitZone, unitZoneIndex)]
+			]),
+			arrayTimingGenerator([[
+				new actions.ChangeMana(player, -unit.level.get()),
+				new actions.Place(player, unit, player.unitZone, unitZoneIndex)
+			]]
+		));
 		this.unit = unit;
 		this.unitZoneIndex = unitZoneIndex;
 	}
@@ -212,12 +217,12 @@ async function* abilityTimingGenerator(ability, card, player) {
 }
 
 async function* abilityCostTimingGenerator(ability, card, player) {
-	await (yield* ability.runCost(card, player));
+	yield* ability.runCost(card, player);
 }
 
 export class AbilityActivation extends Block {
 	constructor(stack, player, card, ability) {
-		super(stack, player, abilityTimingGenerator(ability, card, player), abilityCostTimingGenerator(ability, card, player));
+		super(stack, player, abilityTimingGenerator(ability, card, player), ability.cost? abilityCostTimingGenerator(ability, card, player) : null);
 		this.ability = ability;
 	}
 

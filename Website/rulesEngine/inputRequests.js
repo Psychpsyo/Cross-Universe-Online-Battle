@@ -169,3 +169,21 @@ export const activateOptionalAbility = {
 		return request.eligibleAbilities[response];
 	}
 }
+
+export const chooseZoneSlot = {
+	create: function(player, zone, eligibleSlots) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "chooseZoneSlot",
+			"zone": zone,
+			"eligibleSlots": eligibleSlots
+		}
+	},
+	validate: function(response, request) {
+		if (response < 0 || response >= request.eligibleSlots.length) {
+			throw new Error("Supplied out-of-range zone slot index.");
+		}
+		return request.eligibleSlots[response];
+	}
+}

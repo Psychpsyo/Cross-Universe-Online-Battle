@@ -2,7 +2,7 @@ id: CUU00210
 cardType: unit
 name: CUU00210
 level: 0
-types: Electric Machine
+types: Electric, Machine
 attack: 0
 defense: 0
 o: optional
