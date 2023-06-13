@@ -4,6 +4,7 @@ import {createStackCreatedEvent, createManaChangedEvent} from "./events.js";
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
+import * as abilities from "./abilities.js";
 
 // Base class for all phases
 class Phase {
@@ -146,6 +147,7 @@ export class MainPhase extends StackPhase {
 	getBlockOptions(stack) {
 		let options = super.getBlockOptions(stack);
 		if (stack.canDoNormalActions()) {
+			// turn actions
 			if (this.turn.hasStandardSummoned === null) {
 				options.push(requests.doStandardSummon.create(this.turn.player));
 			}
@@ -168,6 +170,21 @@ export class MainPhase extends StackPhase {
 				}
 				options.push(requests.doRetire.create(this.turn.player, eligibleUnits));
 			}
+
+			// optional abilities
+			let eligibleAbilities = [];
+			for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards, this.turn.player.spellItemZone.cards)) {
+				if (!card) {
+					continue;
+				}
+				let cardAbilities = card.abilities.get();
+				for (let i = 0; i < cardAbilities.length; i++) {
+					if (cardAbilities[i] instanceof abilities.OptionalAbility && cardAbilities[i].activationCount < cardAbilities[i].turnLimit) {
+						eligibleAbilities.push({card: card, index: i});
+					}
+				}
+			}
+			options.push(requests.activateOptionalAbility.create(this.turn.player, eligibleAbilities));
 		}
 		return options;
 	}

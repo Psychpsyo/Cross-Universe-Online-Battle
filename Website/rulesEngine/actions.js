@@ -213,3 +213,25 @@ export class Destroy extends Action {
 		return false;
 	}
 }
+
+export class Exile extends Action {
+	constructor(card) {
+		super();
+		this.card = card;
+	}
+	
+	* run() {
+		this.card = this.card.snapshot();
+		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone);
+		this.card.owner.exileZone.add(this.card.cardRef, this.card.owner.exileZone.cards.length);
+		this.card.cardRef.hidden = false;
+		return event;
+	}
+	
+	isImpossible() {
+		if (this.card.zone.type == "partner") {
+			return true;
+		}
+		return false;
+	}
+}

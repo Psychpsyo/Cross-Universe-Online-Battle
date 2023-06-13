@@ -81,7 +81,10 @@ export async function previewCard(card, specific = true) {
 
 	// set the text preview
 	// general info
-	cardDetailsName.textContent = card.names.get().map(async (name) => (await getCardInfo(name)).name).join("/");
+	let names = card.names.get().map(async (name) => (await getCardInfo(name)).name);
+	Promise.allSettled(names).then(names => {
+		cardDetailsName.textContent = names.map(name => name.value).join("/");
+	});
 	let cardTypes = [...card.cardTypes.get()];
 	if (cardTypes.includes("token")) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);

@@ -13,17 +13,30 @@ async function* arrayTimingGenerator(actionArrays) {
 
 // Base class for all blocks
 class Block {
-	constructor(stack, player, timingGenerator) {
+	constructor(stack, player, timingGenerator, costTimingGenerator = null) {
 		this.player = player;
 		this.stack = stack;
+		this.costTimingGenerator = costTimingGenerator;
 		this.costTiming = null;
 		this.timingGenerator = timingGenerator;
 		this.executionTimings = [];
 	}
 	
 	async* runCost() {
-		if (this.costTiming == null) {
+		if (this.costTimingGenerator == null) {
 			return true;
+		}
+		
+		let generatorOutput = await this.costTimingGenerator.next();
+		while (true) {
+			let actionList = generatorOutput.value;
+			// Needs to first check for updates (events or requests) returned by the timing generator.
+			if (actionList.length == 0 || !(actionList[0] instanceof actions.Action)) {
+				generatorOutput = await this.costTimingGenerator.next(yield actionList);
+				continue;
+			}
+			this.costTiming = new Timing(this.stack.phase.turn.game, actionList, this);
+			break;
 		}
 		return yield* this.costTiming.run(true);
 	}
@@ -34,8 +47,7 @@ class Block {
 			let actionList = generatorOutput.value;
 			// Needs to first check for updates (events or requests) returned by the timing generator.
 			if (actionList.length == 0 || !(actionList[0] instanceof actions.Action)) {
-				yield actionList;
-				generatorOutput = await this.timingGenerator.next();
+				generatorOutput = await this.timingGenerator.next(yield actionList);
 				continue;
 			}
 			let timing = new Timing(this.stack.phase.turn.game, actionList, this);
@@ -71,19 +83,16 @@ export class StandardDraw extends Block {
 
 export class StandardSummon extends Block {
 	constructor(stack, player, unit, unitZoneIndex) {
-		super(stack, player, arrayTimingGenerator([
+		super(stack, player,
+		arrayTimingGenerator([
 			[new actions.Summon(player, unit, unitZoneIndex)]
-		]));
+		]),
+		arrayTimingGenerator([[
+			new actions.ChangeMana(player, -unit.level.get()),
+			new actions.Place(player, unit, player.unitZone, unitZoneIndex)
+		]]));
 		this.unit = unit;
 		this.unitZoneIndex = unitZoneIndex;
-		this.costTiming = new Timing(
-			stack.phase.turn.game,
-			[
-				new actions.ChangeMana(player, -unit.level.get()),
-				new actions.Place(player, unit, player.unitZone, unitZoneIndex)
-			],
-			this
-		)
 	}
 	
 	async* runCost() {
@@ -195,5 +204,28 @@ async function* fightTimingGenerator(attackDeclaration) {
 export class Fight extends Block {
 	constructor(stack, player) {
 		super(stack, player, fightTimingGenerator(stack.phase.turn.game.currentAttackDeclaration));
+	}
+}
+
+async function* abilityTimingGenerator(ability, card, player) {
+	yield* ability.run(card, player);
+}
+
+async function* abilityCostTimingGenerator(ability, card, player) {
+	await (yield* ability.runCost(card, player));
+}
+
+export class AbilityActivation extends Block {
+	constructor(stack, player, card, ability) {
+		super(stack, player, abilityTimingGenerator(ability, card, player), abilityCostTimingGenerator(ability, card, player));
+		this.ability = ability;
+	}
+
+	async* runCost() {
+		let success = await (yield* super.runCost());
+		if (success) {
+			this.ability.activationCount++;
+		}
+		return success;
 	}
 }

@@ -135,6 +135,12 @@
 				"dropCancel": "Abbrechen"
 			},
 
+			"cardOptions": {
+				"attack": "Angreifen",
+				"activate": "Aktivieren",
+				"activateMultiple": "Aktiviere #{#ABILITY}"
+			},
+
 			"gameOver": {
 				"youWon": "Gewonnen!",
 				"youLost": "Verloren!",

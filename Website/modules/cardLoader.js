@@ -40,6 +40,9 @@ defense:${cardData.defense ?? 0}`
 export async function getCdf(cardId) {
 	if (!cdfCache[cardId]) {
 		const response = await fetch("/rulesEngine/cards/CU" + cardId + ".cdf", {cache: "force-cache"});
+		if (!response.ok) {
+			throw new Error("Card " + cardId + " is currently unsupported in automatic matches.");
+		}
 		cdfCache[cardId] = await response.text();
 	}
 	return cdfCache[cardId];

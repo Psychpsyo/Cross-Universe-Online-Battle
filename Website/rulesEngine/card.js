@@ -1,9 +1,10 @@
 // This module exports the Card class which represents a specific card in a Game.
 
 import {CardValue, SnapshotValue} from "./cardValue.js";
+import * as abilities from "./abilities.js";
 
 class BaseCard {
-	constructor(player, cardId, hidden, cardTypes, names, level, types, attack, defense) {
+	constructor(player, cardId, hidden, cardTypes, names, level, types, attack, defense, abilities) {
 		this.owner = player;
 		this.cardId = cardId;
 		this.hidden = hidden;
@@ -14,6 +15,7 @@ class BaseCard {
 		this.types = types;
 		this.attack = attack;
 		this.defense = defense;
+		this.abilities = abilities;
 		
 		this.zone = null;
 		this.index = -1;
@@ -59,12 +61,22 @@ export class Card extends BaseCard {
 			new CardValue(data.level ?? 0),
 			new CardValue(data.types ?? []),
 			new CardValue(data.attack ?? 0),
-			new CardValue(data.defense ?? 0)
+			new CardValue(data.defense ?? 0),
+			new CardValue(data.abilities.map(makeAbility))
 		);
 	}
 
 	snapshot() {
 		return new SnapshotCard(this);
+	}
+
+	endOfTurnReset() {
+		this.attackCount = 0;
+		for (ability of this.abilities) {
+			if (ability instanceof abilities.OptionalAbility || ability instanceof abilities.FastAbility || ability instanceof abilities.TriggerAbility) {
+				ability.activationCount = 0;
+			}
+		}
 	}
 }
 
@@ -77,7 +89,8 @@ class SnapshotCard extends BaseCard {
 			new SnapshotValue(card.level.get(), card.level.getBase()),
 			new SnapshotValue(card.types.get(), card.types.getBase()),
 			new SnapshotValue(card.attack.get(), card.attack.getBase()),
-			new SnapshotValue(card.defense.get(), card.defense.getBase())
+			new SnapshotValue(card.defense.get(), card.defense.getBase()),
+			new SnapshotValue(card.abilities.get(), card.abilities.getBase())
 		);
 
 		this.zone = card.zone;
@@ -89,48 +102,93 @@ class SnapshotCard extends BaseCard {
 
 function parseCdfValues(cdf) {
 	let data = {
-		effects: []
+		abilities: []
 	};
-	let lines = cdf.split("\n");
-	let inEffect = false;
+	let lines = cdf.replaceAll("\r", "").split("\n");
+	let inAbility = false;
+	let abilitySection = "";
 	for (let line of lines) {
-		let parts = line.trim().split(/:(.*)/);
-		if (inEffect && parts[0] != "o") {
-			data.effects[data.effects.length - 1] += line;
+		let parts = line.split(/:(.*)/).map(part => part.trim());
+		if (inAbility && parts[0] != "o") {
+			let ability = data.abilities[data.abilities.length - 1];
+			switch (parts[0]) {
+				case "turnLimit": {
+					ability.turnLimit = parseInt(parts[1]);
+					break;
+				}
+				case "mandatory": {
+					if (ability.type != "trigger") {
+						throw new Error("CDF Parser Error: Only trigger abilities can be mandatory.");
+					}
+					if (!["yes", "no"].includes(parts[1])) {
+						throw new Error("CDF Parser Error: 'mandatory' must be either 'yes' or 'no'.");
+					}
+					ability.mandatory = parts[1] == "yes";
+					break;
+				}
+				case "cost": {
+					abilitySection = "cost";
+					ability.cost = "";
+					break;
+				}
+				case "exec": {
+					abilitySection = "exec";
+					ability.exec = "";
+					break;
+				}
+				default: {
+					if (ability[abilitySection].length > 0) {
+						ability[abilitySection] += "\n";
+					}
+					ability[abilitySection] += line;
+				}
+			}
 			continue;
 		}
 		switch(parts[0]) {
 			case "id": {
-				data.id = parts[1].trim().substring(2);
+				data.id = parts[1].substring(2);
 				break;
 			}
 			case "cardType": {
-				data.cardType = parts[1].trim();
+				if (!["unit", "standardSpell", "continuousSpell", "enchantSpell", "standardItem", "continuousItem", "equipableItem"].includes(parts[1])) {
+					throw new Error("CDF Parser Error: " + parts[0] + " is an invalid card type.");
+				}
+				data.cardType = parts[1];
 				break;
 			}
 			case "name": {
-				data.name = parts[1].trim().substring(2);
+				data.name = parts[1].substring(2);
 				break;
 			}
 			case "level": {
-				data.level = parseInt(parts[1].trim());
+				data.level = parseInt(parts[1]);
 				break;
 			}
 			case "types": {
-				data.types = parts[1].split(",").map(type => type.trim());
+				data.types = parts[1].split(",").map(type => type);
 				break;
 			}
 			case "attack": {
-				data.attack = parseInt(parts[1].trim());
+				data.attack = parseInt(parts[1]);
 				break;
 			}
 			case "defense": {
-				data.defense = parseInt(parts[1].trim());
+				data.defense = parseInt(parts[1]);
 				break;
 			}
 			case "o": {
-				data.effects.push(parts[1]);
-				inEffect = true;
+				if (!["cast", "deploy", "optional", "fast", "trigger", "static"].includes(parts[1])) {
+					throw new Error("CDF Parser Error: " + parts[0] + " is an invalid ability type.");
+				}
+				data.abilities.push({
+					id: data.id + ":" + data.abilities.length,
+					type: parts[1],
+					turnLimit: Infinity,
+					exec: ""
+				});
+				inAbility = true;
+				abilitySection = "exec";
 				break;
 			}
 			default: {
@@ -139,4 +197,27 @@ function parseCdfValues(cdf) {
 		}
 	}
 	return data;
+}
+
+function makeAbility(ability) {
+	switch (ability.type) {
+		case "cast": {
+			return new abilities.CastAbility(ability.id, ability.exec, ability.cost);
+		}
+		case "deploy": {
+			return new abilities.DeployAbility(ability.id, ability.exec, ability.cost);
+		}
+		case "optional": {
+			return new abilities.OptionalAbility(ability.id, ability.exec, ability.cost, ability.turnLimit);
+		}
+		case "fast": {
+			return new abilities.FastAbility(ability.id, ability.exec, ability.cost, ability.turnLimit);
+		}
+		case "trigger": {
+			return new abilities.TriggerAbility(ability.id, ability.exec, ability.cost, ability.mandatory, ability.turnLimit);
+		}
+		case "static": {
+			return new abilities.StaticAbility(ability.id, ability.exec);
+		}
+	}
 }

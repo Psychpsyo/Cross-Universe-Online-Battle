@@ -113,7 +113,7 @@
 				"hide": "Hide"
 			}
 		},
-		
+
 		"automatic": {
 			"phases": {
 				"manaSupplyPhase": "Mana Supply\nPhase",
@@ -123,16 +123,22 @@
 				"secondMainPhase": "Main\nPhase 2",
 				"endPhase": "End\nPhase"
 			},
-			
+
 			"battlePhase": {
 				"question": "Do you want to enter the battle phase?",
 				"enter": "Enter Battle Phase",
 				"skip": "Skip Battle Phase"
 			},
-			
+
 			"retire": {
 				"dropRetire": "Retire (x{#AMOUNT})",
 				"dropCancel": "Cancel"
+			},
+
+			"cardOptions": {
+				"attack": "Attack",
+				"activate": "Activate",
+				"activateMultiple": "Activate #{#ABILITY}"
 			},
 
 			"gameOver": {

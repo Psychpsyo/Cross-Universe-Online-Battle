@@ -359,7 +359,7 @@ export class AutomaticController extends InteractionController {
 					this.unitAttackButtons.push(gameUI.addFieldButton(
 						request.eligibleUnits[i].zone,
 						request.eligibleUnits[i].index,
-						"Attack",
+						locale.game.automatic.cardOptions.attack,
 						"attackDeclaration",
 						function() {
 							this.toggleAttacker(i);
@@ -408,6 +408,35 @@ export class AutomaticController extends InteractionController {
 			}
 			case "enterBattlePhase": {
 				response.value = await gameUI.askQuestion(locale.game.automatic.battlePhase.question, locale.game.automatic.battlePhase.enter, locale.game.automatic.battlePhase.skip);
+				break;
+			}
+			case "activateOptionalAbility": {
+				let activated = await new Promise((resolve, reject) => {
+					for (let i = 0; i < request.eligibleAbilities.length; i++) {
+						gameUI.addFieldButton(
+							request.eligibleAbilities[i].card.zone,
+							request.eligibleAbilities[i].card.index,
+							locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].index + 1),
+							"activateOptional",
+							function() {
+								resolve(i);
+							}
+						)
+					}
+					this.madeMoveTarget.addEventListener("move", function() {
+						for (let ability of request.eligibleAbilities) {
+							gameUI.clearFieldButtons(ability.card.zone, ability.card.index, "activateOptional");
+						}
+						reject();
+					}, {once: true});
+				}).then(
+					index => {return index},
+					() => {return null}
+				);
+				if (activated === null) {
+					return;
+				}
+				response.value = activated;
 				break;
 			}
 		}

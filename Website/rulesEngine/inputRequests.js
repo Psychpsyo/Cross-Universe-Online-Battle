@@ -152,3 +152,20 @@ export const doRetire = {
 		return response.map(cardIndex => request.eligibleUnits[cardIndex]);
 	}
 }
+
+export const activateOptionalAbility = {
+	create: function(player, eligibleAbilities) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "activateOptionalAbility",
+			"eligibleAbilities": eligibleAbilities
+		}
+	},
+	validate: function(response, request) {
+		if (response < 0 || response >= request.eligibleAbilities.length) {
+			throw new Error("Supplied out-of-range ability index for activating an optional ability.");
+		}
+		return request.eligibleAbilities[response];
+	}
+}

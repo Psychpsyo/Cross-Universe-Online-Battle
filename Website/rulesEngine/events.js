@@ -205,3 +205,12 @@ export function createCardDestroyedEvent(fromZone, fromIndex, toZone) {
 	}
 }
 
+export function createCardExiledEvent(fromZone, fromIndex, toZone) {
+	return {
+		"nature": "event",
+		"type": "cardExiled",
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone
+	}
+}

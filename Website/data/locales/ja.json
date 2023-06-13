@@ -135,6 +135,12 @@
 				"dropCancel": "キャンセル"
 			},
 
+			"cardOptions": {
+				"attack": null,
+				"activate": null,
+				"activateMultiple": null
+			},
+
 			"gameOver": {
 				"youWon": null,
 				"youLost": null,

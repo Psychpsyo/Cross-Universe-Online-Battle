@@ -222,6 +222,14 @@ export class DeckState extends GameState {
 	}
 
 	async loadDeck(deck) {
+		try {
+			localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
+		} catch (e) {
+			console.error(e, e.stack);
+			alert("Failed to load deck.");
+			return;
+		}
+
 		// deck selection elements aren't needed anymore.
 		deckDropzone.remove();
 		deckSelector.remove();
@@ -230,7 +238,7 @@ export class DeckState extends GameState {
 		socket.send("[deck]" + JSON.stringify(deck));
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
 		localPlayer.deck = deck;
-		localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
+
 		gameUI.updateCard(localPlayer.deckZone, -1);
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
 
