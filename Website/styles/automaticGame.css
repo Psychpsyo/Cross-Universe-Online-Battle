@@ -1,17 +1,19 @@
+/* card animations*/
+
 @keyframes yourAttack {
 	from {transform: translate3d(-50%, -50%, 0);}
-	to {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% - var(--atk-distance) * 100%), 20vh)}
+	to   {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% - var(--atk-distance) * 100%), 20vh);}
 }
 @keyframes opponentAttack {
 	from {transform: translate3d(-50%, -50%, 0) rotate(180deg);}
-	to {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% + var(--atk-distance) * 100%), 20vh) rotate(180deg)}
+	to   {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% + var(--atk-distance) * 100%), 20vh) rotate(180deg);}
 }
 
 .attacking {
 	z-index: 100;
 }
 .attacking .card {
-	animation-duration: calc(.2s * var(--game-speed));
+	animation-duration: calc(.5s * var(--game-speed));
 	animation-iteration-count: 2;
 	animation-direction: alternate;
 	animation-timing-function: ease-in-out;
@@ -23,6 +25,36 @@
 	animation-name: yourAttack;
 }
 
+@keyframes yourActivation {
+	0%   {transform: translate3d(-50%, -50%, 0);}
+	85%  {transform: translate3d(-50%, -50%, 40vh);}
+	100% {transform: translate3d(-50%, -50%, 40vh);}
+}
+@keyframes opponentActivation {
+	0%   {transform: translate3d(-50%, -50%, 0) rotate(180deg);}
+	85%  {transform: translate3d(-50%, -50%, 40vh) rotate(180deg);}
+	100% {transform: translate3d(-50%, -50%, 40vh) rotate(180deg);}
+}
+
+.activating {
+	z-index: 100;
+}
+
+.activating .card {
+	animation-duration: calc(.5s * var(--game-speed));
+	animation-iteration-count: 2;
+	animation-direction: alternate;
+	animation-timing-function: ease-in-out;
+}
+#p0Grid .activating .card {
+	animation-name: opponentActivation;
+}
+#p1Grid .activating .card {
+	animation-name: yourActivation;
+}
+
+
+/* general UI stuff */
 #phaseDisplay {
 	position: absolute;
 	top: 50%;

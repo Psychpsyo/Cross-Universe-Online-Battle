@@ -268,6 +268,11 @@ export class AutomaticController extends InteractionController {
 				autoUI.setAttackTarget(event.target);
 				return autoUI.attack(event.attackers);
 			}
+			case "blockCreated": {
+				if (event.block instanceof blocks.AbilityActivation) {
+					return autoUI.activate(event.block.card);
+				}
+			}
 		}
 	}
 	

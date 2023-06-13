@@ -223,6 +223,7 @@ async function* abilityCostTimingGenerator(ability, card, player) {
 export class AbilityActivation extends Block {
 	constructor(stack, player, card, ability) {
 		super(stack, player, abilityTimingGenerator(ability, card, player), ability.cost? abilityCostTimingGenerator(ability, card, player) : null);
+		this.card = card;
 		this.ability = ability;
 	}
 

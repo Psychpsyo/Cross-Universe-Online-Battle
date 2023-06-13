@@ -173,9 +173,18 @@ export async function attack(units) {
 		slot.classList.add("attacking");
 		window.setTimeout(function() {
 			slot.classList.remove("attacking");
-		}, 500);
-		animPromises.push(new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 500)));
+		}, gameState.controller.gameSpeed * 400);
+		animPromises.push(new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 400)));
 		await gameState.controller.gameSleep(.3);
 	}
 	return Promise.all(animPromises);
+}
+
+export async function activate(card) {
+	let slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
+	slot.classList.add("activating");
+	window.setTimeout(function() {
+		slot.classList.remove("activating");
+	}, gameState.controller.gameSpeed * 1000);
+	return new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1000));
 }
