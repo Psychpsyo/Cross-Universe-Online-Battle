@@ -55,9 +55,6 @@ export class ChangeLife extends Action {
 		return events.createLifeChangedEvent(this.player);
 	}
 	
-	isImpossible() {
-		return this.amount < 0;
-	}
 	isFullyPossible() {
 		return this.player.life + this.amount >= 0;
 	}

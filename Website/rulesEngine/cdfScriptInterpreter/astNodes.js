@@ -53,6 +53,7 @@ export class FunctionNode extends AstNode {
 			}
 			case "LIFE": {
 				yield [new actions.ChangeLife(player, await (yield* this.parameters[0].eval(card, player)))];
+				return;
 			}
 			case "MANA": {
 				yield [new actions.ChangeMana(player, await (yield* this.parameters[0].eval(card, player)))];
