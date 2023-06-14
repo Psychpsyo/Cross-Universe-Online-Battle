@@ -175,6 +175,30 @@ export function createCardSummonedEvent(player, fromZone, fromIndex, toZone, toI
 	}
 }
 
+export function createCardDeployedEvent(player, fromZone, fromIndex, toZone, toIndex) {
+	return {
+		"nature": "event",
+		"type": "cardDeployed",
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"toIndex": toIndex
+	}
+}
+
+export function createCardCastEvent(player, fromZone, fromIndex, toZone, toIndex) {
+	return {
+		"nature": "event",
+		"type": "cardCast",
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"toIndex": toIndex
+	}
+}
+
 export function createAttackDeclarationEstablishedEvent(player, targetZone, targetIndex) {
 	return {
 		"nature": "event",

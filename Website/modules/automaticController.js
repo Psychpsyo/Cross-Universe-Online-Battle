@@ -256,6 +256,8 @@ export class AutomaticController extends InteractionController {
 				}
 				return this.gameSleep();
 			}
+			case "cardCast":
+			case "cardDeployed":
 			case "cardSummoned": {
 				gameUI.insertCard(event.toZone, event.toIndex);
 				if (event.fromZone) {

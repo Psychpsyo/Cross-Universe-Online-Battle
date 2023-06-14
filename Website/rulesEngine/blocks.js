@@ -264,7 +264,7 @@ export class DeployItem extends Block {
 			new actions.Place(player, item, player.spellItemZone, spellItemZoneIndex)
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Deploy(player, item, player.spellItemZone, spellItemZoneIndex)]]),
+			arrayTimingGenerator([[new actions.Deploy(player, item, player.spellItemZone, spellItemZoneIndex)]])
 		];
 		for (let ability of item.abilities.get()) {
 			if (ability instanceof abilities.DeployAbility) {
@@ -273,7 +273,7 @@ export class DeployItem extends Block {
 				}
 				if (item.cardTypes.get().includes("standardItem")) {
 					// standard items first activate and are only treated as briefly on the field after
-					execTimingGenerators.shift(abilityTimingGenerator(ability, item, player));
+					execTimingGenerators.unshift(abilityTimingGenerator(ability, item, player));
 					// and are then discarded.
 					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(item)]]));
 				} else {
@@ -308,7 +308,7 @@ export class CastSpell extends Block {
 			new actions.Place(player, spell, player.spellItemZone, spellItemZoneIndex)
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Cast(player, spell, player.spellItemZone, spellItemZoneIndex)]]),
+			arrayTimingGenerator([[new actions.Cast(player, spell, player.spellItemZone, spellItemZoneIndex)]])
 		];
 		for (let ability of spell.abilities.get()) {
 			if (ability instanceof abilities.CastAbility) {
@@ -317,7 +317,7 @@ export class CastSpell extends Block {
 				}
 				if (spell.cardTypes.get().includes("standardSpell")) {
 					// standard spells first activate and are only treated as briefly on the field after
-					execTimingGenerators.shift(abilityTimingGenerator(ability, spell, player));
+					execTimingGenerators.unshift(abilityTimingGenerator(ability, spell, player));
 					// and are then discarded.
 					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(spell)]]));
 				} else {
