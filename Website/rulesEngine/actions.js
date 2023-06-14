@@ -243,7 +243,7 @@ export class Discard extends Action {
 		let event = events.createCardDiscardedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
 		this.card.cardRef.hidden = false;
-		if (this.timing?.block.type == "retire") {
+		if (this.timing.block?.type == "retire") {
 			this.timing.block.stack.phase.turn.hasRetired.push(this.card);
 		}
 		return event;

@@ -149,7 +149,8 @@ export class FunctionNode extends AstNode {
 				let defense = await (yield* this.parameters[6].eval(card, player, ability));
 				let cards = [];
 				for (let i = 0; i < amount; i++) {
-					let cardId = await (yield* this.parameters[1].eval(card, player, ability));
+					// TODO: Give player control over the specific token variant that gets selected
+					let cardId = (await (yield* this.parameters[1].eval(card, player, ability)))[0];
 					cards.push(new Card(player, `id: ${cardId}
 cardType: token
 name: ${name}
@@ -278,7 +279,7 @@ export class BoolNode extends AstNode {
 	}
 }
 
-export class CardIdNode extends AstNode {
+export class CardIDsNode extends AstNode {
 	constructor(value) {
 		super();
 		this.value = value;

@@ -95,6 +95,9 @@ function parseParameter() {
 				case "type": {
 					return parseTypeList();
 				}
+				case "cardId": {
+					return parseCardIdList();
+				}
 			}
 			throw new Error("CDF Script Parser Error: Reached unwanted '" + tokens[pos].type + "' token inside list syntax.");
 		}
@@ -135,7 +138,7 @@ function parseBool() {
 }
 
 function parseCardId() {
-	let node = new ast.CardIdNode(tokens[pos].value);
+	let node = new ast.CardIDsNode([tokens[pos].value]);
 	pos++;
 	return node;
 }
@@ -166,6 +169,22 @@ function parseTypeList() {
 	}
 	pos++;
 	return new ast.TypesNode(types);
+}
+
+function parseCardIdList() {
+	let cardIDs = [];
+	while (tokens[pos].type == "cardId") {
+		cardIDs.push(tokens[pos].value);
+		pos++;
+		if (tokens[pos].type == "separator") {
+			pos++;
+		}
+	}
+	if (tokens[pos].type != "rightParen") {
+		throw new Error("CDF Script Parser Error: Expected a 'rightParen' at the end of a card ID list. Got '" + tokens[pos].type + "' instead.");
+	}
+	pos++;
+	return new ast.CardIDsNode(cardIDs);
 }
 
 function parseZone() {
