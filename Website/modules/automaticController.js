@@ -217,10 +217,14 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "blockCreationAborted": {
-				if (event.block instanceof blocks.StandardSummon) {
+				if (event.block instanceof blocks.StandardSummon ||
+					event.block instanceof blocks.DeployItem ||
+					event.block instanceof blocks.CastSpell
+				) {
 					gameUI.clearDragSource(event.block.unit.zone, event.block.unit.index, event.block.player);
 					return;
 				}
+				return;
 			}
 			case "playerLost": {
 				await autoUI.playerLost(event.player);
@@ -294,10 +298,11 @@ export class AutomaticController extends InteractionController {
 				if (event.block instanceof blocks.AbilityActivation) {
 					return autoUI.activate(event.block.card);
 				}
+				return;
 			}
 		}
 	}
-	
+
 	async presentInputRequest(request) {
 		switch (request.type) {
 			case "doStandardSummon": {
@@ -319,11 +324,12 @@ export class AutomaticController extends InteractionController {
 		}
 
 		if (request.player != localPlayer) {
-			// If this is directed at not the local player, we might need to wait for an opponent input.
+			// If this is not directed at the local player, we might need to wait for an opponent input.
 			// Only the first input request is allowed to take this, all others can and must reject since the engine wants only one action per player per request.
 			return new Promise((resolve, reject) => {
 				if (this.waitingForOpponentInput) {
 					reject("Already looking for an opponent input at this time.");
+					return;
 				}
 				this.waitingForOpponentInput = true;
 				if (this.opponentMoves.length > 0) {

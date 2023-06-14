@@ -42,8 +42,8 @@ class Block {
 			this.costTiming = new Timing(this.stack.phase.turn.game, actionList, this);
 			break;
 		}
-
-		return (await (yield* this.costTiming.run()));
+		yield* this.costTiming.run();
+		return this.costTiming.successful;
 	}
 	
 	async* run() {
@@ -56,10 +56,10 @@ class Block {
 				continue;
 			}
 			let timing = new Timing(this.stack.phase.turn.game, actionList, this);
-			if (!(yield* timing.run())) {
-				break;
+			yield* timing.run();
+			if (timing.successful) {
+				this.executionTimings.push(timing);
 			}
-			this.executionTimings.push(timing);
 			generatorOutput = await this.timingGenerator.next(timing);
 		}
 	}
@@ -93,8 +93,8 @@ export class StandardSummon extends Block {
 				[new actions.Summon(player, unit, player.unitZone, unitZoneIndex)]
 			]),
 			arrayTimingGenerator([[
-				new actions.ChangeMana(player, -unit.level.get()),
-				new actions.Place(player, unit, player.unitZone, unitZoneIndex)
+				new actions.Place(player, unit, player.unitZone, unitZoneIndex),
+				new actions.ChangeMana(player, -unit.level.get())
 			]]
 		));
 		this.unit = unit;
@@ -102,8 +102,10 @@ export class StandardSummon extends Block {
 	}
 	
 	async* runCost() {
+		this.unit.zone.remove(this.unit);
 		let paid = await (yield* super.runCost());
 		if (!paid) {
+			this.unit.zone.add(this.unit, this.unit.index);
 			return false;
 		}
 		this.unit = this.unit.snapshot();
@@ -214,7 +216,15 @@ export class Fight extends Block {
 }
 
 async function* abilityTimingGenerator(ability, card, player) {
-	yield* ability.run(card, player);
+	let timingGenerator = ability.run(card, player);
+	let timing;
+	let actionList;
+	do {
+		actionList = (await timingGenerator.next(timing));
+		if (!actionList.done) {
+			timing = yield actionList.value;
+		}
+	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));
 }
 
 async function* abilityCostTimingGenerator(ability, card, player) {
@@ -246,12 +256,13 @@ async function* combinedTimingGenerator() {
 async function* combinedCostTimingGenerator() {
 	let completeCost = [];
 	for (let timingGenerator of arguments) {
-		for await (let actionList of timingGenerator) {
+		let actionList = (await timingGenerator.next()).value;
+		while (true) {
 			if (actionList[0] instanceof actions.Action) {
 				completeCost = completeCost.concat(actionList);
 				break;
 			}
-			yield actionList;
+			actionList = (await timingGenerator.next(yield actionList)).value;
 		}
 	}
 	yield completeCost;
@@ -260,8 +271,8 @@ async function* combinedCostTimingGenerator() {
 export class DeployItem extends Block {
 	constructor(stack, player, item, spellItemZoneIndex) {
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.ChangeMana(player, -item.level.get()),
-			new actions.Place(player, item, player.spellItemZone, spellItemZoneIndex)
+			new actions.Place(player, item, player.spellItemZone, spellItemZoneIndex),
+			new actions.ChangeMana(player, -item.level.get())
 		]])];
 		let execTimingGenerators = [
 			arrayTimingGenerator([[new actions.Deploy(player, item, player.spellItemZone, spellItemZoneIndex)]])
@@ -292,8 +303,10 @@ export class DeployItem extends Block {
 	}
 	
 	async* runCost() {
+		this.item.zone.remove(this.item);
 		let paid = await (yield* super.runCost());
 		if (!paid) {
+			this.item.zone.add(this.spell, this.item.index);
 			return false;
 		}
 		this.item = this.item.snapshot();
@@ -304,8 +317,8 @@ export class DeployItem extends Block {
 export class CastSpell extends Block {
 	constructor(stack, player, spell, spellItemZoneIndex) {
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.ChangeMana(player, -spell.level.get()),
-			new actions.Place(player, spell, player.spellItemZone, spellItemZoneIndex)
+			new actions.Place(player, spell, player.spellItemZone, spellItemZoneIndex),
+			new actions.ChangeMana(player, -spell.level.get())
 		]])];
 		let execTimingGenerators = [
 			arrayTimingGenerator([[new actions.Cast(player, spell, player.spellItemZone, spellItemZoneIndex)]])
@@ -336,8 +349,10 @@ export class CastSpell extends Block {
 	}
 	
 	async* runCost() {
+		this.spell.zone.remove(this.spell);
 		let paid = await (yield* super.runCost());
 		if (!paid) {
+			this.spell.zone.add(this.spell, this.spell.index);
 			return false;
 		}
 		this.spell = this.spell.snapshot();

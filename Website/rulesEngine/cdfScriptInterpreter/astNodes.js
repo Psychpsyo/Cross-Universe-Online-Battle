@@ -103,11 +103,16 @@ export class FunctionNode extends AstNode {
 						costs.push(manaCost);
 					}
 				}
+				for (card of cards) {
+					card.zone?.remove(card);
+				}
 				let timing = yield costs;
 				let summons = [];
 				for (let i = 0; i < timing.costCompletions.length; i++) {
 					if (timing.costCompletions[i]) {
 						summons.push(new actions.Summon(player, cards[i], zone, targetSlots[i]));
+					} else {
+						cards[i].zone?.add(cards[i], cards[i].index);
 					}
 				}
 				yield summons;
@@ -152,6 +157,9 @@ export class CardMatchNode extends AstNode {
 		}
 		for (let zone of zones) {
 			for (let checkCard of zone.cards) {
+				if (checkCard == null) {
+					continue;
+				}
 				for (let cardType of this.cardTypes) {
 					if (cardType == "card" || checkCard.cardTypes.get().includes(cardType)) {
 						cards.push(checkCard);

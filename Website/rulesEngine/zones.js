@@ -125,7 +125,6 @@ export class FieldZone extends Zone {
 		if (this.get(index) == null) {
 			this.placed[index] = card;
 		}
-		card.zone?.remove(card);
 		card.zone = null;
 	}
 	

@@ -12,6 +12,7 @@ export class Timing {
 			action.timing = this;
 		}
 		this.costCompletions = [];
+		this.successful = false;
 	}
 	
 	// returns whether or not any substitutions were handled
@@ -59,7 +60,8 @@ export class Timing {
 			// empty costs count as successful completion
 			if (this.actions.length == 0) {
 				game.nextTimingIndex++;
-				return true;
+				this.successful = true;
+				return;
 			}
 			for (let i = 0; i < this.costCompletions.length; i++) {
 				this.costCompletions[i] = this.isFullyPossible(i);
@@ -72,7 +74,7 @@ export class Timing {
 		}
 		// empty timings are not successful, they interrupt their block or indicate that paying all costs failed.
 		if (this.actions.length == 0) {
-			return false;
+			return;
 		}
 		
 		let events = [];
@@ -84,11 +86,10 @@ export class Timing {
 		}
 		yield events;
 		game.nextTimingIndex++;
+		this.successful = true;
 
 		// check win/lose conditions
 		yield* checkGameOver(this.game);
-		
-		return true;
 	}
 	
 	valueOf() {
