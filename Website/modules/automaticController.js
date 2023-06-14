@@ -78,6 +78,8 @@ export class AutomaticController extends InteractionController {
 					this.waitingForOpponentInput = false;
 					for (let playerInfo of this.playerInfos) {
 						playerInfo.canStandardSummon = false;
+						playerInfo.canDeploy = false;
+						playerInfo.canCast = false;
 						playerInfo.canRetire = [];
 					}
 					for (let button of this.unitAttackButtons) {
@@ -221,7 +223,7 @@ export class AutomaticController extends InteractionController {
 					event.block instanceof blocks.DeployItem ||
 					event.block instanceof blocks.CastSpell
 				) {
-					gameUI.clearDragSource(event.block.unit.zone, event.block.unit.index, event.block.player);
+					gameUI.clearDragSource(event.block.card.zone, event.block.card.index, event.block.player);
 					return;
 				}
 				return;

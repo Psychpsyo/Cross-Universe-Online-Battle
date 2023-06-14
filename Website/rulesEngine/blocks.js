@@ -23,11 +23,7 @@ class Block {
 		this.executionTimings = [];
 	}
 
-	async* runCost() {
-		if (this.costTimingGenerator == null) {
-			return true;
-		}
-
+	async* prepareCostTiming() {
 		let generatorOutput = await this.costTimingGenerator.next();
 		while (true) {
 			let actionList = generatorOutput.value;
@@ -42,6 +38,12 @@ class Block {
 			this.costTiming = new Timing(this.stack.phase.turn.game, actionList, this);
 			break;
 		}
+	}
+	async* runCost() {
+		if (this.costTimingGenerator == null) {
+			return true;
+		}
+		yield* this.prepareCostTiming();
 		yield* this.costTiming.run();
 		return this.costTiming.successful;
 	}
@@ -87,29 +89,29 @@ export class StandardDraw extends Block {
 }
 
 export class StandardSummon extends Block {
-	constructor(stack, player, unit, unitZoneIndex) {
+	constructor(stack, player, card, unitZoneIndex) {
 		super(stack, player,
 			arrayTimingGenerator([
-				[new actions.Summon(player, unit, player.unitZone, unitZoneIndex)]
+				[new actions.Summon(player, card, player.unitZone, unitZoneIndex)]
 			]),
 			arrayTimingGenerator([[
-				new actions.Place(player, unit, player.unitZone, unitZoneIndex),
-				new actions.ChangeMana(player, -unit.level.get())
+				new actions.Place(player, card, player.unitZone, unitZoneIndex),
+				new actions.ChangeMana(player, -card.level.get())
 			]]
 		));
-		this.unit = unit;
+		this.card = card;
 		this.unitZoneIndex = unitZoneIndex;
 	}
 	
 	async* runCost() {
-		this.unit.zone.remove(this.unit);
+		this.card.zone.remove(this.card);
 		let paid = await (yield* super.runCost());
 		if (!paid) {
-			this.unit.zone.add(this.unit, this.unit.index);
+			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		this.unit = this.unit.snapshot();
-		this.stack.phase.turn.hasStandardSummoned = this.unit;
+		this.card = this.card.snapshot();
+		this.stack.phase.turn.hasStandardSummoned = this.card;
 		return true;
 	}
 }
@@ -269,26 +271,28 @@ async function* combinedCostTimingGenerator() {
 }
 
 export class DeployItem extends Block {
-	constructor(stack, player, item, spellItemZoneIndex) {
+	constructor(stack, player, card, spellItemZoneIndex) {
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.Place(player, item, player.spellItemZone, spellItemZoneIndex),
-			new actions.ChangeMana(player, -item.level.get())
+			new actions.Place(player, card, player.spellItemZone, spellItemZoneIndex),
+			new actions.ChangeMana(player, -card.level.get())
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Deploy(player, item, player.spellItemZone, spellItemZoneIndex)]])
+			arrayTimingGenerator([[new actions.Deploy(player, card, player.spellItemZone, spellItemZoneIndex)]])
 		];
-		for (let ability of item.abilities.get()) {
+		let deployAbility = null;
+		for (let ability of card.abilities.get()) {
 			if (ability instanceof abilities.DeployAbility) {
+				deployAbility = ability;
 				if (ability.cost) {
-					costTimingGenerators.push(abilityCostTimingGenerator(ability, item, player));
+					costTimingGenerators.push(abilityCostTimingGenerator(ability, card, player));
 				}
-				if (item.cardTypes.get().includes("standardItem")) {
+				if (card.cardTypes.get().includes("standardItem")) {
 					// standard items first activate and are only treated as briefly on the field after
-					execTimingGenerators.unshift(abilityTimingGenerator(ability, item, player));
+					execTimingGenerators.unshift(abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
-					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(item)]]));
+					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(card)]]));
 				} else {
-					execTimingGenerators.push(abilityTimingGenerator(ability, item, player));
+					execTimingGenerators.push(abilityTimingGenerator(ability, card, player));
 				}
 				// cards only ever have one of these
 				break;
@@ -298,43 +302,57 @@ export class DeployItem extends Block {
 			combinedTimingGenerator(...execTimingGenerators),
 			combinedCostTimingGenerator(...costTimingGenerators)
 		);
-		this.item = item;
+		this.card = card;
 		this.spellItemZoneIndex = spellItemZoneIndex;
+		this.deployAbility = deployAbility;
 	}
-	
+
 	async* runCost() {
-		this.item.zone.remove(this.item);
-		let paid = await (yield* super.runCost());
-		if (!paid) {
-			this.item.zone.add(this.spell, this.item.index);
+		this.card.zone.remove(this.card);
+		if (this.deployAbility.cost && !(await (yield* this.deployAbility.cost.hasAllTargets(this.card, this.player)))) {
+			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		this.item = this.item.snapshot();
+		yield* this.prepareCostTiming();
+		// Check available prerequisite after the player has made at-deploying-time choices but before they paid the cost.
+		// Required for cards similar to Magic Synthesis to correctly be rejected if the wrong decisions were made.
+		if (!(await (yield* this.deployAbility.exec.hasAllTargets(this.card, this.player)))) {
+			this.card.zone.add(this.card, this.card.index);
+			return false;
+		}
+		yield* this.costTiming.run();
+		if (!this.costTiming.successful) {
+			this.card.zone.add(this.spell, this.card.index);
+			return false;
+		}
+		this.card = this.card.snapshot();
 		return true;
 	}
 }
 
 export class CastSpell extends Block {
-	constructor(stack, player, spell, spellItemZoneIndex) {
+	constructor(stack, player, card, spellItemZoneIndex) {
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.Place(player, spell, player.spellItemZone, spellItemZoneIndex),
-			new actions.ChangeMana(player, -spell.level.get())
+			new actions.Place(player, card, player.spellItemZone, spellItemZoneIndex),
+			new actions.ChangeMana(player, -card.level.get())
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Cast(player, spell, player.spellItemZone, spellItemZoneIndex)]])
+			arrayTimingGenerator([[new actions.Cast(player, card, player.spellItemZone, spellItemZoneIndex)]])
 		];
-		for (let ability of spell.abilities.get()) {
+		let castAbility = null;
+		for (let ability of card.abilities.get()) {
 			if (ability instanceof abilities.CastAbility) {
+				castAbility = ability;
 				if (ability.cost) {
-					costTimingGenerators.push(abilityCostTimingGenerator(ability, spell, player));
+					costTimingGenerators.push(abilityCostTimingGenerator(ability, card, player));
 				}
-				if (spell.cardTypes.get().includes("standardSpell")) {
+				if (card.cardTypes.get().includes("standardSpell")) {
 					// standard spells first activate and are only treated as briefly on the field after
-					execTimingGenerators.unshift(abilityTimingGenerator(ability, spell, player));
+					execTimingGenerators.unshift(abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
-					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(spell)]]));
+					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(card)]]));
 				} else {
-					execTimingGenerators.push(abilityTimingGenerator(ability, spell, player));
+					execTimingGenerators.push(abilityTimingGenerator(ability, card, player));
 				}
 				// cards only ever have one of these
 				break;
@@ -344,18 +362,30 @@ export class CastSpell extends Block {
 			combinedTimingGenerator(...execTimingGenerators),
 			combinedCostTimingGenerator(...costTimingGenerators)
 		);
-		this.spell = spell;
+		this.card = card;
 		this.spellItemZoneIndex = spellItemZoneIndex;
+		this.castAbility = castAbility;
 	}
 	
 	async* runCost() {
-		this.spell.zone.remove(this.spell);
-		let paid = await (yield* super.runCost());
-		if (!paid) {
-			this.spell.zone.add(this.spell, this.spell.index);
+		this.card.zone.remove(this.card);
+		if (this.castAbility.cost && !(await (yield* this.castAbility.cost.hasAllTargets(this.card, this.player)))) {
+			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		this.spell = this.spell.snapshot();
+		yield* this.prepareCostTiming();
+		// Check available prerequisite after the player has made at-casting-time choices but before they paid the cost.
+		// Required for cards like Magic Synthesis to correctly be rejected if the wrong casting decisions were made.
+		if (!(await (yield* this.castAbility.exec.hasAllTargets(this.card, this.player)))) {
+			this.card.zone.add(this.card, this.card.index);
+			return false;
+		}
+		yield* this.costTiming.run();
+		if (!this.costTiming.successful) {
+			this.card.zone.add(this.card, this.card.index);
+			return false;
+		}
+		this.card = this.card.snapshot();
 		return true;
 	}
 }

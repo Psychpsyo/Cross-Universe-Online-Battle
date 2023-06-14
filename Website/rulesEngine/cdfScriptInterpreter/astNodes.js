@@ -6,7 +6,10 @@ import {Card} from "../card.js";
 
 class AstNode {
 	async* eval(card, player) {}
-	checkTargets() {}
+	// whether or not all actions in this tree can be done in full
+	async* hasAllTargets(card, player) {
+		return true;
+	}
 }
 
 // This serves as the root node of a card's script body
@@ -19,6 +22,14 @@ export class ScriptNode extends AstNode {
 		for (let step of this.steps) {
 			yield* step.eval(card, player);
 		}
+	}
+	async* hasAllTargets(card, player) {
+		for (let step of this.steps) {
+			if (!(await (yield* step.hasAllTargets(card, player)))) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 
@@ -108,6 +119,7 @@ export class FunctionNode extends AstNode {
 				}
 				let timing = yield costs;
 				let summons = [];
+				console.log(timing.costCompletions);
 				for (let i = 0; i < timing.costCompletions.length; i++) {
 					if (timing.costCompletions[i]) {
 						summons.push(new actions.Summon(player, cards[i], zone, targetSlots[i]));
@@ -137,6 +149,40 @@ attack: ${attack}
 defense: ${defense}`, false));
 				}
 				return cards;
+			}
+		}
+	}
+	async* hasAllTargets(card, player) {
+		switch (this.functionName) {
+			case "DAMAGE": {
+				return player.life + (await (yield* this.parameters[0].eval(card, player))) >= 0; 
+			}
+			case "DESTROY": {
+				return await (yield* this.parameters[0].hasAllTargets(card, player));
+			}
+			case "DISCARD": {
+				return await (yield* this.parameters[0].hasAllTargets(card, player));
+			}
+			case "DRAW": {
+				return player.deckZone.cards.length >= await (yield* this.parameters[0].eval(card, player));
+			}
+			case "EXILE": {
+				return await (yield* this.parameters[0].hasAllTargets(card, player));
+			}
+			case "LIFE": {
+				return player.life + (await (yield* this.parameters[0].eval(card, player))) >= 0;
+			}
+			case "MANA": {
+				return player.mana + (await (yield* this.parameters[0].eval(card, player))) >= 0;
+			}
+			case "SELECT": {
+				return [await (yield* this.parameters[0].eval(card, player))].includes((await (yield* this.parameters[1].eval(card, player))).length);
+			}
+			case "SUMMON": {
+				return await (yield* this.parameters[0].hasAllTargets(card, player));
+			}
+			case "TOKENS": {
+				return true;
 			}
 		}
 	}
