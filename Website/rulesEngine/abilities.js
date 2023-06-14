@@ -15,14 +15,16 @@ export class Ability extends BaseAbility {
 		if (cost) {
 			this.cost = buildCostAST(id, cost);
 		}
+		this.scriptVariables = {};
 	}
 
 	async* runCost(card, player) {
-		yield* this.cost.eval(card, player);
+		yield* this.cost.eval(card, player, this);
 	}
 
 	async* run(card, player) {
-		yield* this.exec.eval(card, player);
+		yield* this.exec.eval(card, player, this);
+		this.scriptVariables = {};
 	}
 }
 

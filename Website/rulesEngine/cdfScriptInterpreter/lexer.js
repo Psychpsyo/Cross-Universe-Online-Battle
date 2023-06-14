@@ -49,6 +49,7 @@ let keywordTokenTypes = {
 	LIFE: "function",
 	MANA: "function",
 	SELECT: "function",
+	SELECTPLAYER: "function",
 	SUMMON: "function",
 	TOKENS: "function",
 	Angel: "type",
@@ -157,13 +158,23 @@ export function tokenize(code) {
 				break;
 			}
 			case "=": {
-				if (code[pos+1] == "!") {
-					tokens.push({type: "comparison", value: "exactEquals"});
+				if (code[pos+1] == "=") {
+					tokens.push({type: "exactEquals"});
 					pos += 2;
 				} else {
-					tokens.push({type: "comparison", value: "equals"});
+					tokens.push({type: "equals"});
 					pos++;
 				}
+				break;
+			}
+			case "$": {
+				let variableLength = 1;
+				while(code[pos + variableLength].match(/[a-z]/i)) {
+					variableLength++;
+				}
+				let variableName = code.substr(pos, variableLength);
+				tokens.push({type: "variable", value: variableName});
+				pos += variableLength;
 				break;
 			}
 			default: {

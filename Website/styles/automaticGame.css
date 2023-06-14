@@ -13,7 +13,7 @@
 	z-index: 100;
 }
 .attacking .card {
-	animation-duration: calc(.5s * var(--game-speed));
+	animation-duration: calc(.2s * var(--game-speed));
 	animation-iteration-count: 2;
 	animation-direction: alternate;
 	animation-timing-function: ease-in-out;

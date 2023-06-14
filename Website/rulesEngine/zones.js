@@ -14,7 +14,9 @@ export class Zone {
 		if (card.zone === this && card.index < index) {
 			index--;
 		}
-		card.zone?.remove(card);
+		if (card.zone && card.zone.cards.includes(card)) {
+			card.zone.remove(card);
+		}
 		if (!card.cardTypes.get().includes("token")) {
 			this.cards.splice(index, 0, card);
 			this.reindex();
@@ -106,7 +108,9 @@ export class FieldZone extends Zone {
 				return -1;
 			}
 		}
-		card.zone?.remove(card);
+		if (card.zone && card.zone.cards.includes(card)) {
+			card.zone.remove(card);
+		}
 		this.cards[index] = card;
 		card.zone = this;
 		card.index = index;

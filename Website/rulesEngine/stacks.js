@@ -78,13 +78,12 @@ export class Stack {
 				}
 			}
 			if (response.type != "pass") {
-				this.passed = false;
-				
 				if (await (yield* nextBlock.runCost())) {
+					this.passed = false;
 					yield [createBlockCreatedEvent(nextBlock)];
 					this.blocks.push(nextBlock);
 				} else {
-					yield [createBlockCreationAbortedEvent(nextBlock)]
+					yield [createBlockCreationAbortedEvent(nextBlock)];
 				}
 			}
 		}

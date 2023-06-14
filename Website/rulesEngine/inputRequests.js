@@ -24,6 +24,23 @@ export const chooseCards = {
 	}
 }
 
+export const choosePlayer = {
+	create: function(player, reason) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "choosePlayer",
+			"reason": reason
+		}
+	},
+	validate: function(response, request) {
+		if (response < 0 || response >= request.player.game.players.length) {
+			throw new Error("Chose an invalid player index: " + response);
+		}
+		return request.player.game.players[response];
+	}
+}
+
 export const enterBattlePhase = {
 	create: function(player) {
 		return {

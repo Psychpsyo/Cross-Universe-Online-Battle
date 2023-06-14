@@ -241,19 +241,24 @@ export class AbilityActivation extends Block {
 	}
 
 	async* runCost() {
-		if (this.ability.cost && !(await (yield* this.ability.cost.hasAllTargets(this.card, this.player)))) {
+		if (this.ability.cost && !(await (yield* this.ability.cost.hasAllTargets(this.card, this.player, this.ability)))) {
 			return false;
 		}
-		yield* this.prepareCostTiming();
+		if (this.costTimingGenerator) {
+			yield* this.prepareCostTiming();
+		}
 		// Check available prerequisite after the player has made at-activation-time choices but before they paid the cost.
 		// Required for abilities similar to that of Magic Synthesis to correctly be rejected if the wrong decisions were made.
-		if (!(await (yield* this.ability.exec.hasAllTargets(this.card, this.player)))) {
+		if (!(await (yield* this.ability.exec.hasAllTargets(this.card, this.player, this.ability)))) {
 			return false;
 		}
-		yield* this.costTiming.run();
-		if (!this.costTiming.successful) {
-			return false;
+		if (this.costTiming) {
+			yield* this.costTiming.run();
+			if (!this.costTiming.successful) {
+				return false;
+			}
 		}
+		this.ability.activationCount++;
 		this.card = this.card.snapshot();
 		return true;
 	}
@@ -269,7 +274,7 @@ async function* combinedCostTimingGenerator(generators) {
 	let completeCost = [];
 	for (let timingGenerator of generators) {
 		let actionList = (await timingGenerator.next()).value;
-		while (true) {
+		while (actionList) {
 			if (actionList[0] instanceof actions.Action) {
 				completeCost = completeCost.concat(actionList);
 				break;
@@ -319,14 +324,14 @@ export class DeployItem extends Block {
 
 	async* runCost() {
 		this.card.zone.remove(this.card);
-		if (this.deployAbility.cost && !(await (yield* this.deployAbility.cost.hasAllTargets(this.card, this.player)))) {
+		if (this.deployAbility.cost && !(await (yield* this.deployAbility.cost.hasAllTargets(this.card, this.player, this.deployAbility)))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
 		yield* this.prepareCostTiming();
 		// Check available prerequisite after the player has made at-deploying-time choices but before they paid the cost.
 		// Required for cards similar to Magic Synthesis to correctly be rejected if the wrong decisions were made.
-		if (!(await (yield* this.deployAbility.exec.hasAllTargets(this.card, this.player)))) {
+		if (!(await (yield* this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility)))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
@@ -379,14 +384,14 @@ export class CastSpell extends Block {
 
 	async* runCost() {
 		this.card.zone.remove(this.card);
-		if (this.castAbility.cost && !(await (yield* this.castAbility.cost.hasAllTargets(this.card, this.player)))) {
+		if (this.castAbility.cost && !(await (yield* this.castAbility.cost.hasAllTargets(this.card, this.player, this.castAbility)))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
 		yield* this.prepareCostTiming();
 		// Check available prerequisite after the player has made at-casting-time choices but before they paid the cost.
 		// Required for cards like Magic Synthesis to correctly be rejected if the wrong casting decisions were made.
-		if (!(await (yield* this.castAbility.exec.hasAllTargets(this.card, this.player)))) {
+		if (!(await (yield* this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility)))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}

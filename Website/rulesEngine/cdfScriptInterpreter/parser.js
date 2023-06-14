@@ -24,6 +24,9 @@ function parseLine() {
 		case "function": {
 			return parseFuction();
 		}
+		case "variable": {
+			return parseAssignment();
+		}
 		default: {
 			throw new Error("CDF Script Parser Error: '" + tokens[pos].type + "' is not a valid token at the start of a line.");
 		}
@@ -46,6 +49,17 @@ function parseFuction() {
 	}
 	pos++;
 	return new ast.FunctionNode(functionName, parameters);
+}
+
+function parseAssignment() {
+	let variableName = tokens[pos].value;
+	pos++;
+	if (tokens[pos].type != "equals") {
+		throw new Error("CDF Script Parser Error: Variable name '" + variableName + "' must be followed by an '=' for assignments.");
+	}
+	pos++;
+	let newValue = parseParameter();
+	return new ast.AssignmentNode(variableName, newValue);
 }
 
 function parseParameter() {
@@ -82,11 +96,21 @@ function parseParameter() {
 					return parseTypeList();
 				}
 			}
+			throw new Error("CDF Script Parser Error: Reached unwanted '" + tokens[pos].type + "' token inside list syntax.");
+		}
+		case "variable": {
+			return parseVariable();
 		}
 		default: {
 			throw new Error("CDF Script Parser Error: A '" + tokens[pos].type + "' token does not start a valid function parameter.");
 		}
 	}
+}
+
+function parseVariable() {
+	let node = new ast.VariableNode(tokens[pos].value);
+	pos++;
+	return node; 
 }
 
 function parseNumber() {

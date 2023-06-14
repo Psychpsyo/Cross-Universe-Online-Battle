@@ -7,24 +7,24 @@ let currentActivePhaseElem = null;
 
 export function init() {
 	Array.from(document.querySelectorAll(".manualOnly")).forEach(elem => elem.remove());
-	
+
 	for (const [key, value] of Object.entries(locale.game.automatic.phases)) {
 		document.getElementById(key + "Indicator").textContent = value;
 	}
-	
+
 	retireCancelBtn.textContent = locale.game.automatic.retire.dropCancel;
-	
+
 	passBtn.addEventListener("click", function() {
 		this.disabled = true;
 	});
-	
+
 	retireBtn.addEventListener("click", clearRetire);
 	retireCancelBtn.addEventListener("click", function() {
 		gameState.controller.cancelRetire(localPlayer);
 		clearRetire();
 		indicatePass();
 	});
-	
+
 	controlPanel.hidden = false;
 }
 
@@ -175,7 +175,7 @@ export async function attack(units) {
 			slot.classList.remove("attacking");
 		}, gameState.controller.gameSpeed * 400);
 		animPromises.push(new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 400)));
-		await gameState.controller.gameSleep(.3);
+		await gameState.controller.gameSleep(.6);
 	}
 	return Promise.all(animPromises);
 }
