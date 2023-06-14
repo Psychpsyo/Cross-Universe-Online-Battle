@@ -241,23 +241,33 @@ export class AbilityActivation extends Block {
 	}
 
 	async* runCost() {
-		let success = await (yield* super.runCost());
-		if (success) {
-			this.ability.activationCount++;
+		if (this.ability.cost && !(await (yield* this.ability.cost.hasAllTargets(this.card, this.player)))) {
+			return false;
 		}
-		return success;
+		yield* this.prepareCostTiming();
+		// Check available prerequisite after the player has made at-activation-time choices but before they paid the cost.
+		// Required for abilities similar to that of Magic Synthesis to correctly be rejected if the wrong decisions were made.
+		if (!(await (yield* this.ability.exec.hasAllTargets(this.card, this.player)))) {
+			return false;
+		}
+		yield* this.costTiming.run();
+		if (!this.costTiming.successful) {
+			return false;
+		}
+		this.card = this.card.snapshot();
+		return true;
 	}
 }
 
-async function* combinedTimingGenerator() {
-	for (let timingGenerator of arguments) {
+async function* combinedTimingGenerator(generators) {
+	for (let timingGenerator of generators) {
 		yield* timingGenerator;
 	}
 }
 
-async function* combinedCostTimingGenerator() {
+async function* combinedCostTimingGenerator(generators) {
 	let completeCost = [];
-	for (let timingGenerator of arguments) {
+	for (let timingGenerator of generators) {
 		let actionList = (await timingGenerator.next()).value;
 		while (true) {
 			if (actionList[0] instanceof actions.Action) {
@@ -299,8 +309,8 @@ export class DeployItem extends Block {
 			}
 		}
 		super(stack, player,
-			combinedTimingGenerator(...execTimingGenerators),
-			combinedCostTimingGenerator(...costTimingGenerators)
+			combinedTimingGenerator(execTimingGenerators),
+			combinedCostTimingGenerator(costTimingGenerators)
 		);
 		this.card = card;
 		this.spellItemZoneIndex = spellItemZoneIndex;
@@ -359,14 +369,14 @@ export class CastSpell extends Block {
 			}
 		}
 		super(stack, player,
-			combinedTimingGenerator(...execTimingGenerators),
-			combinedCostTimingGenerator(...costTimingGenerators)
+			combinedTimingGenerator(execTimingGenerators),
+			combinedCostTimingGenerator(costTimingGenerators)
 		);
 		this.card = card;
 		this.spellItemZoneIndex = spellItemZoneIndex;
 		this.castAbility = castAbility;
 	}
-	
+
 	async* runCost() {
 		this.card.zone.remove(this.card);
 		if (this.castAbility.cost && !(await (yield* this.castAbility.cost.hasAllTargets(this.card, this.player)))) {

@@ -240,7 +240,7 @@ export class Discard extends Action {
 	
 	* run() {
 		this.card = this.card.snapshot();
-		let event = events.createCardDiscardedEvent(this.card.zone, this.card.index, this.card.owner.discardPile);
+		let event = events.createCardDiscardedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
 		this.card.cardRef.hidden = false;
 		if (this.timing?.block.type == "retire") {
@@ -265,7 +265,7 @@ export class Destroy extends Action {
 	
 	* run() {
 		this.card = this.card.snapshot();
-		let event = events.createCardDestroyedEvent(this.card.zone, this.card.index, this.card.owner.discardPile);
+		let event = events.createCardDestroyedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
 		this.card.hidden = false;
 		return event;
@@ -287,7 +287,7 @@ export class Exile extends Action {
 	
 	* run() {
 		this.card = this.card.snapshot();
-		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone);
+		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone, this.card);
 		this.card.owner.exileZone.add(this.card.cardRef, this.card.owner.exileZone.cards.length);
 		this.card.cardRef.hidden = false;
 		return event;

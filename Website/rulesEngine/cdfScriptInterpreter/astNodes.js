@@ -119,7 +119,6 @@ export class FunctionNode extends AstNode {
 				}
 				let timing = yield costs;
 				let summons = [];
-				console.log(timing.costCompletions);
 				for (let i = 0; i < timing.costCompletions.length; i++) {
 					if (timing.costCompletions[i]) {
 						summons.push(new actions.Summon(player, cards[i], zone, targetSlots[i]));

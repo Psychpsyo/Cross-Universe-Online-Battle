@@ -271,14 +271,13 @@ export class AutomaticController extends InteractionController {
 				}
 				return this.gameSleep();
 			}
-			case "cardDiscarded": {
+			case "cardDiscarded":
+			case "cardDestroyed":
+			case "cardExiled": {
 				gameUI.removeCard(event.fromZone, event.fromIndex);
-				gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
-				return this.gameSleep(.5);
-			}
-			case "cardDestroyed": {
-				gameUI.removeCard(event.fromZone, event.fromIndex);
-				gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
+				if (!event.card.cardTypes.get().includes("token")) {
+					gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
+				}
 				return this.gameSleep(.5);
 			}
 			case "actionCancelled": {

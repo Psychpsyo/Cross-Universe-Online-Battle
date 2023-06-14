@@ -218,32 +218,35 @@ export function createCardsAttackedEvent(attackers, target) {
 	}
 }
 
-export function createCardDiscardedEvent(fromZone, fromIndex, toZone) {
+export function createCardDiscardedEvent(fromZone, fromIndex, toZone, card) {
 	return {
 		"nature": "event",
 		"type": "cardDiscarded",
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
-		"toZone": toZone
+		"toZone": toZone,
+		"card": card
 	}
 }
 
-export function createCardDestroyedEvent(fromZone, fromIndex, toZone) {
+export function createCardDestroyedEvent(fromZone, fromIndex, toZone, card) {
 	return {
 		"nature": "event",
 		"type": "cardDestroyed",
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
-		"toZone": toZone
+		"toZone": toZone,
+		"card": card
 	}
 }
 
-export function createCardExiledEvent(fromZone, fromIndex, toZone) {
+export function createCardExiledEvent(fromZone, fromIndex, toZone, card) {
 	return {
 		"nature": "event",
 		"type": "cardExiled",
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
-		"toZone": toZone
+		"toZone": toZone,
+		"card": card
 	}
 }
