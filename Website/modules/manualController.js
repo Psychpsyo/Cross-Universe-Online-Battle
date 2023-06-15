@@ -8,12 +8,13 @@ import {socket, zoneToLocal} from "/modules/netcode.js";
 import {putChatMessage} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as manualUI from "/modules/manualUI.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 class tokenZone {
 	constructor() {
 		this.type = "tokens";
 		this.cards = [];
-		
+
 		fetch("https://crossuniverse.net/cardInfo", {
 			method: "POST",
 			body: JSON.stringify({
@@ -24,10 +25,7 @@ class tokenZone {
 		.then(response => response.json())
 		.then(response => {
 			response.forEach(card => {
-				// intentionally bypasses registerCard()
-				card.imageSrc = getCardImageFromID(card.cardID);
-				game.cardData[card.cardID] = card;
-				this.cards.push(new Card(localPlayer, card.cardID, false));
+				cardLoader.getManualCdf(card.cardID).then(cdf => this.cards.push(new Card(localPlayer, cdf, false)));
 			});
 		});
 	}
@@ -37,32 +35,41 @@ class tokenZone {
 	}
 }
 
+function addPartnerRevealButton() {
+	gameUI.addFieldButton(localPlayer.partnerZone, 0, locale.game.partnerSelect.revealPartner, "revealPartner", function() {
+		gameUI.clearFieldButtons(localPlayer.partnerZone, 0, "revealPartner");
+		localPlayer.partnerZone.cards[0].hidden = false;
+		gameUI.updateCard(localPlayer.partnerZone, 0);
+		socket.send("[revealPartner]");
+	}, true);
+}
+
 export class ManualController extends InteractionController {
 	constructor() {
 		super();
-		
+
 		this.opponentHandShown = false;
 		this.playerInfos = [];
 		for (const player of game.players) {
 			this.playerInfos.push(new ManualPlayerInfo(player));
 		}
-		
+
 		manualUI.init();
-		
+
 		this.tokenZone = new tokenZone();
 		gameState.zones["tokens"] = this.tokenZone;
 	}
-	
+
 	async startGame() {
 		if (youAre === 0) {
 			this.deckShuffle(localPlayer.deckZone);
 			let startingPlayer = Math.random() > .5;
-			putChatMessage(startingPlayer? locale.game.youStart : locale.game.opponentStarts, "notice");
+			putChatMessage(startingPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
 			socket.send("[selectPlayer]" + startingPlayer);
-			localPartnerButtons.classList.add("visible");
+			addPartnerRevealButton();
 		}
 	}
-	
+
 	receiveMessage(command, message) {
 		switch (command) {
 			case "life": { // set opponent's life
@@ -74,7 +81,7 @@ export class ManualController extends InteractionController {
 				return true;
 			}
 			case "grabToken": {
-				this.playerInfos[0].setHeld(new Card(game.players[0], message, false));
+				cardLoader.getManualCdf(message).then(cdf => this.playerInfos[0].setHeld(new Card(game.players[0], cdf, false)));
 				return true;
 			}
 			case "drawCard": {
@@ -114,7 +121,7 @@ export class ManualController extends InteractionController {
 				for (let i = 0; i < deck.cards.length; i++) {
 					gameUI.updateCard(deck, i);
 				}
-				putChatMessage(deck.playerIndex == 1? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");
+				putChatMessage(deck.playerIndex == 1? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
 				return true;
 			}
 			case "showHand": {
@@ -137,9 +144,8 @@ export class ManualController extends InteractionController {
 			}
 			case "selectPlayer": { // opponent chose the starting player (at random)
 				this.deckShuffle(localPlayer.deckZone);
-				putChatMessage(message == "true"? locale.game.opponentStarts : locale.game.youStart, "notice");
-				revealPartnerBtn.style.display = "block";
-				localPartnerButtons.classList.add("visible");
+				putChatMessage(message == "true"? locale.game.notices.opponentStarts : locale.game.notices.youStart, "notice");
+				addPartnerRevealButton();
 				return true;
 			}
 			default: {
@@ -147,14 +153,14 @@ export class ManualController extends InteractionController {
 			}
 		}
 	}
-	
+
 	// returns whether or not the card was fully grabbed from the zone
 	grabCard(player, zone, index) {
 		if (!zone.cards[index] || (zone.cards[index].hidden && player === localPlayer) || this.playerInfos[player.index].heldCard !== null) {
 			return false;
 		}
 		if (zone == this.tokenZone) {
-			this.playerInfos[player.index].setHeld(new Card(localPlayer, zone.cards[index].cardId, false));
+			cardLoader.getManualCdf(zone.cards[index].cardId).then(cdf => this.playerInfos[player.index].setHeld(new Card(localPlayer, cdf, false)));
 			socket.send("[grabToken]" + zone.cards[index].cardId);
 			return false;
 		}
@@ -167,7 +173,7 @@ export class ManualController extends InteractionController {
 		gameUI.makeDragSource(zone, index, player);
 		return true;
 	}
-	
+
 	dropCard(player, zone, index) {
 		let card = this.playerInfos[player.index].heldCard;
 		if (!card) {
@@ -184,16 +190,16 @@ export class ManualController extends InteractionController {
 			}
 			index = zone.cards.length;
 		}
-		
+
 		if (card.zone) {
 			gameUI.clearDragSource(card.zone, card.index, player);
 		}
-		
+
 		if (!zone) {
 			this.playerInfos[player.index].clearHeld();
 			return;
 		}
-		
+
 		let source = card.zone;
 		let sourceIndex = card.index;
 		let insertedIndex = zone.add(card, index);
@@ -209,13 +215,13 @@ export class ManualController extends InteractionController {
 				} else {
 					card.hidden = false;
 				}
-				
+
 				gameUI.insertCard(zone, insertedIndex);
 			}
 		}
 		this.playerInfos[player.index].clearHeld();
 	}
-	
+
 	hotkeyPressed(name) {
 		switch(name) {
 			case "showDeck": {
@@ -248,7 +254,7 @@ export class ManualController extends InteractionController {
 			}
 		}
 	}
-	
+
 	deckDraw(player) {
 		if (player.deckZone.cards.length == 0) {
 			return;
@@ -273,7 +279,7 @@ export class ManualController extends InteractionController {
 		for (let i = order.length - 1; i > 0; i--) {
 			// pick a random element and swap it with the current element
 			let rand = Math.floor(Math.random() * i);
-			
+
 			[order[i], order[rand]] = [order[rand], order[i]];
 		}
 		deckZone.cards.sort((a, b) => order.indexOf(deckZone.cards.indexOf(a)) - order.indexOf(deckZone.cards.indexOf(b)));
@@ -282,7 +288,7 @@ export class ManualController extends InteractionController {
 			gameUI.updateCard(deckZone, i);
 		}
 		socket.send("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
-		putChatMessage(locale.game[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
+		putChatMessage(locale.game.notices[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
 	deckToTop(player, deckZone) {
 		if (player === localPlayer) {
@@ -308,7 +314,7 @@ export class ManualController extends InteractionController {
 			socket.send("[deckCancel]");
 		}
 		let card = this.playerInfos[player.index].heldCard;
-		
+
 		gameUI.clearDragSource(card.zone, card.index, player);
 		this.playerInfos[player.index].clearHeld();
 	}
@@ -343,7 +349,7 @@ export class ManualController extends InteractionController {
 			this.deckShuffle(localPlayer.deckZone);
 		}
 	}
-	
+
 	setLife(player, value) {
 		value = Math.max(value, 0);
 		if (value == player.life) {
@@ -375,7 +381,7 @@ class ManualPlayerInfo {
 		this.presentedZone = new Zone(player, "presented");
 		gameState.zones["presented" + player.index] = this.presentedZone;
 	}
-	
+
 	setHeld(card) {
 		this.heldCard = card;
 		gameUI.uiPlayers[this.player.index].setDrag(card);

@@ -12,17 +12,17 @@ export class DistRandom extends CURandom {
 		this.valueKeys = [];
 		this.cyphertexts = [];
 		this.cypherKeys = [];
-		
+
 		this.cyphertextReceiver = new EventTarget();
 		this.cypherKeyReceiver = new EventTarget();
 	}
 	async nextInt(range) {
 		return (await this.nextInts([range]))[0];
 	}
-	
+
 	async nextInts(ranges) {
 		await this.prepareValues(ranges.length);
-		
+
 		// wait for opponent cyphertext
 		let cyphertext = this.cyphertexts.shift();
 		if (cyphertext === undefined) {
@@ -32,19 +32,19 @@ export class DistRandom extends CURandom {
 				}.bind(this), {once: true});
 			});
 		}
-		
+
 		// send own decryption key now that the opponent has entered the commitment
 		socket.send("[distRandKey]" + u8tos(new Uint8Array(await crypto.subtle.exportKey("raw", this.valueKeys.shift()))));
-		
+
 		let cypherKey = await this.receiveKey();
 		let view = new DataView(await crypto.subtle.decrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, cypherKey, cyphertext));
 		if (view.getFloat64(ranges.length * 8) != 0) {
 			throw new Error("Random value has been altered!");
 		}
-		
+
 		return this.values.shift().map((value, i) => Math.floor((value + view.getFloat64(i * 8)) * ranges[i]) % ranges[i]);
 	}
-	
+
 	async nextPlayer(game) {
 		let player = game.players[await this.nextInt(game.players.length)];
 		if (youAre == 1) {
@@ -52,11 +52,11 @@ export class DistRandom extends CURandom {
 		}
 		return player;
 	}
-	
+
 	async prepareValues(amount) {
 		let key = await crypto.subtle.generateKey({name: "AES-CTR", length: 256}, true, ["encrypt", "decrypt"]);
 		this.valueKeys.push(key);
-		
+
 		let valueList = [];
 		let view = new DataView(new ArrayBuffer(amount * 64 + 64));
 		for (let i = 0; i < amount; i++) {
@@ -64,10 +64,10 @@ export class DistRandom extends CURandom {
 			valueList.push(view.getFloat64(i * 8));
 		}
 		this.values.push(valueList);
-		
+
 		socket.send("[distRandValue]" + u8tos(new Uint8Array(await crypto.subtle.encrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, key, view))));
 	}
-	
+
 	async receiveKey() {
 		let key = this.cypherKeys.shift();
 		if (key === undefined) {
@@ -79,17 +79,17 @@ export class DistRandom extends CURandom {
 		}
 		return key;
 	}
-	
+
 	importCyphertext(stringValue) {
 		this.cyphertexts.push(stou8(stringValue));
 		this.cyphertextReceiver.dispatchEvent(new CustomEvent("textReceived"));
 	}
-	
+
 	async importCypherKey(stringKey) {
 		let key = await crypto.subtle.importKey("raw", stou8(stringKey), {name: "AES-CTR", counter: new Uint8Array(16), length: 256}, true, ["encrypt", "decrypt"]);
 		this.cypherKeys.push(key);
 		this.cypherKeyReceiver.dispatchEvent(new CustomEvent("keyReceived"));
-		return 
+		return
 	}
 }
 

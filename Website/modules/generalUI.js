@@ -1,5 +1,8 @@
 
 import {locale} from "/modules/locale.js";
+import {getCardInfo, getCardImage} from "/modules/cardLoader.js";
+
+let currentPreviewedCard = null;
 
 chatHeader.textContent = locale.chat.title;
 chatInput.placeholder = locale.chat.enterMessage;
@@ -8,7 +11,7 @@ chatInput.placeholder = locale.chat.enterMessage;
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 export function putChatMessage(message, type) {
 	let messageSpan = document.createElement("div");
-	
+
 	while (message.indexOf(":") != -1) {
 		if (message.indexOf(":", message.indexOf(":") + 1) == -1) {
 			break;
@@ -29,7 +32,7 @@ export function putChatMessage(message, type) {
 			message = message.substr(message.indexOf(":", message.indexOf(":") + 1));
 		}
 	}
-	
+
 	messageSpan.appendChild(document.createTextNode(message));
 	if (type) {
 		messageSpan.classList.add(type);
@@ -58,27 +61,30 @@ cardDetails.show();
 
 export function closeCardPreview() {
 	cardDetails.style.setProperty("--side-distance", "-50vh");
-	cardDetails.dataset.currentCard = "";
+	currentPreviewedCard = null;
 }
 
 // previews a card
-export function previewCard(card) {
+export async function previewCard(card, specific = true) {
 	if (!card?.cardId || card.hidden) {
 		return;
 	}
 	// if the already shown card was clicked again
-	if (cardDetails.dataset.currentCard == card.cardId) {
+	if ((currentPreviewedCard == card && specific) || (currentPreviewedCard?.cardId == card.cardId && !specific)) {
 		closeCardPreview();
 		return;
 	}
-	cardDetails.dataset.currentCard = card.cardId;
-	
+	currentPreviewedCard = card;
+
 	// set the image preview
-	cardDetailsImage.style.backgroundImage = "url(" + card.getImage() + ")";
-	
+	cardDetailsImage.style.backgroundImage = "url(" + (await getCardImage(card)) + ")";
+
 	// set the text preview
 	// general info
-	cardDetailsName.textContent = card.names.get().join("/");
+	let names = card.names.get().map(async (name) => (await getCardInfo(name)).name);
+	Promise.allSettled(names).then(names => {
+		cardDetailsName.textContent = names.map(name => name.value).join("/");
+	});
 	let cardTypes = [...card.cardTypes.get()];
 	if (cardTypes.includes("token")) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);
@@ -95,7 +101,7 @@ export function previewCard(card) {
 	} else {
 		cardDetailsTypes.textContent = locale.typeless;
 	}
-	
+
 	// attack & defense
 	if (card.cardTypes.get().includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
@@ -104,27 +110,27 @@ export function previewCard(card) {
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}
-	
+
 	// effects
 	cardDetailsEffectList.innerHTML = "";
 	if (!card.cardId.startsWith("C")) {
-		game.cardData[card.cardId].effects.forEach(effect => {
+		(await getCardInfo(card.cardId)).effects.forEach(effect => {
 			let effectDiv = document.createElement("div");
 			effectDiv.classList.add("cardDetailsEffect");
-			
+
 			if (effect.type != "rule") { // 'rule' effects get no title
 				let effectTitle = document.createElement("span");
 				effectTitle.textContent = locale[effect.type + "CardDetailEffect"];
 				effectDiv.appendChild(effectTitle);
 				effectDiv.appendChild(document.createElement("br"));
 			}
-			
+
 			let indentCount = 0;
 			let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
 			effect.text.split("\n").forEach(line => {
 				let lineDiv = document.createElement("div");
 				lineDiv.textContent = line;
-				
+
 				// recalculate indentation if necessary
 				if (indentChars.includes(line[0])) {
 					// recalculate indentation amount
@@ -133,19 +139,19 @@ export function previewCard(card) {
 						indentCount++;
 					}
 				}
-				
+
 				// indent the line
 				if (indentCount > 0) {
 					lineDiv.classList.add("cardDetailsIndent");
 					lineDiv.style.setProperty("--indent-amount", indentCount + "em");
 				}
-				
+
 				effectDiv.appendChild(lineDiv);
 			});
-			
+
 			cardDetailsEffectList.appendChild(effectDiv);
 		});
 	}
-	
+
 	cardDetails.style.setProperty("--side-distance", ".5em");
 }

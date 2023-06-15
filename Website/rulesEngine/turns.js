@@ -12,14 +12,14 @@ export class Turn {
 		this.hasStandardSummoned = null;
 		this.hasRetired = null;
 	}
-	
+
 	async* run() {
 		yield* this.runPhase(new ManaSupplyPhase(this));
-		
+
 		yield* this.runPhase(new DrawPhase(this));
-		
+
 		yield* this.runPhase(new MainPhase(this));
-		
+
 		if (this.index > 0) {
 			let battlePhase = (yield [enterBattlePhase.create(this.player)]).filter(choice => choice !== undefined)[0];
 			battlePhase.value = enterBattlePhase.validate(battlePhase.value);
@@ -29,10 +29,10 @@ export class Turn {
 				yield* this.runPhase(new MainPhase(this));
 			}
 		}
-		
+
 		yield* this.runPhase(new EndPhase(this));
 	}
-	
+
 	getStacks() {
 		return this.phases.slice(1).map(phase => phase.stacks).flat();
 	}
@@ -49,7 +49,7 @@ export class Turn {
 	currentStack() {
 		return this.currentPhase().currentStack();
 	}
-	
+
 	async* runPhase(phase) {
 		this.phases.push(phase);
 		yield [createPhaseStartedEvent(phase)];

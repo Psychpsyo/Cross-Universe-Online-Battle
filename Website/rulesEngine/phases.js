@@ -4,6 +4,7 @@ import {createStackCreatedEvent, createManaChangedEvent} from "./events.js";
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
+import * as abilities from "./abilities.js";
 
 // Base class for all phases
 class Phase {
@@ -11,9 +12,9 @@ class Phase {
 		this.turn = turn;
 		this.type = type;
 	}
-	
+
 	* run() {}
-	
+
 	getTimings() {
 		return [];
 	}
@@ -28,7 +29,7 @@ class StackPhase extends Phase {
 		super(turn, type);
 		this.stacks = [];
 	}
-	
+
 	async* run() {
 		let currentStackIndex = 0;
 		do {
@@ -41,11 +42,14 @@ class StackPhase extends Phase {
 			} while (this.currentStack().blocks.length > 0);
 		} while (currentStackIndex > 1);
 	}
-	
+
 	getBlockOptions(stack) {
-		return [requests.pass.create(stack.getNextPlayer())];
+		return [
+			requests.pass.create(stack.getNextPlayer()),
+			requests.castSpell.create(stack.getNextPlayer())
+		];
 	}
-	
+
 	getTimings() {
 		return this.stacks.map(stack => stack.getTimings()).flat();
 	}
@@ -63,7 +67,7 @@ export class ManaSupplyPhase extends Phase {
 		super(turn, "manaSupplyPhase");
 		this.timings = [];
 	}
-	
+
 	async* run() {
 		// RULES: First, if any player has more than 5 mana, their mana will be reduced to five.
 		let reduceManaActions = [];
@@ -76,13 +80,12 @@ export class ManaSupplyPhase extends Phase {
 			this.timings.push(new Timing(this.turn.game, reduceManaActions, null));
 			yield* this.timings[this.timings.length - 1].run();
 		}
-		
+
 		// RULES: Next, the active player gains 5 mana.
 		let turnPlayer = this.turn.player;
 		this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5)], null));
 		yield* this.timings[this.timings.length - 1].run();
-		
-		
+
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
 		let partnerLevel = turnPlayer.partnerZone.cards[0].level.get();
 		if (turnPlayer.mana < partnerLevel) {
@@ -96,13 +99,13 @@ export class ManaSupplyPhase extends Phase {
 			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, -partnerLevel)], null));
 			yield* this.timings[this.timings.length - 1].run();
 		}
-		
+
 		// RULES: If they still have more than 5 mana, it will again be reduced to 5.
 		if (turnPlayer.mana > 5) {
 			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5 - turnPlayer.mana)], null));
 			yield* this.timings[this.timings.length - 1].run();
 		}
-		
+
 		// RULES: At the end of the mana supply phase, any player with more than 8 hand cards discards down to 8.
 		let cardChoiceRequests = [];
 		for (let player of this.turn.game.players) {
@@ -116,7 +119,7 @@ export class ManaSupplyPhase extends Phase {
 			yield* this.timings[this.timings.length - 1].run();
 		}
 	}
-	
+
 	getTimings() {
 		return this.timings;
 	}
@@ -129,7 +132,7 @@ export class DrawPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "drawPhase");
 	}
-	
+
 	getBlockOptions(stack) {
 		if (this.turn.index != 0 && this.stacks.length == 1 && stack.blocks.length == 0) {
 			return [requests.doStandardDraw.create(this.turn.player)];
@@ -142,13 +145,15 @@ export class MainPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "mainPhase");
 	}
-	
+
 	getBlockOptions(stack) {
 		let options = super.getBlockOptions(stack);
 		if (stack.canDoNormalActions()) {
+			// turn actions
 			if (this.turn.hasStandardSummoned === null) {
 				options.push(requests.doStandardSummon.create(this.turn.player));
 			}
+			options.push(requests.deployItem.create(this.turn.player));
 			if (this.turn.hasRetired === null) {
 				let eligibleUnits = [];
 				for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
@@ -162,12 +167,27 @@ export class MainPhase extends StackPhase {
 						if (summons.length > 0) {
 							continue;
 						}
-						
+
 						eligibleUnits.push(card);
 					}
 				}
 				options.push(requests.doRetire.create(this.turn.player, eligibleUnits));
 			}
+
+			// optional abilities
+			let eligibleAbilities = [];
+			for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards, this.turn.player.spellItemZone.cards)) {
+				if (!card) {
+					continue;
+				}
+				let cardAbilities = card.abilities.get();
+				for (let i = 0; i < cardAbilities.length; i++) {
+					if (cardAbilities[i] instanceof abilities.OptionalAbility && cardAbilities[i].activationCount < cardAbilities[i].turnLimit) {
+						eligibleAbilities.push({card: card, index: i});
+					}
+				}
+			}
+			options.push(requests.activateOptionalAbility.create(this.turn.player, eligibleAbilities));
 		}
 		return options;
 	}
@@ -177,7 +197,7 @@ export class BattlePhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "battlePhase");
 	}
-	
+
 	getBlockOptions(stack) {
 		let options = super.getBlockOptions(stack);
 		if (stack.canDoNormalActions()) {
@@ -185,7 +205,7 @@ export class BattlePhase extends StackPhase {
 			if (this.turn.game.currentAttackDeclaration) {
 				return [requests.doFight.create(this.turn.player)];
 			}
-			
+
 			// find eligible attackers
 			let eligibleAttackers = this.turn.player.partnerZone.cards.concat(this.turn.player.unitZone.cards.filter(card => card !== null));
 			eligibleAttackers = eligibleAttackers.filter(card => card.attackCount == 0);
@@ -200,9 +220,5 @@ export class BattlePhase extends StackPhase {
 export class EndPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, "endPhase");
-	}
-	
-	getBlockOptions(stack) {
-		return [requests.pass.create(stack.getNextPlayer())];
 	}
 }

@@ -221,7 +221,7 @@ dialog #cardDetails {
 	grid-template-columns: repeat(7, 1fr);
 }
 
-#p1Grid > :last-child {
+#p0Grid > :last-child {
 	grid-column-start: 7;
 	grid-row-start: 1;
 	grid-row-end: 3;
@@ -231,11 +231,11 @@ dialog #cardDetails {
 	transform: rotate(180deg);
 }
 
-#p1Grid .fieldCardContainer .card {
+#p0Grid .fieldCardContainer .card {
 	transform: translate(-50%, -50%) rotate(180deg);
 }
 
-#p2Grid > :first-child {
+#p1Grid > :first-child {
 	grid-column-start: 1;
 	grid-row-start: 1;
 	grid-row-end: 3;
@@ -251,11 +251,9 @@ img[src$="cardBackFrameP0.png"], img[src$="cardBackFrameP1.png"] {
 	background-size: cover;
 	background-position: center;
 }
-
 img[src$="cardBackFrameP0.png"] {
 	background-image: var(--p0-card-back), url("/images/cardBack.png");
 }
-
 img[src$="cardBackFrameP1.png"] {
 	background-image: var(--p1-card-back), url("/images/cardBack.png");
 }
@@ -264,6 +262,7 @@ img[src$="cardBackFrameP1.png"] {
 	position: relative;
 	width: 100%;
 	min-height: 100%;
+	perspective: 1000px;
 }
 
 .fieldCardContainer .card {
@@ -293,10 +292,13 @@ img[src$="cardBackFrameP1.png"] {
 	transform: translateX(-50%);
 	white-space: pre;
 }
+.cardBtns > button.active {
+	background-color: orange;
+}
 .cardBtns.noClick > button {
 	pointer-events: none;
 }
-.fieldCardContainer:hover .cardActionHolder {
+.fieldCardContainer:hover .cardActionHolder, .alwaysShowCardButtons .cardActionHolder {
 	display: block;
 }
 
@@ -736,6 +738,7 @@ dialog.popupSelectMenu {
 	white-space: pre;
 	text-align: center;
 	filter: drop-shadow(black 0 0 .15em);
+	user-select: none;
 }
 
 #mainGameBlackoutContent::first-line {

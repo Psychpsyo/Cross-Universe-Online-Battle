@@ -7,7 +7,7 @@ let effectInterval = null;
 function spawnCard(parentElement) {
 	let card = document.createElement("div");
 	card.classList.add("levitateCard");
-	
+
 	let floatSeconds = Math.random() * 15 + 35;
 	card.style.setProperty("--float-time", floatSeconds + "s");
 	card.style.setProperty("--spin-delay", Math.random() * -20 + "s");
@@ -21,14 +21,14 @@ function spawnCard(parentElement) {
 	card.style.left = position + "%";
 	card.style.backgroundImage = "url('https://crossuniverse.net/images/cards/random?lang=" + locale.code + "&num=" + cardsSoFar + "')"
 	cardsSoFar++;
-	
+
 	parentElement.appendChild(card);
-	
+
 	// starts the animation
 	setTimeout(function() {
 		card.style.top = "-20vh";
 	}.bind(card), 500);
-	
+
 	// deletes the card once the animation is done
 	setTimeout(function() {
 		this.remove();

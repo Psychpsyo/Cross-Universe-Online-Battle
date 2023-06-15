@@ -1,4 +1,5 @@
 import {locale} from "/modules/locale.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 document.getElementById("handGeneratorTitle").textContent = locale["deckMaker"]["startingHandGenerator"]["title"];
 document.getElementById("regenerateStartingHand").textContent = locale["deckMaker"]["startingHandGenerator"]["redraw"];
@@ -13,7 +14,7 @@ export function generateStartingHand() {
 	for (let i = 0; i < 5;i++) {
 		let cardId = cards.splice(Math.floor(Math.random() * cards.length), 1);
 		let img = document.createElement("img");
-		img.src = linkFromCardId(cardId);
+		img.src = cardLoader.getCardImageFromID(cardId);
 		startingHandGeneratorCards.appendChild(img);
 	}
 }

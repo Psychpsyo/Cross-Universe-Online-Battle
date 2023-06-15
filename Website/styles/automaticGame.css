@@ -1,3 +1,60 @@
+/* card animations*/
+
+@keyframes yourAttack {
+	from {transform: translate3d(-50%, -50%, 0);}
+	to   {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% - var(--atk-distance) * 100%), 20vh);}
+}
+@keyframes opponentAttack {
+	from {transform: translate3d(-50%, -50%, 0) rotate(180deg);}
+	to   {transform: translate3d(calc(-50% + var(--atk-offset) * 100%), calc(-50% + var(--atk-distance) * 100%), 20vh) rotate(180deg);}
+}
+
+.attacking {
+	z-index: 100;
+}
+.attacking .card {
+	animation-duration: calc(.2s * var(--game-speed));
+	animation-iteration-count: 2;
+	animation-direction: alternate;
+	animation-timing-function: ease-in-out;
+}
+#p0Grid .attacking .card {
+	animation-name: opponentAttack;
+}
+#p1Grid .attacking .card {
+	animation-name: yourAttack;
+}
+
+@keyframes yourActivation {
+	0%   {transform: translate3d(-50%, -50%, 0);}
+	85%  {transform: translate3d(-50%, -50%, 40vh);}
+	100% {transform: translate3d(-50%, -50%, 40vh);}
+}
+@keyframes opponentActivation {
+	0%   {transform: translate3d(-50%, -50%, 0) rotate(180deg);}
+	85%  {transform: translate3d(-50%, -50%, 40vh) rotate(180deg);}
+	100% {transform: translate3d(-50%, -50%, 40vh) rotate(180deg);}
+}
+
+.activating {
+	z-index: 100;
+}
+
+.activating .card {
+	animation-duration: calc(.5s * var(--game-speed));
+	animation-iteration-count: 2;
+	animation-direction: alternate;
+	animation-timing-function: ease-in-out;
+}
+#p0Grid .activating .card {
+	animation-name: opponentActivation;
+}
+#p1Grid .activating .card {
+	animation-name: yourActivation;
+}
+
+
+/* general UI stuff */
 #phaseDisplay {
 	position: absolute;
 	top: 50%;
@@ -69,4 +126,41 @@
 }
 #opponentTurnDisplayLabel.hidden {
 	transform: translateY(100%);
+}
+
+#stackTitle {
+	padding-left: .2em;
+}
+#stackTitle.invalid {
+	filter: opacity(50%);
+}
+#controlPanel hr {
+	border-bottom: 1px solid var(--theme-border-color);
+	margin: 0;
+}
+#stackDisplayHolder {
+	display: flex;
+	height: 6em;
+	padding: .25em;
+	gap: .25em;
+}
+#stackDisplayHolder > img {
+	height: 100%;
+	display: block;
+}
+#stackDisplayHolder::after {
+	content: attr(data-block);
+	height: 100%;
+	aspect-ratio: 813 / 1185;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: 2px dashed var(--theme-border-color);
+	box-sizing: border-box;
+	filter: opacity(50%);
+}
+#automaticButtonArea {
+	display: flex;
+	justify-content: space-around;
+	padding: .25em;
 }

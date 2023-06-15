@@ -3,13 +3,13 @@
 	<head>
 		<meta charset="utf-8"/>
 		<base href="../">
-		
+
 		<title>Settings - Cross Universe Online Battle</title>
 		<meta name="description" content="Play Cross Universe online against others!">
 		<meta name="keywords" content="Cross Universe, Card Game, Crunis, クロス・ユニバース, クロユニ, card game, カードゲーム">
-		
+
 		<link rel="icon" type="image/png" href="images/favicon.png">
-		
+
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="settings/style.css">
 	</head>
@@ -17,7 +17,7 @@
 		<div id="mainHeaderHolder">
 			<header><h1 id="title">Settings</h1></header>
 		</div>
-		
+
 		<main aria-labelledby="title">
 			<section aria-labelledby="generalHeading">
 				<h2 id="generalHeading"></h2>
@@ -33,9 +33,10 @@
 					</div>
 					<div><input type="checkbox" id="partnerChoiceToggle"> <label for="partnerChoiceToggle" id="partnerChoiceLabel"></label></div>
 					<div><input type="checkbox" id="closePreviewToggle"> <label for="closePreviewToggle" id="closePreviewToggleLabel"></label></div>
+					<div><input type="checkbox" id="alwaysShowCardButtonsToggle"> <label for="alwaysShowCardButtonsToggle" id="alwaysShowCardButtonsToggleLabel"></label></div>
 				</div>
 			</section>
-			
+
 			<section aria-labelledby="profileHeading">
 				<h2 id="profileHeading"></h2>
 				<div class="settingsBlock">
@@ -43,7 +44,7 @@
 					<div><label for="customCardBack" id="cardBackLabel"></label><input type="text" id="customCardBack"></div>
 				</div>
 			</section>
-			
+
 			<section aria-labelledby="customizationHeading">
 				<h2 id="customizationHeading"></h2>
 				<div class="settingsBlock">
@@ -63,7 +64,7 @@
 					<div><input type="checkbox" id="menuCardsToggle"> <label for="menuCardsToggle" id="menuCardsToggleLabel"></label></div>
 				</div>
 			</section>
-			
+
 			<section aria-labelledby="accessibilityHeading">
 				<h2 id="accessibilityHeading"></h2>
 				<div class="settingsBlock">
@@ -80,7 +81,7 @@
 					<div id="customFontInputDiv"><label for="customFontInput" id="customFontLabel"></label><input type="text" id="customFontInput"></div>
 				</div>
 			</section>
-			
+
 			<section aria-labelledby="hotkeysHeading">
 				<h2 id="hotkeysHeading"></h2>
 				<div class="settingsBlock">
@@ -102,14 +103,14 @@
 				</div>
 			</section>
 		</main>
-		
+
 		<template id="langWarning">
 			<span class="warningNote"><b class="warningNoteIcon" aria-role="img">ⓘ</b> <span class="warningText"></span></span>
 		</template>
 		<template id="langWarningLink">
 			<a class="warningNote" href="https://github.com/Psychpsyo/Cross-Universe-Online-translations" target="_blank"><b class="warningNoteIcon" aria-role="img">ⓘ</b> <span class="warningText"></span></a>
 		</template>
-		
+
 		<script src="scripts/localStorageSetup.js"></script>
 		<script src="settings/script.js" type="module"></script>
 	</body>

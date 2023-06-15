@@ -1,0 +1,29 @@
+{
+	"name": {
+		"en": "All Implemented Cards"
+	},
+	"author": {
+		"en": "Psychpsyo"
+	},
+	"description": {
+		"en": "This deck just contains every card currently implemented in automatic mode.\n(Excluding the 10 units without any effects)"
+	},
+	"cards": [
+		{"id": "U00085", "amount": 3},
+		{"id": "U00210", "amount": 3},
+		{"id": "U00089", "amount": 3},
+		{"id": "S00028", "amount": 2},
+		{"id": "S00021", "amount": 1},
+		{"id": "S00099", "amount": 1},
+		{"id": "S00037", "amount": 1},
+		{"id": "S00062", "amount": 1},
+		{"id": "S00201", "amount": 2},
+		{"id": "S00184", "amount": 2},
+		{"id": "S00106", "amount": 2},
+		{"id": "S00123", "amount": 2},
+		{"id": "S00045", "amount": 2},
+		{"id": "I00034", "amount": 2},
+		{"id": "I00003", "amount": 2},
+		{"id": "I00088", "amount": 2}
+	]
+}

@@ -11,44 +11,53 @@
 		"rulesButton": "Spielregeln",
 		"rulesLink": "https://crossuniverse.net/rules",
 		"unofficialNotice": "Diese Seite ist eine Fan-gemachte, unoffizielle Cross Universe Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
-		
+
 		"gamemode": "Spielmodus:",
 		"gamemodes": {
 			"normal": "Normal",
 			"draft": "Draft",
-			"normalAutomatic": "Automatisch"
+			"normalAutomatic": "Automatisch (WIP)"
 		},
-		
+
 		"settingsButton": "Einstellungen",
 		"deckCreatorButton": "Deck Editor"
 	},
-	
+
 	"game": {
-		"youStart": "Du bist zuerst dran.",
-		"opponentStarts": "Dein Gegner ist zuerst dran.",
-		"yourDeckShuffled": "Dein Deck wurde gemischt.",
-		"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
-		
+		"notices": {
+			"youStart": "Du bist zuerst dran.",
+			"opponentStarts": "Dein Gegner ist zuerst dran.",
+			"yourDeckShuffled": "Dein Deck wurde gemischt.",
+			"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
+			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
+			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt."
+		},
+
 		"info": {
 			"you": "Du",
 			"opponent": "Gegner",
 			"life": "LP:",
 			"mana": "Mana:"
 		},
-		
+
 		"deckSelect": {
 			"chooseYourDeck": "Wähle dein Deck.",
 			"loadingDeck": "Deck wird geladen...",
 			"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
 			"dropYourDeck": "Deck per Drag & Drop hier ablegen.",
 			"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
-			
+
 			"deckListDefault": "Default",
 			"deckListLegacy": "Legacy",
 			"deckListLoadSelected": "Gewähltes Deck laden",
-			"deckListCardAmount": "{#CARDS} Karten"
+			"deckListCardAmount": "{#CARDS} Karten",
+
+			"errors": {
+				"generic": "Das Deck konnte aufgrund eines unbekannten Fehlers nicht geladen werden.",
+				"unsupportedInAutomatic": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält. Diese Karte existiert im automatischen Modus noch nicht."
+			}
 		},
-		
+
 		"partnerSelect": {
 			"useSuggestedQuestion": "Möchtest du den empfohlenen Partner für dieses Deck verwenden oder selber einen wählen?",
 			"useSuggested": "Empfohlenen wählen",
@@ -57,7 +66,7 @@
 			"waitingForOpponent": "Warte darauf, dass dein Gegner einen Partner wählt...",
 			"revealPartner": "Partner aufdecken"
 		},
-		
+
 		"cardSelector": {
 			"tokens": "Tokens:",
 			"deck1": "Dein Deck:",
@@ -65,16 +74,18 @@
 			"discard1": "Dein Ablagestapel:",
 			"exile0": "Exil deines Gegners:",
 			"exile1": "Dein Exil:",
-			
+
 			"returnAllToDeck": "Alle zurück in dein Deck mischen"
 		},
-		
+
 		"cardChoice": {
 			"confirm": "Bestätigen",
-			"genericTitle": "Wähle Karten:",
-			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:"
+			"genericTitle": "Wähle Karte(n):",
+			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:",
+			"attackTarget": "Wähle, wen du angreifst:",
+			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':"
 		},
-		
+
 		"fieldLabels": {
 			"verticalText": false,
 			"unitZone": "Einheiten\nZone",
@@ -84,7 +95,7 @@
 			"discardPile": "Ablage-\nstapel",
 			"deck": "Deck"
 		},
-		
+
 		"manual": {
 			"deck": {
 				"draw": "Ziehen",
@@ -96,24 +107,35 @@
 				"dropBottom": "Unten Drunter",
 				"dropCancel": "Abbrechen"
 			},
-			
+
 			"actions": {
 				"life": "LP",
 				"mana": "Mana",
-				
+
 				"half": "Halbieren",
 				"tokens": "Tokens",
 				"showHand": "Handkarten Zeigen",
 				"hideHand": "Handkarten Verbergen"
 			},
-			
+
 			"presented": {
 				"reveal": "Zeigen",
 				"hide": "Verbergen"
 			}
 		},
-		
+
 		"automatic": {
+			"actions": {
+				"pass": "PASSEN",
+				"attack": "ANGREIFEN"
+			},
+
+			"stacks": {
+				"title": "Stack {#NUM}:",
+				"manaSupplyPhase": "Mana Supply Phase:",
+				"block": "Block {#NUM}"
+			},
+
 			"phases": {
 				"manaSupplyPhase": "Mana\nSupply Phase",
 				"drawPhase": "Draw\nPhase",
@@ -122,16 +144,28 @@
 				"secondMainPhase": "Main\nPhase 2",
 				"endPhase": "End\nPhase"
 			},
-			
+
 			"battlePhase": {
 				"question": "Möchtest du die Battle Phase betreten?",
 				"enter": "Battle Phase betreten",
 				"skip": "Battle Phase überspringen"
 			},
-			
+
 			"retire": {
 				"dropRetire": "Retire (x{#AMOUNT})",
 				"dropCancel": "Abbrechen"
+			},
+
+			"cardOptions": {
+				"attack": "Angreifen",
+				"activate": "Aktivieren",
+				"activateMultiple": "Aktiviere #{#ABILITY}"
+			},
+
+			"playerSelect": {
+				"question": "Wähle einen Spieler für den Effekt von '{#CARDNAME}':",
+				"you": "Du selbst",
+				"opponent": "Dein Gegner"
 			},
 
 			"gameOver": {
@@ -159,7 +193,7 @@
 			}
 		}
 	},
-	
+
 	"chat": {
 		"title": "Chat",
 		"enterMessage": "Nachricht schreiben...",
@@ -167,7 +201,7 @@
 		"opponent": "GEGNER: ",
 		"colon": ": "
 	},
-	
+
 	"draft": {
 		"yourTurn": "Wähle eine Karte.",
 		"opponentsTurn": "Dein Gegner wählt eine Karte.",
@@ -180,13 +214,13 @@
 		"yourDeck": "Dein Deck",
 		"opponentDeck": "Gegnerisches Deck"
 	},
-	
+
 	"cardAltText": "{#NAME}, level {#LEVEL} {#CARDTYPE},\n{#TYPES},\nEffekte:\n{#EFFECTS}",
 	"unitAltText": "{#NAME}, level {#LEVEL} {#CARDTYPE},\n{#ATK} Angriff, {#DEF} Verteidigung,\n{#TYPES},\nEffekte:\n{#EFFECTS}",
-	
+
 	"settings": {
 		"title": "Einstellungen",
-		
+
 		"general": {
 			"title": "Allgemeines",
 			"language": "Sprache:",
@@ -198,9 +232,10 @@
 			},
 			"languageWarningName": "Achtung:",
 			"partnerChoice": "Immer die Wahl des Partners geben",
-			"autoClosePreview": "Kartenvorschau durch Danebenklicken schließen"
+			"autoClosePreview": "Kartenvorschau durch Danebenklicken schließen",
+			"alwaysShowCardButtons": "Karteninteraktionsbuttons auch ohne hovern zeigen"
 		},
-		
+
 		"profile": {
 			"title": "Profil",
 			"username": "Dein Nutzername:",
@@ -208,7 +243,7 @@
 			"cardBackLink": "Link für einen Kartenrücken:",
 			"cardBackLinkPlaceholder": "Kein Kartenrücken gewählt."
 		},
-		
+
 		"customization": {
 			"title": "Display & Themes",
 			"fieldLabels": "Feldbeschriftung zeigen",
@@ -223,7 +258,7 @@
 			},
 			"mainMenuCards": "Zeige schwebende Karten im Hauptmenü"
 		},
-		
+
 		"accessibility": {
 			"title": "Barrierefreiheit",
 			"font": "Schriftart:",
@@ -237,7 +272,7 @@
 			"customFont": "Name der Schriftart:",
 			"customFontPlaceholder": "Keine Benutzerdefinierte Schriftart gewählt."
 		},
-		
+
 		"hotkeys": {
 			"title": "Hotkeys",
 			"resetHotkeys": "Hotkeys zurücksetzen",
@@ -258,7 +293,7 @@
 			"shuffleDeck": "Eigenes Deck mischen:",
 			"showDeckTop": "Oberste Karte im Deck zeigen:",
 			"previewHandCard": "Handkarten anzeigen:",
-			
+
 			"keys": {
 				"KeyA": "A",
 				"KeyB": "B",
@@ -285,7 +320,7 @@
 				"KeyX": "X",
 				"KeyY": "Y",
 				"KeyZ": "Z",
-				
+
 				"Digit0": "0",
 				"Digit1": "1",
 				"Digit2": "2",
@@ -296,7 +331,7 @@
 				"Digit7": "7",
 				"Digit8": "8",
 				"Digit9": "9",
-				
+
 				"Escape": "Esc",
 				"Backspace": "Rück",
 				"Tab": "Tab",
@@ -304,23 +339,23 @@
 				"CapsLock": "CapsLock",
 				"Space": "Leer",
 				"ContextMenu": "Menü",
-				
+
 				"PrintScreen": "Druck",
 				"ScrollLock": "Rollen",
 				"Pause": "Pause",
-				
+
 				"Insert": "Einfg",
 				"Home": "Pos1",
 				"PageUp": "Bild↑",
 				"Delete": "Entf",
 				"End": "Ende",
 				"PageDown": "Bild↓",
-				
+
 				"ArrowLeft": "Links",
 				"ArrowRight": "Rechts",
 				"ArrowUp": "Hoch",
 				"ArrowDown": "Runter",
-				
+
 				"Numpad0": "Num0",
 				"Numpad1": "Num1",
 				"Numpad2": "Num2",
@@ -340,7 +375,7 @@
 				"NumpadEqual": "Num=",
 				"NumpadComma": "Num,",
 				"NumpadDecimal": "Num,",
-				
+
 				"F1": "F1",
 				"F2": "F2",
 				"F3": "F3",
@@ -368,12 +403,12 @@
 			}
 		}
 	},
-	
+
 	"deckMaker": {
 		"title": "Deck Editor",
 		"deck": "Deck",
 		"search": "Suche",
-		
+
 		"searchResults": "Suchergebnisse",
 		"unitTokenColumn": "Einheiten-/Tokenspalte",
 		"spellColumn": "Zauberspalte",
@@ -386,7 +421,7 @@
 		"standardItems": "Standard-Items",
 		"continuousItems": "Permanente Items",
 		"equipableItems": "Ausrüstbare Items",
-		
+
 		"searchMenu": {
 			"title": "Kartensuche",
 			"search": "Suchen",
@@ -417,9 +452,13 @@
 			"sortByReleaseDate": "Erscheinungsdatum",
 			"sortByCardId": "Karten-ID",
 			"sortByAttack": "Angriff",
-			"sortByDefense": "Verteidigung"
+			"sortByDefense": "Verteidigung",
+			"supportedIn": "Verfügbar in:",
+			"supportedInAnywhere": "egal",
+			"supportedInManual": "Manuell",
+			"supportedInAutomatic": "Automatisch"
 		},
-		
+
 		"cardInfo": {
 			"title": "Karteninfo",
 			"generalSection": "Allgemeine Infos",
@@ -432,45 +471,46 @@
 			"visibleOn": "Sichtbar Auf:",
 			"toDeck": "Dem Deck Hinzufügen"
 		},
-		
+
 		"deckMenu": {
 			"title": "Deck-Übersicht",
 			"cardListTitle": "Kartenliste",
 			"detailsTitle": "Details",
 			"recentCardsTitle": "Zuletzt Benutzte Karten",
-			
+
 			"name": "Deckname:",
 			"namePlaceholder": "Neues Deck",
 			"description": "Beschreibung:",
 			"partner": "Partnerkarte:",
-			
+
 			"cardTotal": "Gesamt:",
 			"unitTotal": "Einheiten:",
 			"spellTotal": "Zauber:",
 			"itemTotal": "Items:",
-			
+
 			"warnings": {
-				"title": "Warnings:",
-				"cardMinimum": "A deck must have at least 30 cards.",
-				"cardMaximum": "A deck must have at most 50 cards.",
-				"needsUnit": "A deck needs to have a unit.",
-				"noTokens": "A deck may not contain any Tokens.",
-				"noPartner": "To export as .deck, you must select a partner."
+				"title": "Warnungen:",
+				"cardMinimum": "Ein Deck muss mindestens 30 Karten haben.",
+				"cardMaximum": "Ein Deck darf maximal 50 Karten haben.",
+				"needsUnit": "Ein Deck braucht mindestens eine Einheit.",
+				"noTokens": "Ein Deck darf keine Tokens enthalten.",
+				"noPartner": "Um nach .deck zu exportieren musst du einen Partner wählen.",
+				"unsupported": "Manche Karten in diesem Deck gibt es im automatischen Spielmodus nicht."
 			},
-			
+
 			"levelDistribution": "Level-Verteilung:",
 			"options": "Optionen",
 			"exportDeck": "Exportieren (.deck)",
 			"importDeck": "Deck Importieren",
 			"drawStartingHand": "Starthand ziehen"
 		},
-		
+
 		"startingHandGenerator": {
 			"title": "Starthandgenerator",
 			"redraw": "Erneut Ziehen"
 		}
 	},
-	
+
 	"cardDetailsAttack": "Angriff: ",
 	"cardDetailsDefense": "Verteidigung: ",
 	"cardDetailsTypes": "Typen: ",
@@ -490,10 +530,10 @@
 	"fastCardDetailEffect": "Schnelle Fähigkeit:",
 	"deployCardDetailEffect": "Beim Einsetzen:",
 	"castCardDetailEffect": "Beim Einsetzen:",
-	
+
 	"subEffectOpeningBracket": "［",
 	"subEffectClosingBracket": "］",
-	
+
 	"typeSeparator": ", ",
 	"typeless": "typenlos",
 	"types": {
@@ -540,10 +580,10 @@
 		"NinjaTool": "Ninja Tool",
 		"Ninjutsu": "Ninjutsu"
 	},
-	
+
 	"customCards": {
 		"title": "Custom Karten",
-		
+
 		"cardName": "Name:",
 		"cardLevel": "Level:",
 		"cardTypes": "Typen:",
@@ -551,10 +591,10 @@
 		"cardDefense": "Verteidigung:",
 		"cardType": "Art:",
 		"cardAbilities": "Fähigkeiten:",
-		
+
 		"possibleTypes": "Mögliche Typen sind:\n{#TYPES}",
 		"possibleTypesSeperator": ", ",
-		
+
 		"save": "Karte speichern",
 		"saveCopy": "Als Kopie speichern",
 		"createNew": "Neu erstellen",
@@ -564,27 +604,27 @@
 		"noSavedCards": "Du hast noch keine Karten gespeichert.",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
-		
+
 		"unsavedChanges": "Es gibt ungespeicherte Änderungen.\nWenn du fortführst, werden diese verloren gehen.",
 		"reallyDelete": "Möchtest du '{#CARDNAME}' wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden. '{#CARDNAME}' wird für immer verloren sein.",
 		"doesntExist": "Die gewählte Karte existiert nicht mehr und konnte deshalf nicht geladen werden.",
-		
+
 		"renderer": {
 			"attack": "Attack:",
 			"defense": "Defense:",
-			
+
 			"standardSpell": "Standard Spell",
 			"enchantSpell": "Enchant Spell",
 			"continuousSpell": "Continuous Spell",
 			"standardItem": "Standard Item",
 			"equipableItem": "Equipable Item",
 			"continuousItem": "Continuous Item",
-			
+
 			"ideaCredit": "Idee: ",
 			"tokenNotice": "※Token cards may not be added to decks."
 		}
 	},
-	
+
 	"cardActions": {
 		"I00040": {
 			"roll": "Würfeln",
@@ -592,6 +632,6 @@
 			"opponentRoll": "Dein Gegner hat Fate's Dice geworfen. Es war eine {#RESULT}."
 		}
 	},
-	
+
 	"optional": {}
 }

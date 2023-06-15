@@ -1,4 +1,5 @@
 // general
+localStorage.setItem("alwaysShowCardButtons", localStorage.getItem("alwaysShowCardButtons") ?? true);
 localStorage.setItem("autoClosePreview", localStorage.getItem("autoClosePreview") ?? "false");
 localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("cardBackToggle", localStorage.getItem("cardBackToggle") ?? false);

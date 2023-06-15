@@ -1,8 +1,9 @@
 import {cardActions} from "/modules/cardActions.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
-import {previewCard} from "/modules/generalUI.js";
+import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 import {FieldZone} from "/rulesEngine/zones.js";
+import {getCardImage} from "/modules/cardLoader.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -50,34 +51,54 @@ if (localStorage.getItem("fieldLabelToggle") == "true") {
 	});
 }
 
-export function init() {
-	new FieldCardSlot(game.players[0].partnerZone, 0, 2);
-	new FieldCardSlot(game.players[1].partnerZone, 0, 17);
-	for (let i = 0; i < 5; i++) {
-		new FieldCardSlot(game.players[0].unitZone, i, 9 - i);
-		new FieldCardSlot(game.players[1].unitZone, i, 10 + i);
+if (localStorage.getItem("alwaysShowCardButtons") == "true") {
+	document.documentElement.classList.add("alwaysShowCardButtons");
+}
+
+export function fieldSlotIndexFromZone(zone, index) {
+	switch(zone) {
+		case game.players[0].partnerZone: {
+			return 2;
+		}
+		case game.players[1].partnerZone: {
+			return 17;
+		}
+		case game.players[0].unitZone: {
+			return 9 - index;
+		}
+		case game.players[1].unitZone: {
+			return 10 + index;
+		}
+		case game.players[0].spellItemZone: {
+			return [4, 3, 1, 0][index];
+		}
+		case game.players[1].spellItemZone: {
+			return [15, 16, 18, 19][index];
+		}
 	}
-	new FieldCardSlot(game.players[0].spellItemZone, 3, 0);
-	new FieldCardSlot(game.players[0].spellItemZone, 2, 1);
-	new FieldCardSlot(game.players[0].spellItemZone, 1, 3);
-	new FieldCardSlot(game.players[0].spellItemZone, 0, 4);
-	new FieldCardSlot(game.players[1].spellItemZone, 0, 15);
-	new FieldCardSlot(game.players[1].spellItemZone, 1, 16);
-	new FieldCardSlot(game.players[1].spellItemZone, 2, 18);
-	new FieldCardSlot(game.players[1].spellItemZone, 3, 19);
-	
+	return -1;
+}
+
+export function init() {
 	game.players.forEach(player => {
 		uiPlayers.push(new UiPlayer(player));
-		
+
 		new DeckCardSlot(player.deckZone);
 		new PileCardSlot(player.discardPile);
 		new PileCardSlot(player.exileZone);
-		
+		new FieldCardSlot(player.partnerZone, 0);
+		for (let i = 0; i < 5; i++) {
+			new FieldCardSlot(player.unitZone, i);
+		}
+		for (let i = 0; i < 4; i++) {
+			new FieldCardSlot(player.spellItemZone, i);
+		}
+
 		document.getElementById("hand" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
 			dropCard(localPlayer, player.handZone, player.handZone.cards.length);
 		});
-		
+
 		// presented cards (only used during manual play)
 		document.getElementById("presentedCards" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
@@ -85,12 +106,12 @@ export function init() {
 			dropCard(localPlayer, presentedZone, presentedZone.cards.length);
 		});
 	});
-	
+
 	// dropping cards off in nowhere
 	document.addEventListener("mouseup", function() {
 		dropCard(localPlayer, null, 0);
 	});
-	
+
 	// setup cursor movement
 	document.addEventListener("mousemove", function(e) {
 		let fieldRect = document.getElementById("field").getBoundingClientRect();
@@ -110,7 +131,7 @@ export function init() {
 			socket.send("[hideCursor]");
 		}
 	});
-	
+
 	// previewing hand cards
 	document.addEventListener("keydown", function(e) {
 		if (e.code.startsWith("Digit") && !e.shiftKey && !e.altKey && !e.ctrlKey) {
@@ -125,7 +146,7 @@ export function init() {
 			return;
 		}
 	});
-	
+
 	// card selector
 	cardSelectorMainSlot = new CardSelectorMainSlot()
 	cardSelector.addEventListener("click", function(e) {
@@ -141,7 +162,7 @@ export function init() {
 		gameState.controller.returnAllToDeck(cardSelectorMainSlot.zone);
 		closeCardSelect();
 	});
-	
+
 	// card choice menu
 	cardChoiceMenu.addEventListener("cancel", function(e) {
 		e.preventDefault();
@@ -151,8 +172,10 @@ export function init() {
 		cardChoiceMenu.close(cardChoiceSelected.join("|"));
 		cardChoiceGrid.innerHTML = "";
 		cardChoiceSelected = [];
+		// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
+		window.setTimeout(closeCardPreview, 0);
 	});
-	
+
 	lastFrame = performance.now();
 	animate();
 }
@@ -162,7 +185,7 @@ export function receiveMessage(command, message) {
 		case "uiGrabbedCard": { // opponent picked up a card
 			let zone = zoneToLocal(message.substr(0, message.indexOf("|")));
 			let index = message.substr(message.indexOf("|") + 1);
-			
+
 			grabCard(game.players[0], zone, index);
 			return true;
 		}
@@ -173,7 +196,7 @@ export function receiveMessage(command, message) {
 				zone = zoneToLocal(message.substr(0, message.indexOf("|")));
 				index = message.substr(message.indexOf("|") + 1);
 			}
-			
+
 			dropCard(game.players[0], zone, index);
 			return true;
 		}
@@ -232,7 +255,7 @@ export function insertCard(zone, index) {
 			}
 		}
 	});
-	
+
 	switch (zone.type) {
 		case "hand": {
 			new HandCardSlot(zone, index);
@@ -275,13 +298,34 @@ function dropCard(player, zone, index) {
 	}
 }
 
+export function addFieldButton(zone, index, label, type, onClick, visible = false) {
+	if (!(zone instanceof FieldZone)) {
+		throw new Error("Can't add field buttons to non-field zones")
+	}
+	for (let slot of cardSlots) {
+		if (slot.zone === zone && slot.index == index) {
+			return slot.addCardButton(label, type, onClick, visible);
+		}
+	}
+}
+export function clearFieldButtons(zone, index, type) {
+	if (!(zone instanceof FieldZone)) {
+		throw new Error("Can't add field buttons to non-field zones")
+	}
+	for (let slot of cardSlots) {
+		if (slot.zone === zone && slot.index == index) {
+			slot.clearCardButtons(type);
+		}
+	}
+}
+
 export class UiCardSlot {
 	constructor(zone, index) {
 		this.zone = zone;
 		this.index = index;
 		cardSlots.push(this);
 	}
-	
+
 	makeDragSource(player) {}
 	clearDragSource(player) {}
 	update() {}
@@ -292,10 +336,10 @@ export class UiCardSlot {
 }
 
 class FieldCardSlot extends UiCardSlot {
-	constructor(zone, index, fieldIndex) {
+	constructor(zone, index) {
 		super(zone, index);
-		this.fieldSlot = document.getElementById("field" + fieldIndex);
-		
+		this.fieldSlot = document.getElementById("field" + fieldSlotIndexFromZone(zone, index));
+
 		this.fieldSlot.addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, zone, index);
@@ -311,7 +355,7 @@ class FieldCardSlot extends UiCardSlot {
 			dropCard(localPlayer, zone, index);
 		});
 	}
-	
+
 	makeDragSource(player) {
 		this.fieldSlot.classList.add("dragSource");
 	}
@@ -320,20 +364,14 @@ class FieldCardSlot extends UiCardSlot {
 	}
 	update() {
 		let card = this.zone.get(this.index);
-		for (let button of Array.from(this.fieldSlot.parentElement.querySelectorAll(".cardSpecific"))) {
-			button.remove();
-		}
+		this.clearCardButtons("cardSpecific");
 		if (card) {
-			this.fieldSlot.src = card.getImage();
+			getCardImage(card).then(img => this.fieldSlot.src = img);
 			// add card action buttons
 			if (!gameState.automatic && !card.hidden) {
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
-						let button = document.createElement("button");
-						button.classList.add("cardSpecific");
-						button.textContent = locale.cardActions[card.cardId][key];
-						button.addEventListener("click", value);
-						this.fieldSlot.parentElement.querySelector(".cardActionHolder").appendChild(button);
+						this.addCardButton(locale.cardActions[card.cardId][key], "cardSpecific", value);
 					}
 				}
 			}
@@ -345,15 +383,37 @@ class FieldCardSlot extends UiCardSlot {
 	remove() {
 		this.update();
 	}
+
+	addCardButton(label, type, onClick, visible = false) {
+		let button = document.createElement("button");
+		button.classList.add(type);
+		button.textContent = label;
+		button.addEventListener("click", onClick);
+		let buttonHolder = this.fieldSlot.parentElement.querySelector(".cardActionHolder");
+		buttonHolder.appendChild(button);
+		if (visible) {
+			buttonHolder.classList.add("visible");
+		}
+		return button;
+	}
+	clearCardButtons(type) {
+		let buttonHolder = this.fieldSlot.parentElement.querySelector(".cardActionHolder");
+		for (let button of Array.from(buttonHolder.querySelectorAll("." + type))) {
+			button.remove();
+		}
+		if (buttonHolder.childElementCount == 0) {
+			buttonHolder.classList.remove("visible");
+		}
+	}
 }
 
 class HandCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
-		
+
 		this.handElem = document.getElementById("hand" + this.zone.player.index);
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.get(index).getImage();
+		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
 		this.cardElem.classList.add("card");
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
@@ -370,7 +430,7 @@ class HandCardSlot extends UiCardSlot {
 		}
 		this.handElem.style.setProperty("--card-count", "" + this.handElem.childElementCount);
 	}
-	
+
 	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 	}
@@ -378,7 +438,7 @@ class HandCardSlot extends UiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		this.cardElem.src = this.zone.get(this.index).getImage();
+		getCardImage(this.zone.get(this.index)).then(img => this.cardElem.src = img);
 	}
 	remove() {
 		super.remove();
@@ -391,7 +451,7 @@ class DeckCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
-		
+
 		document.getElementById("deck" + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 		});
@@ -400,7 +460,7 @@ class DeckCardSlot extends UiCardSlot {
 			dropCard(localPlayer, this.zone, -1);
 		}.bind(this));
 	}
-	
+
 	update() {
 		this.cardCount = this.zone.cards.length;
 		this.setVisuals();
@@ -414,7 +474,7 @@ class DeckCardSlot extends UiCardSlot {
 		this.setVisuals();
 	}
 	setVisuals() {
-		document.getElementById("deck" + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
+		getCardImage(this.zone.get(this.zone.cards.length - 1)).then(img => document.getElementById("deck" + this.zone.player.index).src = img);
 		document.getElementById("deck" + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
@@ -423,7 +483,7 @@ class PileCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
-		
+
 		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, this.zone, this.zone.cards.length - 1);
@@ -436,7 +496,7 @@ class PileCardSlot extends UiCardSlot {
 			dropCard(localPlayer, this.zone, this.zone.cards.length);
 		}.bind(this));
 	}
-	
+
 	update() {
 		this.cardCount = this.zone.cards.length;
 		this.setVisuals();
@@ -450,7 +510,7 @@ class PileCardSlot extends UiCardSlot {
 		this.setVisuals();
 	}
 	setVisuals() {
-		document.getElementById(this.zone.type + this.zone.player.index).src = this.zone.get(this.zone.cards.length - 1)?.getImage() ?? "images/cardHidden.png";
+		getCardImage(this.zone.get(this.zone.cards.length - 1)).then(img => document.getElementById(this.zone.type + this.zone.player.index).src = img);
 		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 }
@@ -459,13 +519,13 @@ class PileCardSlot extends UiCardSlot {
 class PresentedCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
-		
+
 		this.isRevealed = false;
 		this.zoneElem = document.getElementById("presentedCards" + this.zone.player.index);
 		this.cardElem = document.createElement("div");
-		
-		this.cardImg = document.createElement("img")
-		this.cardImg.src = this.zone.get(index).getImage();
+
+		this.cardImg = document.createElement("img");
+		getCardImage(this.zone.get(index)).then(img => this.cardImg.src = img);
 		this.cardImg.addEventListener("click", function(e) {
 			e.stopPropagation();
 			previewCard(this.zone.get(this.index));
@@ -475,7 +535,7 @@ class PresentedCardSlot extends UiCardSlot {
 			grabCard(localPlayer, this.zone, this.index);
 		}.bind(this));
 		this.cardElem.appendChild(this.cardImg);
-		
+
 		if (this.zone.player === localPlayer) {
 			this.revealBtn = document.createElement("button");
 			this.revealBtn.textContent = locale.game.manual.presented.reveal;
@@ -493,7 +553,7 @@ class PresentedCardSlot extends UiCardSlot {
 		}
 		this.zoneElem.appendChild(this.cardElem);
 	}
-	
+
 	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 		if (player === localPlayer) {
@@ -507,7 +567,7 @@ class PresentedCardSlot extends UiCardSlot {
 		}
 	}
 	update() {
-		this.cardImg.src = this.zone.get(this.index).getImage();
+		getCardImage(this.zone.get(this.index)).then(img => this.cardImg.src = img);
 	}
 	remove() {
 		super.remove();
@@ -518,9 +578,9 @@ class PresentedCardSlot extends UiCardSlot {
 class CardSelectorSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
-		
+
 		this.cardElem = document.createElement("img");
-		this.cardElem.src = zone.get(index).getImage();
+		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
 		this.cardElem.classList.add("card");
 		this.cardElem.style.order = -index;
 		this.cardElem.addEventListener("dragstart", function(e) {
@@ -535,7 +595,7 @@ class CardSelectorSlot extends UiCardSlot {
 		}.bind(this));
 		cardSelectorGrid.insertBefore(this.cardElem, cardSelectorGrid.firstChild);
 	}
-	
+
 	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 	}
@@ -543,7 +603,7 @@ class CardSelectorSlot extends UiCardSlot {
 		this.cardElem.classList.remove("dragSource");
 	}
 	update() {
-		this.cardElem.src = this.zone.get(this.index).getImage();
+		getCardImage(this.zone.get(this.index)).then(img => this.cardElem.src = img);
 	}
 	remove() {
 		super.remove();
@@ -556,7 +616,7 @@ class CardSelectorMainSlot extends UiCardSlot {
 	constructor() {
 		super(null, -1);
 	}
-	
+
 	remove() {}
 	insert(index) {
 		this.zone.cards[index].hidden = false;
@@ -573,7 +633,7 @@ export function openCardSelect(zone) {
 		zone.get(i).hidden = false;
 		cardSelectorSlots.push(new CardSelectorSlot(zone, i));
 	}
-	
+
 	//show selector
 	cardSelectorTitle.textContent = locale.game.cardSelector[gameState.getZoneName(zone)];
 	if (document.getElementById("cardSelectorReturnToDeck")) {
@@ -585,7 +645,7 @@ export function openCardSelect(zone) {
 	}
 	cardSelector.showModal();
 	cardSelector.appendChild(cardDetails);
-	
+
 	cardSelectorGrid.parentNode.scrollTop = 0;
 }
 export function closeCardSelect() {
@@ -600,6 +660,8 @@ export function closeCardSelect() {
 	}
 	gameFlexBox.appendChild(cardDetails);
 	cardSelector.close();
+	// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
+	window.setTimeout(closeCardPreview, 0);
 }
 export function toggleCardSelect(zone) {
 	if (cardSelectorMainSlot.zone === zone) {
@@ -613,17 +675,17 @@ export function toggleCardSelect(zone) {
 class UiPlayer {
 	constructor(player) {
 		this.player = player;
-		
+
 		this.life = new UiValue(player.life, 5, document.getElementById("lifeDisplay" + player.index));
 		this.mana = new UiValue(player.mana, 100, document.getElementById("manaDisplay" + player.index));
-		
+
 		this.posX = 0;
 		this.posY = 0;
 		this.lastX = 0;
 		this.lastY = 0;
 		this.targetX = 0;
 		this.targetY = 0;
-		
+
 		this.dragging = false;
 		this.dragCardElem = document.createElement("img");
 		this.dragCardElem.classList.add("dragCard");
@@ -632,7 +694,7 @@ class UiPlayer {
 			this.dragCardElem.id = "yourDragCard";
 		} else {
 			this.dragCardElem.hidden = true;
-			
+
 			this.cursorElem = document.createElement("img");
 			this.cursorElem.classList.add("dragCard");
 			this.cursorElem.src = "images/opponentCursor.png";
@@ -640,10 +702,10 @@ class UiPlayer {
 			draggedCardImages.appendChild(this.cursorElem);
 		}
 	}
-	
+
 	setDrag(card) {
 		if (card) {
-			this.dragCardElem.src = card.getImage();
+			getCardImage(card).then(img => this.dragCardElem.src = img);
 			this.dragging = true;
 		}
 	}
@@ -661,7 +723,7 @@ class UiValue {
 		this.speed = speed;
 		this.displayElem = displayElem;
 	}
-	
+
 	async set(value, instant) {
 		if (value != this.value) {
 			this.targetValue = value;
@@ -674,7 +736,7 @@ class UiValue {
 			}
 		}
 	}
-	
+
 	animate(delta) {
 		if (this.value != this.targetValue) {
 			this.counter += delta;
@@ -683,7 +745,7 @@ class UiValue {
 				this.value += Math.sign(this.targetValue - this.value);
 			}
 			this.displayElem.textContent = this.value;
-			
+
 			if (this.value == this.targetValue) {
 				this.displayElem.classList.remove("valueDown");
 				this.displayElem.classList.remove("valueUp");
@@ -695,33 +757,33 @@ class UiValue {
 function animate(currentTime) {
 	let delta = currentTime - lastFrame;
 	lastFrame = currentTime;
-	
+
 	let fieldRect = document.getElementById("field").getBoundingClientRect();
 	for (let uiPlayer of uiPlayers) {
 		// cursors
 		uiPlayer.posX += (uiPlayer.targetX - uiPlayer.posX) / 5;
 		uiPlayer.posY += (uiPlayer.targetY - uiPlayer.posY) / 5;
-		
+
 		uiPlayer.dragCardElem.style.left = (uiPlayer.posX * fieldRect.height + fieldRect.width / 2) + "px";
 		uiPlayer.dragCardElem.style.top = uiPlayer.posY * fieldRect.height + "px";
 		if (uiPlayer.player !== localPlayer) {
 			uiPlayer.cursorElem.style.left = uiPlayer.dragCardElem.style.left;
 			uiPlayer.cursorElem.style.top = uiPlayer.dragCardElem.style.top;
 		}
-		
+
 		let velX = uiPlayer.posX - uiPlayer.lastX;
 		let velY = uiPlayer.lastY - uiPlayer.posY;
-		
+
 		let flipped = uiPlayer.player.index % 2 == 0;
 		uiPlayer.dragCardElem.style.transform = "translate(-50%,-50%) perspective(300px) rotateY(" + (velX > 0? Math.min(Math.PI / 3, velX * 100) : Math.max(Math.PI / -3, velX * 100)) + "rad) rotateX(" + (velY > 0? Math.min(Math.PI / 3, velY * 100) : Math.max(Math.PI / -3, velY * 100)) + "rad)" + (flipped? " rotateZ(180deg)" : "");
-		
+
 		uiPlayer.lastX = uiPlayer.posX;
 		uiPlayer.lastY = uiPlayer.posY;
-		
+
 		uiPlayer.life.animate(delta);
 		uiPlayer.mana.animate(delta);
 	}
-	
+
 	requestAnimationFrame(animate);
 }
 
@@ -731,30 +793,27 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 		let validOptions = 0;
 		for (let i = 0; i < cards.length; i++) {
 			let cardImg = document.createElement("img");
-			cardImg.src = cards[i].getImage();
+			getCardImage(cards[i]).then(img => cardImg.src = img);
 			if (matchFunction(cards[i])) {
 				validOptions++;
 				cardImg.dataset.selectionIndex = i;
 				cardImg.addEventListener("click", function(e) {
-					if (e.shiftKey || e.ctrlKey || e.altKey) {
-						e.stopPropagation();
-						previewCard(cards[i]);
-					} else {
-						if (this.classList.toggle("cardHighlight")) {
-							if (validAmounts.length == 1 && validAmounts[0] == 1 && cardChoiceSelected.length > 0) {
-								for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
-									if (elem != this) {
-										elem.classList.remove("cardHighlight");
-									}
+					e.stopPropagation();
+					previewCard(cards[i]);
+					if (this.classList.toggle("cardHighlight")) {
+						if (validAmounts.length == 1 && validAmounts[0] == 1 && cardChoiceSelected.length > 0) {
+							for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
+								if (elem != this) {
+									elem.classList.remove("cardHighlight");
 								}
-								cardChoiceSelected = [];
 							}
-							cardChoiceSelected.push(this.dataset.selectionIndex);
-						} else {
-							cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
+							cardChoiceSelected = [];
 						}
-						cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length);
+						cardChoiceSelected.push(this.dataset.selectionIndex);
+					} else {
+						cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
 					}
+					cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length);
 				});
 			} else {
 				cardImg.classList.add("unselectableCard");
@@ -767,12 +826,12 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 		cardChoiceMenu.addEventListener("close", function() {
 			resolve(this.returnValue.split("|").map(val => parseInt(val)));
 		});
-		
+
 		cardChoiceTitle.textContent = title;
 		cardChoiceConfirm.disabled = true;
 		cardChoiceMenu.showModal();
 		cardChoiceMenu.appendChild(cardDetails);
-		
+
 		cardChoiceGrid.parentNode.scrollTop = 0;
 	});
 }
@@ -782,7 +841,7 @@ export async function askQuestion(question, yesButton, noButton) {
 	questionPopupYesButton.textContent = yesButton;
 	questionPopupNoButton.textContent = noButton;
 	questionPopup.showModal();
-	
+
 	return new Promise((resolve, reject) => {
 		questionPopupYesButton.addEventListener("click", function() {
 			questionPopup.close();

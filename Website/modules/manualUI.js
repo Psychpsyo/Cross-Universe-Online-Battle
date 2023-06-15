@@ -7,9 +7,8 @@ import {putChatMessage} from "/modules/generalUI.js";
 
 export function init() {
 	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());
-	
+
 	// translation
-	revealPartnerBtn.textContent = locale.game.partnerSelect.revealPartner;
 	for (let i = 0; i < 2; i++) {
 		document.getElementById("deckTopBtn"+ i).textContent = locale.game.manual.deck.dropTop;
 		document.getElementById("deckShuffleInBtn" + i).textContent = locale.game.manual.deck.dropShuffle;
@@ -17,30 +16,21 @@ export function init() {
 		document.getElementById("deckCancelBtn" + i).textContent = locale.game.manual.deck.dropCancel;
 		document.getElementById("showTopBtn" + i).textContent = locale.game.manual.deck.showTop;
 	}
-	
+
 	drawBtn.textContent = locale.game.manual.deck.draw;
 	shuffleBtn.textContent = locale.game.manual.deck.shuffle;
 	deckSearchBtn.textContent = locale.game.manual.deck.search;
-	
+
 	lifeBtnHeader.textContent = locale.game.manual.actions.life;
 	manaBtnHeader.textContent = locale.game.manual.actions.mana;
 	tokenBtn.textContent = locale.game.manual.actions.tokens;
 	lifeHalf.textContent = locale.game.manual.actions.half;
 	showHandBtn.textContent = locale.game.manual.actions.showHand;
-	
+
 	cardSelectorReturnToDeck.textContent = locale.game.cardSelector.returnAllToDeck;
-	
+
 	gameInteractions.hidden = false;
-	
-	// partner reveal button
-	revealPartnerBtn.addEventListener("click", function() {
-		this.remove();
-		localPartnerButtons.classList.remove("visible");
-		localPlayer.partnerZone.cards[0].hidden = false;
-		gameUI.updateCard(localPlayer.partnerZone, 0);
-		socket.send("[revealPartner]");
-	});
-	
+
 	//showing/hiding your hand
 	function hideHand() {
 		socket.send("[hideHand]");
@@ -55,7 +45,7 @@ export function init() {
 		document.getElementById("hand1").classList.add("shown");
 	}
 	document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
-	
+
 	// life changes
 	document.getElementById("lifeUp100").addEventListener("click", function() {
 		gameState.controller.setLife(localPlayer, localPlayer.life + 100);
@@ -78,7 +68,7 @@ export function init() {
 	document.getElementById("lifeHalf").addEventListener("click", function() {
 		gameState.controller.setLife(localPlayer, Math.ceil(localPlayer.life / 2));
 	});
-	
+
 	// mana changes
 	document.getElementById("manaUp").addEventListener("click", function() {
 		gameState.controller.setMana(localPlayer, localPlayer.mana + 1);
@@ -89,15 +79,15 @@ export function init() {
 	document.getElementById("manaDown").addEventListener("click", function() {
 		gameState.controller.setMana(localPlayer, localPlayer.mana - 1);
 	});
-	
+
 	// tokens
 	tokenBtn.addEventListener("click", function() {
 		gameUI.openCardSelect(gameState.controller.tokenZone);
 	});
-	
+
 	// counters
 	document.getElementById("field").addEventListener("contextmenu", function (e) {e.preventDefault();});
-	
+
 	// event listeners to add counters and sync those additions.
 	for (let btn of Array.from(document.getElementsByClassName("counterAddBtn"))) {
 		btn.addEventListener("click", function() {
@@ -106,7 +96,7 @@ export function init() {
 			socket.send("[counterAdd]" + fieldSlot);
 		});
 	}
-	
+
 	// deck options
 	document.getElementById("drawBtn").addEventListener("click", function() {
 		gameState.controller.deckDraw(localPlayer);
@@ -121,7 +111,7 @@ export function init() {
 		gameUI.openCardSelect(localPlayer.deckZone);
 		document.getElementById("deckHoverBtns1").style.display = "none"; //workaround for bug in Firefox (at least) where mouseleave does not fire when element is covered by another. (in this case the card selector)
 	});
-	
+
 	game.players.forEach(player => {
 		// dropping to deck
 		document.getElementById("deckTopBtn" + player.index).addEventListener("click", function() {
@@ -140,7 +130,7 @@ export function init() {
 			gameState.controller.deckCancelDrop(localPlayer);
 			document.getElementById("deckDropOptions" + player.index).style.display = "none";
 		});
-		
+
 		// hovering the deck
 		document.getElementById("deck" + player.index).addEventListener("mouseover", function() {
 			if (player.deckZone.cards.length > 0 && !gameState.controller.playerInfos[localPlayer.index].heldCard) {
@@ -157,7 +147,7 @@ export function init() {
 			}
 		});
 	});
-	
+
 	document.documentElement.classList.add("manualGame");
 }
 
@@ -247,6 +237,6 @@ function addCounter(slotIndex) {
 		}
 		e.preventDefault();
 	});
-	
+
 	document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").prepend(counter);
 }

@@ -6,12 +6,12 @@
 	z-index: 5;
 	font-size: .8em;
 }
-#p1Grid .counterHolder {
+#p0Grid .counterHolder {
 	flex-direction: column-reverse;
 	bottom: 0;
 	left: 0;
 }
-#p2Grid .counterHolder {
+#p1Grid .counterHolder {
 	top: 0;
 	right: 0;
 	flex-direction: column;

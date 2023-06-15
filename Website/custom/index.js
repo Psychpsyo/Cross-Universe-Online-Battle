@@ -186,7 +186,7 @@ function insertEffectSection(type) {
 		}
 		// insert the section
 		let section = createEffectSection(type);
-		
+
 		if (range.endContainer === range.startContainer) {
 			if (range.endContainer.childElementCount == 1 && range.endContainer.firstChild.nodeName == "BR") {
 				range.endContainer.firstChild.remove();
@@ -257,7 +257,7 @@ importCardInput.addEventListener("input", function() {
 	reader.onload = async function(e) {
 		// the raw loaded json data
 		let loadedCard = JSON.parse(e.target.result);
-		
+
 		// will be sanitized into this
 		let card = {
 			"cardType": loadedCard.cardType ?? "unit",
@@ -277,7 +277,7 @@ importCardInput.addEventListener("input", function() {
 			}
 		}
 		card.effects = loadedCard.effects ?? [];
-		
+
 		loadCard(card);
 	};
 	reader.readAsText(this.files[0]);
@@ -299,10 +299,10 @@ function reloadCardList() {
 function generateListCard(card) {
 	let listCard = document.createElement("div");
 	listCard.classList.add("listCard")
-	
+
 	let canvas = document.createElement("canvas");
 	renderCard(card.data, canvas);
-	
+
 	let editButton = document.createElement("button");
 	editButton.dataset.cardUuid = card.uuid;
 	editButton.textContent = locale.customCards.edit;
@@ -319,7 +319,7 @@ function generateListCard(card) {
 			this.closest(".listCard").remove();
 		}
 	});
-	
+
 	let deleteButton = document.createElement("button");
 	deleteButton.dataset.cardUuid = card.uuid;
 	deleteButton.textContent = locale.customCards.delete;
@@ -332,7 +332,7 @@ function generateListCard(card) {
 			this.closest(".listCard").remove();
 		}
 	});
-	
+
 	listCard.appendChild(canvas);
 	listCard.appendChild(editButton);
 	listCard.appendChild(deleteButton);
@@ -358,12 +358,12 @@ function loadCard(card) {
 	cardAttack.value = (card.attack == -1? "" : card.attack) ?? "";
 	cardDefense.value = (card.defense == -1? "" : card.defense) ?? "";
 	cardType.value = card.cardType;
-	
+
 	cardTypes.value = card.types.map(type => locale["types"][type]).join(locale["typeSeparator"]);
-	
+
 	effectEditor.innerHTML = "";
 	loadCardEffects(card.effects, effectEditor);
-	
+
 	updateCard(false);
 }
 

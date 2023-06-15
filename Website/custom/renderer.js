@@ -74,7 +74,7 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 				let contentString = "";
 				child.content.split("\n").forEach(line => {
 					line = "　".repeat(indent) + line;
-					
+
 					let lastNewLine = 0;
 					let currentPosition = 0;
 					while (currentPosition != -1) {
@@ -87,7 +87,7 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 					}
 					contentString += "\n" + line;
 				});
-				
+
 				text += contentString.substring(indent + 1);
 				break;
 			}
@@ -104,18 +104,18 @@ async function renderCard(card, canvas) {
 	canvas.width = 813;
 	canvas.height = 1185;
 	let ctx = canvas.getContext("2d");
-	
+
 	ctx.fillStyle = "#B09F97";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.fillStyle = "black";
-	
+
 	ctx.drawImage(await backgrounds[card.cardType], 0, 0);
-	
+
 	// write level
 	ctx.font = "39pt 'Yu Mincho'";
 	ctx.textAlign = "center";
 	ctx.fillText(card.level < 0? "？" : card.level, 684 + (card.level > 99? 10 : 0), 135);
-	
+
 	// write name
 	let fontSize = 49;
 	ctx.textAlign = "left";
@@ -124,7 +124,7 @@ async function renderCard(card, canvas) {
 		ctx.font = fontSize + "px 'Yu Mincho'";
 	}
 	ctx.fillText(card.name, 108, 135);
-	
+
 	// write type
 	let typeString = card.types.map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	fontSize = 49;
@@ -135,7 +135,7 @@ async function renderCard(card, canvas) {
 	}
 	ctx.textBaseline = "middle";
 	ctx.fillText(typeString, 108, 676);
-	
+
 	// write text box
 	fontSize = 28;
 	ctx.font = fontSize + "px 'Yu Gothic UI'";
@@ -153,12 +153,12 @@ async function renderCard(card, canvas) {
 		ctx.drawImage(await bracketLeftTop, 95 + bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap));
 		ctx.drawImage(await bracketLeftMiddle, 95 + bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap) + 7, 17, (bracket.lastLine - bracket.firstLine) * (fontSize + lineGap) - 14);
 		ctx.drawImage(await bracketLeftBottom, 95 + bracket.indent * fontSize, 779 + bracket.lastLine * (fontSize + lineGap) - 7);
-		
+
 		ctx.drawImage(await bracketRightTop, 701 - bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap));
 		ctx.drawImage(await bracketRightMiddle, 701 - bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap) + 7, 17, (bracket.lastLine - bracket.firstLine) * (fontSize + lineGap) - 14);
 		ctx.drawImage(await bracketRightBottom, 701 - bracket.indent * fontSize, 779 + bracket.lastLine * (fontSize + lineGap) - 7);
 	});
-	
+
 	// write token notice and author (but not both)
 	ctx.textBaseline = "alphabetic";
 	if (card.cardType == "token") {
@@ -170,14 +170,14 @@ async function renderCard(card, canvas) {
 		ctx.textAlign = "right";
 		ctx.fillText(locale["customCards"]["renderer"]["ideaCredit"] + card.author, 707, 1048);
 	}
-	
+
 	// write bottom section
 	ctx.font = "35px 'Yu Gothic UI'";
 	if (card.cardType == "unit" || card.cardType == "token") {
 		ctx.textAlign = "left";
 		ctx.fillText(locale["customCards"]["renderer"]["attack"], 104, 1117);
 		ctx.fillText(locale["customCards"]["renderer"]["defense"], 415, 1117);
-		
+
 		ctx.textAlign = "right";
 		ctx.fillText(card.attack < 0? "？" : card.attack, 392 + (card.attack < 0? 8 : 0), 1117);
 		ctx.fillText("/", 406, 1117);

@@ -12,13 +12,13 @@ export class InitState extends GameState {
 	constructor(roomcode, gameMode) {
 		super();
 		gameState = this;
-		
+
 		this.gameMode = gameMode;
 		this.opponentReady = false;
-		
+
 		connectTo(roomcode + gameMode);
 	}
-	
+
 	receiveMessage(command, message) {
 		switch (command) {
 			case "playerFound": { // another player entered the roomcode (Note: This is sent by the server, not the other client.)
@@ -30,13 +30,13 @@ export class InitState extends GameState {
 				if (localStorage.getItem("cardBack") !== "") {
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
-				
+
 				game = new Game();
 				localPlayer = game.players[1];
 				game.players[1].isViewable = true;
 				socket.send("[ready]");
 				this.checkReadyConditions();
-				
+
 				return true;
 			}
 			case "youAre": { // Indicates if this client is player 0 or 1.
@@ -63,7 +63,7 @@ export class InitState extends GameState {
 		}
 		return false;
 	}
-	
+
 	checkReadyConditions() {
 		if (this.opponentReady && youAre !== null) {
 			// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
@@ -73,7 +73,7 @@ export class InitState extends GameState {
 			document.getElementById("gameDiv").addEventListener("drop", function(e) {
 				e.preventDefault();
 			});
-			
+
 			// prevent user from accidently leaving the site
 			window.unloadWarning = new AbortController();
 			window.addEventListener("beforeunload", function(e) {
@@ -82,7 +82,7 @@ export class InitState extends GameState {
 					e.returnValue = "";
 				}
 			}, {"signal": unloadWarning.signal});
-			
+
 			switch (this.gameMode) {
 				case "normal": {
 					new DeckState(false);
@@ -109,30 +109,30 @@ export class InitState extends GameState {
 					} else {
 						putChatMessage(locale["chat"]["you"] + locale["chat"]["colon"] + this.value);
 					}
-					
+
 					this.value = "";
 				}
 				if (e.code == "Escape") {
 					this.blur();
 				}
 			});
-			
+
 			document.getElementById("chatInput").addEventListener("keydown", function(e) {
 				e.stopPropagation();
 			});
-			
+
 			//position the menu on the right if that option is enabled
 			if (localStorage.getItem("fieldLeftToggle") == "true") {
 				document.documentElement.classList.add("leftField");
 			}
-			
+
 			// main screen is no longer needed
 			stopEffect();
 			roomCodeEntry.remove();
 			gameDiv.hiden = false;
 		}
 	}
-	
+
 	cancel() {
 		socket.close();
 		waitingForOpponentSpan.hidden = true;

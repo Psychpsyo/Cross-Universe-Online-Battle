@@ -126,6 +126,14 @@ export function createDamageDealtEvent(player, amount) {
 	}
 }
 
+export function createLifeChangedEvent(player) {
+	return {
+		"nature": "event",
+		"type": "lifeChanged",
+		"player": player
+	}
+}
+
 export function createManaChangedEvent(player) {
 	return {
 		"nature": "event",
@@ -155,13 +163,38 @@ export function createCardPlacedEvent(player, fromZone, fromIndex, toZone, toInd
 	}
 }
 
-export function createCardSummonedEvent(player, fromZone, fromIndex, toIndex) {
+export function createCardSummonedEvent(player, fromZone, fromIndex, toZone, toIndex) {
 	return {
 		"nature": "event",
 		"type": "cardSummoned",
 		"player": player,
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"toIndex": toIndex
+	}
+}
+
+export function createCardDeployedEvent(player, fromZone, fromIndex, toZone, toIndex) {
+	return {
+		"nature": "event",
+		"type": "cardDeployed",
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"toIndex": toIndex
+	}
+}
+
+export function createCardCastEvent(player, fromZone, fromIndex, toZone, toIndex) {
+	return {
+		"nature": "event",
+		"type": "cardCast",
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
 		"toIndex": toIndex
 	}
 }
@@ -169,30 +202,51 @@ export function createCardSummonedEvent(player, fromZone, fromIndex, toIndex) {
 export function createAttackDeclarationEstablishedEvent(player, targetZone, targetIndex) {
 	return {
 		"nature": "event",
-		"type": "cardSummoned",
+		"type": "attackDeclarationEstablished",
 		"player": player,
 		"targetZone": targetZone,
 		"targetIndex": targetIndex
 	}
 }
 
-export function createCardDiscardedEvent(fromZone, fromIndex, toZone) {
+export function createCardsAttackedEvent(attackers, target) {
+	return {
+		"nature": "event",
+		"type": "cardsAttacked",
+		"attackers": attackers,
+		"target": target
+	}
+}
+
+export function createCardDiscardedEvent(fromZone, fromIndex, toZone, card) {
 	return {
 		"nature": "event",
 		"type": "cardDiscarded",
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
-		"toZone": toZone
+		"toZone": toZone,
+		"card": card
 	}
 }
 
-export function createCardDestroyedEvent(fromZone, fromIndex, toZone) {
+export function createCardDestroyedEvent(fromZone, fromIndex, toZone, card) {
 	return {
 		"nature": "event",
 		"type": "cardDestroyed",
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
-		"toZone": toZone
+		"toZone": toZone,
+		"card": card
 	}
 }
 
+export function createCardExiledEvent(fromZone, fromIndex, toZone, card) {
+	return {
+		"nature": "event",
+		"type": "cardExiled",
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"card": card
+	}
+}
