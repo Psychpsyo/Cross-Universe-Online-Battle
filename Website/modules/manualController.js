@@ -288,7 +288,7 @@ export class ManualController extends InteractionController {
 			gameUI.updateCard(deckZone, i);
 		}
 		socket.send("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
-		putChatMessage(locale.game[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
+		putChatMessage(locale.game.notices[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
 	deckToTop(player, deckZone) {
 		if (player === localPlayer) {
