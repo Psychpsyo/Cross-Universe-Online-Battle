@@ -166,7 +166,7 @@ function parseCdfValues(cdf) {
 				break;
 			}
 			case "types": {
-				data.types = parts[1].split(",").map(type => type.trim());
+				data.types = parts[1].split(",").map(type => type.trim()).filter(type => type != "");
 				break;
 			}
 			case "attack": {

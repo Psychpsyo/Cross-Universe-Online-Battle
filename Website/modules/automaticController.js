@@ -266,6 +266,7 @@ export class AutomaticController extends InteractionController {
 			case "cardDeployed":
 			case "cardSummoned": {
 				gameUI.insertCard(event.toZone, event.toIndex);
+				gameUI.clearDragSource(event.toZone, event.toIndex, event.player);
 				if (event.fromZone) {
 					gameUI.removeCard(event.fromZone, event.fromIndex);
 				}
@@ -297,8 +298,13 @@ export class AutomaticController extends InteractionController {
 			}
 			case "blockCreated": {
 				if (event.block instanceof blocks.AbilityActivation) {
-					return autoUI.activate(event.block.card);
+					await autoUI.activate(event.block.card);
 				}
+				autoUI.newBlock(event.block);
+				return;
+			}
+			case "stackCreated": {
+				autoUI.newStack(event.stack.index);
 				return;
 			}
 		}
@@ -397,6 +403,7 @@ export class AutomaticController extends InteractionController {
 				if (summonDetails == null) {
 					return;
 				}
+				gameUI.makeDragSource(localPlayer.unitZone, summonDetails.fieldIndex, localPlayer);
 				response.value = summonDetails;
 				break;
 			}
@@ -414,6 +421,7 @@ export class AutomaticController extends InteractionController {
 				if (deployDetails == null) {
 					return;
 				}
+				gameUI.makeDragSource(localPlayer.spellItemZone, deployDetails.fieldIndex, localPlayer);
 				response.value = deployDetails;
 				break;
 			}
@@ -431,6 +439,7 @@ export class AutomaticController extends InteractionController {
 				if (castDetails == null) {
 					return;
 				}
+				gameUI.makeDragSource(localPlayer.spellItemZone, castDetails.fieldIndex, localPlayer);
 				response.value = castDetails;
 				break;
 			}

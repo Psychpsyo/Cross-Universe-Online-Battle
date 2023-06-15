@@ -22,6 +22,9 @@ export class Timing {
 		for (let action of this.actions) {
 			if (action.isImpossible()) {
 				actionCancelledEvents.push(createActionCancelledEvent(action));
+				if (action.costIndex >= 0) {
+					this.costCompletions[action.costIndex] = false;
+				}
 			}
 		}
 		if (actionCancelledEvents.length > 0) {
@@ -64,7 +67,7 @@ export class Timing {
 				return;
 			}
 			for (let i = 0; i < this.costCompletions.length; i++) {
-				this.costCompletions[i] = this.isFullyPossible(i);
+				this.costCompletions[i] = this.costCompletions[i] && this.isFullyPossible(i);
 			}
 			for (let i = this.actions.length - 1; i >= 0; i--) {
 				if (!this.costCompletions[this.actions[i].costIndex]) {

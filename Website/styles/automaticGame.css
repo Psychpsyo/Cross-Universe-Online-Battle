@@ -127,3 +127,40 @@
 #opponentTurnDisplayLabel.hidden {
 	transform: translateY(100%);
 }
+
+#stackTitle {
+	padding-left: .2em;
+}
+#stackTitle.invalid {
+	filter: opacity(50%);
+}
+#controlPanel hr {
+	border-bottom: 1px solid var(--theme-border-color);
+	margin: 0;
+}
+#stackDisplayHolder {
+	display: flex;
+	height: 6em;
+	padding: .25em;
+	gap: .25em;
+}
+#stackDisplayHolder > img {
+	height: 100%;
+	display: block;
+}
+#stackDisplayHolder::after {
+	content: attr(data-block);
+	height: 100%;
+	aspect-ratio: 813 / 1185;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: 2px dashed var(--theme-border-color);
+	box-sizing: border-box;
+	filter: opacity(50%);
+}
+#automaticButtonArea {
+	display: flex;
+	justify-content: space-around;
+	padding: .25em;
+}

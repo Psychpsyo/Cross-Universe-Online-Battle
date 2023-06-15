@@ -11,31 +11,31 @@
 		"rulesButton": "ゲームのルール",
 		"rulesLink": "https://crossuniverse.jp/%e2%97%86%e2%97%86%e2%97%86%e3%82%af%e3%83%ad%e3%82%b9%e3%83%a6%e3%83%8b%e3%83%90%e3%83%bc%e3%82%b9%e3%81%a8%e3%81%af%e2%97%86%e2%97%86%e2%97%86/",
 		"unofficialNotice": "クロスユニバースのファンサイトです。公式はこちらへ。（<a href=\"https://www.crossuniverse.jp\">https://crossuniverse.jp/</a>）",
-		
+
 		"gamemode": "ゲームモード：",
 		"gamemodes": {
 			"normal": "ノーマル",
 			"draft": "ドラフト",
 			"normalAutomatic": null
 		},
-		
+
 		"settingsButton": null,
 		"deckCreatorButton": null
 	},
-	
+
 	"game": {
 		"youStart": null,
 		"opponentStarts": null,
 		"yourDeckShuffled": null,
 		"opponentDeckShuffled": null,
-		
+
 		"info": {
 			"you": "自分",
 			"opponent": "相手",
 			"life": "Lp：",
 			"mana": "魔力："
 		},
-		
+
 		"deckSelect": {
 			"chooseYourDeck": null,
 			"loadingDeck": null,
@@ -48,7 +48,7 @@
 			"deckListLoadSelected": "選択したデッキを配置する",
 			"deckListCardAmount": "{#CARDS}枚"
 		},
-		
+
 		"partnerSelect": {
 			"useSuggestedQuestion": null,
 			"useSuggested": null,
@@ -57,7 +57,7 @@
 			"waitingForOpponent": null,
 			"revealPartner": null
 		},
-		
+
 		"cardSelector": {
 			"tokens": "トークン：",
 			"deck1": "自分のデッキ：",
@@ -68,14 +68,14 @@
 			
 			"returnAllToDeck": null
 		},
-		
+
 		"cardChoice": {
 			"confirm": null,
 			"genericTitle": null,
 			"handDiscard": null,
 			"attackTarget": null
 		},
-		
+
 		"fieldLabels": {
 			"verticalText": true,
 			"unitZone": "ユニット\nゾーン",
@@ -85,7 +85,7 @@
 			"discardPile": "捨て山",
 			"deck": "デッキ"
 		},
-		
+
 		"manual": {
 			"deck": {
 				"draw": "ドロー",
@@ -97,7 +97,7 @@
 				"dropBottom": "一番下に戻す",
 				"dropCancel": "キャンセル"
 			},
-			
+
 			"actions": {
 				"life": "Lp",
 				"mana": "魔力",
@@ -107,14 +107,25 @@
 				"showHand": "手札を公開",
 				"hideHand": "手札を隠す"
 			},
-			
+
 			"presented": {
 				"reveal": "見せる",
 				"hide": "隠す"
 			}
 		},
-		
+
 		"automatic": {
+			"actions": {
+				"pass": null,
+				"attack": null
+			},
+
+			"stacks": {
+				"title": "テーブル{#NUM}：",
+				"manaSupplyPhase": "魔力ステップ：",
+				"block": "ブロック{#NUM}"
+			},
+
 			"phases": {
 				"manaSupplyPhase": "魔力\nステップ",
 				"drawPhase": "ドロー\nステップ",
@@ -123,13 +134,13 @@
 				"secondMainPhase": "メイン\nステップ 2",
 				"endPhase": "エンド\nステップ"
 			},
-			
+
 			"battlePhase": {
 				"question": null,
 				"enter": null,
 				"skip": null
 			},
-			
+
 			"retire": {
 				"dropRetire": "リターン（×{#AMOUNT}）",
 				"dropCancel": "キャンセル"
@@ -166,7 +177,7 @@
 			}
 		}
 	},
-	
+
 	"chat": {
 		"title": "チャット",
 		"enterMessage": "Enter Message...",
@@ -174,7 +185,7 @@
 		"opponent": "相手",
 		"colon": "："
 	},
-	
+
 	"draft": {
 		"yourTurn": null,
 		"opponentsTurn": null,
@@ -187,13 +198,13 @@
 		"yourDeck": "自分のデッキ",
 		"opponentDeck": "相手のデッキ"
 	},
-	
+
 	"cardAltText": "{#NAME}、レベル{#LEVEL}{#CARDTYPE}、\n{#TYPES}、\n効果：\n{#EFFECTS}",
 	"unitAltText": "{#NAME}、レベル{#LEVEL}{#CARDTYPE}、\n{#ATK}攻撃力、{#DEF}防御力、\n{#TYPES}、\n効果：\n{#EFFECTS}",
-	
+
 	"settings": {
 		"title": null,
-		
+
 		"general": {
 			"title": null,
 			"language": "言語：",
@@ -208,7 +219,7 @@
 			"autoClosePreview": null,
 			"alwaysShowCardButtons": null
 		},
-		
+
 		"profile": {
 			"title": null,
 			"username": null,
@@ -216,7 +227,7 @@
 			"cardBackLink": null,
 			"cardBackLinkPlaceholder": null
 		},
-		
+
 		"customization": {
 			"title": null,
 			"fieldLabels": null,
@@ -231,7 +242,7 @@
 			},
 			"mainMenuCards": null
 		},
-		
+
 		"accessibility": {
 			"title": null,
 			"font": "フォント：",
@@ -245,7 +256,7 @@
 			"customFont": null,
 			"customFontPlaceholder": null
 		},
-		
+
 		"hotkeys": {
 			"title": null,
 			"resetHotkeys": null,
@@ -266,7 +277,7 @@
 			"shuffleDeck": null,
 			"showDeckTop": null,
 			"previewHandCard": null,
-			
+
 			"keys": {
 				"KeyA": "A",
 				"KeyB": "B",
@@ -293,7 +304,7 @@
 				"KeyX": "X",
 				"KeyY": "Y",
 				"KeyZ": "Z",
-				
+
 				"Digit0": "0",
 				"Digit1": "1",
 				"Digit2": "2",
@@ -304,7 +315,7 @@
 				"Digit7": "7",
 				"Digit8": "8",
 				"Digit9": "9",
-				
+
 				"Escape": "Esc",
 				"Backspace": "Backspace",
 				"Tab": "Tab",
@@ -312,23 +323,23 @@
 				"CapsLock": "CapsLock",
 				"Space": "Space",
 				"ContextMenu": "Menu",
-				
+
 				"PrintScreen": "Print",
 				"ScrollLock": "ScrollLock",
 				"Pause": "Pause",
-				
+
 				"Insert": "Ins",
 				"Home": "Home",
 				"PageUp": "PgUp",
 				"Delete": "Del",
 				"End": "End",
 				"PageDown": "PgDown",
-				
+
 				"ArrowLeft": null,
 				"ArrowRight": null,
 				"ArrowUp": null,
 				"ArrowDown": null,
-				
+
 				"Numpad0": "Num0",
 				"Numpad1": "Num1",
 				"Numpad2": "Num2",
@@ -348,7 +359,7 @@
 				"NumpadEqual": "Num=",
 				"NumpadComma": "Num,",
 				"NumpadDecimal": "Num.",
-				
+
 				"F1": "F1",
 				"F2": "F2",
 				"F3": "F3",
@@ -376,12 +387,12 @@
 			}
 		}
 	},
-	
+
 	"deckMaker": {
 		"title": null,
 		"deck": "デッキ",
 		"search": "サーチ",
-		
+
 		"searchResults": null,
 		"unitTokenColumn": null,
 		"spellColumn": null,
@@ -394,7 +405,7 @@
 		"standardItems": "通常アイテム",
 		"continuousItems": "永続アイテム",
 		"equipableItems": "装備アイテム",
-		
+
 		"searchMenu": {
 			"title": "カードサーチ",
 			"search": "サーチ",
@@ -427,7 +438,7 @@
 			"sortByAttack": "攻撃力",
 			"sortByDefense": "防御力"
 		},
-		
+
 		"cardInfo": {
 			"title": null,
 			"generalSection": null,
@@ -440,23 +451,23 @@
 			"visibleOn": null,
 			"toDeck": null
 		},
-		
+
 		"deckMenu": {
 			"title": null,
 			"cardListTitle": null,
 			"detailsTitle": null,
 			"recentCardsTitle": null,
-			
+
 			"name": "デッキ名：",
 			"namePlaceholder": null,
 			"description": "説明文：",
 			"partner": "パートナー：",
-			
+
 			"cardTotal": null,
 			"unitTotal": "ユニット：",
 			"spellTotal": "スペル：",
 			"itemTotal": "アイテム：",
-			
+
 			"warnings": {
 				"title": null,
 				"cardMinimum": null,
@@ -465,20 +476,20 @@
 				"noTokens": null,
 				"noPartner": null
 			},
-			
+
 			"levelDistribution": null,
 			"options": null,
 			"exportDeck": null,
 			"importDeck": null,
 			"drawStartingHand": null
 		},
-		
+
 		"startingHandGenerator": {
 			"title": null,
 			"redraw": null
 		}
 	},
-	
+
 	"cardDetailsAttack": "攻撃力：",
 	"cardDetailsDefense": "防御力：",
 	"cardDetailsTypes": "タイプ：",
@@ -498,10 +509,10 @@
 	"fastCardDetailEffect": "即時起動能力：",
 	"deployCardDetailEffect": "使用時に：",
 	"castCardDetailEffect": "詠唱時に：",
-	
+
 	"subEffectOpeningBracket": "〔",
 	"subEffectClosingBracket": "〕",
-	
+
 	"typeSeparator": ",",
 	"typeless": "タイプなし",
 	"types": {
@@ -548,10 +559,10 @@
 		"NinjaTool": "忍具",
 		"Ninjutsu": "忍法"
 	},
-	
+
 	"customCards": {
 		"title": null,
-		
+
 		"cardName": "名前：",
 		"cardLevel": "レベル：",
 		"cardTypes": "タイプ：",
@@ -559,10 +570,10 @@
 		"cardDefense": "防御力：",
 		"cardType": "種類：",
 		"cardAbilities": "能力：",
-		
+
 		"possibleTypes": null,
 		"possibleTypesSeperator": "，",
-		
+
 		"save": null,
 		"saveCopy": null,
 		"createNew": null,
@@ -572,27 +583,27 @@
 		"noSavedCards": null,
 		"edit": null,
 		"delete": null,
-		
+
 		"unsavedChanges": null,
 		"reallyDelete": null,
 		"doesntExist": null,
-		
+
 		"renderer": {
 			"attack": "攻撃力",
 			"defense": "防御力",
-			
+
 			"standardSpell": "通常スペル",
 			"enchantSpell": "付与スペル",
 			"continuousSpell": "永続スペル",
 			"standardItem": "通常アイテム",
 			"equipableItem": "装備アイテム",
 			"continuousItem": "永続アイテム",
-			
+
 			"ideaCredit": "原案：",
 			"tokenNotice": "※トークンカードはデッキに入れる事が出来ません。"
 		}
 	},
-	
+
 	"cardActions": {
 		"I00040": {
 			"roll": "振る",
@@ -600,7 +611,7 @@
 			"opponentRoll": "相手の「運命のサイコロ」：{#RESULT}"
 		}
 	},
-	
+
 	"optional": {
 		"typeSortNames": {
 			"Angel": "てんし",

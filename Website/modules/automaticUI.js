@@ -1,7 +1,10 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
 import {locale} from "/modules/locale.js";
+import {previewCard} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
+import * as cardLoader from "/modules/cardLoader.js";
+import * as blocks from "/rulesEngine/blocks.js";
 
 let currentActivePhaseElem = null;
 
@@ -13,6 +16,8 @@ export function init() {
 	}
 
 	retireCancelBtn.textContent = locale.game.automatic.retire.dropCancel;
+	passBtn.textContent = locale.game.automatic.actions.pass;
+	attackBtn.textContent = locale.game.automatic.actions.attack;
 
 	passBtn.addEventListener("click", function() {
 		this.disabled = true;
@@ -33,6 +38,9 @@ export function startPhase(type) {
 	switch(type) {
 		case "manaSupplyPhase": {
 			currentActivePhaseElem = manaSupplyPhaseIndicator;
+			stackTitle.textContent = locale.game.automatic.stacks.manaSupplyPhase;
+			stackTitle.classList.add("invalid");
+			stackDisplayHolder.dataset.block = "";
 			break;
 		}
 		case "drawPhase": {
@@ -84,6 +92,38 @@ export function indicatePass() {
 }
 export function clearPass() {
 	passBtn.disabled = true;
+}
+
+export function newStack(number) {
+	stackTitle.textContent = locale.game.automatic.stacks.title.replaceAll("{#NUM}", number);
+	stackTitle.classList.remove("invalid");
+	stackDisplayHolder.innerHTML = "";
+	stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", 1);
+}
+export function newBlock(block) {
+	let card = null;
+	if (block instanceof blocks.StandardDraw) {
+		card = block.player.deckZone.cards[block.player.deckZone.cards.length - 1];
+	} else if (block instanceof blocks.Retire) {
+		card = block.units[0];
+	} else if (block instanceof blocks.AttackDeclaration) {
+		card = block.attackers[0];
+	} else if (block instanceof blocks.Fight) {
+		card = null; // TODO: figure this out
+	} else {
+		card = block.card;
+	}
+
+	let visual = document.createElement("img");
+	cardLoader.getCardImage(card).then(src => {
+		visual.src = src;
+		visual.addEventListener("click", function(e) {
+			e.stopPropagation();
+			previewCard(card.cardRef);
+		})
+		stackDisplayHolder.appendChild(visual);
+		stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", block.stack.blocks.length + 1);
+	});
 }
 
 export function indicateRetire(amount) {

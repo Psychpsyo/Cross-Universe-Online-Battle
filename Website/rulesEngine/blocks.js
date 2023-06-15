@@ -47,7 +47,7 @@ class Block {
 		yield* this.costTiming.run();
 		return this.costTiming.successful;
 	}
-	
+
 	async* run() {
 		let generatorOutput = await this.timingGenerator.next();
 		while(!generatorOutput.done) {
@@ -65,7 +65,7 @@ class Block {
 			generatorOutput = await this.timingGenerator.next(timing);
 		}
 	}
-	
+
 	getCostTiming() {
 		return this.costTiming;
 	}
@@ -102,7 +102,7 @@ export class StandardSummon extends Block {
 		this.card = card;
 		this.unitZoneIndex = unitZoneIndex;
 	}
-	
+
 	async* runCost() {
 		this.card.zone.remove(this.card);
 		let paid = await (yield* super.runCost());
@@ -118,7 +118,7 @@ export class StandardSummon extends Block {
 
 async function* retireTimingGenerator(player, units) {
 	let discardTiming = yield units.map(unit => new actions.Discard(unit));
-	
+
 	let gainedMana = 0;
 	for (const action of discardTiming.actions) {
 		if (action instanceof actions.Discard) {
@@ -135,7 +135,7 @@ export class Retire extends Block {
 		super(stack, player, retireTimingGenerator(player, units));
 		this.units = units;
 	}
-	
+
 	async* runCost() {
 		let paid = await (yield* super.runCost());
 		if (!paid) {
@@ -153,7 +153,7 @@ export class AttackDeclaration extends Block {
 		]));
 		this.attackers = attackers;
 	}
-	
+
 	async* run() {
 		yield* super.run();
 		

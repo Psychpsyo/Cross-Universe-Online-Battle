@@ -80,8 +80,8 @@ export class Stack {
 			if (response.type != "pass") {
 				if (await (yield* nextBlock.runCost())) {
 					this.passed = false;
-					yield [createBlockCreatedEvent(nextBlock)];
 					this.blocks.push(nextBlock);
+					yield [createBlockCreatedEvent(nextBlock)];
 				} else {
 					yield [createBlockCreationAbortedEvent(nextBlock)];
 				}
