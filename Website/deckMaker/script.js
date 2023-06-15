@@ -1,6 +1,7 @@
 import {generateStartingHand} from "/deckMaker/startingHands.js";
 import {locale} from "/modules/locale.js";
 import {toDeckx} from "/modules/deckUtils.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 //load illustrator & contest winner tags
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
@@ -50,6 +51,7 @@ cardMaxWarning.textContent = locale.deckMaker.deckMenu.warnings.cardMaximum;
 unitWarning.textContent = locale.deckMaker.deckMenu.warnings.needsUnit;
 tokenWarning.textContent = locale.deckMaker.deckMenu.warnings.noTokens;
 partnerWarning.textContent = locale.deckMaker.deckMenu.warnings.noPartner;
+unsupportedWarning.textContent = locale.deckMaker.deckMenu.warnings.unsupported;
 
 // starting hand
 deckOptionsTitle.textContent = locale.deckMaker.deckMenu.options;
@@ -90,7 +92,10 @@ searchSortByReleaseDate.textContent = locale.deckMaker.searchMenu.sortByReleaseD
 searchSortByCardID.textContent = locale.deckMaker.searchMenu.sortByCardId;
 searchSortByAttack.textContent = locale.deckMaker.searchMenu.sortByAttack;
 searchSortByDefense.textContent = locale.deckMaker.searchMenu.sortByDefense;
-
+cardSearchSupportLabel.textContent = locale.deckMaker.searchMenu.supportedIn;
+searchSupportedInAnywhere.textContent = locale.deckMaker.searchMenu.supportedInAnywhere;
+searchSupportedInManual.textContent = locale.deckMaker.searchMenu.supportedInManual;
+searchSupportedInAutomatic.textContent = locale.deckMaker.searchMenu.supportedInAutomatic;
 
 //sort the types alphabetically
 let sortedOptions = Array.from(cardSearchTypeInput.children).sort(function(a, b) {
@@ -132,23 +137,9 @@ Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 	});
 });
 
-// gets a card's link from its ID
-window.linkFromCardId = function(cardId) {
-	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
-}
 // gets a card's ID from a link to its image
 function cardIdFromLink(imgLink) {
 	return imgLink.substr(imgLink.length - 10, 6);
-}
-
-// Detailed card info gets cached manually to not rely on the browser's caching system when sending many requests.
-let cardInfoCache = {};
-async function getCardInfo(cardId) {
-	if (!cardInfoCache[cardId]) {
-		const response = await fetch("https://crossuniverse.net/cardInfo/?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId, {cache: "force-cache"});
-		cardInfoCache[cardId] = await response.json();
-	}
-	return cardInfoCache[cardId];
 }
 
 function cardToAltText(card) {
@@ -170,10 +161,10 @@ function createCardButton(card, lazyLoading) {
 	if (lazyLoading) {
 		cardImg.loading = "lazy";
 	}
-	cardImg.src = linkFromCardId(card.cardID);
+	cardImg.src = cardLoader.getCardImageFromID(card.cardID);
 	cardImg.alt = cardToAltText(card);
 	cardButton.addEventListener("click", async function() {
-		showCardInfo(await getCardInfo(this.dataset.cardID));
+		showCardInfo(await cardLoader.getCardInfo(this.dataset.cardID));
 	});
 	cardButton.appendChild(cardImg);
 	return cardButton;
@@ -187,16 +178,37 @@ function searchCards(query) {
 		}
 	});
 	closeAllDeckMakerOverlays();
-	
+
 	fetch("https://crossuniverse.net/cardInfo", {method: "POST", body: JSON.stringify(query)})
 	.then(response => response.text())
-	.then(response => {
-		JSON.parse(response).forEach(card => {
-			cardInfoCache[card.cardID] = card;
-			let listItem = document.createElement("li");
-			listItem.appendChild(createCardButton(card, true));
-			document.getElementById(card.cardType + "Grid").appendChild(listItem);
-		});
+	.then(async (response) => {
+		for (let card of JSON.parse(response)) {
+			cardLoader.cardInfoCache[card.cardID] = card;
+
+			let display = true;
+			switch (cardSearchSupportInput.value) {
+				case "automatic": {
+					display = await cardLoader.isCardScripted(card.cardID);
+					if (card.cardType == "token") {
+						for (let cardId of card.summonedBy) {
+							if (await cardLoader.isCardScripted(cardId)) {
+								display = true;
+							}
+						}
+					}
+					break;
+				}
+				case "neos": {
+					display = await cardLoader.isInNeos(card.cardID);
+					break;
+				}
+			}
+			if (display) {
+				let listItem = document.createElement("li");
+				listItem.appendChild(createCardButton(card, true));
+				document.getElementById(card.cardType + "Grid").appendChild(listItem);
+			}
+		}
 	});
 }
 
@@ -207,7 +219,7 @@ async function fillCardResultGrid(cardList, grid) {
 		}
 		
 		cardList.forEach(async cardId => {
-			document.getElementById("cardInfo" + grid + "Grid").appendChild(createCardButton(await getCardInfo(cardId), false));
+			document.getElementById("cardInfo" + grid + "Grid").appendChild(createCardButton(await cardLoader.getCardInfo(cardId), false));
 		});
 		document.getElementById("cardInfo" + grid + "Area").style.display = "block";
 	}
@@ -215,7 +227,7 @@ async function fillCardResultGrid(cardList, grid) {
 
 async function showCardInfo(cardInfo) {
 	//fill in basic card info
-	document.getElementById("cardInfoCardImg").src = linkFromCardId(cardInfo.cardID);
+	document.getElementById("cardInfoCardImg").src = cardLoader.getCardImageFromID(cardInfo.cardID);
 	document.getElementById("cardInfoCardID").textContent = "CU" + cardInfo.cardID;
 	cardInfoToDeck.dataset.cardID = cardInfo.cardID;
 	
@@ -382,7 +394,7 @@ document.addEventListener("keyup", function(e) {
 window.deckList = [];
 
 async function addCardToDeck(cardId) {
-	let card = await getCardInfo(cardId);
+	let card = await cardLoader.getCardInfo(cardId);
 	//add card to the list on the left
 	if (deckList.includes(cardId)) {
 		//card already there, just increase its counter by one
@@ -452,7 +464,7 @@ async function removeCardFromDeck(cardId) {
 		cardAmountDiv.textContent = deckList.filter(x => x === cardId).length;
 		
 		//check if the card limit for that card is exceeded
-		if (cardAmountDiv.textContent <= (await getCardInfo(cardId)).deckLimit) {
+		if (cardAmountDiv.textContent <= (await cardLoader.getCardInfo(cardId)).deckLimit) {
 			cardAmountDiv.style.color = "revert";
 		}
 	} else {
@@ -489,7 +501,7 @@ function sortCardsInDeck() {
 		if (cardTypeOrderings.indexOf(a.dataset.cardID[0]) != cardTypeOrderings.indexOf(b.dataset.cardID[0])) {
 			return cardTypeOrderings.indexOf(a.dataset.cardID[0]) - cardTypeOrderings.indexOf(b.dataset.cardID[0]);
 		} else {
-			return cardInfoCache[a.dataset.cardID].level - cardInfoCache[b.dataset.cardID].level;
+			return cardLoader.cardInfoCache[a.dataset.cardID].level - cardLoader.cardInfoCache[b.dataset.cardID].level;
 		}
 	});
 	
@@ -509,11 +521,11 @@ async function recalculateDeckStats() {
 		levelDist[i] = {total: 0, units: 0, spells: 0, items: 0};
 	}
 	
-	for (const cardID of deckList) {
-		let card = await getCardInfo(cardID);
+	for (const cardId of deckList) {
+		let card = await cardLoader.getCardInfo(cardId);
 		//max necessary to catch the Lvl? Token that is denoted as -1 in the dataset
 		levelDist[Math.max(0, card.level)].total++;
-		switch (cardID[0]) {
+		switch (cardId[0]) {
 			case "U": {
 				unitCount++;
 				levelDist[card.level].units++;
@@ -570,6 +582,8 @@ async function recalculateDeckStats() {
 	for (let i = 0; i < 13; i++) {
 		document.getElementById("deckMakerLevelDistribution").children.item(i).style.height = (levelDist[i].total / highestLevel * 100).toFixed(3) + "%";
 	}
+
+	document.getElementById("dotDeckExportBtn").disabled = document.getElementById("deckMakerDetailsPartnerSelect").value == "";
 	
 	//enable/disable warnings
 	document.getElementById("unitWarning").style.display = unitCount == 0? "block" : "none";
@@ -577,17 +591,23 @@ async function recalculateDeckStats() {
 	document.getElementById("cardMinWarning").style.display = deckList.length >= 30? "none" : "block";
 	document.getElementById("cardMaxWarning").style.display = deckList.length < 51? "none" : "block";
 	document.getElementById("partnerWarning").style.display = document.getElementById("deckMakerDetailsPartnerSelect").value == ""? "block" : "none";
-	document.getElementById("dotDeckExportBtn").disabled = document.getElementById("deckMakerDetailsPartnerSelect").value == "";
+	document.getElementById("unsupportedWarning").style.display = "none";
+	for (const cardId of deckList) {
+		if (!(await cardLoader.isCardScripted(cardId))) {
+			document.getElementById("unsupportedWarning").style.display = "block";
+		}
+	}
+
 }
 
 async function addRecentCard(cardId) {
 	let cardImg = document.createElement("img");
-	cardImg.src = linkFromCardId(cardId);
+	cardImg.src = cardLoader.getCardImageFromID(cardId);
 	cardImg.addEventListener("click", function() {
 		addCardToDeck(cardIdFromLink(this.src));
 		this.remove();
 	});
-	let cardInfo = await getCardInfo(cardId);
+	let cardInfo = await cardLoader.getCardInfo(cardId);
 	cardImg.alt = cardInfo.name;
 	document.getElementById("recentCardsList").insertBefore(cardImg, document.getElementById("recentCardsList").firstChild);
 	
@@ -687,7 +707,6 @@ document.getElementById("dotDeckExportBtn").addEventListener("click", function()
 });
 
 // recent card hiding
-
 recentCardsHeaderBtn.addEventListener("click", function() {
 	recentCardsList.classList.toggle("shown");
 })

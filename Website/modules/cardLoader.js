@@ -3,9 +3,23 @@ import {locale} from "/modules/locale.js";
 import {renderCard} from "/custom/renderer.js";
 import {deckToCardIdList} from "/modules/deckUtils.js";
 
-let cardInfoCache = {};
+export let cardInfoCache = {};
 let cdfCache = {};
+let scriptedCardList = null;
 let nextCustomCardIDs = [1, 2];
+let neosAvailability = null;
+
+export class UnsupportedCardError extends Error {
+	constructor(cardId) {
+		super("Card " + cardId + " is currently unsupported in automatic matches.");
+		this.name = "UnsupportedCardError";
+		this.cardId = cardId;
+	}
+}
+
+export function getCardImageFromID(cardId) {
+	return "https://crossuniverse.net/images/cards/" + (globalLocale.warnings.includes("noCards")? "en" : globalLocale.code) + "/" + cardId + ".jpg";
+}
 
 export async function getCardInfo(cardId) {
 	if (!cardInfoCache[cardId]) {
@@ -38,11 +52,11 @@ defense:${cardData.defense ?? 0}`
 }
 
 export async function getCdf(cardId) {
+	if (!(await isCardScripted(cardId))) {
+		throw new UnsupportedCardError(cardId);
+	}
 	if (!cdfCache[cardId]) {
 		const response = await fetch("/rulesEngine/cards/CU" + cardId + ".cdf", {cache: "force-cache"});
-		if (!response.ok) {
-			throw new Error("Card " + cardId + " is currently unsupported in automatic matches.");
-		}
 		cdfCache[cardId] = await response.text();
 	}
 	return cdfCache[cardId];
@@ -67,5 +81,42 @@ export async function deckToCdfList(deck, automatic, player) {
 		}
 	}
 	let cdfList = await Promise.allSettled(deckList.map(cardId => automatic? getCdf(cardId) : getManualCdf(cardId)));
-	return cdfList.map(promise => promise.value);
+	for (let i = 0; i < cdfList.length; i++) {
+		if (cdfList[i].status == "rejected") {
+			throw cdfList[i].reason;
+		}
+		cdfList[i] = cdfList[i].value;
+	}
+	return cdfList;
+}
+
+export async function isCardScripted(cardId) {
+	if (!scriptedCardList) {
+		scriptedCardList = (async() => {
+			let response = await fetch("/data/scriptedCardsList.json");
+			return response.json();
+		})();
+	}
+	return (await scriptedCardList).includes(cardId);
+}
+
+export async function isInNeos(cardId) {
+	if (!neosAvailability) {
+		neosAvailability = (async() => {
+			let response = await fetch("https://raw.githubusercontent.com/Psychpsyo/cu-data/master/cards.txt");
+			let availableCards = [];
+			for (let line of (await response.text()).split("\n")) {
+				let parts = line.split("|");
+				if (parts.length < 6) {
+					continue;
+				}
+				let relevantPart = locale.code == "ja"? 5 : 4;
+				if (parts[relevantPart].length > 16) {
+					availableCards.push(parts[0]);
+				}
+			}
+			return availableCards;
+		})();
+	}
+	return (await neosAvailability).includes(cardId);
 }

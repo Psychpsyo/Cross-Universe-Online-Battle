@@ -137,8 +137,9 @@
 						</select>
 					</div>
 					<div class="optionListingItem">
-						<label id="cardSearchCharacterLabel" for="cardSearchIdInput"></label>
-						<input id="cardSearchCharacterInput" type="text" autocomplete="off"></div>
+						<label id="cardSearchCharacterLabel" for="cardSearchCharacterInput"></label>
+						<input id="cardSearchCharacterInput" type="text" autocomplete="off">
+					</div>
 					<div class="optionListingItem">
 						<label id="cardSearchDeckLimitLabel" for="cardSearchDeckLimitInput"></label>
 						<select id="cardSearchDeckLimitInput" autocomplete="off">
@@ -159,6 +160,15 @@
 							<option id="searchSortByCardID" value="cardID"></option>
 							<option id="searchSortByAttack" value="attack"></option>
 							<option id="searchSortByDefense" value="defense"></option>
+						</select>
+					</div>
+					<div class="optionListingItem">
+						<label id="cardSearchSupportLabel" for="cardSearchSupportInput"></label>
+						<select id="cardSearchSupportInput" type="text" autocomplete="off">
+							<option id="searchSupportedInAnywhere" value="anywhere"></option>
+							<option id="searchSupportedInManual" value="manual"></option>
+							<option id="searchSupportedInAutomatic" value="automatic"></option>
+							<option id="searchSupportedInNeos" value="neos">NeosVR</option>
 						</select>
 					</div>
 					<button id="cardSearchSearchBtn"></button>
@@ -250,6 +260,7 @@
 									<div id="unitWarning" class="warning"></div>
 									<div id="tokenWarning" class="warning"></div>
 									<div id="partnerWarning" class="lightWarning"></div>
+									<div id="unsupportedWarning" class="lightWarning"></div>
 								</div>
 								<hr>
 							</section>

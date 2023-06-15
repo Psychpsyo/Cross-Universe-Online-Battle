@@ -46,7 +46,12 @@
 			"deckListDefault": "参考デッキ",
 			"deckListLegacy": "過去のデッキ",
 			"deckListLoadSelected": "選択したデッキを配置する",
-			"deckListCardAmount": "{#CARDS}枚"
+			"deckListCardAmount": "{#CARDS}枚",
+
+			"errors": {
+				"generic": null,
+				"unsupportedInAutomatic": null
+			}
 		},
 
 		"partnerSelect": {
@@ -436,7 +441,11 @@
 			"sortByReleaseDate": null,
 			"sortByCardId": "カードID",
 			"sortByAttack": "攻撃力",
-			"sortByDefense": "防御力"
+			"sortByDefense": "防御力",
+			"supportedIn": null,
+			"supportedInAnywhere": null,
+			"supportedInManual": null,
+			"supportedInAutomatic": null
 		},
 
 		"cardInfo": {
@@ -474,7 +483,8 @@
 				"cardMaximum": null,
 				"needsUnit": null,
 				"noTokens": null,
-				"noPartner": null
+				"noPartner": null,
+				"unsupported": null
 			},
 
 			"levelDistribution": null,

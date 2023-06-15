@@ -46,7 +46,7 @@ function loadDeckPreview(deck) {
 	let partnerAdded = false;
 	deckToCardIdList(builtInDecks[currentDeckList][deck]).forEach(cardId => {
 		let cardImg = document.createElement("img");
-		cardImg.src = getCardImageFromID(cardId);
+		cardImg.src = cardLoader.getCardImageFromID(cardId);
 		cardImg.dataset.cardId = cardId;
 		
 		//make partner card glow
@@ -225,8 +225,13 @@ export class DeckState extends GameState {
 		try {
 			localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
 		} catch (e) {
-			console.error(e, e.stack);
-			alert("Failed to load deck.");
+			if (e instanceof cardLoader.UnsupportedCardError) {
+				let cardInfo = await cardLoader.getCardInfo(e.cardId);
+				alert(locale.game.deckSelect.errors.unsupportedInAutomatic.replaceAll("{#CARDNAME}", cardInfo.name));
+			} else {
+				console.error(e, e.stack);
+				alert(locale.game.deckSelect.errors.generic);
+			}
 			return;
 		}
 
