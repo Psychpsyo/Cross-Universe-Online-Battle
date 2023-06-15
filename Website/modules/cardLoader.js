@@ -18,7 +18,7 @@ export class UnsupportedCardError extends Error {
 }
 
 export function getCardImageFromID(cardId) {
-	return "https://crossuniverse.net/images/cards/" + (globalLocale.warnings.includes("noCards")? "en" : globalLocale.code) + "/" + cardId + ".jpg";
+	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
 }
 
 export async function getCardInfo(cardId) {

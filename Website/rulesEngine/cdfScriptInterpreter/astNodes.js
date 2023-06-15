@@ -35,12 +35,14 @@ export class ScriptNode extends AstNode {
 
 // Represents the language's built-in functions
 export class FunctionNode extends AstNode {
-	constructor(functionName, parameters) {
+	constructor(functionName, parameters, player) {
 		super();
 		this.functionName = functionName;
 		this.parameters = parameters;
+		this.player = player;
 	}
 	async* eval(card, player, ability) {
+		player = await (yield* this.player.eval(card, player, ability));
 		switch (this.functionName) {
 			case "DAMAGE": {
 				yield [new actions.DealDamage(await (yield* this.parameters[1].eval(card, player, ability)), await (yield* this.parameters[0].eval(card, player, ability)))];
@@ -73,7 +75,7 @@ export class FunctionNode extends AstNode {
 			case "SELECT": {
 				let responseCounts = [await (yield* this.parameters[0].eval(card, player, ability))];
 				let eligibleCards = await (yield* this.parameters[1].eval(card, player, ability));
-				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts, "cardEffect");
+				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
 					throw new Error("Incorrect number of responses supplied during card selection. (expected " + responseCounts + ", got " + responses.length + " instead)");
@@ -84,12 +86,12 @@ export class FunctionNode extends AstNode {
 				return requests.chooseCards.validate(responses[0].value, selectionRequest);
 			}
 			case "SELECTPLAYER": {
-				let selectionRequest = new requests.choosePlayer.create(player, "cardEffect");
+				let selectionRequest = new requests.choosePlayer.create(player, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
 					throw new Error("Incorrect number of responses supplied during player selection. (expected " + responseCounts + ", got " + responses.length + " instead)");
 				}
-				if (responses[0].type != "chooseCards") {
+				if (responses[0].type != "choosePlayer") {
 					throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + responses[0].type + "\" instead)");
 				}
 				return requests.choosePlayer.validate(responses[0].value, selectionRequest);

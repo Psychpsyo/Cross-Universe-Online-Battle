@@ -142,6 +142,11 @@ export function tokenize(code) {
 				pos++;
 				break;
 			}
+			case ".": {
+				tokens.push({type: "dotOperator"});
+				pos++;
+				break;
+			}
 			case "&": {
 				tokens.push({type: "logical", value: "and"});
 				pos++;
@@ -204,8 +209,7 @@ export function tokenize(code) {
 					pos += numLength;
 					break;
 				}
-				console.log("Found unknown character while tokenizing: " + code.codePointAt(pos));
-				pos++;
+				throw new Error("Found unknown character while tokenizing: " + code.codePointAt(pos));
 			}
 		}
 	}

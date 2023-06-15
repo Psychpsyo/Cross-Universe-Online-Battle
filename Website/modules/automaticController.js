@@ -10,6 +10,7 @@ import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
 import * as actions from "/rulesEngine/actions.js";
 import * as blocks from "/rulesEngine/blocks.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 export class AutomaticController extends InteractionController {
 	constructor() {
@@ -100,7 +101,12 @@ export class AutomaticController extends InteractionController {
 	receiveMessage(command, message) {
 		switch (command) {
 			case "inputRequestResponse": {
-				this.opponentMoves.push(JSON.parse(message));
+				let move = JSON.parse(message);
+				if (move.type == "choosePlayer") {
+					move.value = game.players[move.value].next().index;
+					putChatMessage(game.players[move.value] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
+				}
+				this.opponentMoves.push(move);
 				this.opponentMoveEventTarget.dispatchEvent(new CustomEvent("input"));
 				return true;
 			}
@@ -191,11 +197,11 @@ export class AutomaticController extends InteractionController {
 	async handleEvent(event) {
 		switch (event.type) {
 			case "deckShuffled": {
-				putChatMessage(event.player == localPlayer? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");
+				putChatMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
 				return this.gameSleep();
 			}
 			case "startingPlayerSelected": {
-				putChatMessage(event.player == localPlayer? locale.game.youStart : locale.game.opponentStarts, "notice");
+				putChatMessage(event.player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
@@ -364,8 +370,18 @@ export class AutomaticController extends InteractionController {
 						title = locale.game.cardChoice.attackTarget;
 						break;
 					}
+					default: {
+						if (request.reason.startsWith("cardEffect:")) {
+							title = locale.game.automatic.playerSelect.question.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+						}
+					}
 				}
 				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts);
+				break;
+			}
+			case "choosePlayer": {
+				let question = locale.game.automatic.playerSelect.question.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+				response.value = (await gameUI.askQuestion(question, locale.game.automatic.playerSelect.you, locale.game.automatic.playerSelect.opponent))? 1 : 0;
 				break;
 			}
 			case "pass": {

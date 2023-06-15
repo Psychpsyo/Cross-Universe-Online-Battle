@@ -64,7 +64,7 @@ export class ManualController extends InteractionController {
 		if (youAre === 0) {
 			this.deckShuffle(localPlayer.deckZone);
 			let startingPlayer = Math.random() > .5;
-			putChatMessage(startingPlayer? locale.game.youStart : locale.game.opponentStarts, "notice");
+			putChatMessage(startingPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
 			socket.send("[selectPlayer]" + startingPlayer);
 			addPartnerRevealButton();
 		}
@@ -121,7 +121,7 @@ export class ManualController extends InteractionController {
 				for (let i = 0; i < deck.cards.length; i++) {
 					gameUI.updateCard(deck, i);
 				}
-				putChatMessage(deck.playerIndex == 1? locale.game.yourDeckShuffled : locale.game.opponentDeckShuffled, "notice");
+				putChatMessage(deck.playerIndex == 1? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
 				return true;
 			}
 			case "showHand": {
@@ -144,7 +144,7 @@ export class ManualController extends InteractionController {
 			}
 			case "selectPlayer": { // opponent chose the starting player (at random)
 				this.deckShuffle(localPlayer.deckZone);
-				putChatMessage(message == "true"? locale.game.opponentStarts : locale.game.youStart, "notice");
+				putChatMessage(message == "true"? locale.game.notices.opponentStarts : locale.game.notices.youStart, "notice");
 				addPartnerRevealButton();
 				return true;
 			}

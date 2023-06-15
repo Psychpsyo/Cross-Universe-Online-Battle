@@ -1,4 +1,5 @@
 import * as ast from "./astNodes.js";
+import {ScriptParserError} from "./interpreter.js";
 
 let pos;
 let tokens;
@@ -22,22 +23,61 @@ export function parseScript(tokenList) {
 function parseLine() {
 	switch (tokens[pos].type) {
 		case "function": {
-			return parseFuction();
+			return parseFunction();
 		}
 		case "variable": {
-			return parseAssignment();
+			switch (tokens[pos+1].type) {
+				case "equals": {
+					return parseAssignment();
+				}
+				case "dotOperator": {
+					return parseFunction();
+				}
+				default: {
+					throw new ScriptParserError("Line starting with 'variable' token continues with unwanted '" + tokens[pos+1].type + "'.");
+				}
+			}
+		}
+		case "player": {
+			return parseFunction();
 		}
 		default: {
-			throw new Error("CDF Script Parser Error: '" + tokens[pos].type + "' is not a valid token at the start of a line.");
+			throw new ScriptParserError("'" + tokens[pos].type + "' is not a valid token at the start of a line.");
 		}
 	}
 }
 
-function parseFuction() {
+function parseFunction() {
+	let player;
+	switch (tokens[pos].type) {
+		case "function": {
+			player = new ast.PlayerNode("you");
+			break;
+		}
+		case "player": {
+			player = parsePlayer();
+			if (tokens[pos].type != "dotOperator") {
+				throw new ScriptParserError("Expected 'dotOperator' token after 'player' token while parsing function, got '" + tokens[pos].type + "' instead.");
+			}
+			pos++;
+			break;
+		}
+		case "variable": {
+			player = parseVariable();
+			if (tokens[pos].type != "dotOperator") {
+				throw new ScriptParserError("Expected 'dotOperator' token after 'variable' token while parsing function, got '" + tokens[pos].type + "' instead.");
+			}
+			pos++;
+			break;
+		}
+		default: {
+			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' while trying to parse a function.");
+		}
+	}
 	let functionName = tokens[pos].value;
 	pos++;
 	if (tokens[pos].type != "leftParen") {
-		throw new Error("CDF Script Parser Error: Function '" + functionName + "' must be followed by a '('.");
+		throw new ScriptParserError("'" + functionName + "' must be followed by a '('.");
 	}
 	pos++;
 	let parameters = [];
@@ -48,14 +88,14 @@ function parseFuction() {
 		}
 	}
 	pos++;
-	return new ast.FunctionNode(functionName, parameters);
+	return new ast.FunctionNode(functionName, parameters, player);
 }
 
 function parseAssignment() {
 	let variableName = tokens[pos].value;
 	pos++;
 	if (tokens[pos].type != "equals") {
-		throw new Error("CDF Script Parser Error: Variable name '" + variableName + "' must be followed by an '=' for assignments.");
+		throw new ScriptParserError("Variable name '" + variableName + "' must be followed by an '=' for assignments.");
 	}
 	pos++;
 	let newValue = parseParameter();
@@ -75,7 +115,7 @@ function parseParameter() {
 			return parseCardMatcher();
 		}
 		case "function": {
-			return parseFuction();
+			return parseFunction();
 		}
 		case "cardId": {
 			return parseCardId();
@@ -99,13 +139,13 @@ function parseParameter() {
 					return parseCardIdList();
 				}
 			}
-			throw new Error("CDF Script Parser Error: Reached unwanted '" + tokens[pos].type + "' token inside list syntax.");
+			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' token inside list syntax.");
 		}
 		case "variable": {
 			return parseVariable();
 		}
 		default: {
-			throw new Error("CDF Script Parser Error: A '" + tokens[pos].type + "' token does not start a valid function parameter.");
+			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid function parameter.");
 		}
 	}
 }
@@ -165,7 +205,7 @@ function parseTypeList() {
 		}
 	}
 	if (tokens[pos].type != "rightParen") {
-		throw new Error("CDF Script Parser Error: Expected a 'rightParen' at the end of a type list. Got '" + tokens[pos].type + "' instead.");
+		throw new ScriptParserError("Expected a 'rightParen' at the end of a type list. Got '" + tokens[pos].type + "' instead.");
 	}
 	pos++;
 	return new ast.TypesNode(types);
@@ -181,7 +221,7 @@ function parseCardIdList() {
 		}
 	}
 	if (tokens[pos].type != "rightParen") {
-		throw new Error("CDF Script Parser Error: Expected a 'rightParen' at the end of a card ID list. Got '" + tokens[pos].type + "' instead.");
+		throw new ScriptParserError("Expected a 'rightParen' at the end of a card ID list. Got '" + tokens[pos].type + "' instead.");
 	}
 	pos++;
 	return new ast.CardIDsNode(cardIDs);
@@ -198,7 +238,7 @@ function parseCardMatcher() {
 	let cardTypes = [];
 	while (tokens[pos].type != "from") {
 		if (tokens[pos].type != "cardType") {
-			throw new Error("CDF Script Parser Error: Expected a 'cardType' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
+			throw new ScriptParserError("Expected a 'cardType' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
 		}
 		cardTypes.push(tokens[pos].value);
 		pos++;
@@ -211,7 +251,7 @@ function parseCardMatcher() {
 	let zones = [];
 	while (tokens[pos].type != "where" && tokens[pos].type != "rightBracket") {
 		if (tokens[pos].type != "zoneIdentifier") {
-			throw new Error("CDF Script Parser Error: Expected a 'zoneIdentifier' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
+			throw new ScriptParserError("Expected a 'zoneIdentifier' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
 		}
 		zones.push(parseZone());
 		if (tokens[pos].type == "separator") {

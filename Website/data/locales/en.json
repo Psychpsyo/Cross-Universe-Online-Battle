@@ -24,10 +24,14 @@
 	},
 
 	"game": {
-		"youStart": "You go first.",
-		"opponentStarts": "Your opponent goes first.",
-		"yourDeckShuffled": "Your deck was shuffled.",
-		"opponentDeckShuffled": "Your opponent's deck was shuffled.",
+		"notices": {
+			"youStart": "You go first.",
+			"opponentStarts": "Your opponent goes first.",
+			"yourDeckShuffled": "Your deck was shuffled.",
+			"opponentDeckShuffled": "Your opponent's deck was shuffled.",
+			"opponentChoseYou": "Your opponent chose you.",
+			"opponentChoseSelf": "Your opponent chose themselves."
+		},
 
 		"info": {
 			"you": "You",
@@ -76,9 +80,10 @@
 
 		"cardChoice": {
 			"confirm": "Confirm",
-			"genericTitle": "Select Card(s):",
+			"genericTitle": "Select card(s):",
 			"handDiscard": "Discard your hand down to 8:",
-			"attackTarget": "Select the attack target:"
+			"attackTarget": "Select the attack target:",
+			"cardEffect": "Select card(s) for the effect of '{#CARDNAME}':"
 		},
 
 		"fieldLabels": {
@@ -155,6 +160,12 @@
 				"attack": "Attack",
 				"activate": "Activate",
 				"activateMultiple": "Activate #{#ABILITY}"
+			},
+
+			"playerSelect": {
+				"question": "Select a player for the effect of '{#CARDNAME}':",
+				"you": "Yourself",
+				"opponent": "Your Opponent"
 			},
 
 			"gameOver": {

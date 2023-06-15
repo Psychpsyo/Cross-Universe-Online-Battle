@@ -24,10 +24,14 @@
 	},
 
 	"game": {
-		"youStart": null,
-		"opponentStarts": null,
-		"yourDeckShuffled": null,
-		"opponentDeckShuffled": null,
+		"notices": {
+			"youStart": null,
+			"opponentStarts": null,
+			"yourDeckShuffled": null,
+			"opponentDeckShuffled": null,
+			"opponentChoseYou": null,
+			"opponentChoseSelf": null
+		},
 
 		"info": {
 			"you": "自分",
@@ -78,7 +82,8 @@
 			"confirm": null,
 			"genericTitle": null,
 			"handDiscard": null,
-			"attackTarget": null
+			"attackTarget": null,
+			"cardEffect": null
 		},
 
 		"fieldLabels": {
@@ -155,6 +160,12 @@
 				"attack": null,
 				"activate": null,
 				"activateMultiple": null
+			},
+
+			"playerSelect": {
+				"question": null,
+				"you": null,
+				"opponent": null
 			},
 
 			"gameOver": {

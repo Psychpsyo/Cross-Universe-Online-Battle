@@ -24,10 +24,14 @@
 	},
 
 	"game": {
-		"youStart": "Du bist zuerst dran.",
-		"opponentStarts": "Dein Gegner ist zuerst dran.",
-		"yourDeckShuffled": "Dein Deck wurde gemischt.",
-		"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
+		"notices": {
+			"youStart": "Du bist zuerst dran.",
+			"opponentStarts": "Dein Gegner ist zuerst dran.",
+			"yourDeckShuffled": "Dein Deck wurde gemischt.",
+			"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
+			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
+			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt."
+		},
 
 		"info": {
 			"you": "Du",
@@ -76,9 +80,10 @@
 
 		"cardChoice": {
 			"confirm": "Bestätigen",
-			"genericTitle": "Wähle Karten:",
+			"genericTitle": "Wähle Karte(n):",
 			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:",
-			"attackTarget": "Wähle, wen du angreifst:"
+			"attackTarget": "Wähle, wen du angreifst:",
+			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':"
 		},
 
 		"fieldLabels": {
@@ -155,6 +160,12 @@
 				"attack": "Angreifen",
 				"activate": "Aktivieren",
 				"activateMultiple": "Aktiviere #{#ABILITY}"
+			},
+
+			"playerSelect": {
+				"question": "Wähle einen Spieler für den Effekt von '{#CARDNAME}':",
+				"you": "Du selbst",
+				"opponent": "Dein Gegner"
 			},
 
 			"gameOver": {

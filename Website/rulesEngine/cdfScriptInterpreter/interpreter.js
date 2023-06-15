@@ -18,3 +18,10 @@ export function buildCostAST(effectId, cdfScript) {
 	}
 	return alreadyParsedCosts[effectId];
 }
+
+export class ScriptParserError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "ScriptParserError";
+	}
+}
