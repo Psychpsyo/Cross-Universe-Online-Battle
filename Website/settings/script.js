@@ -63,7 +63,7 @@ function updateCustomFontInputDiv() {
 // translation
 function setLanguage(language) {
 	localStorage.setItem("language", language);
-	
+
 	reloadLocale().then(function() {
 		languageWarnings.innerHTML = "";
 		languageSelectorDiv.style.marginBottom = 0;
@@ -77,9 +77,9 @@ function setLanguage(language) {
 			}
 			languageSelectorDiv.style.marginBottom = languageWarnings.clientHeight + 5 + "px";
 		}
-		
+
 		title.textContent = locale.settings.title;
-		
+
 		generalHeading.textContent = locale.settings.general.title;
 		languageSelectorLabel.textContent = locale.settings.general.language;
 		partnerChoiceLabel.textContent = locale.settings.general.partnerChoice;
@@ -91,7 +91,7 @@ function setLanguage(language) {
 		usernameInput.placeholder = locale.settings.profile.usernamePlaceholder;
 		cardBackLabel.textContent = locale.settings.profile.cardBackLink;
 		customCardBack.placeholder = locale.settings.profile.cardBackLinkPlaceholder;
-		
+
 		customizationHeading.textContent = locale.settings.customization.title;
 		fieldLabelToggleLabel.textContent = locale.settings.customization.fieldLabels;
 		cardBackToggleLabel.textContent = locale.settings.customization.disableCardBacks;
@@ -101,7 +101,7 @@ function setLanguage(language) {
 			theme.textContent = locale.settings.customization.themes[theme.value];
 		});
 		menuCardsToggleLabel.textContent = locale.settings.customization.mainMenuCards;
-		
+
 		accessibilityHeading.textContent = locale.settings.accessibility.title;
 		fontSelectorLabel.textContent = locale.settings.accessibility.font;
 		Array.from(fontSelector.children).forEach(font => {
@@ -109,7 +109,7 @@ function setLanguage(language) {
 		});
 		customFontLabel.textContent = locale.settings.accessibility.customFont;
 		customFontInput.placeholder = locale.settings.accessibility.customFontPlaceholder;
-		
+
 		hotkeysHeading.textContent = locale.settings.hotkeys.title;
 		hotkeyShowYourDiscardLabel.textContent = locale.settings.hotkeys.showYourDiscardPile;
 		hotkeyShowOpponentDiscardLabel.textContent = locale.settings.hotkeys.showOpponentDiscardPile;
@@ -125,9 +125,9 @@ function setLanguage(language) {
 		hotkeyShowDeckTopLabel.textContent = locale.settings.hotkeys.showDeckTop;
 		hotkeyPreviewHandLabel.textContent = locale.settings.hotkeys.previewHandCard;
 		resetDefaultHotkeys.textContent = locale.settings.hotkeys.resetHotkeys;
-		
+
 		relabelAllHotkeys();
-		
+
 		document.documentElement.lang = locale.code;
 		document.documentElement.removeAttribute("aria-busy");
 	});
@@ -263,7 +263,7 @@ document.addEventListener("keydown", function(e) {
 					"alt": e.altKey
 				}
 			).then(validateHotkeys);
-			
+
 			editingHotkey = "";
 			break;
 		}

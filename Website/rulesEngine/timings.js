@@ -14,7 +14,7 @@ export class Timing {
 		this.costCompletions = [];
 		this.successful = false;
 	}
-	
+
 	// returns whether or not any substitutions were handled
 	* substitute() {
 		let actionCount = this.actions.length;
@@ -31,13 +31,13 @@ export class Timing {
 			yield actionCancelledEvents;
 		}
 		this.actions = this.actions.filter(action => action.isPossible());
-		
+
 		if (actionCount != this.actions.length) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	isFullyPossible(costIndex) {
 		for (let action of this.actions) {
 			if (action.costIndex == costIndex && !action.isFullyPossible()) {
@@ -46,7 +46,7 @@ export class Timing {
 		}
 		return true;
 	}
-	
+
 	// returns whether or not the timing completed sucessfully
 	async* run() {
 		this.index = game.nextTimingIndex;
@@ -58,7 +58,7 @@ export class Timing {
 		}
 
 		while (yield* this.substitute()) {}
-		
+
 		if (this.costCompletions.length > 0) {
 			// empty costs count as successful completion
 			if (this.actions.length == 0) {
@@ -79,7 +79,7 @@ export class Timing {
 		if (this.actions.length == 0) {
 			return;
 		}
-		
+
 		let events = [];
 		for (let action of this.actions) {
 			let event = yield* action.run();
@@ -94,7 +94,7 @@ export class Timing {
 		// check win/lose conditions
 		yield* checkGameOver(this.game);
 	}
-	
+
 	valueOf() {
 		return this.index;
 	}

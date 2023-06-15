@@ -113,7 +113,7 @@ function parseParameter() {
 function parseVariable() {
 	let node = new ast.VariableNode(tokens[pos].value);
 	pos++;
-	return node; 
+	return node;
 }
 
 function parseNumber() {

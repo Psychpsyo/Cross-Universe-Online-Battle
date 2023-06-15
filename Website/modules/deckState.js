@@ -28,7 +28,7 @@ function loadDeckFile(file) {
 		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it to deckx
 		gameState.loadDeck(this.fileName.endsWith(".deck")? toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
 	};
-	
+
 	reader.fileName = file["name"];
 	reader.readAsText(file);
 }
@@ -38,17 +38,17 @@ function loadDeckPreview(deck) {
 	//add card list on the right
 	//remove all cards already there
 	document.getElementById("deckSelectorCardGrid").innerHTML = "";
-	
+
 	//scroll the list to top
 	document.getElementById("deckSelectorCardGrid").scrollTop = 0;
-	
+
 	//add the cards
 	let partnerAdded = false;
 	deckToCardIdList(builtInDecks[currentDeckList][deck]).forEach(cardId => {
 		let cardImg = document.createElement("img");
 		cardImg.src = cardLoader.getCardImageFromID(cardId);
 		cardImg.dataset.cardId = cardId;
-		
+
 		//make partner card glow
 		if (cardId == builtInDecks[currentDeckList][deck]["suggestedPartner"] && !partnerAdded) {
 			partnerAdded = true;
@@ -61,7 +61,7 @@ function loadDeckPreview(deck) {
 			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
 		});
 	});
-	
+
 	// set the description
 	document.getElementById("deckSelectorDescription").textContent = builtInDecks[currentDeckList][deck]["description"][locale.code] ?? builtInDecks[currentDeckList][deck]["description"]["en"] ?? builtInDecks[currentDeckList][deck]["description"]["ja"];
 }
@@ -110,7 +110,7 @@ async function addDecksToDeckSelector(deckList) {
 		deckDiv.appendChild(cardAmountSubtitle);
 		document.getElementById("deckList").appendChild(deckDiv);
 	}
-	
+
 	//also remove all cards still on the right side, as selectedDeck will be wiped
 	while (document.getElementById("deckSelectorCardGrid").firstChild) {
 		document.getElementById("deckSelectorCardGrid").firstChild.remove();
@@ -163,7 +163,7 @@ export class DeckState extends GameState {
 			if (!document.getElementById("selectedDeck")) {
 				return;
 			}
-			
+
 			closeDeckSelect();
 			this.loadDeck(builtInDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
 		}.bind(this));

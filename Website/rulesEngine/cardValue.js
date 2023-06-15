@@ -10,7 +10,7 @@ export class CardValue extends Value {
 		super();
 		this.baseValue = baseValue;
 	}
-	
+
 	get() {
 		return this.baseValue;
 	}
@@ -25,7 +25,7 @@ export class SnapshotValue extends Value {
 		this.value = value;
 		this.baseValue = baseValue;
 	}
-	
+
 	get() {
 		return this.value;
 	}

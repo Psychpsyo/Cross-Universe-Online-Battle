@@ -56,7 +56,7 @@ export function connect() {
 			cancelWaitingBtn.focus();
 		}
 	}, 100);
-	
+
 	// I don't want to import this up-front on pageload since it imports a bunch of other stuff itself.
 	import("/modules/initState.js").then(initModule => {
 		new initModule.InitState(roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value, gameModeSelect.value);

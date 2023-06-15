@@ -156,7 +156,7 @@ export class AttackDeclaration extends Block {
 
 	async* run() {
 		yield* super.run();
-		
+
 		this.attackTarget = this.executionTimings[0].actions[0].attackTarget; // already a snapshot
 		this.stack.phase.turn.game.currentAttackDeclaration = new game.AttackDeclaration(this.stack.phase.turn.game, this.attackers, this.attackTarget.cardRef);
 		this.attackers = this.attackers.map(attacker => attacker.snapshot());

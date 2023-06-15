@@ -13,7 +13,7 @@ export class Player {
 		this.loseReason = "";
 		this.won = false;
 		this.winReason = "";
-		
+
 		this.deckZone = new DeckZone(this);
 		this.handZone = new Zone(this, "hand");
 		this.unitZone = new FieldZone(this, "unit", 5);
@@ -21,16 +21,16 @@ export class Player {
 		this.partnerZone = new FieldZone(this, "partner", 1);
 		this.discardPile = new Zone(this, "discard");
 		this.exileZone = new Zone(this, "exile");
-		
+
 		this.isViewable = false; // determines whether or not this player's cards should be visible locally.
 	}
-	
+
 	setDeck(cdfList) {
 		for (let cdf of cdfList) {
 			this.deckZone.add(new Card(this, cdf, true), this.deckZone.cards.length);
 		}
 	}
-	
+
 	next() {
 		return this.game.players[(this.index + 1) % this.game.players.length];
 	}

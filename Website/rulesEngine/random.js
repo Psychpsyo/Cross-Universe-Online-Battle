@@ -6,11 +6,11 @@ export class CURandom {
 	async nextInt(range) {
 		return Math.floor(Math.random() * range);
 	}
-	
+
 	async nextInts(ranges) {
 		return ranges.map(range => this.nextInt(range));
 	}
-	
+
 	async nextPlayer(game) {
 		return game.players[await this.nextInt(game.players.length)];
 	}

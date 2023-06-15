@@ -18,7 +18,7 @@ export function connectTo(targetRoomcode) {
 	socket.addEventListener("open", function (event) {
 		socket.send("[roomcode]" + roomcode);
 	});
-	
+
 	socket.addEventListener("message", receiveMessage);
 }
 
@@ -27,7 +27,7 @@ function receiveMessage(e) {
 	let message = e.data;
 	let command = message.substring(1, message.indexOf("]"));
 	message = message.substring(message.indexOf("]") + 1);
-	
+
 	switch (command) {
 		case "chat": { // incoming chat message
 			if (!opponentName || opponentName == "") {

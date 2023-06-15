@@ -11,7 +11,7 @@ chatInput.placeholder = locale.chat.enterMessage;
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 export function putChatMessage(message, type) {
 	let messageSpan = document.createElement("div");
-	
+
 	while (message.indexOf(":") != -1) {
 		if (message.indexOf(":", message.indexOf(":") + 1) == -1) {
 			break;
@@ -32,7 +32,7 @@ export function putChatMessage(message, type) {
 			message = message.substr(message.indexOf(":", message.indexOf(":") + 1));
 		}
 	}
-	
+
 	messageSpan.appendChild(document.createTextNode(message));
 	if (type) {
 		messageSpan.classList.add(type);
@@ -117,7 +117,7 @@ export async function previewCard(card, specific = true) {
 		(await getCardInfo(card.cardId)).effects.forEach(effect => {
 			let effectDiv = document.createElement("div");
 			effectDiv.classList.add("cardDetailsEffect");
-			
+
 			if (effect.type != "rule") { // 'rule' effects get no title
 				let effectTitle = document.createElement("span");
 				effectTitle.textContent = locale[effect.type + "CardDetailEffect"];
@@ -148,7 +148,7 @@ export async function previewCard(card, specific = true) {
 
 				effectDiv.appendChild(lineDiv);
 			});
-			
+
 			cardDetailsEffectList.appendChild(effectDiv);
 		});
 	}

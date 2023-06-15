@@ -5,9 +5,9 @@
 		<title>Cross Universe Online Battle</title>
 		<meta name="description" content="Play Cross Universe online against others!">
 		<meta name="keywords" content="Cross Universe, Cross Universe Online Battle, Card Game, Crunis, クロス・ユニバース, クロユニ, card game, カードゲーム">
-		
+
 		<link rel="icon" type="image/png" href="images/favicon.png">
-		
+
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="entryPage.css">
 		<link rel="stylesheet" href="styles/game.css">
@@ -48,7 +48,7 @@
 			</div>
 			<footer id="unofficialNotice"></footer>
 		</div>
-		
+
 		<!--IN-GAME-->
 		<div id="gameDiv" hidden>
 			<div id="gameFlexBox">
@@ -119,7 +119,7 @@
 						</div>
 					</div>
 				</div>
-				
+
 				<main id="draftGameSetupMenu" hidden>
 					<div id="draftGameFlexBox">
 						<div id="draftMainInfo"></div>
@@ -141,7 +141,7 @@
 						<button id="draftStartButton" class="bigButton" hidden></button>
 					</div>
 				</main>
-				
+
 				<main id="mainGameArea" hidden>
 					<div id="fieldHolder">
 						<div id="field">
@@ -370,7 +370,7 @@
 									</div>
 								</div>
 							</div>
-							
+
 							<!--turn phases -->
 							<div id="phaseDisplay" class="automaticOnly" hidden>
 								<ol>
@@ -388,15 +388,15 @@
 									<div id="opponentTurnDisplayLabel" class="turnDisplayLabel hidden">Opponent's Turn</div>
 								</div>
 							</div>
-							
+
 							<!--cards held up by players-->
 							<div id="presentedCards0" class="presentedCards manualOnly"></div>
 							<div id="presentedCards1" class="presentedCards manualOnly"></div>
-							
+
 							<div id="draggedCardImages"></div>
 						</div>
 					</div>
-					
+
 					<!--hands-->
 					<div id="hand0" class="hand"></div>
 					<div id="hand1" class="hand"></div>
@@ -405,7 +405,7 @@
 					</div>
 				</main>
 			</div>
-			
+
 			<!-- Pop-in card preview -->
 			<dialog id="cardDetails">
 				<div id="cardDetailsControl">
@@ -423,7 +423,7 @@
 				</div>
 				<div id="cardDetailsImage"></div>
 			</dialog>
-			
+
 			<!--Card Selector-->
 			<dialog id="cardSelector" class="centerDialog popupSelectMenu">
 				<section class="dialogContent" aria-labelledby="cardSelectorTitle">
@@ -434,7 +434,7 @@
 					<button id="cardSelectorReturnToDeck" class="bigButton cardMenuBottomButton manualOnly"></button>
 				</section>
 			</dialog>
-			
+
 			<!--Deck Selector-->
 			<dialog id="deckSelector" class="centerDialog popupSelectMenu">
 				<section class="dialogContent">
@@ -460,14 +460,14 @@
 					</div>
 				</section>
 			</dialog>
-			
+
 			<!--Partner Selector-->
 			<dialog id="questionPopup" class="centerDialog">
 				<span id="questionPopupText"></span><br>
 				<br>
 				<div id="questionPopupBtns"><button id="questionPopupYesButton"></button><button id="questionPopupNoButton"></button></div>
 			</dialog>
-			
+
 			<!--Generic Card Choice Dialogue-->
 			<dialog id="cardChoiceMenu" class="centerDialog popupSelectMenu">
 				<section class="dialogContent" aria-labelledby="cardChoiceTitle">
@@ -479,10 +479,8 @@
 				</section>
 			</dialog>
 		</div>
-		
-		<!-- 'dependencies' -->
+
 		<script src="scripts/localStorageSetup.js"></script>
 		<script src="modules/main.js", type="module"></script>
-		<script src="scripts/utility.js"></script>
 	</body>
 </html>

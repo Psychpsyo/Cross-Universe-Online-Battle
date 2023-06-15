@@ -183,7 +183,7 @@ export const doAttackDeclaration = {
 				}
 			}
 		}
-		
+
 		return response;
 	}
 }

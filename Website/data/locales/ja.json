@@ -42,7 +42,7 @@
 			"waitingForOpponent": null,
 			"dropYourDeck": "デッキをドラック＆ドロップしてください。",
 			"useOfficialDeck": "もしくは、公式デッキを選択してください。",
-			
+
 			"deckListDefault": "参考デッキ",
 			"deckListLegacy": "過去のデッキ",
 			"deckListLoadSelected": "選択したデッキを配置する",
@@ -70,7 +70,7 @@
 			"discard1": "自分の捨て山：",
 			"exile0": "相手の隔離：",
 			"exile1": "自分の隔離：",
-			
+
 			"returnAllToDeck": null
 		},
 
@@ -106,7 +106,7 @@
 			"actions": {
 				"life": "Lp",
 				"mana": "魔力",
-				
+
 				"half": "半分",
 				"tokens": "トークン",
 				"showHand": "手札を公開",

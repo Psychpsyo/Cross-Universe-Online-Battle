@@ -8,7 +8,7 @@ class BaseCard {
 		this.owner = player;
 		this.cardId = cardId;
 		this.hidden = hidden;
-		
+
 		this.cardTypes = cardTypes;
 		this.names = names;
 		this.level = level;
@@ -16,7 +16,7 @@ class BaseCard {
 		this.attack = attack;
 		this.defense = defense;
 		this.abilities = abilities;
-		
+
 		this.zone = null;
 		this.index = -1;
 		this.attackCount = 0;

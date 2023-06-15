@@ -93,12 +93,12 @@ export function init() {
 		for (let i = 0; i < 4; i++) {
 			new FieldCardSlot(player.spellItemZone, i);
 		}
-		
+
 		document.getElementById("hand" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
 			dropCard(localPlayer, player.handZone, player.handZone.cards.length);
 		});
-		
+
 		// presented cards (only used during manual play)
 		document.getElementById("presentedCards" + player.index).addEventListener("mouseup", function(e) {
 			e.stopPropagation();
@@ -106,12 +106,12 @@ export function init() {
 			dropCard(localPlayer, presentedZone, presentedZone.cards.length);
 		});
 	});
-	
+
 	// dropping cards off in nowhere
 	document.addEventListener("mouseup", function() {
 		dropCard(localPlayer, null, 0);
 	});
-	
+
 	// setup cursor movement
 	document.addEventListener("mousemove", function(e) {
 		let fieldRect = document.getElementById("field").getBoundingClientRect();
@@ -131,7 +131,7 @@ export function init() {
 			socket.send("[hideCursor]");
 		}
 	});
-	
+
 	// previewing hand cards
 	document.addEventListener("keydown", function(e) {
 		if (e.code.startsWith("Digit") && !e.shiftKey && !e.altKey && !e.ctrlKey) {
@@ -146,7 +146,7 @@ export function init() {
 			return;
 		}
 	});
-	
+
 	// card selector
 	cardSelectorMainSlot = new CardSelectorMainSlot()
 	cardSelector.addEventListener("click", function(e) {
@@ -162,7 +162,7 @@ export function init() {
 		gameState.controller.returnAllToDeck(cardSelectorMainSlot.zone);
 		closeCardSelect();
 	});
-	
+
 	// card choice menu
 	cardChoiceMenu.addEventListener("cancel", function(e) {
 		e.preventDefault();
@@ -175,7 +175,7 @@ export function init() {
 		// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
 		window.setTimeout(closeCardPreview, 0);
 	});
-	
+
 	lastFrame = performance.now();
 	animate();
 }
@@ -185,7 +185,7 @@ export function receiveMessage(command, message) {
 		case "uiGrabbedCard": { // opponent picked up a card
 			let zone = zoneToLocal(message.substr(0, message.indexOf("|")));
 			let index = message.substr(message.indexOf("|") + 1);
-			
+
 			grabCard(game.players[0], zone, index);
 			return true;
 		}
@@ -196,7 +196,7 @@ export function receiveMessage(command, message) {
 				zone = zoneToLocal(message.substr(0, message.indexOf("|")));
 				index = message.substr(message.indexOf("|") + 1);
 			}
-			
+
 			dropCard(game.players[0], zone, index);
 			return true;
 		}
@@ -255,7 +255,7 @@ export function insertCard(zone, index) {
 			}
 		}
 	});
-	
+
 	switch (zone.type) {
 		case "hand": {
 			new HandCardSlot(zone, index);
@@ -325,7 +325,7 @@ export class UiCardSlot {
 		this.index = index;
 		cardSlots.push(this);
 	}
-	
+
 	makeDragSource(player) {}
 	clearDragSource(player) {}
 	update() {}
@@ -339,7 +339,7 @@ class FieldCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		this.fieldSlot = document.getElementById("field" + fieldSlotIndexFromZone(zone, index));
-		
+
 		this.fieldSlot.addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, zone, index);
@@ -355,7 +355,7 @@ class FieldCardSlot extends UiCardSlot {
 			dropCard(localPlayer, zone, index);
 		});
 	}
-	
+
 	makeDragSource(player) {
 		this.fieldSlot.classList.add("dragSource");
 	}
@@ -410,7 +410,7 @@ class FieldCardSlot extends UiCardSlot {
 class HandCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
-		
+
 		this.handElem = document.getElementById("hand" + this.zone.player.index);
 		this.cardElem = document.createElement("img");
 		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
@@ -430,7 +430,7 @@ class HandCardSlot extends UiCardSlot {
 		}
 		this.handElem.style.setProperty("--card-count", "" + this.handElem.childElementCount);
 	}
-	
+
 	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 	}
@@ -451,7 +451,7 @@ class DeckCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
-		
+
 		document.getElementById("deck" + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 		});
@@ -460,7 +460,7 @@ class DeckCardSlot extends UiCardSlot {
 			dropCard(localPlayer, this.zone, -1);
 		}.bind(this));
 	}
-	
+
 	update() {
 		this.cardCount = this.zone.cards.length;
 		this.setVisuals();
@@ -483,7 +483,7 @@ class PileCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
-		
+
 		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			grabCard(localPlayer, this.zone, this.zone.cards.length - 1);
@@ -496,7 +496,7 @@ class PileCardSlot extends UiCardSlot {
 			dropCard(localPlayer, this.zone, this.zone.cards.length);
 		}.bind(this));
 	}
-	
+
 	update() {
 		this.cardCount = this.zone.cards.length;
 		this.setVisuals();
@@ -519,11 +519,11 @@ class PileCardSlot extends UiCardSlot {
 class PresentedCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
-		
+
 		this.isRevealed = false;
 		this.zoneElem = document.getElementById("presentedCards" + this.zone.player.index);
 		this.cardElem = document.createElement("div");
-		
+
 		this.cardImg = document.createElement("img");
 		getCardImage(this.zone.get(index)).then(img => this.cardImg.src = img);
 		this.cardImg.addEventListener("click", function(e) {
@@ -535,7 +535,7 @@ class PresentedCardSlot extends UiCardSlot {
 			grabCard(localPlayer, this.zone, this.index);
 		}.bind(this));
 		this.cardElem.appendChild(this.cardImg);
-		
+
 		if (this.zone.player === localPlayer) {
 			this.revealBtn = document.createElement("button");
 			this.revealBtn.textContent = locale.game.manual.presented.reveal;
@@ -553,7 +553,7 @@ class PresentedCardSlot extends UiCardSlot {
 		}
 		this.zoneElem.appendChild(this.cardElem);
 	}
-	
+
 	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 		if (player === localPlayer) {
@@ -578,7 +578,7 @@ class PresentedCardSlot extends UiCardSlot {
 class CardSelectorSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
-		
+
 		this.cardElem = document.createElement("img");
 		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
 		this.cardElem.classList.add("card");
@@ -595,7 +595,7 @@ class CardSelectorSlot extends UiCardSlot {
 		}.bind(this));
 		cardSelectorGrid.insertBefore(this.cardElem, cardSelectorGrid.firstChild);
 	}
-	
+
 	makeDragSource(player) {
 		this.cardElem.classList.add("dragSource");
 	}
@@ -616,7 +616,7 @@ class CardSelectorMainSlot extends UiCardSlot {
 	constructor() {
 		super(null, -1);
 	}
-	
+
 	remove() {}
 	insert(index) {
 		this.zone.cards[index].hidden = false;
@@ -633,7 +633,7 @@ export function openCardSelect(zone) {
 		zone.get(i).hidden = false;
 		cardSelectorSlots.push(new CardSelectorSlot(zone, i));
 	}
-	
+
 	//show selector
 	cardSelectorTitle.textContent = locale.game.cardSelector[gameState.getZoneName(zone)];
 	if (document.getElementById("cardSelectorReturnToDeck")) {
@@ -645,7 +645,7 @@ export function openCardSelect(zone) {
 	}
 	cardSelector.showModal();
 	cardSelector.appendChild(cardDetails);
-	
+
 	cardSelectorGrid.parentNode.scrollTop = 0;
 }
 export function closeCardSelect() {
@@ -675,17 +675,17 @@ export function toggleCardSelect(zone) {
 class UiPlayer {
 	constructor(player) {
 		this.player = player;
-		
+
 		this.life = new UiValue(player.life, 5, document.getElementById("lifeDisplay" + player.index));
 		this.mana = new UiValue(player.mana, 100, document.getElementById("manaDisplay" + player.index));
-		
+
 		this.posX = 0;
 		this.posY = 0;
 		this.lastX = 0;
 		this.lastY = 0;
 		this.targetX = 0;
 		this.targetY = 0;
-		
+
 		this.dragging = false;
 		this.dragCardElem = document.createElement("img");
 		this.dragCardElem.classList.add("dragCard");
@@ -694,7 +694,7 @@ class UiPlayer {
 			this.dragCardElem.id = "yourDragCard";
 		} else {
 			this.dragCardElem.hidden = true;
-			
+
 			this.cursorElem = document.createElement("img");
 			this.cursorElem.classList.add("dragCard");
 			this.cursorElem.src = "images/opponentCursor.png";
@@ -702,7 +702,7 @@ class UiPlayer {
 			draggedCardImages.appendChild(this.cursorElem);
 		}
 	}
-	
+
 	setDrag(card) {
 		if (card) {
 			getCardImage(card).then(img => this.dragCardElem.src = img);
@@ -723,7 +723,7 @@ class UiValue {
 		this.speed = speed;
 		this.displayElem = displayElem;
 	}
-	
+
 	async set(value, instant) {
 		if (value != this.value) {
 			this.targetValue = value;
@@ -736,7 +736,7 @@ class UiValue {
 			}
 		}
 	}
-	
+
 	animate(delta) {
 		if (this.value != this.targetValue) {
 			this.counter += delta;
@@ -745,7 +745,7 @@ class UiValue {
 				this.value += Math.sign(this.targetValue - this.value);
 			}
 			this.displayElem.textContent = this.value;
-			
+
 			if (this.value == this.targetValue) {
 				this.displayElem.classList.remove("valueDown");
 				this.displayElem.classList.remove("valueUp");
@@ -757,33 +757,33 @@ class UiValue {
 function animate(currentTime) {
 	let delta = currentTime - lastFrame;
 	lastFrame = currentTime;
-	
+
 	let fieldRect = document.getElementById("field").getBoundingClientRect();
 	for (let uiPlayer of uiPlayers) {
 		// cursors
 		uiPlayer.posX += (uiPlayer.targetX - uiPlayer.posX) / 5;
 		uiPlayer.posY += (uiPlayer.targetY - uiPlayer.posY) / 5;
-		
+
 		uiPlayer.dragCardElem.style.left = (uiPlayer.posX * fieldRect.height + fieldRect.width / 2) + "px";
 		uiPlayer.dragCardElem.style.top = uiPlayer.posY * fieldRect.height + "px";
 		if (uiPlayer.player !== localPlayer) {
 			uiPlayer.cursorElem.style.left = uiPlayer.dragCardElem.style.left;
 			uiPlayer.cursorElem.style.top = uiPlayer.dragCardElem.style.top;
 		}
-		
+
 		let velX = uiPlayer.posX - uiPlayer.lastX;
 		let velY = uiPlayer.lastY - uiPlayer.posY;
-		
+
 		let flipped = uiPlayer.player.index % 2 == 0;
 		uiPlayer.dragCardElem.style.transform = "translate(-50%,-50%) perspective(300px) rotateY(" + (velX > 0? Math.min(Math.PI / 3, velX * 100) : Math.max(Math.PI / -3, velX * 100)) + "rad) rotateX(" + (velY > 0? Math.min(Math.PI / 3, velY * 100) : Math.max(Math.PI / -3, velY * 100)) + "rad)" + (flipped? " rotateZ(180deg)" : "");
-		
+
 		uiPlayer.lastX = uiPlayer.posX;
 		uiPlayer.lastY = uiPlayer.posY;
-		
+
 		uiPlayer.life.animate(delta);
 		uiPlayer.mana.animate(delta);
 	}
-	
+
 	requestAnimationFrame(animate);
 }
 
@@ -826,12 +826,12 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 		cardChoiceMenu.addEventListener("close", function() {
 			resolve(this.returnValue.split("|").map(val => parseInt(val)));
 		});
-		
+
 		cardChoiceTitle.textContent = title;
 		cardChoiceConfirm.disabled = true;
 		cardChoiceMenu.showModal();
 		cardChoiceMenu.appendChild(cardDetails);
-		
+
 		cardChoiceGrid.parentNode.scrollTop = 0;
 	});
 }
@@ -841,7 +841,7 @@ export async function askQuestion(question, yesButton, noButton) {
 	questionPopupYesButton.textContent = yesButton;
 	questionPopupNoButton.textContent = noButton;
 	questionPopup.showModal();
-	
+
 	return new Promise((resolve, reject) => {
 		questionPopupYesButton.addEventListener("click", function() {
 			questionPopup.close();

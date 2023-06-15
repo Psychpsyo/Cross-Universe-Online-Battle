@@ -11,35 +11,35 @@ export class Game {
 		this.players = [];
 		this.players.push(new Player(this));
 		this.players.push(new Player(this));
-		
+
 		this.turns = [];
 		this.currentAttackDeclaration = null;
 		this.nextTimingIndex = 1;
-		
+
 		this.rng = new CURandom();
 	}
-	
+
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
 	async* begin() {
 		let currentPlayer = await this.rng.nextPlayer(this);
-		
+
 		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
 		for (const player of this.players) {
 			if (!player.partnerZone.cards[0].cardTypes.get().includes("unit")) {
 				throw new Error("All partner cards must be units!");
 			}
 		}
-		
+
 		let deckShuffledEvents = [];
 		await currentPlayer.deckZone.shuffle();
 		await currentPlayer.next().deckZone.shuffle();
 		deckShuffledEvents.push(createDeckShuffledEvent(currentPlayer));
 		deckShuffledEvents.push(createDeckShuffledEvent(currentPlayer.next()));
 		yield deckShuffledEvents;
-		
+
 		// RULES: Randomly decide the first player and the second player.
 		yield [createStartingPlayerSelectedEvent(currentPlayer)];
-		
+
 		// RULES: Draw 5 cards from your deck to your hand.
 		let drawHandEvents = [];
 		for (let player of this.players) {
@@ -52,7 +52,7 @@ export class Game {
 			drawHandEvents.push(createCardsDrawnEvent(player, 5));
 		}
 		yield drawHandEvents;
-		
+
 		// RULES: Both players reveal their partner...
 		let partnerRevealEvents = [];
 		for (let player of this.players) {
@@ -60,7 +60,7 @@ export class Game {
 			partnerRevealEvents.push(createPartnerRevealedEvent(player));
 		}
 		yield partnerRevealEvents;
-		
+
 		// RULES: ...and continue the game as follows.
 		while (true) {
 			this.turns.push(new Turn(currentPlayer));
@@ -74,7 +74,7 @@ export class Game {
 			currentPlayer = currentPlayer.next();
 		}
 	}
-	
+
 	getPhases() {
 		return this.turns.map(turn => turn.phases).flat();
 	}
@@ -107,7 +107,7 @@ export class AttackDeclaration {
 		this.attackers = attackers;
 		this.target = target;
 	}
-	
+
 	isValid() {
 		if (this.target == null) {
 			return false;

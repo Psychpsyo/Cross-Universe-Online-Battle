@@ -12,7 +12,7 @@ export class BoardState extends GameState {
 	constructor(automatic) {
 		super();
 		gameState = this;
-		
+
 		this.automatic = automatic;
 		this.zones = {};
 		for (const player of game.players) {
@@ -24,14 +24,14 @@ export class BoardState extends GameState {
 			this.zones["discard" + player.index] = player.discardPile;
 			this.zones["exile" + player.index] = player.exileZone;
 		}
-		
+
 		// remove draft game section and deck drop zone since they are not needed anymore
 		draftGameSetupMenu.remove();
-		
+
 		// show game area
 		mainGameBlackoutContent.textContent = "";
 		mainGameArea.hidden = false;
-		
+
 		// do partner select
 		if (localPlayer.deck.suggestedPartner) {
 			if (localStorage.getItem("partnerChoiceToggle") === "true") {
@@ -48,7 +48,7 @@ export class BoardState extends GameState {
 		} else {
 			this.openPartnerSelect();
 		}
-		
+
 		this.controller = automatic? new AutomaticController() : new ManualController();
 	}
 	receiveMessage(command, message) {
@@ -75,11 +75,11 @@ export class BoardState extends GameState {
 			}
 		}
 	}
-	
+
 	getZoneName(zone) {
 		return Object.keys(gameState.zones).find(key => gameState.zones[key] === zone);
 	}
-	
+
 	hotkeyPressed(name) {
 		if (!mainGameBlackout.classList.contains("hidden")) {
 			return;
@@ -111,7 +111,7 @@ export class BoardState extends GameState {
 			}
 		}
 	}
-	
+
 	openPartnerSelect() {
 		for (let card of localPlayer.deckZone.cards) {
 			card.hidden = false;
@@ -132,12 +132,12 @@ export class BoardState extends GameState {
 		localPlayer.partnerZone.add(localPlayer.deckZone.cards[partnerPosInDeck], 0);
 		ui.removeCard(localPlayer.deckZone, partnerPosInDeck);
 		ui.insertCard(localPlayer.partnerZone, 0);
-		
+
 		socket.send("[choosePartner]" + partnerPosInDeck);
-		
+
 		this.doStartGame();
 	}
-	
+
 	doStartGame() {
 		if (game.players[0].partnerZone.cards[0] && game.players[1].partnerZone.cards[0]) {
 			mainGameBlackout.classList.add("hidden");

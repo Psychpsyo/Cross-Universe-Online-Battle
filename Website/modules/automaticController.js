@@ -14,10 +14,10 @@ import * as blocks from "/rulesEngine/blocks.js";
 export class AutomaticController extends InteractionController {
 	constructor() {
 		super();
-		
+
 		autoUI.init();
 		game.rng = new DistRandom();
-		
+
 		this.opponentMoveEventTarget = new EventTarget();
 		this.opponentMoves = [];
 		this.waitingForOpponentInput = false;
@@ -26,10 +26,10 @@ export class AutomaticController extends InteractionController {
 			this.playerInfos.push(new AutomaticPlayerInfo(player));
 		}
 		this.madeMoveTarget = new EventTarget();
-		
+
 		this.gameSpeed = 1;
 		document.documentElement.style.setProperty("--game-speed", this.gameSpeed);
-		
+
 		this.standardSummonEventTarget = new EventTarget();
 		this.deployEventTarget = new EventTarget();
 		this.castEventTarget = new EventTarget();
@@ -41,7 +41,7 @@ export class AutomaticController extends InteractionController {
 	async startGame() {
 		let updateGenerator = game.begin();
 		let updates = await updateGenerator.next();
-		
+
 		while (updates.value.length != 0) {
 			let returnValues;
 			switch (updates.value[0].nature) {
@@ -72,7 +72,7 @@ export class AutomaticController extends InteractionController {
 					}
 
 					let responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
-					
+
 					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
 
 					this.waitingForOpponentInput = false;
@@ -149,11 +149,11 @@ export class AutomaticController extends InteractionController {
 	}
 	dropCard(player, zone, index) {
 		retireOptions.classList.remove("noClick");
-		
+
 		let card = this.playerInfos[player.index].heldCard;
 		let playerInfo = this.playerInfos[player.index];
 		playerInfo.clearHeld();
-		
+
 		// summoning
 		if (playerInfo.canStandardSummon && card.zone == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
 			if (player === localPlayer) {
@@ -184,10 +184,10 @@ export class AutomaticController extends InteractionController {
 			}
 			return;
 		}
-		
+
 		gameUI.clearDragSource(card.zone, card.index, player);
 	}
-	
+
 	async handleEvent(event) {
 		switch (event.type) {
 			case "deckShuffled": {

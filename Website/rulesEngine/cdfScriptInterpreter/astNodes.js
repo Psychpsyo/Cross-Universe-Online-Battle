@@ -166,7 +166,7 @@ defense: ${defense}`, false));
 	async* hasAllTargets(card, player, ability) {
 		switch (this.functionName) {
 			case "DAMAGE": {
-				return player.life + (await (yield* this.parameters[0].eval(card, player, ability))) >= 0; 
+				return player.life + (await (yield* this.parameters[0].eval(card, player, ability))) >= 0;
 			}
 			case "DESTROY": {
 				return yield* this.parameters[0].hasAllTargets(card, player, ability);

@@ -8,7 +8,7 @@ export class Zone {
 		this.type = type;
 		this.cards = [];
 	}
-	
+
 	// returns the index at which the card was inserted.
 	add(card, index) {
 		if (card.zone === this && card.index < index) {
@@ -24,7 +24,7 @@ export class Zone {
 			index = -1;
 		}
 		card.zone = this;
-		
+
 		// remove this card from relevant actions
 		let stacks = this.player.game.getStacks();
 		if (stacks.length > 0) {
@@ -47,18 +47,18 @@ export class Zone {
 		}
 		return index;
 	}
-	
+
 	remove(card) {
 		this.cards.splice(card.index, 1);
 		this.reindex();
 	}
-	
+
 	reindex() {
 		for (let i = 0; i < this.cards.length; i++) {
 			this.cards[i].index = i;
 		}
 	}
-	
+
 	get(index) {
 		return this.cards[index];
 	}
@@ -68,7 +68,7 @@ export class DeckZone extends Zone {
 	constructor(player) {
 		super(player, "deck");
 	}
-	
+
 	async shuffle() {
 		let randomRanges = [];
 		for (let i = this.cards.length - 1; i > 0; i--) {
@@ -95,7 +95,7 @@ export class FieldZone extends Zone {
 			this.placed.push(null);
 		}
 	}
-	
+
 	// returns the index at which the card was inserted.
 	add(card, index) {
 		if (this.cards[index] !== null) {
@@ -116,14 +116,14 @@ export class FieldZone extends Zone {
 		card.index = index;
 		return index;
 	}
-	
+
 	remove(card) {
 		let index = this.cards.findIndex(localCard => localCard == card);
 		this.cards[index] = null;
 	}
-	
+
 	reindex() {} // not needed
-	
+
 	// This puts a card into the temporary "not in hand, not on field" position that they go to during standard summons / casting / deploying
 	place(card, index) {
 		if (this.get(index) == null) {
@@ -131,7 +131,7 @@ export class FieldZone extends Zone {
 		}
 		card.zone = null;
 	}
-	
+
 	get(index) {
 		return this.placed[index] ?? this.cards[index];
 	}

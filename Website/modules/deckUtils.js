@@ -6,7 +6,7 @@ export function deckFromCardList(cards, name) {
 	deck["name"] = {};
 	deck["name"][locale.code] = name;
 	deck["cards"] = [];
-	
+
 	//add the cards
 	for (const card of cards) {
 		let alreadyThere = deck["cards"].filter(oldCard => {
@@ -18,27 +18,27 @@ export function deckFromCardList(cards, name) {
 			deck["cards"].push({"id": card, "amount": 1});
 		}
 	}
-	
+
 	return deck;
 }
 
 // Converts an official Cross Universe .deck format file to .deckx with respect to the current user-selected locale.
 export function toDeckx(cuDeck) {
 	let jsonDeck = {};
-	
+
 	//set name
 	jsonDeck["name"] = {};
 	jsonDeck["name"][locale.code] = cuDeck["Name"] === undefined? "Cross Universe VCI Generator デッキ" : cuDeck["Name"];
 	jsonDeck["description"] = {};
 	jsonDeck["description"][locale.code] = cuDeck["Description"] === undefined? "" : cuDeck["Description"];
-	
+
 	//set partner
 	jsonDeck["cards"] = [];
 	if (cuDeck["Partner"]) {
 		jsonDeck["suggestedPartner"] = cuDeck["Partner"].substr(2);
 		jsonDeck["cards"].push({"id": cuDeck["Partner"].substr(2), "amount": 1});
 	}
-	
+
 	//add the rest of the cards
 	for (const card of cuDeck["Cards"]) {
 		let alreadyThere = jsonDeck["cards"].filter(oldCard => {
@@ -50,7 +50,7 @@ export function toDeckx(cuDeck) {
 			jsonDeck["cards"].push({"id": card.substr(2), "amount": 1});
 		}
 	}
-	
+
 	return jsonDeck;
 }
 

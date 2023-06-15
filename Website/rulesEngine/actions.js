@@ -7,11 +7,11 @@ export class Action {
 		this.timing = null; // Is set by the Timing itself
 		this.costIndex = -1; // If this is positive, it indicates that this action is to be treated as a cost, together with other actions of the same costIndex
 	}
-	
+
 	// Returns the event that represents this action.
 	// After run() finishes, this class should only hold references to card snapshots, not actual cards so it serves as a record of what it did
 	* run() {}
-	
+
 	isImpossible() {
 		return false;
 	}
@@ -29,12 +29,12 @@ export class ChangeMana extends Action {
 		this.player = player;
 		this.amount = amount;
 	}
-	
+
 	* run() {
 		this.player.mana += this.amount;
 		return events.createManaChangedEvent(this.player);
 	}
-	
+
 	isImpossible() {
 		return this.player.mana == 0 && this.amount < 0;
 	}
@@ -49,12 +49,12 @@ export class ChangeLife extends Action {
 		this.player = player;
 		this.amount = amount;
 	}
-	
+
 	* run() {
 		this.player.life += this.amount;
 		return events.createLifeChangedEvent(this.player);
 	}
-	
+
 	isFullyPossible() {
 		return this.player.life + this.amount >= 0;
 	}
@@ -67,7 +67,7 @@ export class Draw extends Action {
 		this.amount = amount;
 		this.drawnCards = [];
 	}
-	
+
 	* run() {
 		if (this.amount > this.player.deckZone.cards.length) {
 			this.player.lost = true;
@@ -95,7 +95,7 @@ export class Place extends Action {
 		this.zone = zone;
 		this.index = index;
 	}
-	
+
 	* run() {
 		this.card.hidden = false;
 		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.index);
@@ -103,7 +103,7 @@ export class Place extends Action {
 		this.card = this.card.snapshot();
 		return cardPlacedEvent;
 	}
-	
+
 	isImpossible() {
 		let slotCard = this.zone.get(this.index);
 		return slotCard != null && slotCard != this.card;
@@ -186,14 +186,14 @@ export class EstablishAttackDeclaration extends Action {
 		this.attackers = attackers;
 		this.attackTarget = null;
 	}
-	
+
 	* run() {
 		// determine possible attack targets
 		let eligibleUnits = this.player.next().partnerZone.cards.concat(this.player.next().unitZone.cards.filter(card => card !== null));
 		if (eligibleUnits.length > 1) {
 			eligibleUnits.shift();
 		}
-		
+
 		// send selection request
 		let targetSelectRequest = new requests.chooseCards.create(this.player, eligibleUnits, [1], "selectAttackTarget");
 		let responses = (yield [targetSelectRequest]);
@@ -204,7 +204,7 @@ export class EstablishAttackDeclaration extends Action {
 			throw new Error("Incorrect response type supplied during attack target selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
 		}
 		this.attackTarget = requests.chooseCards.validate(responses[0].value, targetSelectRequest)[0];
-		
+
 		// finish
 		for (let attacker of this.attackers) {
 			attacker.attackCount++;
@@ -237,7 +237,7 @@ export class Discard extends Action {
 		super();
 		this.card = card;
 	}
-	
+
 	* run() {
 		this.card = this.card.snapshot();
 		let event = events.createCardDiscardedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
@@ -248,7 +248,7 @@ export class Discard extends Action {
 		}
 		return event;
 	}
-	
+
 	isImpossible() {
 		if (this.card.zone?.type == "partner") {
 			return true;
@@ -262,7 +262,7 @@ export class Destroy extends Action {
 		super();
 		this.card = card;
 	}
-	
+
 	* run() {
 		this.card = this.card.snapshot();
 		let event = events.createCardDestroyedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
@@ -270,7 +270,7 @@ export class Destroy extends Action {
 		this.card.hidden = false;
 		return event;
 	}
-	
+
 	isImpossible() {
 		if (this.card.zone?.type == "partner") {
 			return true;
@@ -284,7 +284,7 @@ export class Exile extends Action {
 		super();
 		this.card = card;
 	}
-	
+
 	* run() {
 		this.card = this.card.snapshot();
 		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone, this.card);
@@ -292,7 +292,7 @@ export class Exile extends Action {
 		this.card.cardRef.hidden = false;
 		return event;
 	}
-	
+
 	isImpossible() {
 		if (this.card.zone.type == "partner") {
 			return true;
