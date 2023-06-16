@@ -87,7 +87,9 @@ export class Timing {
 				events.push(event);
 			}
 		}
-		yield events;
+		if (events.length > 0) {
+			yield events;
+		}
 		game.nextTimingIndex++;
 		this.successful = true;
 

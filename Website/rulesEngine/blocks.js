@@ -25,7 +25,7 @@ class Block {
 
 	async* prepareCostTiming() {
 		let generatorOutput = await this.costTimingGenerator.next();
-		while (true) {
+		while (!generatorOutput.done) {
 			let actionList = generatorOutput.value;
 			// Needs to first check for updates (events or requests) returned by the timing generator.
 			if (actionList.length == 0 || !(actionList[0] instanceof actions.Action)) {
@@ -224,6 +224,9 @@ async function* abilityTimingGenerator(ability, card, player) {
 	do {
 		actionList = (await timingGenerator.next(timing));
 		if (!actionList.done) {
+			if (actionList.value.length == 0) {
+				return;
+			}
 			timing = yield actionList.value;
 		}
 	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));

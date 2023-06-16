@@ -41,7 +41,9 @@ let keywordTokenTypes = {
 	continuousItem: "cardType",
 	enchantItem: "cardType",
 	APPLY: "function",
+	COUNT: "function",
 	DAMAGE: "function",
+	DECKTOP: "function",
 	DESTROY: "function",
 	DISCARD: "function",
 	DRAW: "function",
@@ -147,18 +149,48 @@ export function tokenize(code) {
 				pos++;
 				break;
 			}
+			case "?": {
+				if (code[pos+1] == "?") {
+					tokens.push({type: "youMayOperator"});
+					pos += 2;
+				} else {
+					tokens.push({type: "asmapOperator"});
+					pos++;
+				}
+				break;
+			}
 			case "&": {
-				tokens.push({type: "logical", value: "and"});
+				tokens.push({type: "andOperator"});
 				pos++;
 				break;
 			}
 			case "|": {
-				tokens.push({type: "logical", value: "or"});
+				tokens.push({type: "orOperator"});
 				pos++;
 				break;
 			}
 			case "-": {
 				tokens.push({type: "minus"});
+				pos++;
+				break;
+			}
+			case "+": {
+				tokens.push({type: "plus"});
+				pos++;
+				break;
+			}
+			case "*": {
+				tokens.push({type: "multiply"});
+				pos++;
+				break;
+			}
+			case "/": {
+				tokens.push({type: "ceilDivide"});
+				pos++;
+				break;
+			}
+			case "\\": {
+				tokens.push({type: "floorDivide"});
 				pos++;
 				break;
 			}
@@ -185,14 +217,13 @@ export function tokenize(code) {
 			default: {
 				if (code[pos].match(/[a-z]/i)) {
 					let wordLength = 1;
-					while(code[pos + wordLength].match(/[a-z]/i)) {
+					while(code[pos + wordLength].match(/[a-z0-9]/i)) {
 						wordLength++;
 					}
 					let word = code.substr(pos, wordLength);
 					if (keywordTokenTypes[word]) {
 						tokens.push({type: keywordTokenTypes[word], value: word});
 					} else if (word.startsWith("CU")) {
-						wordLength = 8;
 						tokens.push({type: "cardId", value: code.substr(pos, wordLength)});
 					} else {
 						tokens.push({type: "name", value: word});

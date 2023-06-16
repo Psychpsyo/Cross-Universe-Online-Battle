@@ -8,9 +8,9 @@ import * as abilities from "./abilities.js";
 
 // Base class for all phases
 class Phase {
-	constructor(turn, type) {
+	constructor(turn, types) {
 		this.turn = turn;
-		this.type = type;
+		this.types = types;
 	}
 
 	* run() {}
@@ -21,12 +21,31 @@ class Phase {
 	getActions() {
 		return [];
 	}
+
+	matches(phaseIndicator, player) {
+		let yourPhase = false;
+		let opponentPhase = false;
+		if (phaseIndicator.startsWith("opponent")) {
+			opponentPhase = true;
+			phaseIndicator = phaseIndicator.substr(8);
+		} else if (phaseIndicator.startsWith("you")) {
+			yourPhase = true;
+			phaseIndicator = phaseIndicator.substr(3);
+		}
+		phaseIndicator = phaseIndicator[0].toLowerCase() + phaseIndicator.substr(1);
+		if ((this.yourPhase && player != this.turn.player) ||
+			(this.opponentPhase && player == this.turn.player) ||
+			!this.types.includes(phaseIndicator)) {
+			return false;
+		}
+		return true;
+	}
 }
 
 // Base class for any phase that works with stacks and blocks
 class StackPhase extends Phase {
-	constructor(turn, type) {
-		super(turn, type);
+	constructor(turn, types) {
+		super(turn, types);
 		this.stacks = [];
 	}
 
@@ -46,8 +65,27 @@ class StackPhase extends Phase {
 	getBlockOptions(stack) {
 		return [
 			requests.pass.create(stack.getNextPlayer()),
-			requests.castSpell.create(stack.getNextPlayer())
+			requests.castSpell.create(stack.getNextPlayer(), this.getCastableSpells())
 		];
+	}
+
+	getCastableSpells() {
+		let spells = [];
+		for (let card of this.currentStack().getNextPlayer().handZone.cards) {
+			if (card.cardTypes.get().includes("spell")) {
+				let eligible = true;
+				for (let ability of card.abilities.get()) {
+					if (ability.duringPhase && !this.matches(ability.duringPhase, card.zone.player)) {
+						eligible = false;
+						break;
+					}
+				}
+				if (eligible) {
+					spells.push(card);
+				}
+			}
+		}
+		return spells;
 	}
 
 	getTimings() {
@@ -64,7 +102,7 @@ class StackPhase extends Phase {
 
 export class ManaSupplyPhase extends Phase {
 	constructor(turn) {
-		super(turn, "manaSupplyPhase");
+		super(turn, ["manaSupplyPhase"]);
 		this.timings = [];
 	}
 
@@ -130,7 +168,7 @@ export class ManaSupplyPhase extends Phase {
 
 export class DrawPhase extends StackPhase {
 	constructor(turn) {
-		super(turn, "drawPhase");
+		super(turn, ["drawPhase"]);
 	}
 
 	getBlockOptions(stack) {
@@ -143,7 +181,9 @@ export class DrawPhase extends StackPhase {
 
 export class MainPhase extends StackPhase {
 	constructor(turn) {
-		super(turn, "mainPhase");
+		let types = ["mainPhase"];
+		types.push(turn.phases.length > 3? "mainPhase2" : "mainPhase1");
+		super(turn, types);
 	}
 
 	getBlockOptions(stack) {
@@ -151,9 +191,9 @@ export class MainPhase extends StackPhase {
 		if (stack.canDoNormalActions()) {
 			// turn actions
 			if (this.turn.hasStandardSummoned === null) {
-				options.push(requests.doStandardSummon.create(this.turn.player));
+				options.push(requests.doStandardSummon.create(this.turn.player, this.getSummonableUnits()));
 			}
-			options.push(requests.deployItem.create(this.turn.player));
+			options.push(requests.deployItem.create(this.turn.player, this.getDeployableItems()));
 			if (this.turn.hasRetired === null) {
 				let eligibleUnits = [];
 				for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
@@ -175,27 +215,63 @@ export class MainPhase extends StackPhase {
 			}
 
 			// optional abilities
-			let eligibleAbilities = [];
-			for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards, this.turn.player.spellItemZone.cards)) {
-				if (!card) {
-					continue;
-				}
-				let cardAbilities = card.abilities.get();
-				for (let i = 0; i < cardAbilities.length; i++) {
-					if (cardAbilities[i] instanceof abilities.OptionalAbility && cardAbilities[i].activationCount < cardAbilities[i].turnLimit) {
-						eligibleAbilities.push({card: card, index: i});
-					}
-				}
-			}
-			options.push(requests.activateOptionalAbility.create(this.turn.player, eligibleAbilities));
+			options.push(requests.activateOptionalAbility.create(this.turn.player, this.getActivatableOptionalAbilities()));
 		}
 		return options;
+	}
+
+	getActivatableOptionalAbilities() {
+		let eligibleAbilities = [];
+		for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards, this.turn.player.spellItemZone.cards)) {
+			if (!card) {
+				continue;
+			}
+			let cardAbilities = card.abilities.get();
+			for (let i = 0; i < cardAbilities.length; i++) {
+				if (cardAbilities[i] instanceof abilities.OptionalAbility &&
+					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
+					(cardAbilities[i].duringPhase == null || this.matches(ability.duringPhase, this.currentStack().getNextPlayer()))
+				) {
+					eligibleAbilities.push({card: card, index: i});
+				}
+			}
+		}
+		return eligibleAbilities;
+	}
+
+	getSummonableUnits() {
+		let units = [];
+		for (let card of this.turn.player.handZone.cards) {
+			if (card.cardTypes.get().includes("unit")) {
+				units.push(card);
+			}
+		}
+		return units;
+	}
+
+	getDeployableItems() {
+		let items = [];
+		for (let card of this.turn.player.handZone.cards) {
+			if (card.cardTypes.get().includes("item")) {
+				let eligible = true;
+				for (let ability of card.abilities.get()) {
+					if (ability.duringPhase && !this.matches(ability.duringPhase, this.turn.player)) {
+						eligible = false;
+						break;
+					}
+				}
+				if (eligible) {
+					items.push(card);
+				}
+			}
+		}
+		return items;
 	}
 }
 
 export class BattlePhase extends StackPhase {
 	constructor(turn) {
-		super(turn, "battlePhase");
+		super(turn, ["battlePhase"]);
 	}
 
 	getBlockOptions(stack) {
@@ -219,6 +295,6 @@ export class BattlePhase extends StackPhase {
 
 export class EndPhase extends StackPhase {
 	constructor(turn) {
-		super(turn, "endPhase");
+		super(turn, ["endPhase"]);
 	}
 }

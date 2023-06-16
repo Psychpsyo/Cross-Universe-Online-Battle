@@ -116,6 +116,19 @@ function parseCdfValues(cdf) {
 					ability.turnLimit = parseInt(parts[1]);
 					break;
 				}
+				case "duringPhase": {
+					if (ability.type == "static") {
+						throw new Error("CDF Parser Error: Static abilities do not have phase restrictions.");
+					}
+					if (!["manaSupplyPhase", "drawPhase", "mainPhase", "mainPhase1", "battlePhase", "mainPhase2", "endPhase",
+						"yourManaSupplyPhase", "yourDrawPhase", "yourMainPhase", "yourMainPhase1", "yourBattlePhase", "yourMainPhase2", "yourEndPhase",
+						"opponentManaSupplyPhase", "opponentDrawPhase", "opponentMainPhase", "opponentMainPhase1", "opponentBattlePhase", "opponenetMainPhase2", "opponentEndPhase"
+					].includes(parts[1])) {
+						throw new Error("CDF Parser Error: 'duringPhase' must be a valid phase identifier.");
+					}
+					ability.duringPhase = parts[1];
+					break;
+				}
 				case "mandatory": {
 					if (ability.type != "trigger") {
 						throw new Error("CDF Parser Error: Only trigger abilities can be mandatory.");
@@ -185,6 +198,7 @@ function parseCdfValues(cdf) {
 					id: data.id + ":" + data.abilities.length,
 					type: parts[1],
 					turnLimit: Infinity,
+					duringPhase: null,
 					exec: ""
 				});
 				inAbility = true;
@@ -202,19 +216,19 @@ function parseCdfValues(cdf) {
 function makeAbility(ability) {
 	switch (ability.type) {
 		case "cast": {
-			return new abilities.CastAbility(ability.id, ability.exec, ability.cost);
+			return new abilities.CastAbility(ability.id, ability.exec, ability.cost, ability.duringPhase);
 		}
 		case "deploy": {
-			return new abilities.DeployAbility(ability.id, ability.exec, ability.cost);
+			return new abilities.DeployAbility(ability.id, ability.exec, ability.cost, ability.duringPhase);
 		}
 		case "optional": {
-			return new abilities.OptionalAbility(ability.id, ability.exec, ability.cost, ability.turnLimit);
+			return new abilities.OptionalAbility(ability.id, ability.exec, ability.cost, ability.turnLimit, ability.duringPhase);
 		}
 		case "fast": {
 			return new abilities.FastAbility(ability.id, ability.exec, ability.cost, ability.turnLimit);
 		}
 		case "trigger": {
-			return new abilities.TriggerAbility(ability.id, ability.exec, ability.cost, ability.mandatory, ability.turnLimit);
+			return new abilities.TriggerAbility(ability.id, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.duringPhase);
 		}
 		case "static": {
 			return new abilities.StaticAbility(ability.id, ability.exec);

@@ -82,11 +82,12 @@ export const doStandardDraw = {
 }
 
 export const doStandardSummon = {
-	create: function(player) {
+	create: function(player, eligibleUnits) {
 		return {
 			"nature": "request",
 			"player": player,
-			"type": "doStandardSummon"
+			"type": "doStandardSummon",
+			"eligibleUnits": eligibleUnits
 		}
 	},
 	validate: function(response, request) {
@@ -99,19 +100,20 @@ export const doStandardSummon = {
 		if (request.player.unitZone.get(response.fieldIndex)) {
 			throw new Error("Supplied already occupied field index for a standard summon.");
 		}
-		if (!request.player.handZone.cards[response.handIndex].cardTypes.get().includes("unit")) {
-			throw new Error("Tried to standard summon a card that isn't a unit.");
+		if (!request.eligibleUnits.includes(request.player.handZone.cards[response.handIndex])) {
+			throw new Error("Tried to standard summon a non-eligible unit.");
 		}
 		return response;
 	}
 }
 
 export const deployItem = {
-	create: function(player) {
+	create: function(player, eligibleItems) {
 		return {
 			"nature": "request",
 			"player": player,
-			"type": "deployItem"
+			"type": "deployItem",
+			"eligibleItems": eligibleItems
 		}
 	},
 	validate: function(response, request) {
@@ -124,19 +126,20 @@ export const deployItem = {
 		if (request.player.spellItemZone.get(response.fieldIndex)) {
 			throw new Error("Supplied already occupied field index for deploying an item.");
 		}
-		if (!request.player.handZone.cards[response.handIndex].cardTypes.get().includes("item")) {
-			throw new Error("Tried to deploy a card that isn't an item.");
+		if (!request.eligibleItems.includes(request.player.handZone.cards[response.handIndex])) {
+			throw new Error("Tried to deploy a non-eligible item.");
 		}
 		return response;
 	}
 }
 
 export const castSpell = {
-	create: function(player) {
+	create: function(player, eligibleSpells) {
 		return {
 			"nature": "request",
 			"player": player,
-			"type": "castSpell"
+			"type": "castSpell",
+			"eligibleSpells": eligibleSpells
 		}
 	},
 	validate: function(response, request) {
@@ -149,8 +152,8 @@ export const castSpell = {
 		if (request.player.spellItemZone.get(response.fieldIndex)) {
 			throw new Error("Supplied already occupied field index for casting a spell.");
 		}
-		if (!request.player.handZone.cards[response.handIndex].cardTypes.get().includes("spell")) {
-			throw new Error("Tried to cast a card that isn't a spell.");
+		if (!request.eligibleSpells.includes(request.player.handZone.cards[response.handIndex])) {
+			throw new Error("Tried to cast a non-eligible spell.");
 		}
 		return response;
 	}

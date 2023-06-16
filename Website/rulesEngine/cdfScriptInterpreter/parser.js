@@ -21,30 +21,39 @@ export function parseScript(tokenList) {
 }
 
 function parseLine() {
-	switch (tokens[pos].type) {
-		case "function": {
-			return parseFunction();
-		}
-		case "variable": {
-			switch (tokens[pos+1].type) {
-				case "equals": {
-					return parseAssignment();
+	let actionNodes = [];
+	do {
+		switch (tokens[pos].type) {
+			case "function": {
+				actionNodes.push(parseFunction());
+				break;
+			}
+			case "variable": {
+				switch (tokens[pos+1].type) {
+					case "equals": {
+						actionNodes.push(parseAssignment());
+						break;
+					}
+					case "dotOperator": {
+						actionNodes.push(parseFunction());
+						break;
+					}
+					default: {
+						throw new ScriptParserError("Line starting with 'variable' token continues with unwanted '" + tokens[pos+1].type + "'.");
+					}
 				}
-				case "dotOperator": {
-					return parseFunction();
-				}
-				default: {
-					throw new ScriptParserError("Line starting with 'variable' token continues with unwanted '" + tokens[pos+1].type + "'.");
-				}
+				break;
+			}
+			case "player": {
+				actionNodes.push(parseFunction());
+				break;
+			}
+			default: {
+				throw new ScriptParserError("'" + tokens[pos].type + "' is not a valid token at the start of a line.");
 			}
 		}
-		case "player": {
-			return parseFunction();
-		}
-		default: {
-			throw new ScriptParserError("'" + tokens[pos].type + "' is not a valid token at the start of a line.");
-		}
-	}
+	} while (pos < tokens.length - 1 && tokens[pos++].type == "andOperator");
+	return new ast.LineNode(actionNodes);
 }
 
 function parseFunction() {
@@ -76,10 +85,18 @@ function parseFunction() {
 	}
 	let functionName = tokens[pos].value;
 	pos++;
+
+	let asManyAsPossible = false;
+	if (tokens[pos].type == "asmapOperator") {
+		asManyAsPossible = true;
+		pos++;
+	}
+
 	if (tokens[pos].type != "leftParen") {
 		throw new ScriptParserError("'" + functionName + "' must be followed by a '('.");
 	}
 	pos++;
+
 	let parameters = [];
 	while (tokens[pos].type != "rightParen") {
 		parameters.push(parseParameter());
@@ -88,7 +105,8 @@ function parseFunction() {
 		}
 	}
 	pos++;
-	return new ast.FunctionNode(functionName, parameters, player);
+
+	return new ast.FunctionNode(functionName, parameters, player, asManyAsPossible);
 }
 
 function parseAssignment() {
@@ -109,7 +127,11 @@ function parseParameter() {
 			return parseNumber();
 		}
 		case "player": {
-			return parsePlayer();
+			if (tokens[pos+1].type == "dotOperator") {
+				return parseFunction();
+			} else {
+				return parsePlayer();
+			}
 		}
 		case "leftBracket": {
 			return parseCardMatcher();
@@ -142,7 +164,11 @@ function parseParameter() {
 			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' token inside list syntax.");
 		}
 		case "variable": {
-			return parseVariable();
+			if (tokens[pos+1].type == "dotOperator") {
+				return parseFunction();
+			} else {
+				return parseVariable();
+			}
 		}
 		default: {
 			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid function parameter.");
