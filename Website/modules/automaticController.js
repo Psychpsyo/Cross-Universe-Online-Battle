@@ -165,6 +165,7 @@ export class AutomaticController extends InteractionController {
 			if (player === localPlayer) {
 				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: card.index, fieldIndex: index}}));
 			}
+			gameUI.makeDragSource(player.unitZone, index, player);
 			return;
 		}
 		// deploying
@@ -172,6 +173,7 @@ export class AutomaticController extends InteractionController {
 			if (player === localPlayer) {
 				this.deployEventTarget.dispatchEvent(new CustomEvent("deploy", {detail: {handIndex: card.index, fieldIndex: index}}));
 			}
+			gameUI.makeDragSource(player.spellItemZone, index, player);
 			return;
 		}
 		// casting
@@ -179,6 +181,7 @@ export class AutomaticController extends InteractionController {
 			if (player === localPlayer) {
 				this.castEventTarget.dispatchEvent(new CustomEvent("cast", {detail: {handIndex: card.index, fieldIndex: index}}));
 			}
+			gameUI.makeDragSource(player.spellItemZone, index, player);
 			return;
 		}
 
@@ -419,7 +422,6 @@ export class AutomaticController extends InteractionController {
 				if (summonDetails == null) {
 					return;
 				}
-				gameUI.makeDragSource(localPlayer.unitZone, summonDetails.fieldIndex, localPlayer);
 				response.value = summonDetails;
 				break;
 			}
@@ -437,7 +439,6 @@ export class AutomaticController extends InteractionController {
 				if (deployDetails == null) {
 					return;
 				}
-				gameUI.makeDragSource(localPlayer.spellItemZone, deployDetails.fieldIndex, localPlayer);
 				response.value = deployDetails;
 				break;
 			}
@@ -455,7 +456,6 @@ export class AutomaticController extends InteractionController {
 				if (castDetails == null) {
 					return;
 				}
-				gameUI.makeDragSource(localPlayer.spellItemZone, castDetails.fieldIndex, localPlayer);
 				response.value = castDetails;
 				break;
 			}
