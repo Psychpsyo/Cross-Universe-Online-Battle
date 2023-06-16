@@ -8,13 +8,14 @@ export class BaseAbility {
 
 // This is the super class of all activatable activities that can have a cost and some processing
 export class Ability extends BaseAbility {
-	constructor(id, exec, cost) {
+	constructor(id, exec, cost, duringPhase) {
 		super(id);
 		this.exec = buildExecAST(id, exec);
 		this.cost =  null;
 		if (cost) {
 			this.cost = buildCostAST(id, cost);
 		}
+		this.duringPhase = duringPhase;
 		this.scriptVariables = {};
 	}
 
@@ -29,20 +30,20 @@ export class Ability extends BaseAbility {
 }
 
 export class CastAbility extends Ability {
-	constructor(id, exec, cost) {
-		super(id, exec, cost);
+	constructor(id, exec, cost, duringPhase) {
+		super(id, exec, cost, duringPhase);
 	}
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, exec, cost) {
-		super(id, exec, cost);
+	constructor(id, exec, cost, duringPhase) {
+		super(id, exec, cost, duringPhase);
 	}
 }
 
 export class OptionalAbility extends Ability {
-	constructor(id, exec, cost, turnLimit) {
-		super(id, exec, cost);
+	constructor(id, exec, cost, turnLimit, duringPhase) {
+		super(id, exec, cost, duringPhase);
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
 	}
@@ -50,15 +51,15 @@ export class OptionalAbility extends Ability {
 
 export class FastAbility extends Ability {
 	constructor(id, exec, cost, turnLimit) {
-		super(id, exec, cost);
+		super(id, exec, cost, null); // A fast ability with a phase restriction would be a trigger ability
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
 	}
 }
 
 export class TriggerAbility extends Ability {
-	constructor(id, exec, cost, mandatory, turnLimit) {
-		super(id, exec, cost);
+	constructor(id, exec, cost, mandatory, turnLimit, duringPhase) {
+		super(id, exec, cost, duringPhase);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
 	}

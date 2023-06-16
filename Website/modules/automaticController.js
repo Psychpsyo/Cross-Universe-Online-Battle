@@ -78,9 +78,9 @@ export class AutomaticController extends InteractionController {
 
 					this.waitingForOpponentInput = false;
 					for (let playerInfo of this.playerInfos) {
-						playerInfo.canStandardSummon = false;
-						playerInfo.canDeploy = false;
-						playerInfo.canCast = false;
+						playerInfo.canStandardSummon = [];
+						playerInfo.canDeploy = [];
+						playerInfo.canCast = [];
 						playerInfo.canRetire = [];
 					}
 					for (let button of this.unitAttackButtons) {
@@ -143,9 +143,9 @@ export class AutomaticController extends InteractionController {
 
 		// for summoning/casting/deploying
 		if (zone === player.handZone && (
-			(playerInfo.canStandardSummon && card.cardTypes.get().includes("unit")) ||
-			(playerInfo.canDeploy && card.cardTypes.get().includes("item")) ||
-			(playerInfo.canCast && card.cardTypes.get().includes("spell"))
+			(playerInfo.canStandardSummon.includes(card)) ||
+			(playerInfo.canDeploy.includes(card)) ||
+			(playerInfo.canCast.includes(card))
 		)) {
 			playerInfo.setHeld(zone, index);
 			return true;
@@ -161,7 +161,7 @@ export class AutomaticController extends InteractionController {
 		playerInfo.clearHeld();
 
 		// summoning
-		if (playerInfo.canStandardSummon && card.zone == player.handZone && zone == player.unitZone && !player.unitZone.get(index) && card.cardTypes.get().includes("unit")) {
+		if (playerInfo.canStandardSummon.includes(card) && zone == player.unitZone && !player.unitZone.get(index)) {
 			if (player === localPlayer) {
 				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: card.index, fieldIndex: index}}));
 			}
@@ -169,7 +169,7 @@ export class AutomaticController extends InteractionController {
 			return;
 		}
 		// deploying
-		if (playerInfo.canDeploy && card.zone == player.handZone && zone == player.spellItemZone && !player.spellItemZone.get(index) && card.cardTypes.get().includes("item")) {
+		if (playerInfo.canDeploy.includes(card) && zone == player.spellItemZone && !player.spellItemZone.get(index)) {
 			if (player === localPlayer) {
 				this.deployEventTarget.dispatchEvent(new CustomEvent("deploy", {detail: {handIndex: card.index, fieldIndex: index}}));
 			}
@@ -177,7 +177,7 @@ export class AutomaticController extends InteractionController {
 			return;
 		}
 		// casting
-		if (playerInfo.canCast && card.zone == player.handZone && zone == player.spellItemZone && !player.spellItemZone.get(index) && card.cardTypes.get().includes("spell")) {
+		if (playerInfo.canCast.includes(card) && zone == player.spellItemZone && !player.spellItemZone.get(index)) {
 			if (player === localPlayer) {
 				this.castEventTarget.dispatchEvent(new CustomEvent("cast", {detail: {handIndex: card.index, fieldIndex: index}}));
 			}
@@ -224,7 +224,7 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "phaseStarted": {
-				autoUI.startPhase(event.phase.type);
+				autoUI.startPhase(event.phase.types[0]);
 				return this.gameSleep();
 			}
 			case "blockCreationAborted": {
@@ -322,15 +322,15 @@ export class AutomaticController extends InteractionController {
 	async presentInputRequest(request) {
 		switch (request.type) {
 			case "doStandardSummon": {
-				this.playerInfos[request.player.index].canStandardSummon = true;
+				this.playerInfos[request.player.index].canStandardSummon = request.eligibleUnits;
 				break;
 			}
 			case "deployItem": {
-				this.playerInfos[request.player.index].canDeploy = true;
+				this.playerInfos[request.player.index].canDeploy = request.eligibleItems;
 				break;
 			}
 			case "castSpell": {
-				this.playerInfos[request.player.index].canCast = true;
+				this.playerInfos[request.player.index].canCast = request.eligibleSpells;
 				break;
 			}
 			case "doRetire": {
@@ -625,9 +625,9 @@ class AutomaticPlayerInfo {
 	constructor(player) {
 		this.player = player;
 		this.heldCard = null;
-		this.canStandardSummon = false;
-		this.canDeploy = false;
-		this.canCast = false;
+		this.canStandardSummon = [];
+		this.canDeploy = [];
+		this.canCast = [];
 		this.canRetire = [];
 		this.retiring = [];
 	}

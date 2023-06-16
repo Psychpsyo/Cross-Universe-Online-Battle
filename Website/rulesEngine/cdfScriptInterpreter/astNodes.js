@@ -33,6 +33,34 @@ export class ScriptNode extends AstNode {
 	}
 }
 
+export class LineNode extends AstNode {
+	constructor(parts) {
+		super();
+		this.parts = parts;
+	}
+	async* eval(card, player, ability) {
+		let allActions = [];
+		for (let part of this.parts) {
+			if (part instanceof AssignmentNode) {
+				yield* part.eval(card, player, ability);
+			} else if (part instanceof FunctionNode) {
+				allActions = allActions.concat(await (yield* part.eval(card, player, ability)))
+			}
+		}
+		if (allActions.length > 0) {
+			yield allActions;
+		}
+	}
+	async* hasAllTargets(card, player, ability) {
+		for (let part of this.parts) {
+			if (!(await (yield* part.hasAllTargets(card, player, ability)))) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
 // Represents the language's built-in functions
 export class FunctionNode extends AstNode {
 	constructor(functionName, parameters, player, asManyAsPossible) {
@@ -45,40 +73,42 @@ export class FunctionNode extends AstNode {
 	async* eval(card, player, ability) {
 		player = await (yield* this.player.eval(card, player, ability));
 		switch (this.functionName) {
+			case "COUNT": {
+				let list = await (yield* this.parameters[0].eval(card, player, ability));
+				// count must yield through any Action lists so that they actually happen.
+				if (list.length > 0 && list[0] instanceof actions.Action) {
+					yield list;
+				}
+				return list.length;
+			}
 			case "DAMAGE": {
-				yield [new actions.DealDamage(await (yield* this.parameters[1].eval(card, player, ability)), await (yield* this.parameters[0].eval(card, player, ability)))];
-				return;
+				return [new actions.DealDamage(await (yield* this.parameters[1].eval(card, player, ability)), await (yield* this.parameters[0].eval(card, player, ability)))];
 			}
 			case "DECKTOP": {
 				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - await (yield* this.parameters[0].eval(card, player, ability))), player.deckZone.cards.length);
 			}
 			case "DESTROY": {
-				yield (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Destroy(card));
-				return;
+				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Destroy(card));
 			}
 			case "DISCARD": {
-				yield (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Discard(card));
-				return;
+				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Discard(card));
 			}
 			case "DRAW": {
 				let amount = await (yield* this.parameters[0].eval(card, player, ability));
 				if (this.asManyAsPossible) {
 					amount = Math.min(amount, player.deckZone.cards.length);
 				}
-				yield [new actions.Draw(player, amount)];
-				return;
+				return [new actions.Draw(player, amount)];
 			}
 			case "EXILE": {
 				yield (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Exile(card));
 				return;
 			}
 			case "LIFE": {
-				yield [new actions.ChangeLife(player, await (yield* this.parameters[0].eval(card, player, ability)))];
-				return;
+				return [new actions.ChangeLife(player, await (yield* this.parameters[0].eval(card, player, ability)))];
 			}
 			case "MANA": {
-				yield [new actions.ChangeMana(player, await (yield* this.parameters[0].eval(card, player, ability)))];
-				return;
+				return [new actions.ChangeMana(player, await (yield* this.parameters[0].eval(card, player, ability)))];
 			}
 			case "SELECT": {
 				let responseCounts = [await (yield* this.parameters[0].eval(card, player, ability))];
@@ -150,8 +180,7 @@ export class FunctionNode extends AstNode {
 						cards[i].zone?.add(cards[i], cards[i].index);
 					}
 				}
-				yield summons;
-				return;
+				return  summons;
 			}
 			case "TOKENS": {
 				let amount = await (yield* this.parameters[0].eval(card, player, ability));
@@ -178,6 +207,9 @@ defense: ${defense}`, false));
 	}
 	async* hasAllTargets(card, player, ability) {
 		switch (this.functionName) {
+			case "COUNT": {
+				return yield* this.parameters[0].hasAllTargets(card, player, ability);
+			}
 			case "DAMAGE": {
 				return player.life + (await (yield* this.parameters[0].eval(card, player, ability))) >= 0;
 			}

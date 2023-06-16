@@ -21,30 +21,39 @@ export function parseScript(tokenList) {
 }
 
 function parseLine() {
-	switch (tokens[pos].type) {
-		case "function": {
-			return parseFunction();
-		}
-		case "variable": {
-			switch (tokens[pos+1].type) {
-				case "equals": {
-					return parseAssignment();
+	let actionNodes = [];
+	do {
+		switch (tokens[pos].type) {
+			case "function": {
+				actionNodes.push(parseFunction());
+				break;
+			}
+			case "variable": {
+				switch (tokens[pos+1].type) {
+					case "equals": {
+						actionNodes.push(parseAssignment());
+						break;
+					}
+					case "dotOperator": {
+						actionNodes.push(parseFunction());
+						break;
+					}
+					default: {
+						throw new ScriptParserError("Line starting with 'variable' token continues with unwanted '" + tokens[pos+1].type + "'.");
+					}
 				}
-				case "dotOperator": {
-					return parseFunction();
-				}
-				default: {
-					throw new ScriptParserError("Line starting with 'variable' token continues with unwanted '" + tokens[pos+1].type + "'.");
-				}
+				break;
+			}
+			case "player": {
+				actionNodes.push(parseFunction());
+				break;
+			}
+			default: {
+				throw new ScriptParserError("'" + tokens[pos].type + "' is not a valid token at the start of a line.");
 			}
 		}
-		case "player": {
-			return parseFunction();
-		}
-		default: {
-			throw new ScriptParserError("'" + tokens[pos].type + "' is not a valid token at the start of a line.");
-		}
-	}
+	} while (pos < tokens.length - 1 && tokens[pos++].type == "andOperator");
+	return new ast.LineNode(actionNodes);
 }
 
 function parseFunction() {
