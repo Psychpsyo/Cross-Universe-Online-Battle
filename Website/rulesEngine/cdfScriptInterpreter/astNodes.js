@@ -48,6 +48,9 @@ export class FunctionNode extends AstNode {
 				yield [new actions.DealDamage(await (yield* this.parameters[1].eval(card, player, ability)), await (yield* this.parameters[0].eval(card, player, ability)))];
 				return;
 			}
+			case "DECKTOP": {
+				return player.deckZone.cards.slice(player.deckZone.cards.length - await (yield* this.parameters[0].eval(card, player, ability)), player.deckZone.cards.length);
+			}
 			case "DESTROY": {
 				yield (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Destroy(card));
 				return;
@@ -169,6 +172,9 @@ defense: ${defense}`, false));
 		switch (this.functionName) {
 			case "DAMAGE": {
 				return player.life + (await (yield* this.parameters[0].eval(card, player, ability))) >= 0;
+			}
+			case "DECKTOP": {
+				return player.deckZone.cards.length >= await (yield* this.parameters[0].eval(card, player, ability));
 			}
 			case "DESTROY": {
 				return yield* this.parameters[0].hasAllTargets(card, player, ability);

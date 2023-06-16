@@ -109,7 +109,11 @@ function parseParameter() {
 			return parseNumber();
 		}
 		case "player": {
-			return parsePlayer();
+			if (tokens[pos+1].type == "dotOperator") {
+				return parseFunction();
+			} else {
+				return parsePlayer();
+			}
 		}
 		case "leftBracket": {
 			return parseCardMatcher();
@@ -142,7 +146,11 @@ function parseParameter() {
 			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' token inside list syntax.");
 		}
 		case "variable": {
-			return parseVariable();
+			if (tokens[pos+1].type == "dotOperator") {
+				return parseFunction();
+			} else {
+				return parseVariable();
+			}
 		}
 		default: {
 			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid function parameter.");

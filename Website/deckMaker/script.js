@@ -128,6 +128,9 @@ cardInfoToDeck.textContent = locale.deckMaker.cardInfo.toDeck;
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 
+window.deckList = [];
+recalculateDeckStats();
+
 // make dialogs work
 Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 	elem.addEventListener("click", function(e) {
@@ -391,8 +394,6 @@ document.addEventListener("keyup", function(e) {
 });
 
 //editing the work-in-progress deck
-window.deckList = [];
-
 async function addCardToDeck(cardId) {
 	let card = await cardLoader.getCardInfo(cardId);
 	//add card to the list on the left

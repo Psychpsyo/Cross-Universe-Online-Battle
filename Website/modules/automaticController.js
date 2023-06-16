@@ -375,7 +375,7 @@ export class AutomaticController extends InteractionController {
 					}
 					default: {
 						if (request.reason.startsWith("cardEffect:")) {
-							title = locale.game.automatic.playerSelect.question.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+							title = locale.game.cardChoice.cardEffect.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 						}
 					}
 				}

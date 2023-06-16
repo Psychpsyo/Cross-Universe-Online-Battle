@@ -42,6 +42,7 @@ let keywordTokenTypes = {
 	enchantItem: "cardType",
 	APPLY: "function",
 	DAMAGE: "function",
+	DECKTOP: "function",
 	DESTROY: "function",
 	DISCARD: "function",
 	DRAW: "function",
