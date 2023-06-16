@@ -224,6 +224,9 @@ async function* abilityTimingGenerator(ability, card, player) {
 	do {
 		actionList = (await timingGenerator.next(timing));
 		if (!actionList.done) {
+			if (actionList.value.length == 0) {
+				return;
+			}
 			timing = yield actionList.value;
 		}
 	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));

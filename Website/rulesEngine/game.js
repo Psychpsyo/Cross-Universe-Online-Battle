@@ -17,6 +17,7 @@ export class Game {
 		this.nextTimingIndex = 1;
 
 		this.rng = new CURandom();
+		this.startingHandSize = 5;
 	}
 
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
@@ -43,13 +44,15 @@ export class Game {
 		// RULES: Draw 5 cards from your deck to your hand.
 		let drawHandEvents = [];
 		for (let player of this.players) {
-			for (let i = 0; i < 5; i++) {
+			let drawnCards = 0;
+			for (let i = 0; i < this.startingHandSize && player.deckZone.cards.length > 0; i++) {
 				player.handZone.add(player.deckZone.cards[player.deckZone.cards.length - 1], player.handZone.cards.length);
 				if (player.isViewable) {
 					player.handZone.cards[player.handZone.cards.length - 1].hidden = false;
 				}
+				drawnCards++;
 			}
-			drawHandEvents.push(createCardsDrawnEvent(player, 5));
+			drawHandEvents.push(createCardsDrawnEvent(player, drawnCards));
 		}
 		yield drawHandEvents;
 

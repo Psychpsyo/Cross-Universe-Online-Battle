@@ -83,6 +83,9 @@ export class FunctionNode extends AstNode {
 			case "SELECT": {
 				let responseCounts = [await (yield* this.parameters[0].eval(card, player, ability))];
 				let eligibleCards = await (yield* this.parameters[1].eval(card, player, ability));
+				if (eligibleCards.length == 0) {
+					return [];
+				}
 				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
