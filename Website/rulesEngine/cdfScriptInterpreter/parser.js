@@ -76,10 +76,18 @@ function parseFunction() {
 	}
 	let functionName = tokens[pos].value;
 	pos++;
+
+	let asManyAsPossible = false;
+	if (tokens[pos].type == "asmapOperator") {
+		asManyAsPossible = true;
+		pos++;
+	}
+
 	if (tokens[pos].type != "leftParen") {
 		throw new ScriptParserError("'" + functionName + "' must be followed by a '('.");
 	}
 	pos++;
+
 	let parameters = [];
 	while (tokens[pos].type != "rightParen") {
 		parameters.push(parseParameter());
@@ -88,7 +96,8 @@ function parseFunction() {
 		}
 	}
 	pos++;
-	return new ast.FunctionNode(functionName, parameters, player);
+
+	return new ast.FunctionNode(functionName, parameters, player, asManyAsPossible);
 }
 
 function parseAssignment() {

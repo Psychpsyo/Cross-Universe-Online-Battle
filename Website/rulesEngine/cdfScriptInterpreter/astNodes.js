@@ -35,11 +35,12 @@ export class ScriptNode extends AstNode {
 
 // Represents the language's built-in functions
 export class FunctionNode extends AstNode {
-	constructor(functionName, parameters, player) {
+	constructor(functionName, parameters, player, asManyAsPossible) {
 		super();
 		this.functionName = functionName;
 		this.parameters = parameters;
 		this.player = player;
+		this.asManyAsPossible = asManyAsPossible;
 	}
 	async* eval(card, player, ability) {
 		player = await (yield* this.player.eval(card, player, ability));
@@ -49,7 +50,7 @@ export class FunctionNode extends AstNode {
 				return;
 			}
 			case "DECKTOP": {
-				return player.deckZone.cards.slice(player.deckZone.cards.length - await (yield* this.parameters[0].eval(card, player, ability)), player.deckZone.cards.length);
+				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - await (yield* this.parameters[0].eval(card, player, ability))), player.deckZone.cards.length);
 			}
 			case "DESTROY": {
 				yield (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Destroy(card));
@@ -60,7 +61,11 @@ export class FunctionNode extends AstNode {
 				return;
 			}
 			case "DRAW": {
-				yield [new actions.Draw(player, await (yield* this.parameters[0].eval(card, player, ability)))];
+				let amount = await (yield* this.parameters[0].eval(card, player, ability));
+				if (this.asManyAsPossible) {
+					amount = Math.min(amount, player.deckZone.cards.length);
+				}
+				yield [new actions.Draw(player, amount)];
 				return;
 			}
 			case "EXILE": {
@@ -174,6 +179,9 @@ defense: ${defense}`, false));
 				return player.life + (await (yield* this.parameters[0].eval(card, player, ability))) >= 0;
 			}
 			case "DECKTOP": {
+				if (this.asManyAsPossible) {
+					return player.deckZone.cards.length > 0;
+				}
 				return player.deckZone.cards.length >= await (yield* this.parameters[0].eval(card, player, ability));
 			}
 			case "DESTROY": {
@@ -183,7 +191,7 @@ defense: ${defense}`, false));
 				return yield* this.parameters[0].hasAllTargets(card, player, ability);
 			}
 			case "DRAW": {
-				return player.deckZone.cards.length >= await (yield* this.parameters[0].eval(card, player, ability));
+				return true;
 			}
 			case "EXILE": {
 				return yield* this.parameters[0].hasAllTargets(card, player, ability);

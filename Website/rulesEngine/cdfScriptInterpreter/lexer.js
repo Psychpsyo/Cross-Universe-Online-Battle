@@ -148,6 +148,16 @@ export function tokenize(code) {
 				pos++;
 				break;
 			}
+			case "?": {
+				if (code[pos+1] == "?") {
+					tokens.push({type: "youMayOperator"});
+					pos += 2;
+				} else {
+					tokens.push({type: "asmapOperator"});
+					pos++;
+				}
+				break;
+			}
 			case "&": {
 				tokens.push({type: "logical", value: "and"});
 				pos++;
