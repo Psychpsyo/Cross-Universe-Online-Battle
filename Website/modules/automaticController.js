@@ -359,7 +359,7 @@ export class AutomaticController extends InteractionController {
 			});
 		} else {
 			if (["pass", "doStandardSummon", "deployItem", "castSpell", "doStandardDraw", "doAttackDeclaration",
-				"doFight", "doRetire", "activateTriggerAbility", "activateOptionalAbility"].includes(request.type)
+				"doFight", "doRetire", "activateTriggerAbility", "activateOptionalAbility", "activateFastAbility"].includes(request.type)
 			) {
 				autoUI.indicateYourMove();
 			}
@@ -525,6 +525,7 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "activateTriggerAbility":
+			case "activateFastAbility":
 			case "activateOptionalAbility": {
 				let activated = await new Promise((resolve, reject) => {
 					for (let i = 0; i < request.eligibleAbilities.length; i++) {

@@ -1,6 +1,6 @@
 // This file contains definitions for all phases in the game.
 import {Stack} from "./stacks.js";
-import {createStackCreatedEvent, createManaChangedEvent} from "./events.js";
+import {createStackCreatedEvent} from "./events.js";
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
@@ -66,7 +66,8 @@ class StackPhase extends Phase {
 		return [
 			requests.pass.create(stack.getNextPlayer()),
 			requests.castSpell.create(stack.getNextPlayer(), this.getCastableSpells()),
-			requests.activateTriggerAbility.create(stack.getNextPlayer(), this.getActivatableTriggerAbilities())
+			requests.activateTriggerAbility.create(stack.getNextPlayer(), this.getActivatableTriggerAbilities()),
+			requests.activateFastAbility.create(stack.getNextPlayer(), this.getActivatableFastAbilities())
 		];
 	}
 
@@ -89,10 +90,28 @@ class StackPhase extends Phase {
 		return spells;
 	}
 
+	getActivatableFastAbilities() {
+		let eligibleAbilities = [];
+		for (let card of this.currentStack().getNextPlayer().getFieldCards()) {
+			if (!card) {
+				continue;
+			}
+			let cardAbilities = card.abilities.get();
+			for (let i = 0; i < cardAbilities.length; i++) {
+				if (cardAbilities[i] instanceof abilities.FastAbility &&
+					cardAbilities[i].activationCount < cardAbilities[i].turnLimit
+				) {
+					eligibleAbilities.push({card: card, index: i});
+				}
+			}
+		}
+		return eligibleAbilities;
+	}
+
 	getActivatableTriggerAbilities() {
 		let eligibleAbilities = [];
 		let player = this.currentStack().getNextPlayer();
-		for (let card of player.unitZone.cards.concat(player.partnerZone.cards.concat(player.spellItemZone.cards))) {
+		for (let card of player.getFieldCards()) {
 			if (!card) {
 				continue;
 			}
@@ -244,7 +263,7 @@ export class MainPhase extends StackPhase {
 
 	getActivatableOptionalAbilities() {
 		let eligibleAbilities = [];
-		for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards.concat(this.turn.player.spellItemZone.cards))) {
+		for (let card of this.turn.player.getFieldCards()) {
 			if (!card) {
 				continue;
 			}

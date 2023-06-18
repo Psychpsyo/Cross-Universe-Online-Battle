@@ -213,6 +213,16 @@ export function tokenize(code) {
 				pos++;
 				break;
 			}
+			case "!": {
+				if (code[pos+1] == "=") {
+					tokens.push({type: "notEquals"});
+					pos++;
+				} else {
+					throw new Error("Generic not operator not currently implemented.");
+				}
+				pos++;
+				break;
+			}
 			case ">": {
 				tokens.push({type: "greaterThan"});
 				pos++;

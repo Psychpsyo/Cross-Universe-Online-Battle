@@ -163,6 +163,10 @@ function parseExpression() {
 					expression.push(new ast.EqualsNode(null, null));
 					break;
 				}
+				case "notEquals": {
+					expression.push(new ast.NotEqualsNode(null, null));
+					break;
+				}
 				case "greaterThan": {
 					expression.push(new ast.GreaterThanNode(null, null));
 					break;

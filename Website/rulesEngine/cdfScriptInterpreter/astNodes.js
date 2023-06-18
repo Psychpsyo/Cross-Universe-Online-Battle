@@ -80,7 +80,7 @@ export class FunctionNode extends AstNode {
 				return list.length;
 			}
 			case "DAMAGE": {
-				return [new actions.DealDamage(await (yield* this.parameters[1].eval(card, player, ability)), (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+				return [new actions.DealDamage(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
 			}
 			case "DECKTOP": {
 				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - (await (yield* this.parameters[0].eval(card, player, ability)))[0]), player.deckZone.cards.length);
@@ -204,12 +204,13 @@ defense: ${defense}`, false));
 		}
 	}
 	async* hasAllTargets(card, player, ability) {
+		player = await (yield* this.player.eval(card, player, ability));
 		switch (this.functionName) {
 			case "COUNT": {
 				return yield* this.parameters[0].hasAllTargets(card, player, ability);
 			}
 			case "DAMAGE": {
-				return player.life + (await (yield* this.parameters[0].eval(card, player, ability)))[0] >= 0;
+				return true;
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
@@ -456,6 +457,20 @@ export class EqualsNode extends ComparisonNode {
 			}
 		}
 		return false;
+	}
+}
+export class NotEqualsNode extends ComparisonNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+	async* eval(card, player, ability) {
+		let rightSideElements = await (yield* this.rightSide.eval());
+		for (let element of await (yield* this.leftSide.eval())) {
+			if (rightSideElements.includes(element)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 export class GreaterThanNode extends ComparisonNode {

@@ -71,11 +71,8 @@ export class Stack {
 					nextBlock = new blocks.Retire(this, this.getNextPlayer(), response.value);
 					break;
 				}
-				case "activateOptionalAbility": {
-					let ability = response.value.card.abilities.get()[response.value.index];
-					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), response.value.card, ability);
-					break;
-				}
+				case "activateOptionalAbility":
+				case "activateFastAbility":
 				case "activateTriggerAbility": {
 					let ability = response.value.card.abilities.get()[response.value.index];
 					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), response.value.card, ability);
