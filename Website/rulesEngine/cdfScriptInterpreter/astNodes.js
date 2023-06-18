@@ -141,8 +141,6 @@ export class FunctionNode extends AstNode {
 				let payCost = await (yield* this.parameters[2].eval(card, player, ability));
 
 				let costs = [];
-				let targetSlots = [];
-				// TODO: Let the player choose the order these are summoned in.
 				for (let i = 0; i < cards.length; i++) {
 					let availableZoneSlots = [];
 					for (let i = 0; i < zone.cards.length; i++) {
@@ -153,10 +151,7 @@ export class FunctionNode extends AstNode {
 					if (availableZoneSlots.length == 0) {
 						break;
 					}
-					let zoneSlotRequest = new requests.chooseZoneSlot.create(player, zone, availableZoneSlots);
-					let zoneSlotResponse = (yield [zoneSlotRequest])[0];
-					targetSlots[i] = requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
-					let placeCost = new actions.Place(player, cards[i], zone, targetSlots[i]);
+					let placeCost = new actions.Place(player, cards[i], zone);
 					placeCost.costIndex = i;
 					costs.push(placeCost);
 
@@ -173,7 +168,7 @@ export class FunctionNode extends AstNode {
 				let summons = [];
 				for (let i = 0; i < timing.costCompletions.length; i++) {
 					if (timing.costCompletions[i]) {
-						summons.push(new actions.Summon(player, cards[i], zone, targetSlots[i]));
+						summons.push(new actions.Summon(player, cards[i], zone, timing.actions.find(action => action instanceof actions.Place && action.costIndex == i).targetIndex));
 					} else {
 						cards[i].zone?.add(cards[i], cards[i].index);
 					}
@@ -237,7 +232,9 @@ defense: ${defense}`, false));
 				return player.mana + (await (yield* this.parameters[0].eval(card, player, ability)))[0] >= 0;
 			}
 			case "SELECT": {
-				return Math.min(...[await (yield* this.parameters[0].eval(card, player, ability))]) <= ((await (yield* this.parameters[1].eval(card, player, ability))).length);
+				return Math.min(...[await (yield* this.parameters[0].eval(card, player, ability))]) <=
+					((await (yield* this.parameters[1].eval(card, player, ability))).length) &&
+					await (yield* this.parameters[0].hasAllTargets(card, player, ability));
 			}
 			case "SELECTPLAYER": {
 				return true;
@@ -293,6 +290,9 @@ export class CardMatchNode extends AstNode {
 			}
 		}
 		return cards;
+	}
+	async* hasAllTargets(card, player, ability) {
+		return (await (yield* this.eval(card, player, ability))).length > 0;
 	}
 }
 export class ThisCardNode extends AstNode {

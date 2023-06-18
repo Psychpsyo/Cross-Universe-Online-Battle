@@ -91,16 +91,10 @@ export const doStandardSummon = {
 		}
 	},
 	validate: function(response, request) {
-		if (response.handIndex < 0 || response.handIndex >= request.player.handZone.cards.length) {
+		if (response < 0 || response >= request.player.handZone.cards.length) {
 			throw new Error("Supplied out-of-range hand card index for a standard summon.");
 		}
-		if (response.fieldIndex < 0 || response.fieldIndex > 4) {
-			throw new Error("Supplied out-of-range field index for a standard summon.");
-		}
-		if (request.player.unitZone.get(response.fieldIndex)) {
-			throw new Error("Supplied already occupied field index for a standard summon.");
-		}
-		if (!request.eligibleUnits.includes(request.player.handZone.cards[response.handIndex])) {
+		if (!request.eligibleUnits.includes(request.player.handZone.cards[response])) {
 			throw new Error("Tried to standard summon a non-eligible unit.");
 		}
 		return response;
@@ -117,16 +111,10 @@ export const deployItem = {
 		}
 	},
 	validate: function(response, request) {
-		if (response.handIndex < 0 || response.handIndex >= request.player.handZone.cards.length) {
+		if (response < 0 || response >= request.player.handZone.cards.length) {
 			throw new Error("Supplied out-of-range hand card index for deploying an item.");
 		}
-		if (response.fieldIndex < 0 || response.fieldIndex > 3) {
-			throw new Error("Supplied out-of-range field index for deploying an item.");
-		}
-		if (request.player.spellItemZone.get(response.fieldIndex)) {
-			throw new Error("Supplied already occupied field index for deploying an item.");
-		}
-		if (!request.eligibleItems.includes(request.player.handZone.cards[response.handIndex])) {
+		if (!request.eligibleItems.includes(request.player.handZone.cards[response])) {
 			throw new Error("Tried to deploy a non-eligible item.");
 		}
 		return response;
@@ -143,16 +131,10 @@ export const castSpell = {
 		}
 	},
 	validate: function(response, request) {
-		if (response.handIndex < 0 || response.handIndex >= request.player.handZone.cards.length) {
+		if (response < 0 || response >= request.player.handZone.cards.length) {
 			throw new Error("Supplied out-of-range hand card index for casting a spell.");
 		}
-		if (response.fieldIndex < 0 || response.fieldIndex > 3) {
-			throw new Error("Supplied out-of-range field index for casting a spell.");
-		}
-		if (request.player.spellItemZone.get(response.fieldIndex)) {
-			throw new Error("Supplied already occupied field index for casting a spell.");
-		}
-		if (!request.eligibleSpells.includes(request.player.handZone.cards[response.handIndex])) {
+		if (!request.eligibleSpells.includes(request.player.handZone.cards[response])) {
 			throw new Error("Tried to cast a non-eligible spell.");
 		}
 		return response;

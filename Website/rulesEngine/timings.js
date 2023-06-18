@@ -19,18 +19,28 @@ export class Timing {
 	* substitute() {
 		let actionCount = this.actions.length;
 		let actionCancelledEvents = []
-		for (let action of this.actions) {
-			if (action.isImpossible()) {
+		for (let i = 0; i < this.actions.length; i++) {
+			if (this.actions[i].isImpossible(this)) {
+				let action = this.actions[i];
+				this.actions.splice(i, 1);
+				i--;
 				actionCancelledEvents.push(createActionCancelledEvent(action));
 				if (action.costIndex >= 0) {
 					this.costCompletions[action.costIndex] = false;
+					for (let j = this.actions.length - 1; j >= 0; j--) {
+						if (this.actions[j].costIndex == action.costIndex) {
+							this.actions.splice(j, i);
+							if (j <= i) {
+								i--;
+							}
+						}
+					}
 				}
 			}
 		}
 		if (actionCancelledEvents.length > 0) {
 			yield actionCancelledEvents;
 		}
-		this.actions = this.actions.filter(action => action.isPossible());
 
 		if (actionCount != this.actions.length) {
 			return true;
@@ -40,7 +50,7 @@ export class Timing {
 
 	isFullyPossible(costIndex) {
 		for (let action of this.actions) {
-			if (action.costIndex == costIndex && !action.isFullyPossible()) {
+			if (action.costIndex == costIndex && !action.isFullyPossible(this)) {
 				return false;
 			}
 		}
