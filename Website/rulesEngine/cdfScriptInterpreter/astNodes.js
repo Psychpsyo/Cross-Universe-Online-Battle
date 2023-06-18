@@ -86,7 +86,7 @@ export class FunctionNode extends AstNode {
 		switch (this.functionName) {
 			case "COUNT": {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
-				return list.length;
+				return [list.length];
 			}
 			case "DAMAGE": {
 				return [new actions.DealDamage(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
