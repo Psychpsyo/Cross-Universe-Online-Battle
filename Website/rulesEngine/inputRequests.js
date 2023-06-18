@@ -240,6 +240,23 @@ export const activateOptionalAbility = {
 	}
 }
 
+export const activateFastAbility = {
+	create: function(player, eligibleAbilities) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "activateFastAbility",
+			"eligibleAbilities": eligibleAbilities
+		}
+	},
+	validate: function(response, request) {
+		if (response < 0 || response >= request.eligibleAbilities.length) {
+			throw new Error("Supplied out-of-range ability index for activating a fast ability.");
+		}
+		return request.eligibleAbilities[response];
+	}
+}
+
 export const activateTriggerAbility = {
 	create: function(player, eligibleAbilities) {
 		return {

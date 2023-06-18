@@ -70,7 +70,7 @@
 	text-align: center;
 	width: 100%;
 	justify-content: center;
-	
+
 	list-style-type: none;
 }
 #phaseDisplay li {
@@ -155,9 +155,15 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border: 2px dashed var(--theme-border-color);
+	border: 2px dashed var(--theme-text-color);
 	box-sizing: border-box;
 	filter: opacity(50%);
+	transition: color .5s, border-color .5s, filter .5s;
+}
+#stackDisplayHolder.yourMove::after {
+	color: orange;
+	border-color: orange;
+	filter: opacity(100%);
 }
 #automaticButtonArea {
 	display: flex;

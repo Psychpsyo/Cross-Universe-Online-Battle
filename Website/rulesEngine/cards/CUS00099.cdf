@@ -5,6 +5,6 @@ level: 0
 types:
 o: cast
 cost:
-DISCARD(SELECT(4, [card from yourHand]))
+DISCARD(SELECT(4, [from yourHand]))
 exec:
-DESTROY([card from field])
+DESTROY([from field])

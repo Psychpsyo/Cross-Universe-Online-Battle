@@ -31,6 +31,21 @@ export class Player {
 		}
 	}
 
+	getFieldCards() {
+		let cards = [this.partnerZone.cards[0]];
+		for (let card of this.unitZone.cards) {
+			if (card) {
+				cards.push(card);
+			}
+		}
+		for (let card of this.spellItemZone.cards) {
+			if (card) {
+				cards.push(card);
+			}
+		}
+		return cards;
+	}
+
 	next() {
 		return this.game.players[(this.index + 1) % this.game.players.length];
 	}

@@ -1,11 +1,25 @@
 let keywordTokenTypes = {
 	from: "from",
+	where: "where",
 	set: "set",
 	thisCard: "thisCard",
 	yes: "bool",
 	no: "bool",
 	you: "player",
 	opponent: "player",
+	name: "cardProperty",
+	baseName: "cardProperty",
+	level: "cardProperty",
+	baseLevel: "cardProperty",
+	types: "cardProperty",
+	baseTypes: "cardProperty",
+	attack: "cardProperty",
+	baseAttack: "cardProperty",
+	defense: "cardProperty",
+	baseDefense: "cardProperty",
+	cardType: "cardProperty",
+	baseCardType: "cardProperty",
+	owner: "cardProperty",
 	field: "zoneIdentifier",
 	deck: "zoneIdentifier",
 	discard: "zoneIdentifier",
@@ -30,7 +44,6 @@ let keywordTokenTypes = {
 	opponentUnitZone: "zoneIdentifier",
 	opponentSpellItemZone: "zoneIdentifier",
 	opponentPartnerZone: "zoneIdentifier",
-	card: "cardType",
 	unit: "cardType",
 	token: "cardType",
 	spell: "cardType",
@@ -196,13 +209,28 @@ export function tokenize(code) {
 				break;
 			}
 			case "=": {
+				tokens.push({type: "equals"});
+				pos++;
+				break;
+			}
+			case "!": {
 				if (code[pos+1] == "=") {
-					tokens.push({type: "exactEquals"});
-					pos += 2;
-				} else {
-					tokens.push({type: "equals"});
+					tokens.push({type: "notEquals"});
 					pos++;
+				} else {
+					throw new Error("Generic not operator not currently implemented.");
 				}
+				pos++;
+				break;
+			}
+			case ">": {
+				tokens.push({type: "greaterThan"});
+				pos++;
+				break;
+			}
+			case "<": {
+				tokens.push({type: "lessThan"});
+				pos++;
 				break;
 			}
 			case "$": {

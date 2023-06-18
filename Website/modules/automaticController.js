@@ -76,6 +76,7 @@ export class AutomaticController extends InteractionController {
 
 					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
 
+					autoUI.clearYourMove();
 					this.waitingForOpponentInput = false;
 					for (let playerInfo of this.playerInfos) {
 						playerInfo.canStandardSummon = [];
@@ -356,6 +357,12 @@ export class AutomaticController extends InteractionController {
 					resolve(this.opponentMoves.shift());
 				}.bind(this), {once: true});
 			});
+		} else {
+			if (["pass", "doStandardSummon", "deployItem", "castSpell", "doStandardDraw", "doAttackDeclaration",
+				"doFight", "doRetire", "activateTriggerAbility", "activateOptionalAbility", "activateFastAbility"].includes(request.type)
+			) {
+				autoUI.indicateYourMove();
+			}
 		}
 
 		let response = {
@@ -518,6 +525,7 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "activateTriggerAbility":
+			case "activateFastAbility":
 			case "activateOptionalAbility": {
 				let activated = await new Promise((resolve, reject) => {
 					for (let i = 0; i < request.eligibleAbilities.length; i++) {

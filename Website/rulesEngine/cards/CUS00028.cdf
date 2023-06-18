@@ -5,6 +5,6 @@ level: 0
 types:
 o: cast
 cost:
-$unit = SELECT(1, [unit from discard])
+$unit = SELECT(1, [from discard where cardType = unit])
 exec:
 SUMMON($unit, yourField, yes)
