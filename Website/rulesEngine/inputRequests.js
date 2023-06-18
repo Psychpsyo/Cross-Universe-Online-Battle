@@ -268,7 +268,7 @@ export const chooseZoneSlot = {
 	},
 	validate: function(response, request) {
 		if (response < 0 || response >= request.eligibleSlots.length) {
-			throw new Error("Supplied out-of-range zone slot index.");
+			throw new Error("Supplied out-of-range zone slot index '" + response + "'. It should have been between 0 and " + request.eligibleSlots.length + ".");
 		}
 		return request.eligibleSlots[response];
 	}

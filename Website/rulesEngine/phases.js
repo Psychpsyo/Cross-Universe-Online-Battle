@@ -213,10 +213,11 @@ export class DrawPhase extends StackPhase {
 	}
 
 	getBlockOptions(stack) {
-		if (this.turn.index != 0 && this.stacks.length == 1 && stack.blocks.length == 0) {
-			return [requests.doStandardDraw.create(this.turn.player)];
+		let blockOptions = super.getBlockOptions(stack);
+		if (this.turn.index != 0 && !this.turn.hasStandardDrawn && stack.index == 1 && stack.blocks.length == 0) {
+			blockOptions.push(requests.doStandardDraw.create(this.turn.player));
 		}
-		return super.getBlockOptions(stack);
+		return getHighestPriorityOptions(blockOptions);
 	}
 }
 
@@ -258,7 +259,7 @@ export class MainPhase extends StackPhase {
 			// optional abilities
 			options.push(requests.activateOptionalAbility.create(this.turn.player, this.getActivatableOptionalAbilities()));
 		}
-		return options;
+		return getHighestPriorityOptions(options);
 	}
 
 	getActivatableOptionalAbilities() {
@@ -330,7 +331,7 @@ export class BattlePhase extends StackPhase {
 				options.push(requests.doAttackDeclaration.create(this.turn.player, eligibleAttackers));
 			}
 		}
-		return options;
+		return getHighestPriorityOptions(options);
 	}
 }
 
@@ -338,4 +339,44 @@ export class EndPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, ["endPhase"]);
 	}
+
+	getBlockOptions(stack) {
+		return getHighestPriorityOptions(super.getBlockOptions(stack));
+	}
+}
+
+function getOptionPriority(option) {
+	if (["doFight", "doStandardDraw"].includes(option.type)) {
+		return 1;
+	}
+	if (option.type == "activateTriggerAbility") {
+		let hasMandatory = false;
+		for (let i = option.eligibleAbilities.length -1; i >= 0; i--) {
+			let ability = option.eligibleAbilities[i].card.abilities.get()[option.eligibleAbilities[i].index];
+			if (ability.mandatory) {
+				if (!hasMandatory) {
+					option.eligibleAbilities.splice(i + 1);
+					hasMandatory = true;
+				}
+			} else if (hasMandatory) {
+				option.eligibleAbilities.splice(i, 1);
+			}
+		}
+		if (hasMandatory) {
+			return 2;
+		}
+	}
+	return 0;
+}
+
+function getHighestPriorityOptions(blockOptions) {
+	let priorityLevels = [];
+	for (let option of blockOptions) {
+		let priority = getOptionPriority(option);
+		while (priorityLevels.length - 1 < priority) {
+			priorityLevels.push([]);
+		}
+		priorityLevels[priority].push(option);
+	}
+	return priorityLevels.pop();
 }

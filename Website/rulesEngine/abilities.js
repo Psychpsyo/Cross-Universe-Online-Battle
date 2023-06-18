@@ -62,6 +62,7 @@ export class TriggerAbility extends Ability {
 		super(id, exec, cost, duringPhase);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
+		this.activationCount = 0;
 	}
 }
 

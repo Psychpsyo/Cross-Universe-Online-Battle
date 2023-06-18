@@ -2,6 +2,7 @@
 
 import {locale} from "/modules/locale.js";
 import {previewCard} from "/modules/generalUI.js";
+import {FieldZone} from "/rulesEngine/zones.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 import * as blocks from "/rulesEngine/blocks.js";
@@ -228,6 +229,9 @@ export async function attack(units) {
 }
 
 export async function activate(card) {
+	if (!(card.zone instanceof FieldZone)) {
+		return;
+	}
 	let slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
 	slot.classList.add("activating");
 	window.setTimeout(function() {

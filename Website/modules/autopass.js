@@ -28,15 +28,26 @@ export function getAutoResponse(requests) {
 	// non-pass actions
 	if (requests.length == 1) {
 		let request = requests[0];
-		if (request.type == "chooseCards") {
-			if (Math.min(...request.validAmounts) == request.from.length) {
-				let choice = [];
-				for (let i = 0; i < request.from.length; i++) {
-					choice.push(i);
+		switch (request.type) {
+			case "chooseCards": {
+				if (Math.min(...request.validAmounts) == request.from.length) {
+					let choice = [];
+					for (let i = 0; i < request.from.length; i++) {
+						choice.push(i);
+					}
+					return {
+						type: "chooseCards",
+						value: choice
+					}
 				}
-				return {
-					type: "chooseCards",
-					value: choice
+				break;
+			}
+			case "activateTriggerAbility": {
+				if (request.eligibleAbilities.length == 1) {
+					return {
+						type: "activateTriggerAbility",
+						value: 0
+					};
 				}
 			}
 		}

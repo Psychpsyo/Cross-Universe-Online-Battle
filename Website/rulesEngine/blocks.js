@@ -86,6 +86,14 @@ export class StandardDraw extends Block {
 			[new actions.Draw(player, 1)]
 		]));
 	}
+
+	async* runCost() {
+		if (await (yield* super.runCost())) {
+			this.stack.phase.turn.hasStandardDrawn = true;
+			return true;
+		}
+		return false;
+	}
 }
 
 export class StandardSummon extends Block {
