@@ -5,4 +5,5 @@ level: 2
 types:
 o: cast
 duringPhase: opponentDrawPhase
-opponent.MANA(2) & DRAW(2)
+opponent.MANA(2)
+DRAW(2)

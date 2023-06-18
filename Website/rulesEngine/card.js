@@ -117,8 +117,9 @@ function parseCdfValues(cdf) {
 					break;
 				}
 				case "duringPhase": {
-					if (ability.type == "static") {
-						throw new Error("CDF Parser Error: Static abilities do not have phase restrictions.");
+					// TODO: Also exclude casting and deploying from this once general activation conditions are implemented.
+					if (["static", "fast", "optional"].includes(ability.type)) {
+						throw new Error("CDF Parser Error: Only trigger abilities have phase restrictions.");
 					}
 					if (!["manaSupplyPhase", "drawPhase", "mainPhase", "mainPhase1", "battlePhase", "mainPhase2", "endPhase",
 						"yourManaSupplyPhase", "yourDrawPhase", "yourMainPhase", "yourMainPhase1", "yourBattlePhase", "yourMainPhase2", "yourEndPhase",

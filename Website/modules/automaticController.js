@@ -517,6 +517,7 @@ export class AutomaticController extends InteractionController {
 				response.value = await gameUI.askQuestion(locale.game.automatic.battlePhase.question, locale.game.automatic.battlePhase.enter, locale.game.automatic.battlePhase.skip);
 				break;
 			}
+			case "activateTriggerAbility":
 			case "activateOptionalAbility": {
 				let activated = await new Promise((resolve, reject) => {
 					for (let i = 0; i < request.eligibleAbilities.length; i++) {
@@ -524,7 +525,7 @@ export class AutomaticController extends InteractionController {
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
 							locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].index + 1),
-							"activateOptional",
+							"activateAbility",
 							function() {
 								resolve(i);
 							}
@@ -532,7 +533,7 @@ export class AutomaticController extends InteractionController {
 					}
 					this.madeMoveTarget.addEventListener("move", function() {
 						for (let ability of request.eligibleAbilities) {
-							gameUI.clearFieldButtons(ability.card.zone, ability.card.index, "activateOptional");
+							gameUI.clearFieldButtons(ability.card.zone, ability.card.index, "activateAbility");
 						}
 						reject();
 					}, {once: true});

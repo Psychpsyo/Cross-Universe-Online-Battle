@@ -33,8 +33,8 @@ class Phase {
 			phaseIndicator = phaseIndicator.substr(3);
 		}
 		phaseIndicator = phaseIndicator[0].toLowerCase() + phaseIndicator.substr(1);
-		if ((this.yourPhase && player != this.turn.player) ||
-			(this.opponentPhase && player == this.turn.player) ||
+		if ((yourPhase && player != this.turn.player) ||
+			(opponentPhase && player == this.turn.player) ||
 			!this.types.includes(phaseIndicator)) {
 			return false;
 		}
@@ -65,7 +65,8 @@ class StackPhase extends Phase {
 	getBlockOptions(stack) {
 		return [
 			requests.pass.create(stack.getNextPlayer()),
-			requests.castSpell.create(stack.getNextPlayer(), this.getCastableSpells())
+			requests.castSpell.create(stack.getNextPlayer(), this.getCastableSpells()),
+			requests.activateTriggerAbility.create(stack.getNextPlayer(), this.getActivatableTriggerAbilities())
 		];
 	}
 
@@ -75,7 +76,7 @@ class StackPhase extends Phase {
 			if (card.cardTypes.get().includes("spell")) {
 				let eligible = true;
 				for (let ability of card.abilities.get()) {
-					if (ability.duringPhase && !this.matches(ability.duringPhase, card.zone.player)) {
+					if (ability instanceof abilities.CastAbility && ability.duringPhase && !this.matches(ability.duringPhase, card.zone.player)) {
 						eligible = false;
 						break;
 					}
@@ -86,6 +87,27 @@ class StackPhase extends Phase {
 			}
 		}
 		return spells;
+	}
+
+	getActivatableTriggerAbilities() {
+		let eligibleAbilities = [];
+		let player = this.currentStack().getNextPlayer();
+		for (let card of player.unitZone.cards.concat(player.partnerZone.cards.concat(player.spellItemZone.cards))) {
+			if (!card) {
+				continue;
+			}
+			let cardAbilities = card.abilities.get();
+			for (let i = 0; i < cardAbilities.length; i++) {
+				if (cardAbilities[i] instanceof abilities.TriggerAbility &&
+					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
+					(cardAbilities[i].duringPhase == null || this.matches(cardAbilities[i].duringPhase, player))
+					// TODO: Validate if other triggers are met or not here!
+				) {
+					eligibleAbilities.push({card: card, index: i});
+				}
+			}
+		}
+		return eligibleAbilities;
 	}
 
 	getTimings() {
@@ -222,7 +244,7 @@ export class MainPhase extends StackPhase {
 
 	getActivatableOptionalAbilities() {
 		let eligibleAbilities = [];
-		for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards, this.turn.player.spellItemZone.cards)) {
+		for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards.concat(this.turn.player.spellItemZone.cards))) {
 			if (!card) {
 				continue;
 			}
@@ -255,7 +277,7 @@ export class MainPhase extends StackPhase {
 			if (card.cardTypes.get().includes("item")) {
 				let eligible = true;
 				for (let ability of card.abilities.get()) {
-					if (ability.duringPhase && !this.matches(ability.duringPhase, this.turn.player)) {
+					if (ability instanceof abilities.DeployAbility && ability.duringPhase && !this.matches(ability.duringPhase, this.turn.player)) {
 						eligible = false;
 						break;
 					}

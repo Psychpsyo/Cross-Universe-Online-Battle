@@ -1,6 +1,7 @@
 let keywordTokenTypes = {
 	from: "from",
 	set: "set",
+	thisCard: "thisCard",
 	yes: "bool",
 	no: "bool",
 	you: "player",
@@ -246,10 +247,3 @@ export function tokenize(code) {
 	}
 	return tokens;
 }
-
-
-//DISCARD(SELECT(1, [card from yourHand]))
-//DAMAGE(100, opponent)
-
-//set unit = SELECT(1, [unit from field])
-//APPLY({this.name = unit.name, this.types + unit.types}, endPhase)
