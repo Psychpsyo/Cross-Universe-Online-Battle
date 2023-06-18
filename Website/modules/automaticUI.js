@@ -94,6 +94,13 @@ export function clearPass() {
 	passBtn.disabled = true;
 }
 
+export function indicateYourMove() {
+	stackDisplayHolder.classList.add("yourMove");
+}
+export function clearYourMove() {
+	stackDisplayHolder.classList.remove("yourMove");
+}
+
 export function newStack(number) {
 	stackTitle.textContent = locale.game.automatic.stacks.title.replaceAll("{#NUM}", number);
 	stackTitle.classList.remove("invalid");
