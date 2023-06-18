@@ -62,22 +62,23 @@ export class StackPhase extends Phase {
 		} while (currentStackIndex > 1);
 	}
 
-	getBlockOptions(stack) {
+	async* getBlockOptions(stack) {
 		return [
 			requests.pass.create(stack.getNextPlayer()),
-			requests.castSpell.create(stack.getNextPlayer(), this.getCastableSpells()),
-			requests.activateTriggerAbility.create(stack.getNextPlayer(), this.getActivatableTriggerAbilities()),
-			requests.activateFastAbility.create(stack.getNextPlayer(), this.getActivatableFastAbilities())
+			requests.castSpell.create(stack.getNextPlayer(), await (yield* this.getCastableSpells())),
+			requests.activateTriggerAbility.create(stack.getNextPlayer(), await (yield* this.getActivatableTriggerAbilities())),
+			requests.activateFastAbility.create(stack.getNextPlayer(), await (yield* this.getActivatableFastAbilities()))
 		];
 	}
 
-	getCastableSpells() {
+	async* getCastableSpells() {
 		let spells = [];
-		for (let card of this.currentStack().getNextPlayer().handZone.cards) {
+		let player = this.currentStack().getNextPlayer();
+		for (let card of player.handZone.cards) {
 			if (card.cardTypes.get().includes("spell")) {
 				let eligible = true;
 				for (let ability of card.abilities.get()) {
-					if (ability instanceof abilities.CastAbility && ability.duringPhase && !this.matches(ability.duringPhase, card.zone.player)) {
+					if (ability instanceof abilities.CastAbility && (ability.condition && !(await (yield* ability.condition.eval(card, player, ability))))) {
 						eligible = false;
 						break;
 					}
@@ -90,16 +91,18 @@ export class StackPhase extends Phase {
 		return spells;
 	}
 
-	getActivatableFastAbilities() {
+	async* getActivatableFastAbilities() {
 		let eligibleAbilities = [];
-		for (let card of this.currentStack().getNextPlayer().getFieldCards()) {
+		let player = this.currentStack().getNextPlayer();
+		for (let card of player.getFieldCards()) {
 			if (!card) {
 				continue;
 			}
 			let cardAbilities = card.abilities.get();
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.FastAbility &&
-					cardAbilities[i].activationCount < cardAbilities[i].turnLimit
+					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
+					(ability.condition == null || await (yield* ability.condition.eval(card, player, ability)))
 				) {
 					eligibleAbilities.push({card: card, index: i});
 				}
@@ -108,7 +111,7 @@ export class StackPhase extends Phase {
 		return eligibleAbilities;
 	}
 
-	getActivatableTriggerAbilities() {
+	async* getActivatableTriggerAbilities() {
 		let eligibleAbilities = [];
 		let player = this.currentStack().getNextPlayer();
 		for (let card of player.getFieldCards()) {
@@ -119,7 +122,8 @@ export class StackPhase extends Phase {
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.TriggerAbility &&
 					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
-					(cardAbilities[i].duringPhase == null || this.matches(cardAbilities[i].duringPhase, player))
+					(cardAbilities[i].duringPhase == null || this.matches(cardAbilities[i].duringPhase, player)) &&
+					(cardAbilities[i].condition == null || await (yield* cardAbilities[i].condition.eval(card, player, cardAbilities[i])))
 					// TODO: Validate if other triggers are met or not here!
 				) {
 					eligibleAbilities.push({card: card, index: i});
@@ -212,8 +216,8 @@ export class DrawPhase extends StackPhase {
 		super(turn, ["drawPhase"]);
 	}
 
-	getBlockOptions(stack) {
-		let blockOptions = super.getBlockOptions(stack);
+	async* getBlockOptions(stack) {
+		let blockOptions = await (yield* super.getBlockOptions(stack));
 		if (this.turn.index != 0 && !this.turn.hasStandardDrawn && stack.index == 1 && stack.blocks.length == 0) {
 			blockOptions.push(requests.doStandardDraw.create(this.turn.player));
 		}
@@ -228,14 +232,14 @@ export class MainPhase extends StackPhase {
 		super(turn, types);
 	}
 
-	getBlockOptions(stack) {
-		let options = super.getBlockOptions(stack);
+	async* getBlockOptions(stack) {
+		let options = await (yield* super.getBlockOptions(stack));
 		if (stack.canDoNormalActions()) {
 			// turn actions
 			if (this.turn.hasStandardSummoned === null) {
 				options.push(requests.doStandardSummon.create(this.turn.player, this.getSummonableUnits()));
 			}
-			options.push(requests.deployItem.create(this.turn.player, this.getDeployableItems()));
+			options.push(requests.deployItem.create(this.turn.player, await (yield* this.getDeployableItems())));
 			if (this.turn.hasRetired === null) {
 				let eligibleUnits = [];
 				for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
@@ -257,12 +261,12 @@ export class MainPhase extends StackPhase {
 			}
 
 			// optional abilities
-			options.push(requests.activateOptionalAbility.create(this.turn.player, this.getActivatableOptionalAbilities()));
+			options.push(requests.activateOptionalAbility.create(this.turn.player, await (yield* this.getActivatableOptionalAbilities())));
 		}
 		return getHighestPriorityOptions(options);
 	}
 
-	getActivatableOptionalAbilities() {
+	async* getActivatableOptionalAbilities() {
 		let eligibleAbilities = [];
 		for (let card of this.turn.player.getFieldCards()) {
 			if (!card) {
@@ -272,7 +276,7 @@ export class MainPhase extends StackPhase {
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.OptionalAbility &&
 					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
-					(cardAbilities[i].duringPhase == null || this.matches(ability.duringPhase, this.currentStack().getNextPlayer()))
+					(cardAbilities[i].condition == null || await (yield* cardAbilities[i].condition.eval(card, this.turn.player, cardAbilities[i])))
 				) {
 					eligibleAbilities.push({card: card, index: i});
 				}
@@ -291,13 +295,13 @@ export class MainPhase extends StackPhase {
 		return units;
 	}
 
-	getDeployableItems() {
+	async* getDeployableItems() {
 		let items = [];
 		for (let card of this.turn.player.handZone.cards) {
 			if (card.cardTypes.get().includes("item")) {
 				let eligible = true;
 				for (let ability of card.abilities.get()) {
-					if (ability instanceof abilities.DeployAbility && ability.duringPhase && !this.matches(ability.duringPhase, this.turn.player)) {
+					if (ability instanceof abilities.DeployAbility && (ability.condition && !(await (yield* ability.condition.eval(card, this.turn.player, ability))))) {
 						eligible = false;
 						break;
 					}
@@ -316,8 +320,8 @@ export class BattlePhase extends StackPhase {
 		super(turn, ["battlePhase"]);
 	}
 
-	getBlockOptions(stack) {
-		let options = super.getBlockOptions(stack);
+	async* getBlockOptions(stack) {
+		let options = await (yield* super.getBlockOptions(stack));
 		if (stack.canDoNormalActions()) {
 			// check for fight
 			if (this.turn.game.currentAttackDeclaration) {
@@ -340,8 +344,8 @@ export class EndPhase extends StackPhase {
 		super(turn, ["endPhase"]);
 	}
 
-	getBlockOptions(stack) {
-		return getHighestPriorityOptions(super.getBlockOptions(stack));
+	async* getBlockOptions(stack) {
+		return getHighestPriorityOptions(await (yield* super.getBlockOptions(stack)));
 	}
 }
 

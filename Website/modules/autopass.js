@@ -3,6 +3,7 @@
 
 import * as phases from "/rulesEngine/phases.js";
 import * as abilities from "/rulesEngine/abilities.js";
+import * as ast from "/rulesEngine/cdfScriptInterpreter/astNodes.js";
 
 // track ctrl to disable the autoresponder when it's held
 let ctrlHeld = false;
@@ -77,19 +78,19 @@ function isImportant(request) {
 			return false;
 		}
 		case "doStandardSummon": {
-			if (request.player.handZone.cards.find(card => card.cardTypes.get().includes("unit"))) {
+			if (!request.eligibleUnits.length == 0) {
 				return false;
 			}
 			break;
 		}
 		case "deployItem": {
-			if (request.player.handZone.cards.find(card => card.cardTypes.get().includes("item"))) {
+			if (request.eligibleItems.length == 0) {
 				return false;
 			}
 			break;
 		}
 		case "castSpell": {
-			if (request.player.handZone.cards.find(card => card.cardTypes.get().includes("spell"))) {
+			if (request.eligibleSpells.length == 0) {
 				return false;
 			}
 			break;
@@ -112,13 +113,15 @@ function isImportant(request) {
 	if (localStorage.getItem("passOnStackTwo") === "true") {
 		let currentStack = game.currentStack()
 		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
-			return request.type == "activateTriggerAbility";
+			if (request.type != "activateTriggerAbility") {
+				return false;
+			}
 		}
 	}
 
 	let currentPhase = game.currentPhase();
-	if ((currentPhase instanceof phases.DrawPhase && localStorage.getItem("passInDrawPhase") === "true") ||
-		(currentPhase instanceof phases.EndPhase && localStorage.getItem("passInEndPhase") === "true")
+	if (((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||
+		((currentPhase instanceof phases.EndPhase) && localStorage.getItem("passInEndPhase") === "true")
 	) {
 		switch (request.type) {
 			case "activateTriggerAbility": {
@@ -134,7 +137,7 @@ function isImportant(request) {
 				for (let card of request.eligibleSpells) {
 					for (let ability of card.abilities.get()) {
 						if (ability instanceof abilities.CastAbility) {
-							if (ability.duringPhase && currentPhase.matches(ability.duringPhase, request.player)) {
+							if (ability.condition && hasPhaseEqualityCondition(ability.condition)) {
 								return true;
 							}
 						}
@@ -146,4 +149,15 @@ function isImportant(request) {
 		return false;
 	}
 	return true;
+}
+
+function hasPhaseEqualityCondition(node) {
+	if (node instanceof ast.EqualsNode && (node.leftSide instanceof ast.CurrentPhaseNode || node.rightSide instanceof ast.CurrentPhaseNode)) {
+		return true;
+	}
+	for (let childNode of expression.getChildNodes()) {
+		if (hasPhaseEqualityCondition(childNode)) {
+			return true;
+		}
+	}
 }

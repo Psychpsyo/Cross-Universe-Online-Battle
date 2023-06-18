@@ -420,7 +420,7 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "doStandardSummon": {
-				let fieldIndex = await new Promise((resolve, reject) => {
+				let handIndex = await new Promise((resolve, reject) => {
 					this.standardSummonEventTarget.addEventListener("summon", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						this.standardSummonEventTarget.removeEventListener("summon", resolve);
@@ -430,14 +430,14 @@ export class AutomaticController extends InteractionController {
 					(e) => {return e.detail},
 					() => {return null}
 				);
-				if (fieldIndex === null) {
+				if (handIndex === null) {
 					return;
 				}
-				response.value = fieldIndex;
+				response.value = handIndex;
 				break;
 			}
 			case "deployItem": {
-				let fieldIndex = await new Promise((resolve, reject) => {
+				let handIndex = await new Promise((resolve, reject) => {
 					this.deployEventTarget.addEventListener("deploy", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						this.deployEventTarget.removeEventListener("deploy", resolve);
@@ -447,14 +447,14 @@ export class AutomaticController extends InteractionController {
 					(e) => {return e.detail},
 					() => {return null}
 				);
-				if (fieldIndex === null) {
+				if (handIndex === null) {
 					return;
 				}
-				response.value = fieldIndex;
+				response.value = handIndex;
 				break;
 			}
 			case "castSpell": {
-				let fieldIndex = await new Promise((resolve, reject) => {
+				let handIndex = await new Promise((resolve, reject) => {
 					this.castEventTarget.addEventListener("cast", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						this.castEventTarget.removeEventListener("cast", resolve);
@@ -464,10 +464,10 @@ export class AutomaticController extends InteractionController {
 					(e) => {return e.detail},
 					() => {return null}
 				);
-				if (fieldIndex === null) {
+				if (handIndex === null) {
 					return;
 				}
-				response.value = fieldIndex;
+				response.value = handIndex;
 				break;
 			}
 			case "doAttackDeclaration": {

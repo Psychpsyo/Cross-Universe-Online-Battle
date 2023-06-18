@@ -4,6 +4,6 @@ name: CUS00040
 level: 2
 types:
 o: cast
-duringPhase: opponentDrawPhase
+condition: currentPhase = opponentDrawPhase
 opponent.MANA(2)
 DRAW(2)

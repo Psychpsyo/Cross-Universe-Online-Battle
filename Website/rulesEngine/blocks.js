@@ -302,7 +302,7 @@ export class DeployItem extends Block {
 	constructor(stack, player, card) {
 		let deployAction = new actions.Deploy(player, card, player.spellItemZone, 0);
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.Place(player, card, player.spellItemZone, spellItemZoneIndex),
+			new actions.Place(player, card, player.spellItemZone),
 			new actions.ChangeMana(player, -card.level.get())
 		]])];
 		let execTimingGenerators = [

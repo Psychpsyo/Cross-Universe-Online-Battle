@@ -12,6 +12,9 @@ class AstNode {
 	async* hasAllTargets(card, player, ability) {
 		return true;
 	}
+	getChildNodes() {
+		return [];
+	}
 }
 
 // This serves as the root node of a card's script body
@@ -32,6 +35,9 @@ export class ScriptNode extends AstNode {
 			}
 		}
 		return true;
+	}
+	getChildNodes() {
+		return this.steps;
 	}
 }
 
@@ -60,6 +66,9 @@ export class LineNode extends AstNode {
 			}
 		}
 		return true;
+	}
+	getChildNodes() {
+		return this.parts;
 	}
 }
 
@@ -261,6 +270,9 @@ export class AssignmentNode extends AstNode {
 	async* hasAllTargets(card, player, ability) {
 		return yield* this.newValue.hasAllTargets(card, player, ability);
 	}
+	getChildNodes() {
+		return [this.newValue];
+	}
 }
 
 export class CardMatchNode extends AstNode {
@@ -293,6 +305,9 @@ export class CardMatchNode extends AstNode {
 	}
 	async* hasAllTargets(card, player, ability) {
 		return (await (yield* this.eval(card, player, ability))).length > 0;
+	}
+	getChildNodes() {
+		return this.zoneNodes.concat(this.conditions);
 	}
 }
 export class ThisCardNode extends AstNode {
@@ -389,6 +404,9 @@ export class MathNode extends AstNode {
 		this.leftSide = leftSide;
 		this.rightSide = rightSide;
 	}
+	getChildNodes() {
+		return [this.leftSide, this.rightSide];
+	}
 }
 export class DashMathNode extends MathNode {
 	constructor(leftSide, rightSide) {
@@ -400,7 +418,7 @@ export class PlusNode extends DashMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval()))[0] + (await (yield* this.rightSide.eval()))[0];
+		return (await (yield* this.leftSide.eval(card, player, ability)))[0] + (await (yield* this.rightSide.eval(card, player, ability)))[0];
 	}
 }
 export class MinusNode extends DashMathNode {
@@ -408,7 +426,7 @@ export class MinusNode extends DashMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval()))[0] - (await (yield* this.rightSide.eval()))[0];
+		return (await (yield* this.leftSide.eval(card, player, ability)))[0] - (await (yield* this.rightSide.eval(card, player, ability)))[0];
 	}
 }
 export class DotMathNode extends MathNode {
@@ -421,7 +439,7 @@ export class MultiplyNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval()))[0] * (await (yield* this.rightSide.eval()))[0];
+		return (await (yield* this.leftSide.eval(card, player, ability)))[0] * (await (yield* this.rightSide.eval(card, player, ability)))[0];
 	}
 }
 export class CeilDivideNode extends DotMathNode {
@@ -429,7 +447,7 @@ export class CeilDivideNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return Math.ceil((await (yield* this.leftSide.eval()))[0] / (await (yield* this.rightSide.eval())))[0];
+		return Math.ceil((await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability))))[0];
 	}
 }
 export class FloorDivideNode extends DotMathNode {
@@ -437,7 +455,7 @@ export class FloorDivideNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return Math.floor((await (yield* this.leftSide.eval()))[0] / (await (yield* this.rightSide.eval())))[0];
+		return Math.floor((await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability))))[0];
 	}
 }
 export class ComparisonNode extends MathNode {
@@ -450,8 +468,8 @@ export class EqualsNode extends ComparisonNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		let rightSideElements = await (yield* this.rightSide.eval());
-		for (let element of await (yield* this.leftSide.eval())) {
+		let rightSideElements = await (yield* this.rightSide.eval(card, player, ability));
+		for (let element of await (yield* this.leftSide.eval(card, player, ability))) {
 			if (rightSideElements.includes(element)) {
 				return true;
 			}
@@ -464,8 +482,8 @@ export class NotEqualsNode extends ComparisonNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		let rightSideElements = await (yield* this.rightSide.eval());
-		for (let element of await (yield* this.leftSide.eval())) {
+		let rightSideElements = await (yield* this.rightSide.eval(card, player, ability));
+		for (let element of await (yield* this.leftSide.eval(card, player, ability))) {
 			if (rightSideElements.includes(element)) {
 				return false;
 			}
@@ -478,7 +496,7 @@ export class GreaterThanNode extends ComparisonNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval()))[0] > (await (yield* this.rightSide.eval()))[0];
+		return (await (yield* this.leftSide.eval(card, player, ability)))[0] > (await (yield* this.rightSide.eval(card, player, ability)))[0];
 	}
 }
 export class LessThanNode extends ComparisonNode {
@@ -486,7 +504,7 @@ export class LessThanNode extends ComparisonNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval()))[0] < (await (yield* this.rightSide.eval()))[0];
+		return (await (yield* this.leftSide.eval(card, player, ability)))[0] < (await (yield* this.rightSide.eval(card, player, ability)))[0];
 	}
 }
 export class LogicNode extends MathNode {
@@ -499,7 +517,7 @@ export class AndNode extends LogicNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval())) && (await (yield* this.rightSide.eval()));
+		return (await (yield* this.leftSide.eval(card, player, ability))) && (await (yield* this.rightSide.eval(card, player, ability)));
 	}
 }
 export class OrNode extends LogicNode {
@@ -507,7 +525,7 @@ export class OrNode extends LogicNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval())) || (await (yield* this.rightSide.eval()));
+		return (await (yield* this.leftSide.eval(card, player, ability))) || (await (yield* this.rightSide.eval(card, player, ability)));
 	}
 }
 
@@ -564,5 +582,22 @@ export class ZoneNode extends AstNode {
 			opponentSpellItemZone: [opponent.spellItemZone],
 			opponentPartnerZone: [opponent.partnerZone]
 		})[this.zoneIdentifier];
+	}
+}
+
+export class CurrentPhaseNode extends AstNode {
+	async* eval(card, player, ability) {
+		let phaseTypes = [...player.game.currentPhase().types];
+		let prefix = player == game.currentTurn().player? "your" : "opponent";
+		for (let i = phaseTypes.length -1; i >= 0; i--) {
+			phaseTypes.push(prefix + phaseTypes[i][0].toUpperCase() + phaseTypes[i].slice(1));
+		}
+		return phaseTypes;
+	}
+}
+
+export class CurrentTurnNode extends AstNode {
+	async* eval(card, player, ability) {
+		return [player == game.currentTurn().player? "yourTurn" : "opponentTurn"];
 	}
 }

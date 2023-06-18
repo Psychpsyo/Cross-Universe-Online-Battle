@@ -13,7 +13,7 @@ export class Stack {
 
 	async* run() {
 		while (true) {
-			let inputRequests = this.phase.getBlockOptions(this);
+			let inputRequests = await (yield* this.phase.getBlockOptions(this));
 			let responses = (yield inputRequests).filter(choice => choice !== undefined);
 
 			if (responses.length != 1) {

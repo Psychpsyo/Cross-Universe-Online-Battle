@@ -11,13 +11,16 @@ class ScriptParserError extends Error {
 	}
 }
 
-export function parseScript(tokenList, newEffectId) {
+export function parseScript(tokenList, newEffectId, expressionOnly = false) {
 	effectId = newEffectId;
 	tokens = tokenList;
 	pos = 0;
 
-	let steps = [];
+	if (expressionOnly) {
+		return parseExpression();
+	}
 
+	let steps = [];
 	while(pos < tokens.length) {
 		if (tokens[pos].type == "newLine") {
 			pos++;
@@ -245,13 +248,14 @@ function parseValue() {
 		case "function": {
 			return parseFunction();
 		}
-		case "cardId": {
-			return parseCardId();
-		}
+		case "cardType":
+		case "phase":
+		case "turn":
+		case "cardId":
 		case "type": {
-			return parseType();
+			return parseValueArray();
 		}
-		case "zoneIdentifier": {
+		case "zone": {
 			return parseZone();
 		}
 		case "bool": {
@@ -281,8 +285,13 @@ function parseValue() {
 		case "cardProperty": {
 			return parseCardProperty(new ast.ImplicitCardNode());
 		}
-		case "cardType": {
-			return parseCardType();
+		case "currentPhase": {
+			pos++;
+			return new ast.CurrentPhaseNode();
+		}
+		case "currentTurn": {
+			pos++;
+			return new ast.CurrentTurnNode();
 		}
 		default: {
 			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid value.");
@@ -323,25 +332,13 @@ function parseBool() {
 	return node;
 }
 
-function parseCardId() {
-	let node = new ast.ValueArrayNode([tokens[pos].value]);
-	pos++;
-	return node;
-}
-
 function parsePlayer() {
 	let node = new ast.PlayerNode(tokens[pos].value);
 	pos++;
 	return node;
 }
 
-function parseType() {
-	let node = new ast.ValueArrayNode([tokens[pos].value]);
-	pos++;
-	return node;
-}
-
-function parseCardType() {
+function parseValueArray() {
 	let node = new ast.ValueArrayNode([tokens[pos].value]);
 	pos++;
 	return node;
@@ -375,8 +372,8 @@ function parseCardMatcher() {
 	pos++; // just skip over the 'from' token
 	let zones = [];
 	while (tokens[pos].type != "where" && tokens[pos].type != "rightBracket") {
-		if (tokens[pos].type != "zoneIdentifier") {
-			throw new ScriptParserError("Expected a 'zoneIdentifier' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
+		if (tokens[pos].type != "zone") {
+			throw new ScriptParserError("Expected a 'zone' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
 		}
 		zones.push(parseZone());
 		if (tokens[pos].type == "separator") {
