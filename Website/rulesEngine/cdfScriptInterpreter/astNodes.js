@@ -75,10 +75,6 @@ export class FunctionNode extends AstNode {
 		switch (this.functionName) {
 			case "COUNT": {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
-				// count must yield through any Action lists so that they actually happen.
-				if (list.length > 0 && list[0] instanceof actions.Action) {
-					yield list;
-				}
 				return list.length;
 			}
 			case "DAMAGE": {
@@ -307,6 +303,70 @@ export class VariableNode extends AstNode {
 			throw new Error("Tried to access unitialized variable '" + this.name + "'.");
 		}
 		return ability.scriptVariables[this.name];
+	}
+}
+
+export class ThisCardNode extends AstNode {
+	async* eval(card, player, ability) {
+		return card;
+	}
+}
+
+export class MathNode extends AstNode {
+	constructor(leftSide, rightSide) {
+		super();
+		this.leftSide = leftSide;
+		this.rightSide = rightSide;
+	}
+}
+export class DashMathNode extends MathNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+}
+export class DotMathNode extends MathNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+}
+export class PlusNode extends DashMathNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+	async* eval(card, player, ability) {
+		return (await (yield* this.leftSide.eval())) + (await (yield* this.rightSide.eval()));
+	}
+}
+export class MinusNode extends DashMathNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+	async* eval(card, player, ability) {
+		return (await (yield* this.leftSide.eval())) - (await (yield* this.rightSide.eval()));
+	}
+}
+export class MultiplyNode extends DotMathNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+	async* eval(card, player, ability) {
+		return (await (yield* this.leftSide.eval())) * (await (yield* this.rightSide.eval()));
+	}
+}
+export class CeilDivideNode extends DotMathNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+	async* eval(card, player, ability) {
+		return Math.ceil((await (yield* this.leftSide.eval())) / (await (yield* this.rightSide.eval())));
+	}
+}
+export class FloorDivideNode extends DotMathNode {
+	constructor(leftSide, rightSide) {
+		super(leftSide, rightSide);
+	}
+	async* eval(card, player, ability) {
+		return Math.floor((await (yield* this.leftSide.eval())) / (await (yield* this.rightSide.eval())));
 	}
 }
 

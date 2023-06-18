@@ -76,6 +76,11 @@ export class Stack {
 					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), response.value.card, ability);
 					break;
 				}
+				case "activateTriggerAbility": {
+					let ability = response.value.card.abilities.get()[response.value.index];
+					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), response.value.card, ability);
+					break;
+				}
 			}
 			if (response.type != "pass") {
 				if (await (yield* nextBlock.runCost())) {

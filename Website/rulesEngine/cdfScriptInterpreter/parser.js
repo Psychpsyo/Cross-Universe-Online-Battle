@@ -99,7 +99,7 @@ function parseFunction() {
 
 	let parameters = [];
 	while (tokens[pos].type != "rightParen") {
-		parameters.push(parseParameter());
+		parameters.push(parseExpression());
 		if (tokens[pos].type == "separator") {
 			pos++;
 		}
@@ -116,11 +116,80 @@ function parseAssignment() {
 		throw new ScriptParserError("Variable name '" + variableName + "' must be followed by an '=' for assignments.");
 	}
 	pos++;
-	let newValue = parseParameter();
+	let newValue = parseExpression();
 	return new ast.AssignmentNode(variableName, newValue);
 }
 
-function parseParameter() {
+function parseExpression() {
+	let insideParens = false;
+	if (tokens[pos].type == "leftParen") {
+		insideParens = true;
+		pos++;
+	}
+	let expression = [];
+	do {
+		expression.push(parseValue());
+		if (tokens[pos] && ["plus", "minus", "multiply", "ceilDivide", "floorDivide"].includes(tokens[pos].type)) {
+			switch (tokens[pos].type) {
+				case "plus": {
+					expression.push(new ast.PlusNode(null, null));
+					break;
+				}
+				case "minus": {
+					expression.push(new ast.MinusNode(null, null));
+					break;
+				}
+				case "multiply": {
+					expression.push(new ast.MultiplyNode(null, null));
+					break;
+				}
+				case "ceilDivide": {
+					expression.push(new ast.CeilDivideNode(null, null));
+					break;
+				}
+				case "floorDivide": {
+					expression.push(new ast.FloorDivideNode(null, null));
+					break;
+				}
+			}
+			pos++;
+		}
+	} while (tokens[pos] && !["rightParen", "newLine", "separator"].includes(tokens[pos].type));
+
+	if (insideParens) {
+		if (tokens[pos].type == "rightParen") {
+			pos++;
+		} else {
+			throw new ScriptParserError("Found unwanted '" + tokens[pos].type + "' token instead of ')' at the end of parenthesized expression.");
+		}
+	}
+
+	// consolidate *, / and \ operators
+	for (let i = 0; i < expression.length; i++) {
+		if (expression[i] instanceof ast.DotMathNode) {
+			expression[i].leftSide = expression[i-1];
+			expression[i].rightSide = expression[i+1];
+			i--;
+			expression.splice(i, 3, expression[i+1]);
+		}
+	}
+
+	// consolidate + and - operators
+	for (let i = 0; i < expression.length; i++) {
+		if (expression[i] instanceof ast.DashMathNode) {
+			expression[i].leftSide = expression[i-1];
+			expression[i].rightSide = expression[i+1];
+			i--;
+			expression.splice(i, 3, expression[i+1]);
+		}
+	}
+	if (expression.length > 1) {
+		throw new ScriptParserError("Failed to fully consolidate expression.");
+	}
+	return expression[0];
+}
+
+function parseValue() {
 	switch (tokens[pos].type) {
 		case "minus":
 		case "number": {
@@ -134,7 +203,20 @@ function parseParameter() {
 			}
 		}
 		case "leftBracket": {
-			return parseCardMatcher();
+			switch (tokens[pos+1].type) {
+				case "type": {
+					pos++;
+					return parseTypeList();
+				}
+				case "cardId": {
+					pos++;
+					return parseCardIdList();
+				}
+				case "cardType": {
+					return parseCardMatcher();
+				}
+			}
+			throw new ScriptParserError("Encountered unwanted '" + tokens[pos+1].type + "' token inside brackets.");
 		}
 		case "function": {
 			return parseFunction();
@@ -152,16 +234,7 @@ function parseParameter() {
 			return parseBool();
 		}
 		case "leftParen": {
-			pos++;
-			switch (tokens[pos].type) {
-				case "type": {
-					return parseTypeList();
-				}
-				case "cardId": {
-					return parseCardIdList();
-				}
-			}
-			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' token inside list syntax.");
+			return parseExpression();
 		}
 		case "variable": {
 			if (tokens[pos+1].type == "dotOperator") {
@@ -170,8 +243,12 @@ function parseParameter() {
 				return parseVariable();
 			}
 		}
+		case "thisCard": {
+			pos++;
+			return new ast.ThisCardNode();
+		}
 		default: {
-			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid function parameter.");
+			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid value.");
 		}
 	}
 }
@@ -230,8 +307,8 @@ function parseTypeList() {
 			pos++;
 		}
 	}
-	if (tokens[pos].type != "rightParen") {
-		throw new ScriptParserError("Expected a 'rightParen' at the end of a type list. Got '" + tokens[pos].type + "' instead.");
+	if (tokens[pos].type != "rightBracket") {
+		throw new ScriptParserError("Expected a 'rightBracket' at the end of a type list. Got '" + tokens[pos].type + "' instead.");
 	}
 	pos++;
 	return new ast.TypesNode(types);
@@ -246,8 +323,8 @@ function parseCardIdList() {
 			pos++;
 		}
 	}
-	if (tokens[pos].type != "rightParen") {
-		throw new ScriptParserError("Expected a 'rightParen' at the end of a card ID list. Got '" + tokens[pos].type + "' instead.");
+	if (tokens[pos].type != "rightBracket") {
+		throw new ScriptParserError("Expected a 'rightBracket' at the end of a card ID list. Got '" + tokens[pos].type + "' instead.");
 	}
 	pos++;
 	return new ast.CardIDsNode(cardIDs);

@@ -2,6 +2,7 @@
 // whether or not to automatically perform an action for the player, such as passing priority.
 
 import * as phases from "/rulesEngine/phases.js";
+import * as abilities from "/rulesEngine/abilities.js";
 
 // track ctrl to disable the autoresponder when it's held
 let ctrlHeld = false;
@@ -86,10 +87,30 @@ function isImportant(request) {
 	}
 
 	let currentPhase = game.currentPhase();
-	if (currentPhase instanceof phases.DrawPhase) {
-		return false;
-	}
-	if (currentPhase instanceof phases.EndPhase) {
+	if (currentPhase instanceof phases.DrawPhase || currentPhase instanceof phases.EndPhase) {
+		switch (request.type) {
+			case "activateTriggerAbility": {
+				for (let ability of request.eligibleAbilities) {
+					let phaseIndicator = ability.card.abilities.get()[ability.index].duringPhase;
+					if (phaseIndicator && currentPhase.matches(phaseIndicator, request.player)) {
+						return true;
+					}
+				}
+				break;
+			}
+			case "castSpell": {
+				for (let card of request.eligibleSpells) {
+					for (let ability of card.abilities.get()) {
+						if (ability instanceof abilities.CastAbility) {
+							if (ability.duringPhase && currentPhase.matches(ability.duringPhase, request.player)) {
+								return true;
+							}
+						}
+					}
+				}
+				break;
+			}
+		}
 		return false;
 	}
 	return true;

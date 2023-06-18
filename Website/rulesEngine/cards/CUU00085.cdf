@@ -10,5 +10,5 @@ turnLimit: 1
 cost:
 MANA(-1)
 exec:
-SUMMON(TOKENS(1, CUT00001, CUT00001, 0, (Light, Illusion, Bug), 0, 0), yourUnitZone, yes)
+SUMMON(TOKENS(1, CUT00001, CUT00001, 0, [Illusion, Light, Bug], 0, 0), yourUnitZone, yes)
 LIFE(-100)
