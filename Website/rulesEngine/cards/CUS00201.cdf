@@ -4,5 +4,5 @@ name: CUS00201
 level: 1
 types:
 o: cast
-DESTROY([unit from yourField])
+DESTROY(SELECT(1, [from yourField where cardType = unit]))
 DRAW(1)

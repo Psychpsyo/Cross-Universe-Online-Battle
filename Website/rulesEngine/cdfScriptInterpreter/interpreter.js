@@ -7,21 +7,14 @@ let alreadyParsedCosts = {};
 
 export function buildExecAST(effectId, cdfScript) {
 	if (!alreadyParsedExecs[effectId]) {
-		alreadyParsedExecs[effectId] = parseScript(tokenize(cdfScript));
+		alreadyParsedExecs[effectId] = parseScript(tokenize(cdfScript), effectId);
 	}
 	return alreadyParsedExecs[effectId];
 }
 
 export function buildCostAST(effectId, cdfScript) {
 	if (!alreadyParsedCosts[effectId]) {
-		alreadyParsedCosts[effectId] = parseScript(tokenize(cdfScript));
+		alreadyParsedCosts[effectId] = parseScript(tokenize(cdfScript), effectId);
 	}
 	return alreadyParsedCosts[effectId];
-}
-
-export class ScriptParserError extends Error {
-	constructor(message) {
-		super(message);
-		this.name = "ScriptParserError";
-	}
 }

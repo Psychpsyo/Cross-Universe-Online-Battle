@@ -1,10 +1,18 @@
 import * as ast from "./astNodes.js";
-import {ScriptParserError} from "./interpreter.js";
 
 let pos;
 let tokens;
+let effectId; // The effect that is currently being parsed.
 
-export function parseScript(tokenList) {
+class ScriptParserError extends Error {
+	constructor(message) {
+		super("On " + effectId + " : " + message);
+		this.name = "ScriptParserError";
+	}
+}
+
+export function parseScript(tokenList, newEffectId) {
+	effectId = newEffectId;
 	tokens = tokenList;
 	pos = 0;
 
@@ -129,7 +137,7 @@ function parseExpression() {
 	let expression = [];
 	do {
 		expression.push(parseValue());
-		if (tokens[pos] && ["plus", "minus", "multiply", "ceilDivide", "floorDivide"].includes(tokens[pos].type)) {
+		if (tokens[pos]) {
 			switch (tokens[pos].type) {
 				case "plus": {
 					expression.push(new ast.PlusNode(null, null));
@@ -151,10 +159,33 @@ function parseExpression() {
 					expression.push(new ast.FloorDivideNode(null, null));
 					break;
 				}
+				case "equals": {
+					expression.push(new ast.EqualsNode(null, null));
+					break;
+				}
+				case "greaterThan": {
+					expression.push(new ast.GreaterThanNode(null, null));
+					break;
+				}
+				case "lessThan": {
+					expression.push(new ast.LessThanNode(null, null));
+					break;
+				}
+				case "andOperator": {
+					expression.push(new ast.AndNode(null, null));
+					break;
+				}
+				case "orOperator": {
+					expression.push(new ast.OrNode(null, null));
+					break;
+				}
+				default: {
+					pos--;
+				}
 			}
 			pos++;
 		}
-	} while (tokens[pos] && !["rightParen", "newLine", "separator"].includes(tokens[pos].type));
+	} while (tokens[pos] && !["rightParen", "rightBracket", "newLine", "separator"].includes(tokens[pos].type));
 
 	if (insideParens) {
 		if (tokens[pos].type == "rightParen") {
@@ -164,23 +195,14 @@ function parseExpression() {
 		}
 	}
 
-	// consolidate *, / and \ operators
-	for (let i = 0; i < expression.length; i++) {
-		if (expression[i] instanceof ast.DotMathNode) {
-			expression[i].leftSide = expression[i-1];
-			expression[i].rightSide = expression[i+1];
-			i--;
-			expression.splice(i, 3, expression[i+1]);
-		}
-	}
-
-	// consolidate + and - operators
-	for (let i = 0; i < expression.length; i++) {
-		if (expression[i] instanceof ast.DashMathNode) {
-			expression[i].leftSide = expression[i-1];
-			expression[i].rightSide = expression[i+1];
-			i--;
-			expression.splice(i, 3, expression[i+1]);
+	for (let type of [ast.DotMathNode, ast.DashMathNode, ast.ComparisonNode, ast.LogicNode]) {
+		for (let i = 0; i < expression.length; i++) {
+			if (expression[i] instanceof type) {
+				expression[i].leftSide = expression[i-1];
+				expression[i].rightSide = expression[i+1];
+				i--;
+				expression.splice(i, 3, expression[i+1]);
+			}
 		}
 	}
 	if (expression.length > 1) {
@@ -203,20 +225,18 @@ function parseValue() {
 			}
 		}
 		case "leftBracket": {
-			switch (tokens[pos+1].type) {
-				case "type": {
+			if (tokens[pos+1].type == "from") {
+				let cardMatcher = parseCardMatcher();
+				if (tokens[pos].type == "dotOperator") {
 					pos++;
-					return parseTypeList();
+					if (tokens[pos].type != "cardProperty") {
+						throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access card property of a card match statement [from...where...].");
+					}
+					return parseCardProperty(cardMatcher);
 				}
-				case "cardId": {
-					pos++;
-					return parseCardIdList();
-				}
-				case "cardType": {
-					return parseCardMatcher();
-				}
+				return cardMatcher;
 			}
-			throw new ScriptParserError("Encountered unwanted '" + tokens[pos+1].type + "' token inside brackets.");
+			return parseList(tokens[pos+1].type);
 		}
 		case "function": {
 			return parseFunction();
@@ -245,12 +265,31 @@ function parseValue() {
 		}
 		case "thisCard": {
 			pos++;
+			if (tokens[pos].type == "dotOperator") {
+				pos++;
+				if (tokens[pos].type != "cardProperty") {
+					throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access thisCard property.");
+				}
+				return parseCardProperty(new ast.ThisCardNode());
+			}
 			return new ast.ThisCardNode();
+		}
+		case "cardProperty": {
+			return parseCardProperty(new ast.ImplicitCardNode());
+		}
+		case "cardType": {
+			return parseCardType();
 		}
 		default: {
 			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid value.");
 		}
 	}
+}
+
+function parseCardProperty(cardsNode) {
+	let node = new ast.CardPropertyNode(cardsNode, tokens[pos].value);
+	pos++;
+	return node;
 }
 
 function parseVariable() {
@@ -269,7 +308,7 @@ function parseNumber() {
 	if (negative) {
 		value *= -1;
 	}
-	let node = new ast.IntNode(value);
+	let node = new ast.ValueArrayNode([value]);
 	pos++;
 	return node;
 }
@@ -281,7 +320,7 @@ function parseBool() {
 }
 
 function parseCardId() {
-	let node = new ast.CardIDsNode([tokens[pos].value]);
+	let node = new ast.ValueArrayNode([tokens[pos].value]);
 	pos++;
 	return node;
 }
@@ -293,41 +332,32 @@ function parsePlayer() {
 }
 
 function parseType() {
-	let node = new ast.TypesNode([tokens[pos].value]);
+	let node = new ast.ValueArrayNode([tokens[pos].value]);
 	pos++;
 	return node;
 }
 
-function parseTypeList() {
-	let types = [];
-	while (tokens[pos].type == "type") {
-		types.push(tokens[pos].value);
-		pos++;
-		if (tokens[pos].type == "separator") {
-			pos++;
-		}
-	}
-	if (tokens[pos].type != "rightBracket") {
-		throw new ScriptParserError("Expected a 'rightBracket' at the end of a type list. Got '" + tokens[pos].type + "' instead.");
-	}
+function parseCardType() {
+	let node = new ast.ValueArrayNode([tokens[pos].value]);
 	pos++;
-	return new ast.TypesNode(types);
+	return node;
 }
 
-function parseCardIdList() {
-	let cardIDs = [];
-	while (tokens[pos].type == "cardId") {
-		cardIDs.push(tokens[pos].value);
+function parseList(type) {
+	let elements = [];
+	pos++;
+	while (tokens[pos].type == type) {
+		elements.push(tokens[pos].value);
 		pos++;
 		if (tokens[pos].type == "separator") {
 			pos++;
 		}
 	}
 	if (tokens[pos].type != "rightBracket") {
-		throw new ScriptParserError("Expected a 'rightBracket' at the end of a card ID list. Got '" + tokens[pos].type + "' instead.");
+		throw new ScriptParserError("Expected a 'rightBracket' at the end of a list. Got '" + tokens[pos].type + "' instead.");
 	}
 	pos++;
-	return new ast.CardIDsNode(cardIDs);
+	return new ast.ValueArrayNode(elements);
 }
 
 function parseZone() {
@@ -338,19 +368,7 @@ function parseZone() {
 
 function parseCardMatcher() {
 	pos++;
-	let cardTypes = [];
-	while (tokens[pos].type != "from") {
-		if (tokens[pos].type != "cardType") {
-			throw new ScriptParserError("Expected a 'cardType' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
-		}
-		cardTypes.push(tokens[pos].value);
-		pos++;
-		if (tokens[pos].type == "separator") {
-			pos++;
-		}
-	}
-
-	pos++;
+	pos++; // just skip over the 'from' token
 	let zones = [];
 	while (tokens[pos].type != "where" && tokens[pos].type != "rightBracket") {
 		if (tokens[pos].type != "zoneIdentifier") {
@@ -362,13 +380,16 @@ function parseCardMatcher() {
 		}
 	}
 
+	let conditions = null;
 	if (tokens[pos].type == "where") {
-		while (tokens[pos].type != "rightBracket") {
-			pos++;
-			// TODO: implement where clause
-		}
+		pos++;
+		conditions = parseExpression();
+	}
+
+	if (tokens[pos].type != "rightBracket") {
+		throw new ScriptParserError("Expected a 'rightBracket' token at the end of card matcher syntax. Got '" + tokens[pos].type + "' instead.");
 	}
 
 	pos++;
-	return new ast.CardMatchNode(cardTypes, zones);
+	return new ast.CardMatchNode(zones, conditions);
 }

@@ -4,5 +4,5 @@ name: CUS00062
 level: 0
 types:
 o: cast
-SUMMON(SELECT(1, [unit from yourHand]), opponentField, yes)
+SUMMON(SELECT(1, [from yourHand where cardType = unit]), opponentField, yes)
 DRAW(1)
