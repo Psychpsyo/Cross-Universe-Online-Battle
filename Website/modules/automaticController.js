@@ -37,6 +37,7 @@ export class AutomaticController extends InteractionController {
 		this.canDeclareToAttack = [];
 		this.unitAttackButtons = [];
 		this.declaredAttackers = [];
+		this.fieldPlaceIndex = null;
 	}
 
 	async startGame() {
@@ -163,24 +164,27 @@ export class AutomaticController extends InteractionController {
 
 		// summoning
 		if (playerInfo.canStandardSummon.includes(card) && zone == player.unitZone && !player.unitZone.get(index)) {
+			this.fieldPlaceIndex = index;
 			if (player === localPlayer) {
-				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: {handIndex: card.index, fieldIndex: index}}));
+				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: card.index}));
 			}
 			gameUI.makeDragSource(player.unitZone, index, player);
 			return;
 		}
 		// deploying
 		if (playerInfo.canDeploy.includes(card) && zone == player.spellItemZone && !player.spellItemZone.get(index)) {
+			this.fieldPlaceIndex = index;
 			if (player === localPlayer) {
-				this.deployEventTarget.dispatchEvent(new CustomEvent("deploy", {detail: {handIndex: card.index, fieldIndex: index}}));
+				this.deployEventTarget.dispatchEvent(new CustomEvent("deploy", {detail: card.index}));
 			}
 			gameUI.makeDragSource(player.spellItemZone, index, player);
 			return;
 		}
 		// casting
 		if (playerInfo.canCast.includes(card) && zone == player.spellItemZone && !player.spellItemZone.get(index)) {
+			this.fieldPlaceIndex = index;
 			if (player === localPlayer) {
-				this.castEventTarget.dispatchEvent(new CustomEvent("cast", {detail: {handIndex: card.index, fieldIndex: index}}));
+				this.castEventTarget.dispatchEvent(new CustomEvent("cast", {detail: card.index}));
 			}
 			gameUI.makeDragSource(player.spellItemZone, index, player);
 			return;
@@ -416,7 +420,7 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "doStandardSummon": {
-				let summonDetails = await new Promise((resolve, reject) => {
+				let handIndex = await new Promise((resolve, reject) => {
 					this.standardSummonEventTarget.addEventListener("summon", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						this.standardSummonEventTarget.removeEventListener("summon", resolve);
@@ -426,14 +430,14 @@ export class AutomaticController extends InteractionController {
 					(e) => {return e.detail},
 					() => {return null}
 				);
-				if (summonDetails == null) {
+				if (handIndex === null) {
 					return;
 				}
-				response.value = summonDetails;
+				response.value = handIndex;
 				break;
 			}
 			case "deployItem": {
-				let deployDetails = await new Promise((resolve, reject) => {
+				let handIndex = await new Promise((resolve, reject) => {
 					this.deployEventTarget.addEventListener("deploy", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						this.deployEventTarget.removeEventListener("deploy", resolve);
@@ -443,14 +447,14 @@ export class AutomaticController extends InteractionController {
 					(e) => {return e.detail},
 					() => {return null}
 				);
-				if (deployDetails == null) {
+				if (handIndex === null) {
 					return;
 				}
-				response.value = deployDetails;
+				response.value = handIndex;
 				break;
 			}
 			case "castSpell": {
-				let castDetails = await new Promise((resolve, reject) => {
+				let handIndex = await new Promise((resolve, reject) => {
 					this.castEventTarget.addEventListener("cast", resolve, {once: true});
 					this.madeMoveTarget.addEventListener("move", function() {
 						this.castEventTarget.removeEventListener("cast", resolve);
@@ -460,10 +464,10 @@ export class AutomaticController extends InteractionController {
 					(e) => {return e.detail},
 					() => {return null}
 				);
-				if (castDetails == null) {
+				if (handIndex === null) {
 					return;
 				}
-				response.value = castDetails;
+				response.value = handIndex;
 				break;
 			}
 			case "doAttackDeclaration": {
@@ -556,6 +560,11 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "chooseZoneSlot": {
+				if (this.fieldPlaceIndex !== null) {
+					response.value = request.eligibleSlots.indexOf(this.fieldPlaceIndex);
+					this.fieldPlaceIndex = null;
+					break;
+				}
 				// TODO: Let player choose one here.
 				response.value = 0;
 				break;

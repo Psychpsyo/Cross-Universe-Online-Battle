@@ -86,21 +86,30 @@ export class StandardDraw extends Block {
 			[new actions.Draw(player, 1)]
 		]));
 	}
+
+	async* runCost() {
+		if (await (yield* super.runCost())) {
+			this.stack.phase.turn.hasStandardDrawn = true;
+			return true;
+		}
+		return false;
+	}
 }
 
 export class StandardSummon extends Block {
-	constructor(stack, player, card, unitZoneIndex) {
+	constructor(stack, player, card) {
+		let summonAction = new actions.Summon(player, card, player.unitZone, 0);
 		super(stack, player,
 			arrayTimingGenerator([
-				[new actions.Summon(player, card, player.unitZone, unitZoneIndex)]
+				[summonAction]
 			]),
 			arrayTimingGenerator([[
-				new actions.Place(player, card, player.unitZone, unitZoneIndex),
+				new actions.Place(player, card, player.unitZone),
 				new actions.ChangeMana(player, -card.level.get())
 			]]
 		));
 		this.card = card;
-		this.unitZoneIndex = unitZoneIndex;
+		this.summonAction = summonAction;
 	}
 
 	async* runCost() {
@@ -112,6 +121,7 @@ export class StandardSummon extends Block {
 		}
 		this.card = this.card.snapshot();
 		this.stack.phase.turn.hasStandardSummoned = this.card;
+		this.summonAction.zoneIndex = this.costTiming.actions.find(action => action instanceof actions.Place).targetIndex;
 		return true;
 	}
 }
@@ -289,13 +299,14 @@ async function* combinedCostTimingGenerator(generators) {
 }
 
 export class DeployItem extends Block {
-	constructor(stack, player, card, spellItemZoneIndex) {
+	constructor(stack, player, card) {
+		let deployAction = new actions.Deploy(player, card, player.spellItemZone, 0);
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.Place(player, card, player.spellItemZone, spellItemZoneIndex),
+			new actions.Place(player, card, player.spellItemZone),
 			new actions.ChangeMana(player, -card.level.get())
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Deploy(player, card, player.spellItemZone, spellItemZoneIndex)]])
+			arrayTimingGenerator([[deployAction]])
 		];
 		let deployAbility = null;
 		for (let ability of card.abilities.get()) {
@@ -321,8 +332,8 @@ export class DeployItem extends Block {
 			combinedCostTimingGenerator(costTimingGenerators)
 		);
 		this.card = card;
-		this.spellItemZoneIndex = spellItemZoneIndex;
 		this.deployAbility = deployAbility;
+		this.deployAction = deployAction;
 	}
 
 	async* runCost() {
@@ -344,18 +355,20 @@ export class DeployItem extends Block {
 			return false;
 		}
 		this.card = this.card.snapshot();
+		this.deployAction.zoneIndex = this.costTiming.actions.find(action => action instanceof actions.Place).targetIndex;
 		return true;
 	}
 }
 
 export class CastSpell extends Block {
-	constructor(stack, player, card, spellItemZoneIndex) {
+	constructor(stack, player, card) {
+		let castAction = new actions.Cast(player, card, player.spellItemZone, 0);
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.Place(player, card, player.spellItemZone, spellItemZoneIndex),
+			new actions.Place(player, card, player.spellItemZone),
 			new actions.ChangeMana(player, -card.level.get())
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Cast(player, card, player.spellItemZone, spellItemZoneIndex)]])
+			arrayTimingGenerator([[castAction]])
 		];
 		let castAbility = null;
 		for (let ability of card.abilities.get()) {
@@ -381,8 +394,8 @@ export class CastSpell extends Block {
 			combinedCostTimingGenerator(costTimingGenerators)
 		);
 		this.card = card;
-		this.spellItemZoneIndex = spellItemZoneIndex;
 		this.castAbility = castAbility;
+		this.castAction = castAction;
 	}
 
 	async* runCost() {
@@ -404,6 +417,7 @@ export class CastSpell extends Block {
 			return false;
 		}
 		this.card = this.card.snapshot();
+		this.castAction.zoneIndex = this.costTiming.actions.find(action => action instanceof actions.Place).targetIndex;
 		return true;
 	}
 }

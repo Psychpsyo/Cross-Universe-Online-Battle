@@ -13,7 +13,7 @@ export class Stack {
 
 	async* run() {
 		while (true) {
-			let inputRequests = this.phase.getBlockOptions(this);
+			let inputRequests = await (yield* this.phase.getBlockOptions(this));
 			let responses = (yield inputRequests).filter(choice => choice !== undefined);
 
 			if (responses.length != 1) {
@@ -39,24 +39,15 @@ export class Stack {
 					break;
 				}
 				case "doStandardSummon": {
-					nextBlock = new blocks.StandardSummon(this, this.getNextPlayer(),
-						this.getNextPlayer().handZone.cards[response.value.handIndex],
-						response.value.fieldIndex
-					);
+					nextBlock = new blocks.StandardSummon(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[response.value]);
 					break;
 				}
 				case "deployItem": {
-					nextBlock = new blocks.DeployItem(this, this.getNextPlayer(),
-						this.getNextPlayer().handZone.cards[response.value.handIndex],
-						response.value.fieldIndex
-					);
+					nextBlock = new blocks.DeployItem(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[response.value]);
 					break;
 				}
 				case "castSpell": {
-					nextBlock = new blocks.CastSpell(this, this.getNextPlayer(),
-						this.getNextPlayer().handZone.cards[response.value.handIndex],
-						response.value.fieldIndex
-					);
+					nextBlock = new blocks.CastSpell(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[response.value]);
 					break;
 				}
 				case "doAttackDeclaration": {

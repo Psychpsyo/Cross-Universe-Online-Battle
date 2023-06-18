@@ -8,7 +8,8 @@ export class Turn {
 		this.player = player;
 		this.phases = [];
 		this.index = game.turns.length;
-		
+
+		this.hasStandardDrawn = false;
 		this.hasStandardSummoned = null;
 		this.hasRetired = null;
 	}
@@ -25,7 +26,7 @@ export class Turn {
 			battlePhase.value = enterBattlePhase.validate(battlePhase.value);
 			if (battlePhase.value) {
 				yield* this.runPhase(new BattlePhase(this));
-				
+
 				yield* this.runPhase(new MainPhase(this));
 			}
 		}

@@ -3,6 +3,7 @@
 
 import * as phases from "/rulesEngine/phases.js";
 import * as abilities from "/rulesEngine/abilities.js";
+import * as ast from "/rulesEngine/cdfScriptInterpreter/astNodes.js";
 
 // track ctrl to disable the autoresponder when it's held
 let ctrlHeld = false;
@@ -28,15 +29,26 @@ export function getAutoResponse(requests) {
 	// non-pass actions
 	if (requests.length == 1) {
 		let request = requests[0];
-		if (request.type == "chooseCards") {
-			if (Math.min(...request.validAmounts) == request.from.length) {
-				let choice = [];
-				for (let i = 0; i < request.from.length; i++) {
-					choice.push(i);
+		switch (request.type) {
+			case "chooseCards": {
+				if (Math.min(...request.validAmounts) == request.from.length) {
+					let choice = [];
+					for (let i = 0; i < request.from.length; i++) {
+						choice.push(i);
+					}
+					return {
+						type: "chooseCards",
+						value: choice
+					}
 				}
-				return {
-					type: "chooseCards",
-					value: choice
+				break;
+			}
+			case "activateTriggerAbility": {
+				if (request.eligibleAbilities.length == 1) {
+					return {
+						type: "activateTriggerAbility",
+						value: 0
+					};
 				}
 			}
 		}
@@ -53,7 +65,7 @@ export function getAutoResponse(requests) {
 			importantRequests++;
 		}
 	}
-	if (importantRequests == 0) {
+	if (importantRequests == 0 && localStorage.getItem("passOnOnlyOption") === "true") {
 		return {type: "pass"};
 	}
 
@@ -61,33 +73,56 @@ export function getAutoResponse(requests) {
 }
 
 function isImportant(request) {
-	if (request.type == "pass") {
-		return false;
+	switch (request.type) {
+		case "pass": {
+			return false;
+		}
+		case "doStandardSummon": {
+			if (!request.eligibleUnits.length == 0) {
+				return false;
+			}
+			break;
+		}
+		case "deployItem": {
+			if (request.eligibleItems.length == 0) {
+				return false;
+			}
+			break;
+		}
+		case "castSpell": {
+			if (request.eligibleSpells.length == 0) {
+				return false;
+			}
+			break;
+		}
+		case "doRetire": {
+			if (request.eligibleUnits.length == 1 && request.eligibleUnits[0].zone.type == "partner") {
+				return false;
+			}
+			break;
+		}
+		case "activateOptionalAbility":
+		case "activateFastAbility":
+		case "activateTriggerAbility": {
+			if (request.eligibleAbilities.length == 0) {
+				return false;
+			}
+		}
 	}
-	if (request.type == "doStandardSummon" &&
-		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("unit"))
-	) {
-		return false;
-	}
-	if (request.type == "deployItem" &&
-		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("item"))
-	) {
-		return false;
-	}
-	if (request.type == "castSpell" &&
-		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("spell"))
-	) {
-		return false;
-	}
-	if (request.type == "doRetire" &&
-		request.eligibleUnits.length == 1 &&
-		request.eligibleUnits[0].zone.type == "partner"
-	) {
-		return false;
+
+	if (localStorage.getItem("passOnStackTwo") === "true") {
+		let currentStack = game.currentStack()
+		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
+			if (request.type != "activateTriggerAbility") {
+				return false;
+			}
+		}
 	}
 
 	let currentPhase = game.currentPhase();
-	if (currentPhase instanceof phases.DrawPhase || currentPhase instanceof phases.EndPhase) {
+	if (((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||
+		((currentPhase instanceof phases.EndPhase) && localStorage.getItem("passInEndPhase") === "true")
+	) {
 		switch (request.type) {
 			case "activateTriggerAbility": {
 				for (let ability of request.eligibleAbilities) {
@@ -102,7 +137,7 @@ function isImportant(request) {
 				for (let card of request.eligibleSpells) {
 					for (let ability of card.abilities.get()) {
 						if (ability instanceof abilities.CastAbility) {
-							if (ability.duringPhase && currentPhase.matches(ability.duringPhase, request.player)) {
+							if (ability.condition && hasPhaseEqualityCondition(ability.condition)) {
 								return true;
 							}
 						}
@@ -114,4 +149,15 @@ function isImportant(request) {
 		return false;
 	}
 	return true;
+}
+
+function hasPhaseEqualityCondition(node) {
+	if (node instanceof ast.EqualsNode && (node.leftSide instanceof ast.CurrentPhaseNode || node.rightSide instanceof ast.CurrentPhaseNode)) {
+		return true;
+	}
+	for (let childNode of expression.getChildNodes()) {
+		if (hasPhaseEqualityCondition(childNode)) {
+			return true;
+		}
+	}
 }

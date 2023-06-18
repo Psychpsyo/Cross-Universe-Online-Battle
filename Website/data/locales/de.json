@@ -273,6 +273,14 @@
 			"customFontPlaceholder": "Keine Benutzerdefinierte Schriftart gewählt."
 		},
 
+		"auto": {
+			"title": "Automatische Runden",
+			"passOnOnlyOption": "Auto-passen wenn es die einzige vernünftige Option ist",
+			"passInDrawPhase": "In der Drawphase auto-passen, wenn du keine Drawphase-spezifischen Optionen hast",
+			"passInEndPhase": "In der Endphase auto-passen, wenn du keine Endphase-spezifischen Optionen hast",
+			"passOnStackTwo": "Auf leeren Stacks 2+ auto-passen, wenn du keine Trigger-Fähigkeiten oder konditionsbedingte Zauber hast"
+		},
+
 		"hotkeys": {
 			"title": "Hotkeys",
 			"resetHotkeys": "Hotkeys zurücksetzen",

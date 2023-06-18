@@ -12,14 +12,14 @@ export class Action {
 	// After run() finishes, this class should only hold references to card snapshots, not actual cards so it serves as a record of what it did
 	* run() {}
 
-	isImpossible() {
+	isImpossible(timing) {
 		return false;
 	}
-	isPossible() {
-		return !this.isImpossible();
+	isPossible(timing) {
+		return !this.isImpossible(timing);
 	}
-	isFullyPossible() {
-		return this.isPossible();
+	isFullyPossible(timing) {
+		return this.isPossible(timing);
 	}
 }
 
@@ -35,10 +35,10 @@ export class ChangeMana extends Action {
 		return events.createManaChangedEvent(this.player);
 	}
 
-	isImpossible() {
+	isImpossible(timing) {
 		return this.player.mana == 0 && this.amount < 0;
 	}
-	isFullyPossible() {
+	isFullyPossible(timing) {
 		return this.player.mana + this.amount >= 0;
 	}
 }
@@ -55,7 +55,7 @@ export class ChangeLife extends Action {
 		return events.createLifeChangedEvent(this.player);
 	}
 
-	isFullyPossible() {
+	isFullyPossible(timing) {
 		return this.player.life + this.amount >= 0;
 	}
 }
@@ -88,25 +88,39 @@ export class Draw extends Action {
 
 // places a card on the field without moving it there yet.
 export class Place extends Action {
-	constructor(player, card, zone, index) {
+	constructor(player, card, zone) {
 		super();
 		this.player = player;
 		this.card = card;
 		this.zone = zone;
-		this.index = index;
+		this.targetIndex = null;
 	}
 
 	* run() {
+		let zoneSlotRequest = new requests.chooseZoneSlot.create(this.player, this.zone, this.getAvailableZoneSlots());
+		let zoneSlotResponse = (yield [zoneSlotRequest])[0];
+		this.targetIndex = requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
+
 		this.card.hidden = false;
-		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.index);
-		this.zone.place(this.card, this.index);
+		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex);
+		this.zone.place(this.card, this.targetIndex);
 		this.card = this.card.snapshot();
 		return cardPlacedEvent;
 	}
 
-	isImpossible() {
-		let slotCard = this.zone.get(this.index);
-		return slotCard != null && slotCard != this.card;
+	isImpossible(timing) {
+		return this.getAvailableZoneSlots().length < timing.actions.filter(action => action instanceof Place).length;
+	}
+
+	getAvailableZoneSlots() {
+		let slots = [];
+		for (let i = 0; i < this.zone.cards.length; i++) {
+			let slotCard = this.zone.get(i);
+			if (slotCard === null || slotCard === this.card) {
+				slots.push(i);
+			}
+		}
+		return slots;
 	}
 }
 
@@ -127,7 +141,7 @@ export class Summon extends Action {
 		return summonEvent;
 	}
 
-	isImpossible() {
+	isImpossible(timing) {
 		let slotCard = this.zone.get(this.zoneIndex);
 		return slotCard != null && slotCard != this.unit;
 	}
@@ -150,7 +164,7 @@ export class Deploy extends Action {
 		return deployEvent;
 	}
 
-	isImpossible() {
+	isImpossible(timing) {
 		let slotCard = this.zone.get(this.zoneIndex);
 		return slotCard != null && slotCard != this.item;
 	}
@@ -173,7 +187,7 @@ export class Cast extends Action {
 		return deployEvent;
 	}
 
-	isImpossible() {
+	isImpossible(timing) {
 		let slotCard = this.zone.get(this.zoneIndex);
 		return slotCard != null && slotCard != this.spell;
 	}
@@ -249,7 +263,7 @@ export class Discard extends Action {
 		return event;
 	}
 
-	isImpossible() {
+	isImpossible(timing) {
 		if (this.card.zone?.type == "partner") {
 			return true;
 		}
@@ -271,7 +285,7 @@ export class Destroy extends Action {
 		return event;
 	}
 
-	isImpossible() {
+	isImpossible(timing) {
 		if (this.card.zone?.type == "partner") {
 			return true;
 		}
@@ -293,7 +307,7 @@ export class Exile extends Action {
 		return event;
 	}
 
-	isImpossible() {
+	isImpossible(timing) {
 		if (this.card.zone.type == "partner") {
 			return true;
 		}

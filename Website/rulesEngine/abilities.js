@@ -1,21 +1,24 @@
-import {buildExecAST, buildCostAST} from "./cdfScriptInterpreter/interpreter.js";
+import {buildExecAST, buildCostAST, buildConditionAST} from "./cdfScriptInterpreter/interpreter.js";
 
 export class BaseAbility {
-	constructor(id) {
+	constructor(id, condition) {
 		this.id = id;
+		this.condition = null;
+		if (condition) {
+			this.condition = buildConditionAST(id, condition);
+		}
 	}
 }
 
 // This is the super class of all activatable activities that can have a cost and some processing
 export class Ability extends BaseAbility {
-	constructor(id, exec, cost, duringPhase) {
-		super(id);
+	constructor(id, exec, cost, condition) {
+		super(id, condition);
 		this.exec = buildExecAST(id, exec);
 		this.cost =  null;
 		if (cost) {
 			this.cost = buildCostAST(id, cost);
 		}
-		this.duringPhase = duringPhase;
 		this.scriptVariables = {};
 	}
 
@@ -30,38 +33,40 @@ export class Ability extends BaseAbility {
 }
 
 export class CastAbility extends Ability {
-	constructor(id, exec, cost, duringPhase) {
-		super(id, exec, cost, duringPhase);
+	constructor(id, exec, cost, condition) {
+		super(id, exec, cost, condition);
 	}
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, exec, cost, duringPhase) {
-		super(id, exec, cost, duringPhase);
+	constructor(id, exec, cost, condition) {
+		super(id, exec, cost, condition);
 	}
 }
 
 export class OptionalAbility extends Ability {
-	constructor(id, exec, cost, turnLimit, duringPhase) {
-		super(id, exec, cost, duringPhase);
+	constructor(id, exec, cost, turnLimit, condition) {
+		super(id, exec, cost, condition);
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
 	}
 }
 
 export class FastAbility extends Ability {
-	constructor(id, exec, cost, turnLimit) {
-		super(id, exec, cost, null); // A fast ability with a phase restriction would be a trigger ability
+	constructor(id, exec, cost, turnLimit, condition) {
+		super(id, exec, cost, condition);
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
 	}
 }
 
 export class TriggerAbility extends Ability {
-	constructor(id, exec, cost, mandatory, turnLimit, duringPhase) {
-		super(id, exec, cost, duringPhase);
+	constructor(id, exec, cost, mandatory, turnLimit, duringPhase, condition) {
+		super(id, exec, cost, condition);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
+		this.duringPhase = duringPhase;
+		this.activationCount = 0;
 	}
 }
 

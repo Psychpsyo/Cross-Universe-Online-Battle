@@ -1,12 +1,16 @@
 let keywordTokenTypes = {
 	from: "from",
 	where: "where",
-	set: "set",
 	thisCard: "thisCard",
+	currentPhase: "currentPhase",
+	currentTurn: "currentTurn",
+
 	yes: "bool",
 	no: "bool",
+
 	you: "player",
 	opponent: "player",
+
 	name: "cardProperty",
 	baseName: "cardProperty",
 	level: "cardProperty",
@@ -20,30 +24,57 @@ let keywordTokenTypes = {
 	cardType: "cardProperty",
 	baseCardType: "cardProperty",
 	owner: "cardProperty",
-	field: "zoneIdentifier",
-	deck: "zoneIdentifier",
-	discard: "zoneIdentifier",
-	exile: "zoneIdentifier",
-	hand: "zoneIdentifier",
-	unitZone: "zoneIdentifier",
-	spellItemZone: "zoneIdentifier",
-	partnerZone: "zoneIdentifier",
-	yourField: "zoneIdentifier",
-	yourDeck: "zoneIdentifier",
-	yourDiscard: "zoneIdentifier",
-	yourExile: "zoneIdentifier",
-	yourHand: "zoneIdentifier",
-	yourUnitZone: "zoneIdentifier",
-	yourSpellItemZone: "zoneIdentifier",
-	yourPartnerZone: "zoneIdentifier",
-	opponentField: "zoneIdentifier",
-	opponentDeck: "zoneIdentifier",
-	opponentDiscard: "zoneIdentifier",
-	opponentExile: "zoneIdentifier",
-	opponentHand: "zoneIdentifier",
-	opponentUnitZone: "zoneIdentifier",
-	opponentSpellItemZone: "zoneIdentifier",
-	opponentPartnerZone: "zoneIdentifier",
+
+	field: "zone",
+	deck: "zone",
+	discard: "zone",
+	exile: "zone",
+	hand: "zone",
+	unitZone: "zone",
+	spellItemZone: "zone",
+	partnerZone: "zone",
+	yourField: "zone",
+	yourDeck: "zone",
+	yourDiscard: "zone",
+	yourExile: "zone",
+	yourHand: "zone",
+	yourUnitZone: "zone",
+	yourSpellItemZone: "zone",
+	yourPartnerZone: "zone",
+	opponentField: "zone",
+	opponentDeck: "zone",
+	opponentDiscard: "zone",
+	opponentExile: "zone",
+	opponentHand: "zone",
+	opponentUnitZone: "zone",
+	opponentSpellItemZone: "zone",
+	opponentPartnerZone: "zone",
+
+	yourTurn: "turn",
+	opponentTurn: "turn",
+
+	manaSupplyPhase: "phase",
+	drawPhase: "phase",
+	mainPhase: "phase",
+	mainPhase1: "phase",
+	battlePhase: "phase",
+	mainPhase2: "phase",
+	endPhase2: "phase",
+	yourManaSupplyPhase: "phase",
+	yourDrawPhase: "phase",
+	yourMainPhase: "phase",
+	yourMainPhase1: "phase",
+	yourBattlePhase: "phase",
+	yourMainPhase2: "phase",
+	yourEndPhase2: "phase",
+	opponentManaSupplyPhase: "phase",
+	opponentDrawPhase: "phase",
+	opponentMainPhase: "phase",
+	opponentMainPhase1: "phase",
+	opponentBattlePhase: "phase",
+	opponentMainPhase2: "phase",
+	opponentEndPhase2: "phase",
+
 	unit: "cardType",
 	token: "cardType",
 	spell: "cardType",
@@ -54,6 +85,7 @@ let keywordTokenTypes = {
 	standardItem: "cardType",
 	continuousItem: "cardType",
 	enchantItem: "cardType",
+
 	APPLY: "function",
 	COUNT: "function",
 	DAMAGE: "function",
@@ -68,6 +100,7 @@ let keywordTokenTypes = {
 	SELECTPLAYER: "function",
 	SUMMON: "function",
 	TOKENS: "function",
+
 	Angel: "type",
 	Armor: "type",
 	Beast: "type",
@@ -235,7 +268,7 @@ export function tokenize(code) {
 			}
 			case "$": {
 				let variableLength = 1;
-				while(code[pos + variableLength].match(/[a-z]/i)) {
+				while(code[pos + variableLength] && code[pos + variableLength].match(/[a-z]/i)) {
 					variableLength++;
 				}
 				let variableName = code.substr(pos, variableLength);
@@ -246,7 +279,7 @@ export function tokenize(code) {
 			default: {
 				if (code[pos].match(/[a-z]/i)) {
 					let wordLength = 1;
-					while(code[pos + wordLength].match(/[a-z0-9]/i)) {
+					while(code[pos + wordLength] && code[pos + wordLength].match(/[a-z0-9]/i)) {
 						wordLength++;
 					}
 					let word = code.substr(pos, wordLength);
@@ -262,7 +295,7 @@ export function tokenize(code) {
 				}
 				if (code[pos].match(/[0-9]/)) {
 					let numLength = 1;
-					while(code[pos + numLength].match(/[0-9]/i)) {
+					while(code[pos + numLength] && code[pos + numLength].match(/[0-9]/i)) {
 						numLength++;
 					}
 					tokens.push({type: "number", value: parseInt(code.substr(pos, numLength))});
