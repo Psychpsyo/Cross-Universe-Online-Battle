@@ -273,6 +273,14 @@
 			"customFontPlaceholder": null
 		},
 
+		"auto": {
+			"title": null,
+			"passOnOnlyOption": null,
+			"passInDrawPhase": null,
+			"passInEndPhase": null,
+			"passOnStackTwo": null
+		},
+
 		"hotkeys": {
 			"title": null,
 			"resetHotkeys": null,

@@ -273,6 +273,14 @@
 			"customFontPlaceholder": "No custom font selected."
 		},
 
+		"auto": {
+			"title": "Automatic Games",
+			"passOnOnlyOption": "Auto-pass when it is the only real option",
+			"passInDrawPhase": "Pass through draw phase if you have no draw phase specific options",
+			"passInEndPhase": "Pass through end phase if you have no end phase specific options",
+			"passOnStackTwo": "Pass on empty stacks 2+ if you have no trigger abilities or conditional spells"
+		},
+
 		"hotkeys": {
 			"title": "Hotkeys",
 			"resetHotkeys": "Reset Hotkeys",

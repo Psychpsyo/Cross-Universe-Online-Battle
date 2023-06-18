@@ -64,7 +64,7 @@ export function getAutoResponse(requests) {
 			importantRequests++;
 		}
 	}
-	if (importantRequests == 0) {
+	if (importantRequests == 0 && localStorage.getItem("passOnOnlyOption") === "true") {
 		return {type: "pass"};
 	}
 
@@ -72,33 +72,54 @@ export function getAutoResponse(requests) {
 }
 
 function isImportant(request) {
-	if (request.type == "pass") {
-		return false;
+	switch (request.type) {
+		case "pass": {
+			return false;
+		}
+		case "doStandardSummon": {
+			if (request.player.handZone.cards.find(card => card.cardTypes.get().includes("unit"))) {
+				return false;
+			}
+			break;
+		}
+		case "deployItem": {
+			if (request.player.handZone.cards.find(card => card.cardTypes.get().includes("item"))) {
+				return false;
+			}
+			break;
+		}
+		case "castSpell": {
+			if (request.player.handZone.cards.find(card => card.cardTypes.get().includes("spell"))) {
+				return false;
+			}
+			break;
+		}
+		case "doRetire": {
+			if (request.eligibleUnits.length == 1 && request.eligibleUnits[0].zone.type == "partner") {
+				return false;
+			}
+			break;
+		}
+		case "activateOptionalAbility":
+		case "activateFastAbility":
+		case "activateTriggerAbility": {
+			if (request.eligibleAbilities.length == 0) {
+				return false;
+			}
+		}
 	}
-	if (request.type == "doStandardSummon" &&
-		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("unit"))
-	) {
-		return false;
-	}
-	if (request.type == "deployItem" &&
-		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("item"))
-	) {
-		return false;
-	}
-	if (request.type == "castSpell" &&
-		!request.player.handZone.cards.find(card => card.cardTypes.get().includes("spell"))
-	) {
-		return false;
-	}
-	if (request.type == "doRetire" &&
-		request.eligibleUnits.length == 1 &&
-		request.eligibleUnits[0].zone.type == "partner"
-	) {
-		return false;
+
+	if (localStorage.getItem("passOnStackTwo") === "true") {
+		let currentStack = game.currentStack()
+		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
+			return request.type == "activateTriggerAbility";
+		}
 	}
 
 	let currentPhase = game.currentPhase();
-	if (currentPhase instanceof phases.DrawPhase || currentPhase instanceof phases.EndPhase) {
+	if ((currentPhase instanceof phases.DrawPhase && localStorage.getItem("passInDrawPhase") === "true") ||
+		(currentPhase instanceof phases.EndPhase && localStorage.getItem("passInEndPhase") === "true")
+	) {
 		switch (request.type) {
 			case "activateTriggerAbility": {
 				for (let ability of request.eligibleAbilities) {

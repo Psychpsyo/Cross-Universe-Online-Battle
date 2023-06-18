@@ -43,7 +43,7 @@ class Phase {
 }
 
 // Base class for any phase that works with stacks and blocks
-class StackPhase extends Phase {
+export class StackPhase extends Phase {
 	constructor(turn, types) {
 		super(turn, types);
 		this.stacks = [];

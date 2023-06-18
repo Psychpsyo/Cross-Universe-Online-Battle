@@ -96,7 +96,7 @@ export class Game {
 	}
 	currentStack() {
 		let currentPhase = this.currentPhase();
-		return !currentPhase instanceof phases.StackPhase? null : currentPhase.currentStack();
+		return !(currentPhase instanceof phases.StackPhase)? null : currentPhase.currentStack();
 	}
 
 	getFieldCards(player) {

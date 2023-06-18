@@ -110,6 +110,12 @@ function setLanguage(language) {
 		customFontLabel.textContent = locale.settings.accessibility.customFont;
 		customFontInput.placeholder = locale.settings.accessibility.customFontPlaceholder;
 
+		autoHeading.textContent = locale.settings.auto.title;
+		passOnOnlyOptionToggleLabel.textContent = locale.settings.auto.passOnOnlyOption;
+		passInDrawPhaseToggleLabel.textContent = locale.settings.auto.passInDrawPhase;
+		passInEndPhaseToggleLabel.textContent = locale.settings.auto.passInEndPhase;
+		passOnStackTwoToggleLabel.textContent = locale.settings.auto.passOnStackTwo;
+
 		hotkeysHeading.textContent = locale.settings.hotkeys.title;
 		hotkeyShowYourDiscardLabel.textContent = locale.settings.hotkeys.showYourDiscardPile;
 		hotkeyShowOpponentDiscardLabel.textContent = locale.settings.hotkeys.showOpponentDiscardPile;
@@ -150,6 +156,11 @@ menuCardsToggle.checked = localStorage.getItem("mainMenuCards") === "true";
 
 fontSelector.value = localStorage.getItem("font");
 updateCustomFontInputDiv();
+
+passOnOnlyOptionToggle.checked = localStorage.getItem("passOnOnlyOption") === "true";
+passInDrawPhaseToggle.checked = localStorage.getItem("passInDrawPhase") === "true";
+passInEndPhaseToggle.checked = localStorage.getItem("passInEndPhase") === "true";
+passOnStackTwoToggle.checked = localStorage.getItem("passOnStackTwo") === "true";
 
 setLanguage(languageSelector.value);
 validateHotkeys();
@@ -199,6 +210,19 @@ customFontInput.addEventListener("change", function() {
 	fonts.custom = this.value;
 	applyFont("custom");
 	localStorage.setItem("customFont", this.value);
+});
+
+passOnOnlyOptionToggle.addEventListener("change", function() {
+	localStorage.setItem("passOnOnlyOption", this.checked);
+});
+passInDrawPhaseToggle.addEventListener("change", function() {
+	localStorage.setItem("passInDrawPhase", this.checked);
+});
+passInEndPhaseToggle.addEventListener("change", function() {
+	localStorage.setItem("passInEndPhase", this.checked);
+});
+passOnStackTwoToggle.addEventListener("change", function() {
+	localStorage.setItem("passOnStackTwo", this.checked);
 });
 
 // for hotkeys
