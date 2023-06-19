@@ -78,7 +78,7 @@ function isImportant(request) {
 			return false;
 		}
 		case "doStandardSummon": {
-			if (!request.eligibleUnits.length == 0) {
+			if (request.eligibleUnits.length == 0) {
 				return false;
 			}
 			break;
