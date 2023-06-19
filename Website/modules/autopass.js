@@ -78,7 +78,7 @@ function isImportant(request) {
 			return false;
 		}
 		case "doStandardSummon": {
-			if (!request.eligibleUnits.length == 0) {
+			if (request.eligibleUnits.length == 0) {
 				return false;
 			}
 			break;
@@ -155,7 +155,7 @@ function hasPhaseEqualityCondition(node) {
 	if (node instanceof ast.EqualsNode && (node.leftSide instanceof ast.CurrentPhaseNode || node.rightSide instanceof ast.CurrentPhaseNode)) {
 		return true;
 	}
-	for (let childNode of expression.getChildNodes()) {
+	for (let childNode of node.getChildNodes()) {
 		if (hasPhaseEqualityCondition(childNode)) {
 			return true;
 		}

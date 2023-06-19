@@ -8,6 +8,6 @@ defense: 250
 o: optional
 turnLimit: 1
 cost:
-DISCARD(SELECT(1, [from yourHand where cardType = spell]))
+DISCARD(SELECT(1, [from you.hand where cardType = spell]))
 exec:
 DRAW(1)

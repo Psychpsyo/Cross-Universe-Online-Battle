@@ -86,7 +86,7 @@ export class FunctionNode extends AstNode {
 		switch (this.functionName) {
 			case "COUNT": {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
-				return list.length;
+				return [list.length];
 			}
 			case "DAMAGE": {
 				return [new actions.DealDamage(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
@@ -256,6 +256,9 @@ defense: ${defense}`, false));
 			}
 		}
 	}
+	getChildNodes() {
+		return this.parameters.concat([this.player]);
+	}
 }
 
 export class AssignmentNode extends AstNode {
@@ -398,6 +401,7 @@ export class ValueArrayNode extends AstNode {
 	}
 }
 
+// Math and comparison operators with left and right operands
 export class MathNode extends AstNode {
 	constructor(leftSide, rightSide) {
 		super();
@@ -418,7 +422,7 @@ export class PlusNode extends DashMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval(card, player, ability)))[0] + (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] + (await (yield* this.rightSide.eval(card, player, ability)))[0]];
 	}
 }
 export class MinusNode extends DashMathNode {
@@ -426,7 +430,7 @@ export class MinusNode extends DashMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval(card, player, ability)))[0] - (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] - (await (yield* this.rightSide.eval(card, player, ability)))[0]];
 	}
 }
 export class DotMathNode extends MathNode {
@@ -439,15 +443,15 @@ export class MultiplyNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval(card, player, ability)))[0] * (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] * (await (yield* this.rightSide.eval(card, player, ability)))[0]];
 	}
 }
-export class CeilDivideNode extends DotMathNode {
+export class DivideNode extends DotMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return Math.ceil((await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability))))[0];
+		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability)))[0]];
 	}
 }
 export class FloorDivideNode extends DotMathNode {
@@ -455,7 +459,7 @@ export class FloorDivideNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return Math.floor((await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability))))[0];
+		return [Math.floor((await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability)))[0])];
 	}
 }
 export class ComparisonNode extends MathNode {
@@ -529,6 +533,32 @@ export class OrNode extends LogicNode {
 	}
 }
 
+// Unary operators
+export class UnaryMinusNode extends AstNode {
+	constructor(operand) {
+		super();
+		this.operand = operand;
+	}
+	async* eval(card, player, ability) {
+		return (await (yield* this.operand.eval(card, player, ability))).map(value => -value);
+	}
+	getChildNodes() {
+		return [this.operand];
+	}
+}
+export class UnaryNotNode extends AstNode {
+	constructor(operand) {
+		super();
+		this.operand = operand;
+	}
+	async* eval(card, player, ability) {
+		return !(await (yield* this.operand.eval(card, player, ability)));
+	}
+	getChildNodes() {
+		return [this.operand];
+	}
+}
+
 export class BoolNode extends AstNode {
 	constructor(value) {
 		super();
@@ -548,43 +578,88 @@ export class PlayerNode extends AstNode {
 		return this.playerKeyword == "you"? player : player.next();
 	}
 }
-
-export class ZoneNode extends AstNode {
-	constructor(zoneIdentifier) {
+export class LifeNode extends AstNode {
+	constructor(player) {
 		super();
-		this.zoneIdentifier = zoneIdentifier;
+		this.player = player;
 	}
 	async* eval(card, player, ability) {
-		let opponent = player.next();
-		return ({
-			field: [player.unitZone, player.spellItemZone, player.partnerZone, player.next().unitZone, player.next().spellItemZone, player.next().partnerZone],
-			deck: [player.deckZone, opponent.deckZone],
-			discard: [player.discardPile, opponent.discardPile],
-			exile: [player.exileZone, opponent.exileZone],
-			hand: [player.handZone, opponent.handZone],
-			unitZone: [player.unitZone, opponent.unitZone],
-			spellItemZone: [player.spellItemZone, opponent.spellItemZone],
-			partnerZone: [player.partnerZone, opponent.partnerZone],
-			yourField: [player.unitZone, player.spellItemZone, player.partnerZone],
-			yourDeck: [player.deckZone],
-			yourDiscard: [player.discardPile],
-			yourExile: [player.exileZone],
-			yourHand: [player.handZone],
-			yourUnitZone: [player.unitZone],
-			yourSpellItemZone: [player.spellItemZone],
-			yourPartnerZone: [player.partnerZone],
-			opponentField: [opponent.unitZone, opponent.spellItemZone, opponent.partnerZone],
-			opponentDeck: [opponent.deckZone],
-			opponentDiscard: [opponent.discardPile],
-			opponentExile: [opponent.exileZone],
-			opponentHand: [opponent.handZone],
-			opponentUnitZone: [opponent.unitZone],
-			opponentSpellItemZone: [opponent.spellItemZone],
-			opponentPartnerZone: [opponent.partnerZone]
-		})[this.zoneIdentifier];
+		return [(await (yield* this.player.eval(card, player, ability))).life];
+	}
+}
+export class ManaNode extends AstNode {
+	constructor(player) {
+		super();
+		this.player = player;
+	}
+	async* eval(card, player, ability) {
+		return [(await (yield* this.player.eval(card, player, ability))).mana];
 	}
 }
 
+export class ZoneNode extends AstNode {
+	constructor(zoneIdentifier, player) {
+		super();
+		this.zoneIdentifier = zoneIdentifier;
+		this.player = player;
+	}
+	async* eval(card, player, ability) {
+		if (this.player) {
+			player = await (yield* this.player.eval(card, player, ability));
+			return ({
+				field: [player.unitZone, player.spellItemZone, player.partnerZone],
+				deck: [player.deckZone],
+				discard: [player.discardPile],
+				exile: [player.exileZone],
+				hand: [player.handZone],
+				unitZone: [player.unitZone],
+				spellItemZone: [player.spellItemZone],
+				partnerZone: [player.partnerZone]
+			})[this.zoneIdentifier];
+		}
+		return ({
+			field: [player.unitZone, player.spellItemZone, player.partnerZone, player.next().unitZone, player.next().spellItemZone, player.next().partnerZone],
+			deck: [player.deckZone, player.next().deckZone],
+			discard: [player.discardPile, player.next().discardPile],
+			exile: [player.exileZone, player.next().exileZone],
+			hand: [player.handZone, player.next().handZone],
+			unitZone: [player.unitZone, player.next().unitZone],
+			spellItemZone: [player.spellItemZone, player.next().spellItemZone],
+			partnerZone: [player.partnerZone, player.next().partnerZone]
+		})[this.zoneIdentifier];
+	}
+	getChildNodes() {
+		return this.player? [this.player] : [];
+	}
+}
+
+export class PhaseNode extends AstNode {
+	constructor(player, phaseIndicator) {
+		super();
+		this.player = player;
+		this.phaseIndicator = phaseIndicator;
+	}
+	async* eval(card, player, ability) {
+		let phaseAfterPrefix = this.phaseIndicator[0].toUpperCase() + this.phaseIndicator.slice(1);
+		if (this.player) {
+			let prefix = player == await (yield* this.player.eval(card, player, ability))? "your" : "opponent";
+			return [prefix + phaseAfterPrefix];
+		}
+		return ["your" + phaseAfterPrefix, "opponent" + phaseAfterPrefix];
+	}
+}
+export class TurnNode extends AstNode {
+	constructor(player) {
+		super();
+		this.player = player;
+	}
+	async* eval(card, player, ability) {
+		if (player == await (yield* this.player.eval(card, player, ability))) {
+			return ["yourTurn"];
+		}
+		return ["opponentTurn"];
+	}
+}
 export class CurrentPhaseNode extends AstNode {
 	async* eval(card, player, ability) {
 		let phaseTypes = [...player.game.currentPhase().types];
@@ -595,7 +670,6 @@ export class CurrentPhaseNode extends AstNode {
 		return phaseTypes;
 	}
 }
-
 export class CurrentTurnNode extends AstNode {
 	async* eval(card, player, ability) {
 		return [player == game.currentTurn().player? "yourTurn" : "opponentTurn"];

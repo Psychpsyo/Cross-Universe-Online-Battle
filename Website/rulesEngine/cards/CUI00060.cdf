@@ -11,4 +11,4 @@ cost:
 LIFE(-200)
 exec:
 DISCARD(thisCard)
-SUMMON(SELECT(1, [from yourDiscard where cardType = unit]), yourUnitZone, yes)
+SUMMON(SELECT(1, [from you.discard where cardType = unit]), you.unitZone, yes)

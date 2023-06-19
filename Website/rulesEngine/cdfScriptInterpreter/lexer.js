@@ -11,6 +11,10 @@ let keywordTokenTypes = {
 	you: "player",
 	opponent: "player",
 
+	life: "playerLife",
+	mana: "playerMana",
+	turn: "turn",
+
 	name: "cardProperty",
 	baseName: "cardProperty",
 	level: "cardProperty",
@@ -33,25 +37,6 @@ let keywordTokenTypes = {
 	unitZone: "zone",
 	spellItemZone: "zone",
 	partnerZone: "zone",
-	yourField: "zone",
-	yourDeck: "zone",
-	yourDiscard: "zone",
-	yourExile: "zone",
-	yourHand: "zone",
-	yourUnitZone: "zone",
-	yourSpellItemZone: "zone",
-	yourPartnerZone: "zone",
-	opponentField: "zone",
-	opponentDeck: "zone",
-	opponentDiscard: "zone",
-	opponentExile: "zone",
-	opponentHand: "zone",
-	opponentUnitZone: "zone",
-	opponentSpellItemZone: "zone",
-	opponentPartnerZone: "zone",
-
-	yourTurn: "turn",
-	opponentTurn: "turn",
 
 	manaSupplyPhase: "phase",
 	drawPhase: "phase",
@@ -60,20 +45,6 @@ let keywordTokenTypes = {
 	battlePhase: "phase",
 	mainPhase2: "phase",
 	endPhase2: "phase",
-	yourManaSupplyPhase: "phase",
-	yourDrawPhase: "phase",
-	yourMainPhase: "phase",
-	yourMainPhase1: "phase",
-	yourBattlePhase: "phase",
-	yourMainPhase2: "phase",
-	yourEndPhase2: "phase",
-	opponentManaSupplyPhase: "phase",
-	opponentDrawPhase: "phase",
-	opponentMainPhase: "phase",
-	opponentMainPhase1: "phase",
-	opponentBattlePhase: "phase",
-	opponentMainPhase2: "phase",
-	opponentEndPhase2: "phase",
 
 	unit: "cardType",
 	token: "cardType",
@@ -232,7 +203,7 @@ export function tokenize(code) {
 				break;
 			}
 			case "/": {
-				tokens.push({type: "ceilDivide"});
+				tokens.push({type: "divide"});
 				pos++;
 				break;
 			}
@@ -251,7 +222,7 @@ export function tokenize(code) {
 					tokens.push({type: "notEquals"});
 					pos++;
 				} else {
-					throw new Error("Generic not operator not currently implemented.");
+					tokens.push({type: "bang"});
 				}
 				pos++;
 				break;

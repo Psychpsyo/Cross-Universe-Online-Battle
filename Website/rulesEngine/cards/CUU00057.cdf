@@ -8,12 +8,12 @@ defense: 200
 o: optional
 turnLimit: 1
 cost:
-DISCARD(SELECT(1, [from yourField]))
+DISCARD(SELECT(1, [from you.field]))
 exec:
 opponent.DAMAGE(100)
 o: optional
 turnLimit: 1
 cost:
-DISCARD(SELECT(1, [from yourField]))
+DISCARD(SELECT(1, [from you.field]))
 exec:
 DESTROY(SELECT(1, [from field where cardType = spell | cardType = item]))

@@ -102,7 +102,7 @@ export class StackPhase extends Phase {
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.FastAbility &&
 					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
-					(ability.condition == null || await (yield* ability.condition.eval(card, player, ability)))
+					(cardAbilities[i].condition == null || await (yield* cardAbilities[i].condition.eval(card, player, cardAbilities[i])))
 				) {
 					eligibleAbilities.push({card: card, index: i});
 				}

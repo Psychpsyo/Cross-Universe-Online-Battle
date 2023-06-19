@@ -8,4 +8,4 @@ defense: 0
 o: optional
 turnLimit: 1
 exec:
-SUMMON(SELECT(1, [from yourHand where cardType = unit & types = Wind]), yourField, yes)
+SUMMON(SELECT(1, [from you.hand where cardType = unit & types = Wind]), you.field, yes)

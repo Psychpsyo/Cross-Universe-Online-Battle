@@ -8,7 +8,7 @@ defense: 650
 o: optional
 turnLimit: 1
 cost:
-DISCARD(SELECT(1, [from yourHand where types = Machine]))
+DISCARD(SELECT(1, [from you.hand where types = Machine]))
 exec:
 DESTROY(SELECT(1, [from field where cardType = spell | cardType = item]))
 opponent.DAMAGE(100)
