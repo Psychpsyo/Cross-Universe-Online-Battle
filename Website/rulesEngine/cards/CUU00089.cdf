@@ -7,4 +7,4 @@ attack: 0
 defense: 200
 o: optional
 turnLimit: 1
-SUMMON(TOKENS(1, CUT00002, CUT00002, 1, Ice, 0, 0), yourUnitZone, yes)
+SUMMON(TOKENS(1, CUT00002, CUT00002, 1, Ice, 0, 0), you.unitZone, yes)

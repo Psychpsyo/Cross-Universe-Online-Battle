@@ -155,7 +155,7 @@ function hasPhaseEqualityCondition(node) {
 	if (node instanceof ast.EqualsNode && (node.leftSide instanceof ast.CurrentPhaseNode || node.rightSide instanceof ast.CurrentPhaseNode)) {
 		return true;
 	}
-	for (let childNode of expression.getChildNodes()) {
+	for (let childNode of node.getChildNodes()) {
 		if (hasPhaseEqualityCondition(childNode)) {
 			return true;
 		}

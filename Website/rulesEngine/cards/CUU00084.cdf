@@ -8,6 +8,6 @@ defense: 100
 o: optional
 turnLimit: 1
 cost:
-DISCARD(SELECT(1, [from yourHand]))
+DISCARD(SELECT(1, [from you.hand]))
 exec:
 LIFE(200)

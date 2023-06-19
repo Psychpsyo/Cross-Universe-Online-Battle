@@ -6,6 +6,6 @@ types: Fire
 o: fast
 turnLimit: 1
 cost:
-EXILE(SELECT(1, [from yourDiscard where types = Fire]))
+EXILE(SELECT(1, [from you.discard where types = Fire]))
 exec:
-EXILE(SELECT(1, [from opponentDiscard]))
+EXILE(SELECT(1, [from opponent.discard]))

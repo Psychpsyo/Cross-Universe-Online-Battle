@@ -7,4 +7,4 @@ o: cast
 cost:
 $unit = SELECT(1, [from discard where cardType = unit])
 exec:
-SUMMON($unit, yourField, yes)
+SUMMON($unit, you.field, yes)

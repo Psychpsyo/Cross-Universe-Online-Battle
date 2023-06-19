@@ -76,16 +76,16 @@ function parseFunction() {
 		}
 		case "player": {
 			player = parsePlayer();
-			if (tokens[pos].type != "dotOperator") {
-				throw new ScriptParserError("Expected 'dotOperator' token after 'player' token while parsing function, got '" + tokens[pos].type + "' instead.");
+			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "function") {
+				throw new ScriptParserError("Failed to parse function.");
 			}
 			pos++;
 			break;
 		}
 		case "variable": {
 			player = parseVariable();
-			if (tokens[pos].type != "dotOperator") {
-				throw new ScriptParserError("Expected 'dotOperator' token after 'variable' token while parsing function, got '" + tokens[pos].type + "' instead.");
+			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "function") {
+				throw new ScriptParserError("Failed to parse function.");
 			}
 			pos++;
 			break;
@@ -94,6 +94,11 @@ function parseFunction() {
 			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' while trying to parse a function.");
 		}
 	}
+
+	return parseFunctionToken(player);
+}
+
+function parseFunctionToken(player) {
 	let functionName = tokens[pos].value;
 	pos++;
 
@@ -138,7 +143,7 @@ function parseExpression() {
 		pos++;
 	}
 	let expression = [];
-	do {
+	while (tokens[pos] && !["rightParen", "rightBracket", "newLine", "separator"].includes(tokens[pos].type)) {
 		expression.push(parseValue());
 		if (tokens[pos]) {
 			switch (tokens[pos].type) {
@@ -154,8 +159,8 @@ function parseExpression() {
 					expression.push(new ast.MultiplyNode(null, null));
 					break;
 				}
-				case "ceilDivide": {
-					expression.push(new ast.CeilDivideNode(null, null));
+				case "divide": {
+					expression.push(new ast.DivideNode(null, null));
 					break;
 				}
 				case "floorDivide": {
@@ -192,7 +197,11 @@ function parseExpression() {
 			}
 			pos++;
 		}
-	} while (tokens[pos] && !["rightParen", "rightBracket", "newLine", "separator"].includes(tokens[pos].type));
+	}
+
+	if (expression.length == 0) {
+		return null;
+	}
 
 	if (insideParens) {
 		if (tokens[pos].type == "rightParen") {
@@ -213,6 +222,7 @@ function parseExpression() {
 		}
 	}
 	if (expression.length > 1) {
+		console.log(expression);
 		throw new ScriptParserError("Failed to fully consolidate expression.");
 	}
 	return expression[0];
@@ -220,26 +230,31 @@ function parseExpression() {
 
 function parseValue() {
 	switch (tokens[pos].type) {
-		case "minus":
 		case "number": {
 			return parseNumber();
 		}
+		case "minus": {
+			pos++;
+			return new ast.UnaryMinusNode(parseValue());
+		}
+		case "bang": {
+			pos++;
+			return new ast.UnaryNotNode(parseValue());
+		}
 		case "player": {
-			if (tokens[pos+1].type == "dotOperator") {
-				return parseFunction();
-			} else {
-				return parsePlayer();
+			let player = parsePlayer();
+			if (tokens[pos].type == "dotOperator") {
+				pos++;
+				return parsePlayerDotAccess(player);
 			}
+			return player;
 		}
 		case "leftBracket": {
 			if (tokens[pos+1].type == "from") {
 				let cardMatcher = parseCardMatcher();
 				if (tokens[pos].type == "dotOperator") {
 					pos++;
-					if (tokens[pos].type != "cardProperty") {
-						throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access card property of a card match statement [from...where...].");
-					}
-					return parseCardProperty(cardMatcher);
+					return parseCardDotAccess(cardMatcher);
 				}
 				return cardMatcher;
 			}
@@ -249,11 +264,14 @@ function parseValue() {
 			return parseFunction();
 		}
 		case "cardType":
-		case "phase":
-		case "turn":
 		case "cardId":
 		case "type": {
 			return parseValueArray();
+		}
+		case "phase": {
+			let node = new ast.PhaseNode(null, tokens[pos].value);
+			pos++;
+			return node;
 		}
 		case "zone": {
 			return parseZone();
@@ -265,22 +283,34 @@ function parseValue() {
 			return parseExpression();
 		}
 		case "variable": {
-			if (tokens[pos+1].type == "dotOperator") {
-				return parseFunction();
-			} else {
-				return parseVariable();
+			let variable = parseVariable();
+			if (tokens[pos].type == "dotOperator") {
+				pos++;
+				switch (tokens[pos].type) {
+					case "phase":
+					case "turn":
+					case "function":
+					case "zone": {
+						return parsePlayerDotAccess(variable);
+					}
+					case "cardProperty": {
+						return parseCardDotAccess(variable);
+					}
+					default: {
+						throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access property of a variable.");
+					}
+				}
 			}
+			return variable;
 		}
 		case "thisCard": {
+			let card = new ast.ThisCardNode();
 			pos++;
 			if (tokens[pos].type == "dotOperator") {
 				pos++;
-				if (tokens[pos].type != "cardProperty") {
-					throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access thisCard property.");
-				}
-				return parseCardProperty(new ast.ThisCardNode());
+				return parseCardDotAccess(card);
 			}
-			return new ast.ThisCardNode();
+			return card;
 		}
 		case "cardProperty": {
 			return parseCardProperty(new ast.ImplicitCardNode());
@@ -299,6 +329,43 @@ function parseValue() {
 	}
 }
 
+function parsePlayerDotAccess(player) {
+	switch (tokens[pos].type) {
+		case "function": {
+			return parseFunctionToken(player);
+		}
+		case "zone": {
+			return parseZoneToken(player);
+		}
+		case "turn": {
+			pos++;
+			return new ast.TurnNode(player);
+		}
+		case "phase": {
+			let node = new ast.PhaseNode(player, tokens[pos].value);
+			pos++;
+			return node;
+		}
+		case "playerLife": {
+			let node = new ast.LifeNode(player);
+			pos++;
+			return node;
+		}
+		case "playerMana": {
+			let node = new ast.ManaNode(player);
+			pos++;
+			return node;
+		}
+	}
+	throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access player value.");
+}
+function parseCardDotAccess(card) {
+	if (tokens[pos].type != "cardProperty") {
+		throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access card property.");
+	}
+	return parseCardProperty(card);
+}
+
 function parseCardProperty(cardsNode) {
 	let node = new ast.CardPropertyNode(cardsNode, tokens[pos].value);
 	pos++;
@@ -307,6 +374,11 @@ function parseCardProperty(cardsNode) {
 
 function parseVariable() {
 	let node = new ast.VariableNode(tokens[pos].value);
+	pos++;
+	return node;
+}
+function parsePlayer() {
+	let node = new ast.PlayerNode(tokens[pos].value);
 	pos++;
 	return node;
 }
@@ -328,12 +400,6 @@ function parseNumber() {
 
 function parseBool() {
 	let node = new ast.BoolNode(tokens[pos].value);
-	pos++;
-	return node;
-}
-
-function parsePlayer() {
-	let node = new ast.PlayerNode(tokens[pos].value);
 	pos++;
 	return node;
 }
@@ -362,7 +428,37 @@ function parseList(type) {
 }
 
 function parseZone() {
-	let node = new ast.ZoneNode(tokens[pos].value);
+	let player = null;
+	switch (tokens[pos].type) {
+		case "zone": {
+			// null player will be interpreted as both players
+			break;
+		}
+		case "player": {
+			player = parsePlayer();
+			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "zone") {
+				throw new ScriptParserError("Failed to parse zone.");
+			}
+			pos++;
+			break;
+		}
+		case "variable": {
+			player = parseVariable();
+			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "zone") {
+				throw new ScriptParserError("Failed to parse zone.");
+			}
+			pos++;
+			break;
+		}
+		default: {
+			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' while trying to parse a zone.");
+		}
+	}
+
+	return parseZoneToken(player);
+}
+function parseZoneToken(player) {
+	let node = new ast.ZoneNode(tokens[pos].value, player);
 	pos++;
 	return node;
 }
@@ -372,9 +468,6 @@ function parseCardMatcher() {
 	pos++; // just skip over the 'from' token
 	let zones = [];
 	while (tokens[pos].type != "where" && tokens[pos].type != "rightBracket") {
-		if (tokens[pos].type != "zone") {
-			throw new ScriptParserError("Expected a 'zone' token in card matcher syntax. Got '" + tokens[pos].type + "' instead.");
-		}
 		zones.push(parseZone());
 		if (tokens[pos].type == "separator") {
 			pos++;

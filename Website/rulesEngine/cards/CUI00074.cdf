@@ -5,7 +5,7 @@ level: 1
 types: Dark, Fire
 o: deploy
 cost:
-DISCARD(SELECT(1, [from yourHand where types = Dark]))
+DISCARD(SELECT(1, [from you.hand where types = Dark & cardType = unit]))
 exec:
 LIFE(300)
 DRAW(1)

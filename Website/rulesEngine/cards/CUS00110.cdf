@@ -7,4 +7,4 @@ o: cast
 cost:
 LIFE(-800)
 exec:
-SUMMON(SELECT(1, [from yourHand where level < 8 & types != Light]), yourField, no)
+SUMMON(SELECT(1, [from you.hand where level < 8 & types != Light]), you.field, no)
