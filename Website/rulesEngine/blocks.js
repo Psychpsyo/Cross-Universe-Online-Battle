@@ -25,7 +25,7 @@ class Block {
 
 	async* runCost() {
 		if (!this.costTimingGenerator) {
-			return;
+			return true;
 		}
 		let generatorOutput = await this.costTimingGenerator.next();
 		while (!generatorOutput.done) {
