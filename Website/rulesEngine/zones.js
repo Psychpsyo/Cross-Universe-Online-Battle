@@ -32,6 +32,7 @@ export class Zone {
 				let retire = stacks[stacks.length - 1].blocks[0];
 				if (retire.units.includes(card)) {
 					retire.units.splice(retire.units.indexOf(card), 1);
+					card.isRetiring = false;
 				}
 			}
 		}
@@ -39,10 +40,12 @@ export class Zone {
 		if (this.player.game.currentAttackDeclaration) {
 			if (this.player.game.currentAttackDeclaration.target == card) {
 				this.player.game.currentAttackDeclaration.target = null;
+				card.isAttackTarget = false;
 			}
 			let attackerIndex = this.player.game.currentAttackDeclaration.attackers.indexOf(card);
 			if (attackerIndex != -1) {
 				this.player.game.currentAttackDeclaration.attackers.splice(attackerIndex, 1);
+				card.isAttacking = false;
 			}
 		}
 		return index;

@@ -12,6 +12,8 @@ export class Action {
 	// After run() finishes, this class should only hold references to card snapshots, not actual cards so it serves as a record of what it did
 	* run() {}
 
+	undo() {}
+
 	isImpossible(timing) {
 		return false;
 	}
@@ -35,6 +37,11 @@ export class ChangeMana extends Action {
 		return events.createManaChangedEvent(this.player);
 	}
 
+	undo() {
+		this.player.mana -= this.amount;
+		return events.createManaChangedEvent(this.player);
+	}
+
 	isImpossible(timing) {
 		return this.player.mana == 0 && this.amount < 0;
 	}
@@ -52,6 +59,11 @@ export class ChangeLife extends Action {
 
 	* run() {
 		this.player.life += this.amount;
+		return events.createLifeChangedEvent(this.player);
+	}
+
+	undo() {
+		this.player.life -= this.amount;
 		return events.createLifeChangedEvent(this.player);
 	}
 
@@ -84,6 +96,16 @@ export class Draw extends Action {
 		}
 		return events.createCardsDrawnEvent(this.player, this.amount);
 	}
+
+	undo() {
+		let movedCards = [];
+		for (let i = this.drawnCards.length - 1; i >= 0; i++) {
+			let card = this.drawnCards[i];
+			movedCards.push({fromZone: card.cardRef.zone, fromIndex: card.cardRef.index, toZone: card.zone, toIndex: card.index});
+			card.restore();
+		}
+		return events.createCardsMovedEvent(movedCards);
+	}
 }
 
 // places a card on the field without moving it there yet.
@@ -106,6 +128,11 @@ export class Place extends Action {
 		this.zone.place(this.card, this.targetIndex);
 		this.card = this.card.snapshot();
 		return cardPlacedEvent;
+	}
+
+	undo() {
+		this.zone.placed[index] = null;
+		this.card.cardRef.zone = this.card.zone;
 	}
 
 	isImpossible(timing) {
@@ -141,6 +168,10 @@ export class Summon extends Action {
 		return summonEvent;
 	}
 
+	undo() {
+		this.zone.remove(this.unit.cardRef, this.zoneIndex);
+	}
+
 	isImpossible(timing) {
 		let slotCard = this.zone.get(this.zoneIndex);
 		return slotCard != null && slotCard != this.unit;
@@ -164,6 +195,10 @@ export class Deploy extends Action {
 		return deployEvent;
 	}
 
+	undo() {
+		this.zone.remove(this.item.cardRef, this.zoneIndex);
+	}
+
 	isImpossible(timing) {
 		let slotCard = this.zone.get(this.zoneIndex);
 		return slotCard != null && slotCard != this.item;
@@ -180,11 +215,15 @@ export class Cast extends Action {
 	}
 
 	* run() {
-		let deployEvent = events.createCardCastEvent(this.player, this.spell.zone, this.spell.index, this.zone, this.zoneIndex);
+		let castEvent = events.createCardCastEvent(this.player, this.spell.zone, this.spell.index, this.zone, this.zoneIndex);
 		this.spell.hidden = false;
 		this.zone.add(this.spell, this.zoneIndex);
 		this.spell = this.spell.snapshot();
-		return deployEvent;
+		return castEvent;
+	}
+
+	undo() {
+		this.zone.remove(this.spell.cardRef, this.zoneIndex);
 	}
 
 	isImpossible(timing) {
@@ -227,6 +266,10 @@ export class EstablishAttackDeclaration extends Action {
 		this.attackTarget = this.attackTarget.snapshot();
 		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget.zone, this.attackTarget.index);
 	}
+
+	undo() {
+		// This actually does not do anything noteworthy. Huh.
+	}
 }
 
 export class DealDamage extends Action {
@@ -234,15 +277,22 @@ export class DealDamage extends Action {
 		super();
 		this.player = player;
 		this.amount = amount;
+		this.oldAmount = null;
 	}
 
 	* run() {
+		this.oldAmount = this.player.life;
 		this.player.life = Math.max(this.player.life - this.amount, 0);
 		if (this.player.life == 0) {
 			this.player.lost = true;
 			this.player.loseReason = "lifeZero";
 		}
 		return events.createDamageDealtEvent(this.player, this.amount);
+	}
+
+	undo() {
+		this.player.life = this.oldAmount;
+		return events.createLifeChangedEvent(this.player);
 	}
 }
 
@@ -260,6 +310,14 @@ export class Discard extends Action {
 		if (this.timing.block?.type == "retire") {
 			this.timing.block.stack.phase.turn.hasRetired.push(this.card);
 		}
+		return event;
+	}
+
+	undo() {
+		let event = events.createCardsMovedEvent([
+			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
+		]);
+		this.card.restore();
 		return event;
 	}
 
@@ -285,6 +343,14 @@ export class Destroy extends Action {
 		return event;
 	}
 
+	undo() {
+		let event = events.createCardsMovedEvent([
+			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
+		]);
+		this.card.restore();
+		return event;
+	}
+
 	isImpossible(timing) {
 		if (this.card.zone?.type == "partner") {
 			return true;
@@ -304,6 +370,14 @@ export class Exile extends Action {
 		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone, this.card);
 		this.card.owner.exileZone.add(this.card.cardRef, this.card.owner.exileZone.cards.length);
 		this.card.cardRef.hidden = false;
+		return event;
+	}
+
+	undo() {
+		let event = events.createCardsMovedEvent([
+			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
+		]);
+		this.card.restore();
 		return event;
 	}
 

@@ -23,7 +23,7 @@ class Block {
 		this.executionTimings = [];
 	}
 
-	async* prepareCostTimings() {
+	async* runCost() {
 		if (!this.costTimingGenerator) {
 			return;
 		}
@@ -41,15 +41,16 @@ class Block {
 			this.costTimings.push(new Timing(this.stack.phase.turn.game, actionList, this));
 			break;
 		}
-	}
-	async* runCost() {
-		yield* this.prepareCostTimings();
+
 		let costTimingSuccess = true;
 		for (let costTiming of this.costTimings) {
 			yield* costTiming.run();
 			if (!costTiming.successful) {
 				costTimingSuccess = false;
 			}
+		}
+		if (!costTimingSuccess) {
+			yield* this.undoCost();
 		}
 		return costTimingSuccess;
 	}
@@ -69,6 +70,18 @@ class Block {
 				this.executionTimings.push(timing);
 			}
 			generatorOutput = await this.timingGenerator.next(timing);
+		}
+	}
+
+	* undoCost() {
+		for (let i = this.costTimings.length - 1; i >= 0; i--) {
+			yield* this.costTimings[i].undo();
+		}
+	}
+
+	* undoExecution() {
+		for (let i = this.executionTimings.length - 1; i >= 0; i--) {
+			yield* this.executionTimings[i].undo();
 		}
 	}
 
@@ -150,6 +163,9 @@ export class Retire extends Block {
 	constructor(stack, player, units) {
 		super(stack, player, retireTimingGenerator(player, units));
 		this.units = units;
+		for (let unit of units) {
+			unit.isRetiring = true;
+		}
 	}
 
 	async* runCost() {
@@ -180,7 +196,7 @@ export class AttackDeclaration extends Block {
 }
 
 async function* fightTimingGenerator(attackDeclaration) {
-	attackDeclaration.game.currentAttackDeclaration = null;
+	attackDeclaration.clear();
 	if (!attackDeclaration.isValid()) {
 		return;
 	}
@@ -260,27 +276,16 @@ export class AbilityActivation extends Block {
 	}
 
 	async* runCost() {
-		if (this.ability.cost && !(await (yield* this.ability.cost.hasAllTargets(this.card, this.player, this.ability)))) {
+		if (!(await (yield* super.runCost()))) {
 			return false;
 		}
-		if (this.costTimingGenerator) {
-			yield* this.prepareCostTimings();
-		}
-		// Check available prerequisite after the player has made at-activation-time choices but before they paid the cost.
-		// Required for abilities similar to that of Magic Synthesis to correctly be rejected if the wrong decisions were made.
-		if (!(await (yield* this.ability.exec.hasAllTargets(this.card, this.player, this.ability)))) {
+
+		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
+		if (this.ability.exec && !(await (yield* this.ability.exec.hasAllTargets(this.card, this.player, this.ability)))) {
+			yield* this.undoCost();
 			return false;
 		}
-		let costTimingSuccess = true;
-		for (let costTiming of this.costTimings) {
-			yield* costTiming.run();
-			if (!costTiming.successful) {
-				costTimingSuccess = false;
-			}
-		}
-		if (!costTimingSuccess) {
-			return false;
-		}
+
 		this.ability.activationCount++;
 		this.card = this.card.snapshot();
 		return true;
@@ -348,28 +353,18 @@ export class DeployItem extends Block {
 
 	async* runCost() {
 		this.card.zone.remove(this.card);
-		if (this.deployAbility && this.deployAbility.cost && !(await (yield* this.deployAbility.cost.hasAllTargets(this.card, this.player, this.deployAbility)))) {
+		if (!(await (yield* super.runCost()))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		yield* this.prepareCostTimings();
-		// Check available prerequisite after the player has made at-deploying-time choices but before they paid the cost.
-		// Required for cards similar to Magic Synthesis to correctly be rejected if the wrong decisions were made.
-		if (this.deployAbility && !(await (yield* this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility)))) {
+
+		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
+		if (this.deployAbility && this.deployAbility.exec && !(await (yield* this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility)))) {
+			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		let costTimingSuccess = true;
-		for (let costTiming of this.costTimings) {
-			yield* costTiming.run();
-			if (!costTiming.successful) {
-				costTimingSuccess = false;
-			}
-		}
-		if (!costTimingSuccess) {
-			this.card.zone.add(this.card, this.card.index);
-			return false;
-		}
+
 		this.card = this.card.snapshot();
 		this.deployAction.zoneIndex = this.getCostActions().find(action => action instanceof actions.Place).targetIndex;
 		return true;
@@ -416,28 +411,18 @@ export class CastSpell extends Block {
 
 	async* runCost() {
 		this.card.zone.remove(this.card);
-		if (this.castAbility && this.castAbility.cost && !(await (yield* this.castAbility.cost.hasAllTargets(this.card, this.player, this.castAbility)))) {
+		if (!(await (yield* super.runCost()))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		yield* this.prepareCostTimings();
-		// Check available prerequisite after the player has made at-casting-time choices but before they paid the cost.
-		// Required for cards like Magic Synthesis to correctly be rejected if the wrong casting decisions were made.
-		if (this.castAbility && !(await (yield* this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility)))) {
+
+		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
+		if (this.castAbility && this.castAbility.exec && !(await (yield* this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility)))) {
+			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		let costTimingSuccess = true;
-		for (let costTiming of this.costTimings) {
-			yield* costTiming.run();
-			if (!costTiming.successful) {
-				costTimingSuccess = false;
-			}
-		}
-		if (!costTimingSuccess) {
-			this.card.zone.add(this.card, this.card.index);
-			return false;
-		}
+
 		this.card = this.card.snapshot();
 		this.castAction.zoneIndex = this.getCostActions().find(action => action instanceof actions.Place).targetIndex;
 		return true;
