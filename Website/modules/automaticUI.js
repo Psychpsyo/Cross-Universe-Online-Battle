@@ -117,7 +117,7 @@ export function newBlock(block) {
 	} else if (block instanceof blocks.AttackDeclaration) {
 		card = block.attackers[0];
 	} else if (block instanceof blocks.Fight) {
-		card = null; // TODO: figure this out
+		card = game.currentAttackDeclaration.target;
 	} else {
 		card = block.card;
 	}
