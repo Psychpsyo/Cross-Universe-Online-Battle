@@ -71,7 +71,7 @@ export class Timing {
 
 		if (this.costCompletions.length > 0) {
 			// empty costs count as successful completion
-			if (this.actions.length == 0) {
+			if (this.actions.length == 0 && this.costCompletions.includes(true)) {
 				game.nextTimingIndex++;
 				this.successful = true;
 				return;
