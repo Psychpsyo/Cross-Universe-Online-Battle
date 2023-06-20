@@ -23,7 +23,7 @@
 	width: 100%;
 	height: 70vh;
 	font-size: 2.5vh;
-	
+
 	user-select: none;
 }
 
@@ -34,7 +34,7 @@
 	width: 100%;
 	height: 100%;
 	filter: var(--theme-field-filter);
-	
+
 	background-image: url("/images/fieldUnlabeled.jpg");
 	background-size: contain;
 	background-repeat: no-repeat;
@@ -44,14 +44,14 @@
 #cardDetails {
 	height: 65vh;
 	aspect-ratio: 813 / 1185;
-	
+
 	overflow: visible;
 	background: none;
 	padding: 0;
 	border: 0;
 	color: var(--theme-text-color);
 	text-align: left;
-	
+
 	position: absolute;
 	top: 50%;
 	--side-distance: -50vh;
@@ -59,7 +59,7 @@
 	left: unset;
 	transform: translateY(-50%);
 	transition: right 0.2s ease-out;
-	
+
 	z-index: 500;
 }
 dialog #cardDetails {
@@ -81,10 +81,10 @@ dialog #cardDetails {
 	right: 0;
 	height: 2em;
 	width: 5em;
-	
+
 	display: flex;
 	align-items: center;
-	
+
 	background-color: var(--theme-dialog-background-color);
 	box-sizing: border-box;
 	border-bottom: none;
@@ -111,12 +111,12 @@ dialog #cardDetails {
 
 #cardDetailsText {
 	height: 100%;
-	
+
 	background-color: var(--theme-dialog-background-color);
 	box-sizing: border-box;
 	border: 2px var(--theme-border-color) solid;
 	border-radius: 1em 0 1em 1em;
-	
+
 	overflow-y: auto;
 }
 .leftField #cardDetailsText {
@@ -161,7 +161,7 @@ dialog #cardDetails {
 	height: 100vh;
 	box-sizing: border-box;
 	z-index: 1;
-	
+
 	border-right: 2px var(--theme-border-color) solid;
 	background-color: var(--theme-shadow);
 }
@@ -206,7 +206,7 @@ dialog #cardDetails {
 #playerGrids {
 	display: flex;
 	align-items: center;
-	
+
 	flex-direction: column;
 	height: 100%;
 	justify-content: space-between;
@@ -216,7 +216,7 @@ dialog #cardDetails {
 	width: 84.75vh; /* this has no basis whatsoever. It just lines up nicely with the official background image */
 	height: 32vh;
 	display: grid;
-	
+
 	grid-template-rows: 1fr 1fr;
 	grid-template-columns: repeat(7, 1fr);
 }
@@ -334,7 +334,7 @@ img[src$="cardBackFrameP1.png"] {
 	max-width: 12vh;
 	transition: transform 0.3s ease-out;
 	transform: translate(-50%, -50%);
-	
+
 	pointer-events: none;
 	user-select: none;
 	z-index: 90;
@@ -360,12 +360,12 @@ img[src$="cardBackFrameP1.png"] {
 	transform: translateX(-50%);
 	width: 95%;
 	z-index: 1;
-	
+
 	border-radius: 1em;
-	
+
 	transition-property: background;
 	transition-duration: 0.15s;
-	
+
 	--card-count: 0;
 }
 
@@ -374,7 +374,7 @@ img[src$="cardBackFrameP1.png"] {
 	width: 100vw / var(--card-count);
 	user-select: none;
 	margin-right: min(((var(--card-count) * (813 / 1185) * 25vh - (100% - 1.5em)) / (var(--card-count) - 1)) * -1, .1vw); /* (cardAmount * cardWidth - handMax) / (cardAmount - 1) */
-	
+
 	transition-property: transform;
 	transition-duration: .1s;
 }
@@ -453,7 +453,7 @@ label[for="fileSelectDeckLoader"] {
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	
+
 	cursor: pointer;
 }
 
@@ -489,16 +489,16 @@ label[for="fileSelectDeckLoader"] {
 	background-color: #2a4882;
 }
 #chatBox > .warning {
-	background-color: #796a1c;	
+	background-color: #796a1c;
 }
 #chatBox > .error {
-	background-color: #802929;	
+	background-color: #802929;
 }
 
 .emoji {
 	height: 32px;
 	transform: translateY(.3em);
-	
+
 	image-rendering: crisp-edges;
 	image-rendering: pixelated;
 }
@@ -547,9 +547,9 @@ dialog.popupSelectMenu {
 .cardListScrollParent {
 	overflow-y: scroll;
 	flex-grow: 1;
-	
+
 	padding: 0 1em;
-	
+
 	/*hide scrollbar*/
 	scrollbar-width: none;
 	-ms-overflow-style: none;
@@ -582,7 +582,7 @@ dialog.popupSelectMenu {
 #deckList {
 	overflow-y: scroll;
 	flex: auto;
-	
+
 	/*hide scrollbar*/
 	scrollbar-width: none;
 	-ms-overflow-style: none;
@@ -648,7 +648,7 @@ dialog.popupSelectMenu {
 	height: 70%;
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
-	
+
 	/*hide scrollbar*/
 	scrollbar-width: none;
 	-ms-overflow-style: none;
