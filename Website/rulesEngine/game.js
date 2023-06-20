@@ -109,6 +109,19 @@ export class AttackDeclaration {
 		this.game = game;
 		this.attackers = attackers;
 		this.target = target;
+
+		for (let attacker of attackers) {
+			attacker.isAttacking = true;
+		}
+		target.isAttackTarget = true;
+	}
+
+	clear() {
+		this.game.currentAttackDeclaration = null;
+		for (let attacker of this.attackers) {
+			attacker.isAttacking = false;
+		}
+		this.target.isAttackTarget = false;
 	}
 
 	isValid() {

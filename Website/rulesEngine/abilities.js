@@ -8,6 +8,10 @@ export class BaseAbility {
 			this.condition = buildConditionAST(id, condition);
 		}
 	}
+
+	async* canActivate(card, player) {
+		return this.condition === null || await (yield* this.condition.eval(card, player, this));
+	}
 }
 
 // This is the super class of all activatable activities that can have a cost and some processing
@@ -20,6 +24,10 @@ export class Ability extends BaseAbility {
 			this.cost = buildCostAST(id, cost);
 		}
 		this.scriptVariables = {};
+	}
+
+	async* canActivate(card, player) {
+		return (await (yield* super.canActivate(card, player))) && (this.cost === null || await (yield* this.cost.hasAllTargets(card, player, this)));
 	}
 
 	async* runCost(card, player) {
@@ -50,6 +58,10 @@ export class OptionalAbility extends Ability {
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
 	}
+
+	async* canActivate(card, player) {
+		return (await (yield* super.canActivate(card, player))) && this.activationCount < this.turnLimit;
+	}
 }
 
 export class FastAbility extends Ability {
@@ -57,6 +69,10 @@ export class FastAbility extends Ability {
 		super(id, exec, cost, condition);
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
+	}
+
+	async* canActivate(card, player) {
+		return (await (yield* super.canActivate(card, player))) && this.activationCount < this.turnLimit;
 	}
 }
 
@@ -67,6 +83,12 @@ export class TriggerAbility extends Ability {
 		this.turnLimit = turnLimit;
 		this.duringPhase = duringPhase;
 		this.activationCount = 0;
+	}
+
+	async* canActivate(card, player) {
+		return (await (yield* super.canActivate(card, player))) &&
+			this.activationCount < this.turnLimit &&
+			(this.duringPhase == null || this.player.game.currentPhase().matches(this.duringPhase, player));
 	}
 }
 

@@ -142,6 +142,14 @@ export function createManaChangedEvent(player) {
 	}
 }
 
+export function createCardsMovedEvent(movedCards) {
+	return {
+		"nature": "event",
+		"type": "cardsMoved",
+		"movedCards": movedCards
+	}
+}
+
 export function createCardsDrawnEvent(player, amount) {
 	return {
 		"nature": "event",

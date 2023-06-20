@@ -20,6 +20,9 @@ class BaseCard {
 		this.zone = null;
 		this.index = -1;
 		this.attackCount = 0;
+		this.isAttacking = false;
+		this.isAttackTarget = false;
+		this.isRetiring = false;
 		this.cardRef = this;
 	}
 
@@ -96,7 +99,26 @@ class SnapshotCard extends BaseCard {
 		this.zone = card.zone;
 		this.index = card.index;
 		this.attackCount = card.attackCount;
+		this.isAttacking = card.isAttacking;
+		this.isAttackTarget = card.isAttackTarget;
+		this.isRetiring = card.isRetiring;
 		this.cardRef = card;
+	}
+
+	restore() {
+		this.zone.add(this.cardRef, this.index);
+		this.cardRef.hidden = this.hidden;
+		this.cardRef.attackCount = this.attackCount;
+		this.cardRef.isAttackTarget = this.isAttackTarget;
+		this.cardRef.isAttacking = this.isAttacking;
+		if (this.isAttackTarget) {
+			this.owner.game.currentAttackDeclaration.target = this.cardRef;
+		}
+		if (this.isAttacking) {
+			if (this.owner.game.currentAttackDeclaration.attackers.indexOf(this.cardRef) == -1) {
+				this.owner.game.currentAttackDeclaration.attackers.push(this.cardRef);
+			}
+		}
 	}
 }
 

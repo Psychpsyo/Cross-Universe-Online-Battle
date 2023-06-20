@@ -295,6 +295,15 @@ export class AutomaticController extends InteractionController {
 				}
 				return this.gameSleep(.5);
 			}
+			case "cardsMoved": {
+				for (let card of event.movedCards) {
+					gameUI.removeCard(card.fromZone, card.fromIndex);
+					if (card.toZone) {
+						gameUI.insertCard(card.toZone, card.toIndex);
+					}
+				}
+				return;
+			}
 			case "actionCancelled": {
 				// units that got excluded from retires
 				if (event.action instanceof actions.Discard && event.action.timing?.block instanceof blocks.Retire) {

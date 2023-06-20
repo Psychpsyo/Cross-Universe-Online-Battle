@@ -78,7 +78,7 @@ export class StackPhase extends Phase {
 			if (card.cardTypes.get().includes("spell")) {
 				let eligible = true;
 				for (let ability of card.abilities.get()) {
-					if (ability instanceof abilities.CastAbility && (ability.condition && !(await (yield* ability.condition.eval(card, player, ability))))) {
+					if (ability instanceof abilities.CastAbility && !(await (yield* ability.canActivate(card, player)))) {
 						eligible = false;
 						break;
 					}
@@ -100,10 +100,7 @@ export class StackPhase extends Phase {
 			}
 			let cardAbilities = card.abilities.get();
 			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.FastAbility &&
-					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
-					(cardAbilities[i].condition == null || await (yield* cardAbilities[i].condition.eval(card, player, cardAbilities[i])))
-				) {
+				if (cardAbilities[i] instanceof abilities.FastAbility && await (yield* cardAbilities[i].canActivate(card, player))) {
 					eligibleAbilities.push({card: card, index: i});
 				}
 			}
@@ -120,12 +117,7 @@ export class StackPhase extends Phase {
 			}
 			let cardAbilities = card.abilities.get();
 			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.TriggerAbility &&
-					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
-					(cardAbilities[i].duringPhase == null || this.matches(cardAbilities[i].duringPhase, player)) &&
-					(cardAbilities[i].condition == null || await (yield* cardAbilities[i].condition.eval(card, player, cardAbilities[i])))
-					// TODO: Validate if other triggers are met or not here!
-				) {
+				if (cardAbilities[i] instanceof abilities.TriggerAbility && await (yield* cardAbilities[i].canActivate(card, player))) {
 					eligibleAbilities.push({card: card, index: i});
 				}
 			}
@@ -274,10 +266,7 @@ export class MainPhase extends StackPhase {
 			}
 			let cardAbilities = card.abilities.get();
 			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.OptionalAbility &&
-					cardAbilities[i].activationCount < cardAbilities[i].turnLimit &&
-					(cardAbilities[i].condition == null || await (yield* cardAbilities[i].condition.eval(card, this.turn.player, cardAbilities[i])))
-				) {
+				if (cardAbilities[i] instanceof abilities.OptionalAbility && await (yield* cardAbilities[i].canActivate(card, this.turn.player))) {
 					eligibleAbilities.push({card: card, index: i});
 				}
 			}
@@ -301,7 +290,7 @@ export class MainPhase extends StackPhase {
 			if (card.cardTypes.get().includes("item")) {
 				let eligible = true;
 				for (let ability of card.abilities.get()) {
-					if (ability instanceof abilities.DeployAbility && (ability.condition && !(await (yield* ability.condition.eval(card, this.turn.player, ability))))) {
+					if (ability instanceof abilities.DeployAbility && !(await (yield* ability.canActivate(card, this.turn.player)))) {
 						eligible = false;
 						break;
 					}

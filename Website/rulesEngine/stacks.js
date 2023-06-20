@@ -9,6 +9,7 @@ export class Stack {
 		this.index = index;
 		this.blocks = [];
 		this.passed = false;
+		this.processed = false;
 	}
 
 	async* run() {
@@ -97,6 +98,27 @@ export class Stack {
 		for (let i = this.blocks.length - 1; i >= 0; i--) {
 			yield [createBlockStartedEvent(this.blocks[i])];
 			yield* this.blocks[i].run();
+		}
+		this.processed = true;
+	}
+
+	* undoCreateBlock() {
+		this.blocks.pop().undoCost();
+	}
+
+	* undoExecuteBlocks() {
+		for (let block of this.blocks) {
+			yield* block.undoExecution();
+		}
+		this.processed = false;
+	}
+
+	* undo() {
+		if (this.processed) {
+			yield* this.undoExecuteBlocks();
+		}
+		while (this.blocks.length > 0) {
+			yield* this.undoCreateBlock();
 		}
 	}
 

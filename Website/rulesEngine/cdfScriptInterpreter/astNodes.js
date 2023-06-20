@@ -10,6 +10,11 @@ class AstNode {
 	async* eval(card, player, ability) {}
 	// whether or not all actions in this tree can be done in full
 	async* hasAllTargets(card, player, ability) {
+		for (let childNode of this.getChildNodes()) {
+			if (!(await (yield* childNode.hasAllTargets(card, player, ability)))) {
+				return false;
+			}
+		}
 		return true;
 	}
 	getChildNodes() {
@@ -27,14 +32,6 @@ export class ScriptNode extends AstNode {
 		for (let step of this.steps) {
 			yield* step.eval(card, player, ability);
 		}
-	}
-	async* hasAllTargets(card, player, ability) {
-		for (let step of this.steps) {
-			if (!(await (yield* step.hasAllTargets(card, player, ability)))) {
-				return false;
-			}
-		}
-		return true;
 	}
 	getChildNodes() {
 		return this.steps;
@@ -58,14 +55,6 @@ export class LineNode extends AstNode {
 		if (allActions.length > 0) {
 			yield allActions;
 		}
-	}
-	async* hasAllTargets(card, player, ability) {
-		for (let part of this.parts) {
-			if (!(await (yield* part.hasAllTargets(card, player, ability)))) {
-				return false;
-			}
-		}
-		return true;
 	}
 	getChildNodes() {
 		return this.parts;
@@ -241,7 +230,7 @@ defense: ${defense}`, false));
 				return player.mana + (await (yield* this.parameters[0].eval(card, player, ability)))[0] >= 0;
 			}
 			case "SELECT": {
-				return Math.min(...[await (yield* this.parameters[0].eval(card, player, ability))]) <=
+				return Math.min(...(await (yield* this.parameters[0].eval(card, player, ability)))) <=
 					((await (yield* this.parameters[1].eval(card, player, ability))).length) &&
 					await (yield* this.parameters[0].hasAllTargets(card, player, ability));
 			}
@@ -270,9 +259,6 @@ export class AssignmentNode extends AstNode {
 	async* eval(card, player, ability) {
 		ability.scriptVariables[this.variable] = await (yield* this.newValue.eval(card, player, ability));
 	}
-	async* hasAllTargets(card, player, ability) {
-		return yield* this.newValue.hasAllTargets(card, player, ability);
-	}
 	getChildNodes() {
 		return [this.newValue];
 	}
@@ -296,12 +282,14 @@ export class CardMatchNode extends AstNode {
 				if (checkCard == null) {
 					continue;
 				}
+				let lastImplicitCard = currentImplicitCard;
 				currentImplicitCard = checkCard;
 				if ((!this.conditions || await (yield* this.conditions.eval(card, player, ability)))) {
 					cards.push(checkCard);
+					currentImplicitCard = lastImplicitCard;
 					continue;
 				}
-				currentImplicitCard = null;
+				currentImplicitCard = lastImplicitCard;
 			}
 		}
 		return cards;
@@ -332,7 +320,7 @@ export class CardPropertyNode extends AstNode {
 	}
 
 	async* eval(card, player, ability) {
-		return (await (yield* this.cards.eval())).map(card => {
+		return (await (yield* this.cards.eval(card, player, ability))).map(card => {
 			switch(this.property) {
 				case "name": {
 					return card.names.get();

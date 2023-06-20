@@ -107,6 +107,21 @@ export class Timing {
 		yield* checkGameOver(this.game);
 	}
 
+	* undo() {
+		// check if this timing actually ran
+		if (!this.successful) {
+			return;
+		}
+		let events = [];
+		for (let action of this.actions) {
+			let event = action.undo();
+			if (event) {
+				events.push(event);
+			}
+		}
+		yield events;
+	}
+
 	valueOf() {
 		return this.index;
 	}
