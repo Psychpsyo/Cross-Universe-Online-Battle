@@ -6,6 +6,7 @@ import * as blocks from "../blocks.js";
 import {Card} from "../card.js";
 
 let currentImplicitCard = null;
+let currentImplicitActions = null;
 
 class AstNode {
 	async* eval(card, player, ability) {}
@@ -24,7 +25,7 @@ class AstNode {
 }
 
 // This serves as the root node of a card's script body
-export class ScriptNode extends AstNode {
+export class ScriptRootNode extends AstNode {
 	constructor(steps) {
 		super();
 		this.steps = steps;
@@ -61,6 +62,28 @@ export class LineNode extends AstNode {
 	}
 	getChildNodes() {
 		return this.parts;
+	}
+}
+
+export class TriggerRootNode extends AstNode {
+	constructor(expression) {
+		super();
+		this.expression = expression;
+	}
+	async* eval(card, player, ability) {
+		let currentPhase = player.game.currentPhase();
+		if (currentPhase.currentStack().index < 2) {
+			return false;
+		}
+		currentImplicitActions = currentPhase.stacks[currentPhase.stacks.length - 2].getActions();
+
+		let returnValue = await (yield* this.expression.eval(card, player, ability));
+
+		currentImplicitActions = null;
+		return returnValue;
+	}
+	getChildNodes() {
+		return this.expression;
 	}
 }
 
@@ -122,6 +145,9 @@ export class FunctionNode extends AstNode {
 				if (eligibleCards.length == 0) {
 					return [];
 				}
+				for (let card of eligibleCards) {
+					card.hidden = false;
+				}
 				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts == "any"? [] : responseCounts, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
@@ -129,6 +155,9 @@ export class FunctionNode extends AstNode {
 				}
 				if (responses[0].type != "chooseCards") {
 					throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
+				}
+				for (let card of eligibleCards) {
+					card.hidden = card.zone.type == "deck" || (card.zone.type == "hand" && !card.zone.player.isViewable);
 				}
 				return requests.chooseCards.validate(responses[0].value, selectionRequest);
 			}
@@ -276,34 +305,35 @@ defense: ${defense}`, false));
 }
 
 export class CardMatchNode extends AstNode {
-	constructor(zoneNodes, conditions) {
+	constructor(cardListNodes, conditions) {
 		super();
-		this.zoneNodes = zoneNodes;
+		this.cardListNodes = cardListNodes;
 		this.conditions = conditions;
-
 	}
 	async* eval(card, player, ability) {
 		let cards = [];
-		let zones = [];
-		for (let zoneNode of this.zoneNodes) {
-			zones.push(...(await (yield* zoneNode.eval(card, player, ability))));
-		}
-		for (let zone of zones) {
-			for (let checkCard of zone.cards) {
-				if (checkCard == null) {
-					continue;
-				}
-				let lastImplicitCard = currentImplicitCard;
-				currentImplicitCard = checkCard;
-				if ((!this.conditions || await (yield* this.conditions.eval(card, player, ability)))) {
-					cards.push(checkCard);
-					currentImplicitCard = lastImplicitCard;
-					continue;
-				}
-				currentImplicitCard = lastImplicitCard;
+		let matchingCards = [];
+		for (let cardList of this.cardListNodes) {
+			if (cardList instanceof ZoneNode) {
+				cards.push(...((await (yield* cardList.eval(card, player, ability))).map(zone => zone.cards).flat()));
+			} else {
+				cards.push(...(await (yield* cardList.eval(card, player, ability))));
 			}
 		}
-		return cards;
+		for (let checkCard of cards) {
+			if (checkCard == null) {
+				continue;
+			}
+			let lastImplicitCard = currentImplicitCard;
+			currentImplicitCard = checkCard;
+			if ((!this.conditions || await (yield* this.conditions.eval(card, player, ability)))) {
+				matchingCards.push(checkCard);
+				currentImplicitCard = lastImplicitCard;
+				continue;
+			}
+			currentImplicitCard = lastImplicitCard;
+		}
+		return matchingCards;
 	}
 	async* hasAllTargets(card, player, ability) {
 		return (await (yield* this.eval(card, player, ability))).length > 0;
@@ -320,6 +350,11 @@ export class ThisCardNode extends AstNode {
 export class ImplicitCardNode extends AstNode {
 	async* eval(card, player, ability) {
 		return [currentImplicitCard];
+	}
+}
+export class ImplicitActionsNode extends AstNode {
+	async* eval(card, player, ability) {
+		return currentImplicitActions;
 	}
 }
 
@@ -369,8 +404,14 @@ export class CardPropertyNode extends AstNode {
 				case "baseCardType": {
 					return card.cardTypes.getBase();
 				}
-				case "owner": {
+				case "baseOwner": {
 					return card.owner;
+				}
+				case "owner": {
+					return card.zone.player;
+				}
+				case "self": {
+					return card.cardRef;
 				}
 			}
 		}).flat();
@@ -505,7 +546,14 @@ export class GreaterThanNode extends ComparisonNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval(card, player, ability)))[0] > (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		for (let rightSide of await (yield* this.rightSide.eval(card, player, ability))) {
+			for (let leftSide of await (yield* this.leftSide.eval(card, player, ability))) {
+				if (leftSide > rightSide) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
 export class LessThanNode extends ComparisonNode {
@@ -513,7 +561,14 @@ export class LessThanNode extends ComparisonNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval(card, player, ability)))[0] < (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		for (let rightSide of await (yield* this.rightSide.eval(card, player, ability))) {
+			for (let leftSide of await (yield* this.leftSide.eval(card, player, ability))) {
+				if (leftSide < rightSide) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
 export class LogicNode extends MathNode {
@@ -622,7 +677,6 @@ export class ZoneNode extends AstNode {
 				partnerZone: [player.partnerZone]
 			})[this.zoneIdentifier];
 		}
-
 		return ({
 			field: [player.unitZone, player.spellItemZone, player.partnerZone, player.next().unitZone, player.next().spellItemZone, player.next().partnerZone],
 			deck: [player.deckZone, player.next().deckZone],

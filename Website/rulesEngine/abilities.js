@@ -1,4 +1,5 @@
-import {buildExecAST, buildCostAST, buildConditionAST} from "./cdfScriptInterpreter/interpreter.js";
+import {buildExecAST, buildCostAST, buildConditionAST, buildTriggerAST} from "./cdfScriptInterpreter/interpreter.js";
+import * as blocks from "./blocks.js";
 
 export class BaseAbility {
 	constructor(id, condition) {
@@ -77,18 +78,21 @@ export class FastAbility extends Ability {
 }
 
 export class TriggerAbility extends Ability {
-	constructor(id, exec, cost, mandatory, turnLimit, duringPhase, condition) {
+	constructor(id, exec, cost, mandatory, turnLimit, duringPhase, trigger, condition) {
 		super(id, exec, cost, condition);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
 		this.duringPhase = duringPhase;
+		this.trigger = buildTriggerAST(id, trigger);
 		this.activationCount = 0;
 	}
 
 	async* canActivate(card, player) {
 		return (await (yield* super.canActivate(card, player))) &&
 			this.activationCount < this.turnLimit &&
-			(this.duringPhase == null || player.game.currentPhase().matches(this.duringPhase, player));
+			(this.duringPhase == null || player.game.currentPhase().matches(this.duringPhase, player)) &&
+			((this.trigger == null || await (yield* this.trigger.eval(card, player, this))) &&
+			!player.game.currentStack().blocks.find(block => (block instanceof blocks.AbilityActivation) && block.ability === this));
 	}
 }
 

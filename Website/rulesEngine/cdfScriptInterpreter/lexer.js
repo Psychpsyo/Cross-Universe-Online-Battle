@@ -28,6 +28,8 @@ let keywordTokenTypes = {
 	cardType: "cardProperty",
 	baseCardType: "cardProperty",
 	owner: "cardProperty",
+	baseOwner: "cardProperty",
+	self: "cardProperty",
 
 	field: "zone",
 	deck: "zone",
@@ -271,7 +273,7 @@ export function tokenize(code) {
 					if (keywordTokenTypes[word]) {
 						tokens.push({type: keywordTokenTypes[word], value: word});
 					} else if (word.startsWith("CU")) {
-						tokens.push({type: "cardId", value: code.substr(pos, wordLength)});
+						tokens.push({type: "cardId", value: code.substr(pos + 2, wordLength - 2)});
 					} else {
 						tokens.push({type: "name", value: word});
 					}
