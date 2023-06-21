@@ -142,9 +142,22 @@ function parseCdfValues(cdf) {
 					ability.condition = parts[1];
 					break;
 				}
+				case "after": {
+					if (ability.type != "trigger") {
+						throw new Error("CDF Parser Error: Only trigger abilities have an 'after' clause.");
+					}
+					if (ability.duringPhase) {
+						throw new Error("CDF Parser Error: 'after' and 'duringPhase' clauses are mutually exclusive.");
+					}
+					ability.after = parts[1];
+					break;
+				}
 				case "duringPhase": {
 					if (ability.type != "trigger") {
 						throw new Error("CDF Parser Error: Only trigger abilities have phase restrictions.");
+					}
+					if (ability.after) {
+						throw new Error("CDF Parser Error: 'after' and 'duringPhase' clauses are mutually exclusive.");
 					}
 					if (!["manaSupplyPhase", "drawPhase", "mainPhase", "mainPhase1", "battlePhase", "mainPhase2", "endPhase",
 						"yourManaSupplyPhase", "yourDrawPhase", "yourMainPhase", "yourMainPhase1", "yourBattlePhase", "yourMainPhase2", "yourEndPhase",
@@ -225,6 +238,7 @@ function parseCdfValues(cdf) {
 					type: parts[1],
 					turnLimit: Infinity,
 					duringPhase: null,
+					after: null,
 					condition: null,
 					exec: ""
 				});
@@ -255,7 +269,7 @@ function makeAbility(ability) {
 			return new abilities.FastAbility(ability.id, ability.exec, ability.cost, ability.turnLimit, ability.condition);
 		}
 		case "trigger": {
-			return new abilities.TriggerAbility(ability.id, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.duringPhase, ability.condition);
+			return new abilities.TriggerAbility(ability.id, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.duringPhase, ability.after, ability.condition);
 		}
 		case "static": {
 			return new abilities.StaticAbility(ability.id, ability.exec, ability.condition);

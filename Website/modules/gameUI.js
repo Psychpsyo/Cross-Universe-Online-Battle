@@ -813,14 +813,14 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 					} else {
 						cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
 					}
-					cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length);
+					cardChoiceConfirm.disabled = (validAmounts.length > 0 && !validAmounts.includes(cardChoiceSelected.length)) || cardChoiceSelected.length == 0;
 				});
 			} else {
 				cardImg.classList.add("unselectableCard");
 			}
 			cardChoiceGrid.appendChild(cardImg);
 		}
-		if (validOptions < Math.min(...validAmounts)) {
+		if (validAmounts.length > 0 && validOptions < Math.min(...validAmounts)) {
 			reject(new Error("Not enough valid choices were passed to the card choice dialogue"));
 		}
 		cardChoiceMenu.addEventListener("close", function() {

@@ -12,7 +12,7 @@ export const chooseCards = {
 		}
 	},
 	validate: function(response, request) {
-		if (!request.validAmounts.includes(response.length)) {
+		if (!request.validAmounts.includes(response.length) && request.validAmounts.length > 0) {
 			throw new Error("Chose invalid amount of cards.");
 		}
 		for (let cardIndex of response) {

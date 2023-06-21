@@ -11,28 +11,35 @@ class ScriptParserError extends Error {
 	}
 }
 
-export function parseScript(tokenList, newEffectId, expressionOnly = false) {
+export function parseScript(tokenList, newEffectId, type) {
 	effectId = newEffectId;
 	tokens = tokenList;
 	pos = 0;
 
-	if (expressionOnly) {
-		return parseExpression();
-	}
-
-	let steps = [];
-	while(pos < tokens.length) {
-		if (tokens[pos].type == "newLine") {
-			pos++;
-		} else {
-			steps.push(parseLine());
+	switch (type) {
+		case "condition": {
+			return parseExpression();
+		}
+		case "trigger": {
+			return new ast.TriggerRootNode(parseExpression());
+		}
+		default: {
+			let steps = [];
+			while(pos < tokens.length) {
+				if (tokens[pos].type == "newLine") {
+					pos++;
+				} else {
+					steps.push(parseLine());
+				}
+			}
+			return new ast.ScriptRootNode(steps);
 		}
 	}
-	return new ast.ScriptNode(steps);
 }
 
 function parseLine() {
 	let actionNodes = [];
+	let variableName = null;
 	do {
 		switch (tokens[pos].type) {
 			case "function": {
@@ -42,7 +49,9 @@ function parseLine() {
 			case "variable": {
 				switch (tokens[pos+1].type) {
 					case "equals": {
-						actionNodes.push(parseAssignment());
+						variableName = tokens[pos].value;
+						pos += 2;
+						actionNodes.push(parseExpression());
 						break;
 					}
 					case "dotOperator": {
@@ -64,7 +73,7 @@ function parseLine() {
 			}
 		}
 	} while (pos < tokens.length - 1 && tokens[pos++].type == "andOperator");
-	return new ast.LineNode(actionNodes);
+	return new ast.LineNode(actionNodes, variableName);
 }
 
 function parseFunction() {
@@ -123,17 +132,6 @@ function parseFunctionToken(player) {
 	pos++;
 
 	return new ast.FunctionNode(functionName, parameters, player, asManyAsPossible);
-}
-
-function parseAssignment() {
-	let variableName = tokens[pos].value;
-	pos++;
-	if (tokens[pos].type != "equals") {
-		throw new ScriptParserError("Variable name '" + variableName + "' must be followed by an '=' for assignments.");
-	}
-	pos++;
-	let newValue = parseExpression();
-	return new ast.AssignmentNode(variableName, newValue);
 }
 
 function parseExpression() {
@@ -233,6 +231,10 @@ function parseValue() {
 		case "number": {
 			return parseNumber();
 		}
+		case "anyAmount": {
+			pos++;
+			return new ast.AnyAmountNode();
+		}
 		case "minus": {
 			pos++;
 			return new ast.UnaryMinusNode(parseValue());
@@ -296,6 +298,9 @@ function parseValue() {
 					case "cardProperty": {
 						return parseCardDotAccess(variable);
 					}
+					case "actionAccessor": {
+						return parseActionAccessor(variable);
+					}
 					default: {
 						throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access property of a variable.");
 					}
@@ -314,6 +319,9 @@ function parseValue() {
 		}
 		case "cardProperty": {
 			return parseCardProperty(new ast.ImplicitCardNode());
+		}
+		case "actionAccessor": {
+			return parseActionAccessor(new ast.ImplicitActionsNode());
 		}
 		case "currentPhase": {
 			pos++;
@@ -369,6 +377,16 @@ function parseCardDotAccess(card) {
 function parseCardProperty(cardsNode) {
 	let node = new ast.CardPropertyNode(cardsNode, tokens[pos].value);
 	pos++;
+	return node;
+}
+
+function parseActionAccessor(actionsNode) {
+	let node = new ast.ActionAccessorNode(actionsNode, tokens[pos].value);
+	pos++;
+	if (tokens[pos].type == "dotOperator") {
+		pos++;
+		return parseCardDotAccess(node);
+	}
 	return node;
 }
 
@@ -466,9 +484,9 @@ function parseZoneToken(player) {
 function parseCardMatcher() {
 	pos++;
 	pos++; // just skip over the 'from' token
-	let zones = [];
+	let cardLists = [];
 	while (tokens[pos].type != "where" && tokens[pos].type != "rightBracket") {
-		zones.push(parseZone());
+		cardLists.push(parseValue());
 		if (tokens[pos].type == "separator") {
 			pos++;
 		}
@@ -485,5 +503,5 @@ function parseCardMatcher() {
 	}
 
 	pos++;
-	return new ast.CardMatchNode(zones, conditions);
+	return new ast.CardMatchNode(cardLists, conditions);
 }

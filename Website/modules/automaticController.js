@@ -295,7 +295,7 @@ export class AutomaticController extends InteractionController {
 				}
 				return this.gameSleep(.5);
 			}
-			case "cardsMoved": {
+			case "undoCardsMoved": {
 				for (let card of event.movedCards) {
 					gameUI.removeCard(card.fromZone, card.fromIndex);
 					if (card.toZone) {

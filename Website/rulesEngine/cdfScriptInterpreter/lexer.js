@@ -4,16 +4,16 @@ let keywordTokenTypes = {
 	thisCard: "thisCard",
 	currentPhase: "currentPhase",
 	currentTurn: "currentTurn",
+	turn: "turn",
+	any: "anyAmount",
+	life: "playerLife",
+	mana: "playerMana",
 
 	yes: "bool",
 	no: "bool",
 
 	you: "player",
 	opponent: "player",
-
-	life: "playerLife",
-	mana: "playerMana",
-	turn: "turn",
 
 	name: "cardProperty",
 	baseName: "cardProperty",
@@ -28,6 +28,8 @@ let keywordTokenTypes = {
 	cardType: "cardProperty",
 	baseCardType: "cardProperty",
 	owner: "cardProperty",
+	baseOwner: "cardProperty",
+	self: "cardProperty",
 
 	field: "zone",
 	deck: "zone",
@@ -65,12 +67,26 @@ let keywordTokenTypes = {
 	DISCARD: "function",
 	DRAW: "function",
 	EXILE: "function",
-	LIFE: "function",
-	MANA: "function",
+	GAINLIFE: "function",
+	GAINMANA: "function",
+	LOSELIFE: "function",
+	LOSEMANA: "function",
 	SELECT: "function",
 	SELECTPLAYER: "function",
+	SUM: "function",
 	SUMMON: "function",
 	TOKENS: "function",
+
+	destroyed: "actionAccessor",
+	exiled: "actionAccessor",
+	discarded: "actionAccessor",
+	attacked: "actionAccessor",
+	summoned: "actionAccessor",
+	cast: "actionAccessor",
+	deployed: "actionAccessor",
+	targeted: "actionAccessor",
+	declared: "actionAccessor",
+	retired: "actionAccessor",
 
 	Angel: "type",
 	Armor: "type",
@@ -257,7 +273,7 @@ export function tokenize(code) {
 					if (keywordTokenTypes[word]) {
 						tokens.push({type: keywordTokenTypes[word], value: word});
 					} else if (word.startsWith("CU")) {
-						tokens.push({type: "cardId", value: code.substr(pos, wordLength)});
+						tokens.push({type: "cardId", value: code.substr(pos + 2, wordLength - 2)});
 					} else {
 						tokens.push({type: "name", value: word});
 					}

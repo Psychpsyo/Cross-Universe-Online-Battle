@@ -7,4 +7,4 @@ o: deploy
 cost:
 $player = SELECTPLAYER()
 exec:
-$player.LIFE(300)
+$player.GAINLIFE(300)
