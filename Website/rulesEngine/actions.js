@@ -104,7 +104,7 @@ export class Draw extends Action {
 			movedCards.push({fromZone: card.cardRef.zone, fromIndex: card.cardRef.index, toZone: card.zone, toIndex: card.index});
 			card.restore();
 		}
-		return events.createCardsMovedEvent(movedCards);
+		return events.createUndoCardsMovedEvent(movedCards);
 	}
 }
 
@@ -125,14 +125,14 @@ export class Place extends Action {
 
 		this.card.hidden = false;
 		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex);
-		this.zone.place(this.card, this.targetIndex);
 		this.card = this.card.snapshot();
+		this.zone.place(this.card.cardRef, this.targetIndex);
 		return cardPlacedEvent;
 	}
 
 	undo() {
 		this.zone.placed[index] = null;
-		this.card.cardRef.zone = this.card.zone;
+		this.card.restore();
 	}
 
 	isImpossible(timing) {
@@ -162,7 +162,6 @@ export class Summon extends Action {
 
 	* run() {
 		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.zone, this.unit.index, this.zone, this.zoneIndex);
-		this.unit.hidden = false;
 		this.zone.add(this.unit, this.zoneIndex);
 		this.unit = this.unit.snapshot();
 		return summonEvent;
@@ -189,7 +188,6 @@ export class Deploy extends Action {
 
 	* run() {
 		let deployEvent = events.createCardDeployedEvent(this.player, this.item.zone, this.item.index, this.zone, this.zoneIndex);
-		this.item.hidden = false;
 		this.zone.add(this.item, this.zoneIndex);
 		this.item = this.item.snapshot();
 		return deployEvent;
@@ -216,7 +214,6 @@ export class Cast extends Action {
 
 	* run() {
 		let castEvent = events.createCardCastEvent(this.player, this.spell.zone, this.spell.index, this.zone, this.zoneIndex);
-		this.spell.hidden = false;
 		this.zone.add(this.spell, this.zoneIndex);
 		this.spell = this.spell.snapshot();
 		return castEvent;
@@ -314,7 +311,7 @@ export class Discard extends Action {
 	}
 
 	undo() {
-		let event = events.createCardsMovedEvent([
+		let event = events.createUndoCardsMovedEvent([
 			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
 		]);
 		this.card.restore();
@@ -344,7 +341,7 @@ export class Destroy extends Action {
 	}
 
 	undo() {
-		let event = events.createCardsMovedEvent([
+		let event = events.createUndoCardsMovedEvent([
 			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
 		]);
 		this.card.restore();
@@ -374,7 +371,7 @@ export class Exile extends Action {
 	}
 
 	undo() {
-		let event = events.createCardsMovedEvent([
+		let event = events.createUndoCardsMovedEvent([
 			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
 		]);
 		this.card.restore();

@@ -88,7 +88,7 @@ export class TriggerAbility extends Ability {
 	async* canActivate(card, player) {
 		return (await (yield* super.canActivate(card, player))) &&
 			this.activationCount < this.turnLimit &&
-			(this.duringPhase == null || this.player.game.currentPhase().matches(this.duringPhase, player));
+			(this.duringPhase == null || player.game.currentPhase().matches(this.duringPhase, player));
 	}
 }
 

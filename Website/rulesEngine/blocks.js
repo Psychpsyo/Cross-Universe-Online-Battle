@@ -132,7 +132,6 @@ export class StandardSummon extends Block {
 	}
 
 	async* runCost() {
-		this.card.zone.remove(this.card);
 		let paid = await (yield* super.runCost());
 		if (!paid) {
 			this.card.zone.add(this.card, this.card.index);
@@ -352,7 +351,6 @@ export class DeployItem extends Block {
 	}
 
 	async* runCost() {
-		this.card.zone.remove(this.card);
 		if (!(await (yield* super.runCost()))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
@@ -410,7 +408,6 @@ export class CastSpell extends Block {
 	}
 
 	async* runCost() {
-		this.card.zone.remove(this.card);
 		if (!(await (yield* super.runCost()))) {
 			this.card.zone.add(this.card, this.card.index);
 			return false;

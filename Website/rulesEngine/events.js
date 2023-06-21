@@ -142,10 +142,10 @@ export function createManaChangedEvent(player) {
 	}
 }
 
-export function createCardsMovedEvent(movedCards) {
+export function createUndoCardsMovedEvent(movedCards) {
 	return {
 		"nature": "event",
-		"type": "cardsMoved",
+		"type": "undoCardsMoved",
 		"movedCards": movedCards
 	}
 }

@@ -54,6 +54,7 @@ export class Zone {
 	remove(card) {
 		this.cards.splice(card.index, 1);
 		this.reindex();
+		card.zone = null;
 	}
 
 	reindex() {
@@ -123,16 +124,17 @@ export class FieldZone extends Zone {
 	remove(card) {
 		let index = this.cards.findIndex(localCard => localCard == card);
 		this.cards[index] = null;
+		card.zone = null;
 	}
 
 	reindex() {} // not needed
 
-	// This puts a card into the temporary "not in hand, not on field" position that they go to during standard summons / casting / deploying
+	// This puts a card into the temporary "not in hand, not on field" position that they go to during summoning / casting / deploying
 	place(card, index) {
 		if (this.get(index) == null) {
+			card.zone.remove(card);
 			this.placed[index] = card;
 		}
-		card.zone = null;
 	}
 
 	get(index) {

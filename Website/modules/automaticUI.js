@@ -1,7 +1,7 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
 import {locale} from "/modules/locale.js";
-import {previewCard} from "/modules/generalUI.js";
+import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {FieldZone} from "/rulesEngine/zones.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
@@ -151,6 +151,7 @@ export function playerLost(player) {
 	mainGameBlackout.classList.remove("hidden");
 }
 export function playerWon(player) {
+	closeCardPreview();
 	let displayText = player == localPlayer? locale.game.automatic.gameOver.youWon : locale.game.automatic.gameOver.youLost;
 	displayText += "\n\n";
 	displayText += locale.game.automatic.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.winReason];
@@ -158,6 +159,7 @@ export function playerWon(player) {
 	mainGameBlackout.classList.remove("hidden");
 }
 export function gameDrawn() {
+	closeCardPreview();
 	let displayText = locale.game.automatic.gameOver.draw;
 	displayText += "\n\n";
 	let drawReason = "";

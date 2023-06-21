@@ -69,8 +69,15 @@ let keywordTokenTypes = {
 	MANA: "function",
 	SELECT: "function",
 	SELECTPLAYER: "function",
+	SUM: "function",
 	SUMMON: "function",
 	TOKENS: "function",
+
+	destroyed: "actionAccessor",
+	exiled: "actionAccessor",
+	discarded: "actionAccessor",
+	attacked: "actionAccessor",
+	summoned: "actionAccessor",
 
 	Angel: "type",
 	Armor: "type",
