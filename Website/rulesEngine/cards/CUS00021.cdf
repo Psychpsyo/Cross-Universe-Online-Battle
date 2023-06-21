@@ -7,4 +7,4 @@ o: cast
 cost:
 $player = SELECTPLAYER()
 exec:
-$player.LIFE(200)
+$player.GAINLIFE(200)

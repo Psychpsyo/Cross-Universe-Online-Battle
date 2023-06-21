@@ -6,6 +6,6 @@ types:
 o: cast
 condition: you.life > 500
 cost:
-LIFE(-(you.life / 2))
+LOSELIFE(you.life / 2)
 exec:
 DRAW(2)

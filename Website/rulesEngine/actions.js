@@ -131,8 +131,11 @@ export class Place extends Action {
 	}
 
 	undo() {
-		this.zone.placed[index] = null;
+		this.zone.placed[this.targetIndex] = null;
 		this.card.restore();
+		return events.createUndoCardsMovedEvent([
+			{fromZone: this.zone, fromIndex: this.targetIndex, toZone: this.card.zone, toIndex: this.card.index}
+		]);
 	}
 
 	isImpossible(timing) {
@@ -333,19 +336,9 @@ export class Destroy extends Action {
 	}
 
 	* run() {
+		// destroying a card doesn't do anything.
+		// Only the accompanying discard actually does something
 		this.card = this.card.snapshot();
-		let event = events.createCardDestroyedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
-		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
-		this.card.hidden = false;
-		return event;
-	}
-
-	undo() {
-		let event = events.createUndoCardsMovedEvent([
-			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
-		]);
-		this.card.restore();
-		return event;
 	}
 
 	isImpossible(timing) {

@@ -8,7 +8,7 @@ defense: 0
 o: optional
 turnLimit: 1
 cost:
-MANA(-1)
+LOSEMANA(1)
 exec:
 SUMMON(TOKENS(1, CUT00001, CUT00001, 0, [Illusion, Light, Bug], 0, 0), you.unitZone, yes)
-LIFE(-100)
+LOSELIFE(100)

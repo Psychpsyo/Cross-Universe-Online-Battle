@@ -2,6 +2,7 @@
 
 import * as actions from "../actions.js";
 import * as requests from "../inputRequests.js";
+import * as blocks from "../blocks.js";
 import {Card} from "../card.js";
 
 let currentImplicitCard = null;
@@ -79,14 +80,6 @@ export class FunctionNode extends AstNode {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
 				return [list.length];
 			}
-			case "SUM": {
-				let list = await (yield* this.parameters[0].eval(card, player, ability));
-				let sum = 0;
-				for (let num of list) {
-					sum += num;
-				}
-				return [sum];
-			}
 			case "DAMAGE": {
 				return [new actions.DealDamage(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
 			}
@@ -94,7 +87,8 @@ export class FunctionNode extends AstNode {
 				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - (await (yield* this.parameters[0].eval(card, player, ability)))[0]), player.deckZone.cards.length);
 			}
 			case "DESTROY": {
-				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Destroy(card.cardRef));
+				let cards = await (yield* this.parameters[0].eval(card, player, ability));
+				return cards.map(card => new actions.Destroy(card.cardRef)).concat(cards.map(card => new actions.Discard(card.cardRef)));
 			}
 			case "DISCARD": {
 				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Discard(card.cardRef));
@@ -110,11 +104,17 @@ export class FunctionNode extends AstNode {
 				yield (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Exile(card.cardRef));
 				return;
 			}
-			case "LIFE": {
+			case "GAINLIFE": {
 				return [new actions.ChangeLife(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
 			}
-			case "MANA": {
+			case "GAINMANA": {
 				return [new actions.ChangeMana(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+			}
+			case "LOSELIFE": {
+				return [new actions.ChangeLife(player, -(await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+			}
+			case "LOSEMANA": {
+				return [new actions.ChangeMana(player, -(await (yield* this.parameters[0].eval(card, player, ability)))[0])];
 			}
 			case "SELECT": {
 				let responseCounts = await (yield* this.parameters[0].eval(card, player, ability));
@@ -122,10 +122,10 @@ export class FunctionNode extends AstNode {
 				if (eligibleCards.length == 0) {
 					return [];
 				}
-				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts, "cardEffect:" + ability.id);
+				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts == "any"? [] : responseCounts, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
-					throw new Error("Incorrect number of responses supplied during card selection. (expected " + responseCounts + ", got " + responses.length + " instead)");
+					throw new Error("Incorrect number of responses supplied during card selection. (expected 1, got " + responses.length + " instead)");
 				}
 				if (responses[0].type != "chooseCards") {
 					throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
@@ -136,12 +136,20 @@ export class FunctionNode extends AstNode {
 				let selectionRequest = new requests.choosePlayer.create(player, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
-					throw new Error("Incorrect number of responses supplied during player selection. (expected " + responseCounts + ", got " + responses.length + " instead)");
+					throw new Error("Incorrect number of responses supplied during player selection. (expected 1, got " + responses.length + " instead)");
 				}
 				if (responses[0].type != "choosePlayer") {
 					throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + responses[0].type + "\" instead)");
 				}
 				return requests.choosePlayer.validate(responses[0].value, selectionRequest);
+			}
+			case "SUM": {
+				let list = await (yield* this.parameters[0].eval(card, player, ability));
+				let sum = 0;
+				for (let num of list) {
+					sum += num;
+				}
+				return [sum];
 			}
 			case "SUMMON": {
 				let cards = await (yield* this.parameters[0].eval(card, player, ability));
@@ -204,9 +212,8 @@ defense: ${defense}`, false));
 	async* hasAllTargets(card, player, ability) {
 		player = (await (yield* this.player.eval(card, player, ability)))[0];
 		switch (this.functionName) {
-			case "COUNT":
-			case "SUM": {
-				return yield* this.parameters[0].hasAllTargets(card, player, ability);
+			case "COUNT": {
+				return true;
 			}
 			case "DAMAGE": {
 				return true;
@@ -229,18 +236,30 @@ defense: ${defense}`, false));
 			case "EXILE": {
 				return yield* this.parameters[0].hasAllTargets(card, player, ability);
 			}
-			case "LIFE": {
+			case "GAINLIFE": {
+				return true;
+			}
+			case "GAINMANA": {
+				return true;
+			}
+			case "LOSELIFE": {
 				return player.life + (await (yield* this.parameters[0].eval(card, player, ability)))[0] >= 0;
 			}
-			case "MANA": {
+			case "LOSEMANA": {
 				return player.mana + (await (yield* this.parameters[0].eval(card, player, ability)))[0] >= 0;
 			}
 			case "SELECT": {
-				return Math.min(...(await (yield* this.parameters[0].eval(card, player, ability)))) <=
-					((await (yield* this.parameters[1].eval(card, player, ability))).length) &&
-					await (yield* this.parameters[0].hasAllTargets(card, player, ability));
+				let availableAmount = (await (yield* this.parameters[1].eval(card, player, ability))).length;
+				if (this.parameters[0] instanceof AnyAmountNode && availableAmount > 0) {
+					return true;
+				}
+				let amountsRequired = await (yield* this.parameters[0].eval(card, player, ability));
+				return Math.min(...amountsRequired) <= availableAmount && await (yield* this.parameters[0].hasAllTargets(card, player, ability));
 			}
 			case "SELECTPLAYER": {
+				return true;
+			}
+			case "SUM": {
 				return true;
 			}
 			case "SUMMON": {
@@ -378,6 +397,12 @@ export class ValueArrayNode extends AstNode {
 	}
 	async* eval(card, player, ability) {
 		return this.values;
+	}
+}
+
+export class AnyAmountNode extends AstNode {
+	async* eval(card, player, ability) {
+		return "any";
 	}
 }
 
@@ -672,7 +697,8 @@ export class ActionAccessorNode extends AstNode {
 			"cast": actions.Cast,
 			"deployed": actions.Deploy,
 			"targeted": actions.EstablishAttackDeclaration,
-			"declared": actions.EstablishAttackDeclaration
+			"declared": actions.EstablishAttackDeclaration,
+			"retired": actions.Discard
 		}[this.accessor];
 
 		let values = [];
@@ -704,6 +730,12 @@ export class ActionAccessorNode extends AstNode {
 					case "declared": {
 						for (let attacker of action.attackers) {
 							values.push(attacker);
+						}
+						break;
+					}
+					case "retired": {
+						if (action.timing.block instanceof blocks.Retire) {
+							values.push(action.card);
 						}
 						break;
 					}

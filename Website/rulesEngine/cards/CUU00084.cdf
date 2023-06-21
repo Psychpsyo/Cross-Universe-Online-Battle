@@ -10,4 +10,4 @@ turnLimit: 1
 cost:
 DISCARD(SELECT(1, [from you.hand]))
 exec:
-LIFE(200)
+GAINLIFE(200)

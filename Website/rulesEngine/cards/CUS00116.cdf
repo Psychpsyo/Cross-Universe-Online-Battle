@@ -6,6 +6,6 @@ types: Gravity
 o: cast
 condition: COUNT([from discard]) > 14
 cost:
-LIFE(-(you.life / 2))
+LOSELIFE(you.life / 2)
 exec:
 DESTROY([from field])

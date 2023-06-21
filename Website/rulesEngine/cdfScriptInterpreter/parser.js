@@ -225,6 +225,10 @@ function parseValue() {
 		case "number": {
 			return parseNumber();
 		}
+		case "anyAmount": {
+			pos++;
+			return new ast.AnyAmountNode();
+		}
 		case "minus": {
 			pos++;
 			return new ast.UnaryMinusNode(parseValue());

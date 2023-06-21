@@ -5,5 +5,5 @@ level: 2
 types:
 o: cast
 condition: currentPhase = opponent.drawPhase
-opponent.MANA(2)
+opponent.GAINMANA(2)
 DRAW(2)

@@ -7,5 +7,5 @@ o: deploy
 cost:
 DISCARD(SELECT(1, [from you.hand where types = Dark & cardType = unit]))
 exec:
-LIFE(300)
+GAINLIFE(300)
 DRAW(1)
