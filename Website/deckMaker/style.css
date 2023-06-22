@@ -1,5 +1,10 @@
 html {
-	overflow: hidden;
+	height: 100vh;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
 }
 
 h1, h2, h3, h4 {
@@ -9,7 +14,8 @@ h1, h2, h3, h4 {
 #deckMakerPanels {
 	display: flex;
 	justify-content: space-between;
-	height: 95vh;
+	min-height: 0;
+	flex-grow: 1;
 }
 
 #deckMakerPanels > section {
