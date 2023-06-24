@@ -14,7 +14,7 @@ export class Stack {
 
 	async* run() {
 		while (true) {
-			let inputRequests = await (yield* this.phase.getBlockOptions(this));
+			let inputRequests = await this.phase.getBlockOptions(this);
 			let responses = (yield inputRequests).filter(choice => choice !== undefined);
 
 			if (responses.length != 1) {
@@ -66,7 +66,7 @@ export class Stack {
 				case "activateOptionalAbility":
 				case "activateFastAbility":
 				case "activateTriggerAbility": {
-					let ability = response.value.card.abilities.get()[response.value.index];
+					let ability = response.value.card.values.abilities[response.value.index];
 					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), response.value.card, ability);
 					break;
 				}

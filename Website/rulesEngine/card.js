@@ -1,21 +1,18 @@
 // This module exports the Card class which represents a specific card in a Game.
 
-import {CardValue, SnapshotValue} from "./cardValue.js";
+import {CardValues} from "./cardValues.js";
 import * as abilities from "./abilities.js";
 
 class BaseCard {
-	constructor(player, cardId, hidden, cardTypes, names, level, types, attack, defense, abilities) {
+	constructor(player, cardId, hidden, initialValues) {
 		this.owner = player;
 		this.cardId = cardId;
 		this.hidden = hidden;
 
-		this.cardTypes = cardTypes;
-		this.names = names;
-		this.level = level;
-		this.types = types;
-		this.attack = attack;
-		this.defense = defense;
-		this.abilities = abilities;
+		this.initialValues = initialValues;
+		this.values = initialValues;
+		this.baseValues = initialValues;
+		this.modifierStack = [];
 
 		this.zone = null;
 		this.index = -1;
@@ -27,13 +24,24 @@ class BaseCard {
 	}
 
 	sharesTypeWith(card) {
-		let ownTypes = this.types.get();
-		for (let type of card.types.get()) {
+		let ownTypes = this.values.types;
+		for (let type of card.values.types) {
 			if (ownTypes.includes(type)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	async recalculateModifiedValues() {
+		this.baseValues = this.initialValues.clone();
+		for (let modifier of this.modifierStack) {
+			this.baseValues = await modifier.modify(this.baseValues, true);
+		}
+		this.values = this.baseValues.clone();
+		for (let modifier of this.modifierStack) {
+			this.values = await modifier.modify(this.values, false);
+		}
 	}
 
 	static sort(a, b) {
@@ -59,13 +67,15 @@ export class Card extends BaseCard {
 			baseCardTypes.push("item");
 		}
 		super(player, data.id, hidden,
-			new CardValue(baseCardTypes),
-			new CardValue([data.name ?? data.id]),
-			new CardValue(data.level ?? 0),
-			new CardValue(data.types ?? []),
-			new CardValue(data.attack ?? 0),
-			new CardValue(data.defense ?? 0),
-			new CardValue(data.abilities.map(makeAbility))
+			new CardValues(
+				baseCardTypes,
+				[data.name ?? data.id],
+				data.level ?? 0,
+				data.types ?? [],
+				data.attack ?? 0,
+				data.defense ?? 0,
+				data.abilities.map(makeAbility)
+			)
 		);
 	}
 
@@ -75,7 +85,7 @@ export class Card extends BaseCard {
 
 	endOfTurnReset() {
 		this.attackCount = 0;
-		for (let ability of this.abilities.get()) {
+		for (let ability of this.values.abilities) {
 			if (ability instanceof abilities.OptionalAbility || ability instanceof abilities.FastAbility || ability instanceof abilities.TriggerAbility) {
 				ability.activationCount = 0;
 			}
@@ -86,15 +96,7 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 class SnapshotCard extends BaseCard {
 	constructor(card) {
-		super(card.owner, card.cardId, card.hidden,
-			new SnapshotValue(card.cardTypes.get(), card.cardTypes.getBase()),
-			new SnapshotValue(card.names.get(), card.names.getBase()),
-			new SnapshotValue(card.level.get(), card.level.getBase()),
-			new SnapshotValue(card.types.get(), card.types.getBase()),
-			new SnapshotValue(card.attack.get(), card.attack.getBase()),
-			new SnapshotValue(card.defense.get(), card.defense.getBase()),
-			new SnapshotValue(card.abilities.get(), card.abilities.getBase())
-		);
+		super(card.owner, card.cardId, card.hidden, card.initialValues);
 
 		this.zone = card.zone;
 		this.index = card.index;
@@ -136,6 +138,13 @@ function parseCdfValues(cdf) {
 			switch (parts[0]) {
 				case "turnLimit": {
 					ability.turnLimit = parseInt(parts[1]);
+					break;
+				}
+				case "fromZone": {
+					if (!["cast", "deploy"].includes()) {
+						throw new Error("CDF Parser Error: Cast and deploy effects can't have a zone restriction.");
+					}
+					ability.zone = parts[1];
 					break;
 				}
 				case "condition": {
@@ -186,6 +195,20 @@ function parseCdfValues(cdf) {
 				case "exec": {
 					abilitySection = "exec";
 					ability.exec = "";
+					break;
+				}
+				case "applyTo": {
+					if (ability.type != "static") {
+						throw new Error("CDF Parser Error: Only static abilities have a 'applyTo' clause.");
+					}
+					ability.applyTo = parts[1];
+					break;
+				}
+				case "modifier": {
+					if (ability.type != "static") {
+						throw new Error("CDF Parser Error: Only static abilities have a 'modifier' clause.");
+					}
+					ability.modifier = parts[1];
 					break;
 				}
 				default: {
@@ -239,8 +262,11 @@ function parseCdfValues(cdf) {
 					turnLimit: Infinity,
 					duringPhase: null,
 					after: null,
+					fromZone: "field",
 					condition: null,
-					exec: ""
+					exec: "",
+					applyTo: "",
+					modifier: ""
 				});
 				inAbility = true;
 				abilitySection = "exec";
@@ -255,6 +281,9 @@ function parseCdfValues(cdf) {
 }
 
 function makeAbility(ability) {
+	if (!["cast", "deploy"].includes(ability.type)) {
+		ability.condition = "thisCard.zone = " + ability.fromZone + (ability.condition? " & (" + ability.condition + ")" : "");
+	}
 	switch (ability.type) {
 		case "cast": {
 			return new abilities.CastAbility(ability.id, ability.exec, ability.cost, ability.condition);
@@ -272,7 +301,7 @@ function makeAbility(ability) {
 			return new abilities.TriggerAbility(ability.id, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.duringPhase, ability.after, ability.condition);
 		}
 		case "static": {
-			return new abilities.StaticAbility(ability.id, ability.exec, ability.condition);
+			return new abilities.StaticAbility(ability.id, ability.modifier, ability.applyTo, ability.condition);
 		}
 	}
 }

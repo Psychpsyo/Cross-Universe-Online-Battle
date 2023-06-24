@@ -1,5 +1,6 @@
 
 import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent} from "./events.js";
+import {StaticAbility} from "./abilities.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
@@ -103,8 +104,12 @@ export class Timing {
 		game.nextTimingIndex++;
 		this.successful = true;
 
-		// check win/lose conditions
-		yield* checkGameOver(this.game);
+		// static abilities and win/lose condition checks
+		let staticsChanged = true;
+		while (staticsChanged) {
+			staticsChanged = await phaseStaticAbilities(this.game);
+			yield* checkGameOver(this.game);
+		}
 	}
 
 	* undo() {
@@ -142,7 +147,7 @@ function* checkGameOver(game) {
 				gameOverEvents.push(createGameDrawnEvent());
 				break;
 			}
-			gameOverEvents.push(createPlayerLostEvent(player));
+			gameOverEvents.push(createPlayerWonEvent(player));
 		}
 	}
 	if (gameOverEvents.length > 0) {
@@ -151,4 +156,39 @@ function* checkGameOver(game) {
 			yield [];
 		}
 	}
+}
+
+// iterates over all static abilities and activates/deactivates those that need it.
+async function phaseStaticAbilities(game) {
+	let abilitiesChanged = false;
+	for (let player of game.players) {
+		let activeCards = player.getActiveCards();
+		for (let currentCard of activeCards) {
+			for (let ability of currentCard.values.abilities) {
+				if (ability instanceof StaticAbility) {
+					let eligibleCards = await ability.getTargetCards(currentCard, player);
+					for (let otherCard of activeCards) {
+						if (eligibleCards.includes(otherCard)) {
+							if (!otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
+								otherCard.modifierStack.push(await ability.getModifier(currentCard, player));
+								abilitiesChanged = true;
+							}
+						} else {
+							let modifierIndex = otherCard.modifierStack.findIndex(modifier => modifier.ability === ability);
+							if (modifierIndex != -1) {
+								otherCard.modifierStack.splice(modifierIndex, 1);
+								abilitiesChanged = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for (let player of game.players) {
+		for (let card of player.getActiveCards()) {
+			await card.recalculateModifiedValues();
+		}
+	}
+	return abilitiesChanged;
 }

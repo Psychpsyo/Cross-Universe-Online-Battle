@@ -6,6 +6,7 @@ let keywordTokenTypes = {
 	currentTurn: "currentTurn",
 	turn: "turn",
 	any: "anyAmount",
+	allTypes: "allTypes",
 	life: "playerLife",
 	mana: "playerMana",
 
@@ -30,6 +31,7 @@ let keywordTokenTypes = {
 	owner: "cardProperty",
 	baseOwner: "cardProperty",
 	self: "cardProperty",
+	zone: "cardProperty",
 
 	field: "zone",
 	deck: "zone",
@@ -204,12 +206,22 @@ export function tokenize(code) {
 				break;
 			}
 			case "-": {
-				tokens.push({type: "minus"});
+				if (code[pos+1] == "=") {
+					tokens.push({type: "minusAssignment"});
+					pos++;
+				} else {
+					tokens.push({type: "minus"});
+				}
 				pos++;
 				break;
 			}
 			case "+": {
-				tokens.push({type: "plus"});
+				if (code[pos+1] == "=") {
+					tokens.push({type: "plusAssignment"});
+					pos++;
+				} else {
+					tokens.push({type: "plus"});
+				}
 				pos++;
 				break;
 			}
@@ -244,7 +256,12 @@ export function tokenize(code) {
 				break;
 			}
 			case ">": {
-				tokens.push({type: "greaterThan"});
+				if (code[pos+1] == "<") {
+					tokens.push({type: "swapAssignment"});
+					pos++;
+				} else {
+					tokens.push({type: "greaterThan"});
+				}
 				pos++;
 				break;
 			}

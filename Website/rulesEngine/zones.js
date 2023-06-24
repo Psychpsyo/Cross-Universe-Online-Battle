@@ -17,7 +17,7 @@ export class Zone {
 		if (card.zone && card.zone.cards.includes(card)) {
 			card.zone.remove(card);
 		}
-		if (!card.cardTypes.get().includes("token")) {
+		if (!card.values.cardTypes.includes("token")) {
 			this.cards.splice(index, 0, card);
 			this.reindex();
 		} else {

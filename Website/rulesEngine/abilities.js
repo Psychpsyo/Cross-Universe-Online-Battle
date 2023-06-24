@@ -1,4 +1,4 @@
-import {buildExecAST, buildCostAST, buildConditionAST, buildTriggerAST} from "./cdfScriptInterpreter/interpreter.js";
+import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
 import * as blocks from "./blocks.js";
 
 export class BaseAbility {
@@ -6,12 +6,12 @@ export class BaseAbility {
 		this.id = id;
 		this.condition = null;
 		if (condition) {
-			this.condition = buildConditionAST(id, condition);
+			this.condition = interpreter.buildConditionAST(id, condition);
 		}
 	}
 
-	async* canActivate(card, player) {
-		return this.condition === null || await (yield* this.condition.eval(card, player, this));
+	async canActivate(card, player) {
+		return this.condition === null || await this.condition.evalFull(card, player, this);
 	}
 }
 
@@ -19,16 +19,16 @@ export class BaseAbility {
 export class Ability extends BaseAbility {
 	constructor(id, exec, cost, condition) {
 		super(id, condition);
-		this.exec = buildExecAST(id, exec);
+		this.exec = interpreter.buildExecAST(id, exec);
 		this.cost =  null;
 		if (cost) {
-			this.cost = buildCostAST(id, cost);
+			this.cost = interpreter.buildCostAST(id, cost);
 		}
 		this.scriptVariables = {};
 	}
 
-	async* canActivate(card, player) {
-		return (await (yield* super.canActivate(card, player))) && (this.cost === null || await (yield* this.cost.hasAllTargets(card, player, this)));
+	async canActivate(card, player) {
+		return (await super.canActivate(card, player)) && (this.cost === null || await this.cost.hasAllTargets(card, player, this));
 	}
 
 	async* runCost(card, player) {
@@ -60,8 +60,8 @@ export class OptionalAbility extends Ability {
 		this.activationCount = 0;
 	}
 
-	async* canActivate(card, player) {
-		return (await (yield* super.canActivate(card, player))) && this.activationCount < this.turnLimit;
+	async canActivate(card, player) {
+		return (await super.canActivate(card, player)) && this.activationCount < this.turnLimit;
 	}
 }
 
@@ -72,8 +72,8 @@ export class FastAbility extends Ability {
 		this.activationCount = 0;
 	}
 
-	async* canActivate(card, player) {
-		return (await (yield* super.canActivate(card, player))) && this.activationCount < this.turnLimit;
+	async canActivate(card, player) {
+		return (await super.canActivate(card, player)) && this.activationCount < this.turnLimit;
 	}
 }
 
@@ -83,21 +83,34 @@ export class TriggerAbility extends Ability {
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
 		this.duringPhase = duringPhase;
-		this.trigger = buildTriggerAST(id, trigger);
+		this.trigger = interpreter.buildTriggerAST(id, trigger);
 		this.activationCount = 0;
 	}
 
-	async* canActivate(card, player) {
-		return (await (yield* super.canActivate(card, player))) &&
+	async canActivate(card, player) {
+		return (await super.canActivate(card, player)) &&
 			this.activationCount < this.turnLimit &&
 			(this.duringPhase == null || player.game.currentPhase().matches(this.duringPhase, player)) &&
-			((this.trigger == null || await (yield* this.trigger.eval(card, player, this))) &&
+			((this.trigger == null || await this.trigger.evalFull(card, player, this)) &&
 			!player.game.currentStack().blocks.find(block => (block instanceof blocks.AbilityActivation) && block.ability === this));
 	}
 }
 
 export class StaticAbility extends BaseAbility {
-	constructor(id, effect) {
-		super(id);
+	constructor(id, modifier, applyTo, condition) {
+		super(id, condition);
+		this.modifier = interpreter.buildMofifierAST(id, modifier);
+		this.applyTo = interpreter.buildApplyTargetAST(id, applyTo);
+	}
+
+	async getTargetCards(card, player) {
+		if (await this.canActivate(card, player)) {
+			return this.applyTo.evalFull(card, player, this);
+		}
+		return [];
+	}
+
+	async getModifier(card, player) {
+		return this.modifier.evalFull(card, player, this);
 	}
 }

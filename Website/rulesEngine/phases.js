@@ -62,23 +62,23 @@ export class StackPhase extends Phase {
 		} while (currentStackIndex > 1);
 	}
 
-	async* getBlockOptions(stack) {
+	async getBlockOptions(stack) {
 		return [
 			requests.pass.create(stack.getNextPlayer()),
-			requests.castSpell.create(stack.getNextPlayer(), await (yield* this.getCastableSpells())),
-			requests.activateTriggerAbility.create(stack.getNextPlayer(), await (yield* this.getActivatableTriggerAbilities())),
-			requests.activateFastAbility.create(stack.getNextPlayer(), await (yield* this.getActivatableFastAbilities()))
+			requests.castSpell.create(stack.getNextPlayer(), await this.getCastableSpells()),
+			requests.activateTriggerAbility.create(stack.getNextPlayer(), await this.getActivatableTriggerAbilities()),
+			requests.activateFastAbility.create(stack.getNextPlayer(), await this.getActivatableFastAbilities())
 		];
 	}
 
-	async* getCastableSpells() {
+	async getCastableSpells() {
 		let spells = [];
 		let player = this.currentStack().getNextPlayer();
 		for (let card of player.handZone.cards) {
-			if (card.cardTypes.get().includes("spell")) {
+			if (card.values.cardTypes.includes("spell")) {
 				let eligible = true;
-				for (let ability of card.abilities.get()) {
-					if (ability instanceof abilities.CastAbility && !(await (yield* ability.canActivate(card, player)))) {
+				for (let ability of card.values.abilities) {
+					if (ability instanceof abilities.CastAbility && !(await ability.canActivate(card, player))) {
 						eligible = false;
 						break;
 					}
@@ -91,16 +91,16 @@ export class StackPhase extends Phase {
 		return spells;
 	}
 
-	async* getActivatableFastAbilities() {
+	async getActivatableFastAbilities() {
 		let eligibleAbilities = [];
 		let player = this.currentStack().getNextPlayer();
-		for (let card of player.getFieldCards()) {
+		for (let card of player.getActiveCards()) {
 			if (!card) {
 				continue;
 			}
-			let cardAbilities = card.abilities.get();
+			let cardAbilities = card.values.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.FastAbility && await (yield* cardAbilities[i].canActivate(card, player))) {
+				if (cardAbilities[i] instanceof abilities.FastAbility && await cardAbilities[i].canActivate(card, player)) {
 					eligibleAbilities.push({card: card, index: i});
 				}
 			}
@@ -108,16 +108,16 @@ export class StackPhase extends Phase {
 		return eligibleAbilities;
 	}
 
-	async* getActivatableTriggerAbilities() {
+	async getActivatableTriggerAbilities() {
 		let eligibleAbilities = [];
 		let player = this.currentStack().getNextPlayer();
-		for (let card of player.getFieldCards()) {
+		for (let card of player.getActiveCards()) {
 			if (!card) {
 				continue;
 			}
-			let cardAbilities = card.abilities.get();
+			let cardAbilities = card.values.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.TriggerAbility && await (yield* cardAbilities[i].canActivate(card, player))) {
+				if (cardAbilities[i] instanceof abilities.TriggerAbility && await cardAbilities[i].canActivate(card, player)) {
 					eligibleAbilities.push({card: card, index: i});
 				}
 			}
@@ -162,7 +162,7 @@ export class ManaSupplyPhase extends Phase {
 		yield* this.timings[this.timings.length - 1].run();
 
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
-		let partnerLevel = turnPlayer.partnerZone.cards[0].level.get();
+		let partnerLevel = turnPlayer.partnerZone.cards[0].values.level;
 		if (turnPlayer.mana < partnerLevel) {
 			turnPlayer.lost = true;
 			turnPlayer.loseReason = "partnerCostTooHigh";
@@ -208,8 +208,8 @@ export class DrawPhase extends StackPhase {
 		super(turn, ["drawPhase"]);
 	}
 
-	async* getBlockOptions(stack) {
-		let blockOptions = await (yield* super.getBlockOptions(stack));
+	async getBlockOptions(stack) {
+		let blockOptions = await super.getBlockOptions(stack);
 		if (this.turn.index != 0 && !this.turn.hasStandardDrawn && stack.index == 1 && stack.blocks.length == 0) {
 			blockOptions.push(requests.doStandardDraw.create(this.turn.player));
 		}
@@ -224,14 +224,14 @@ export class MainPhase extends StackPhase {
 		super(turn, types);
 	}
 
-	async* getBlockOptions(stack) {
-		let options = await (yield* super.getBlockOptions(stack));
+	async getBlockOptions(stack) {
+		let options = await super.getBlockOptions(stack);
 		if (stack.canDoNormalActions()) {
 			// turn actions
 			if (this.turn.hasStandardSummoned === null) {
 				options.push(requests.doStandardSummon.create(this.turn.player, this.getSummonableUnits()));
 			}
-			options.push(requests.deployItem.create(this.turn.player, await (yield* this.getDeployableItems())));
+			options.push(requests.deployItem.create(this.turn.player, await this.getDeployableItems()));
 			if (this.turn.hasRetired === null) {
 				let eligibleUnits = [];
 				for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
@@ -253,20 +253,20 @@ export class MainPhase extends StackPhase {
 			}
 
 			// optional abilities
-			options.push(requests.activateOptionalAbility.create(this.turn.player, await (yield* this.getActivatableOptionalAbilities())));
+			options.push(requests.activateOptionalAbility.create(this.turn.player, await this.getActivatableOptionalAbilities()));
 		}
 		return getHighestPriorityOptions(options);
 	}
 
-	async* getActivatableOptionalAbilities() {
+	async getActivatableOptionalAbilities() {
 		let eligibleAbilities = [];
-		for (let card of this.turn.player.getFieldCards()) {
+		for (let card of this.turn.player.getActiveCards()) {
 			if (!card) {
 				continue;
 			}
-			let cardAbilities = card.abilities.get();
+			let cardAbilities = card.values.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.OptionalAbility && await (yield* cardAbilities[i].canActivate(card, this.turn.player))) {
+				if (cardAbilities[i] instanceof abilities.OptionalAbility && await cardAbilities[i].canActivate(card, this.turn.player)) {
 					eligibleAbilities.push({card: card, index: i});
 				}
 			}
@@ -277,20 +277,20 @@ export class MainPhase extends StackPhase {
 	getSummonableUnits() {
 		let units = [];
 		for (let card of this.turn.player.handZone.cards) {
-			if (card.cardTypes.get().includes("unit")) {
+			if (card.values.cardTypes.includes("unit")) {
 				units.push(card);
 			}
 		}
 		return units;
 	}
 
-	async* getDeployableItems() {
+	async getDeployableItems() {
 		let items = [];
 		for (let card of this.turn.player.handZone.cards) {
-			if (card.cardTypes.get().includes("item")) {
+			if (card.values.cardTypes.includes("item")) {
 				let eligible = true;
-				for (let ability of card.abilities.get()) {
-					if (ability instanceof abilities.DeployAbility && !(await (yield* ability.canActivate(card, this.turn.player)))) {
+				for (let ability of card.values.abilities) {
+					if (ability instanceof abilities.DeployAbility && !(await ability.canActivate(card, this.turn.player))) {
 						eligible = false;
 						break;
 					}
@@ -309,8 +309,8 @@ export class BattlePhase extends StackPhase {
 		super(turn, ["battlePhase"]);
 	}
 
-	async* getBlockOptions(stack) {
-		let options = await (yield* super.getBlockOptions(stack));
+	async getBlockOptions(stack) {
+		let options = await super.getBlockOptions(stack);
 		if (stack.canDoNormalActions()) {
 			// check for fight
 			if (this.turn.game.currentAttackDeclaration) {
@@ -333,8 +333,8 @@ export class EndPhase extends StackPhase {
 		super(turn, ["endPhase"]);
 	}
 
-	async* getBlockOptions(stack) {
-		return getHighestPriorityOptions(await (yield* super.getBlockOptions(stack)));
+	async getBlockOptions(stack) {
+		return getHighestPriorityOptions(await super.getBlockOptions(stack));
 	}
 }
 
@@ -345,7 +345,7 @@ function getOptionPriority(option) {
 	if (option.type == "activateTriggerAbility") {
 		let hasMandatory = false;
 		for (let i = option.eligibleAbilities.length -1; i >= 0; i--) {
-			let ability = option.eligibleAbilities[i].card.abilities.get()[option.eligibleAbilities[i].index];
+			let ability = option.eligibleAbilities[i].card.values.abilities[option.eligibleAbilities[i].index];
 			if (ability.mandatory) {
 				if (!hasMandatory) {
 					option.eligibleAbilities.splice(i + 1);

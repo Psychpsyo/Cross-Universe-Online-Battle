@@ -290,7 +290,7 @@ export class AutomaticController extends InteractionController {
 			case "cardDestroyed":
 			case "cardExiled": {
 				gameUI.removeCard(event.fromZone, event.fromIndex);
-				if (!event.card.cardTypes.get().includes("token")) {
+				if (!event.card.values.cardTypes.includes("token")) {
 					gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
 				}
 				return this.gameSleep(.5);

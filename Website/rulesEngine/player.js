@@ -31,7 +31,8 @@ export class Player {
 		}
 	}
 
-	getFieldCards() {
+	// returns all cards that aren't currently in deck. (cards that could have available abilities on them.)
+	getActiveCards() {
 		let cards = [this.partnerZone.cards[0]];
 		for (let card of this.unitZone.cards) {
 			if (card) {
@@ -39,6 +40,21 @@ export class Player {
 			}
 		}
 		for (let card of this.spellItemZone.cards) {
+			if (card) {
+				cards.push(card);
+			}
+		}
+		for (let card of this.handZone.cards) {
+			if (card) {
+				cards.push(card);
+			}
+		}
+		for (let card of this.discardPile.cards) {
+			if (card) {
+				cards.push(card);
+			}
+		}
+		for (let card of this.exileZone.cards) {
 			if (card) {
 				cards.push(card);
 			}

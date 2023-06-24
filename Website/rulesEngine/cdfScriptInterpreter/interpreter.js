@@ -1,4 +1,3 @@
-
 import {parseScript} from "./parser.js";
 import {tokenize} from "./lexer.js";
 
@@ -6,6 +5,8 @@ let alreadyParsedExecs = {};
 let alreadyParsedCosts = {};
 let alreadyParsedConditions = {};
 let alreadyParsedTriggers = {};
+let alreadyParsedModifiers = {};
+let alreadyParsedApplyTargets = {};
 
 export function buildExecAST(effectId, cdfScript) {
 	if (!alreadyParsedExecs[effectId]) {
@@ -33,4 +34,18 @@ export function buildTriggerAST(effectId, cdfScript) {
 		alreadyParsedTriggers[effectId] = parseScript(tokenize(cdfScript), effectId, "trigger");
 	}
 	return alreadyParsedTriggers[effectId];
+}
+
+export function buildMofifierAST(effectId, cdfScript) {
+	if (!alreadyParsedModifiers[effectId]) {
+		alreadyParsedModifiers[effectId] = parseScript(tokenize(cdfScript), effectId, "modifier");
+	}
+	return alreadyParsedModifiers[effectId];
+}
+
+export function buildApplyTargetAST(effectId, cdfScript) {
+	if (!alreadyParsedApplyTargets[effectId]) {
+		alreadyParsedApplyTargets[effectId] = parseScript(tokenize(cdfScript), effectId, "applyTarget");
+	}
+	return alreadyParsedApplyTargets[effectId];
 }

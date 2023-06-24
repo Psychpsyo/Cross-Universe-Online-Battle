@@ -18,6 +18,47 @@ export class Game {
 
 		this.rng = new CURandom();
 		this.startingHandSize = 5;
+		this.allTypes = [
+			"Angel",
+			"Armor",
+			"Beast",
+			"Bird",
+			"Book",
+			"Boundary",
+			"Bug",
+			"Chain",
+			"Curse",
+			"Dark",
+			"Demon",
+			"Dragon",
+			"Earth",
+			"Electric",
+			"Figure",
+			"Fire",
+			"Fish",
+			"Ghost",
+			"Gravity",
+			"Ice",
+			"Illusion",
+			"Katana",
+			"Landmine",
+			"Light",
+			"Machine",
+			"Mage",
+			"Medicine",
+			"Myth",
+			"Plant",
+			"Psychic",
+			"Rock",
+			"Samurai",
+			"Shield",
+			"Spirit",
+			"Structure",
+			"Sword",
+			"Warrior",
+			"Water",
+			"Wind"
+		];
 	}
 
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
@@ -26,7 +67,7 @@ export class Game {
 
 		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
 		for (const player of this.players) {
-			if (!player.partnerZone.cards[0].cardTypes.get().includes("unit")) {
+			if (!player.partnerZone.cards[0].values.cardTypes.includes("unit")) {
 				throw new Error("All partner cards must be units!");
 			}
 		}
@@ -136,9 +177,10 @@ export class AttackDeclaration {
 			if (!partner) {
 				return false;
 			}
-			let unitWithoutPartnerType = this.attackers.find(unit => unit.types.get().filter(type => partner.types.get().includes(type)).length == 0);
-			if (unitWithoutPartnerType) {
-				return false;
+			for (const unit of this.attackers) {
+				if (!partner.sharesTypeWith(unit)) {
+					return false;
+				}
 			}
 		}
 		return true;

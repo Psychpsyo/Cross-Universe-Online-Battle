@@ -2,10 +2,9 @@
 
 import {locale} from "/modules/locale.js";
 import {GameState} from "/modules/gameState.js";
-import {socket, zoneToLocal} from "/modules/netcode.js";
+import {socket} from "/modules/netcode.js";
 import {ManualController} from "/modules/manualController.js";
 import {AutomaticController} from "/modules/automaticController.js";
-import {putChatMessage, previewCard} from "/modules/generalUI.js";
 import * as ui from "/modules/gameUI.js";
 
 export class BoardState extends GameState {
@@ -116,7 +115,7 @@ export class BoardState extends GameState {
 		for (let card of localPlayer.deckZone.cards) {
 			card.hidden = false;
 		}
-		ui.presentCardChoice(localPlayer.deckZone.cards, locale.game.partnerSelect.popupTitle, card => card.cardTypes.get().includes("unit") && card.level.get() < 6).then(cards => {
+		ui.presentCardChoice(localPlayer.deckZone.cards, locale.game.partnerSelect.popupTitle, card => card.values.cardTypes.includes("unit") && card.values.level < 6).then(cards => {
 			for (let card of localPlayer.deckZone.cards) {
 				card.hidden = true;
 			}

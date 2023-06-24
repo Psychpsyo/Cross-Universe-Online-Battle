@@ -1,0 +1,10 @@
+id: CUU00100
+cardType: unit
+name: CUU00100
+level: 9
+types: Water, Ghost
+attack: 500
+defense: 500
+o: static
+applyTo: thisCard
+modifier: {attack += COUNT([from you.discard where types = thisCard.types]) * 50, defense += COUNT([from you.discard where types = thisCard.types]) * 50}

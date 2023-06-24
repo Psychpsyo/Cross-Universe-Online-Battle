@@ -1,4 +1,5 @@
 import * as ast from "./astNodes.js";
+import * as cardValues from "../cardValues.js";
 
 let pos;
 let tokens;
@@ -17,11 +18,17 @@ export function parseScript(tokenList, newEffectId, type) {
 	pos = 0;
 
 	switch (type) {
+		case "applyTarget": {
+			return new ast.ApplyTargetRootNode(parseExpression());
+		}
 		case "condition": {
 			return parseExpression();
 		}
 		case "trigger": {
 			return new ast.TriggerRootNode(parseExpression());
+		}
+		case "modifier": {
+			return parseModifier();
 		}
 		default: {
 			let steps = [];
@@ -141,7 +148,7 @@ function parseExpression() {
 		pos++;
 	}
 	let expression = [];
-	while (tokens[pos] && !["rightParen", "rightBracket", "newLine", "separator"].includes(tokens[pos].type)) {
+	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator"].includes(tokens[pos].type)) {
 		expression.push(parseValue());
 		if (tokens[pos]) {
 			switch (tokens[pos].type) {
@@ -220,7 +227,6 @@ function parseExpression() {
 		}
 	}
 	if (expression.length > 1) {
-		console.log(expression);
 		throw new ScriptParserError("Failed to fully consolidate expression.");
 	}
 	return expression[0];
@@ -234,6 +240,10 @@ function parseValue() {
 		case "anyAmount": {
 			pos++;
 			return new ast.AnyAmountNode();
+		}
+		case "allTypes": {
+			pos++;
+			return new ast.AllTypesNode();
 		}
 		case "minus": {
 			pos++;
@@ -311,7 +321,7 @@ function parseValue() {
 		case "thisCard": {
 			let card = new ast.ThisCardNode();
 			pos++;
-			if (tokens[pos].type == "dotOperator") {
+			if (tokens[pos] && tokens[pos].type == "dotOperator") {
 				pos++;
 				return parseCardDotAccess(card);
 			}
@@ -330,6 +340,9 @@ function parseValue() {
 		case "currentTurn": {
 			pos++;
 			return new ast.CurrentTurnNode();
+		}
+		case "leftBrace": {
+			return parseModifier();
 		}
 		default: {
 			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid value.");
@@ -504,4 +517,65 @@ function parseCardMatcher() {
 
 	pos++;
 	return new ast.CardMatchNode(cardLists, conditions);
+}
+
+function parseModifier() {
+	let valueModifications = [];
+	while (tokens[pos] && tokens[pos].type != "rightBrace") {
+		pos++;
+		if (tokens[pos].type != "cardProperty") {
+			throw new ScriptParserError("Expected a 'cardProperty' token at the start of a modifier assignment. Got '" + tokens[pos].type + "' instead.");
+		}
+		let valueIdentifier = tokens[pos].value;
+		let toBaseValues = false;
+		if (valueIdentifier.startsWith("base")) {
+			valueIdentifier = valueIdentifier[4].toLowerCase() + valueIdentifier.substr(5);
+			toBaseValues = true;
+		}
+
+		pos++;
+		if (!["equals", "plusAssignment", "minusAssignment", "swapAssignment"].includes(tokens[pos].type)) {
+			throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' token as operator in modifier syntax.");
+		}
+		let assignmentType = tokens[pos].type;
+
+		pos++;
+		switch (assignmentType) {
+			case "equals": {
+				valueModifications.push(new cardValues.ValueSetModification(valueIdentifier, parseExpression(), toBaseValues));
+				break;
+			}
+			case "plusAssignment": {
+				if (["level", "attack", "defense"].includes(valueIdentifier)) {
+					valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, parseExpression(), toBaseValues));
+				} else {
+					valueModifications.push(new cardValues.ValueAppendModification(valueIdentifier, parseExpression(), toBaseValues));
+				}
+				break;
+			}
+			case "minusAssignment": {
+				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
+					throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.");
+				}
+				valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(parseExpression()), toBaseValues));
+				break;
+			}
+			case "swapAssignment": {
+				if (tokens[pos].type != "cardProperty") {
+					throw new ScriptParserError("Modifier can only swap card properties with other card properties. (Got '" + tokens[pos].type + "' token instead.)");
+				}
+				let otherIdentifier = tokens[pos].value;
+				if (otherIdentifier.startsWith("base") != toBaseValues) {
+					throw new ScriptParserError("Modifier cannot swap base value with non-base value.");
+				}
+				if (toBaseValues) {
+					otherIdentifier = otherIdentifier[4].toLowerCase() + otherIdentifier.substr(5);
+				}
+				valueModifications.push(new cardValues.ValueSwapModification(valueIdentifier, otherIdentifier, toBaseValues));
+				break;
+			}
+		}
+	}
+
+	return new ast.ModifierNode(valueModifications);
 }

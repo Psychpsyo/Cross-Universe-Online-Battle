@@ -126,7 +126,7 @@ function isImportant(request) {
 		switch (request.type) {
 			case "activateTriggerAbility": {
 				for (let ability of request.eligibleAbilities) {
-					let phaseIndicator = ability.card.abilities.get()[ability.index].duringPhase;
+					let phaseIndicator = ability.card.values.abilities[ability.index].duringPhase;
 					if (phaseIndicator && currentPhase.matches(phaseIndicator, request.player)) {
 						return true;
 					}
@@ -135,7 +135,7 @@ function isImportant(request) {
 			}
 			case "castSpell": {
 				for (let card of request.eligibleSpells) {
-					for (let ability of card.abilities.get()) {
+					for (let ability of card.values.abilities) {
 						if (ability instanceof abilities.CastAbility) {
 							if (ability.condition && hasPhaseEqualityCondition(ability.condition)) {
 								return true;

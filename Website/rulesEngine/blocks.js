@@ -124,7 +124,7 @@ export class StandardSummon extends Block {
 			]),
 			arrayTimingGenerator([[
 				new actions.Place(player, card, player.unitZone),
-				new actions.ChangeMana(player, -card.level.get())
+				new actions.ChangeMana(player, -card.values.level)
 			]]
 		));
 		this.card = card;
@@ -150,7 +150,7 @@ async function* retireTimingGenerator(player, units) {
 	let gainedMana = 0;
 	for (const action of discardTiming.actions) {
 		if (action instanceof actions.Discard) {
-			gainedMana += action.card.level.get();
+			gainedMana += action.card.values.level;
 		}
 	}
 	if (gainedMana > 0) {
@@ -202,15 +202,15 @@ async function* fightTimingGenerator(attackDeclaration) {
 	// RULES: Compare the attacker’s Attack to the target’s Defense.
 	let totalAttack = 0;
 	for (const unit of attackDeclaration.attackers) {
-		totalAttack += unit.attack.get();
+		totalAttack += unit.values.attack;
 	}
 
 	// RULES: If the Attack is greater the attacker destroys the target.
 	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
-	if (totalAttack > attackDeclaration.target.defense.get()) {
-		let actionList = [new actions.Destroy(attackDeclaration.target)];
+	if (totalAttack > attackDeclaration.target.values.defense) {
+		let actionList = [new actions.Destroy(attackDeclaration.target), new actions.Discard(attackDeclaration.target)];
 		if (attackDeclaration.target.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(attackDeclaration.target.zone.player, totalAttack - attackDeclaration.target.defense.get()));
+			actionList.push(new actions.DealDamage(attackDeclaration.target.zone.player, totalAttack - attackDeclaration.target.values.defense));
 		}
 		yield actionList;
 	}
@@ -233,10 +233,10 @@ async function* fightTimingGenerator(attackDeclaration) {
 	}
 
 	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
-	if (attackDeclaration.target.attack.get() > counterattackTarget.defense.get()) {
-		let actionList = [new actions.Destroy(counterattackTarget)];
+	if (attackDeclaration.target.values.attack > counterattackTarget.values.defense) {
+		let actionList = [new actions.Destroy(counterattackTarget), new actions.Discard(counterattackTarget)];
 		if (counterattackTarget.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(counterattackTarget.zone.player, attackDeclaration.target.attack.get() - counterattackTarget.defense.get()));
+			actionList.push(new actions.DealDamage(counterattackTarget.zone.player, attackDeclaration.target.values.attack - counterattackTarget.values.defense));
 		}
 		yield actionList;
 	}
@@ -280,7 +280,7 @@ export class AbilityActivation extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.ability.exec && !(await (yield* this.ability.exec.hasAllTargets(this.card, this.player, this.ability)))) {
+		if (this.ability.exec && !(await this.ability.exec.hasAllTargets(this.card, this.player, this.ability))) {
 			yield* this.undoCost();
 			return false;
 		}
@@ -317,19 +317,19 @@ export class DeployItem extends Block {
 		let deployAction = new actions.Deploy(player, card, player.spellItemZone, 0);
 		let costTimingGenerators = [arrayTimingGenerator([[
 			new actions.Place(player, card, player.spellItemZone),
-			new actions.ChangeMana(player, -card.level.get())
+			new actions.ChangeMana(player, -card.values.level)
 		]])];
 		let execTimingGenerators = [
 			arrayTimingGenerator([[deployAction]])
 		];
 		let deployAbility = null;
-		for (let ability of card.abilities.get()) {
+		for (let ability of card.values.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
 				deployAbility = ability;
 				if (ability.cost) {
 					costTimingGenerators.push(abilityCostTimingGenerator(ability, card, player));
 				}
-				if (card.cardTypes.get().includes("standardItem")) {
+				if (card.values.cardTypes.includes("standardItem")) {
 					// standard items first activate and are only treated as briefly on the field after
 					execTimingGenerators.unshift(abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
@@ -357,7 +357,7 @@ export class DeployItem extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.deployAbility && this.deployAbility.exec && !(await (yield* this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility)))) {
+		if (this.deployAbility && this.deployAbility.exec && !(await this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility))) {
 			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;
@@ -374,19 +374,19 @@ export class CastSpell extends Block {
 		let castAction = new actions.Cast(player, card, player.spellItemZone, 0);
 		let costTimingGenerators = [arrayTimingGenerator([[
 			new actions.Place(player, card, player.spellItemZone),
-			new actions.ChangeMana(player, -card.level.get())
+			new actions.ChangeMana(player, -card.values.level)
 		]])];
 		let execTimingGenerators = [
 			arrayTimingGenerator([[castAction]])
 		];
 		let castAbility = null;
-		for (let ability of card.abilities.get()) {
+		for (let ability of card.values.abilities) {
 			if (ability instanceof abilities.CastAbility) {
 				castAbility = ability;
 				if (ability.cost) {
 					costTimingGenerators.push(abilityCostTimingGenerator(ability, card, player));
 				}
-				if (card.cardTypes.get().includes("standardSpell")) {
+				if (card.values.cardTypes.includes("standardSpell")) {
 					// standard spells first activate and are only treated as briefly on the field after
 					execTimingGenerators.unshift(abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
@@ -414,7 +414,7 @@ export class CastSpell extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.castAbility && this.castAbility.exec && !(await (yield* this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility)))) {
+		if (this.castAbility && this.castAbility.exec && !(await this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility))) {
 			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;

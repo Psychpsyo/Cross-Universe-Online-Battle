@@ -81,11 +81,11 @@ export async function previewCard(card, specific = true) {
 
 	// set the text preview
 	// general info
-	let names = card.names.get().map(async (name) => (await getCardInfo(name)).name);
+	let names = card.values.names.map(async (name) => (await getCardInfo(name)).name);
 	Promise.allSettled(names).then(names => {
 		cardDetailsName.textContent = names.map(name => name.value).join("/");
 	});
-	let cardTypes = [...card.cardTypes.get()];
+	let cardTypes = [...card.values.cardTypes];
 	if (cardTypes.includes("token")) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);
 	}
@@ -95,18 +95,18 @@ export async function previewCard(card, specific = true) {
 	if (cardTypes.includes("item")) {
 		cardTypes.splice(cardTypes.indexOf("item"), 1);
 	}
-	cardDetailsLevelType.textContent = locale.cardDetailsInfoString.replace("{#LEVEL}", card.level.get() == -1? "?" : card.level.get()).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
-	if (card.types.get().length > 0) {
-		cardDetailsTypes.textContent = locale.cardDetailsTypes + card.types.get().map(type => locale.types[type]).join(locale.typeSeparator);
+	cardDetailsLevelType.textContent = locale.cardDetailsInfoString.replace("{#LEVEL}", card.values.level == -1? "?" : card.values.level).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
+	if (card.values.types.length > 0) {
+		cardDetailsTypes.textContent = locale.cardDetailsTypes + card.values.types.map(type => locale.types[type]).join(locale.typeSeparator);
 	} else {
 		cardDetailsTypes.textContent = locale.typeless;
 	}
 
 	// attack & defense
-	if (card.cardTypes.get().includes("unit")) {
+	if (card.values.cardTypes.includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
-		cardDetailsAttack.innerHTML = locale.cardDetailsAttack + (card.attack.get() == -1? "?" : card.attack.get());
-		cardDetailsDefense.innerHTML = locale.cardDetailsDefense + (card.defense.get() == -1? "?" : card.defense.get());
+		cardDetailsAttack.innerHTML = locale.cardDetailsAttack + (card.values.attack == -1? "?" : card.values.attack);
+		cardDetailsDefense.innerHTML = locale.cardDetailsDefense + (card.values.defense == -1? "?" : card.values.defense);
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}
