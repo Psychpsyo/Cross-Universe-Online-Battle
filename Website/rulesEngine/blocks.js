@@ -27,6 +27,7 @@ class Block {
 		if (!this.costTimingGenerator) {
 			return true;
 		}
+		let costTimingSuccess = true;
 		let generatorOutput = await this.costTimingGenerator.next();
 		while (!generatorOutput.done) {
 			let actionList = generatorOutput.value;
@@ -38,16 +39,15 @@ class Block {
 			for (let action of actionList) {
 				action.costIndex = 0;
 			}
-			this.costTimings.push(new Timing(this.stack.phase.turn.game, actionList, this));
-			break;
-		}
-
-		let costTimingSuccess = true;
-		for (let costTiming of this.costTimings) {
-			yield* costTiming.run();
-			if (!costTiming.successful) {
+			let timing = new Timing(this.stack.phase.turn.game, actionList, this);
+			this.costTimings.push(timing);
+			yield* timing.run();
+			if (!timing.successful) {
 				costTimingSuccess = false;
+				this.costTimings.pop();
+				break;
 			}
+			generatorOutput = await this.costTimingGenerator.next(timing);
 		}
 		if (!costTimingSuccess) {
 			yield* this.undoCost();
@@ -65,9 +65,11 @@ class Block {
 				continue;
 			}
 			let timing = new Timing(this.stack.phase.turn.game, actionList, this);
+			this.executionTimings.push(timing);
 			yield* timing.run();
-			if (timing.successful) {
-				this.executionTimings.push(timing);
+			if (!timing.successful) {
+				this.executionTimings.pop();
+				break;
 			}
 			generatorOutput = await this.timingGenerator.next(timing);
 		}
@@ -163,7 +165,7 @@ export class Retire extends Block {
 		super(stack, player, retireTimingGenerator(player, units));
 		this.units = units;
 		for (let unit of units) {
-			unit.isRetiring = true;
+			unit.inRetire = this;
 		}
 	}
 
@@ -264,12 +266,12 @@ async function* abilityTimingGenerator(ability, card, player) {
 }
 
 async function* abilityCostTimingGenerator(ability, card, player) {
-	yield* ability.runCost(card, player);
+	return yield* ability.runCost(card, player);
 }
 
 export class AbilityActivation extends Block {
 	constructor(stack, player, card, ability) {
-		super(stack, player, abilityTimingGenerator(ability, card, player), ability.cost? abilityCostTimingGenerator(ability, card, player) : null);
+		super(stack, player, abilityTimingGenerator(ability, card, player), abilityCostTimingGenerator(ability, card, player));
 		this.card = card;
 		this.ability = ability;
 	}

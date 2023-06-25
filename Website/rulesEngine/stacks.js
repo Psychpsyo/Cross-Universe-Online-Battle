@@ -2,6 +2,7 @@
 import * as requests from "./inputRequests.js";
 import * as blocks from "./blocks.js";
 import {createBlockCreatedEvent, createBlockCreationAbortedEvent, createStackStartedEvent, createBlockStartedEvent} from "./events.js"
+import {TriggerAbility} from "./abilities.js";
 
 export class Stack {
 	constructor(phase, index) {
@@ -72,11 +73,12 @@ export class Stack {
 				}
 			}
 			if (response.type != "pass") {
+				this.blocks.push(nextBlock);
 				if (await (yield* nextBlock.runCost())) {
 					this.passed = false;
-					this.blocks.push(nextBlock);
 					yield [createBlockCreatedEvent(nextBlock)];
 				} else {
+					this.blocks.pop();
 					yield [createBlockCreationAbortedEvent(nextBlock)];
 				}
 			}
@@ -84,7 +86,7 @@ export class Stack {
 	}
 
 	getTimings() {
-		let costTimings = this.blocks.map(block => block.getCostTiming());
+		let costTimings = this.blocks.map(block => block.getCostTimings()).flat();
 		let executionTimings = [...this.blocks].reverse().map(block => block.getExecutionTimings()).flat();
 		return costTimings.concat(executionTimings);
 	}
@@ -95,6 +97,17 @@ export class Stack {
 	}
 
 	async* executeBlocks() {
+		// unmeet trigger abilities
+		for (let player of this.phase.turn.game.players) {
+			for (let card of player.getActiveCards()) {
+				for (let ability of card.values.abilities) {
+					if (ability instanceof TriggerAbility) {
+						ability.triggerMet = false;
+					}
+				}
+			}
+		}
+
 		for (let i = this.blocks.length - 1; i >= 0; i--) {
 			yield [createBlockStartedEvent(this.blocks[i])];
 			yield* this.blocks[i].run();

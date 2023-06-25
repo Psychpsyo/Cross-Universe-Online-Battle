@@ -6,7 +6,8 @@ types: Fire, Beast
 attack: 200
 defense: 600
 o: trigger
+turnLimit: 1
 mandatory: yes
 duringPhase: endPhase
-turnLimit: 1
+condition: thisCard.zone = field
 DAMAGE(100)

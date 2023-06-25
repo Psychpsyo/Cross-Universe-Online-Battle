@@ -19,7 +19,7 @@ class BaseCard {
 		this.attackCount = 0;
 		this.isAttacking = false;
 		this.isAttackTarget = false;
-		this.isRetiring = false;
+		this.inRetire = null;
 		this.cardRef = this;
 	}
 
@@ -96,19 +96,40 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 class SnapshotCard extends BaseCard {
 	constructor(card) {
-		super(card.owner, card.cardId, card.hidden, card.initialValues);
+		super(card.owner, card.cardId, card.hidden, card.initialValues.clone());
+
+		this.values = card.values.clone();
+		this.baseValues = card.baseValues.clone();
+		this.modifierStack = [...card.modifierStack];
+
+		let abilities = this.initialValues.abilities;
+		for (let ability of this.baseValues.abilities.concat(this.values.abilities)) {
+			if (!abilities.includes(ability)) {
+				abilities.push(ability);
+			}
+		}
+		let abilitySnapshots = abilities.map(ability => ability.snapshot());
+		this.initialValues.abilities = this.initialValues.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+		this.baseValues.abilities = this.baseValues.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+		this.values.abilities = this.values.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
 
 		this.zone = card.zone;
 		this.index = card.index;
 		this.attackCount = card.attackCount;
 		this.isAttacking = card.isAttacking;
 		this.isAttackTarget = card.isAttackTarget;
-		this.isRetiring = card.isRetiring;
+		this.inRetire = card.inRetire;
 		this.cardRef = card;
 	}
 
 	restore() {
 		this.zone.add(this.cardRef, this.index);
+
+		this.cardRef.initialValues = this.initialValues;
+		this.cardRef.values = this.values;
+		this.cardRef.baseValues = this.baseValues;
+		this.cardRef.modifierStack = this.modifierStack;
+
 		this.cardRef.hidden = this.hidden;
 		this.cardRef.attackCount = this.attackCount;
 		this.cardRef.isAttackTarget = this.isAttackTarget;
@@ -120,6 +141,10 @@ class SnapshotCard extends BaseCard {
 			if (this.owner.game.currentAttackDeclaration.attackers.indexOf(this.cardRef) == -1) {
 				this.owner.game.currentAttackDeclaration.attackers.push(this.cardRef);
 			}
+		}
+		this.cardRef.inRetire = this.inRetire;
+		if (this.inRetire) {
+			this.inRetire.units.push(this.cardRef);
 		}
 	}
 }
@@ -138,13 +163,6 @@ function parseCdfValues(cdf) {
 			switch (parts[0]) {
 				case "turnLimit": {
 					ability.turnLimit = parseInt(parts[1]);
-					break;
-				}
-				case "fromZone": {
-					if (!["cast", "deploy"].includes()) {
-						throw new Error("CDF Parser Error: Cast and deploy effects can't have a zone restriction.");
-					}
-					ability.zone = parts[1];
 					break;
 				}
 				case "condition": {
@@ -262,7 +280,6 @@ function parseCdfValues(cdf) {
 					turnLimit: Infinity,
 					duringPhase: null,
 					after: null,
-					fromZone: "field",
 					condition: null,
 					exec: "",
 					applyTo: "",
@@ -281,9 +298,6 @@ function parseCdfValues(cdf) {
 }
 
 function makeAbility(ability) {
-	if (!["cast", "deploy"].includes(ability.type)) {
-		ability.condition = "thisCard.zone = " + ability.fromZone + (ability.condition? " & (" + ability.condition + ")" : "");
-	}
 	switch (ability.type) {
 		case "cast": {
 			return new abilities.CastAbility(ability.id, ability.exec, ability.cost, ability.condition);

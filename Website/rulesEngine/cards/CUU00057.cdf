@@ -7,12 +7,14 @@ attack: 0
 defense: 200
 o: optional
 turnLimit: 1
+condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.field]))
 exec:
 opponent.DAMAGE(100)
 o: optional
 turnLimit: 1
+condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.field]))
 exec:

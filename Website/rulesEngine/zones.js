@@ -1,5 +1,6 @@
 // This module exports zone-related classes which define single zones as per the Cross Universe rules.
 
+import {TriggerAbility} from "./abilities.js";
 import * as blocks from "./blocks.js";
 
 export class Zone {
@@ -26,15 +27,9 @@ export class Zone {
 		card.zone = this;
 
 		// remove this card from relevant actions
-		let stacks = this.player.game.getStacks();
-		if (stacks.length > 0) {
-			if (stacks[stacks.length - 1].blocks[0] instanceof blocks.Retire) {
-				let retire = stacks[stacks.length - 1].blocks[0];
-				if (retire.units.includes(card)) {
-					retire.units.splice(retire.units.indexOf(card), 1);
-					card.isRetiring = false;
-				}
-			}
+		if (card.inRetire) {
+			card.inRetire.units.splice(card.inRetire.units.indexOf(card), 1);
+			card.inRetire = null;
 		}
 		card.attackCount = 0;
 		if (this.player.game.currentAttackDeclaration) {
@@ -46,6 +41,12 @@ export class Zone {
 			if (attackerIndex != -1) {
 				this.player.game.currentAttackDeclaration.attackers.splice(attackerIndex, 1);
 				card.isAttacking = false;
+			}
+		}
+		// All of the card's trigger abilities aren't met anymore.
+		for (let ability of card.values.abilities) {
+			if (ability instanceof TriggerAbility) {
+				ability.triggerMet = false;
 			}
 		}
 		return index;

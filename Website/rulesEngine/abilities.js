@@ -1,5 +1,4 @@
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
-import * as blocks from "./blocks.js";
 
 export class BaseAbility {
 	constructor(id, condition) {
@@ -12,6 +11,10 @@ export class BaseAbility {
 
 	async canActivate(card, player) {
 		return this.condition === null || await this.condition.evalFull(card, player, this);
+	}
+
+	snapshot() {
+		return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 	}
 }
 
@@ -32,7 +35,9 @@ export class Ability extends BaseAbility {
 	}
 
 	async* runCost(card, player) {
-		yield* this.cost.eval(card, player, this);
+		if (this.cost) {
+			yield* this.cost.eval(card, player, this);
+		}
 	}
 
 	async* run(card, player) {
@@ -84,6 +89,7 @@ export class TriggerAbility extends Ability {
 		this.turnLimit = turnLimit;
 		this.duringPhase = duringPhase;
 		this.trigger = interpreter.buildTriggerAST(id, trigger);
+		this.triggerMet = false;
 		this.activationCount = 0;
 	}
 
@@ -91,8 +97,18 @@ export class TriggerAbility extends Ability {
 		return (await super.canActivate(card, player)) &&
 			this.activationCount < this.turnLimit &&
 			(this.duringPhase == null || player.game.currentPhase().matches(this.duringPhase, player)) &&
-			((this.trigger == null || await this.trigger.evalFull(card, player, this)) &&
-			!player.game.currentStack().blocks.find(block => (block instanceof blocks.AbilityActivation) && block.ability === this));
+			(this.duringPhase != null || this.triggerMet)
+	}
+
+	async* runCost(card, player) {
+		yield* super.runCost(card, player);
+		this.triggerMet = false;
+	}
+
+	async checkTrigger(card, player) {
+		if (this.trigger == null || await this.trigger.evalFull(card, player, this)) {
+			this.triggerMet = true;
+		}
 	}
 }
 

@@ -1,6 +1,6 @@
 
 import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent} from "./events.js";
-import {StaticAbility} from "./abilities.js";
+import {StaticAbility, TriggerAbility} from "./abilities.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
@@ -109,6 +109,19 @@ export class Timing {
 		while (staticsChanged) {
 			staticsChanged = await phaseStaticAbilities(this.game);
 			yield* checkGameOver(this.game);
+		}
+
+		// check trigger ability conditions
+		if (this.game.currentStack()) {
+			for (let player of game.players) {
+				for (let card of player.getActiveCards()) {
+					for (let ability of card.values.abilities) {
+						if (ability instanceof TriggerAbility) {
+							await ability.checkTrigger(card, player);
+						}
+					}
+				}
+			}
 		}
 	}
 

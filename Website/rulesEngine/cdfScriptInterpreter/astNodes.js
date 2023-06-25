@@ -83,11 +83,8 @@ export class TriggerRootNode extends AstNode {
 		this.expression = expression;
 	}
 	async* eval(card, player, ability) {
-		let currentPhase = player.game.currentPhase();
-		if (currentPhase.currentStack().index < 2) {
-			return false;
-		}
-		currentImplicitActions = currentPhase.stacks[currentPhase.stacks.length - 2].getActions();
+		let stackTimings = player.game.currentStack().getTimings();
+		currentImplicitActions = stackTimings[stackTimings.length - 1].actions;
 
 		let returnValue = await (yield* this.expression.eval(card, player, ability));
 

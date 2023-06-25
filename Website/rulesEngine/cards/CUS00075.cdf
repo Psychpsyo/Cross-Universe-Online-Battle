@@ -5,6 +5,7 @@ level: 1
 types: Fire
 o: fast
 turnLimit: 1
+condition: thisCard.zone = field
 cost:
 EXILE(SELECT(1, [from you.discard where types = Fire]))
 exec:

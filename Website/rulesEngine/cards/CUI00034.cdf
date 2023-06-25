@@ -5,6 +5,7 @@ level: 0
 types:
 o: optional
 turnLimit: 2
+condition: thisCard.zone = field
 cost:
 LOSELIFE(200)
 exec:

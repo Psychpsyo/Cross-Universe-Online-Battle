@@ -5,8 +5,9 @@ level: 0
 types: Dark, Rock
 o: trigger
 mandatory: no
-duringPhase: endPhase
 turnLimit: 1
+duringPhase: endPhase
+condition: thisCard.zone = field
 cost:
 LOSELIFE(200)
 exec:

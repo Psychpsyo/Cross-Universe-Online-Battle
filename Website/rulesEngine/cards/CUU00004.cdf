@@ -7,4 +7,5 @@ attack: 0
 defense: 0
 o: static
 applyTo: thisCard
+condition: thisCard.zone = field
 modifier: {types += allTypes}

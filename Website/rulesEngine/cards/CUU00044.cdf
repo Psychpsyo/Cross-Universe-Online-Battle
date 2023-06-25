@@ -7,6 +7,7 @@ attack: 200
 defense: 200
 o: optional
 turnLimit: 1
+condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand]))
 exec:

@@ -7,4 +7,5 @@ attack: 500
 defense: 500
 o: static
 applyTo: thisCard
+condition: thisCard.zone = field
 modifier: {attack += COUNT([from you.discard where types = thisCard.types]) * 50, defense += COUNT([from you.discard where types = thisCard.types]) * 50}

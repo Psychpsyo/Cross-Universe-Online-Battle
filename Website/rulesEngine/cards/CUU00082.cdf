@@ -7,6 +7,7 @@ attack: 100
 defense: 100
 o: optional
 turnLimit: 1
+condition: thisCard.zone = field
 cost:
 $player = SELECTPLAYER()
 exec:

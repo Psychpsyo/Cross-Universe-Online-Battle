@@ -7,6 +7,7 @@ attack: 0
 defense: 0
 o: optional
 turnLimit: 1
+condition: thisCard.zone = field
 cost:
 LOSEMANA(1)
 exec:
