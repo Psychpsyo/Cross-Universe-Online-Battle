@@ -1,7 +1,6 @@
 // This module exports zone-related classes which define single zones as per the Cross Universe rules.
 
 import {TriggerAbility} from "./abilities.js";
-import * as blocks from "./blocks.js";
 
 export class Zone {
 	constructor(player, type) {
@@ -49,6 +48,8 @@ export class Zone {
 				ability.triggerMet = false;
 			}
 		}
+		// Effects that applied to the card before stop applying.
+		card.modifierStack = [];
 		return index;
 	}
 

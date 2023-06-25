@@ -65,15 +65,15 @@ export class StackPhase extends Phase {
 	async getBlockOptions(stack) {
 		return [
 			requests.pass.create(stack.getNextPlayer()),
-			requests.castSpell.create(stack.getNextPlayer(), await this.getCastableSpells()),
-			requests.activateTriggerAbility.create(stack.getNextPlayer(), await this.getActivatableTriggerAbilities()),
-			requests.activateFastAbility.create(stack.getNextPlayer(), await this.getActivatableFastAbilities())
+			requests.castSpell.create(stack.getNextPlayer(), await this.getCastableSpells(stack)),
+			requests.activateTriggerAbility.create(stack.getNextPlayer(), await this.getActivatableTriggerAbilities(stack)),
+			requests.activateFastAbility.create(stack.getNextPlayer(), await this.getActivatableFastAbilities(stack))
 		];
 	}
 
-	async getCastableSpells() {
+	async getCastableSpells(stack) {
 		let spells = [];
-		let player = this.currentStack().getNextPlayer();
+		let player = stack.getNextPlayer();
 		for (let card of player.handZone.cards) {
 			if (card.values.cardTypes.includes("spell")) {
 				let eligible = true;
@@ -91,13 +91,10 @@ export class StackPhase extends Phase {
 		return spells;
 	}
 
-	async getActivatableFastAbilities() {
+	async getActivatableFastAbilities(stack) {
 		let eligibleAbilities = [];
-		let player = this.currentStack().getNextPlayer();
+		let player = stack.getNextPlayer();
 		for (let card of player.getActiveCards()) {
-			if (!card) {
-				continue;
-			}
 			let cardAbilities = card.values.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.FastAbility && await cardAbilities[i].canActivate(card, player)) {
@@ -108,13 +105,10 @@ export class StackPhase extends Phase {
 		return eligibleAbilities;
 	}
 
-	async getActivatableTriggerAbilities() {
+	async getActivatableTriggerAbilities(stack) {
 		let eligibleAbilities = [];
-		let player = this.currentStack().getNextPlayer();
+		let player = stack.getNextPlayer();
 		for (let card of player.getActiveCards()) {
-			if (!card) {
-				continue;
-			}
 			let cardAbilities = card.values.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.TriggerAbility && await cardAbilities[i].canActivate(card, player)) {
@@ -261,9 +255,6 @@ export class MainPhase extends StackPhase {
 	async getActivatableOptionalAbilities() {
 		let eligibleAbilities = [];
 		for (let card of this.turn.player.getActiveCards()) {
-			if (!card) {
-				continue;
-			}
 			let cardAbilities = card.values.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.OptionalAbility && await cardAbilities[i].canActivate(card, this.turn.player)) {

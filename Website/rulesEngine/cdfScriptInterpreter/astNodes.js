@@ -126,6 +126,10 @@ export class FunctionNode extends AstNode {
 	async* eval(card, player, ability) {
 		player = (await (yield* this.player.eval(card, player, ability)))[0];
 		switch (this.functionName) {
+			case "APPLY": {
+				let modifier = await (yield* this.parameters[1].eval(card, player, ability));
+				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.ApplyCardStatChange(card.cardRef, modifier));
+			}
 			case "COUNT": {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
 				return [list.length];
@@ -268,6 +272,9 @@ defense: ${defense}`, false));
 	async hasAllTargets(card, player, ability) {
 		player = (await this.player.evalFull(card, player, ability))[0];
 		switch (this.functionName) {
+			case "APPLY": {
+				return this.parameters[0].hasAllTargets(card, player, ability);
+			}
 			case "COUNT": {
 				return true;
 			}

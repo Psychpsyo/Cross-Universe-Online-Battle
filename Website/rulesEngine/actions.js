@@ -378,3 +378,20 @@ export class Exile extends Action {
 		return false;
 	}
 }
+
+export class ApplyCardStatChange extends Action {
+	constructor(card, modifier) {
+		super();
+		this.card = card;
+		this.modifier = modifier;
+	}
+
+	* run() {
+		this.card = this.card.snapshot();
+		this.card.cardRef.modifierStack.push(this.modifier);
+	}
+
+	undo() {
+		this.card.cardRef.modifierStack.pop();
+	}
+}

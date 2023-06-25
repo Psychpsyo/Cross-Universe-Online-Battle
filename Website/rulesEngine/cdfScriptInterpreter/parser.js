@@ -576,6 +576,6 @@ function parseModifier() {
 			}
 		}
 	}
-
+	pos++;
 	return new ast.ModifierNode(valueModifications);
 }
