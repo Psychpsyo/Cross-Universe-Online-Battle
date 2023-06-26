@@ -277,6 +277,7 @@ export class AbilityActivation extends Block {
 	}
 
 	async* runCost() {
+		this.card = this.card.snapshot();
 		if (!(await (yield* super.runCost()))) {
 			return false;
 		}
@@ -287,8 +288,7 @@ export class AbilityActivation extends Block {
 			return false;
 		}
 
-		this.ability.activationCount++;
-		this.card = this.card.snapshot();
+		this.ability.successfulActivation();
 		return true;
 	}
 }

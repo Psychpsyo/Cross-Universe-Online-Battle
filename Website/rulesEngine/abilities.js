@@ -44,6 +44,8 @@ export class Ability extends BaseAbility {
 		yield* this.exec.eval(card, player, this);
 		this.scriptVariables = {};
 	}
+
+	successfulActivation() {}
 }
 
 export class CastAbility extends Ability {
@@ -68,6 +70,10 @@ export class OptionalAbility extends Ability {
 	async canActivate(card, player) {
 		return (await super.canActivate(card, player)) && this.activationCount < this.turnLimit;
 	}
+
+	successfulActivation() {
+		this.activationCount++;
+	}
 }
 
 export class FastAbility extends Ability {
@@ -79,6 +85,10 @@ export class FastAbility extends Ability {
 
 	async canActivate(card, player) {
 		return (await super.canActivate(card, player)) && this.activationCount < this.turnLimit;
+	}
+
+	successfulActivation() {
+		this.activationCount++;
 	}
 }
 
@@ -100,15 +110,15 @@ export class TriggerAbility extends Ability {
 			(this.duringPhase != null || this.triggerMet)
 	}
 
-	async* runCost(card, player) {
-		yield* super.runCost(card, player);
-		this.triggerMet = false;
-	}
-
 	async checkTrigger(card, player) {
 		if (this.trigger == null || await this.trigger.evalFull(card, player, this)) {
 			this.triggerMet = true;
 		}
+	}
+
+	successfulActivation() {
+		this.activationCount++;
+		this.triggerMet = false;
 	}
 }
 

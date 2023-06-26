@@ -11,6 +11,7 @@ import * as autoUI from "/modules/automaticUI.js";
 import * as actions from "/rulesEngine/actions.js";
 import * as blocks from "/rulesEngine/blocks.js";
 import * as cardLoader from "/modules/cardLoader.js";
+import * as zones from "/rulesEngine/zones.js";
 
 export class AutomaticController extends InteractionController {
 	constructor() {
@@ -164,8 +165,8 @@ export class AutomaticController extends InteractionController {
 
 		// summoning
 		if (playerInfo.canStandardSummon.includes(card) && zone == player.unitZone && !player.unitZone.get(index)) {
-			this.fieldPlaceIndex = index;
 			if (player === localPlayer) {
+				this.fieldPlaceIndex = index;
 				this.standardSummonEventTarget.dispatchEvent(new CustomEvent("summon", {detail: card.index}));
 			}
 			gameUI.makeDragSource(player.unitZone, index, player);
@@ -173,8 +174,8 @@ export class AutomaticController extends InteractionController {
 		}
 		// deploying
 		if (playerInfo.canDeploy.includes(card) && zone == player.spellItemZone && !player.spellItemZone.get(index)) {
-			this.fieldPlaceIndex = index;
 			if (player === localPlayer) {
+				this.fieldPlaceIndex = index;
 				this.deployEventTarget.dispatchEvent(new CustomEvent("deploy", {detail: card.index}));
 			}
 			gameUI.makeDragSource(player.spellItemZone, index, player);
@@ -182,8 +183,8 @@ export class AutomaticController extends InteractionController {
 		}
 		// casting
 		if (playerInfo.canCast.includes(card) && zone == player.spellItemZone && !player.spellItemZone.get(index)) {
-			this.fieldPlaceIndex = index;
 			if (player === localPlayer) {
+				this.fieldPlaceIndex = index;
 				this.castEventTarget.dispatchEvent(new CustomEvent("cast", {detail: card.index}));
 			}
 			gameUI.makeDragSource(player.spellItemZone, index, player);
@@ -483,7 +484,7 @@ export class AutomaticController extends InteractionController {
 				this.canDeclareToAttack = request.eligibleUnits;
 
 				for (let i = 0; i < request.eligibleUnits.length; i++) {
-					this.unitAttackButtons.push(gameUI.addFieldButton(
+					this.unitAttackButtons.push(gameUI.addCardButton(
 						request.eligibleUnits[i].zone,
 						request.eligibleUnits[i].index,
 						locale.game.automatic.cardOptions.attack,
@@ -542,7 +543,7 @@ export class AutomaticController extends InteractionController {
 			case "activateOptionalAbility": {
 				let activated = await new Promise((resolve, reject) => {
 					for (let i = 0; i < request.eligibleAbilities.length; i++) {
-						gameUI.addFieldButton(
+						gameUI.addCardButton(
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
 							locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].index + 1),
@@ -554,7 +555,7 @@ export class AutomaticController extends InteractionController {
 					}
 					this.madeMoveTarget.addEventListener("move", function() {
 						for (let ability of request.eligibleAbilities) {
-							gameUI.clearFieldButtons(ability.card.zone, ability.card.index, "activateAbility");
+							gameUI.clearCardButtons(ability.card.zone, ability.card.index, "activateAbility");
 						}
 						reject();
 					}, {once: true});

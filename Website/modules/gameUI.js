@@ -196,7 +196,6 @@ export function receiveMessage(command, message) {
 				zone = zoneToLocal(message.substr(0, message.indexOf("|")));
 				index = message.substr(message.indexOf("|") + 1);
 			}
-
 			dropCard(game.players[0], zone, index);
 			return true;
 		}
@@ -298,22 +297,20 @@ function dropCard(player, zone, index) {
 	}
 }
 
-export function addFieldButton(zone, index, label, type, onClick, visible = false) {
-	if (!(zone instanceof FieldZone)) {
-		throw new Error("Can't add field buttons to non-field zones")
-	}
+export function addCardButton(zone, index, label, type, onClick, visible = false) {
 	for (let slot of cardSlots) {
-		if (slot.zone === zone && slot.index == index) {
-			return slot.addCardButton(label, type, onClick, visible);
+		if (slot.zone === zone && (slot.index == index || slot.index == -1)) {
+			let button = slot.addCardButton(label, type, onClick, visible);
+			if (button) {
+				return button;
+			}
 		}
 	}
+	throw new Error("Can't add card buttons to zone of this type.");
 }
-export function clearFieldButtons(zone, index, type) {
-	if (!(zone instanceof FieldZone)) {
-		throw new Error("Can't add field buttons to non-field zones")
-	}
+export function clearCardButtons(zone, index, type) {
 	for (let slot of cardSlots) {
-		if (slot.zone === zone && slot.index == index) {
+		if (slot.zone === zone && (slot.index == index || slot.index == -1)) {
 			slot.clearCardButtons(type);
 		}
 	}
@@ -333,6 +330,36 @@ export class UiCardSlot {
 		cardSlots.splice(cardSlots.indexOf(this), 1);
 	}
 	insert(index) {}
+
+	getButtonHolder() {}
+
+	addCardButton(label, type, onClick, visible = false) {
+		let buttonHolder = this.getButtonHolder();
+		if (!buttonHolder) {
+			return;
+		}
+		let button = document.createElement("button");
+		button.classList.add(type);
+		button.textContent = label;
+		button.addEventListener("click", onClick);
+		buttonHolder.appendChild(button);
+		if (visible) {
+			buttonHolder.classList.add("visible");
+		}
+		return button;
+	}
+	clearCardButtons(type) {
+		let buttonHolder = this.getButtonHolder();
+		if (!buttonHolder) {
+			return;
+		}
+		for (let button of Array.from(buttonHolder.querySelectorAll("." + type))) {
+			button.remove();
+		}
+		if (buttonHolder.childElementCount == 0) {
+			buttonHolder.classList.remove("visible");
+		}
+	}
 }
 
 class FieldCardSlot extends UiCardSlot {
@@ -384,26 +411,8 @@ class FieldCardSlot extends UiCardSlot {
 		this.update();
 	}
 
-	addCardButton(label, type, onClick, visible = false) {
-		let button = document.createElement("button");
-		button.classList.add(type);
-		button.textContent = label;
-		button.addEventListener("click", onClick);
-		let buttonHolder = this.fieldSlot.parentElement.querySelector(".cardActionHolder");
-		buttonHolder.appendChild(button);
-		if (visible) {
-			buttonHolder.classList.add("visible");
-		}
-		return button;
-	}
-	clearCardButtons(type) {
-		let buttonHolder = this.fieldSlot.parentElement.querySelector(".cardActionHolder");
-		for (let button of Array.from(buttonHolder.querySelectorAll("." + type))) {
-			button.remove();
-		}
-		if (buttonHolder.childElementCount == 0) {
-			buttonHolder.classList.remove("visible");
-		}
+	getButtonHolder() {
+		return this.fieldSlot.parentElement.querySelector(".cardActionHolder");
 	}
 }
 
@@ -512,6 +521,10 @@ class PileCardSlot extends UiCardSlot {
 	setVisuals() {
 		getCardImage(this.zone.get(this.zone.cards.length - 1)).then(img => document.getElementById(this.zone.type + this.zone.player.index).src = img);
 		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
+	}
+
+	getButtonHolder() {
+		return document.getElementById(this.zone.type + this.zone.player.index + "CardButtons");
 	}
 }
 
@@ -792,6 +805,10 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 	return new Promise((resolve, reject) => {
 		let validOptions = 0;
 		for (let i = 0; i < cards.length; i++) {
+			if (i > 0 && cards[i].zone != cards[i-1].zone) {
+				cardChoiceGrid.appendChild(document.createElement("hr"));
+			}
+
 			let cardImg = document.createElement("img");
 			getCardImage(cards[i]).then(img => cardImg.src = img);
 			if (matchFunction(cards[i])) {

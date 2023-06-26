@@ -36,8 +36,8 @@ class tokenZone {
 }
 
 function addPartnerRevealButton() {
-	gameUI.addFieldButton(localPlayer.partnerZone, 0, locale.game.partnerSelect.revealPartner, "revealPartner", function() {
-		gameUI.clearFieldButtons(localPlayer.partnerZone, 0, "revealPartner");
+	gameUI.addCardButton(localPlayer.partnerZone, 0, locale.game.partnerSelect.revealPartner, "revealPartner", function() {
+		gameUI.clearCardButtons(localPlayer.partnerZone, 0, "revealPartner");
 		localPlayer.partnerZone.cards[0].hidden = false;
 		gameUI.updateCard(localPlayer.partnerZone, 0);
 		socket.send("[revealPartner]");
