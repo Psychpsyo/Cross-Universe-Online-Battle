@@ -1,5 +1,5 @@
 
-import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent} from "./events.js";
+import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
 import {StaticAbility, TriggerAbility} from "./abilities.js";
 
 // Represents a single instance in time where multiple actions take place at once.
@@ -104,10 +104,13 @@ export class Timing {
 		game.nextTimingIndex++;
 		this.successful = true;
 
+		yield* recalculateCardValues(this.game);
+
 		// static abilities and win/lose condition checks
 		let staticsChanged = true;
 		while (staticsChanged) {
 			staticsChanged = await phaseStaticAbilities(this.game);
+			yield* recalculateCardValues(this.game);
 			yield* checkGameOver(this.game);
 		}
 
@@ -125,7 +128,7 @@ export class Timing {
 		}
 	}
 
-	* undo() {
+	async* undo() {
 		// check if this timing actually ran
 		if (!this.successful) {
 			return;
@@ -137,6 +140,7 @@ export class Timing {
 				events.push(event);
 			}
 		}
+		yield* recalculateCardValues(this.game);
 		yield events;
 	}
 
@@ -198,10 +202,26 @@ async function phaseStaticAbilities(game) {
 			}
 		}
 	}
+	return abilitiesChanged;
+}
+
+async function* recalculateCardValues(game) {
 	for (let player of game.players) {
 		for (let card of player.getActiveCards()) {
+			let cardBaseValues = card.baseValues;
+			let cardValues = card.values;
 			await card.recalculateModifiedValues();
+
+			let valueChangeEvents = [];
+			for (let property of cardBaseValues.compareTo(card.baseValues)) {
+				valueChangeEvents.push(createCardValueChangedEvent(card, property, true))
+			}
+			for (let property of cardValues.compareTo(card.values)) {
+				valueChangeEvents.push(createCardValueChangedEvent(card, property, false))
+			}
+			if (valueChangeEvents.length > 0) {
+				yield valueChangeEvents;
+			}
 		}
 	}
-	return abilitiesChanged;
 }

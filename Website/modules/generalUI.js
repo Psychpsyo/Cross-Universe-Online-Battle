@@ -7,6 +7,12 @@ let currentPreviewedCard = null;
 chatHeader.textContent = locale.chat.title;
 chatInput.placeholder = locale.chat.enterMessage;
 
+cardDetailsAttack.textContent = locale.cardDetailsAttack;
+cardDetailsDefense.textContent = locale.cardDetailsDefense;
+cardDetailsLevel.textContent = locale.cardDetailsLevel;
+cardDetailsLevelTypeSeparator.textContent = locale.cardDetailsLevelTypeSeparator;
+cardDetailsTypes.textContent = locale.cardDetailsTypes;
+
 // chat box
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 export function putChatMessage(message, type) {
@@ -79,12 +85,16 @@ export async function previewCard(card, specific = true) {
 	// set the image preview
 	cardDetailsImage.style.backgroundImage = "url(" + (await getCardImage(card)) + ")";
 
-	// set the text preview
+	return updateCardPreview(card);
+}
+
+export async function updateCardPreview(card) {
+	if (currentPreviewedCard != card) {
+		return;
+	}
 	// general info
-	let names = card.values.names.map(async (name) => (await getCardInfo(name)).name);
-	Promise.allSettled(names).then(names => {
-		cardDetailsName.textContent = names.map(name => name.value).join("/");
-	});
+	insertCardValueList(card, "names", cardDetailsName, "/", async (name) => (await getCardInfo(name)).name);
+
 	let cardTypes = [...card.values.cardTypes];
 	if (cardTypes.includes("token")) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);
@@ -95,18 +105,17 @@ export async function previewCard(card, specific = true) {
 	if (cardTypes.includes("item")) {
 		cardTypes.splice(cardTypes.indexOf("item"), 1);
 	}
-	cardDetailsLevelType.textContent = locale.cardDetailsInfoString.replace("{#LEVEL}", card.values.level == -1? "?" : card.values.level).replace("{#CARDTYPE}", cardTypes.map(type => locale[type + "CardDetailType"]).join("/"));
-	if (card.values.types.length > 0) {
-		cardDetailsTypes.textContent = locale.cardDetailsTypes + card.values.types.map(type => locale.types[type]).join(locale.typeSeparator);
-	} else {
-		cardDetailsTypes.textContent = locale.typeless;
-	}
+
+	insertCardValue(card, "level", cardDetailsLevelValues);
+	cardDetailsTypeValues.textContent = cardTypes.map(type => locale[type + "CardDetailType"]).join("/");
+
+	insertCardValueList(card, "types", cardDetailsTypesValues, locale.typeSeparator, async (type) => locale.types[type], locale.typeless);
 
 	// attack & defense
 	if (card.values.cardTypes.includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
-		cardDetailsAttack.innerHTML = locale.cardDetailsAttack + (card.values.attack == -1? "?" : card.values.attack);
-		cardDetailsDefense.innerHTML = locale.cardDetailsDefense + (card.values.defense == -1? "?" : card.values.defense);
+		insertCardValue(card, "attack", cardDetailsAttackValues);
+		insertCardValue(card, "defense", cardDetailsDefenseValues);
 	} else {
 		cardDetailsAttackDefense.style.display = "none";
 	}
@@ -154,4 +163,64 @@ export async function previewCard(card, specific = true) {
 	}
 
 	cardDetails.style.setProperty("--side-distance", ".5em");
+}
+
+function insertCardValue(card, value, target) {
+	target.innerHTML = "";
+	insertCardValueText(card.baseValues[value] == -1? "?" : card.baseValues[value], target, card.baseValues[value] == card.values[value]? null : "valueGone");
+	if (card.baseValues[value] != card.values[value]) {
+		target.appendChild(document.createTextNode(" "));
+		insertCardValueText(card.values[value] == -1? "?" : card.values[value], target, "valueAdded");
+	}
+}
+
+function insertCardValueText(string, target, className) {
+	let valueSpan = document.createElement("span");
+	valueSpan.textContent = string;
+	if (className) {
+		valueSpan.classList.add(className);
+	}
+	target.appendChild(valueSpan);
+}
+
+function insertCardValueList(card, valueName, target, separator, localizer, noneText = "---") {
+	target.innerHTML = "";
+	let valueAdded = false;
+	for (let value of card.baseValues[valueName]) {
+		if (valueAdded) {
+			target.appendChild(document.createTextNode(separator));
+		}
+		let valueSpan = document.createElement("span");
+		localizer(value).then(localizedValue => {
+			valueSpan.textContent = localizedValue;
+		});
+		if (!card.values[valueName].includes(value)) {
+			valueSpan.classList.add("valueGone");
+		}
+		target.appendChild(valueSpan);
+		valueAdded = true;
+	}
+	if (card.baseValues[valueName].length == 0) {
+		insertCardValueText(noneText, target, card.values[valueName].length == 0? null : "valueGone");
+		target.appendChild(document.createTextNode(" "));
+	}
+	for (let value of card.values[valueName]) {
+		if (card.baseValues[valueName].includes(value)) {
+			continue;
+		}
+		if (valueAdded) {
+			target.appendChild(document.createTextNode(separator));
+		}
+		let valueSpan = document.createElement("span");
+		localizer(value).then(localizedValue => {
+			valueSpan.textContent = localizedValue;
+		});
+		valueSpan.classList.add("valueAdded");
+		target.appendChild(valueSpan);
+		valueAdded = true;
+	}
+	if (card.baseValues[valueName].length != 0 && card.values[valueName].length == 0) {
+		target.appendChild(document.createTextNode(separator));
+		insertCardValueText(noneText, target, "valueAdded");
+	}
 }

@@ -1,5 +1,6 @@
 import * as events from "./events.js";
 import * as requests from "./inputRequests.js";
+import * as zones from "./zones.js";
 
 // Base class for any action in the game.
 export class Action {
@@ -393,5 +394,9 @@ export class ApplyCardStatChange extends Action {
 
 	undo() {
 		this.card.cardRef.modifierStack.pop();
+	}
+
+	isImpossible(timing) {
+		return !(this.card.zone instanceof zones.FieldZone);
 	}
 }

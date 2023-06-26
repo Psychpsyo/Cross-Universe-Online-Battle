@@ -2,16 +2,15 @@
 
 import {locale} from "/modules/locale.js";
 import {InteractionController} from "/modules/interactionController.js";
-import {putChatMessage} from "/modules/generalUI.js";
 import {socket} from "/modules/netcode.js";
 import {DistRandom} from "/modules/distributedRandom.js";
 import {getAutoResponse} from "/modules/autopass.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
+import * as generalUI from "/modules/generalUI.js";
 import * as actions from "/rulesEngine/actions.js";
 import * as blocks from "/rulesEngine/blocks.js";
 import * as cardLoader from "/modules/cardLoader.js";
-import * as zones from "/rulesEngine/zones.js";
 
 export class AutomaticController extends InteractionController {
 	constructor() {
@@ -107,7 +106,7 @@ export class AutomaticController extends InteractionController {
 				let move = JSON.parse(message);
 				if (move.type == "choosePlayer") {
 					move.value = game.players[move.value].next().index;
-					putChatMessage(game.players[move.value] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
+					generalUI.putChatMessage(game.players[move.value] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
 				}
 				this.opponentMoves.push(move);
 				this.opponentMoveEventTarget.dispatchEvent(new CustomEvent("input"));
@@ -206,11 +205,11 @@ export class AutomaticController extends InteractionController {
 	async handleEvent(event) {
 		switch (event.type) {
 			case "deckShuffled": {
-				putChatMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+				generalUI.putChatMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
 				return this.gameSleep();
 			}
 			case "startingPlayerSelected": {
-				putChatMessage(event.player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
+				generalUI.putChatMessage(event.player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
@@ -269,6 +268,10 @@ export class AutomaticController extends InteractionController {
 			case "manaChanged": {
 				await gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
 				return this.gameSleep();
+			}
+			case "cardValueChanged": {
+				generalUI.updateCardPreview(event.card);
+				return;
 			}
 			case "cardPlaced": {
 				gameUI.insertCard(event.toZone, event.toIndex);

@@ -194,6 +194,13 @@ dialog #cardDetails {
 	font-weight: bold;
 	color: #f00;
 }
+.valueGone {
+	filter: opacity(50%);
+	text-decoration: line-through;
+}
+.valueAdded {
+	font-weight: bold;
+}
 
 #gameInteractions {
 	text-align: center;
@@ -362,9 +369,6 @@ img[src$="cardBackFrameP1.png"] {
 	z-index: 1;
 
 	border-radius: 1em;
-
-	transition-property: background;
-	transition-duration: 0.15s;
 
 	--card-count: 0;
 }

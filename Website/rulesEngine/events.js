@@ -258,3 +258,13 @@ export function createCardExiledEvent(fromZone, fromIndex, toZone, card) {
 		"card": card
 	}
 }
+
+export function createCardValueChangedEvent(card, valueName, isBaseValue) {
+	return {
+		"nature": "event",
+		"type": "cardValueChanged",
+		"card": card,
+		"valueName": valueName,
+		"isBaseValue": isBaseValue
+	}
+}

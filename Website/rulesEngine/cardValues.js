@@ -22,6 +22,30 @@ export class CardValues {
 			[...this.abilities]
 		);
 	}
+
+	// returns a list of all properties that are different between this and other
+	compareTo(other) {
+		let differences = [];
+		for (let property of ["level", "attack", "defense"]) {
+			if (this[property] != other[property]) {
+				differences.push(property);
+			}
+		}
+
+		for (let property of ["cardTypes", "names", "types", "abilities"]) {
+			if (this[property].length != other[property].length) {
+				differences.push(property);
+			} else {
+				for (let i = 0; i < this[property].length; i++) {
+					if (this[property][i] != other[property][i]) {
+						differences.push(property);
+						break;
+					}
+				}
+			}
+		}
+		return differences;
+	}
 }
 
 export class CardModifier {

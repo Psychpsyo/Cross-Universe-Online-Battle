@@ -415,11 +415,18 @@
 					<button id="cardDetailsClose" class="bigButton">X</button>
 				</div>
 				<div id="cardDetailsText">
-					<div id="cardDetailsName">---</div>
+					<div id="cardDetailsName"></div>
 					<div id="cardDetailsInfo">
-						<span id="cardDetailsLevelType">Lv- ---</span><br>
-						<span id="cardDetailsTypes">Types:</span><br>
-						<div id="cardDetailsAttackDefense"><span id="cardDetailsAttack">Attack: ?</span><span id="cardDetailsDefense">Defense: ?</span></div>
+						<!-- These need to be one-liners, else spaces are inserted inbetween -->
+						<span id="cardDetailsLevel"></span><span id="cardDetailsLevelValues"></span><span id="cardDetailsLevelTypeSeparator"></span><span id="cardDetailsTypeValues"></span><br>
+						<span id="cardDetailsTypes"></span><span id="cardDetailsTypesValues"></span><br>
+							<span>
+								<span id="cardDetailsAttack"></span><span id="cardDetailsAttackValues"></span>
+							</span>
+							<span>
+								<span id="cardDetailsDefense"></span><span id="cardDetailsDefenseValues"></span>
+							</span>
+						</div>
 					</div>
 					<div id="cardDetailsEffectList"></div>
 				</div>
