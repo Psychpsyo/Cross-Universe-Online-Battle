@@ -90,6 +90,12 @@ let keywordTokenTypes = {
 	declared: "actionAccessor",
 	retired: "actionAccessor",
 
+	forever: "untilIndicator",
+	endOfTurn: "untilIndicator",
+	endOfNextTurn: "untilIndicator",
+	endOfYourNextTurn: "untilIndicator",
+	endOfOpponentNextTurn: "untilIndicator",
+
 	Angel: "type",
 	Armor: "type",
 	Beast: "type",

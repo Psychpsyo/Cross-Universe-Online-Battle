@@ -83,8 +83,7 @@ export class TriggerRootNode extends AstNode {
 		this.expression = expression;
 	}
 	async* eval(card, player, ability) {
-		let stackTimings = player.game.currentStack().getTimings();
-		currentImplicitActions = stackTimings[stackTimings.length - 1].actions;
+		currentImplicitActions = player.game.currentPhase().lastActionList;
 
 		let returnValue = await (yield* this.expression.eval(card, player, ability));
 
@@ -127,8 +126,9 @@ export class FunctionNode extends AstNode {
 		player = (await (yield* this.player.eval(card, player, ability)))[0];
 		switch (this.functionName) {
 			case "APPLY": {
-				let modifier = await (yield* this.parameters[1].eval(card, player, ability));
-				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.ApplyCardStatChange(card.cardRef, modifier));
+				let modifier = await (await (yield* this.parameters[1].eval(card, player, ability))).bake();
+				let until = await (yield* this.parameters[2].eval(card, player, ability));
+				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.ApplyCardStatChange(card.cardRef, modifier, until));
 			}
 			case "COUNT": {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
@@ -155,8 +155,7 @@ export class FunctionNode extends AstNode {
 				return [new actions.Draw(player, amount)];
 			}
 			case "EXILE": {
-				yield (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Exile(card.cardRef));
-				return;
+				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Exile(card.cardRef));
 			}
 			case "GAINLIFE": {
 				return [new actions.ChangeLife(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
@@ -851,5 +850,15 @@ export class ModifierNode extends AstNode {
 	}
 	async* eval(card, player, ability) {
 		return new CardModifier(this.modifications, card, player, ability);
+	}
+}
+
+export class UntilIndicatorNode extends AstNode {
+	constructor(type) {
+		super();
+		this.type = type;
+	}
+	async* eval(card, player, ability) {
+		return this.type;
 	}
 }

@@ -264,7 +264,7 @@ function parseValue() {
 		case "leftBracket": {
 			if (tokens[pos+1].type == "from") {
 				let cardMatcher = parseCardMatcher();
-				if (tokens[pos].type == "dotOperator") {
+				if (tokens[pos] && tokens[pos].type == "dotOperator") {
 					pos++;
 					return parseCardDotAccess(cardMatcher);
 				}
@@ -343,6 +343,11 @@ function parseValue() {
 		}
 		case "leftBrace": {
 			return parseModifier();
+		}
+		case "untilIndicator": {
+			let node = new ast.UntilIndicatorNode(tokens[pos].value);
+			pos++;
+			return node;
 		}
 		default: {
 			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid value.");
@@ -531,6 +536,9 @@ function parseModifier() {
 		if (valueIdentifier.startsWith("base")) {
 			valueIdentifier = valueIdentifier[4].toLowerCase() + valueIdentifier.substr(5);
 			toBaseValues = true;
+		}
+		if (valueIdentifier == "name") {
+			valueIdentifier = "names";
 		}
 
 		pos++;

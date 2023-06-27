@@ -3,7 +3,7 @@ import {createPhaseStartedEvent} from "./events.js";
 import {enterBattlePhase} from "./inputRequests.js";
 
 export class Turn {
-	constructor(player) {
+	constructor(player, endOfTurnTimings) {
 		this.game = player.game;
 		this.player = player;
 		this.phases = [];
@@ -12,6 +12,8 @@ export class Turn {
 		this.hasStandardDrawn = false;
 		this.hasStandardSummoned = null;
 		this.hasRetired = null;
+
+		this.endOfTurnTimings = endOfTurnTimings;
 	}
 
 	async* run() {

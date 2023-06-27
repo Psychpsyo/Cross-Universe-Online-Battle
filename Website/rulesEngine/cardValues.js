@@ -1,4 +1,5 @@
 // This file holds definitions for the CardValues class and modifiers for the card's modifier stacks.
+import * as ast from "./cdfScriptInterpreter/astNodes.js";
 
 export class CardValues {
 	constructor(cardTypes, names, level, types, attack, defense, abilities) {
@@ -64,11 +65,21 @@ export class CardModifier {
 		}
 		return values;
 	}
+
+	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
+	async bake() {
+		let bakedModifications = (await Promise.allSettled(this.modifications.map(async modification => modification.bake(this.card, this.player, this.ability)))).map(fulfillment => fulfillment.value);
+		return new CardModifier(bakedModifications, this.card, this.player, this.ability);
+	}
 }
 
 export class ValueModification {
 	async modify(values, card, player, ability) {
 		return values;
+	}
+
+	async bake(card, player, ability) {
+		return this;
 	}
 }
 
@@ -79,9 +90,18 @@ export class ValueSetModification extends ValueModification {
 		this.newValue = newValue;
 		this.toBaseValues = toBaseValues;
 	}
+
 	async modify(values, card, player, ability) {
-		values[this.value] = (await this.newValue.evalFull(card, player, ability))[0];
+		if (["level", "attack", "defense"].includes(this.value)) {
+			values[this.value] = (await this.newValue.evalFull(card, player, ability))[0];
+		} else {
+			values[this.value] = (await this.newValue.evalFull(card, player, ability));
+		}
 		return values;
+	}
+
+	async bake(card, player, ability) {
+		return new ValueSetModification(this.value, new ast.ValueArrayNode(await this.newValue.evalFull(card, player, ability)), this.toBaseValues);
 	}
 }
 
@@ -92,6 +112,7 @@ export class ValueAppendModification extends ValueModification {
 		this.newValues = newValues;
 		this.toBaseValues = toBaseValues;
 	}
+
 	async modify(values, card, player, ability) {
 		for (let newValue of await this.newValues.evalFull(card, player, ability)) {
 			if (!values[this.value].includes(newValue)) {
@@ -99,6 +120,10 @@ export class ValueAppendModification extends ValueModification {
 			}
 		}
 		return values;
+	}
+
+	async bake(card, player, ability) {
+		return new ValueAppendModification(this.value, new ast.ValueArrayNode(await this.newValues.evalFull(card, player, ability)), this.toBaseValues);
 	}
 }
 
@@ -109,9 +134,14 @@ export class NumericChangeModification extends ValueModification {
 		this.amount = amount;
 		this.toBaseValues = toBaseValues;
 	}
+
 	async modify(values, card, player, ability) {
 		values[this.value] = Math.max(0, values[this.value] + (await this.amount.evalFull(card, player, ability))[0]);
 		return values;
+	}
+
+	async bake(card, player, ability) {
+		return new NumericChangeModification(this.value, new ast.ValueArrayNode(await this.amount.evalFull(card, player, ability)), this.toBaseValues);
 	}
 }
 
@@ -122,6 +152,7 @@ export class ValueSwapModification extends ValueModification {
 		this.valueB = valueB;
 		this.toBaseValues = toBaseValues;
 	}
+
 	async modify(values) {
 		let temp = values[valueA];
 		values[this.valueA] = values[this.valueB];

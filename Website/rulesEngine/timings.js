@@ -1,6 +1,7 @@
 
 import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
 import {StaticAbility, TriggerAbility} from "./abilities.js";
+import * as phases from "./phases.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
@@ -60,7 +61,7 @@ export class Timing {
 
 	// returns whether or not the timing completed sucessfully
 	async* run() {
-		this.index = game.nextTimingIndex;
+		this.index = this.game.nextTimingIndex;
 
 		for (let action of this.actions) {
 			if (action.costIndex >= this.costCompletions.length) {
@@ -73,7 +74,7 @@ export class Timing {
 		if (this.costCompletions.length > 0) {
 			// empty costs count as successful completion
 			if (this.actions.length == 0 && this.costCompletions.includes(true)) {
-				game.nextTimingIndex++;
+				this.game.nextTimingIndex++;
 				this.successful = true;
 				return;
 			}
@@ -91,6 +92,7 @@ export class Timing {
 			return;
 		}
 
+		this.game.currentPhase().lastActionList = this.actions;
 		let events = [];
 		for (let action of this.actions) {
 			let event = yield* action.run();
@@ -101,7 +103,7 @@ export class Timing {
 		if (events.length > 0) {
 			yield events;
 		}
-		game.nextTimingIndex++;
+		this.game.nextTimingIndex++;
 		this.successful = true;
 
 		yield* recalculateCardValues(this.game);
@@ -115,7 +117,7 @@ export class Timing {
 		}
 
 		// check trigger ability conditions
-		if (this.game.currentStack()) {
+		if (this.game.currentPhase() instanceof phases.StackPhase) {
 			for (let player of game.players) {
 				for (let card of player.getActiveCards()) {
 					for (let ability of card.values.abilities) {

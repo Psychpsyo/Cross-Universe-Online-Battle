@@ -9,7 +9,7 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-$unit = SELECT(1, [from unitZone, spellItemZone where types != Curse])
+$card = SELECT(1, [from unitZone, spellItemZone where types != Curse])
 exec:
-APPLY($unit, {level -= 1})
-APPLY($unit, {types += Curse})
+APPLY($card, {level -= 1}, forever)
+APPLY($card, {types += Curse}, forever)

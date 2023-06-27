@@ -123,7 +123,9 @@ export async function updateCardPreview(card) {
 	// effects
 	cardDetailsEffectList.innerHTML = "";
 	if (!card.cardId.startsWith("C")) {
-		(await getCardInfo(card.cardId)).effects.forEach(effect => {
+		let effects = (await getCardInfo(card.cardId)).effects;
+		cardDetailsEffectList.innerHTML = "";
+		for (let effect of effects) {
 			let effectDiv = document.createElement("div");
 			effectDiv.classList.add("cardDetailsEffect");
 
@@ -159,7 +161,7 @@ export async function updateCardPreview(card) {
 			});
 
 			cardDetailsEffectList.appendChild(effectDiv);
-		});
+		}
 	}
 
 	cardDetails.style.setProperty("--side-distance", ".5em");

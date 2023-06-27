@@ -11,6 +11,8 @@ class Phase {
 	constructor(turn, types) {
 		this.turn = turn;
 		this.types = types;
+		// Set by a timing when it successfully runs, to be read by the TriggerRoot AST nodes right after.
+		this.lastActionList = [];
 	}
 
 	* run() {}
@@ -322,6 +324,33 @@ export class BattlePhase extends StackPhase {
 export class EndPhase extends StackPhase {
 	constructor(turn) {
 		super(turn, ["endPhase"]);
+	}
+
+	async* run() {
+		do {
+			yield* super.run();
+
+			let timings = this.turn.endOfTurnTimings;
+			this.turn.endOfTurnTimings = []; // might be filled with new timings by what happens
+			for (let timing of timings) {
+				yield* timing.run();
+			}
+		} while (this.triggerAbilitiesMet());
+	}
+
+	triggerAbilitiesMet() {
+		for (let player of this.turn.game.players) {
+			for (let card of player.getActiveCards()) {
+				for (let ability of card.values.abilities) {
+					if (ability instanceof abilities.TriggerAbility) {
+						if (ability.triggerMet) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	async getBlockOptions(stack) {

@@ -13,6 +13,7 @@ export class Game {
 		this.players.push(new Player(this));
 
 		this.turns = [];
+		this.endOfUpcomingTurnTimings = [[], []];
 		this.currentAttackDeclaration = null;
 		this.nextTimingIndex = 1;
 
@@ -107,7 +108,8 @@ export class Game {
 
 		// RULES: ...and continue the game as follows.
 		while (true) {
-			this.turns.push(new Turn(currentPlayer));
+			this.turns.push(new Turn(currentPlayer, this.endOfUpcomingTurnTimings.shift()));
+			this.endOfUpcomingTurnTimings.push([]);
 			yield [createTurnStartedEvent()];
 			yield* this.currentTurn().run();
 			for (let card of this.getFieldCards(currentPlayer).concat(this.getFieldCards(currentPlayer.next()))) {

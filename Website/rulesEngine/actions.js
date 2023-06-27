@@ -1,6 +1,7 @@
 import * as events from "./events.js";
 import * as requests from "./inputRequests.js";
 import * as zones from "./zones.js";
+import {Timing} from "./timings.js";
 
 // Base class for any action in the game.
 export class Action {
@@ -381,15 +382,40 @@ export class Exile extends Action {
 }
 
 export class ApplyCardStatChange extends Action {
-	constructor(card, modifier) {
+	constructor(card, modifier, until) {
 		super();
 		this.card = card;
 		this.modifier = modifier;
+		this.until = until;
 	}
 
 	* run() {
 		this.card = this.card.snapshot();
 		this.card.cardRef.modifierStack.push(this.modifier);
+		if (this.until == "forever") {
+			return;
+		}
+		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.card.cardRef, this.modifier)], null);
+		switch (this.until) {
+			case "endOfTurn": {
+				this.card.owner.game.currentTurn().endOfTurnTimings.push(removalTiming);
+				break;
+			}
+			case "endOfNextTurn": {
+				this.card.owner.game.endOfUpcomingTurnTimings[0].push(removalTiming);
+				break;
+			}
+			case "endOfYourNextTurn": {
+				let currentlyYourTurn = this.card.owner.game.currentTurn().player == this.modifier.card.zone.player;
+				this.card.owner.game.endOfUpcomingTurnTimings[currentlyYourTurn? 1 : 0].push(removalTiming);
+				break;
+			}
+			case "endOfOpponentNextTurn": {
+				let currentlyOpponentTurn = this.card.owner.game.currentTurn().player != this.modifier.card.zone.player;
+				this.card.owner.game.endOfUpcomingTurnTimings[currentlyOpponentTurn? 1 : 0].push(removalTiming);
+				break;
+			}
+		}
 	}
 
 	undo() {
@@ -398,5 +424,26 @@ export class ApplyCardStatChange extends Action {
 
 	isImpossible(timing) {
 		return !(this.card.zone instanceof zones.FieldZone);
+	}
+}
+
+export class RemoveCardStatChange extends Action {
+	constructor(card, modifier) {
+		super();
+		this.card = card;
+		this.modifier = modifier;
+		this.index = -1;
+	}
+
+	* run() {
+		this.card = this.card.snapshot();
+		this.index = this.card.cardRef.modifierStack.indexOf(this.modifier);
+		if (this.index != -1) {
+			this.card.cardRef.modifierStack.splice(this.index, 1);
+		}
+	}
+
+	undo() {
+		this.card.cardRef.modifierStack.splice(this.index, 0, this.modifier);
 	}
 }

@@ -115,18 +115,18 @@ export class Stack {
 		this.processed = true;
 	}
 
-	* undoCreateBlock() {
+	async* undoCreateBlock() {
 		this.blocks.pop().undoCost();
 	}
 
-	* undoExecuteBlocks() {
+	async* undoExecuteBlocks() {
 		for (let block of this.blocks) {
 			yield* block.undoExecution();
 		}
 		this.processed = false;
 	}
 
-	* undo() {
+	async* undo() {
 		if (this.processed) {
 			yield* this.undoExecuteBlocks();
 		}

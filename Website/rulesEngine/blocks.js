@@ -75,13 +75,13 @@ class Block {
 		}
 	}
 
-	* undoCost() {
+	async* undoCost() {
 		for (let i = this.costTimings.length - 1; i >= 0; i--) {
 			yield* this.costTimings[i].undo();
 		}
 	}
 
-	* undoExecution() {
+	async* undoExecution() {
 		for (let i = this.executionTimings.length - 1; i >= 0; i--) {
 			yield* this.executionTimings[i].undo();
 		}
