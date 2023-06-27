@@ -260,7 +260,7 @@ async function showCardInfo(cardInfo) {
 	}
 
 	// set card image alt text
-	cardInfoCardImg.alt = locale.cardDetailsInfoString.replace("{#LEVEL}", cardInfo.level == -1? "?" : cardInfo.level).replace("{#CARDTYPE}", locale[cardInfo.cardType + "CardDetailType"]) + ".\n" + locale.cardDetailsEffects + "\n" + cardInfo.effectsPlain;
+	cardInfoCardImg.alt = locale.cardDetailsLevel + (cardInfo.level == -1? "?" : cardInfo.level) + locale.cardDetailsLevelTypeSeparator + locale[cardInfo.cardType + "CardDetailType"] + ".\n" + locale.cardDetailsEffects + "\n" + cardInfo.effectsPlain;
 
 	//fill in release date
 	if (cardInfo.releaseDate) {
