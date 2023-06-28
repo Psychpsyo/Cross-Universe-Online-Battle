@@ -79,6 +79,7 @@ let keywordTokenTypes = {
 	SUMMON: "function",
 	TOKENS: "function",
 
+	cards: "actionAccessor",
 	destroyed: "actionAccessor",
 	exiled: "actionAccessor",
 	discarded: "actionAccessor",

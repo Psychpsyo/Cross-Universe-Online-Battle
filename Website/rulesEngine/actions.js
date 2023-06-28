@@ -125,9 +125,9 @@ export class Place extends Action {
 		let zoneSlotResponse = (yield [zoneSlotRequest])[0];
 		this.targetIndex = requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
 
-		this.card.hidden = false;
-		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex);
 		this.card = this.card.snapshot();
+		this.card.cardRef.hidden = false;
+		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex);
 		this.zone.place(this.card.cardRef, this.targetIndex);
 		return cardPlacedEvent;
 	}
@@ -423,7 +423,7 @@ export class ApplyCardStatChange extends Action {
 	}
 
 	isImpossible(timing) {
-		return !(this.card.zone instanceof zones.FieldZone);
+		return !(this.card.zone instanceof zones.FieldZone) || this.modifier.modifications.length == 0;
 	}
 }
 

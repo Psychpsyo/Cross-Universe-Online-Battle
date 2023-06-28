@@ -68,8 +68,17 @@ export class CardModifier {
 
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
 	async bake() {
-		let bakedModifications = (await Promise.allSettled(this.modifications.map(async modification => modification.bake(this.card, this.player, this.ability)))).map(fulfillment => fulfillment.value);
+		let bakedModifications = (await Promise.allSettled(this.modifications.map(async modification => modification.bake(this.card, this.player, this.ability)))).map(fulfillment => fulfillment.value).filter(modification => modification !== null);
 		return new CardModifier(bakedModifications, this.card, this.player, this.ability);
+	}
+
+	async hasAllTargets(card, player, ability) {
+		for (let childNode of this.modifications) {
+			if (!(await childNode.hasAllTargets(card, player, ability))) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 
@@ -80,6 +89,10 @@ export class ValueModification {
 
 	async bake(card, player, ability) {
 		return this;
+	}
+
+	async hasAllTargets(card, player, ability) {
+		return true;
 	}
 }
 
@@ -101,7 +114,15 @@ export class ValueSetModification extends ValueModification {
 	}
 
 	async bake(card, player, ability) {
-		return new ValueSetModification(this.value, new ast.ValueArrayNode(await this.newValue.evalFull(card, player, ability)), this.toBaseValues);
+		let valueArray = await this.newValue.evalFull(card, player, ability);
+		if (valueArray.length == 0) {
+			return null;
+		}
+		return new ValueSetModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+	}
+
+	async hasAllTargets(card, player, ability) {
+		return (await this.newValue.evalFull(card, player, ability)).length > 0;
 	}
 }
 
@@ -123,7 +144,15 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	async bake(card, player, ability) {
-		return new ValueAppendModification(this.value, new ast.ValueArrayNode(await this.newValues.evalFull(card, player, ability)), this.toBaseValues);
+		let valueArray = await this.newValues.evalFull(card, player, ability);
+		if (valueArray.length == 0) {
+			return null;
+		}
+		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+	}
+
+	async hasAllTargets(card, player, ability) {
+		return (await this.newValues.evalFull(card, player, ability)).length > 0;
 	}
 }
 
@@ -141,7 +170,15 @@ export class NumericChangeModification extends ValueModification {
 	}
 
 	async bake(card, player, ability) {
-		return new NumericChangeModification(this.value, new ast.ValueArrayNode(await this.amount.evalFull(card, player, ability)), this.toBaseValues);
+		let valueArray = await this.amount.evalFull(card, player, ability);
+		if (valueArray.length == 0) {
+			return null;
+		}
+		return new NumericChangeModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+	}
+
+	async hasAllTargets(card, player, ability) {
+		return (await this.amount.evalFull(card, player, ability)).length > 0;
 	}
 }
 

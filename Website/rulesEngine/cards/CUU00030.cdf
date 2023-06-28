@@ -8,4 +8,4 @@ defense: 300
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field
-modifier: {defense += COUNT([from you.field where self != thisCard & types = Earth]) * 100}
+modifier: {defense += COUNT([from field where self != thisCard & types = Earth]) * 100}

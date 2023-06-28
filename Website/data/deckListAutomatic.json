@@ -1,7 +1,5 @@
 {
-	"default": [
-		"allAutomaticCards"
-	],
+	"default": [],
 	"legacy": [
 		"legalInAutomatic"
 	]

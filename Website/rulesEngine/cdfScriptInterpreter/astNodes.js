@@ -272,7 +272,7 @@ defense: ${defense}`, false));
 		player = (await this.player.evalFull(card, player, ability))[0];
 		switch (this.functionName) {
 			case "APPLY": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
+				return await this.parameters[0].hasAllTargets(card, player, ability) && await this.parameters[1].hasAllTargets(card, player, ability);
 			}
 			case "COUNT": {
 				return true;
@@ -787,6 +787,7 @@ export class ActionAccessorNode extends AstNode {
 	}
 	async* eval(card, player, ability) {
 		let actionType = {
+			"cards": null,
 			"discarded": actions.Discard,
 			"destroyed": actions.Destroy,
 			"exiled": actions.Exile,
@@ -800,39 +801,37 @@ export class ActionAccessorNode extends AstNode {
 
 		let values = [];
 		for (let action of await (yield* this.actionsNode.eval(card, player, ability))) {
-			if (action instanceof actionType) {
-				switch (this.accessor) {
-					case "discarded":
-					case "destroyed":
-					case "exiled": {
+			if (this.accessor == "cards" || action instanceof actionType) {
+				switch (action.constructor) {
+					case actions.Discard:
+						if (this.accessor == "retired" && !(action.timing.block instanceof blocks.Retire)) {
+							break;
+						}
+					case actions.Destroy:
+					case actions.Exile: {
 						values.push(action.card);
 						break;
 					}
-					case "summoned": {
+					case actions.Summon: {
 						values.push(action.unit);
 						break;
 					}
-					case "cast": {
+					case actions.Cast: {
 						values.push(action.spell);
 						break;
 					}
-					case "deployed": {
+					case actions.Deploy: {
 						values.push(action.item);
 						break;
 					}
-					case "targeted": {
-						values.push(action.attackTarget);
-						break;
-					}
-					case "declared": {
-						for (let attacker of action.attackers) {
-							values.push(attacker);
+					case actions.EstablishAttackDeclaration: {
+						if (this.accessor == "targeted" || this.accessor == "cards") {
+							values.push(action.attackTarget);
 						}
-						break;
-					}
-					case "retired": {
-						if (action.timing.block instanceof blocks.Retire) {
-							values.push(action.card);
+						if (this.accessor == "declared" || this.accessor == "cards") {
+							for (let attacker of action.attackers) {
+								values.push(attacker);
+							}
 						}
 						break;
 					}
