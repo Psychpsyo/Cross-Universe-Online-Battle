@@ -2,7 +2,7 @@ id: CUI00003
 cardType: standardItem
 name: CUI00003
 level: 0
-types:
+types: Medicine
 o: deploy
 cost:
 $player = SELECTPLAYER()

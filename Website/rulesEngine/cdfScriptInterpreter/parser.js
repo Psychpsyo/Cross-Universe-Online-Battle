@@ -573,6 +573,7 @@ function parseModifier() {
 					throw new ScriptParserError("Modifier can only swap card properties with other card properties. (Got '" + tokens[pos].type + "' token instead.)");
 				}
 				let otherIdentifier = tokens[pos].value;
+				pos++;
 				if (otherIdentifier.startsWith("base") != toBaseValues) {
 					throw new ScriptParserError("Modifier cannot swap base value with non-base value.");
 				}

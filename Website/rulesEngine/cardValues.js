@@ -154,7 +154,7 @@ export class ValueSwapModification extends ValueModification {
 	}
 
 	async modify(values) {
-		let temp = values[valueA];
+		let temp = values[this.valueA];
 		values[this.valueA] = values[this.valueB];
 		values[this.valueB] = temp;
 		return values;
