@@ -31,7 +31,7 @@ export class Ability extends BaseAbility {
 	}
 
 	async canActivate(card, player) {
-		return (await super.canActivate(card, player)) && (this.cost === null || await this.cost.hasAllTargets(card, player, this));
+		return (await super.canActivate(card, player)) && (this.cost === null || await this.cost.canDoInFull(card, player, this));
 	}
 
 	async* runCost(card, player) {

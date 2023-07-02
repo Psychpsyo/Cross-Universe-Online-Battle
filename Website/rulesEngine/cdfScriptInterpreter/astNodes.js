@@ -22,10 +22,19 @@ class AstNode {
 		} while (!next.done);
 		return next.value;
 	}
-	// whether or not all actions in this tree can be done in full
+	// whether or not all actions in this tree have enough targets to specify the target availability rule.
 	async hasAllTargets(card, player, ability) {
 		for (let childNode of this.getChildNodes()) {
 			if (!(await childNode.hasAllTargets(card, player, ability))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	// Wether or not all actions in this tree can be done fully (as a cost)
+	async canDoInFull(card, player, ability) {
+		for (let childNode of this.getChildNodes()) {
+			if (!(await childNode.canDoInFull(card, player, ability))) {
 				return false;
 			}
 		}
@@ -271,14 +280,20 @@ defense: ${defense}`, false));
 	async hasAllTargets(card, player, ability) {
 		player = (await this.player.evalFull(card, player, ability))[0];
 		switch (this.functionName) {
+			case "COUNT":
+			case "DAMAGE":
+			case "DRAW":
+			case "GAINLIFE":
+			case "GAINMANA":
+			case "LOSELIFE":
+			case "LOSEMANA":
+			case "SELECTPLAYER":
+			case "SUM":
+			case "TOKENS": {
+				return true;
+			}
 			case "APPLY": {
 				return await this.parameters[0].hasAllTargets(card, player, ability) && await this.parameters[1].hasAllTargets(card, player, ability);
-			}
-			case "COUNT": {
-				return true;
-			}
-			case "DAMAGE": {
-				return true;
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
@@ -292,17 +307,52 @@ defense: ${defense}`, false));
 			case "DISCARD": {
 				return this.parameters[0].hasAllTargets(card, player, ability);
 			}
-			case "DRAW": {
-				return true;
-			}
 			case "EXILE": {
 				return this.parameters[0].hasAllTargets(card, player, ability);
 			}
-			case "GAINLIFE": {
+			case "SELECT": {
+				let availableAmount = (await this.parameters[1].evalFull(card, player, ability)).length;
+				if (this.parameters[0] instanceof AnyAmountNode && availableAmount > 0) {
+					return true;
+				}
+				let amountsRequired = await this.parameters[0].evalFull(card, player, ability);
+				return Math.min(...amountsRequired) <= availableAmount && await this.parameters[0].hasAllTargets(card, player, ability);
+			}
+			case "SUMMON": {
+				return this.parameters[0].hasAllTargets(card, player, ability);
+			}
+		}
+	}
+	async canDoInFull(card, player, ability) {
+		player = (await this.player.evalFull(card, player, ability))[0];
+		switch (this.functionName) {
+			case "COUNT":
+			case "DAMAGE":
+			case "GAINLIFE":
+			case "GAINMANA":
+			case "DRAW":
+			case "SELECTPLAYER":
+			case "SUM":
+			case "TOKENS": {
 				return true;
 			}
-			case "GAINMANA": {
-				return true;
+			case "APPLY": {
+				return await this.parameters[0].canDoInFull(card, player, ability) && await this.parameters[1].canDoInFull(card, player, ability);
+			}
+			case "DECKTOP": {
+				if (this.asManyAsPossible) {
+					return player.deckZone.cards.length > 0;
+				}
+				return player.deckZone.cards.length >= (await this.parameters[0].evalFull(card, player, ability))[0];
+			}
+			case "DESTROY": {
+				return this.parameters[0].canDoInFull(card, player, ability);
+			}
+			case "DISCARD": {
+				return this.parameters[0].canDoInFull(card, player, ability);
+			}
+			case "EXILE": {
+				return this.parameters[0].canDoInFull(card, player, ability);
 			}
 			case "LOSELIFE": {
 				return player.life + (await this.parameters[0].evalFull(card, player, ability))[0] >= 0;
@@ -316,19 +366,10 @@ defense: ${defense}`, false));
 					return true;
 				}
 				let amountsRequired = await this.parameters[0].evalFull(card, player, ability);
-				return Math.min(...amountsRequired) <= availableAmount && await this.parameters[0].hasAllTargets(card, player, ability);
-			}
-			case "SELECTPLAYER": {
-				return true;
-			}
-			case "SUM": {
-				return true;
+				return Math.min(...amountsRequired) <= availableAmount && await this.parameters[0].canDoInFull(card, player, ability);
 			}
 			case "SUMMON": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
-			}
-			case "TOKENS": {
-				return true;
+				return this.parameters[0].canDoInFull(card, player, ability);
 			}
 		}
 	}
