@@ -4,6 +4,7 @@ import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 import {FieldZone} from "/rulesEngine/zones.js";
 import {getCardImage} from "/modules/cardLoader.js";
+import {Card} from "/rulesEngine/card.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -11,6 +12,7 @@ let lastFrame = 0;
 
 let cardSelectorSlots = [];
 let cardSelectorMainSlot = null;
+let cardSelectorSorted = false;
 
 let cardChoiceSelected = [];
 
@@ -595,7 +597,9 @@ class CardSelectorSlot extends UiCardSlot {
 		this.cardElem = document.createElement("img");
 		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
 		this.cardElem.classList.add("card");
-		this.cardElem.style.order = -index;
+		if (!cardSelectorSorted) {
+			this.cardElem.style.order = -index;
+		}
 		this.cardElem.addEventListener("dragstart", function(e) {
 			e.preventDefault();
 			if (grabCard(localPlayer, zone, this.index) || zone == gameState.controller.tokenZone) {
@@ -642,9 +646,22 @@ export function openCardSelect(zone) {
 		closeCardSelect();
 	}
 	cardSelectorMainSlot.zone = zone;
-	for (let i = 0; i < zone.cards.length; i++) {
-		zone.get(i).hidden = false;
-		cardSelectorSlots.push(new CardSelectorSlot(zone, i));
+	cardSelectorSorted = false;
+	let cards = [];
+	for (const [index, element] of zone.cards.entries()) {
+		cards.push([index, element]);
+		if (element.hidden) {
+			cardSelectorSorted = true;
+		}
+	}
+	if (cardSelectorSorted) {
+		cards.sort(function(a, b) {
+			return Card.sort(a[1], b[1]);
+		});
+	}
+	for (const card of cards) {
+		card[1].hidden = false;
+		cardSelectorSlots.push(new CardSelectorSlot(zone, card[0]));
 	}
 
 	//show selector
