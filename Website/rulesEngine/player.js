@@ -23,6 +23,7 @@ export class Player {
 		this.exileZone = new Zone(this, "exile");
 
 		this.isViewable = false; // determines whether or not this player's cards should be visible locally.
+		this.aiSystem = null;
 	}
 
 	setDeck(cdfList) {

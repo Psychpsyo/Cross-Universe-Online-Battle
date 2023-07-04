@@ -5,6 +5,7 @@ import {Turn} from "./turns.js";
 import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
 import * as phases from "./phases.js";
+import * as actions from "./actions.js";
 
 export class Game {
 	constructor() {
@@ -111,7 +112,22 @@ export class Game {
 			this.turns.push(new Turn(currentPlayer, this.endOfUpcomingTurnTimings.shift()));
 			this.endOfUpcomingTurnTimings.push([]);
 			yield [createTurnStartedEvent()];
-			yield* this.currentTurn().run();
+
+			let turnGenerator = this.currentTurn().run();
+			let generatorOutput = await turnGenerator.next();
+			while (!generatorOutput.done) {
+				let actionList = generatorOutput.value;
+				if (actionList.length == 0 ||
+					!(actionList[0] instanceof actions.Action) ||
+					actionList[0].player.aiSystem === null
+				) {
+					generatorOutput = await turnGenerator.next(yield actionList);
+					continue;
+				}
+				// actionList contains decisions that need to be made by the AI.
+				generatorOutput = await turnGenerator.next(actionList[0].player.aiSystem.selectMove(actionList));
+			}
+
 			for (let card of this.getFieldCards(currentPlayer).concat(this.getFieldCards(currentPlayer.next()))) {
 				if (card) {
 					card.endOfTurnReset();
