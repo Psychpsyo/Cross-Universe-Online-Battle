@@ -238,7 +238,12 @@ export function tokenize(code) {
 				break;
 			}
 			case "/": {
-				tokens.push({type: "divide"});
+				if (code[pos+1] == "=") {
+					tokens.push({type: "divideAssignment"});
+					pos++;
+				} else {
+					tokens.push({type: "divide"});
+				}
 				pos++;
 				break;
 			}

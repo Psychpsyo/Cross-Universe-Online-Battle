@@ -264,10 +264,10 @@ export class FunctionNode extends AstNode {
 				let cards = [];
 				for (let i = 0; i < amount; i++) {
 					// TODO: Give player control over the specific token variant that gets selected
-					let cardId = (await (yield* this.parameters[1].eval(card, player, ability)))[0];
-					cards.push(new Card(player, `id: ${cardId}
+					let cardIds = await (yield* this.parameters[1].eval(card, player, ability));
+					cards.push(new Card(player, `id: CU${cardIds[i % cardIds.length]}
 cardType: token
-name: ${name}
+name: CU${name}
 level: ${level}
 types: ${types.join(",")}
 attack: ${attack}
@@ -414,7 +414,7 @@ export class CardMatchNode extends AstNode {
 		return (await this.evalFull(card, player, ability)).length > 0;
 	}
 	getChildNodes() {
-		return this.zoneNodes.concat(this.conditions);
+		return this.cardListNodes.concat(this.conditions);
 	}
 }
 export class ThisCardNode extends AstNode {
@@ -820,6 +820,14 @@ export class CurrentTurnNode extends AstNode {
 	}
 }
 
+
+function addCardIfUnique(values, card) {
+	if (values.find(inList => inList.cardRef == card.cardRef)) {
+		return;
+	}
+	values.push(card);
+}
+
 export class ActionAccessorNode extends AstNode {
 	constructor(actionsNode, accessor) {
 		super();
@@ -850,28 +858,28 @@ export class ActionAccessorNode extends AstNode {
 						}
 					case actions.Destroy:
 					case actions.Exile: {
-						values.push(action.card);
+						addCardIfUnique(values, action.card);
 						break;
 					}
 					case actions.Summon: {
-						values.push(action.unit);
+						addCardIfUnique(values, action.unit);
 						break;
 					}
 					case actions.Cast: {
-						values.push(action.spell);
+						addCardIfUnique(values, action.spell);
 						break;
 					}
 					case actions.Deploy: {
-						values.push(action.item);
+						addCardIfUnique(values, action.item);
 						break;
 					}
 					case actions.EstablishAttackDeclaration: {
 						if (this.accessor == "targeted" || this.accessor == "cards") {
-							values.push(action.attackTarget);
+							addCardIfUnique(values, action.attackTarget);
 						}
 						if (this.accessor == "declared" || this.accessor == "cards") {
 							for (let attacker of action.attackers) {
-								values.push(attacker);
+								addCardIfUnique(values, action.attacker);
 							}
 						}
 						break;

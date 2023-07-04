@@ -542,7 +542,7 @@ function parseModifier() {
 		}
 
 		pos++;
-		if (!["equals", "plusAssignment", "minusAssignment", "swapAssignment"].includes(tokens[pos].type)) {
+		if (!["equals", "plusAssignment", "minusAssignment", "divideAssignment", "swapAssignment"].includes(tokens[pos].type)) {
 			throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' token as operator in modifier syntax.");
 		}
 		let assignmentType = tokens[pos].type;
@@ -566,6 +566,13 @@ function parseModifier() {
 					throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.");
 				}
 				valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(parseExpression()), toBaseValues));
+				break;
+			}
+			case "divideAssignment": {
+				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
+					throw new ScriptParserError("Modifier cannot divide non-number card property '" + valueIdentifier + "'.");
+				}
+				valueModifications.push(new cardValues.NumericDivideModification(valueIdentifier, parseExpression(), toBaseValues));
 				break;
 			}
 			case "swapAssignment": {
