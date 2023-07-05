@@ -836,7 +836,6 @@ export class ActionAccessorNode extends AstNode {
 	}
 	async* eval(card, player, ability) {
 		let actionType = {
-			"cards": null,
 			"discarded": actions.Discard,
 			"destroyed": actions.Destroy,
 			"exiled": actions.Exile,
@@ -850,7 +849,7 @@ export class ActionAccessorNode extends AstNode {
 
 		let values = [];
 		for (let action of await (yield* this.actionsNode.eval(card, player, ability))) {
-			if (this.accessor == "cards" || action instanceof actionType) {
+			if (action instanceof actionType) {
 				switch (action.constructor) {
 					case actions.Discard:
 						if (this.accessor == "retired" && !(action.timing.block instanceof blocks.Retire)) {
@@ -874,10 +873,10 @@ export class ActionAccessorNode extends AstNode {
 						break;
 					}
 					case actions.EstablishAttackDeclaration: {
-						if (this.accessor == "targeted" || this.accessor == "cards") {
+						if (this.accessor == "targeted") {
 							addCardIfUnique(values, action.attackTarget);
 						}
-						if (this.accessor == "declared" || this.accessor == "cards") {
+						if (this.accessor == "declared") {
 							for (let attacker of action.attackers) {
 								addCardIfUnique(values, attacker);
 							}
