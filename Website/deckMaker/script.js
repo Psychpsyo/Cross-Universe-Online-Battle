@@ -246,7 +246,7 @@ async function showCardInfo(cardInfo) {
 	//fill in name
 	if (cardInfo.nameFurigana) {
 		let cardNameFurigana = cardInfo.name;
-		[...cardInfo.nameFurigana].reverse().forEach(furigana => {
+		cardInfo.nameFurigana.toReversed().forEach(furigana => {
 			// check for empty necessary to determine whether or not furigana needs parentheses in unsupported browsers.
 			if (furigana.text != "") {
 				cardNameFurigana = cardNameFurigana.slice(0, furigana.end) + "<rp>(</rp><rt>" + furigana.text + "</rt><rp>)</rp>" + cardNameFurigana.slice(furigana.end);
