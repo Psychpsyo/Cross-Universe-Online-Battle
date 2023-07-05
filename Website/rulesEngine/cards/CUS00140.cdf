@@ -5,4 +5,4 @@ level: 6
 types:
 o: cast
 $destructions = DESTROY([from you.field])
-opponent.DAMAGE(COUNT($destructions.cards) * 100)
+opponent.DAMAGE(COUNT($destructions.destroyed) * 100)

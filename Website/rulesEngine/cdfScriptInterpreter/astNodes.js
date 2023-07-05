@@ -879,7 +879,7 @@ export class ActionAccessorNode extends AstNode {
 						}
 						if (this.accessor == "declared" || this.accessor == "cards") {
 							for (let attacker of action.attackers) {
-								addCardIfUnique(values, action.attacker);
+								addCardIfUnique(values, attacker);
 							}
 						}
 						break;

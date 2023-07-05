@@ -5,4 +5,4 @@ level: 2
 types: Fire
 o: cast
 $discards = DISCARD(DECKTOP?(4))
-opponent.DAMAGE(COUNT([from $discards.cards where types = Fire]))
+opponent.DAMAGE(COUNT([from $discards.discarded where types = Fire]))
