@@ -123,6 +123,11 @@ class SnapshotCard extends BaseCard {
 	}
 
 	restore() {
+		// tokens might need to be restored back to non-existance
+		if (this.zone === null) {
+			this.cardRef.zone.remove(this.cardRef);
+			return;
+		}
 		this.zone.add(this.cardRef, this.index);
 
 		this.cardRef.initialValues = this.initialValues;
@@ -170,8 +175,8 @@ function parseCdfValues(cdf) {
 					break;
 				}
 				case "after": {
-					if (ability.type != "trigger") {
-						throw new Error("CDF Parser Error: Only trigger abilities have an 'after' clause.");
+					if (!["trigger", "cast", "deploy"].includes(ability.type)) {
+						throw new Error("CDF Parser Error: " + ability.type + " abilities can't have an 'after' clause.");
 					}
 					if (ability.duringPhase) {
 						throw new Error("CDF Parser Error: 'after' and 'duringPhase' clauses are mutually exclusive.");
@@ -300,10 +305,10 @@ function parseCdfValues(cdf) {
 function makeAbility(ability) {
 	switch (ability.type) {
 		case "cast": {
-			return new abilities.CastAbility(ability.id, ability.exec, ability.cost, ability.condition);
+			return new abilities.CastAbility(ability.id, ability.exec, ability.cost, ability.condition, ability.after);
 		}
 		case "deploy": {
-			return new abilities.DeployAbility(ability.id, ability.exec, ability.cost, ability.condition);
+			return new abilities.DeployAbility(ability.id, ability.exec, ability.cost, ability.condition, ability.after);
 		}
 		case "optional": {
 			return new abilities.OptionalAbility(ability.id, ability.exec, ability.cost, ability.turnLimit, ability.condition);

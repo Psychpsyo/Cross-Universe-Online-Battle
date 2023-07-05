@@ -1,6 +1,6 @@
 
 import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
-import {StaticAbility, TriggerAbility} from "./abilities.js";
+import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
 
 // Represents a single instance in time where multiple actions take place at once.
@@ -121,7 +121,9 @@ export class Timing {
 			for (let player of game.players) {
 				for (let card of player.getActiveCards()) {
 					for (let ability of card.values.abilities) {
-						if (ability instanceof TriggerAbility) {
+						if (ability instanceof abilities.TriggerAbility ||
+							ability instanceof abilities.CastAbility ||
+							ability instanceof abilities.DeployAbility) {
 							await ability.checkTrigger(card, player);
 						}
 					}
@@ -184,7 +186,7 @@ async function phaseStaticAbilities(game) {
 		let activeCards = player.getActiveCards();
 		for (let currentCard of activeCards) {
 			for (let ability of currentCard.values.abilities) {
-				if (ability instanceof StaticAbility) {
+				if (ability instanceof abilities.StaticAbility) {
 					let eligibleCards = await ability.getTargetCards(currentCard, player);
 					for (let otherCard of activeCards) {
 						if (eligibleCards.includes(otherCard)) {

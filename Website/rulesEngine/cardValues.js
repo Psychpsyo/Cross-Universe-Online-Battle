@@ -182,6 +182,32 @@ export class NumericChangeModification extends ValueModification {
 	}
 }
 
+export class NumericDivideModification extends ValueModification {
+	constructor(value, byAmount, toBaseValues) {
+		super();
+		this.value = value;
+		this.byAmount = byAmount;
+		this.toBaseValues = toBaseValues;
+	}
+
+	async modify(values, card, player, ability) {
+		values[this.value] = Math.ceil(values[this.value] / (await this.byAmount.evalFull(card, player, ability))[0]);
+		return values;
+	}
+
+	async bake(card, player, ability) {
+		let valueArray = await this.byAmount.evalFull(card, player, ability);
+		if (valueArray.length == 0) {
+			return null;
+		}
+		return new NumericDivideModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+	}
+
+	async hasAllTargets(card, player, ability) {
+		return (await this.byAmount.evalFull(card, player, ability)).length > 0;
+	}
+}
+
 export class ValueSwapModification extends ValueModification {
 	constructor(valueA, valueB, toBaseValues) {
 		super();

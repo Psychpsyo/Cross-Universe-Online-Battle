@@ -49,14 +49,44 @@ export class Ability extends BaseAbility {
 }
 
 export class CastAbility extends Ability {
-	constructor(id, exec, cost, condition) {
+	constructor(id, exec, cost, condition, trigger) {
 		super(id, exec, cost, condition);
+		this.trigger = null;
+		if (trigger) {
+			this.trigger = interpreter.buildTriggerAST(id, trigger);
+		}
+		this.triggerMet = false;
+	}
+
+	async canActivate(card, player) {
+		return (await super.canActivate(card, player)) && (this.trigger == null || this.triggerMet);
+	}
+
+	async checkTrigger(card, player) {
+		if (this.trigger == null || await this.trigger.evalFull(card, player, this)) {
+			this.triggerMet = true;
+		}
 	}
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, exec, cost, condition) {
+	constructor(id, exec, cost, condition, trigger) {
 		super(id, exec, cost, condition);
+		this.trigger = null;
+		if (trigger) {
+			this.trigger = interpreter.buildTriggerAST(id, trigger);
+		}
+		this.triggerMet = false;
+	}
+
+	async canActivate(card, player) {
+		return (await super.canActivate(card, player)) && (this.trigger == null || this.triggerMet);
+	}
+
+	async checkTrigger(card, player) {
+		if (this.trigger == null || await this.trigger.evalFull(card, player, this)) {
+			this.triggerMet = true;
+		}
 	}
 }
 
@@ -107,7 +137,7 @@ export class TriggerAbility extends Ability {
 		return (await super.canActivate(card, player)) &&
 			this.activationCount < this.turnLimit &&
 			(this.duringPhase == null || player.game.currentPhase().matches(this.duringPhase, player)) &&
-			(this.duringPhase != null || this.triggerMet)
+			(this.duringPhase != null || this.triggerMet);
 	}
 
 	async checkTrigger(card, player) {

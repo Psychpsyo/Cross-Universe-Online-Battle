@@ -69,7 +69,6 @@ class Block {
 			yield* timing.run();
 			if (!timing.successful) {
 				this.executionTimings.pop();
-				break;
 			}
 			generatorOutput = await this.timingGenerator.next(timing);
 		}
@@ -299,21 +298,6 @@ async function* combinedTimingGenerator(generators) {
 	}
 }
 
-async function* combinedCostTimingGenerator(generators) {
-	let completeCost = [];
-	for (let timingGenerator of generators) {
-		let actionList = (await timingGenerator.next()).value;
-		while (actionList) {
-			if (actionList[0] instanceof actions.Action) {
-				completeCost = completeCost.concat(actionList);
-				break;
-			}
-			actionList = (await timingGenerator.next(yield actionList)).value;
-		}
-	}
-	yield completeCost;
-}
-
 export class DeployItem extends Block {
 	constructor(stack, player, card) {
 		let deployAction = new actions.Deploy(player, card, player.spellItemZone, 0);
@@ -345,7 +329,7 @@ export class DeployItem extends Block {
 		}
 		super(stack, player,
 			combinedTimingGenerator(execTimingGenerators),
-			combinedCostTimingGenerator(costTimingGenerators)
+			combinedTimingGenerator(costTimingGenerators)
 		);
 		this.card = card;
 		this.deployAbility = deployAbility;
@@ -402,7 +386,7 @@ export class CastSpell extends Block {
 		}
 		super(stack, player,
 			combinedTimingGenerator(execTimingGenerators),
-			combinedCostTimingGenerator(costTimingGenerators)
+			combinedTimingGenerator(costTimingGenerators)
 		);
 		this.card = card;
 		this.castAbility = castAbility;

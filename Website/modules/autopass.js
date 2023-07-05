@@ -113,7 +113,10 @@ function isImportant(request) {
 	if (localStorage.getItem("passOnStackTwo") === "true") {
 		let currentStack = game.currentStack()
 		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
-			if (request.type != "activateTriggerAbility") {
+			if (request.type != "activateTriggerAbility" &&
+				(request.type != "castSpell" || request.eligibleSpells.find(isSpellItemTriggered) === undefined) &&
+				(request.type != "deployItem" || request.eligibleItems.find(isSpellItemTriggered) === undefined)
+			) {
 				return false;
 			}
 		}
@@ -149,6 +152,17 @@ function isImportant(request) {
 		return false;
 	}
 	return true;
+}
+
+function isSpellItemTriggered(card) {
+	for (let ability of card.values.abilities) {
+		if (ability instanceof abilities.CastAbility || ability instanceof abilities.DeployAbility) {
+			if (ability.trigger) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 function hasPhaseEqualityCondition(node) {

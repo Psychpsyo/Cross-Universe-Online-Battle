@@ -180,7 +180,9 @@ export class AttackDeclaration {
 		for (let attacker of this.attackers) {
 			attacker.isAttacking = false;
 		}
-		this.target.isAttackTarget = false;
+		if (this.target) {
+			this.target.isAttackTarget = false;
+		}
 	}
 
 	isValid() {

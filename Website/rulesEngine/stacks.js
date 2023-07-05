@@ -2,7 +2,7 @@
 import * as requests from "./inputRequests.js";
 import * as blocks from "./blocks.js";
 import {createBlockCreatedEvent, createBlockCreationAbortedEvent, createStackStartedEvent, createBlockStartedEvent} from "./events.js"
-import {TriggerAbility} from "./abilities.js";
+import * as abilities from "./abilities.js";
 
 export class Stack {
 	constructor(phase, index) {
@@ -87,12 +87,12 @@ export class Stack {
 
 	getTimings() {
 		let costTimings = this.blocks.map(block => block.getCostTimings()).flat();
-		let executionTimings = [...this.blocks].reverse().map(block => block.getExecutionTimings()).flat();
+		let executionTimings = this.blocks.toReversed().map(block => block.getExecutionTimings()).flat();
 		return costTimings.concat(executionTimings);
 	}
 	getActions() {
 		let costActions = this.blocks.map(block => block.getCostActions());
-		let executionActions = [...this.blocks].reverse().map(block => block.getExecutionActions()).flat();
+		let executionActions = this.blocks.toReversed().map(block => block.getExecutionActions()).flat();
 		return costActions.concat(executionActions);
 	}
 
@@ -101,7 +101,10 @@ export class Stack {
 		for (let player of this.phase.turn.game.players) {
 			for (let card of player.getActiveCards()) {
 				for (let ability of card.values.abilities) {
-					if (ability instanceof TriggerAbility) {
+					if (ability instanceof abilities.TriggerAbility ||
+						ability instanceof abilities.CastAbility ||
+						ability instanceof abilities.DeployAbility
+					) {
 						ability.triggerMet = false;
 					}
 				}

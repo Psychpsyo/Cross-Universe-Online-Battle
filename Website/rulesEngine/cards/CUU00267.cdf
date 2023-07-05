@@ -9,7 +9,7 @@ o: trigger
 mandatory: no
 after: COUNT([from summoned where self = thisCard]) > 0
 $exiles = EXILE(SELECT([1, 2, 3], [from you.discard]))
-GAINLIFE(COUNT($exiles.cards) * 100)
+GAINLIFE(COUNT($exiles.exiled) * 100)
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
