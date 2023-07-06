@@ -6,6 +6,54 @@ import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
 import * as phases from "./phases.js";
 
+export const baseTypes = [
+	"Angel",
+	"Armor",
+	"Beast",
+	"Bird",
+	"Book",
+	"Boundary",
+	"Bug",
+	"Chain",
+	"Curse",
+	"Dark",
+	"Demon",
+	"Dragon",
+	"Earth",
+	"Electric",
+	"Figure",
+	"Fire",
+	"Fish",
+	"Ghost",
+	"Gravity",
+	"Ice",
+	"Illusion",
+	"Katana",
+	"Landmine",
+	"Light",
+	"Machine",
+	"Mage",
+	"Medicine",
+	"Myth",
+	"Plant",
+	"Psychic",
+	"Rock",
+	"Samurai",
+	"Shield",
+	"Spirit",
+	"Structure",
+	"Sword",
+	"Warrior",
+	"Water",
+	"Wind"
+];
+
+export const novelTypes = [
+	"Ninja",
+	"NinjaTool",
+	"Ninjutsu"
+];
+
 export class Game {
 	constructor() {
 		this.players = [];
@@ -19,52 +67,23 @@ export class Game {
 
 		this.rng = new CURandom();
 		this.startingHandSize = 5;
-		this.allTypes = [
-			"Angel",
-			"Armor",
-			"Beast",
-			"Bird",
-			"Book",
-			"Boundary",
-			"Bug",
-			"Chain",
-			"Curse",
-			"Dark",
-			"Demon",
-			"Dragon",
-			"Earth",
-			"Electric",
-			"Figure",
-			"Fire",
-			"Fish",
-			"Ghost",
-			"Gravity",
-			"Ice",
-			"Illusion",
-			"Katana",
-			"Landmine",
-			"Light",
-			"Machine",
-			"Mage",
-			"Medicine",
-			"Myth",
-			"Plant",
-			"Psychic",
-			"Rock",
-			"Samurai",
-			"Shield",
-			"Spirit",
-			"Structure",
-			"Sword",
-			"Warrior",
-			"Water",
-			"Wind"
-		];
+		this.allTypes = baseTypes;
+
+		this.replay = {
+			allTypes: this.allTypes,
+			startingHandSize: this.startingHandSize,
+			players: [{deckList: [], partnerIndex: -1}, {deckList: [], partnerIndex: -1}],
+			inputLog: [],
+			rngLog: []
+		}
+		this.isReplaying = false;
+		this.replayPosition = 0;
+		this.replayRngPosition = 0;
 	}
 
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
 	async* begin() {
-		let currentPlayer = await this.rng.nextPlayer(this);
+		let currentPlayer = await this.nextPlayer();
 
 		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
 		for (const player of this.players) {
@@ -111,7 +130,31 @@ export class Game {
 			this.turns.push(new Turn(currentPlayer, this.endOfUpcomingTurnTimings.shift()));
 			this.endOfUpcomingTurnTimings.push([]);
 			yield [createTurnStartedEvent()];
-			yield* this.currentTurn().run();
+
+			let turnGenerator = this.currentTurn().run();
+			let generatorOutput = await turnGenerator.next();
+			while (!generatorOutput.done) {
+				let playerInput;
+				let actionList = generatorOutput.value;
+				if (actionList.length == 0) {
+					return;
+				}
+				if (actionList[0].nature == "event") {
+					playerInput = yield actionList;
+				} else if (this.isReplaying && this.replay.inputLog.length > this.replayPosition) { // we're currently stepping through an unfinished replay
+					playerInput = this.replay.inputLog[this.replayPosition++];
+				} else { // a player actually needs to make a choice
+					if (actionList[0].player.aiSystem === null) {
+						playerInput = yield actionList;
+					} else {
+						playerInput = actionList[0].player.aiSystem.selectMove(actionList);
+					}
+					this.replay.inputLog.push(playerInput);
+					this.replayPosition++;
+				}
+				generatorOutput = await turnGenerator.next(playerInput);
+			}
+
 			for (let card of this.getFieldCards(currentPlayer).concat(this.getFieldCards(currentPlayer.next()))) {
 				if (card) {
 					card.endOfTurnReset();
@@ -119,6 +162,47 @@ export class Game {
 			}
 			currentPlayer = currentPlayer.next();
 		}
+	}
+
+	setReplay(replay) {
+		this.replay = replay;
+		this.allTypes = replay.allTypes;
+		this.startingHandSize = replay.startingHandSize;
+		this.isReplaying = true;
+		this.replayPosition = 0;
+		this.replayRngPosition = 0;
+		for (const player of this.players) {
+			player.setDeck(replay.players[player.index].deckList);
+			player.setPartner(replay.players[player.index].partnerIndex);
+		}
+	}
+
+	async nextInts(ranges) {
+		if (this.isReplaying) {
+			return this.replay.rngLog[this.replayRngPosition++];
+		}
+		let results = await this.rng.nextInts(ranges);
+		this.replay.rngLog.push([...results]);
+		this.replayRngPosition++;
+		return results;
+	}
+	async nextInt(range) {
+		if (this.isReplaying) {
+			return this.replay.rngLog[this.replayRngPosition++];
+		}
+		let result = await this.rng.nextInt(range);
+		this.replay.rngLog.push(result);
+		this.replayRngPosition++;
+		return result;
+	}
+	async nextPlayer() {
+		if (this.isReplaying) {
+			return this.players[this.replay.rngLog[this.replayRngPosition++]];
+		}
+		let result = await this.rng.nextPlayer(this);
+		this.replay.rngLog.push(result);
+		this.replayRngPosition++;
+		return this.players[result];
 	}
 
 	getPhases() {

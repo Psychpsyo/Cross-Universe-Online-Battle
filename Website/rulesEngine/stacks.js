@@ -23,7 +23,7 @@ export class Stack {
 			}
 
 			let response = responses[0];
-			response.value = requests[response.type].validate(response.value, inputRequests.find(request => request.type == response.type));
+			let responseValue = requests[response.type].validate(response.value, inputRequests.find(request => request.type == response.type));
 
 			let nextBlock;
 			switch (response.type) {
@@ -41,19 +41,19 @@ export class Stack {
 					break;
 				}
 				case "doStandardSummon": {
-					nextBlock = new blocks.StandardSummon(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[response.value]);
+					nextBlock = new blocks.StandardSummon(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[responseValue]);
 					break;
 				}
 				case "deployItem": {
-					nextBlock = new blocks.DeployItem(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[response.value]);
+					nextBlock = new blocks.DeployItem(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[responseValue]);
 					break;
 				}
 				case "castSpell": {
-					nextBlock = new blocks.CastSpell(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[response.value]);
+					nextBlock = new blocks.CastSpell(this, this.getNextPlayer(), this.getNextPlayer().handZone.cards[responseValue]);
 					break;
 				}
 				case "doAttackDeclaration": {
-					nextBlock = new blocks.AttackDeclaration(this, this.getNextPlayer(), response.value);
+					nextBlock = new blocks.AttackDeclaration(this, this.getNextPlayer(), responseValue);
 					break;
 				}
 				case "doFight": {
@@ -61,14 +61,14 @@ export class Stack {
 					break;
 				}
 				case "doRetire": {
-					nextBlock = new blocks.Retire(this, this.getNextPlayer(), response.value);
+					nextBlock = new blocks.Retire(this, this.getNextPlayer(), responseValue);
 					break;
 				}
 				case "activateOptionalAbility":
 				case "activateFastAbility":
 				case "activateTriggerAbility": {
-					let ability = response.value.card.values.abilities[response.value.index];
-					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), response.value.card, ability);
+					let ability = responseValue.card.values.abilities[responseValue.index];
+					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), responseValue.card, ability);
 					break;
 				}
 			}

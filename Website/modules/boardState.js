@@ -31,33 +31,14 @@ export class BoardState extends GameState {
 		mainGameBlackoutContent.textContent = "";
 		mainGameArea.hidden = false;
 
-		// do partner select
-		if (localPlayer.deck.suggestedPartner) {
-			if (localStorage.getItem("partnerChoiceToggle") === "true") {
-				ui.askQuestion(locale.game.partnerSelect.useSuggestedQuestion, locale.game.partnerSelect.useSuggested, locale.game.partnerSelect.selectManually).then(result => {
-					if (result) {
-						this.getPartnerFromDeck();
-					} else {
-						this.openPartnerSelect();
-					}
-				});
-			} else {
-				this.getPartnerFromDeck();
-			}
-		} else {
-			this.openPartnerSelect();
-		}
-
 		this.controller = automatic? new AutomaticController() : new ManualController();
 	}
+
 	receiveMessage(command, message) {
 		switch (command) {
 			case "choosePartner": { // opponent selected their partner
-			let partnerPosInDeck = parseInt(message);
-				game.players[0].partnerZone.add(game.players[0].deckZone.cards[partnerPosInDeck], 0);
-				ui.removeCard(game.players[0].deckZone, partnerPosInDeck);
-				ui.insertCard(game.players[0].partnerZone, 0);
-				this.doStartGame();
+				let partnerPosInDeck = parseInt(message);
+				this.setPartner(game.players[0], partnerPosInDeck);
 				return true;
 			}
 			case "revealPartner": { // opponent revealed their partner
@@ -111,6 +92,30 @@ export class BoardState extends GameState {
 		}
 	}
 
+	givePartnerChoice() {
+		// do partner select
+		if (localPlayer.deck.suggestedPartner) {
+			if (localStorage.getItem("partnerChoiceToggle") === "true") {
+				ui.askQuestion(locale.game.partnerSelect.useSuggestedQuestion, locale.game.partnerSelect.useSuggested, locale.game.partnerSelect.selectManually).then(result => {
+					if (result) {
+						this.getPartnerFromDeck();
+					} else {
+						this.openPartnerSelect();
+					}
+				});
+			} else {
+				this.getPartnerFromDeck();
+			}
+		} else {
+			this.openPartnerSelect();
+		}
+	}
+	setPartner(player, partnerPosInDeck) {
+		player.setPartner(partnerPosInDeck);
+		ui.removeCard(player.deckZone, partnerPosInDeck);
+		ui.insertCard(player.partnerZone, 0);
+		this.doStartGame();
+	}
 	openPartnerSelect() {
 		for (let card of localPlayer.deckZone.cards) {
 			card.hidden = false;
@@ -128,13 +133,8 @@ export class BoardState extends GameState {
 		if (partnerPosInDeck == -1) {
 			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == game.players[localPlayer.index].deck["suggestedPartner"]});
 		}
-		localPlayer.partnerZone.add(localPlayer.deckZone.cards[partnerPosInDeck], 0);
-		ui.removeCard(localPlayer.deckZone, partnerPosInDeck);
-		ui.insertCard(localPlayer.partnerZone, 0);
-
 		socket.send("[choosePartner]" + partnerPosInDeck);
-
-		this.doStartGame();
+		this.setPartner(localPlayer, partnerPosInDeck);
 	}
 
 	doStartGame() {

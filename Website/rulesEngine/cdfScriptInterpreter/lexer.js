@@ -95,50 +95,10 @@ let keywordTokenTypes = {
 	endOfTurn: "untilIndicator",
 	endOfNextTurn: "untilIndicator",
 	endOfYourNextTurn: "untilIndicator",
-	endOfOpponentNextTurn: "untilIndicator",
-
-	Angel: "type",
-	Armor: "type",
-	Beast: "type",
-	Bird: "type",
-	Book: "type",
-	Boundary: "type",
-	Bug: "type",
-	Chain: "type",
-	Curse: "type",
-	Dark: "type",
-	Demon: "type",
-	Dragon: "type",
-	Earth: "type",
-	Electric: "type",
-	Figure: "type",
-	Fire: "type",
-	Fish: "type",
-	Ghost: "type",
-	Gravity: "type",
-	Ice: "type",
-	Illusion: "type",
-	Katana: "type",
-	Landmine: "type",
-	Light: "type",
-	Machine: "type",
-	Mage: "type",
-	Medicine: "type",
-	Myth: "type",
-	Plant: "type",
-	Psychic: "type",
-	Rock: "type",
-	Samurai: "type",
-	Shield: "type",
-	Spirit: "type",
-	Structure: "type",
-	Sword: "type",
-	Warrior: "type",
-	Water: "type",
-	Wind: "type"
+	endOfOpponentNextTurn: "untilIndicator"
 }
 
-export function tokenize(code) {
+export function tokenize(code, game) {
 	let pos = 0;
 	let tokens = [];
 	while (pos < code.length) {
@@ -303,6 +263,8 @@ export function tokenize(code) {
 						tokens.push({type: keywordTokenTypes[word], value: word});
 					} else if (word.startsWith("CU")) {
 						tokens.push({type: "cardId", value: code.substr(pos + 2, wordLength - 2)});
+					} else if (game.allTypes.includes(word)) {
+						tokens.push({type: "type", value: word});
 					} else {
 						tokens.push({type: "name", value: word});
 					}

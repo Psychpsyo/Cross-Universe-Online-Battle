@@ -258,6 +258,7 @@ export class DeckState extends GameState {
 			}
 			if (this.opponentReady) {
 				new BoardState(this.automatic);
+				gameState.givePartnerChoice();
 			}
 		}
 	}

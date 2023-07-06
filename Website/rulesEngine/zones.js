@@ -80,7 +80,7 @@ export class DeckZone extends Zone {
 		for (let i = this.cards.length - 1; i > 0; i--) {
 			randomRanges.push(i);
 		}
-		let randomValues = await this.player.game.rng.nextInts(randomRanges);
+		let randomValues = await this.player.game.nextInts(randomRanges);
 		// Fisher-Yates shuffle
 		for (let i = this.cards.length - 1; i > 0; i--) {
 			// pick a random element and swap it with the current element

@@ -97,6 +97,26 @@ document.addEventListener("keydown", async function(e) {
 	}
 });
 
+// drag&drop loading for replays
+roomCodeEntry.addEventListener("dragover", function(e) {
+	e.preventDefault();
+});
+roomCodeEntry.addEventListener("drop", function(e) {
+	e.preventDefault();
+	let file = e.dataTransfer.items[0].getAsFile();
+	if (!file || !file.name.endsWith(".replay")) {
+		return;
+	}
+
+	let reader = new FileReader();
+	reader.onload = function(e) {
+		import("/modules/replayInitState.js").then(initModule => {
+			new initModule.ReplayInitState(JSON.parse(e.target.result));
+		});
+	};
+	reader.readAsText(file);
+});
+
 // set up the background cards effect
 document.documentElement.style.setProperty("--p1-card-back", "url('" + localStorage.getItem("cardBack") + "')");
 if (localStorage.getItem("mainMenuCards") == "true") {

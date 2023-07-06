@@ -1,6 +1,5 @@
 // This module exports the base class for a random number generator to be used by the game.
-// To instantiate a game, subclass this class to provide a random number generator that can
-// ensure every instance of the game can receive the same random numbers.
+// This can be used to make sure multiple games can run together and receive the same random numbers.
 
 export class CURandom {
 	async nextInt(range) {
@@ -12,6 +11,6 @@ export class CURandom {
 	}
 
 	async nextPlayer(game) {
-		return game.players[await this.nextInt(game.players.length)];
+		return await this.nextInt(game.players.length);
 	}
 }

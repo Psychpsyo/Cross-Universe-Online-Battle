@@ -81,6 +81,7 @@ export class DraftState extends GameState {
 	checkReadyConditions() {
 		if (this.pressedReady && this.opponentReady) {
 			new BoardState();
+			gameState.givePartnerChoice();
 		}
 	}
 

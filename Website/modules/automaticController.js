@@ -44,7 +44,7 @@ export class AutomaticController extends InteractionController {
 		let updateGenerator = game.begin();
 		let updates = await updateGenerator.next();
 
-		while (updates.value.length != 0) {
+		while (!updates.done) {
 			let returnValues;
 			switch (updates.value[0].nature) {
 				case "event": {

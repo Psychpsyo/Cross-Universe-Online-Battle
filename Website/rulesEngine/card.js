@@ -74,7 +74,7 @@ export class Card extends BaseCard {
 				data.types ?? [],
 				data.attack ?? 0,
 				data.defense ?? 0,
-				data.abilities.map(makeAbility)
+				data.abilities.map(ability => makeAbility(ability, player.game))
 			)
 		);
 	}
@@ -302,25 +302,25 @@ function parseCdfValues(cdf) {
 	return data;
 }
 
-function makeAbility(ability) {
+function makeAbility(ability, game) {
 	switch (ability.type) {
 		case "cast": {
-			return new abilities.CastAbility(ability.id, ability.exec, ability.cost, ability.condition, ability.after);
+			return new abilities.CastAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
 		}
 		case "deploy": {
-			return new abilities.DeployAbility(ability.id, ability.exec, ability.cost, ability.condition, ability.after);
+			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
 		}
 		case "optional": {
-			return new abilities.OptionalAbility(ability.id, ability.exec, ability.cost, ability.turnLimit, ability.condition);
+			return new abilities.OptionalAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.condition);
 		}
 		case "fast": {
-			return new abilities.FastAbility(ability.id, ability.exec, ability.cost, ability.turnLimit, ability.condition);
+			return new abilities.FastAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.condition);
 		}
 		case "trigger": {
-			return new abilities.TriggerAbility(ability.id, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.duringPhase, ability.after, ability.condition);
+			return new abilities.TriggerAbility(ability.id, game, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.duringPhase, ability.after, ability.condition);
 		}
 		case "static": {
-			return new abilities.StaticAbility(ability.id, ability.modifier, ability.applyTo, ability.condition);
+			return new abilities.StaticAbility(ability.id, game, ability.modifier, ability.applyTo, ability.condition);
 		}
 	}
 }

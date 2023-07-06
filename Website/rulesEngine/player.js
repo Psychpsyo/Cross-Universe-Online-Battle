@@ -26,9 +26,15 @@ export class Player {
 	}
 
 	setDeck(cdfList) {
+		this.game.replay.players[this.index].deckList = cdfList;
 		for (let cdf of cdfList) {
 			this.deckZone.add(new Card(this, cdf, true), this.deckZone.cards.length);
 		}
+	}
+
+	setPartner(partnerPosInDeck) {
+		this.game.replay.players[this.index].partnerIndex = partnerPosInDeck;
+		this.partnerZone.add(this.deckZone.cards[partnerPosInDeck], 0);
 	}
 
 	// returns all cards that aren't currently in deck. (cards that could have available abilities on them.)

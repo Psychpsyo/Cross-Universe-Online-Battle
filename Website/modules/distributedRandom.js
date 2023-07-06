@@ -46,9 +46,9 @@ export class DistRandom extends CURandom {
 	}
 
 	async nextPlayer(game) {
-		let player = game.players[await this.nextInt(game.players.length)];
+		let player = await this.nextInt(game.players.length);
 		if (youAre == 1) {
-			player = player.next();
+			player = (player + 1) % game.players.length;
 		}
 		return player;
 	}

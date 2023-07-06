@@ -123,14 +123,14 @@ export function init() {
 		uiPlayers[1].posY = uiPlayers[1].targetY;
 	});
 	document.getElementById("field").addEventListener("mouseleave", function() {
-		socket.send("[hideCursor]");
+		socket?.send("[hideCursor]");
 	});
 	document.getElementById("field").addEventListener("mousemove", function() {
 		// check if the normalized cursor position is within the bounds of the visual field
 		if (Math.abs(uiPlayers[1].posX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
-			socket.send("[placeCursor]" + uiPlayers[1].posX + "|" + uiPlayers[1].posY);
+			socket?.send("[placeCursor]" + uiPlayers[1].posX + "|" + uiPlayers[1].posY);
 		} else {
-			socket.send("[hideCursor]");
+			socket?.send("[hideCursor]");
 		}
 	});
 
@@ -177,6 +177,11 @@ export function init() {
 		// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
 		window.setTimeout(closeCardPreview, 0);
 	});
+
+	//position the menu on the right if that option is enabled
+	if (localStorage.getItem("fieldLeftToggle") == "true") {
+		document.documentElement.classList.add("leftField");
+	}
 
 	lastFrame = performance.now();
 	animate();
@@ -285,7 +290,7 @@ export function clearDragSource(zone, index, player) {
 
 function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
-		socket.send("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
+		socket?.send("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
 		return true;
 	}
 	return false;
@@ -293,7 +298,7 @@ function grabCard(player, zone, index) {
 function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
-			socket.send("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
+			socket?.send("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
 		}
 		gameState.controller.dropCard(player, zone, index);
 	}
@@ -557,10 +562,10 @@ class PresentedCardSlot extends UiCardSlot {
 			this.revealBtn.addEventListener("click", function() {
 				this.isRevealed = !this.isRevealed;
 				if (this.isRevealed) {
-					socket.send("[revealCard]" + this.index);
+					socket?.send("[revealCard]" + this.index);
 					this.revealBtn.textContent = locale.game.manual.presented.hide;
 				} else {
-					socket.send("[unrevealCard]" + this.index);
+					socket?.send("[unrevealCard]" + this.index);
 					this.revealBtn.textContent = locale.game.manual.presented.reveal;
 				}
 			}.bind(this));

@@ -26,7 +26,6 @@ export class InitState extends GameState {
 				if (localStorage.getItem("username") !== "") {
 					socket.send("[username]" + localStorage.getItem("username"));
 				}
-				document.documentElement.style.setProperty("--p0-card-back", "url('')");
 				if (localStorage.getItem("cardBack") !== "") {
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
@@ -98,7 +97,6 @@ export class InitState extends GameState {
 				}
 			}
 			gameUI.init();
-			gameDiv.hidden = false;
 
 			// make chat functional
 			document.getElementById("chatInput").addEventListener("keyup", function(e) {
@@ -121,15 +119,10 @@ export class InitState extends GameState {
 				e.stopPropagation();
 			});
 
-			//position the menu on the right if that option is enabled
-			if (localStorage.getItem("fieldLeftToggle") == "true") {
-				document.documentElement.classList.add("leftField");
-			}
-
 			// main screen is no longer needed
 			stopEffect();
 			roomCodeEntry.remove();
-			gameDiv.hiden = false;
+			gameDiv.hidden = false;
 		}
 	}
 

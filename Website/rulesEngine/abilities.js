@@ -1,11 +1,11 @@
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
 
 export class BaseAbility {
-	constructor(id, condition) {
+	constructor(id, game, condition) {
 		this.id = id;
 		this.condition = null;
 		if (condition) {
-			this.condition = interpreter.buildConditionAST(id, condition);
+			this.condition = interpreter.buildConditionAST(id, condition, game);
 		}
 	}
 
@@ -20,12 +20,12 @@ export class BaseAbility {
 
 // This is the super class of all activatable activities that can have a cost and some processing
 export class Ability extends BaseAbility {
-	constructor(id, exec, cost, condition) {
-		super(id, condition);
-		this.exec = interpreter.buildExecAST(id, exec);
+	constructor(id, game, exec, cost, condition) {
+		super(id, game, condition);
+		this.exec = interpreter.buildExecAST(id, exec, game);
 		this.cost =  null;
 		if (cost) {
-			this.cost = interpreter.buildCostAST(id, cost);
+			this.cost = interpreter.buildCostAST(id, cost, game);
 		}
 		this.scriptVariables = {};
 	}
@@ -49,11 +49,11 @@ export class Ability extends BaseAbility {
 }
 
 export class CastAbility extends Ability {
-	constructor(id, exec, cost, condition, trigger) {
-		super(id, exec, cost, condition);
+	constructor(id, game, exec, cost, condition, trigger) {
+		super(id, game, exec, cost, condition);
 		this.trigger = null;
 		if (trigger) {
-			this.trigger = interpreter.buildTriggerAST(id, trigger);
+			this.trigger = interpreter.buildTriggerAST(id, trigger, game);
 		}
 		this.triggerMet = false;
 	}
@@ -70,11 +70,11 @@ export class CastAbility extends Ability {
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, exec, cost, condition, trigger) {
-		super(id, exec, cost, condition);
+	constructor(id, game, exec, cost, condition, trigger) {
+		super(id, game, exec, cost, condition);
 		this.trigger = null;
 		if (trigger) {
-			this.trigger = interpreter.buildTriggerAST(id, trigger);
+			this.trigger = interpreter.buildTriggerAST(id, trigger, game);
 		}
 		this.triggerMet = false;
 	}
@@ -91,8 +91,8 @@ export class DeployAbility extends Ability {
 }
 
 export class OptionalAbility extends Ability {
-	constructor(id, exec, cost, turnLimit, condition) {
-		super(id, exec, cost, condition);
+	constructor(id, game, exec, cost, turnLimit, condition) {
+		super(id, game, exec, cost, condition);
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
 	}
@@ -107,8 +107,8 @@ export class OptionalAbility extends Ability {
 }
 
 export class FastAbility extends Ability {
-	constructor(id, exec, cost, turnLimit, condition) {
-		super(id, exec, cost, condition);
+	constructor(id, game, exec, cost, turnLimit, condition) {
+		super(id, game, exec, cost, condition);
 		this.turnLimit = turnLimit;
 		this.activationCount = 0;
 	}
@@ -123,12 +123,12 @@ export class FastAbility extends Ability {
 }
 
 export class TriggerAbility extends Ability {
-	constructor(id, exec, cost, mandatory, turnLimit, duringPhase, trigger, condition) {
-		super(id, exec, cost, condition);
+	constructor(id, game, exec, cost, mandatory, turnLimit, duringPhase, trigger, condition) {
+		super(id, game, exec, cost, condition);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
 		this.duringPhase = duringPhase;
-		this.trigger = interpreter.buildTriggerAST(id, trigger);
+		this.trigger = interpreter.buildTriggerAST(id, trigger, game);
 		this.triggerMet = false;
 		this.activationCount = 0;
 	}
@@ -153,10 +153,10 @@ export class TriggerAbility extends Ability {
 }
 
 export class StaticAbility extends BaseAbility {
-	constructor(id, modifier, applyTo, condition) {
-		super(id, condition);
-		this.modifier = interpreter.buildMofifierAST(id, modifier);
-		this.applyTo = interpreter.buildApplyTargetAST(id, applyTo);
+	constructor(id, game, modifier, applyTo, condition) {
+		super(id, game, condition);
+		this.modifier = interpreter.buildMofifierAST(id, modifier, game);
+		this.applyTo = interpreter.buildApplyTargetAST(id, applyTo, game);
 	}
 
 	async getTargetCards(card, player) {

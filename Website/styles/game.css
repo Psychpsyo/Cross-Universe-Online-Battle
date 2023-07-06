@@ -1,3 +1,8 @@
+html {
+	--p0-card-back: url('');
+	--p1-card-back: url('');
+}
+
 #gameFlexBox {
 	display: flex;
 }
