@@ -5,6 +5,7 @@ import {Turn} from "./turns.js";
 import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
 import * as phases from "./phases.js";
+import * as actions from "./actions.js";
 
 export const baseTypes = [
 	"Angel",
