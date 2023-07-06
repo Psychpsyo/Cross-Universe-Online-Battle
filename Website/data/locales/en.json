@@ -604,6 +604,10 @@
 		"possibleTypes": "Possible types are:\n{#TYPES}",
 		"possibleTypesSeperator": ", ",
 
+		"enableScripting": "Enable Scripting",
+		"scriptingExperimentalWarning": "Note: Effect scripting is currently experimental.\nThat means it is poorly documented and the scripting language might change at any point, potentially breaking your old scripts.",
+		"enterEffectsScripts": "Enter effect scripts here, like so:\n\no: optional\nturnLimit: 1\ncondition: thisCard.zone = field\ncost:\nDISCARD(SELECT(1, [from you.hand]))\nexec:\nopponent.DAMAGE(100)",
+
 		"save": "Save Card",
 		"saveCopy": "Save as Copy",
 		"createNew": "Create New",

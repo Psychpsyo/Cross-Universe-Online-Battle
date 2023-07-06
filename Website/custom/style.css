@@ -22,6 +22,7 @@ main {
 #inputFields {
 	flex-grow: 1;
 	min-width: 0;
+	overflow-y: auto;
 }
 
 #inputFieldHolder {
@@ -181,4 +182,13 @@ main {
 .bracketsEditSection::after {
 	right: -.75em;
 	border-left: none;
+}
+
+#cardEffectScript {
+	width: 100%;
+	box-sizing: border-box;
+}
+#scriptingExperimentalWarning {
+	white-space: pre-line;
+	color: orange;
 }

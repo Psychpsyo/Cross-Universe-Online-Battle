@@ -20,6 +20,10 @@ Array.from(cardType.children).forEach(elem => {
 
 cardTypes.title = locale.customCards.possibleTypes.replace("{#TYPES}", Object.values(locale.types).map(val => val.replace(" ", "_")).join(locale.customCards.possibleTypesSeperator))
 
+enableScriptingLabel.textContent = locale.customCards.enableScripting;
+scriptingExperimentalWarning.textContent = locale.customCards.scriptingExperimentalWarning;
+cardEffectScript.placeholder = locale.customCards.enterEffectsScripts;
+
 saveButton.textContent = locale.customCards.save;
 saveCopyButton.textContent = locale.customCards.saveCopy;
 createNewButton.textContent = locale.customCards.createNew;
@@ -48,6 +52,9 @@ function getCard() {
 	}
 	if (localStorage.getItem("username")) {
 		card.author = localStorage.getItem("username");
+	}
+	if (enableScriptingToggle.checked) {
+		card.cdfScriptEffects = cardEffectScript.value;
 	}
 	return card;
 }
@@ -127,6 +134,10 @@ effectEditor.addEventListener("input", function() {updateCard(true)});
 cardAttack.addEventListener("input", function() {updateCard(true)});
 cardDefense.addEventListener("input", function() {updateCard(true)});
 cardType.addEventListener("input", function() {updateCard(true)});
+
+enableScriptingToggle.addEventListener("change", function() {
+	scriptingEditor.hidden = !this.checked;
+});
 
 // effect editor
 if (!effectEditor.isContentEditable) {

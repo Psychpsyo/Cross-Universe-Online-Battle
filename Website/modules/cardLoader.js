@@ -51,13 +51,45 @@ attack:${cardData.attack ?? 0}
 defense:${cardData.defense ?? 0}`
 }
 
+function generateCustomCardCdf(cardId) {
+	let cardData = cardInfoCache[cardId];
+	if (!("cdfScriptEffects" in cardData)) {
+		throw new Error("Cannot generate cdf for non-scripted custom card.");
+	}
+	if (cardData.level == -1 || cardData.attack == -1 || cardData.defense == -1) {
+		throw new Error("Cannot generate cdf for custom card with a level, attack or defense of ?.");
+	}
+	let cdf = `id: CU${cardId}
+cardType: ${cardData.cardType}
+name: CU${cardId}
+level: ${cardData.level}
+types: ${cardData.types.join(",")}`;
+	if (["unit", "token"].includes(cardData.cardType)) {
+		cdf += "\nattack: " + cardData.attack;
+		cdf += "\ndefense: " + cardData.defense;
+	}
+	if (cardData.cdfScriptEffects.length > 0) {
+		cdf += "\n" + cardData.cdfScriptEffects;
+	}
+	return cdf;
+}
+
 export async function getCdf(cardId) {
 	if (!(await isCardScripted(cardId))) {
 		throw new UnsupportedCardError(cardId);
 	}
 	if (!cdfCache[cardId]) {
-		const response = await fetch("/rulesEngine/cards/CU" + cardId + ".cdf", {cache: "force-cache"});
-		cdfCache[cardId] = await response.text();
+		if (cardId.startsWith("C")) {
+			try {
+				cdfCache[cardId] = generateCustomCardCdf(cardId);
+			} catch (e) {
+				console.log(e);
+				throw new UnsupportedCardError(cardId);
+			}
+		} else {
+			const response = await fetch("/rulesEngine/cards/CU" + cardId + ".cdf", {cache: "force-cache"});
+			cdfCache[cardId] = await response.text();
+		}
 	}
 	return cdfCache[cardId];
 }
@@ -91,6 +123,9 @@ export async function deckToCdfList(deck, automatic, player) {
 }
 
 export async function isCardScripted(cardId) {
+	if (cardId.startsWith("C")) {
+		return "cdfScriptEffects" in cardInfoCache[cardId];
+	}
 	if (!scriptedCardList) {
 		scriptedCardList = (async() => {
 			let response = await fetch("/data/scriptedCardsList.json");

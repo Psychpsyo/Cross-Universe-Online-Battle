@@ -604,6 +604,10 @@
 		"possibleTypes": "Mögliche Typen sind:\n{#TYPES}",
 		"possibleTypesSeperator": ", ",
 
+		"enableScripting": "Scripting aktivieren",
+		"scriptingExperimentalWarning": "Achtung: Effekt-Skripte sind momentan experimentell.\nDas heisst, dass es wenig Dokumentation gibt und die Skript-Sprache sich jederzeit ändern kann.",
+		"enterEffectsScripts": "Schreibe Effekt-Scripte hier, in etwa so:\n\no: optional\nturnLimit: 1\ncondition: thisCard.zone = field\ncost:\nDISCARD(SELECT(1, [from you.hand]))\nexec:\nopponent.DAMAGE(100)",
+
 		"save": "Karte speichern",
 		"saveCopy": "Als Kopie speichern",
 		"createNew": "Neu erstellen",

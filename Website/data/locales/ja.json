@@ -604,6 +604,10 @@
 		"possibleTypes": null,
 		"possibleTypesSeperator": "，",
 
+		"enableScripting": null,
+		"scriptingExperimentalWarning": null,
+		"enterEffectsScripts": null,
+
 		"save": null,
 		"saveCopy": null,
 		"createNew": null,
