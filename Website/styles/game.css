@@ -315,6 +315,11 @@ img[src$="cardBackFrameP1.png"] {
 }
 
 
+.overlayText {
+	font-weight: bold;
+	pointer-events: none;
+	filter: drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em black) drop-shadow(0 0 .3em black);
+}
 .fieldCardAmountDisplay {
 	color: #eee;
 	position: absolute;
@@ -323,9 +328,6 @@ img[src$="cardBackFrameP1.png"] {
 	width: 100%;
 	top: 50%;
 	transform: translateY(-50%);
-	font-weight: bold;
-	pointer-events: none;
-	filter: drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em black) drop-shadow(0 0 .3em black);
 	font-size: 1.3em;
 	z-index: 2;
 }

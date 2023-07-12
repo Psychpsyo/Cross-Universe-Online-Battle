@@ -135,6 +135,16 @@
 				"manaSupplyPhase": "Mana Supply Phase:",
 				"block": "Block {#NUM}"
 			},
+			"blocks": {
+				"draw": "Zug",
+				"summon": "Beschwörung",
+				"cast": "Cast",
+				"deploy": "Deploy",
+				"activate": "Aktivierung",
+				"retire": "Retire",
+				"declare": "Angriff",
+				"fight": "Kampf"
+			},
 
 			"phases": {
 				"manaSupplyPhase": "Mana\nSupply Phase",
@@ -537,8 +547,8 @@
 	"triggerCardDetailEffect": "Trigger-Fähigkeit:",
 	"staticCardDetailEffect": "Statische Fähigkeit:",
 	"fastCardDetailEffect": "Schnelle Fähigkeit:",
-	"deployCardDetailEffect": "Beim Einsetzen:",
-	"castCardDetailEffect": "Beim Einsetzen:",
+	"deployCardDetailEffect": "Beim Deployen:",
+	"castCardDetailEffect": "Beim Casten:",
 
 	"subEffectOpeningBracket": "［",
 	"subEffectClosingBracket": "］",

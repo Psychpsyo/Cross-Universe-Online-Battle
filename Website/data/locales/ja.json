@@ -135,6 +135,16 @@
 				"manaSupplyPhase": "魔力ステップ：",
 				"block": "ブロック{#NUM}"
 			},
+			"blocks": {
+				"draw": "ドロー",
+				"summon": "召喚",
+				"cast": "詠唱",
+				"deploy": "使用",
+				"activate": "発動",
+				"retire": "リターン",
+				"declare": "攻撃宣言",
+				"fight": "戦闘処理"
+			},
 
 			"phases": {
 				"manaSupplyPhase": "魔力\nステップ",

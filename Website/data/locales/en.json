@@ -135,6 +135,16 @@
 				"manaSupplyPhase": "Mana Supply Phase:",
 				"block": "Block {#NUM}"
 			},
+			"blocks": {
+				"draw": "Draw",
+				"summon": "Summon",
+				"cast": "Cast",
+				"deploy": "Deploy",
+				"activate": "Activation",
+				"retire": "Retire",
+				"declare": "Attack",
+				"fight": "Fight"
+			},
 
 			"phases": {
 				"manaSupplyPhase": "Mana Supply\nPhase",

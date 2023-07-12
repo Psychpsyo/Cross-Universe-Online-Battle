@@ -144,9 +144,20 @@
 	padding: .25em;
 	gap: .25em;
 }
-#stackDisplayHolder > img {
-	height: 100%;
-	display: block;
+#stackDisplayHolder img {
+	height: 6em;
+}
+#stackDisplayHolder span {
+	position: absolute;
+	top: 75%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: .75em;
+	white-space: pre;
+	text-align: center;
+}
+#stackDisplayHolder > div {
+	position: relative;
 }
 #stackDisplayHolder::after {
 	content: attr(data-block);

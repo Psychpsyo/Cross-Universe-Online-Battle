@@ -110,28 +110,72 @@ export function newStack(number) {
 }
 export function newBlock(block) {
 	let card = null;
-	if (block instanceof blocks.StandardDraw) {
-		card = block.player.deckZone.cards[block.player.deckZone.cards.length - 1];
-	} else if (block instanceof blocks.Retire) {
-		card = block.units[0];
-	} else if (block instanceof blocks.AttackDeclaration) {
-		card = block.attackers[0];
-	} else if (block instanceof blocks.Fight) {
-		card = game.currentAttackDeclaration.target;
-	} else {
-		card = block.card;
+	let label = "";
+	switch(block.constructor) {
+		case blocks.StandardDraw: {
+			card = block.player.deckZone.cards[block.player.deckZone.cards.length - 1];
+			label = locale.game.automatic.blocks.draw;
+			break;
+		}
+		case blocks.Retire: {
+			card = block.units[0];
+			label = locale.game.automatic.blocks.retire;
+			break;
+		}
+		case blocks.AttackDeclaration: {
+			card = block.attackers[0];
+			label = locale.game.automatic.blocks.declare;
+			break;
+		}
+		case blocks.Fight: {
+			card = game.currentAttackDeclaration.target;
+			label = locale.game.automatic.blocks.fight;
+			break;
+		}
+		case blocks.StandardSummon: {
+			card = block.card;
+			label = locale.game.automatic.blocks.summon;
+			break;
+		}
+		case blocks.CastSpell: {
+			card = block.card;
+			label = locale.game.automatic.blocks.cast;
+			break;
+		}
+		case blocks.DeployItem: {
+			card = block.card;
+			label = locale.game.automatic.blocks.deploy;
+			break;
+		}
+		case blocks.AbilityActivation: {
+			card = block.card;
+			label = locale.game.automatic.blocks.activate;
+			break;
+		}
 	}
 
-	let visual = document.createElement("img");
-	cardLoader.getCardImage(card).then(src => {
-		visual.src = src;
-		visual.addEventListener("click", function(e) {
-			e.stopPropagation();
-			previewCard(card.cardRef);
-		})
-		stackDisplayHolder.appendChild(visual);
-		stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", block.stack.blocks.length + 1);
+	let visual = document.createElement("div");
+
+	let img = document.createElement("img");
+	visual.appendChild(img);
+	img.addEventListener("click", function(e) {
+		e.stopPropagation();
+		previewCard(card.cardRef);
 	});
+	img.addEventListener("dragstart", function(e) {
+		e.preventDefault();
+	});
+	cardLoader.getCardImage(card).then(src => {
+		img.src = src;
+	});
+
+	let labelElem = document.createElement("span");
+	labelElem.classList.add("overlayText");
+	labelElem.textContent = label;
+	visual.appendChild(labelElem);
+
+	stackDisplayHolder.appendChild(visual);
+	stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", block.stack.blocks.length + 1);
 }
 
 export function indicateRetire(amount) {
