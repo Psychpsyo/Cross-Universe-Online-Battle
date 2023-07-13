@@ -71,14 +71,6 @@ export class Game {
 		this.startingPlayerChooses = false; // whether or not the randomly selected starting player gets to choose the actual starting player
 		this.startingHandSize = 5; // how many hand cards each player draws at the beginning of the game
 
-		this.replay = null;
-		this.isReplaying = false;
-		this.replayPosition = 0;
-		this.replayRngPosition = 0;
-	}
-
-	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
-	async* begin() {
 		this.replay = {
 			allTypes: this.allTypes,
 			startingHandSize: this.startingHandSize,
@@ -87,6 +79,16 @@ export class Game {
 			inputLog: [],
 			rngLog: []
 		}
+		this.isReplaying = false;
+		this.replayPosition = 0;
+		this.replayRngPosition = 0;
+	}
+
+	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
+	async* begin() {
+		this.replay.allTypes = this.allTypes;
+		this.replay.startingPlayerChooses = this.startingPlayerChooses;
+		this.replay.startingHandSize = this.startingHandSize;
 
 		let currentPlayer = await this.randomPlayer();
 
