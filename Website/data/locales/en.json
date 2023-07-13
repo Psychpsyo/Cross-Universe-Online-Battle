@@ -173,7 +173,9 @@
 			},
 
 			"playerSelect": {
-				"question": "Select a player for the effect of '{#CARDNAME}':",
+				"question": "Select a player:",
+				"cardEffectQuestion": "Select a player for the effect of '{#CARDNAME}':",
+				"startingPlayerQuestion": "Select which player goes first:",
 				"you": "Yourself",
 				"opponent": "Your Opponent"
 			},

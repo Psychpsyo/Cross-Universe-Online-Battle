@@ -157,6 +157,8 @@
 
 			"battlePhase": {
 				"question": null,
+				"cardEffectQuestion": null,
+				"startingPlayerQuestion": null,
 				"enter": null,
 				"skip": null
 			},

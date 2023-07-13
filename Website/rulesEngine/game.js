@@ -5,7 +5,7 @@ import {Turn} from "./turns.js";
 import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
 import * as phases from "./phases.js";
-import * as actions from "./actions.js";
+import * as requests from "./inputRequests.js";
 
 export const baseTypes = [
 	"Angel",
@@ -66,17 +66,12 @@ export class Game {
 		this.currentAttackDeclaration = null;
 		this.nextTimingIndex = 1;
 
-		this.rng = new CURandom();
-		this.startingHandSize = 5;
-		this.allTypes = baseTypes;
+		this.rng = new CURandom(); // the random number source for this game
+		this.allTypes = baseTypes; // all types that the game is aware of. This may be extended by custom types to allow for custom cards.
+		this.startingPlayerChooses = false; // whether or not the randomly selected starting player gets to choose the actual starting player
+		this.startingHandSize = 5; // how many hand cards each player draws at the beginning of the game
 
-		this.replay = {
-			allTypes: this.allTypes,
-			startingHandSize: this.startingHandSize,
-			players: [{deckList: [], partnerIndex: -1}, {deckList: [], partnerIndex: -1}],
-			inputLog: [],
-			rngLog: []
-		}
+		this.replay = null;
 		this.isReplaying = false;
 		this.replayPosition = 0;
 		this.replayRngPosition = 0;
@@ -84,7 +79,16 @@ export class Game {
 
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
 	async* begin() {
-		let currentPlayer = await this.nextPlayer();
+		this.replay = {
+			allTypes: this.allTypes,
+			startingHandSize: this.startingHandSize,
+			startingPlayerChooses: this.startingPlayerChooses,
+			players: [{deckList: [], partnerIndex: -1}, {deckList: [], partnerIndex: -1}],
+			inputLog: [],
+			rngLog: []
+		}
+
+		let currentPlayer = await this.randomPlayer();
 
 		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
 		for (const player of this.players) {
@@ -101,6 +105,18 @@ export class Game {
 		yield deckShuffledEvents;
 
 		// RULES: Randomly decide the first player and the second player.
+		// not rules: starting player may be manually chosen.
+		if (this.startingPlayerChooses) {
+			let selectionRequest = new requests.choosePlayer.create(currentPlayer, "chooseStartingPlayer");
+			let responses = yield [selectionRequest];
+			if (responses.length != 1) {
+				throw new Error("Incorrect number of responses supplied during player selection. (expected 1, got " + responses.length + " instead)");
+			}
+			if (responses[0].type != "choosePlayer") {
+				throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + responses[0].type + "\" instead)");
+			}
+			currentPlayer = requests.choosePlayer.validate(responses[0].value, selectionRequest);
+		}
 		yield [createStartingPlayerSelectedEvent(currentPlayer)];
 
 		// RULES: Draw 5 cards from your deck to your hand.
@@ -168,6 +184,7 @@ export class Game {
 	setReplay(replay) {
 		this.replay = replay;
 		this.allTypes = replay.allTypes;
+		this.startingPlayerChooses = replay.startingPlayerChooses;
 		this.startingHandSize = replay.startingHandSize;
 		this.isReplaying = true;
 		this.replayPosition = 0;
@@ -178,7 +195,7 @@ export class Game {
 		}
 	}
 
-	async nextInts(ranges) {
+	async randomInts(ranges) {
 		if (this.isReplaying) {
 			return this.replay.rngLog[this.replayRngPosition++];
 		}
@@ -187,7 +204,7 @@ export class Game {
 		this.replayRngPosition++;
 		return results;
 	}
-	async nextInt(range) {
+	async randomInt(range) {
 		if (this.isReplaying) {
 			return this.replay.rngLog[this.replayRngPosition++];
 		}
@@ -196,7 +213,7 @@ export class Game {
 		this.replayRngPosition++;
 		return result;
 	}
-	async nextPlayer() {
+	async randomPlayer() {
 		if (this.isReplaying) {
 			return this.players[this.replay.rngLog[this.replayRngPosition++]];
 		}

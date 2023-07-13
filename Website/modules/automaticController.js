@@ -407,7 +407,12 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "choosePlayer": {
-				let question = locale.game.automatic.playerSelect.question.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+				let question = locale.game.automatic.playerSelect.question;
+				if (request.reason == "chooseStartingPlayer") {
+					question = locale.game.automatic.playerSelect.startingPlayerQuestion;
+				} else if (request.reason.startsWith("cardEffect:")) {
+					question = locale.game.automatic.playerSelect.cardEffectQuestion.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+				}
 				response.value = (await gameUI.askQuestion(question, locale.game.automatic.playerSelect.you, locale.game.automatic.playerSelect.opponent))? 1 : 0;
 				break;
 			}
