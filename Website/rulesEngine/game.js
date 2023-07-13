@@ -254,6 +254,7 @@ export class AttackDeclaration {
 		this.game = game;
 		this.attackers = attackers;
 		this.target = target;
+		this.isCancelled = false;
 
 		for (let attacker of attackers) {
 			attacker.isAttacking = true;
@@ -271,11 +272,18 @@ export class AttackDeclaration {
 		}
 	}
 
-	isValid() {
-		if (this.target == null) {
-			return false;
+	undoClear() {
+		if (this.target) {
+			this.target.isAttackTarget = true;
 		}
-		if (this.attackers.length == 0) {
+		for (let attacker of this.attackers) {
+			attacker.isAttacking = true;
+		}
+		this.game.currentAttackDeclaration = this;
+	}
+
+	isValid() {
+		if (this.target == null || this.attackers.length == 0) {
 			return false;
 		}
 		if (this.attackers.length > 1) {

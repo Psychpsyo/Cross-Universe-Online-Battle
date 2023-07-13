@@ -7,5 +7,5 @@ attack: 0
 defense: 0
 o: trigger
 mandatory: no
-after: COUNT([from destroyed where self = thisCard]) > 0
+after: destroyed = thisCard
 SUMMON(SELECT(1, [from you.deck where level < 5 & types = Fish & cardType = unit]), you.field, yes)

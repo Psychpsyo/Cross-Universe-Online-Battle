@@ -7,9 +7,9 @@ attack: 0
 defense: 0
 o: trigger
 mandatory: yes
-after: COUNT([from targeted where self = thisCard]) > 0
+after: targeted = thisCard
 DRAW(1)
 o: trigger
 mandatory: yes
-after: COUNT([from destroyed where self = thisCard]) > 0
+after: destroyed = thisCard
 LOSELIFE(300)

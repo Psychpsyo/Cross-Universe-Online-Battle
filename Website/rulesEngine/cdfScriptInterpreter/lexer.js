@@ -2,6 +2,7 @@ let keywordTokenTypes = {
 	from: "from",
 	where: "where",
 	thisCard: "thisCard",
+	attackTarget: "attackTarget",
 	currentPhase: "currentPhase",
 	currentTurn: "currentTurn",
 	turn: "turn",
@@ -62,6 +63,7 @@ let keywordTokenTypes = {
 	enchantItem: "cardType",
 
 	APPLY: "function",
+	CANCELATTACK: "function",
 	COUNT: "function",
 	DAMAGE: "function",
 	DECKTOP: "function",
@@ -75,10 +77,12 @@ let keywordTokenTypes = {
 	LOSEMANA: "function",
 	SELECT: "function",
 	SELECTPLAYER: "function",
+	SETATTACKTARGET: "function",
 	SUM: "function",
 	SUMMON: "function",
 	TOKENS: "function",
 
+	chosenTarget: "actionAccessor",
 	destroyed: "actionAccessor",
 	exiled: "actionAccessor",
 	discarded: "actionAccessor",

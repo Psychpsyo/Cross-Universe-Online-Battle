@@ -7,5 +7,5 @@ attack: 100
 defense: 500
 o: trigger
 mandatory: yes
-after: COUNT([from destroyed where self = thisCard]) > 0
+after: destroyed = thisCard
 DISCARD(DECKTOP?(2))

@@ -21,6 +21,7 @@ class Block {
 		this.costTimings = [];
 		this.timingGenerator = timingGenerator;
 		this.executionTimings = [];
+		this.isCancelled = false;
 	}
 
 	async* runCost() {
@@ -56,6 +57,9 @@ class Block {
 	}
 
 	async* run() {
+		if (this.getIsCancelled()) {
+			return;
+		}
 		let generatorOutput = await this.timingGenerator.next();
 		while(!generatorOutput.done) {
 			let actionList = generatorOutput.value;
@@ -84,6 +88,10 @@ class Block {
 		for (let i = this.executionTimings.length - 1; i >= 0; i--) {
 			yield* this.executionTimings[i].undo();
 		}
+	}
+
+	getIsCancelled() {
+		return this.isCancelled;
 	}
 
 	getCostTimings() {
@@ -196,7 +204,6 @@ export class AttackDeclaration extends Block {
 }
 
 async function* fightTimingGenerator(attackDeclaration) {
-	attackDeclaration.clear();
 	if (!attackDeclaration.isValid()) {
 		return;
 	}
@@ -246,6 +253,21 @@ async function* fightTimingGenerator(attackDeclaration) {
 export class Fight extends Block {
 	constructor(stack, player) {
 		super(stack, player, fightTimingGenerator(stack.phase.turn.game.currentAttackDeclaration));
+		this.attackDeclaration = stack.phase.turn.game.currentAttackDeclaration;
+	}
+
+	async* run() {
+		this.attackDeclaration.clear();
+		yield* super.run();
+	}
+
+	async* undoExecution() {
+		yield* super.undoExecution();
+		this.attackDeclaration.undoClear();
+	}
+
+	getIsCancelled() {
+		return super.getIsCancelled() || this.attackDeclaration.isCancelled;
 	}
 }
 

@@ -94,7 +94,7 @@ export class Card extends BaseCard {
 }
 
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
-class SnapshotCard extends BaseCard {
+export class SnapshotCard extends BaseCard {
 	constructor(card) {
 		super(card.owner, card.cardId, card.hidden, card.initialValues.clone());
 

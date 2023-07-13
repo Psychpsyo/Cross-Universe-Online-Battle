@@ -7,5 +7,5 @@ attack: 100
 defense: 100
 o: trigger
 mandatory: yes
-after: COUNT([from destroyed where self = thisCard]) > 0
+after: destroyed = thisCard
 DAMAGE(100) & opponent.DAMAGE(100)

@@ -7,7 +7,7 @@ attack: 0
 defense: 0
 o: trigger
 mandatory: no
-after: COUNT([from summoned where self = thisCard]) > 0
+after: summoned = thisCard
 $exiles = EXILE(SELECT([1, 2, 3], [from you.discard]))
 GAINLIFE(COUNT($exiles.exiled) * 100)
 o: optional

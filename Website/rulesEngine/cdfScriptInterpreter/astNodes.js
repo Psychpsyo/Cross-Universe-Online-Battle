@@ -3,7 +3,7 @@
 import * as actions from "../actions.js";
 import * as requests from "../inputRequests.js";
 import * as blocks from "../blocks.js";
-import {Card} from "../card.js";
+import {Card, SnapshotCard} from "../card.js";
 import {CardModifier} from "../cardValues.js";
 import {Zone} from "../zones.js";
 
@@ -139,6 +139,9 @@ export class FunctionNode extends AstNode {
 				let until = await (yield* this.parameters[2].eval(card, player, ability));
 				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.ApplyCardStatChange(card.cardRef, modifier, until));
 			}
+			case "CANCELATTACK": {
+				return [new actions.CancelAttack()];
+			}
 			case "COUNT": {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
 				return [list.length];
@@ -211,6 +214,9 @@ export class FunctionNode extends AstNode {
 				}
 				return requests.choosePlayer.validate(responses[0].value, selectionRequest);
 			}
+			case "SETATTACKTARGET": {
+				return [new actions.SetAttackTarget((await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+			}
 			case "SUM": {
 				let list = await (yield* this.parameters[0].eval(card, player, ability));
 				let sum = 0;
@@ -280,6 +286,7 @@ defense: ${defense}`, false));
 	async hasAllTargets(card, player, ability) {
 		player = (await this.player.evalFull(card, player, ability))[0];
 		switch (this.functionName) {
+			case "CANCELATTACK":
 			case "COUNT":
 			case "DAMAGE":
 			case "DRAW":
@@ -318,6 +325,9 @@ defense: ${defense}`, false));
 				let amountsRequired = await this.parameters[0].evalFull(card, player, ability);
 				return Math.min(...amountsRequired) <= availableAmount && await this.parameters[0].hasAllTargets(card, player, ability);
 			}
+			case "SETATTACKTARGET": {
+				return this.parameters[0].hasAllTargets(card, player, ability);
+			}
 			case "SUMMON": {
 				return this.parameters[0].hasAllTargets(card, player, ability);
 			}
@@ -326,6 +336,7 @@ defense: ${defense}`, false));
 	async canDoInFull(card, player, ability) {
 		player = (await this.player.evalFull(card, player, ability))[0];
 		switch (this.functionName) {
+			case "CANCELATTACK":
 			case "COUNT":
 			case "DAMAGE":
 			case "GAINLIFE":
@@ -367,6 +378,9 @@ defense: ${defense}`, false));
 				}
 				let amountsRequired = await this.parameters[0].evalFull(card, player, ability);
 				return Math.min(...amountsRequired) <= availableAmount && await this.parameters[0].canDoInFull(card, player, ability);
+			}
+			case "SETATTACKTARGET": {
+				return this.parameters[0].canDoInFull(card, player, ability);
 			}
 			case "SUMMON": {
 				return this.parameters[0].canDoInFull(card, player, ability);
@@ -420,6 +434,14 @@ export class CardMatchNode extends AstNode {
 export class ThisCardNode extends AstNode {
 	async* eval(card, player, ability) {
 		return [card];
+	}
+}
+export class AttackTargetNode extends AstNode {
+	async* eval(card, player, ability) {
+		if (player.game.currentAttackDeclaration?.target) {
+			return [player.game.currentAttackDeclaration?.target];
+		}
+		return [];
 	}
 }
 export class ImplicitCardNode extends AstNode {
@@ -552,7 +574,12 @@ export class PlusNode extends DashMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] + (await (yield* this.rightSide.eval(card, player, ability)))[0]];
+		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
+		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		if (typeof left == "number" && typeof right == "number") {
+			return [left + right];
+		}
+		return [NaN];
 	}
 }
 export class MinusNode extends DashMathNode {
@@ -560,7 +587,12 @@ export class MinusNode extends DashMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] - (await (yield* this.rightSide.eval(card, player, ability)))[0]];
+		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
+		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		if (typeof left == "number" && typeof right == "number") {
+			return [left - right];
+		}
+		return [NaN];
 	}
 }
 export class DotMathNode extends MathNode {
@@ -573,7 +605,12 @@ export class MultiplyNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] * (await (yield* this.rightSide.eval(card, player, ability)))[0]];
+		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
+		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		if (typeof left != "number" || typeof right != "number") {
+			return [NaN];
+		}
+		return [left * right];
 	}
 }
 export class DivideNode extends DotMathNode {
@@ -581,7 +618,12 @@ export class DivideNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return [(await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability)))[0]];
+		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
+		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		if (typeof left != "number" || typeof right != "number") {
+			return [NaN];
+		}
+		return [left / right];
 	}
 }
 export class FloorDivideNode extends DotMathNode {
@@ -589,13 +631,27 @@ export class FloorDivideNode extends DotMathNode {
 		super(leftSide, rightSide);
 	}
 	async* eval(card, player, ability) {
-		return [Math.floor((await (yield* this.leftSide.eval(card, player, ability)))[0] / (await (yield* this.rightSide.eval(card, player, ability)))[0])];
+		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
+		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+		if (typeof left != "number" || typeof right != "number") {
+			return [NaN];
+		}
+		return [Math.floor(left / right)];
 	}
 }
 export class ComparisonNode extends MathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
+}
+function equalityCompare(a, b) {
+	if (a instanceof SnapshotCard) {
+		a = a.cardRef;
+	}
+	if (b instanceof SnapshotCard) {
+		b = b.cardRef;
+	}
+	return a == b;
 }
 export class EqualsNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
@@ -604,7 +660,7 @@ export class EqualsNode extends ComparisonNode {
 	async* eval(card, player, ability) {
 		let rightSideElements = await (yield* this.rightSide.eval(card, player, ability));
 		for (let element of await (yield* this.leftSide.eval(card, player, ability))) {
-			if (rightSideElements.includes(element)) {
+			if (rightSideElements.some(elem => equalityCompare(elem, element))) {
 				return true;
 			}
 		}
@@ -618,7 +674,7 @@ export class NotEqualsNode extends ComparisonNode {
 	async* eval(card, player, ability) {
 		let rightSideElements = await (yield* this.rightSide.eval(card, player, ability));
 		for (let element of await (yield* this.leftSide.eval(card, player, ability))) {
-			if (rightSideElements.includes(element)) {
+			if (rightSideElements.some(elem => !equalityCompare(elem, element))) {
 				return false;
 			}
 		}
@@ -835,54 +891,72 @@ export class ActionAccessorNode extends AstNode {
 		this.accessor = accessor;
 	}
 	async* eval(card, player, ability) {
-		let actionType = {
-			"discarded": actions.Discard,
-			"destroyed": actions.Destroy,
-			"exiled": actions.Exile,
-			"summoned": actions.Summon,
-			"cast": actions.Cast,
-			"deployed": actions.Deploy,
-			"targeted": actions.EstablishAttackDeclaration,
-			"declared": actions.EstablishAttackDeclaration,
-			"retired": actions.Discard
-		}[this.accessor];
-
 		let values = [];
 		for (let action of await (yield* this.actionsNode.eval(card, player, ability))) {
-			if (action instanceof actionType) {
-				switch (action.constructor) {
-					case actions.Discard:
-						if (this.accessor == "retired" && !(action.timing.block instanceof blocks.Retire)) {
-							break;
-						}
-					case actions.Destroy:
-					case actions.Exile: {
-						addCardIfUnique(values, action.card);
-						break;
-					}
-					case actions.Summon: {
-						addCardIfUnique(values, action.unit);
-						break;
-					}
-					case actions.Cast: {
+			switch (this.accessor) {
+				case "cast": {
+					if (action instanceof actions.Cast) {
 						addCardIfUnique(values, action.spell);
-						break;
 					}
-					case actions.Deploy: {
+					break;
+				}
+				case "chosenTarget": {
+					if (action instanceof actions.EstablishAttackDeclaration) {
+						addCardIfUnique(values, action.attackTarget);
+					}
+					break;
+				}
+				case "declared": {
+					if (action instanceof actions.EstablishAttackDeclaration) {
+						for (let attacker of action.attackers) {
+							addCardIfUnique(values, attacker);
+						}
+					}
+					break;
+				}
+				case "deployed": {
+					if (action instanceof actions.Deploy) {
 						addCardIfUnique(values, action.item);
-						break;
 					}
-					case actions.EstablishAttackDeclaration: {
-						if (this.accessor == "targeted") {
-							addCardIfUnique(values, action.attackTarget);
-						}
-						if (this.accessor == "declared") {
-							for (let attacker of action.attackers) {
-								addCardIfUnique(values, attacker);
-							}
-						}
-						break;
+					break;
+				}
+				case "destroyed": {
+					if (action instanceof actions.Destroy) {
+						addCardIfUnique(values, action.card);
 					}
+					break;
+				}
+				case "discarded": {
+					if (action instanceof actions.Discard) {
+						addCardIfUnique(values, action.card);
+					}
+					break;
+				}
+				case "exiled": {
+					if (action instanceof actions.Exile) {
+						addCardIfUnique(values, action.card);
+					}
+					break;
+				}
+				case "retired": {
+					if (action instanceof actions.Discard && action.timing.block instanceof blocks.Retire) {
+						addCardIfUnique(values, action.card);
+					}
+					break;
+				}
+				case "summoned": {
+					if (action instanceof actions.Summon) {
+						addCardIfUnique(values, action.unit);
+					}
+					break;
+				}
+				case "targeted": {
+					if (action instanceof actions.EstablishAttackDeclaration) {
+						addCardIfUnique(values, action.attackTarget);
+					} else if (action instanceof actions.SetAttackTarget) {
+						addCardIfUnique(values, action.newTarget);
+					}
+					break;
 				}
 			}
 		}

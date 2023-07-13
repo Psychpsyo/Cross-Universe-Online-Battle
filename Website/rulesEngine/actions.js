@@ -447,3 +447,48 @@ export class RemoveCardStatChange extends Action {
 		this.card.cardRef.modifierStack.splice(this.index, 0, this.modifier);
 	}
 }
+
+export class CancelAttack extends Action {
+	constructor() {
+		super();
+		this.wasCancelled = null;
+	}
+
+	* run() {
+		if (this.timing.game.currentAttackDeclaration) {
+			this.wasCancelled = this.timing.game.currentAttackDeclaration.isCancelled;
+			this.timing.game.currentAttackDeclaration.isCancelled = true;
+		}
+	}
+
+	undo() {
+		if (this.timing.game.currentAttackDeclaration) {
+			this.timing.game.currentAttackDeclaration.isCancelled = this.wasCancelled;
+		}
+	}
+}
+
+export class SetAttackTarget extends Action {
+	constructor(newTarget) {
+		super();
+		this.newTarget = newTarget;
+		this.oldTarget = null;
+	}
+
+	* run() {
+		if (this.timing.game.currentAttackDeclaration) {
+			this.oldTarget = this.timing.game.currentAttackDeclaration.target;
+			if (this.newTarget.zone instanceof zones.FieldZone) {
+				this.timing.game.currentAttackDeclaration.target = this.newTarget;
+			} else {
+				this.timing.game.currentAttackDeclaration.target = null;
+			}
+		}
+	}
+
+	undo() {
+		if (this.timing.game.currentAttackDeclaration) {
+			this.timing.game.currentAttackDeclaration.target = this.oldTarget;
+		}
+	}
+}

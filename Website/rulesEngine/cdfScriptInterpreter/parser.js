@@ -255,7 +255,7 @@ function parseValue() {
 		}
 		case "player": {
 			let player = parsePlayer();
-			if (tokens[pos].type == "dotOperator") {
+			if (tokens[pos] && tokens[pos].type == "dotOperator") {
 				pos++;
 				return parsePlayerDotAccess(player);
 			}
@@ -296,7 +296,7 @@ function parseValue() {
 		}
 		case "variable": {
 			let variable = parseVariable();
-			if (tokens[pos].type == "dotOperator") {
+			if (tokens[pos] && tokens[pos].type == "dotOperator") {
 				pos++;
 				switch (tokens[pos].type) {
 					case "phase":
@@ -320,6 +320,15 @@ function parseValue() {
 		}
 		case "thisCard": {
 			let card = new ast.ThisCardNode();
+			pos++;
+			if (tokens[pos] && tokens[pos].type == "dotOperator") {
+				pos++;
+				return parseCardDotAccess(card);
+			}
+			return card;
+		}
+		case "attackTarget": {
+			let card = new ast.AttackTargetNode();
 			pos++;
 			if (tokens[pos] && tokens[pos].type == "dotOperator") {
 				pos++;

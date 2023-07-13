@@ -7,6 +7,6 @@ attack: 100
 defense: 200
 o: trigger
 mandatory: no
-after: COUNT([from summoned where self = thisCard]) > 0
+after: summoned = thisCard
 condition: thisCard.zone = field
 SUMMON(SELECT(1, [from you.deck where name = CUU00074]), you.unitZone, yes)

@@ -7,5 +7,5 @@ attack: 100
 defense: 100
 o: trigger
 mandatory: no
-after: COUNT([from declared where self = thisCard]) > 0
+after: declared = thisCard
 APPLY(thisCard, {attack += 100}, forever)
