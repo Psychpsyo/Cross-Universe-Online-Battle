@@ -14,6 +14,7 @@ html {
 #mainGameArea {
 	position: relative;
 	flex-grow: 1;
+	touch-action: none;
 }
 
 #fieldHolder {
@@ -599,6 +600,7 @@ dialog.popupSelectMenu {
 .cardListScrollParent {
 	overflow-y: scroll;
 	flex-grow: 1;
+	touch-action: none;
 
 	padding: 0 1em;
 

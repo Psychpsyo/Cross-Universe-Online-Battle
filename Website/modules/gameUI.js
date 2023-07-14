@@ -8,6 +8,7 @@ import {Card} from "/rulesEngine/card.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
+let currentPointer = null;
 let lastFrame = 0;
 
 let cardSelectorSlots = [];
@@ -115,13 +116,19 @@ export function init() {
 			new FieldCardSlot(player.spellItemZone, i);
 		}
 
-		document.getElementById("hand" + player.index).addEventListener("mouseup", function(e) {
+		document.getElementById("hand" + player.index).addEventListener("pointerup", function(e) {
+			if (e.pointerId != currentPointer) {
+				return;
+			}
 			e.stopPropagation();
 			dropCard(localPlayer, player.handZone, player.handZone.cards.length);
 		});
 
 		// presented cards (only used during manual play)
-		document.getElementById("presentedCards" + player.index).addEventListener("mouseup", function(e) {
+		document.getElementById("presentedCards" + player.index).addEventListener("pointerup", function(e) {
+			if (e.pointerId != currentPointer) {
+				return;
+			}
 			e.stopPropagation();
 			let presentedZone = gameState.controller.playerInfos[player.index].presentedZone;
 			dropCard(localPlayer, presentedZone, presentedZone.cards.length);
@@ -129,22 +136,38 @@ export function init() {
 	});
 
 	// dropping cards off in nowhere
-	document.addEventListener("mouseup", function() {
+	document.addEventListener("pointerup", function(e) {
+		if (e.pointerId != currentPointer) {
+			return;
+		}
 		dropCard(localPlayer, null, 0);
 	});
 
 	// setup cursor movement
-	document.addEventListener("mousemove", function(e) {
+	document.addEventListener("pointermove", function(e) {
+		if (e.pointerId != currentPointer) {
+			if (uiPlayers[1].dragging) {
+				return;
+			}
+			currentPointer = e.pointerId;
+			socket?.send("[hideCursor]");
+		}
 		let fieldRect = document.getElementById("field").getBoundingClientRect();
 		uiPlayers[1].targetX = (e.clientX - fieldRect.left - fieldRect.width / 2) / fieldRect.height;
 		uiPlayers[1].targetY = (e.clientY - fieldRect.top) / fieldRect.height;
 		uiPlayers[1].posX = uiPlayers[1].targetX;
 		uiPlayers[1].posY = uiPlayers[1].targetY;
 	});
-	document.getElementById("field").addEventListener("mouseleave", function() {
+	document.getElementById("field").addEventListener("pointerleave", function() {
 		socket?.send("[hideCursor]");
 	});
-	document.getElementById("field").addEventListener("mousemove", function() {
+	document.getElementById("field").addEventListener("pointermove", function(e) {
+		if (e.pointerId != currentPointer) {
+			if (uiPlayers[1].dragging) {
+				return;
+			}
+			currentPointer = e.pointerId;
+		}
 		// check if the normalized cursor position is within the bounds of the visual field
 		if (Math.abs(uiPlayers[1].posX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
 			socket?.send("[placeCursor]" + uiPlayers[1].posX + "|" + uiPlayers[1].posY);
@@ -156,7 +179,7 @@ export function init() {
 	// previewing hand cards
 	document.addEventListener("keydown", function(e) {
 		if (e.code.startsWith("Digit") && !e.shiftKey && !e.altKey && !e.ctrlKey) {
-			let cardIndex = e.code.substr(5);
+			let cardIndex = e.code.substring(5);
 			if (cardIndex == 0) {
 				cardIndex = 10;
 			}
@@ -342,6 +365,27 @@ export function clearCardButtons(zone, index, type) {
 	}
 }
 
+function setCardDragEvent(element, uiCardSlot) {
+	element.addEventListener("dragstart", function(e) {
+		e.preventDefault();
+	});
+	element.addEventListener("pointerdown", function(e) {
+		e.target.releasePointerCapture(e.pointerId);
+	});
+	element.addEventListener("pointermove", function(e) {
+		if (e.buttons == 0) {
+			return;
+		}
+		e.preventDefault();
+		if (grabCard(localPlayer, uiCardSlot.zone, uiCardSlot.index) || uiCardSlot.zone == gameState.controller.tokenZone) {
+			if (uiCardSlot instanceof CardSelectorSlot) {
+				closeCardSelect();
+			}
+			currentPointer = e.pointerId;
+		}
+	});
+}
+
 export class UiCardSlot {
 	constructor(zone, index) {
 		this.zone = zone;
@@ -393,17 +437,17 @@ class FieldCardSlot extends UiCardSlot {
 		super(zone, index);
 		this.fieldSlot = document.getElementById("field" + fieldSlotIndexFromZone(zone, index));
 
-		this.fieldSlot.addEventListener("dragstart", function(e) {
-			e.preventDefault();
-			grabCard(localPlayer, zone, index);
-		});
+		setCardDragEvent(this.fieldSlot, this);
 		this.fieldSlot.addEventListener("click", function(e) {
 			if (zone.get(index)) {
 				e.stopPropagation();
 				previewCard(zone.get(index));
 			}
 		});
-		this.fieldSlot.addEventListener("mouseup", function(e) {
+		this.fieldSlot.addEventListener("pointerup", function(e) {
+			if (e.pointerId != currentPointer) {
+				return;
+			}
 			e.stopPropagation();
 			dropCard(localPlayer, zone, index);
 		});
@@ -450,10 +494,8 @@ class HandCardSlot extends UiCardSlot {
 		this.cardElem = document.createElement("img");
 		getCardImage(zone.get(index)).then(img => this.cardElem.src = img);
 		this.cardElem.classList.add("card");
-		this.cardElem.addEventListener("dragstart", function(e) {
-			e.preventDefault();
-			grabCard(localPlayer, this.zone, this.index);
-		}.bind(this));
+
+		setCardDragEvent(this.cardElem, this);
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
 			previewCard(zone.get(this.index));
@@ -490,7 +532,10 @@ class DeckCardSlot extends UiCardSlot {
 		document.getElementById("deck" + this.zone.player.index).addEventListener("dragstart", function(e) {
 			e.preventDefault();
 		});
-		document.getElementById("deck" + this.zone.player.index).addEventListener("mouseup", function(e) {
+		document.getElementById("deck" + this.zone.player.index).addEventListener("pointerup", function(e) {
+			if (e.pointerId != currentPointer) {
+				return;
+			}
 			e.stopPropagation();
 			dropCard(localPlayer, this.zone, -1);
 		}.bind(this));
@@ -517,36 +562,35 @@ class DeckCardSlot extends UiCardSlot {
 class PileCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
-		this.cardCount = zone.cards.length;
 
-		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("dragstart", function(e) {
-			e.preventDefault();
-			grabCard(localPlayer, this.zone, this.zone.cards.length - 1);
-		}.bind(this));
+		setCardDragEvent(document.getElementById(this.zone.type + this.zone.player.index), this);
 		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("click", function() {
-			openCardSelect(this.zone);
-		}.bind(this));
-		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("mouseup", function(e) {
+			openCardSelect(zone);
+		});
+		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("pointerup", function(e) {
+			if (e.pointerId != currentPointer) {
+				return;
+			}
 			e.stopPropagation();
-			dropCard(localPlayer, this.zone, this.zone.cards.length);
-		}.bind(this));
+			dropCard(localPlayer, zone, zone.cards.length);
+		});
 	}
 
 	update() {
-		this.cardCount = this.zone.cards.length;
+		this.index = this.zone.cards.length - 1;
 		this.setVisuals();
 	}
 	remove() {
-		this.cardCount -= 1;
+		this.index -= 1;
 		this.setVisuals();
 	}
 	insert(index) {
-		this.cardCount += 1;
+		this.index += 1;
 		this.setVisuals();
 	}
 	setVisuals() {
 		getCardImage(this.zone.get(this.zone.cards.length - 1)).then(img => document.getElementById(this.zone.type + this.zone.player.index).src = img);
-		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
+		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.index >= 0? this.index + 1 : "";
 	}
 
 	getButtonHolder() {
@@ -569,10 +613,7 @@ class PresentedCardSlot extends UiCardSlot {
 			e.stopPropagation();
 			previewCard(this.zone.get(this.index));
 		}.bind(this));
-		this.cardImg.addEventListener("dragstart", function(e) {
-			e.preventDefault();
-			grabCard(localPlayer, this.zone, this.index);
-		}.bind(this));
+		setCardDragEvent(this.cardImg, this);
 		this.cardElem.appendChild(this.cardImg);
 
 		if (this.zone.player === localPlayer) {
@@ -624,12 +665,7 @@ class CardSelectorSlot extends UiCardSlot {
 		if (!cardSelectorSorted) {
 			this.cardElem.style.order = -index;
 		}
-		this.cardElem.addEventListener("dragstart", function(e) {
-			e.preventDefault();
-			if (grabCard(localPlayer, zone, this.index) || zone == gameState.controller.tokenZone) {
-				closeCardSelect();
-			}
-		}.bind(this));
+		setCardDragEvent(this.cardElem, this);
 		this.cardElem.addEventListener("click", function(e) {
 			e.stopPropagation();
 			previewCard(zone.get(this.index));
