@@ -31,11 +31,7 @@ function receiveMessage(e) {
 
 	switch (command) {
 		case "chat": { // incoming chat message
-			if (!opponentName || opponentName == "") {
-				putChatMessage(locale["chat"]["opponent"] + locale["chat"]["colon"] + message);
-			} else {
-				putChatMessage(opponentName + locale["chat"]["colon"] + message);
-			}
+			putChatMessage(players[0].name + locale["chat"]["colon"] + message);
 			break;
 		}
 		case "quit": { // opponent quit the game (or crashed)

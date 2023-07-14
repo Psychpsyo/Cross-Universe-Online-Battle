@@ -26,6 +26,9 @@ export class InitState extends GameState {
 				if (localStorage.getItem("username") !== "") {
 					socket.send("[username]" + localStorage.getItem("username"));
 				}
+				if (localStorage.getItem("profilePicture") !== "") {
+					socket.send("[profilePicture]" + localStorage.getItem("profilePicture"));
+				}
 				if (localStorage.getItem("cardBack") !== "") {
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
@@ -45,7 +48,13 @@ export class InitState extends GameState {
 				return true;
 			}
 			case "username": {
-				opponentName = message;
+				players[0].name = message;
+				return true;
+			}
+			case "profilePicture": {
+				if (message.match(/^[USIT]\d{5}$/)) {
+					players[0].profilePicture = message;
+				}
 				return true;
 			}
 			case "cardBack": {
@@ -102,12 +111,7 @@ export class InitState extends GameState {
 			document.getElementById("chatInput").addEventListener("keyup", function(e) {
 				if (e.code == "Enter" && this.value != "") {
 					socket.send("[chat]" + this.value);
-					if (localStorage.getItem("username") !== "") {
-						putChatMessage(localStorage.getItem("username") + locale["chat"]["colon"] + this.value);
-					} else {
-						putChatMessage(locale["chat"]["you"] + locale["chat"]["colon"] + this.value);
-					}
-
+					putChatMessage(players[1].name + locale["chat"]["colon"] + this.value);
 					this.value = "";
 				}
 				if (e.code == "Escape") {

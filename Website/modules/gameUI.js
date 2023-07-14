@@ -3,7 +3,7 @@ import {socket, zoneToLocal} from "/modules/netcode.js";
 import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 import {FieldZone} from "/rulesEngine/zones.js";
-import {getCardImage} from "/modules/cardLoader.js";
+import {getCardImage, getCardImageFromID} from "/modules/cardLoader.js";
 import {Card} from "/rulesEngine/card.js";
 
 let cardSlots = [];
@@ -15,13 +15,15 @@ let cardSelectorMainSlot = null;
 let cardSelectorSorted = false;
 
 let cardChoiceSelected = [];
-
-youInfoText.textContent = locale.game.info.you;
-opponentInfoText.textContent = locale.game.info.opponent;
-lifeInfoText.textContent = locale.game.info.life;
-manaInfoText.textContent = locale.game.info.mana;
+for (const elem of Array.from(document.querySelectorAll(".lifeTitle"))) {
+	elem.textContent = locale.game.playerInfo.life;
+}
+for (const elem of Array.from(document.querySelectorAll(".manaTitle"))) {
+	elem.textContent = locale.game.playerInfo.mana;
+}
 
 cardChoiceConfirm.textContent = locale.game.cardChoice.confirm;
+infoPanelVS.textContent = locale.game.playerInfo.vs;
 
 if (localStorage.getItem("fieldLabelToggle") == "true") {
 	document.querySelectorAll(".fieldLabelUnitZone").forEach(label => {
@@ -81,7 +83,24 @@ export function fieldSlotIndexFromZone(zone, index) {
 	return -1;
 }
 
+
+let profilePictureInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
+
 export function init() {
+	for (let i = 0; i < 2; i++) {
+		document.getElementById("username" + i).textContent = players[i].name;
+		document.getElementById("profilePicture" + i).style.backgroundImage = "url('" + getCardImageFromID(players[i].profilePicture) + "')";
+		if (profilePictureInfo[players[i].profilePicture]?.left) {
+			document.getElementById("profilePicture" + i).style.backgroundPositionX = profilePictureInfo[players[i].profilePicture]?.left + "%";
+		}
+	}
+	if (!profilePictureInfo[players[0].profilePicture]?.flip && !profilePictureInfo[players[0].profilePicture]?.neverFlip) {
+		profilePicture0.style.transform = "scaleX(-1)";
+	}
+	if (profilePictureInfo[players[1].profilePicture]?.flip) {
+		profilePicture1.style.transform = "scaleX(-1)";
+	}
+
 	game.players.forEach(player => {
 		uiPlayers.push(new UiPlayer(player));
 

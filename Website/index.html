@@ -64,21 +64,24 @@
 			<div id="gameFlexBox">
 				<div id="leftPanel">
 					<div id="infoPanel">
-						<div>
-							<br>
-							<span id="lifeInfoText"></span><br>
-							<span id="manaInfoText"></span>
+						<div class="playerInfoHolder">
+							<div class="profilePictureHolder">
+								<div id="profilePicture1" class="profilePicture"></div>
+								<span id="username1" class="username overlayText"></span>
+							</div>
+							<div class="playerInfoValueHolder"><span class="lifeTitle"></span><span id="lifeDisplay1">1000</span></div>
+							<div class="playerInfoValueHolder"><span class="manaTitle"></span><span id="manaDisplay1">0</span></div>
 						</div>
-						<div>
-							<span id="youInfoText"></span><br>
-							<span id="lifeDisplay1">1000</span><br>
-							<span id="manaDisplay1">0</span>
+						<hr>
+						<div class="playerInfoHolder">
+							<div class="profilePictureHolder">
+								<div id="profilePicture0" class="profilePicture"></div>
+								<span id="username0" class="username overlayText"></span>
+							</div>
+							<div class="playerInfoValueHolder"><span class="lifeTitle"></span><span id="lifeDisplay0">1000</span></div>
+							<div class="playerInfoValueHolder"><span class="manaTitle"></span><span id="manaDisplay0">0</span></div>
 						</div>
-						<div>
-							<span id="opponentInfoText"></span><br>
-							<span id="lifeDisplay0">1000</span><br>
-							<span id="manaDisplay0">0</span>
-						</div>
+						<div id="infoPanelVS"></div>
 					</div>
 					<div id="gameInteractions" class="manualOnly" hidden>
 						<div>
@@ -115,7 +118,7 @@
 						<div id="deckDropPanel" class="sideBox">
 							<input id="fileSelectDeckLoader" type="file" accept=".deck,.deckx">
 							<label for="fileSelectDeckLoader"></label>
-							<div id="deckDropTextContainer" class="centeredTextDiv">
+							<div id="deckDropTextContainer">
 								<span id="dropDeckHereLabel"></span><br>
 								<span id="deckSelectSpan" class="clickableText"></span><br>
 							</div>

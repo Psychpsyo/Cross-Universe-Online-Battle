@@ -33,11 +33,10 @@
 			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt."
 		},
 
-		"info": {
-			"you": "Du",
-			"opponent": "Gegner",
+		"playerInfo": {
 			"life": "LP:",
-			"mana": "Mana:"
+			"mana": "Mana:",
+			"vs": "VS"
 		},
 
 		"deckSelect": {
@@ -209,8 +208,8 @@
 	"chat": {
 		"title": "Chat",
 		"enterMessage": "Nachricht schreiben...",
-		"you": "Du: ",
-		"opponent": "GEGNER: ",
+		"you": "Du",
+		"opponent": "Gegner",
 		"colon": ": "
 	},
 
@@ -252,6 +251,8 @@
 			"title": "Profil",
 			"username": "Dein Nutzername:",
 			"usernamePlaceholder": "Kein Nutzername gewählt.",
+			"profilePicture": "Profilbild:",
+			"profilePicturePlaceholder": "Karten-ID eingeben (z.B: U00031)",
 			"cardBackLink": "Link für einen Kartenrücken:",
 			"cardBackLinkPlaceholder": "Kein Kartenrücken gewählt."
 		},

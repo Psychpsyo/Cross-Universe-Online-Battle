@@ -179,18 +179,56 @@ dialog #cardDetails {
 }
 
 #infoPanel {
+	position: relative;
 	display: flex;
-	justify-content: center;
-	text-align: right;
 	white-space: nowrap;
-	padding: .5em;
 }
-#infoPanel > div {
-	min-width: 4vw;
+#infoPanel > hr {
+	margin: 0 .3em;
 }
-#infoPanel > :not(:last-child) {
-	margin-right: 2vw;
+.playerInfoHolder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 50%;
+	text-align: center;
+	padding: .6em;
 }
+.profilePictureHolder {
+	position: relative;
+	width: 70%;
+	margin-bottom: .5em;
+}
+.profilePicture {
+	background-image: url("https://crossuniverse.net/images/cards/en/U00161.jpg");
+	aspect-ratio: 1;
+	border-radius: 50%;
+	border: 4px solid white;
+	background-position-x: center;
+	background-position-y: 22.5%;
+	background-size: 177%;
+}
+.username {
+	position: absolute;
+	left: 50%;
+	bottom: -7.4%;
+	transform: translateX(-50%);
+	font-size: .75em;
+}
+.playerInfoValueHolder {
+	width: 80%;
+	display: flex;
+	justify-content: space-between;
+}
+#infoPanelVS {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-weight: bold;
+	font-size: 1.8em;
+}
+
 .valueUp {
 	font-weight: bold;
 	color: #0f0;

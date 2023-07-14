@@ -33,11 +33,10 @@
 			"opponentChoseSelf": null
 		},
 
-		"info": {
-			"you": "自分",
-			"opponent": "相手",
+		"playerInfo": {
 			"life": "Lp：",
-			"mana": "魔力："
+			"mana": "魔力：",
+			"vs": "VS"
 		},
 
 		"deckSelect": {
@@ -252,6 +251,8 @@
 			"title": null,
 			"username": null,
 			"usernamePlaceholder": null,
+			"profilePicture": null,
+			"profilePicturePlaceholder": null,
 			"cardBackLink": null,
 			"cardBackLinkPlaceholder": null
 		},

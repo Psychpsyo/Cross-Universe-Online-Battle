@@ -89,6 +89,8 @@ function setLanguage(language) {
 		profileHeading.textContent = locale.settings.profile.title;
 		usernameLabel.textContent = locale.settings.profile.username;
 		usernameInput.placeholder = locale.settings.profile.usernamePlaceholder;
+		profilePictureLabel.textContent = locale.settings.profile.profilePicture;
+		profilePictureInput.placeholder = locale.settings.profile.profilePicturePlaceholder;
 		cardBackLabel.textContent = locale.settings.profile.cardBackLink;
 		customCardBack.placeholder = locale.settings.profile.cardBackLinkPlaceholder;
 
@@ -146,6 +148,7 @@ closePreviewToggle.checked = localStorage.getItem("autoClosePreview") === "true"
 alwaysShowCardButtonsToggle.checked = localStorage.getItem("alwaysShowCardButtons") === "true";
 
 usernameInput.value = localStorage.getItem("username");
+profilePictureInput.value = localStorage.getItem("profilePicture");
 customCardBack.value = localStorage.getItem("cardBack");
 
 fieldLabelToggle.checked = localStorage.getItem("fieldLabelToggle") === "true";
@@ -181,6 +184,9 @@ alwaysShowCardButtonsToggle.addEventListener("change", function() {
 
 usernameInput.addEventListener("change", function() {
 	localStorage.setItem("username", this.value);
+});
+profilePictureInput.addEventListener("change", function() {
+	localStorage.setItem("profilePicture", this.value);
 });
 customCardBack.addEventListener("change", function() {
 	localStorage.setItem("cardBack", this.value);

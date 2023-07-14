@@ -33,11 +33,10 @@
 			"opponentChoseSelf": "Your opponent chose themselves."
 		},
 
-		"info": {
-			"you": "You",
-			"opponent": "Opponent",
+		"playerInfo": {
 			"life": "Life:",
-			"mana": "Mana:"
+			"mana": "Mana:",
+			"vs": "VS"
 		},
 
 		"deckSelect": {
@@ -252,6 +251,8 @@
 			"title": "Profile",
 			"username": "Your Username:",
 			"usernamePlaceholder": "No username set.",
+			"profilePicture": "Profile Picture:",
+			"profilePicturePlaceholder": "Enter card ID (i.e: U00031)",
 			"cardBackLink": "Custom Card Back Link:",
 			"cardBackLinkPlaceholder": "No card back set."
 		},

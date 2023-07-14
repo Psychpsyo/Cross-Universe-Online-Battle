@@ -27,11 +27,8 @@ export class DraftState extends GameState {
 		this.opponentReady = false;
 
 		draftStartButton.textContent = locale.draft.startGame;
-		draftDeckOwner0.textContent = localStorage.getItem("username");
-		if (draftDeckOwner0.textContent == "") {
-			draftDeckOwner0.textContent = locale.draft.yourDeck;
-		}
-		draftDeckOwner1.textContent = opponentName ?? locale.draft.opponentDeck;
+		draftDeckOwner0.textContent = players[0].name;
+		draftDeckOwner1.textContent = players[1].name;
 		draftDeckCount0.textContent = "0/" + this.format.deckSize;
 		draftDeckCount1.textContent = "0/" + this.format.deckSize;
 

@@ -5,8 +5,21 @@ import {startEffect} from "/modules/levitationEffect.js";
 window.game = null;
 window.localPlayer = null;
 window.gameState = null;
-window.opponentName = null;
 window.youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and partner selection, as far as the board is concerned, the local player is always player 1.)
+
+window.players = [
+	{
+		name: locale.chat.opponent,
+		profilePicture: "S00093"
+	},
+	{
+		name: localStorage.getItem("username"),
+		profilePicture: localStorage.getItem("profilePicture")
+	}
+];
+if (players[1].name == "") {
+	players[1].name = locale.chat.you;
+}
 
 // translate main menu
 roomCodeInputTitle.textContent = locale.mainMenu.roomCodeInputTitle;
