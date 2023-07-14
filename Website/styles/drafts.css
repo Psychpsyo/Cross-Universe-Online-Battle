@@ -20,13 +20,14 @@
 	display: flex;
 	aspect-ratio: 8130 / 1185;
 	background-color: #0004;
+	user-select: none;
 }
 
 @keyframes cardEntry {
 	from {
 		transform: translateX(100vw);
 	}
-	
+
 	to {
 		transform: translateX(0);
 	}
@@ -71,6 +72,7 @@
 	border: 2px solid #eee;
 	aspect-ratio: 8130 / 3555;
 	background-color: var(--theme-shadow);
+	user-select: none;
 }
 
 .draftDeckList img {

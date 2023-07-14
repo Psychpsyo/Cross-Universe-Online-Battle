@@ -835,6 +835,13 @@ function animate(currentTime) {
 		uiPlayer.lastY = uiPlayer.posY;
 
 		uiPlayer.life.animate(delta);
+		if (uiPlayer.life.value == 0) {
+			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "grayscale(100%)";
+			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "opacity(50%)";
+		} else {
+			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "";
+			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "";
+		}
 		uiPlayer.mana.animate(delta);
 	}
 
