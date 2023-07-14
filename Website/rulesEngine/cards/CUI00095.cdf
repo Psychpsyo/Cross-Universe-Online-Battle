@@ -8,5 +8,5 @@ condition: you.life > 1999
 cost:
 LOSELIFE(you.life / 2)
 exec:
-SUMMON([from you.deck, you.hand, you.discard where name = CUU00101], you.field, no)
+SUMMON([from you.deck, you.hand, you.discard where name = CUU00101], you.unitZone, no)
 DESTROY([from field])

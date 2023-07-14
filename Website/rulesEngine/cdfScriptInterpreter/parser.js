@@ -336,6 +336,15 @@ function parseValue() {
 			}
 			return card;
 		}
+		case "attackers": {
+			let cards = new ast.AttackersNode();
+			pos++;
+			if (tokens[pos] && tokens[pos].type == "dotOperator") {
+				pos++;
+				return parseCardDotAccess(cards);
+			}
+			return cards;
+		}
 		case "cardProperty": {
 			return parseCardProperty(new ast.ImplicitCardNode());
 		}

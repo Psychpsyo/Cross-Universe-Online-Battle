@@ -8,4 +8,4 @@ defense: 0
 o: trigger
 mandatory: no
 after: destroyed = thisCard
-SUMMON(SELECT(1, [from you.deck where level < 5 & types = Fish & cardType = unit]), you.field, yes)
+SUMMON(SELECT(1, [from you.deck where level < 5 & types = Fish & cardType = unit]), you.unitZone, yes)

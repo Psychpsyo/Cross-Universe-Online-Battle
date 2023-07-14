@@ -6,4 +6,4 @@ types: Wind
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field
-SUMMON(SELECT(1, [from you.hand where types = Wind]))
+SUMMON(SELECT(1, [from you.hand where types = Wind]), you.unitZone, yes)

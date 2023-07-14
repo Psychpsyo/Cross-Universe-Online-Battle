@@ -3,6 +3,7 @@ let keywordTokenTypes = {
 	where: "where",
 	thisCard: "thisCard",
 	attackTarget: "attackTarget",
+	attackers: "attackers",
 	currentPhase: "currentPhase",
 	currentTurn: "currentTurn",
 	turn: "turn",

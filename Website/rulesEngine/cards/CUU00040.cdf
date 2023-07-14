@@ -9,4 +9,4 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 exec:
-SUMMON(SELECT(1, [from you.hand where cardType = unit & types = Wind]), you.field, yes)
+SUMMON(SELECT(1, [from you.hand where cardType = unit & types = Wind]), you.unitZone, yes)

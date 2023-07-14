@@ -439,7 +439,15 @@ export class ThisCardNode extends AstNode {
 export class AttackTargetNode extends AstNode {
 	async* eval(card, player, ability) {
 		if (player.game.currentAttackDeclaration?.target) {
-			return [player.game.currentAttackDeclaration?.target];
+			return [player.game.currentAttackDeclaration.target];
+		}
+		return [];
+	}
+}
+export class AttackersNode extends AstNode {
+	async* eval(card, player, ability) {
+		if (player.game.currentAttackDeclaration) {
+			return player.game.currentAttackDeclaration.attackers;
 		}
 		return [];
 	}
