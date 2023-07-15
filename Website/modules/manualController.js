@@ -121,7 +121,7 @@ export class ManualController extends InteractionController {
 				for (let i = 0; i < deck.cards.length; i++) {
 					gameUI.updateCard(deck, i);
 				}
-				putChatMessage(deck.playerIndex == 1? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+				putChatMessage(deck.player.index == 1? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
 				return true;
 			}
 			case "showHand": {

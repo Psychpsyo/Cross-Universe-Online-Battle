@@ -291,10 +291,14 @@ export function removeCard(zone, index) {
 	// iterates in reverse since the array may be modified during iteration
 	for (let i = cardSlots.length - 1; i >= 0; i--) {
 		if (cardSlots[i].zone === zone) {
-			if (cardSlots[i].index == index || cardSlots[i].index == -1) {
-				cardSlots[i].remove();
-			} else if (cardSlots[i].index > index && !(zone instanceof FieldZone)) {
+			let oldIndex = cardSlots[i].index;
+			if (cardSlots[i].index > index && !(zone instanceof FieldZone)) {
 				cardSlots[i].index--;
+			}
+			if (oldIndex == index) {
+				cardSlots[i].remove();
+			} else {
+				cardSlots[i].update();
 			}
 		}
 	}
@@ -306,11 +310,10 @@ export function insertCard(zone, index) {
 	}
 	cardSlots.forEach(slot => {
 		if (slot.zone === zone) {
-			if (slot.index >= index) {
+			if (slot.index >= index && !(zone instanceof FieldZone)) {
 				slot.index++;
-			} else if (slot.index == -1) {
-				slot.insert(index);
 			}
+			slot.update();
 		}
 	});
 
@@ -591,15 +594,13 @@ class PileCardSlot extends UiCardSlot {
 		this.setVisuals();
 	}
 	remove() {
-		this.index -= 1;
-		this.setVisuals();
+		this.update();
 	}
 	insert(index) {
-		this.index += 1;
-		this.setVisuals();
+		this.update();
 	}
 	setVisuals() {
-		getCardImage(this.zone.get(this.zone.cards.length - 1)).then(img => document.getElementById(this.zone.type + this.zone.player.index).src = img);
+		getCardImage(this.zone.get(this.index)).then(img => document.getElementById(this.zone.type + this.zone.player.index).src = img);
 		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.index >= 0? this.index + 1 : "";
 	}
 
