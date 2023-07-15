@@ -653,10 +653,10 @@ export class ComparisonNode extends MathNode {
 	}
 }
 function equalityCompare(a, b) {
-	if (a instanceof SnapshotCard) {
+	if (a instanceof SnapshotCard && a.cardRef) {
 		a = a.cardRef;
 	}
-	if (b instanceof SnapshotCard) {
+	if (b instanceof SnapshotCard && b.cardRef) {
 		b = b.cardRef;
 	}
 	return a == b;
@@ -884,14 +884,6 @@ export class CurrentTurnNode extends AstNode {
 	}
 }
 
-
-function addCardIfUnique(values, card) {
-	if (values.find(inList => inList.cardRef == card.cardRef)) {
-		return;
-	}
-	values.push(card);
-}
-
 export class ActionAccessorNode extends AstNode {
 	constructor(actionsNode, accessor) {
 		super();
@@ -904,65 +896,65 @@ export class ActionAccessorNode extends AstNode {
 			switch (this.accessor) {
 				case "cast": {
 					if (action instanceof actions.Cast) {
-						addCardIfUnique(values, action.spell);
+						values.push(action.spell)
 					}
 					break;
 				}
 				case "chosenTarget": {
 					if (action instanceof actions.EstablishAttackDeclaration) {
-						addCardIfUnique(values, action.attackTarget);
+						values.push(action.attackTarget);
 					}
 					break;
 				}
 				case "declared": {
 					if (action instanceof actions.EstablishAttackDeclaration) {
 						for (let attacker of action.attackers) {
-							addCardIfUnique(values, attacker);
+							values.push(attacker);
 						}
 					}
 					break;
 				}
 				case "deployed": {
 					if (action instanceof actions.Deploy) {
-						addCardIfUnique(values, action.item);
+						values.push(action.item);
 					}
 					break;
 				}
 				case "destroyed": {
 					if (action instanceof actions.Destroy) {
-						addCardIfUnique(values, action.card);
+						values.push(action.card);
 					}
 					break;
 				}
 				case "discarded": {
 					if (action instanceof actions.Discard) {
-						addCardIfUnique(values, action.card);
+						values.push(action.card);
 					}
 					break;
 				}
 				case "exiled": {
 					if (action instanceof actions.Exile) {
-						addCardIfUnique(values, action.card);
+						values.push(action.card);
 					}
 					break;
 				}
 				case "retired": {
 					if (action instanceof actions.Discard && action.timing.block instanceof blocks.Retire) {
-						addCardIfUnique(values, action.card);
+						values.push(action.card);
 					}
 					break;
 				}
 				case "summoned": {
 					if (action instanceof actions.Summon) {
-						addCardIfUnique(values, action.unit);
+						values.push(action.unit);
 					}
 					break;
 				}
 				case "targeted": {
 					if (action instanceof actions.EstablishAttackDeclaration) {
-						addCardIfUnique(values, action.attackTarget);
+						values.push(action.attackTarget);
 					} else if (action instanceof actions.SetAttackTarget) {
-						addCardIfUnique(values, action.newTarget);
+						values.push(action.newTarget);
 					}
 					break;
 				}

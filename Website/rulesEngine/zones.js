@@ -50,6 +50,8 @@ export class Zone {
 		}
 		// Effects that applied to the card before stop applying.
 		card.modifierStack = [];
+		// Snapshots pointing to this card become invalid. (The card stops being tracked as that specific instance)
+		card.invalidateSnapshots();
 		return index;
 	}
 
@@ -116,6 +118,10 @@ export class FieldZone extends Zone {
 		}
 		if (card.zone && card.zone.cards.includes(card)) {
 			card.zone.remove(card);
+		}
+		// If the card came from outside the field, it stops being tracked as itself.
+		if (!(card.zone instanceof FieldZone)) {
+			card.invalidateSnapshots();
 		}
 		this.cards[index] = card;
 		card.zone = this;

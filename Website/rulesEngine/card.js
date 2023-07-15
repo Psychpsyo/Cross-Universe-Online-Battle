@@ -77,10 +77,30 @@ export class Card extends BaseCard {
 				data.abilities.map(ability => makeAbility(ability, player.game))
 			)
 		);
+		this.snapshots = [];
+		this.invalidatedSnapshotLists = [];
 	}
 
 	snapshot() {
-		return new SnapshotCard(this);
+		let snapshot = new SnapshotCard(this);
+		this.snapshots.push(snapshot);
+		return snapshot;
+	}
+	undoSnapshot() {
+		this.snapshots.pop();
+	}
+	invalidateSnapshots() {
+		for (let snapshot of this.snapshots) {
+			snapshot.cardRef = null;
+		}
+		this.invalidatedSnapshotLists.push(this.snapshots);
+		this.snapshots = [];
+	}
+	undoInvalidateSnapshots() {
+		this.snapshots = this.invalidatedSnapshotLists.pop();
+		for (const snapshot of this.snapshots) {
+			snapshot.cardRef = this;
+		}
 	}
 
 	endOfTurnReset() {
@@ -120,15 +140,24 @@ export class SnapshotCard extends BaseCard {
 		this.isAttackTarget = card.isAttackTarget;
 		this.inRetire = card.inRetire;
 		this.cardRef = card;
+		this.permanentCardRef = card; // will not be cleared by card moving and is only for restoring a card on undo
 	}
 
 	restore() {
 		// tokens might need to be restored back to non-existance
 		if (this.zone === null) {
-			this.cardRef.zone.remove(this.cardRef);
+			this.permanentCardRef.zone.remove(this.permanentCardRef);
 			return;
 		}
-		this.zone.add(this.cardRef, this.index);
+		this.zone.add(this.permanentCardRef, this.index);
+		this.permanentCardRef.invalidatedSnapshotLists.pop();
+		if (!this.cardRef) {
+			this.permanentCardRef.undoInvalidateSnapshots();
+		}
+
+		// now that this snapshot is no longer invalidated, we can use this.cardRef instead of the permanent one.
+
+		this.cardRef.undoSnapshot();
 
 		this.cardRef.initialValues = this.initialValues;
 		this.cardRef.values = this.values;

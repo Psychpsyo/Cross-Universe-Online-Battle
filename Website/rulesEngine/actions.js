@@ -88,13 +88,19 @@ export class Draw extends Action {
 			this.player.loseReason = "drawFromEmptyDeck";
 			return null;
 		}
+		let drawCardRefs = [];
 		for (let i = 0; i < this.amount; i++) {
 			let drawCard = this.player.deckZone.cards[this.player.deckZone.cards.length - 1];
+			this.drawnCards.push(drawCard.snapshot());
+			drawCardRefs.push(drawCard);
 			this.player.handZone.add(drawCard, this.player.handZone.cards.length);
 			if (this.player.isViewable) {
 				drawCard.hidden = false;
 			}
-			this.drawnCards.push(drawCard.snapshot());
+		}
+		for (let i = 0; i < drawCardRefs.length; i++) {
+			this.drawnCards[i].cardRef = drawCardRefs[i];
+			drawCardRefs[i].snapshots.push(this.drawnCards[i]);
 		}
 		return events.createCardsDrawnEvent(this.player, this.amount);
 	}
@@ -166,9 +172,12 @@ export class Summon extends Action {
 	}
 
 	* run() {
-		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.zone, this.unit.index, this.zone, this.zoneIndex);
-		this.zone.add(this.unit, this.zoneIndex);
+		let cardRef = this.unit;
 		this.unit = this.unit.snapshot();
+		let summonEvent = events.createCardSummonedEvent(this.player, this.unit.zone, this.unit.index, this.zone, this.zoneIndex);
+		this.zone.add(cardRef, this.zoneIndex);
+		this.unit.cardRef = cardRef;
+		cardRef.snapshots.push(this.unit);
 		return summonEvent;
 	}
 
@@ -192,9 +201,12 @@ export class Deploy extends Action {
 	}
 
 	* run() {
-		let deployEvent = events.createCardDeployedEvent(this.player, this.item.zone, this.item.index, this.zone, this.zoneIndex);
-		this.zone.add(this.item, this.zoneIndex);
+		let cardRef = this.item;
 		this.item = this.item.snapshot();
+		let deployEvent = events.createCardDeployedEvent(this.player, this.item.zone, this.item.index, this.zone, this.zoneIndex);
+		this.zone.add(cardRef, this.zoneIndex);
+		this.item.cardRef = cardRef;
+		cardRef.snapshots.push(this.item);
 		return deployEvent;
 	}
 
@@ -218,9 +230,12 @@ export class Cast extends Action {
 	}
 
 	* run() {
-		let castEvent = events.createCardCastEvent(this.player, this.spell.zone, this.spell.index, this.zone, this.zoneIndex);
-		this.zone.add(this.spell, this.zoneIndex);
+		let cardRef = this.spell;
 		this.spell = this.spell.snapshot();
+		let castEvent = events.createCardCastEvent(this.player, this.spell.zone, this.spell.index, this.zone, this.zoneIndex);
+		this.zone.add(cardRef, this.zoneIndex);
+		this.spell.cardRef = cardRef;
+		cardRef.snapshots.push(this.spell);
 		return castEvent;
 	}
 
@@ -305,10 +320,13 @@ export class Discard extends Action {
 	}
 
 	* run() {
+		let cardRef = this.card;
 		this.card = this.card.snapshot();
 		let event = events.createCardDiscardedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
-		this.card.cardRef.hidden = false;
+		this.card.cardRef = cardRef;
+		cardRef.snapshots.push(this.card);
+		cardRef.hidden = false;
 		if (this.timing.block?.type == "retire") {
 			this.timing.block.stack.phase.turn.hasRetired.push(this.card);
 		}
@@ -358,10 +376,13 @@ export class Exile extends Action {
 	}
 
 	* run() {
+		let cardRef = this.card;
 		this.card = this.card.snapshot();
 		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone, this.card);
 		this.card.owner.exileZone.add(this.card.cardRef, this.card.owner.exileZone.cards.length);
-		this.card.cardRef.hidden = false;
+		this.card.cardRef = cardRef;
+		cardRef.snapshots.push(this.card);
+		cardRef.hidden = false;
 		return event;
 	}
 
