@@ -178,26 +178,20 @@ function parseCdfValues(cdf) {
 					if (!["trigger", "cast", "deploy"].includes(ability.type)) {
 						throw new Error("CDF Parser Error: " + ability.type + " abilities can't have an 'after' clause.");
 					}
-					if (ability.duringPhase) {
-						throw new Error("CDF Parser Error: 'after' and 'duringPhase' clauses are mutually exclusive.");
+					if (ability.during) {
+						throw new Error("CDF Parser Error: 'after' and 'during' clauses are mutually exclusive. Use a condition instead of the during.");
 					}
 					ability.after = parts[1];
 					break;
 				}
-				case "duringPhase": {
+				case "during": {
 					if (ability.type != "trigger") {
 						throw new Error("CDF Parser Error: Only trigger abilities have phase restrictions.");
 					}
 					if (ability.after) {
-						throw new Error("CDF Parser Error: 'after' and 'duringPhase' clauses are mutually exclusive.");
+						throw new Error("CDF Parser Error: 'after' and 'during' clauses are mutually exclusive. Use a condition instead of the during.");
 					}
-					if (!["manaSupplyPhase", "drawPhase", "mainPhase", "mainPhase1", "battlePhase", "mainPhase2", "endPhase",
-						"yourManaSupplyPhase", "yourDrawPhase", "yourMainPhase", "yourMainPhase1", "yourBattlePhase", "yourMainPhase2", "yourEndPhase",
-						"opponentManaSupplyPhase", "opponentDrawPhase", "opponentMainPhase", "opponentMainPhase1", "opponentBattlePhase", "opponenetMainPhase2", "opponentEndPhase"
-					].includes(parts[1])) {
-						throw new Error("CDF Parser Error: 'duringPhase' must be a valid phase identifier.");
-					}
-					ability.duringPhase = parts[1];
+					ability.during = parts[1];
 					break;
 				}
 				case "mandatory": {
@@ -283,7 +277,7 @@ function parseCdfValues(cdf) {
 					id: data.id + ":" + data.abilities.length,
 					type: parts[1],
 					turnLimit: Infinity,
-					duringPhase: null,
+					during: null,
 					after: null,
 					condition: null,
 					exec: "",
@@ -317,7 +311,7 @@ function makeAbility(ability, game) {
 			return new abilities.FastAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.condition);
 		}
 		case "trigger": {
-			return new abilities.TriggerAbility(ability.id, game, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.duringPhase, ability.after, ability.condition);
+			return new abilities.TriggerAbility(ability.id, game, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.during, ability.after, ability.condition);
 		}
 		case "static": {
 			return new abilities.StaticAbility(ability.id, game, ability.modifier, ability.applyTo, ability.condition);

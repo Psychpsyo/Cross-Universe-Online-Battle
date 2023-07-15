@@ -516,7 +516,7 @@ export class CardPropertyNode extends AstNode {
 					return card.zone.player;
 				}
 				case "self": {
-					return card.cardRef;
+					return card;
 				}
 				case "zone": {
 					return card.zone;
@@ -682,7 +682,7 @@ export class NotEqualsNode extends ComparisonNode {
 	async* eval(card, player, ability) {
 		let rightSideElements = await (yield* this.rightSide.eval(card, player, ability));
 		for (let element of await (yield* this.leftSide.eval(card, player, ability))) {
-			if (rightSideElements.some(elem => !equalityCompare(elem, element))) {
+			if (rightSideElements.some(elem => equalityCompare(elem, element))) {
 				return false;
 			}
 		}

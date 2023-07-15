@@ -13,8 +13,7 @@ DISCARD(SELECT(1, [from you.hand]))
 exec:
 DESTROY(SELECT(1, [from field where defense = 0]))
 o: trigger
-turnLimit: 1
 mandatory: yes
-duringPhase: endPhase
+during: currentPhase = endPhase
 condition: thisCard.zone = field
 DAMAGE(50) & opponent.DAMAGE(50)

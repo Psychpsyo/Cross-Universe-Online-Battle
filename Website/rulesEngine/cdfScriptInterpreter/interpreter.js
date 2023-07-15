@@ -5,6 +5,7 @@ let alreadyParsedExecs = {};
 let alreadyParsedCosts = {};
 let alreadyParsedConditions = {};
 let alreadyParsedTriggers = {};
+let alreadyParsedDurings = {};
 let alreadyParsedModifiers = {};
 let alreadyParsedApplyTargets = {};
 
@@ -34,6 +35,13 @@ export function buildTriggerAST(effectId, cdfScript, game) {
 		alreadyParsedTriggers[effectId] = parseScript(tokenize(cdfScript, game), effectId, "trigger");
 	}
 	return alreadyParsedTriggers[effectId];
+}
+
+export function buildDuringAST(effectId, cdfScript, game) {
+	if (!alreadyParsedDurings[effectId]) {
+		alreadyParsedDurings[effectId] = parseScript(tokenize(cdfScript, game), effectId, "during");
+	}
+	return alreadyParsedDurings[effectId];
 }
 
 export function buildMofifierAST(effectId, cdfScript, game) {

@@ -129,6 +129,9 @@ export class AutomaticController extends InteractionController {
 	}
 
 	grabCard(player, zone, index) {
+		if (!zone.cards[index] || this.playerInfos[player.index].heldCard !== null) {
+			return false;
+		}
 		retireOptions.classList.add("noClick");
 
 		let card = zone.cards[index];

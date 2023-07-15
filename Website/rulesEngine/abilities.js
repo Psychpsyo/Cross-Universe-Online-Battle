@@ -123,12 +123,19 @@ export class FastAbility extends Ability {
 }
 
 export class TriggerAbility extends Ability {
-	constructor(id, game, exec, cost, mandatory, turnLimit, duringPhase, trigger, condition) {
+	constructor(id, game, exec, cost, mandatory, turnLimit, during, trigger, condition) {
 		super(id, game, exec, cost, condition);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
-		this.duringPhase = duringPhase;
-		this.trigger = interpreter.buildTriggerAST(id, trigger, game);
+		this.during = null;
+		if (during) {
+			this.during = interpreter.buildDuringAST(id, during, game);
+		}
+		this.usedDuring = false;
+		this.trigger = null;
+		if (trigger) {
+			this.trigger = interpreter.buildTriggerAST(id, trigger, game);
+		}
 		this.triggerMet = false;
 		this.activationCount = 0;
 	}
@@ -136,12 +143,26 @@ export class TriggerAbility extends Ability {
 	async canActivate(card, player) {
 		return (await super.canActivate(card, player)) &&
 			this.activationCount < this.turnLimit &&
-			(this.duringPhase == null || player.game.currentPhase().matches(this.duringPhase, player)) &&
-			(this.duringPhase != null || this.triggerMet);
+			this.triggerMet;
 	}
 
 	async checkTrigger(card, player) {
-		if (this.trigger == null || await this.trigger.evalFull(card, player, this)) {
+		if (!this.trigger) {
+			return;
+		}
+		if (await this.trigger.evalFull(card, player, this)) {
+			this.triggerMet = true;
+		}
+	}
+
+	async checkDuring(card, player) {
+		if (!this.during) {
+			return;
+		}
+		if (!(await this.during.evalFull(card, player, this))) {
+			this.triggerMet = false;
+			this.usedDuring = false;
+		} else if (!this.usedDuring) {
 			this.triggerMet = true;
 		}
 	}
@@ -149,6 +170,9 @@ export class TriggerAbility extends Ability {
 	successfulActivation() {
 		this.activationCount++;
 		this.triggerMet = false;
+		if (this.during) {
+			this.usedDuring = true;
+		}
 	}
 }
 

@@ -14,6 +14,16 @@ export class Stack {
 	}
 
 	async* run() {
+		// check non-after based trigger ability triggers (these go during phases or "[when units are] going to attack")
+		for (let player of this.phase.turn.game.players) {
+			for (let card of player.getActiveCards()) {
+				for (let ability of card.values.abilities) {
+					if (ability instanceof abilities.TriggerAbility) {
+						ability.checkDuring(card, player);
+					}
+				}
+			}
+		}
 		while (true) {
 			let inputRequests = await this.phase.getBlockOptions(this);
 			let responses = (yield inputRequests).filter(choice => choice !== undefined);
@@ -101,9 +111,10 @@ export class Stack {
 		for (let player of this.phase.turn.game.players) {
 			for (let card of player.getActiveCards()) {
 				for (let ability of card.values.abilities) {
-					if (ability instanceof abilities.TriggerAbility ||
+					if ((ability instanceof abilities.TriggerAbility ||
 						ability instanceof abilities.CastAbility ||
-						ability instanceof abilities.DeployAbility
+						ability instanceof abilities.DeployAbility) &&
+						ability.after
 					) {
 						ability.triggerMet = false;
 					}

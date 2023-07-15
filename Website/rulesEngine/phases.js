@@ -342,10 +342,8 @@ export class EndPhase extends StackPhase {
 		for (let player of this.turn.game.players) {
 			for (let card of player.getActiveCards()) {
 				for (let ability of card.values.abilities) {
-					if (ability instanceof abilities.TriggerAbility) {
-						if (ability.triggerMet) {
-							return true;
-						}
+					if (ability instanceof abilities.TriggerAbility && ability.after && ability.triggerMet) {
+						return true;
 					}
 				}
 			}

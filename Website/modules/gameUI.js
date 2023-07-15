@@ -9,6 +9,7 @@ import {Card} from "/rulesEngine/card.js";
 let cardSlots = [];
 export let uiPlayers = [];
 let currentPointer = null;
+let cursorHidden = true; // whether or not the cursor is hidden for the opponent
 let lastFrame = 0;
 
 let cardSelectorSlots = [];
@@ -84,6 +85,14 @@ export function fieldSlotIndexFromZone(zone, index) {
 	return -1;
 }
 
+// hides your cursor from the opponent
+function hideCursor() {
+	if (cursorHidden) {
+		return;
+	}
+	cursorHidden = true;
+	socket?.send("[hideCursor]");
+}
 
 let profilePictureInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
 
@@ -150,7 +159,7 @@ export function init() {
 				return;
 			}
 			currentPointer = e.pointerId;
-			socket?.send("[hideCursor]");
+			hideCursor();
 		}
 		let fieldRect = document.getElementById("field").getBoundingClientRect();
 		uiPlayers[1].targetX = (e.clientX - fieldRect.left - fieldRect.width / 2) / fieldRect.height;
@@ -159,7 +168,7 @@ export function init() {
 		uiPlayers[1].posY = uiPlayers[1].targetY;
 	});
 	document.getElementById("field").addEventListener("pointerleave", function() {
-		socket?.send("[hideCursor]");
+		hideCursor();
 	});
 	document.getElementById("field").addEventListener("pointermove", function(e) {
 		if (e.pointerId != currentPointer) {
@@ -171,8 +180,9 @@ export function init() {
 		// check if the normalized cursor position is within the bounds of the visual field
 		if (Math.abs(uiPlayers[1].posX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
 			socket?.send("[placeCursor]" + uiPlayers[1].posX + "|" + uiPlayers[1].posY);
+			cursorHidden = false;
 		} else {
-			socket?.send("[hideCursor]");
+			hideCursor();
 		}
 	});
 

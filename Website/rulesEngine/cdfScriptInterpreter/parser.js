@@ -21,6 +21,7 @@ export function parseScript(tokenList, newEffectId, type) {
 		case "applyTarget": {
 			return new ast.ApplyTargetRootNode(parseExpression());
 		}
+		case "during":
 		case "condition": {
 			return parseExpression();
 		}
@@ -280,7 +281,7 @@ function parseValue() {
 		case "type": {
 			return parseValueArray();
 		}
-		case "phase": {
+		case "phaseType": {
 			let node = new ast.PhaseNode(null, tokens[pos].value);
 			pos++;
 			return node;
@@ -299,7 +300,7 @@ function parseValue() {
 			if (tokens[pos] && tokens[pos].type == "dotOperator") {
 				pos++;
 				switch (tokens[pos].type) {
-					case "phase":
+					case "phaseType":
 					case "turn":
 					case "function":
 					case "zone": {
@@ -385,7 +386,7 @@ function parsePlayerDotAccess(player) {
 			pos++;
 			return new ast.TurnNode(player);
 		}
-		case "phase": {
+		case "phaseType": {
 			let node = new ast.PhaseNode(player, tokens[pos].value);
 			pos++;
 			return node;
