@@ -787,32 +787,36 @@ class UiPlayer {
 		this.targetX = 0;
 		this.targetY = 0;
 
-		this.dragging = false;
+		this.dragging = null;
 		this.dragCardElem = document.createElement("img");
 		this.dragCardElem.classList.add("dragCard");
+
+		this.cursorElem = document.createElement("img");
+		this.cursorElem.classList.add("dragCard");
+		this.cursorElem.src = "images/opponentCursor.png";
+		this.cursorElem.hidden = true;
+		draggedCardImages.appendChild(this.cursorElem);
 		draggedCardImages.appendChild(this.dragCardElem);
 		if (player == localPlayer) {
 			this.dragCardElem.id = "yourDragCard";
+			this.cursorElem.hidden = true;
 		} else {
 			this.dragCardElem.hidden = true;
-
-			this.cursorElem = document.createElement("img");
-			this.cursorElem.classList.add("dragCard");
-			this.cursorElem.src = "images/opponentCursor.png";
-			this.cursorElem.hidden = true;
-			draggedCardImages.appendChild(this.cursorElem);
+			this.dragCardElem.addEventListener("click", function () {
+				previewCard(this.dragging);
+			}.bind(this));
 		}
 	}
 
 	setDrag(card) {
 		if (card) {
 			getCardImage(card).then(img => this.dragCardElem.src = img);
-			this.dragging = true;
+			this.dragging = card;
 		}
 	}
 	clearDrag() {
 		this.dragCardElem.src = "images/cardHidden.png";
-		this.dragging = false;
+		this.dragging = null;
 	}
 }
 
@@ -867,10 +871,8 @@ function animate(currentTime) {
 
 		uiPlayer.dragCardElem.style.left = (uiPlayer.posX * fieldRect.height + fieldRect.width / 2) + "px";
 		uiPlayer.dragCardElem.style.top = uiPlayer.posY * fieldRect.height + "px";
-		if (uiPlayer.player !== localPlayer) {
-			uiPlayer.cursorElem.style.left = uiPlayer.dragCardElem.style.left;
-			uiPlayer.cursorElem.style.top = uiPlayer.dragCardElem.style.top;
-		}
+		uiPlayer.cursorElem.style.left = uiPlayer.dragCardElem.style.left;
+		uiPlayer.cursorElem.style.top = uiPlayer.dragCardElem.style.top;
 
 		let velX = uiPlayer.posX - uiPlayer.lastX;
 		let velY = uiPlayer.lastY - uiPlayer.posY;
