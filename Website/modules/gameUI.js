@@ -101,7 +101,7 @@ export function init() {
 		document.getElementById("username" + i).textContent = players[i].name;
 		document.getElementById("profilePicture" + i).style.backgroundImage = "url('" + getCardImageFromID(players[i].profilePicture) + "')";
 		if (profilePictureInfo[players[i].profilePicture]?.left) {
-			document.getElementById("profilePicture" + i).style.backgroundPositionX = profilePictureInfo[players[i].profilePicture]?.left + "%";
+			document.getElementById("profilePicture" + i).style.backgroundPositionX = profilePictureInfo[players[i].profilePicture].left + "%";
 		}
 	}
 	if (!profilePictureInfo[players[0].profilePicture]?.flip && !profilePictureInfo[players[0].profilePicture]?.neverFlip) {

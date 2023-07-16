@@ -208,7 +208,7 @@ dialog #cardDetails {
 	border: 4px solid white;
 	background-position-x: center;
 	background-position-y: 22.5%;
-	background-size: 177%;
+	background-size: 180%;
 	transition: filter 1s;
 }
 .username {
@@ -578,17 +578,7 @@ dialog.popupSelectMenu {
 	transform: translateX(10%);
 }
 
-#cardSelector, #partnerSelectionMenu {
-	text-align: center;
-	line-height: 1.5;
-}
-#cardSelector header, #partnerSelectionMenu header {
-	font-weight: bold;
-	padding: .3em 0;
-	border-bottom: 2px var(--theme-border-color) solid;
-}
-
-#cardSelector > :first-child, #partnerSelectionMenu > :first-child {
+#cardSelector > :first-child, #cardChoiceMenu > :first-child {
 	height: 80vh;
 }
 
@@ -733,16 +723,6 @@ dialog.popupSelectMenu {
 }
 .unselectableCard {
 	filter: grayscale() brightness(.5);
-}
-
-.cardMenuBottomButton {
-	height: 2em;
-	line-height: 2em;
-	border-left: none;
-	border-right: none;
-	border-bottom: none;
-	border-bottom-left-radius: 1em;
-	border-bottom-right-radius: 1em;
 }
 
 /* field labels */

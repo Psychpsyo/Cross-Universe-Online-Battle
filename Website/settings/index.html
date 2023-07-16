@@ -41,7 +41,7 @@
 				<h2 id="profileHeading"></h2>
 				<div class="settingsBlock">
 					<div><label for="usernameInput" id="usernameLabel"></label><input type="text" id="usernameInput"></div>
-					<div><label for="profilePictureInput" id="profilePictureLabel"></label><input type="text" id="profilePictureInput"></div>
+					<div><label for="profilePictureButton" id="profilePictureLabel"></label><button id="profilePictureButton"></button></div>
 					<div><label for="customCardBack" id="cardBackLabel"></label><input type="text" id="customCardBack"></div>
 				</div>
 			</section>
@@ -114,6 +114,19 @@
 				</div>
 			</section>
 		</main>
+
+		<dialog id="profilePictureDialog" class="centerDialog">
+			<section class="dialogContent" aria-labelledBy="profilePictureDialogHeader">
+				<header><h2 id="profilePictureDialogHeader"></h2></header>
+				<div id="profilePictureSwitcher">
+					<button id="profilePicturesCategorizedBtn" class="bigButton" disabled></button>
+					<button id="profilePicturesAllBtn" class="bigButton"></button>
+				</div>
+				<div id="profilePicturesCategorized" class="profilePictureLists"></div>
+				<div id="profilePicturesAll" class="profilePictureLists" hidden></div>
+				<button id="profilePictureCloseBtn" class="bigButton"></button>
+			</section>
+		</dialog>
 
 		<template id="langWarning">
 			<span class="warningNote"><b class="warningNoteIcon" aria-role="img">ⓘ</b> <span class="warningText"></span></span>

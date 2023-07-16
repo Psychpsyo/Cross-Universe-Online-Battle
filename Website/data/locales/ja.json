@@ -251,8 +251,19 @@
 			"title": null,
 			"username": null,
 			"usernamePlaceholder": null,
-			"profilePicture": null,
-			"profilePicturePlaceholder": null,
+			"profilePicture": {
+				"label": null,
+				"button": null,
+				"header": null,
+				"categoriesTab": null,
+				"allCardsTab": null,
+				"close": null,
+				"categories": {
+					"worldOfAmnesia": "忘却の世界",
+					"cardGameRecommendation": "カードゲームのススメ！！",
+					"cardGameDystopia": "俺が少女！？ここはカードに支配されたディストピアな未来世界"
+				}
+			},
 			"cardBackLink": null,
 			"cardBackLinkPlaceholder": null
 		},
@@ -600,7 +611,8 @@
 		"Bird": "鳥",
 		"Ninja": "忍者",
 		"NinjaTool": "忍具",
-		"Ninjutsu": "忍法"
+		"Ninjutsu": "忍法",
+		"Song": "歌"
 	},
 
 	"customCards": {

@@ -251,8 +251,19 @@
 			"title": "Profile",
 			"username": "Your Username:",
 			"usernamePlaceholder": "No username set.",
-			"profilePicture": "Profile Picture:",
-			"profilePicturePlaceholder": "Enter card ID (i.e: U00031)",
+			"profilePicture": {
+				"label": "Profile Picture:",
+				"button": "Change Profile Picture",
+				"header": "Choose a Profile Picture",
+				"categoriesTab": "Categorized",
+				"allCardsTab": "All Cards",
+				"close": "Close",
+				"categories": {
+					"worldOfAmnesia": "World of Amnesia",
+					"cardGameRecommendation": "Card Game Recommendation!!",
+					"cardGameDystopia": "I'm a Girl?! In this Dystopian Future Ruled by Cards"
+				}
+			},
 			"cardBackLink": "Custom Card Back Link:",
 			"cardBackLinkPlaceholder": "No card back set."
 		},
@@ -600,7 +611,8 @@
 		"Bird": "Bird",
 		"Ninja": "Ninja",
 		"NinjaTool": "Ninja Tool",
-		"Ninjutsu": "Ninjutsu"
+		"Ninjutsu": "Ninjutsu",
+		"Song": "Song"
 	},
 
 	"customCards": {

@@ -52,7 +52,8 @@ export const baseTypes = [
 export const novelTypes = [
 	"Ninja",
 	"NinjaTool",
-	"Ninjutsu"
+	"Ninjutsu",
+	"Song"
 ];
 
 export class Game {

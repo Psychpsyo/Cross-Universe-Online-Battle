@@ -1,3 +1,10 @@
+html {
+	scrollbar-gutter: stable;
+}
+html.dialogOpen {
+	overflow-y: hidden;
+}
+
 main {
 	max-width: 100%;
 	width: 30.5em;
@@ -5,7 +12,7 @@ main {
 	background-color: var(--theme-shadow);
 }
 
-section {
+main > section {
 	padding-bottom: 2.5em;
 }
 
@@ -38,7 +45,7 @@ hr {
 	text-align: left;
 }
 
-input[type="text"], select, .keybind {
+input[type="text"], select, .settingsBlock > div > button {
 	position: absolute;
 	right: .4em;
 	top: 50%;
@@ -47,7 +54,6 @@ input[type="text"], select, .keybind {
 
 .keybind {
 	width: 10em;
-	color: black;
 }
 
 #languageWarnings {
@@ -59,4 +65,53 @@ input[type="text"], select, .keybind {
 
 .invalidHotkey {
 	color: red;
+}
+
+.profilePictureLists {
+	overflow-y: scroll;
+}
+.profilePictureLists > h2 {
+	box-sizing: border-box;
+	padding-bottom: 0;
+}
+.profilePictureList {
+	display: grid;
+	grid-template-columns: repeat(9, 1fr);
+	padding: .5em;
+	padding-top: 0;
+	gap: .5em;
+}
+
+.profilePicture {
+	background-color: transparent;
+	padding: 0;
+	width: min(8vw, 8em);
+	aspect-ratio: 1;
+	border-radius: 50%;
+	border: 3px solid white;
+	position: relative;
+	overflow: hidden;
+}
+.profilePicture > img {
+	width: 180%;
+	height: calc(180% * (1185/813));
+	position: absolute;
+	top: calc(-22.5% * (1185/813 * 1.8 - 1)); /* This recreates background-position-y: 22.5% */
+	left: calc(var(--left) * .8);
+	filter: brightness(.7);
+	transition: filter, .25s;
+}
+.profilePicture:hover img, .selectedProfilePic img {
+	filter: brightness(1);
+}
+.selectedProfilePic {
+	border: 3px solid #ffd686;
+	box-shadow: 0px 0px .75em #ffd686;
+}
+
+#profilePictureSwitcher {
+	display: flex;
+}
+#profilePictureSwitcher > * {
+	width: 100%;
 }

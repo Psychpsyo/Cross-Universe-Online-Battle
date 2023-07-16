@@ -1,4 +1,5 @@
 import {reloadLocale, locale} from "/modules/locale.js";
+import {refetchCardData} from "./profilePictureSelector.js";
 
 // hotkey helper functions
 // these convert between the ids of the hotkeys' button elements and the the name for the hotkey
@@ -89,10 +90,15 @@ function setLanguage(language) {
 		profileHeading.textContent = locale.settings.profile.title;
 		usernameLabel.textContent = locale.settings.profile.username;
 		usernameInput.placeholder = locale.settings.profile.usernamePlaceholder;
-		profilePictureLabel.textContent = locale.settings.profile.profilePicture;
-		profilePictureInput.placeholder = locale.settings.profile.profilePicturePlaceholder;
 		cardBackLabel.textContent = locale.settings.profile.cardBackLink;
 		customCardBack.placeholder = locale.settings.profile.cardBackLinkPlaceholder;
+
+		profilePictureLabel.textContent = locale.settings.profile.profilePicture.label;
+		profilePictureButton.textContent = locale.settings.profile.profilePicture.button;
+		profilePictureDialogHeader.textContent = locale.settings.profile.profilePicture.header;
+		profilePicturesCategorizedBtn.textContent = locale.settings.profile.profilePicture.categoriesTab;
+		profilePicturesAllBtn.textContent = locale.settings.profile.profilePicture.allCardsTab;
+		profilePictureCloseBtn.textContent = locale.settings.profile.profilePicture.close;
 
 		customizationHeading.textContent = locale.settings.customization.title;
 		fieldLabelToggleLabel.textContent = locale.settings.customization.fieldLabels;
@@ -135,6 +141,7 @@ function setLanguage(language) {
 		resetDefaultHotkeys.textContent = locale.settings.hotkeys.resetHotkeys;
 
 		relabelAllHotkeys();
+		refetchCardData();
 
 		document.documentElement.lang = locale.code;
 		document.documentElement.removeAttribute("aria-busy");
@@ -148,7 +155,6 @@ closePreviewToggle.checked = localStorage.getItem("autoClosePreview") === "true"
 alwaysShowCardButtonsToggle.checked = localStorage.getItem("alwaysShowCardButtons") === "true";
 
 usernameInput.value = localStorage.getItem("username");
-profilePictureInput.value = localStorage.getItem("profilePicture");
 customCardBack.value = localStorage.getItem("cardBack");
 
 fieldLabelToggle.checked = localStorage.getItem("fieldLabelToggle") === "true";
@@ -184,9 +190,6 @@ alwaysShowCardButtonsToggle.addEventListener("change", function() {
 
 usernameInput.addEventListener("change", function() {
 	localStorage.setItem("username", this.value);
-});
-profilePictureInput.addEventListener("change", function() {
-	localStorage.setItem("profilePicture", this.value);
 });
 customCardBack.addEventListener("change", function() {
 	localStorage.setItem("cardBack", this.value);

@@ -1,4 +1,3 @@
-import {generateStartingHand} from "/deckMaker/startingHands.js";
 import {locale} from "/modules/locale.js";
 import {toDeckx} from "/modules/deckUtils.js";
 import * as cardLoader from "/modules/cardLoader.js";

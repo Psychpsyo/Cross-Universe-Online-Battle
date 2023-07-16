@@ -144,14 +144,6 @@ h1, h2, h3, h4 {
 	grid-template-columns: repeat(4, 1fr);
 }
 
-#cardInfoToDeck {
-	padding: .3em .5em;
-	line-height: 1.5em;
-	border-left: none;
-	border-right: none;
-	border-bottom: none;
-}
-
 /*deck maker panel*/
 #deckCreationPanelInner {
 	max-width: 75vw;
@@ -336,7 +328,7 @@ h1, h2, h3, h4 {
 	overflow-x: scroll;
 	border-radius: 0 0 1em 1em;
 	border-top: 2px var(--theme-border-color) solid;
-	
+
 	/*hide scrollbar*/
 	scrollbar-width: none;
 	-ms-overflow-style: none;
