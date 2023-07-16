@@ -524,6 +524,10 @@ export class CardPropertyNode extends AstNode {
 			}
 		}).flat();
 	}
+
+	getChildNodes() {
+		return [this.cards];
+	}
 }
 
 export class VariableNode extends AstNode {

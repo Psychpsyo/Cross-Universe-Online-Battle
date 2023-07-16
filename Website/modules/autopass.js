@@ -151,12 +151,23 @@ function isImportant(request) {
 function isSpellItemTriggered(card) {
 	for (let ability of card.values.abilities) {
 		if (ability instanceof abilities.CastAbility || ability instanceof abilities.DeployAbility) {
-			if (ability.trigger) {
+			if (ability.trigger || hasTimeSensitiveCondition(ability.condition)) {
 				return true;
 			}
 		}
 	}
 	return false;
+}
+// returns whether or not the abilities condition depends on the current phase or attacking units / attack target
+function hasTimeSensitiveCondition(node) {
+	if (node instanceof ast.CurrentPhaseNode || node instanceof ast.AttackersNode || node instanceof ast.AttackTargetNode) {
+		return true;
+	}
+	for (let childNode of node.getChildNodes()) {
+		if (hasTimeSensitiveCondition(childNode)) {
+			return true;
+		}
+	}
 }
 
 function hasPhaseEqualityCondition(node) {
