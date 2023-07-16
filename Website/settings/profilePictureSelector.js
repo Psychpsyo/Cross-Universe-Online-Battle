@@ -1,7 +1,12 @@
 import {getCardImageFromID} from "/modules/cardLoader.js";
 import {locale} from "/modules/locale.js";
 
-let profilePictureInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
+const categoryLinks = {
+	"cardGameRecommendation": "https://crossuniverse.jp/原作小説/",
+	"cardGameDystopia": "https://novelup.plus/story/406826942"
+}
+
+const profilePictureInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
 fetch("../data/profilePictureGroups.json")
 .then(async response => await response.json())
 .then(profilePictureGroups => {
@@ -89,9 +94,19 @@ function addProfilePictureList(name, cardIdList, targetDiv) {
 		list.appendChild(button);
 	}
 	let h2 = document.createElement("h2");
-	h2.textContent = locale.settings.profile.profilePicture.categories[name];
-	h2.classList.add("profilePictureHeader");
-	h2.dataset.category = name;
+	if (name in categoryLinks) {
+		let a = document.createElement("a");
+		a.textContent = locale.settings.profile.profilePicture.categories[name];
+		a.href = categoryLinks[name];
+		a.target = "_blank";
+		a.classList.add("profilePictureCategoryName");
+		a.dataset.category = name;
+		h2.appendChild(a);
+	} else {
+		h2.textContent = locale.settings.profile.profilePicture.categories[name];
+		h2.classList.add("profilePictureCategoryName");
+		h2.dataset.category = name;
+	}
 	targetDiv.appendChild(h2);
 	targetDiv.appendChild(list);
 }

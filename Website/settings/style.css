@@ -74,6 +74,12 @@ input[type="text"], select, .settingsBlock > div > button {
 	box-sizing: border-box;
 	padding-bottom: 0;
 }
+.profilePictureLists > h2 > a {
+	text-decoration: none;
+}
+.profilePictureLists > h2 > a:hover {
+	text-decoration: underline;
+}
 .profilePictureList {
 	display: grid;
 	grid-template-columns: repeat(9, 1fr);
@@ -112,6 +118,11 @@ input[type="text"], select, .settingsBlock > div > button {
 #profilePictureSwitcher {
 	display: flex;
 }
-#profilePictureSwitcher > * {
+#profilePictureSwitcher > button {
 	width: 100%;
+	border-top: 0;
+	border-left: 0;
+}
+#profilePictureSwitcher > :last-child {
+	border-right: 0;
 }

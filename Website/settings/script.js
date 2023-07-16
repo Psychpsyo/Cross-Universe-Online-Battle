@@ -99,7 +99,7 @@ function setLanguage(language) {
 		profilePicturesCategorizedBtn.textContent = locale.settings.profile.profilePicture.categoriesTab;
 		profilePicturesAllBtn.textContent = locale.settings.profile.profilePicture.allCardsTab;
 		profilePictureCloseBtn.textContent = locale.settings.profile.profilePicture.close;
-		for (const categoryHeading of Array.from(document.querySelectorAll(".profilePictureHeader"))) {
+		for (const categoryHeading of Array.from(document.querySelectorAll(".profilePictureCategoryName"))) {
 			categoryHeading.textContent = locale.settings.profile.profilePicture.categories[categoryHeading.dataset.category];
 		}
 

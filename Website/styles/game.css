@@ -391,12 +391,12 @@ img[src$="cardBackFrameP1.png"] {
 	transition: transform 0.3s ease-out;
 	transform: translate(-50%, -50%);
 
-	pointer-events: none;
 	user-select: none;
 	z-index: 90;
 }
 
 #yourDragCard {
+	pointer-events: none;
 	z-index: 95;
 }
 
