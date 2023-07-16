@@ -259,7 +259,16 @@
 				"allCardsTab": "Alle Karten",
 				"close": "Schließen",
 				"categories": {
+					"units": "Einheiten",
+					"spells": "Zauber",
+					"items": "Items",
+					"tokens": "Tokens",
 					"worldOfAmnesia": "World of Amnesia",
+					"heavenlyKnights": "Knights of Heaven",
+					"serpentMountain": "Serpent Mountain",
+					"makai": "Makai",
+					"chronoArk": "Chrono Ark",
+					"borders": "'Borders'",
 					"cardGameRecommendation": "Card Game Recommendation!!",
 					"cardGameDystopia": "I'm a Girl?! In this Dystopian Future Ruled by Cards"
 				}

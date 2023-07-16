@@ -259,7 +259,16 @@
 				"allCardsTab": null,
 				"close": null,
 				"categories": {
+					"units": "ユニット",
+					"spells": "スペル",
+					"items": "アイテム",
+					"tokens": "トークン",
 					"worldOfAmnesia": "忘却の世界",
+					"hildRyeAle": "天界騎士",
+					"serpentMountain": "蛇竜山",
+					"makai": "魔界",
+					"chronoArk": "クロノ・アルク",
+					"borders": "『ボーダーズ』",
 					"cardGameRecommendation": "カードゲームのススメ！！",
 					"cardGameDystopia": "俺が少女！？ここはカードに支配されたディストピアな未来世界"
 				}

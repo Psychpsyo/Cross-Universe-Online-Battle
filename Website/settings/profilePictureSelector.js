@@ -6,7 +6,7 @@ fetch("../data/profilePictureGroups.json")
 .then(async response => await response.json())
 .then(profilePictureGroups => {
 	for (const group of Object.keys(profilePictureGroups)) {
-		addProfilePictureList(locale.settings.profile.profilePicture.categories[group], profilePictureGroups[group], profilePicturesCategorized);
+		addProfilePictureList(group, profilePictureGroups[group], profilePicturesCategorized);
 	}
 });
 
@@ -34,10 +34,10 @@ export function refetchCardData() {
 			response.forEach(card => {
 				cardLists[card.cardID[0]].push(card.cardID);
 			});
-			addProfilePictureList("Units", cardLists.U, profilePicturesAll);
-			addProfilePictureList("Tokens", cardLists.T, profilePicturesAll);
-			addProfilePictureList("Spells", cardLists.S, profilePicturesAll);
-			addProfilePictureList("Items", cardLists.I, profilePicturesAll);
+			addProfilePictureList("units", cardLists.U, profilePicturesAll);
+			addProfilePictureList("tokens", cardLists.T, profilePicturesAll);
+			addProfilePictureList("spells", cardLists.S, profilePicturesAll);
+			addProfilePictureList("items", cardLists.I, profilePicturesAll);
 		}
 	});
 }
@@ -89,7 +89,9 @@ function addProfilePictureList(name, cardIdList, targetDiv) {
 		list.appendChild(button);
 	}
 	let h2 = document.createElement("h2");
-	h2.textContent = name;
+	h2.textContent = locale.settings.profile.profilePicture.categories[name];
+	h2.classList.add("profilePictureHeader");
+	h2.dataset.category = name;
 	targetDiv.appendChild(h2);
 	targetDiv.appendChild(list);
 }
