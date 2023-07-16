@@ -291,29 +291,14 @@ export function removeCard(zone, index) {
 	// iterates in reverse since the array may be modified during iteration
 	for (let i = cardSlots.length - 1; i >= 0; i--) {
 		if (cardSlots[i].zone === zone) {
-			let oldIndex = cardSlots[i].index;
-			if (cardSlots[i].index > index && !(zone instanceof FieldZone)) {
-				cardSlots[i].index--;
-			}
-			if (oldIndex == index) {
-				cardSlots[i].remove();
-			} else {
-				cardSlots[i].update();
-			}
+			cardSlots[i].remove(index);
 		}
 	}
 }
 export function insertCard(zone, index) {
-	if (zone instanceof FieldZone) {
-		updateCard(zone, index);
-		return;
-	}
 	cardSlots.forEach(slot => {
 		if (slot.zone === zone) {
-			if (slot.index >= index && !(zone instanceof FieldZone)) {
-				slot.index++;
-			}
-			slot.update();
+			slot.insert(index);
 		}
 	});
 
@@ -409,8 +394,10 @@ export class UiCardSlot {
 	makeDragSource(player) {}
 	clearDragSource(player) {}
 	update() {}
-	remove() {
-		cardSlots.splice(cardSlots.indexOf(this), 1);
+	remove(index) {
+		if (index == this.index) {
+			cardSlots.splice(cardSlots.indexOf(this), 1);
+		}
 	}
 	insert(index) {}
 
@@ -490,7 +477,10 @@ class FieldCardSlot extends UiCardSlot {
 			this.clearDragSource(null);
 		}
 	}
-	remove() {
+	insert(index) {
+		this.update();
+	}
+	remove(index) {
 		this.update();
 	}
 
@@ -530,10 +520,21 @@ class HandCardSlot extends UiCardSlot {
 	update() {
 		getCardImage(this.zone.get(this.index)).then(img => this.cardElem.src = img);
 	}
-	remove() {
-		super.remove();
-		this.cardElem.remove();
-		this.handElem.style.setProperty("--card-count", "" + this.handElem.childElementCount);
+	insert(index) {
+		if (index <= this.index) {
+			this.index++;
+			this.update();
+		}
+	}
+	remove(index) {
+		if (index == this.index) {
+			super.remove(index);
+			this.cardElem.remove();
+			this.handElem.style.setProperty("--card-count", "" + this.handElem.childElementCount);
+		} else if (index < this.index) {
+			this.index--;
+			this.update();
+		}
 	}
 }
 
@@ -558,7 +559,7 @@ class DeckCardSlot extends UiCardSlot {
 		this.cardCount = this.zone.cards.length;
 		this.setVisuals();
 	}
-	remove() {
+	remove(index) {
 		this.cardCount -= 1;
 		this.setVisuals();
 	}
@@ -575,6 +576,7 @@ class DeckCardSlot extends UiCardSlot {
 class PileCardSlot extends UiCardSlot {
 	constructor(zone) {
 		super(zone, -1);
+		this.cardCount = zone.cards.length;
 
 		setCardDragEvent(document.getElementById(this.zone.type + this.zone.player.index), this);
 		document.getElementById(this.zone.type + this.zone.player.index).addEventListener("click", function() {
@@ -591,17 +593,20 @@ class PileCardSlot extends UiCardSlot {
 
 	update() {
 		this.index = this.zone.cards.length - 1;
+		this.cardCount = this.zone.cards.length;
 		this.setVisuals();
 	}
-	remove() {
+	remove(index) {
+		this.cardCount -= 1;
 		this.update();
 	}
 	insert(index) {
+		this.cardCount += 1;
 		this.update();
 	}
 	setVisuals() {
 		getCardImage(this.zone.get(this.index)).then(img => document.getElementById(this.zone.type + this.zone.player.index).src = img);
-		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.index >= 0? this.index + 1 : "";
+		document.getElementById(this.zone.type + this.zone.player.index + "CardCount").textContent = this.cardCount > 0? this.cardCount : "";
 	}
 
 	getButtonHolder() {
@@ -660,9 +665,20 @@ class PresentedCardSlot extends UiCardSlot {
 	update() {
 		getCardImage(this.zone.get(this.index)).then(img => this.cardImg.src = img);
 	}
-	remove() {
-		super.remove();
-		this.cardElem.remove();
+	insert(index) {
+		if (index <= this.index) {
+			this.index++;
+			this.update();
+		}
+	}
+	remove(index) {
+		if (index == this.index) {
+			super.remove(index);
+			this.cardElem.remove();
+		} else if (index < this.index) {
+			this.index--;
+			this.update();
+		}
 	}
 }
 
@@ -693,10 +709,21 @@ class CardSelectorSlot extends UiCardSlot {
 	update() {
 		getCardImage(this.zone.get(this.index)).then(img => this.cardElem.src = img);
 	}
-	remove() {
-		super.remove();
-		this.cardElem.remove();
-		cardSelectorSlots.splice(cardSelectorSlots.indexOf(this), 1);
+	insert(index) {
+		if (index <= this.index) {
+			this.index++;
+			this.update();
+		}
+	}
+	remove(index) {
+		if (index == this.index) {
+			super.remove(index);
+			this.cardElem.remove();
+			cardSelectorSlots.splice(cardSelectorSlots.indexOf(this), 1);
+		} else if (index < this.index) {
+			this.index--;
+			this.update();
+		}
 	}
 }
 
@@ -705,7 +732,7 @@ class CardSelectorMainSlot extends UiCardSlot {
 		super(null, -1);
 	}
 
-	remove() {}
+	remove(index) {}
 	insert(index) {
 		this.zone.cards[index].hidden = false;
 		cardSelectorSlots.push(new CardSelectorSlot(this.zone, index));
@@ -757,7 +784,7 @@ export function closeCardSelect() {
 	}
 	cardSelectorMainSlot.zone = null;
 	while (cardSelectorSlots.length > 0) {
-		cardSelectorSlots[0].remove();
+		cardSelectorSlots[0].remove(cardSelectorSlots[0].index);
 	}
 	gameFlexBox.appendChild(cardDetails);
 	cardSelector.close();
