@@ -253,7 +253,7 @@
 			"usernamePlaceholder": "No username set.",
 			"profilePicture": {
 				"label": "Profile Picture:",
-				"button": "Change Profile Picture",
+				"button": "Change Profile Picture...",
 				"header": "Choose a Profile Picture",
 				"categoriesTab": "Categorized",
 				"allCardsTab": "All Cards",

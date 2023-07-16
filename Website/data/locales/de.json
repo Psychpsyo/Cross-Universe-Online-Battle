@@ -253,7 +253,7 @@
 			"usernamePlaceholder": "Kein Nutzername gewählt.",
 			"profilePicture": {
 				"label": "Profilbild:",
-				"button": "Profilbild ändern",
+				"button": "Profilbild ändern...",
 				"header": "Wähle ein Profilbild",
 				"categoriesTab": "Kategorisiert",
 				"allCardsTab": "Alle Karten",
