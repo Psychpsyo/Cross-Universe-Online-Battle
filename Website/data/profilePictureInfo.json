@@ -154,7 +154,7 @@
 	"U00205": {"flip": true, "left": 35},
 	"U00206": {"left": 63},
 	"U00207": {"flip": true},
-	"U00209": {"neverFlip": true},
+	"U00209": {"neverFlip": true, "left": 53},
 	"U00210": {"flip": true},
 	"U00211": {"flip": true},
 	"U00212": {"flip": true, "left": 35},
