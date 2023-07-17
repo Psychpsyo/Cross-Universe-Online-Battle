@@ -25,7 +25,7 @@ export class Stack {
 			}
 		}
 		while (true) {
-			let inputRequests = await this.phase.getBlockOptions(this);
+			let inputRequests = this.phase.getBlockOptions(this);
 			let responses = (yield inputRequests).filter(choice => choice !== undefined);
 
 			if (responses.length != 1) {

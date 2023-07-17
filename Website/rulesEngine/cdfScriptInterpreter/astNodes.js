@@ -11,30 +11,30 @@ let currentImplicitCard = null;
 let currentImplicitActions = null;
 
 class AstNode {
-	async* eval(card, player, ability) {}
+	* eval(card, player, ability) {}
 	// evalFull() does the same as eval without being a generator function itself.
 	// This means that player input and events generated inside of evalFull() will be ignored.
-	async evalFull(card, player, ability) {
+	evalFull(card, player, ability) {
 		let generator = this.eval(card, player, ability);
 		let next;
 		do {
-			next = await generator.next();
+			next = generator.next();
 		} while (!next.done);
 		return next.value;
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
-	async hasAllTargets(card, player, ability) {
+	hasAllTargets(card, player, ability) {
 		for (let childNode of this.getChildNodes()) {
-			if (!(await childNode.hasAllTargets(card, player, ability))) {
+			if (!childNode.hasAllTargets(card, player, ability)) {
 				return false;
 			}
 		}
 		return true;
 	}
 	// Wether or not all actions in this tree can be done fully (as a cost)
-	async canDoInFull(card, player, ability) {
+	canDoInFull(card, player, ability) {
 		for (let childNode of this.getChildNodes()) {
-			if (!(await childNode.canDoInFull(card, player, ability))) {
+			if (!childNode.canDoInFull(card, player, ability)) {
 				return false;
 			}
 		}
@@ -51,7 +51,7 @@ export class ScriptRootNode extends AstNode {
 		super();
 		this.steps = steps;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		for (let step of this.steps) {
 			yield* step.eval(card, player, ability);
 		}
@@ -67,10 +67,10 @@ export class LineNode extends AstNode {
 		this.parts = parts;
 		this.assignTo = variable;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		let returnValues = [];
 		for (let part of this.parts) {
-			returnValues = returnValues.concat(await (yield* part.eval(card, player, ability)));
+			returnValues = returnValues.concat(yield* part.eval(card, player, ability));
 		}
 		if (returnValues.length > 0 && returnValues[0] instanceof actions.Action) {
 			let timing = yield returnValues;
@@ -91,10 +91,10 @@ export class TriggerRootNode extends AstNode {
 		super();
 		this.expression = expression;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		currentImplicitActions = player.game.currentPhase().lastActionList;
 
-		let returnValue = await (yield* this.expression.eval(card, player, ability));
+		let returnValue = yield* this.expression.eval(card, player, ability);
 
 		currentImplicitActions = null;
 		return returnValue;
@@ -109,8 +109,8 @@ export class ApplyTargetRootNode extends AstNode {
 		super();
 		this.expression = expression;
 	}
-	async* eval(card, player, ability) {
-		let cardList = await (yield* this.expression.eval(card, player, ability));
+	* eval(card, player, ability) {
+		let cardList = yield* this.expression.eval(card, player, ability);
 
 		if (cardList.length > 0 && cardList[0] instanceof Zone) {
 			cardList = cardList.map(zone => zone.cards).flat();
@@ -131,59 +131,60 @@ export class FunctionNode extends AstNode {
 		this.player = player;
 		this.asManyAsPossible = asManyAsPossible;
 	}
-	async* eval(card, player, ability) {
-		player = (await (yield* this.player.eval(card, player, ability)))[0];
+	* eval(card, player, ability) {
+		player = (yield* this.player.eval(card, player, ability))[0];
 		switch (this.functionName) {
 			case "APPLY": {
-				let modifier = await (await (yield* this.parameters[1].eval(card, player, ability))).bake();
-				let until = await (yield* this.parameters[2].eval(card, player, ability));
-				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.ApplyCardStatChange(card.cardRef, modifier, until));
+				let modifier = (yield* this.parameters[1].eval(card, player, ability)).bake();
+				let until = yield* this.parameters[2].eval(card, player, ability);
+				return (yield* this.parameters[0].eval(card, player, ability)).map(card => new actions.ApplyCardStatChange(card.cardRef, modifier, until));
 			}
 			case "CANCELATTACK": {
 				return [new actions.CancelAttack()];
 			}
 			case "COUNT": {
-				let list = await (yield* this.parameters[0].eval(card, player, ability));
+				let list = yield* this.parameters[0].eval(card, player, ability);
 				return [list.length];
 			}
 			case "DAMAGE": {
-				return [new actions.DealDamage(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+				return [new actions.DealDamage(player, (yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
 			case "DECKTOP": {
-				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - (await (yield* this.parameters[0].eval(card, player, ability)))[0]), player.deckZone.cards.length);
+				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - (yield* this.parameters[0].eval(card, player, ability))[0]), player.deckZone.cards.length);
 			}
 			case "DESTROY": {
-				let cards = await (yield* this.parameters[0].eval(card, player, ability));
-				return cards.map(card => new actions.Destroy(card.cardRef)).concat(cards.map(card => new actions.Discard(card.cardRef)));
+				let cards = yield* this.parameters[0].eval(card, player, ability);
+				let discards = cards.map(card => new actions.Discard(card.cardRef));
+				return discards.concat(discards.map(discard => new actions.Destroy(discard)));
 			}
 			case "DISCARD": {
-				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Discard(card.cardRef));
+				return (yield* this.parameters[0].eval(card, player, ability)).map(card => new actions.Discard(card.cardRef));
 			}
 			case "DRAW": {
-				let amount = (await (yield* this.parameters[0].eval(card, player, ability)))[0];
+				let amount = (yield* this.parameters[0].eval(card, player, ability))[0];
 				if (this.asManyAsPossible) {
 					amount = Math.min(amount, player.deckZone.cards.length);
 				}
 				return [new actions.Draw(player, amount)];
 			}
 			case "EXILE": {
-				return (await (yield* this.parameters[0].eval(card, player, ability))).map(card => new actions.Exile(card.cardRef));
+				return (yield* this.parameters[0].eval(card, player, ability)).map(card => new actions.Exile(card.cardRef));
 			}
 			case "GAINLIFE": {
-				return [new actions.ChangeLife(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+				return [new actions.ChangeLife(player, (yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
 			case "GAINMANA": {
-				return [new actions.ChangeMana(player, (await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+				return [new actions.ChangeMana(player, (yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
 			case "LOSELIFE": {
-				return [new actions.ChangeLife(player, -(await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+				return [new actions.ChangeLife(player, -(yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
 			case "LOSEMANA": {
-				return [new actions.ChangeMana(player, -(await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+				return [new actions.ChangeMana(player, -(yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
 			case "SELECT": {
-				let responseCounts = await (yield* this.parameters[0].eval(card, player, ability));
-				let eligibleCards = await (yield* this.parameters[1].eval(card, player, ability));
+				let responseCounts = yield* this.parameters[0].eval(card, player, ability);
+				let eligibleCards = yield* this.parameters[1].eval(card, player, ability);
 				if (eligibleCards.length == 0) {
 					return [];
 				}
@@ -215,10 +216,10 @@ export class FunctionNode extends AstNode {
 				return requests.choosePlayer.validate(responses[0].value, selectionRequest);
 			}
 			case "SETATTACKTARGET": {
-				return [new actions.SetAttackTarget((await (yield* this.parameters[0].eval(card, player, ability)))[0])];
+				return [new actions.SetAttackTarget((yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
 			case "SUM": {
-				let list = await (yield* this.parameters[0].eval(card, player, ability));
+				let list = yield* this.parameters[0].eval(card, player, ability);
 				let sum = 0;
 				for (let num of list) {
 					sum += num;
@@ -226,9 +227,9 @@ export class FunctionNode extends AstNode {
 				return [sum];
 			}
 			case "SUMMON": {
-				let cards = await (yield* this.parameters[0].eval(card, player, ability));
-				let zone = (await (yield* this.parameters[1].eval(card, player, ability)))[0];
-				let payCost = await (yield* this.parameters[2].eval(card, player, ability));
+				let cards = yield* this.parameters[0].eval(card, player, ability);
+				let zone = (yield* this.parameters[1].eval(card, player, ability))[0];
+				let payCost = yield* this.parameters[2].eval(card, player, ability);
 
 				let costs = [];
 				for (let i = 0; i < cards.length; i++) {
@@ -261,16 +262,16 @@ export class FunctionNode extends AstNode {
 				return  summons;
 			}
 			case "TOKENS": {
-				let amount = (await (yield* this.parameters[0].eval(card, player, ability)))[0];
-				let name = (await (yield* this.parameters[2].eval(card, player, ability)))[0];
-				let level = (await (yield* this.parameters[3].eval(card, player, ability)))[0];
-				let types = await (yield* this.parameters[4].eval(card, player, ability));
-				let attack = (await (yield* this.parameters[5].eval(card, player, ability)))[0];
-				let defense = (await (yield* this.parameters[6].eval(card, player, ability)))[0];
+				let amount = (yield* this.parameters[0].eval(card, player, ability))[0];
+				let name = (yield* this.parameters[2].eval(card, player, ability))[0];
+				let level = (yield* this.parameters[3].eval(card, player, ability))[0];
+				let types = yield* this.parameters[4].eval(card, player, ability);
+				let attack = (yield* this.parameters[5].eval(card, player, ability))[0];
+				let defense = (yield* this.parameters[6].eval(card, player, ability))[0];
 				let cards = [];
 				for (let i = 0; i < amount; i++) {
 					// TODO: Give player control over the specific token variant that gets selected
-					let cardIds = await (yield* this.parameters[1].eval(card, player, ability));
+					let cardIds = yield* this.parameters[1].eval(card, player, ability);
 					cards.push(new Card(player, `id: CU${cardIds[i % cardIds.length]}
 cardType: token
 name: CU${name}
@@ -283,8 +284,8 @@ defense: ${defense}`, false));
 			}
 		}
 	}
-	async hasAllTargets(card, player, ability) {
-		player = (await this.player.evalFull(card, player, ability))[0];
+	hasAllTargets(card, player, ability) {
+		player = this.player.evalFull(card, player, ability)[0];
 		switch (this.functionName) {
 			case "CANCELATTACK":
 			case "COUNT":
@@ -300,13 +301,13 @@ defense: ${defense}`, false));
 				return true;
 			}
 			case "APPLY": {
-				return await this.parameters[0].hasAllTargets(card, player, ability) && await this.parameters[1].hasAllTargets(card, player, ability);
+				return this.parameters[0].hasAllTargets(card, player, ability) && this.parameters[1].hasAllTargets(card, player, ability);
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
 					return player.deckZone.cards.length > 0;
 				}
-				return player.deckZone.cards.length >= (await this.parameters[0].evalFull(card, player, ability))[0];
+				return player.deckZone.cards.length >= this.parameters[0].evalFull(card, player, ability)[0];
 			}
 			case "DESTROY": {
 				return this.parameters[0].hasAllTargets(card, player, ability);
@@ -318,12 +319,12 @@ defense: ${defense}`, false));
 				return this.parameters[0].hasAllTargets(card, player, ability);
 			}
 			case "SELECT": {
-				let availableAmount = (await this.parameters[1].evalFull(card, player, ability)).length;
+				let availableAmount = this.parameters[1].evalFull(card, player, ability).length;
 				if (this.parameters[0] instanceof AnyAmountNode && availableAmount > 0) {
 					return true;
 				}
-				let amountsRequired = await this.parameters[0].evalFull(card, player, ability);
-				return Math.min(...amountsRequired) <= availableAmount && await this.parameters[0].hasAllTargets(card, player, ability);
+				let amountsRequired = this.parameters[0].evalFull(card, player, ability);
+				return Math.min(...amountsRequired) <= availableAmount && this.parameters[0].hasAllTargets(card, player, ability);
 			}
 			case "SETATTACKTARGET": {
 				return this.parameters[0].hasAllTargets(card, player, ability);
@@ -333,8 +334,8 @@ defense: ${defense}`, false));
 			}
 		}
 	}
-	async canDoInFull(card, player, ability) {
-		player = (await this.player.evalFull(card, player, ability))[0];
+	canDoInFull(card, player, ability) {
+		player = this.player.evalFull(card, player, ability)[0];
 		switch (this.functionName) {
 			case "CANCELATTACK":
 			case "COUNT":
@@ -348,13 +349,13 @@ defense: ${defense}`, false));
 				return true;
 			}
 			case "APPLY": {
-				return await this.parameters[0].canDoInFull(card, player, ability) && await this.parameters[1].canDoInFull(card, player, ability);
+				return this.parameters[0].canDoInFull(card, player, ability) && this.parameters[1].canDoInFull(card, player, ability);
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
 					return player.deckZone.cards.length > 0;
 				}
-				return player.deckZone.cards.length >= (await this.parameters[0].evalFull(card, player, ability))[0];
+				return player.deckZone.cards.length >= this.parameters[0].evalFull(card, player, ability)[0];
 			}
 			case "DESTROY": {
 				return this.parameters[0].canDoInFull(card, player, ability);
@@ -366,18 +367,18 @@ defense: ${defense}`, false));
 				return this.parameters[0].canDoInFull(card, player, ability);
 			}
 			case "LOSELIFE": {
-				return player.life + (await this.parameters[0].evalFull(card, player, ability))[0] >= 0;
+				return player.life + this.parameters[0].evalFull(card, player, ability)[0] >= 0;
 			}
 			case "LOSEMANA": {
-				return player.mana + (await this.parameters[0].evalFull(card, player, ability))[0] >= 0;
+				return player.mana + this.parameters[0].evalFull(card, player, ability)[0] >= 0;
 			}
 			case "SELECT": {
-				let availableAmount = (await this.parameters[1].evalFull(card, player, ability)).length;
+				let availableAmount = this.parameters[1].evalFull(card, player, ability).length;
 				if (this.parameters[0] instanceof AnyAmountNode && availableAmount > 0) {
 					return true;
 				}
-				let amountsRequired = await this.parameters[0].evalFull(card, player, ability);
-				return Math.min(...amountsRequired) <= availableAmount && await this.parameters[0].canDoInFull(card, player, ability);
+				let amountsRequired = this.parameters[0].evalFull(card, player, ability);
+				return Math.min(...amountsRequired) <= availableAmount && this.parameters[0].canDoInFull(card, player, ability);
 			}
 			case "SETATTACKTARGET": {
 				return this.parameters[0].canDoInFull(card, player, ability);
@@ -398,11 +399,11 @@ export class CardMatchNode extends AstNode {
 		this.cardListNodes = cardListNodes;
 		this.conditions = conditions;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		let cards = [];
 		let matchingCards = [];
 		for (let cardList of this.cardListNodes) {
-			cardList = await (yield* cardList.eval(card, player, ability));
+			cardList = yield* cardList.eval(card, player, ability);
 			if (cardList.length > 0 && (cardList[0] instanceof Zone)) {
 				cards.push(...(cardList.map(zone => zone.cards).flat()));
 			} else {
@@ -415,7 +416,7 @@ export class CardMatchNode extends AstNode {
 			}
 			let lastImplicitCard = currentImplicitCard;
 			currentImplicitCard = checkCard;
-			if ((!this.conditions || await (yield* this.conditions.eval(card, player, ability)))) {
+			if ((!this.conditions || (yield* this.conditions.eval(card, player, ability)))) {
 				matchingCards.push(checkCard);
 				currentImplicitCard = lastImplicitCard;
 				continue;
@@ -424,20 +425,20 @@ export class CardMatchNode extends AstNode {
 		}
 		return matchingCards;
 	}
-	async hasAllTargets(card, player, ability) {
-		return (await this.evalFull(card, player, ability)).length > 0;
+	hasAllTargets(card, player, ability) {
+		return this.evalFull(card, player, ability).length > 0;
 	}
 	getChildNodes() {
 		return this.cardListNodes.concat(this.conditions);
 	}
 }
 export class ThisCardNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return [card];
 	}
 }
 export class AttackTargetNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		if (player.game.currentAttackDeclaration?.target) {
 			return [player.game.currentAttackDeclaration.target];
 		}
@@ -445,20 +446,30 @@ export class AttackTargetNode extends AstNode {
 	}
 }
 export class AttackersNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		if (player.game.currentAttackDeclaration) {
 			return player.game.currentAttackDeclaration.attackers;
 		}
 		return [];
 	}
 }
+export class EquipmentNode extends AstNode {
+	* eval(card, player, ability) {
+		return card.equipments;
+	}
+}
+export class EquippedToNode extends AstNode {
+	* eval(card, player, ability) {
+		return [card.equippedTo];
+	}
+}
 export class ImplicitCardNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return [currentImplicitCard];
 	}
 }
 export class ImplicitActionsNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return currentImplicitActions;
 	}
 }
@@ -470,8 +481,8 @@ export class CardPropertyNode extends AstNode {
 		this.property = property;
 	}
 
-	async* eval(card, player, ability) {
-		return (await (yield* this.cards.eval(card, player, ability))).map(card => {
+	* eval(card, player, ability) {
+		return (yield* this.cards.eval(card, player, ability)).map(card => {
 			switch(this.property) {
 				case "name": {
 					return card.values.names;
@@ -513,7 +524,7 @@ export class CardPropertyNode extends AstNode {
 					return card.owner;
 				}
 				case "owner": {
-					return card.zone.player;
+					return card.zone?.player ?? card.owner;
 				}
 				case "self": {
 					return card;
@@ -535,7 +546,7 @@ export class VariableNode extends AstNode {
 		super();
 		this.name = name;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		if (ability.scriptVariables[this.name] === undefined) {
 			throw new Error("Tried to access unitialized variable '" + this.name + "'.");
 		}
@@ -548,19 +559,19 @@ export class ValueArrayNode extends AstNode {
 		super();
 		this.values = values;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return this.values;
 	}
 }
 
 export class AnyAmountNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return "any";
 	}
 }
 
 export class AllTypesNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return player.game.allTypes;
 	}
 }
@@ -585,9 +596,9 @@ export class PlusNode extends DashMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
-		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+	* eval(card, player, ability) {
+		let left = (yield* this.leftSide.eval(card, player, ability))[0];
+		let right = (yield* this.rightSide.eval(card, player, ability))[0];
 		if (typeof left == "number" && typeof right == "number") {
 			return [left + right];
 		}
@@ -598,9 +609,9 @@ export class MinusNode extends DashMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
-		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+	* eval(card, player, ability) {
+		let left = (yield* this.leftSide.eval(card, player, ability))[0];
+		let right = (yield* this.rightSide.eval(card, player, ability))[0];
 		if (typeof left == "number" && typeof right == "number") {
 			return [left - right];
 		}
@@ -616,9 +627,9 @@ export class MultiplyNode extends DotMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
-		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+	* eval(card, player, ability) {
+		let left = (yield* this.leftSide.eval(card, player, ability))[0];
+		let right = (yield* this.rightSide.eval(card, player, ability))[0];
 		if (typeof left != "number" || typeof right != "number") {
 			return [NaN];
 		}
@@ -629,9 +640,9 @@ export class DivideNode extends DotMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
-		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+	* eval(card, player, ability) {
+		let left = (yield* this.leftSide.eval(card, player, ability))[0];
+		let right = (yield* this.rightSide.eval(card, player, ability))[0];
 		if (typeof left != "number" || typeof right != "number") {
 			return [NaN];
 		}
@@ -642,9 +653,9 @@ export class FloorDivideNode extends DotMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		let left = (await (yield* this.leftSide.eval(card, player, ability)))[0];
-		let right = (await (yield* this.rightSide.eval(card, player, ability)))[0];
+	* eval(card, player, ability) {
+		let left = (yield* this.leftSide.eval(card, player, ability))[0];
+		let right = (yield* this.rightSide.eval(card, player, ability))[0];
 		if (typeof left != "number" || typeof right != "number") {
 			return [NaN];
 		}
@@ -669,9 +680,9 @@ export class EqualsNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		let rightSideElements = await (yield* this.rightSide.eval(card, player, ability));
-		for (let element of await (yield* this.leftSide.eval(card, player, ability))) {
+	* eval(card, player, ability) {
+		let rightSideElements = yield* this.rightSide.eval(card, player, ability);
+		for (let element of yield* this.leftSide.eval(card, player, ability)) {
 			if (rightSideElements.some(elem => equalityCompare(elem, element))) {
 				return true;
 			}
@@ -683,9 +694,9 @@ export class NotEqualsNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		let rightSideElements = await (yield* this.rightSide.eval(card, player, ability));
-		for (let element of await (yield* this.leftSide.eval(card, player, ability))) {
+	* eval(card, player, ability) {
+		let rightSideElements = yield* this.rightSide.eval(card, player, ability);
+		for (let element of yield* this.leftSide.eval(card, player, ability)) {
 			if (rightSideElements.some(elem => equalityCompare(elem, element))) {
 				return false;
 			}
@@ -697,9 +708,9 @@ export class GreaterThanNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		for (let rightSide of await (yield* this.rightSide.eval(card, player, ability))) {
-			for (let leftSide of await (yield* this.leftSide.eval(card, player, ability))) {
+	* eval(card, player, ability) {
+		for (let rightSide of yield* this.rightSide.eval(card, player, ability)) {
+			for (let leftSide of yield* this.leftSide.eval(card, player, ability)) {
 				if (leftSide > rightSide) {
 					return true;
 				}
@@ -712,9 +723,9 @@ export class LessThanNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		for (let rightSide of await (yield* this.rightSide.eval(card, player, ability))) {
-			for (let leftSide of await (yield* this.leftSide.eval(card, player, ability))) {
+	* eval(card, player, ability) {
+		for (let rightSide of yield* this.rightSide.eval(card, player, ability)) {
+			for (let leftSide of yield* this.leftSide.eval(card, player, ability)) {
 				if (leftSide < rightSide) {
 					return true;
 				}
@@ -732,16 +743,16 @@ export class AndNode extends LogicNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval(card, player, ability))) && (await (yield* this.rightSide.eval(card, player, ability)));
+	* eval(card, player, ability) {
+		return (yield* this.leftSide.eval(card, player, ability)) && (yield* this.rightSide.eval(card, player, ability));
 	}
 }
 export class OrNode extends LogicNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	async* eval(card, player, ability) {
-		return (await (yield* this.leftSide.eval(card, player, ability))) || (await (yield* this.rightSide.eval(card, player, ability)));
+	* eval(card, player, ability) {
+		return (yield* this.leftSide.eval(card, player, ability)) || (yield* this.rightSide.eval(card, player, ability));
 	}
 }
 
@@ -751,8 +762,8 @@ export class UnaryMinusNode extends AstNode {
 		super();
 		this.operand = operand;
 	}
-	async* eval(card, player, ability) {
-		return (await (yield* this.operand.eval(card, player, ability))).map(value => -value);
+	* eval(card, player, ability) {
+		return (yield* this.operand.eval(card, player, ability)).map(value => -value);
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -763,8 +774,8 @@ export class UnaryNotNode extends AstNode {
 		super();
 		this.operand = operand;
 	}
-	async* eval(card, player, ability) {
-		return !(await (yield* this.operand.eval(card, player, ability)));
+	* eval(card, player, ability) {
+		return !(yield* this.operand.eval(card, player, ability));
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -776,7 +787,7 @@ export class BoolNode extends AstNode {
 		super();
 		this.value = value == "yes";
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return this.value;
 	}
 }
@@ -786,7 +797,7 @@ export class PlayerNode extends AstNode {
 		super();
 		this.playerKeyword = playerKeyword;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return this.playerKeyword == "you"? [player] : [player.next()];
 	}
 }
@@ -795,8 +806,8 @@ export class LifeNode extends AstNode {
 		super();
 		this.playerNode = playerNode;
 	}
-	async* eval(card, player, ability) {
-		return (await (yield* this.playerNode.eval(card, player, ability))).map(player => player.life);
+	* eval(card, player, ability) {
+		return (yield* this.playerNode.eval(card, player, ability)).map(player => player.life);
 	}
 }
 export class ManaNode extends AstNode {
@@ -804,8 +815,8 @@ export class ManaNode extends AstNode {
 		super();
 		this.playerNode = playerNode;
 	}
-	async* eval(card, player, ability) {
-		return (await (yield* this.playerNode.eval(card, player, ability))).map(player => player.mana);
+	* eval(card, player, ability) {
+		return (yield* this.playerNode.eval(card, player, ability)).map(player => player.mana);
 	}
 }
 
@@ -815,9 +826,9 @@ export class ZoneNode extends AstNode {
 		this.zoneIdentifier = zoneIdentifier;
 		this.playerNode = playerNode;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		if (this.playerNode) {
-			player = (await (yield* this.playerNode.eval(card, player, ability)))[0];
+			player = (yield* this.playerNode.eval(card, player, ability))[0];
 			return ({
 				field: [player.unitZone, player.spellItemZone, player.partnerZone],
 				deck: [player.deckZone],
@@ -851,10 +862,10 @@ export class PhaseNode extends AstNode {
 		this.playerNode = playerNode;
 		this.phaseIndicator = phaseIndicator;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		let phaseAfterPrefix = this.phaseIndicator[0].toUpperCase() + this.phaseIndicator.slice(1);
 		if (this.player) {
-			let prefix = player == (await (yield* this.playerNode.eval(card, player, ability)))[0]? "your" : "opponent";
+			let prefix = player == (yield* this.playerNode.eval(card, player, ability))[0]? "your" : "opponent";
 			return [prefix + phaseAfterPrefix];
 		}
 		return ["your" + phaseAfterPrefix, "opponent" + phaseAfterPrefix];
@@ -865,15 +876,15 @@ export class TurnNode extends AstNode {
 		super();
 		this.playerNode = playerNode;
 	}
-	async* eval(card, player, ability) {
-		if (player == (await (yield* this.playerNode.eval(card, player, ability)))[0]) {
+	* eval(card, player, ability) {
+		if (player == (yield* this.playerNode.eval(card, player, ability))[0]) {
 			return ["yourTurn"];
 		}
 		return ["opponentTurn"];
 	}
 }
 export class CurrentPhaseNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		let phaseTypes = [...player.game.currentPhase().types];
 		let prefix = player == game.currentTurn().player? "your" : "opponent";
 		for (let i = phaseTypes.length -1; i >= 0; i--) {
@@ -883,7 +894,7 @@ export class CurrentPhaseNode extends AstNode {
 	}
 }
 export class CurrentTurnNode extends AstNode {
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return [player == game.currentTurn().player? "yourTurn" : "opponentTurn"];
 	}
 }
@@ -894,9 +905,9 @@ export class ActionAccessorNode extends AstNode {
 		this.actionsNode = actionsNode;
 		this.accessor = accessor;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		let values = [];
-		for (let action of await (yield* this.actionsNode.eval(card, player, ability))) {
+		for (let action of yield* this.actionsNode.eval(card, player, ability)) {
 			switch (this.accessor) {
 				case "cast": {
 					if (action instanceof actions.Cast) {
@@ -926,7 +937,7 @@ export class ActionAccessorNode extends AstNode {
 				}
 				case "destroyed": {
 					if (action instanceof actions.Destroy) {
-						values.push(action.card);
+						values.push(action.discard.card);
 					}
 					break;
 				}
@@ -973,7 +984,7 @@ export class ModifierNode extends AstNode {
 		super();
 		this.modifications = modifications;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return new CardModifier(this.modifications, card, player, ability);
 	}
 }
@@ -983,7 +994,7 @@ export class UntilIndicatorNode extends AstNode {
 		super();
 		this.type = type;
 	}
-	async* eval(card, player, ability) {
+	* eval(card, player, ability) {
 		return this.type;
 	}
 }

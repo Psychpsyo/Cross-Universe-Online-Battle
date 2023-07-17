@@ -6,6 +6,8 @@ import * as game from "./game.js";
 import * as actions from "./actions.js";
 import * as abilities from "./abilities.js";
 
+let lastRealTiming; // keeps track of the last non-interjected timing since only those must be passed to timing generators.
+
 async function* arrayTimingGenerator(actionArrays) {
 	for (let actionList of actionArrays) {
 		yield actionList;
@@ -29,18 +31,11 @@ class Block {
 			return true;
 		}
 		let costTimingSuccess = true;
-		let generatorOutput = await this.costTimingGenerator.next();
-		while (!generatorOutput.done) {
-			let actionList = generatorOutput.value;
-			// Needs to first check for updates (events or requests) returned by the timing generator.
-			if (actionList.length == 0 || !(actionList[0] instanceof actions.Action)) {
-				generatorOutput = await this.costTimingGenerator.next(yield actionList);
-				continue;
-			}
-			for (let action of actionList) {
+		let timing = await (yield* this.getNextTiming(this.costTimingGenerator, null));
+		while (timing) {
+			for (let action of timing.actions) {
 				action.costIndex = 0;
 			}
-			let timing = new Timing(this.stack.phase.turn.game, actionList, this);
 			this.costTimings.push(timing);
 			yield* timing.run();
 			if (!timing.successful) {
@@ -48,7 +43,7 @@ class Block {
 				this.costTimings.pop();
 				break;
 			}
-			generatorOutput = await this.costTimingGenerator.next(timing);
+			timing = await (yield* this.getNextTiming(this.costTimingGenerator, timing));
 		}
 		if (!costTimingSuccess) {
 			yield* this.undoCost();
@@ -60,22 +55,43 @@ class Block {
 		if (this.getIsCancelled()) {
 			return;
 		}
-		let generatorOutput = await this.timingGenerator.next();
-		while(!generatorOutput.done) {
-			let actionList = generatorOutput.value;
-			// Needs to first check for updates (events or requests) returned by the timing generator.
-			if (actionList.length == 0 || !(actionList[0] instanceof actions.Action)) {
-				generatorOutput = await this.timingGenerator.next(yield actionList);
-				continue;
-			}
-			let timing = new Timing(this.stack.phase.turn.game, actionList, this);
+		let timing = await (yield* this.getNextTiming(this.timingGenerator, null));
+		while(timing) {
 			this.executionTimings.push(timing);
 			yield* timing.run();
 			if (!timing.successful) {
 				this.executionTimings.pop();
 			}
-			generatorOutput = await this.timingGenerator.next(timing);
+			timing = await (yield* this.getNextTiming(this.timingGenerator, timing));
 		}
+	}
+
+	async* getNextTiming(timingGenerator, previousTiming) {
+		// check if timings need to be interjected inbetween the regular flow of events.
+		if (previousTiming)  {
+			// Equipable items and enchant spells whose unit got discarded or doesn't meet the conditions anymore
+			let invalidEquipments = [];
+			for (const equipment of previousTiming.game.players.map(player => player.spellItemZone.cards).flat()) {
+				if (equipment && !equipment.equipableTo.evalFull(equipment, equipment.zone.player, null).includes(equipment.equippedTo)) {
+					invalidEquipments.push(equipment);
+				}
+			}
+			if (invalidEquipments.length > 0) {
+				let discards = invalidEquipments.map(equipment => new actions.Discard(equipment));
+				return new Timing(this.stack.phase.turn.game, discards.concat(discards.map(discard => new actions.Destroy(discard))), this);
+			}
+		}
+
+		let generatorOutput = await timingGenerator.next(lastRealTiming);
+		while (!generatorOutput.done && (generatorOutput.value.length == 0 || !(generatorOutput.value[0] instanceof actions.Action))) {
+			generatorOutput = await timingGenerator.next(yield generatorOutput.value);
+		}
+		if (generatorOutput.done) {
+			lastRealTiming = null;
+			return null;
+		}
+		lastRealTiming = new Timing(this.stack.phase.turn.game, generatorOutput.value, this);
+		return lastRealTiming;
 	}
 
 	async* undoCost() {
@@ -216,7 +232,8 @@ async function* fightTimingGenerator(attackDeclaration) {
 	// RULES: If the Attack is greater the attacker destroys the target.
 	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
 	if (totalAttack > attackDeclaration.target.values.defense) {
-		let actionList = [new actions.Destroy(attackDeclaration.target), new actions.Discard(attackDeclaration.target)];
+		let discard = new actions.Discard(attackDeclaration.target);
+		let actionList = [new actions.Destroy(discard), discard];
 		if (attackDeclaration.target.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(attackDeclaration.target.zone.player, totalAttack - attackDeclaration.target.values.defense));
 		}
@@ -242,7 +259,8 @@ async function* fightTimingGenerator(attackDeclaration) {
 
 	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
 	if (attackDeclaration.target.values.attack > counterattackTarget.values.defense) {
-		let actionList = [new actions.Destroy(counterattackTarget), new actions.Discard(counterattackTarget)];
+		let discard = new actions.Discard(counterattackTarget);
+		let actionList = [new actions.Destroy(discard), discard];
 		if (counterattackTarget.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(counterattackTarget.zone.player, attackDeclaration.target.values.attack - counterattackTarget.values.defense));
 		}
@@ -320,6 +338,10 @@ async function* combinedTimingGenerator(generators) {
 	}
 }
 
+async function* equipTimingGenerator(equipChoiceAction, player) {
+	yield [new actions.EquipCard(equipChoiceAction.spellItem.cardRef, equipChoiceAction.chosenUnit.cardRef, player)];
+}
+
 export class DeployItem extends Block {
 	constructor(stack, player, card) {
 		let deployAction = new actions.Deploy(player, card, player.spellItemZone, 0);
@@ -330,6 +352,11 @@ export class DeployItem extends Block {
 		let execTimingGenerators = [
 			arrayTimingGenerator([[deployAction]])
 		];
+		if (card.values.cardTypes.includes("equipableItem")) {
+			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
+			costTimingGenerators.unshift(arrayTimingGenerator([[selectEquipableAction]]));
+			execTimingGenerators.unshift(equipTimingGenerator(selectEquipableAction, player));
+		}
 		let deployAbility = null;
 		for (let ability of card.values.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
@@ -387,6 +414,11 @@ export class CastSpell extends Block {
 		let execTimingGenerators = [
 			arrayTimingGenerator([[castAction]])
 		];
+		if (card.values.cardTypes.includes("enchantSpell")) {
+			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
+			costTimingGenerators.unshift(arrayTimingGenerator([[selectEquipableAction]]));
+			execTimingGenerators.unshift(equipTimingGenerator(selectEquipableAction, player));
+		}
 		let castAbility = null;
 		for (let ability of card.values.abilities) {
 			if (ability instanceof abilities.CastAbility) {

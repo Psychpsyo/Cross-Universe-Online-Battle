@@ -21,6 +21,7 @@ export function parseScript(tokenList, newEffectId, type) {
 		case "applyTarget": {
 			return new ast.ApplyTargetRootNode(parseExpression());
 		}
+		case "equipableTo":
 		case "during":
 		case "condition": {
 			return parseExpression();
@@ -319,26 +320,28 @@ function parseValue() {
 			}
 			return variable;
 		}
-		case "thisCard": {
-			let card = new ast.ThisCardNode();
-			pos++;
-			if (tokens[pos] && tokens[pos].type == "dotOperator") {
-				pos++;
-				return parseCardDotAccess(card);
-			}
-			return card;
-		}
-		case "attackTarget": {
-			let card = new ast.AttackTargetNode();
-			pos++;
-			if (tokens[pos] && tokens[pos].type == "dotOperator") {
-				pos++;
-				return parseCardDotAccess(card);
-			}
-			return card;
-		}
+		case "thisCard":
+		case "attackTarget":
+		case "equipment":
+		case "equippedUnit":
 		case "attackers": {
-			let cards = new ast.AttackersNode();
+			let cards;
+			switch (tokens[pos].type) {
+				case "thisCard":
+					cards = new ast.ThisCardNode();
+					break;
+				case "attackTarget":
+					cards = new ast.AttackTargetNode();
+					break;
+				case "attackers":
+					cards = new ast.AttackersNode();
+					break;
+				case "equipment":
+					cards = new ast.EquipmentNode();
+					break;
+				case "equippedUnit":
+					cards = new ast.EquippedToNode();
+			}
 			pos++;
 			if (tokens[pos] && tokens[pos].type == "dotOperator") {
 				pos++;

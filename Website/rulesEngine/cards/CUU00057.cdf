@@ -18,4 +18,4 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.field]))
 exec:
-DESTROY(SELECT(1, [from field where cardType = spell | cardType = item]))
+DESTROY(SELECT(1, [from field where cardType = [spell, item]]))

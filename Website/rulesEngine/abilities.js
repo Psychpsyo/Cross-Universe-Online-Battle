@@ -5,12 +5,12 @@ export class BaseAbility {
 		this.id = id;
 		this.condition = null;
 		if (condition) {
-			this.condition = interpreter.buildConditionAST(id, condition, game);
+			this.condition = interpreter.buildAST("condition", id, condition, game);
 		}
 	}
 
-	async canActivate(card, player) {
-		return this.condition === null || await this.condition.evalFull(card, player, this);
+	canActivate(card, player) {
+		return this.condition === null || this.condition.evalFull(card, player, this);
 	}
 
 	snapshot() {
@@ -22,25 +22,25 @@ export class BaseAbility {
 export class Ability extends BaseAbility {
 	constructor(id, game, exec, cost, condition) {
 		super(id, game, condition);
-		this.exec = interpreter.buildExecAST(id, exec, game);
+		this.exec = interpreter.buildAST("exec", id, exec, game);
 		this.cost =  null;
 		if (cost) {
-			this.cost = interpreter.buildCostAST(id, cost, game);
+			this.cost = interpreter.buildAST("cost", id, cost, game);
 		}
 		this.scriptVariables = {};
 	}
 
-	async canActivate(card, player) {
-		return (await super.canActivate(card, player)) && (this.cost === null || await this.cost.canDoInFull(card, player, this));
+	canActivate(card, player) {
+		return super.canActivate(card, player) && (this.cost === null || this.cost.canDoInFull(card, player, this));
 	}
 
-	async* runCost(card, player) {
+	* runCost(card, player) {
 		if (this.cost) {
 			yield* this.cost.eval(card, player, this);
 		}
 	}
 
-	async* run(card, player) {
+	* run(card, player) {
 		yield* this.exec.eval(card, player, this);
 		this.scriptVariables = {};
 	}
@@ -53,17 +53,17 @@ export class CastAbility extends Ability {
 		super(id, game, exec, cost, condition);
 		this.trigger = null;
 		if (trigger) {
-			this.trigger = interpreter.buildTriggerAST(id, trigger, game);
+			this.trigger = interpreter.buildAST("trigger", id, trigger, game);
 		}
 		this.triggerMet = false;
 	}
 
-	async canActivate(card, player) {
-		return (await super.canActivate(card, player)) && (this.trigger == null || this.triggerMet);
+	canActivate(card, player) {
+		return super.canActivate(card, player) && (this.trigger == null || this.triggerMet);
 	}
 
-	async checkTrigger(card, player) {
-		if (this.trigger == null || await this.trigger.evalFull(card, player, this)) {
+	checkTrigger(card, player) {
+		if (this.trigger == null || this.trigger.evalFull(card, player, this)) {
 			this.triggerMet = true;
 		}
 	}
@@ -74,17 +74,17 @@ export class DeployAbility extends Ability {
 		super(id, game, exec, cost, condition);
 		this.trigger = null;
 		if (trigger) {
-			this.trigger = interpreter.buildTriggerAST(id, trigger, game);
+			this.trigger = interpreter.buildAST("trigger", id, trigger, game);
 		}
 		this.triggerMet = false;
 	}
 
-	async canActivate(card, player) {
-		return (await super.canActivate(card, player)) && (this.trigger == null || this.triggerMet);
+	canActivate(card, player) {
+		return super.canActivate(card, player) && (this.trigger == null || this.triggerMet);
 	}
 
-	async checkTrigger(card, player) {
-		if (this.trigger == null || await this.trigger.evalFull(card, player, this)) {
+	checkTrigger(card, player) {
+		if (this.trigger == null || this.trigger.evalFull(card, player, this)) {
 			this.triggerMet = true;
 		}
 	}
@@ -97,8 +97,8 @@ export class OptionalAbility extends Ability {
 		this.activationCount = 0;
 	}
 
-	async canActivate(card, player) {
-		return (await super.canActivate(card, player)) && this.activationCount < this.turnLimit;
+	canActivate(card, player) {
+		return super.canActivate(card, player) && this.activationCount < this.turnLimit;
 	}
 
 	successfulActivation() {
@@ -113,8 +113,8 @@ export class FastAbility extends Ability {
 		this.activationCount = 0;
 	}
 
-	async canActivate(card, player) {
-		return (await super.canActivate(card, player)) && this.activationCount < this.turnLimit;
+	canActivate(card, player) {
+		return super.canActivate(card, player) && this.activationCount < this.turnLimit;
 	}
 
 	successfulActivation() {
@@ -129,37 +129,37 @@ export class TriggerAbility extends Ability {
 		this.turnLimit = turnLimit;
 		this.during = null;
 		if (during) {
-			this.during = interpreter.buildDuringAST(id, during, game);
+			this.during = interpreter.buildAST("during", id, during, game);
 		}
 		this.usedDuring = false;
 		this.trigger = null;
 		if (trigger) {
-			this.trigger = interpreter.buildTriggerAST(id, trigger, game);
+			this.trigger = interpreter.buildAST("trigger", id, trigger, game);
 		}
 		this.triggerMet = false;
 		this.activationCount = 0;
 	}
 
-	async canActivate(card, player) {
-		return (await super.canActivate(card, player)) &&
+	canActivate(card, player) {
+		return super.canActivate(card, player) &&
 			this.activationCount < this.turnLimit &&
 			this.triggerMet;
 	}
 
-	async checkTrigger(card, player) {
+	checkTrigger(card, player) {
 		if (!this.trigger) {
 			return;
 		}
-		if (await this.trigger.evalFull(card, player, this)) {
+		if (this.trigger.evalFull(card, player, this)) {
 			this.triggerMet = true;
 		}
 	}
 
-	async checkDuring(card, player) {
+	checkDuring(card, player) {
 		if (!this.during) {
 			return;
 		}
-		if (!(await this.during.evalFull(card, player, this))) {
+		if (!this.during.evalFull(card, player, this)) {
 			this.triggerMet = false;
 			this.usedDuring = false;
 		} else if (!this.usedDuring) {
@@ -179,18 +179,18 @@ export class TriggerAbility extends Ability {
 export class StaticAbility extends BaseAbility {
 	constructor(id, game, modifier, applyTo, condition) {
 		super(id, game, condition);
-		this.modifier = interpreter.buildMofifierAST(id, modifier, game);
-		this.applyTo = interpreter.buildApplyTargetAST(id, applyTo, game);
+		this.modifier = interpreter.buildAST("modifier", id, modifier, game);
+		this.applyTo = interpreter.buildAST("applyTarget", id, applyTo, game);
 	}
 
-	async getTargetCards(card, player) {
-		if (await this.canActivate(card, player)) {
+	getTargetCards(card, player) {
+		if (this.canActivate(card, player)) {
 			return this.applyTo.evalFull(card, player, this);
 		}
 		return [];
 	}
 
-	async getModifier(card, player) {
+	getModifier(card, player) {
 		return this.modifier.evalFull(card, player, this);
 	}
 }

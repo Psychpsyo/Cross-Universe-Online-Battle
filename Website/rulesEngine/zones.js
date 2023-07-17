@@ -50,6 +50,11 @@ export class Zone {
 		}
 		// Effects that applied to the card before stop applying.
 		card.modifierStack = [];
+		// equipments get unequipped
+		if (card.equippedTo) {
+			card.equippedTo.equipments.splice(card.equippedTo.equipments.indexOf(card), 1);
+		}
+		card.equipments = [];
 		// Snapshots pointing to this card become invalid. (The card stops being tracked as that specific instance)
 		card.invalidateSnapshots();
 		return index;

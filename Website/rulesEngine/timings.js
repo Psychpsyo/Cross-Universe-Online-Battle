@@ -2,15 +2,16 @@
 import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
+import * as actions from "./actions.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
-	constructor(game, actions, block) {
+	constructor(game, actionList, block) {
 		this.game = game;
 		this.index = 0;
-		this.actions = actions;
+		this.actions = actionList;
 		this.block = block; // block may be null
-		for (let action of this.actions) {
+		for (const action of this.actions) {
 			action.timing = this;
 		}
 		this.costCompletions = [];
@@ -111,7 +112,7 @@ export class Timing {
 		// static abilities and win/lose condition checks
 		let staticsChanged = true;
 		while (staticsChanged) {
-			staticsChanged = await phaseStaticAbilities(this.game);
+			staticsChanged = phaseStaticAbilities(this.game);
 			yield* recalculateCardValues(this.game);
 			yield* checkGameOver(this.game);
 		}
@@ -124,7 +125,7 @@ export class Timing {
 						if (ability instanceof abilities.TriggerAbility ||
 							ability instanceof abilities.CastAbility ||
 							ability instanceof abilities.DeployAbility) {
-							await ability.checkTrigger(card, player);
+							ability.checkTrigger(card, player);
 						}
 					}
 				}
@@ -180,26 +181,24 @@ function* checkGameOver(game) {
 }
 
 // iterates over all static abilities and activates/deactivates those that need it.
-async function phaseStaticAbilities(game) {
+function phaseStaticAbilities(game) {
 	let abilitiesChanged = false;
-	for (let player of game.players) {
-		let activeCards = player.getActiveCards();
-		for (let currentCard of activeCards) {
-			for (let ability of currentCard.values.abilities) {
-				if (ability instanceof abilities.StaticAbility) {
-					let eligibleCards = await ability.getTargetCards(currentCard, player);
-					for (let otherCard of activeCards) {
-						if (eligibleCards.includes(otherCard)) {
-							if (!otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
-								otherCard.modifierStack.push(await ability.getModifier(currentCard, player));
-								abilitiesChanged = true;
-							}
-						} else {
-							let modifierIndex = otherCard.modifierStack.findIndex(modifier => modifier.ability === ability);
-							if (modifierIndex != -1) {
-								otherCard.modifierStack.splice(modifierIndex, 1);
-								abilitiesChanged = true;
-							}
+	let activeCards = game.players.map(player => player.getActiveCards()).flat();
+	for (let currentCard of activeCards) {
+		for (let ability of currentCard.values.abilities) {
+			if (ability instanceof abilities.StaticAbility) {
+				let eligibleCards = ability.getTargetCards(currentCard, currentCard.zone.player);
+				for (let otherCard of activeCards) {
+					if (eligibleCards.includes(otherCard)) {
+						if (!otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
+							otherCard.modifierStack.push(ability.getModifier(currentCard, currentCard.zone.player));
+							abilitiesChanged = true;
+						}
+					} else {
+						let modifierIndex = otherCard.modifierStack.findIndex(modifier => modifier.ability === ability);
+						if (modifierIndex != -1) {
+							otherCard.modifierStack.splice(modifierIndex, 1);
+							abilitiesChanged = true;
 						}
 					}
 				}
@@ -209,12 +208,12 @@ async function phaseStaticAbilities(game) {
 	return abilitiesChanged;
 }
 
-async function* recalculateCardValues(game) {
+function* recalculateCardValues(game) {
 	for (let player of game.players) {
 		for (let card of player.getActiveCards()) {
 			let cardBaseValues = card.baseValues;
 			let cardValues = card.values;
-			await card.recalculateModifiedValues();
+			card.recalculateModifiedValues();
 
 			let valueChangeEvents = [];
 			for (let property of cardBaseValues.compareTo(card.baseValues)) {

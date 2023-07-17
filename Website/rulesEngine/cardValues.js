@@ -57,24 +57,24 @@ export class CardModifier {
 		this.ability = ability;
 	}
 
-	async modify(values, isBaseValues) {
+	modify(values, isBaseValues) {
 		for (let modification of this.modifications) {
 			if (isBaseValues == modification.toBaseValues) {
-				values = await modification.modify(values, this.card, this.player, this.ability);
+				values = modification.modify(values, this.card, this.player, this.ability);
 			}
 		}
 		return values;
 	}
 
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
-	async bake() {
-		let bakedModifications = (await Promise.allSettled(this.modifications.map(async modification => modification.bake(this.card, this.player, this.ability)))).map(fulfillment => fulfillment.value).filter(modification => modification !== null);
+	bake() {
+		let bakedModifications = this.modifications.map(modification => modification.bake(this.card, this.player, this.ability)).filter(modification => modification !== null);
 		return new CardModifier(bakedModifications, this.card, this.player, this.ability);
 	}
 
-	async hasAllTargets(card, player, ability) {
+	hasAllTargets(card, player, ability) {
 		for (let childNode of this.modifications) {
-			if (!(await childNode.hasAllTargets(card, player, ability))) {
+			if (!childNode.hasAllTargets(card, player, ability)) {
 				return false;
 			}
 		}
@@ -83,15 +83,15 @@ export class CardModifier {
 }
 
 export class ValueModification {
-	async modify(values, card, player, ability) {
+	modify(values, card, player, ability) {
 		return values;
 	}
 
-	async bake(card, player, ability) {
+	bake(card, player, ability) {
 		return this;
 	}
 
-	async hasAllTargets(card, player, ability) {
+	hasAllTargets(card, player, ability) {
 		return true;
 	}
 }
@@ -104,25 +104,25 @@ export class ValueSetModification extends ValueModification {
 		this.toBaseValues = toBaseValues;
 	}
 
-	async modify(values, card, player, ability) {
+	modify(values, card, player, ability) {
 		if (["level", "attack", "defense"].includes(this.value)) {
-			values[this.value] = (await this.newValue.evalFull(card, player, ability))[0];
+			values[this.value] = this.newValue.evalFull(card, player, ability)[0];
 		} else {
-			values[this.value] = (await this.newValue.evalFull(card, player, ability));
+			values[this.value] = this.newValue.evalFull(card, player, ability);
 		}
 		return values;
 	}
 
-	async bake(card, player, ability) {
-		let valueArray = await this.newValue.evalFull(card, player, ability);
+	bake(card, player, ability) {
+		let valueArray = this.newValue.evalFull(card, player, ability);
 		if (valueArray.length == 0) {
 			return null;
 		}
 		return new ValueSetModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
 	}
 
-	async hasAllTargets(card, player, ability) {
-		return (await this.newValue.evalFull(card, player, ability)).length > 0;
+	hasAllTargets(card, player, ability) {
+		return this.newValue.evalFull(card, player, ability).length > 0;
 	}
 }
 
@@ -134,8 +134,8 @@ export class ValueAppendModification extends ValueModification {
 		this.toBaseValues = toBaseValues;
 	}
 
-	async modify(values, card, player, ability) {
-		for (let newValue of await this.newValues.evalFull(card, player, ability)) {
+	modify(values, card, player, ability) {
+		for (let newValue of this.newValues.evalFull(card, player, ability)) {
 			if (!values[this.value].includes(newValue)) {
 				values[this.value].push(newValue);
 			}
@@ -143,16 +143,16 @@ export class ValueAppendModification extends ValueModification {
 		return values;
 	}
 
-	async bake(card, player, ability) {
-		let valueArray = await this.newValues.evalFull(card, player, ability);
+	bake(card, player, ability) {
+		let valueArray = this.newValues.evalFull(card, player, ability);
 		if (valueArray.length == 0) {
 			return null;
 		}
 		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
 	}
 
-	async hasAllTargets(card, player, ability) {
-		return (await this.newValues.evalFull(card, player, ability)).length > 0;
+	hasAllTargets(card, player, ability) {
+		return this.newValues.evalFull(card, player, ability).length > 0;
 	}
 }
 
@@ -164,21 +164,21 @@ export class NumericChangeModification extends ValueModification {
 		this.toBaseValues = toBaseValues;
 	}
 
-	async modify(values, card, player, ability) {
-		values[this.value] = Math.max(0, values[this.value] + (await this.amount.evalFull(card, player, ability))[0]);
+	modify(values, card, player, ability) {
+		values[this.value] = Math.max(0, values[this.value] + this.amount.evalFull(card, player, ability)[0]);
 		return values;
 	}
 
-	async bake(card, player, ability) {
-		let valueArray = await this.amount.evalFull(card, player, ability);
+	bake(card, player, ability) {
+		let valueArray = this.amount.evalFull(card, player, ability);
 		if (valueArray.length == 0) {
 			return null;
 		}
 		return new NumericChangeModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
 	}
 
-	async hasAllTargets(card, player, ability) {
-		return (await this.amount.evalFull(card, player, ability)).length > 0;
+	hasAllTargets(card, player, ability) {
+		return this.amount.evalFull(card, player, ability).length > 0;
 	}
 }
 
@@ -190,21 +190,21 @@ export class NumericDivideModification extends ValueModification {
 		this.toBaseValues = toBaseValues;
 	}
 
-	async modify(values, card, player, ability) {
-		values[this.value] = Math.ceil(values[this.value] / (await this.byAmount.evalFull(card, player, ability))[0]);
+	modify(values, card, player, ability) {
+		values[this.value] = Math.ceil(values[this.value] / this.byAmount.evalFull(card, player, ability)[0]);
 		return values;
 	}
 
-	async bake(card, player, ability) {
-		let valueArray = await this.byAmount.evalFull(card, player, ability);
+	bake(card, player, ability) {
+		let valueArray = this.byAmount.evalFull(card, player, ability);
 		if (valueArray.length == 0) {
 			return null;
 		}
 		return new NumericDivideModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
 	}
 
-	async hasAllTargets(card, player, ability) {
-		return (await this.byAmount.evalFull(card, player, ability)).length > 0;
+	hasAllTargets(card, player, ability) {
+		return this.byAmount.evalFull(card, player, ability).length > 0;
 	}
 }
 
@@ -216,7 +216,7 @@ export class ValueSwapModification extends ValueModification {
 		this.toBaseValues = toBaseValues;
 	}
 
-	async modify(values) {
+	modify(values) {
 		let temp = values[this.valueA];
 		values[this.valueA] = values[this.valueB];
 		values[this.valueB] = temp;

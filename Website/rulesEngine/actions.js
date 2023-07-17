@@ -350,19 +350,18 @@ export class Discard extends Action {
 }
 
 export class Destroy extends Action {
-	constructor(card) {
+	constructor(discard) {
 		super();
-		this.card = card;
+		this.discard = discard;
 	}
 
 	* run() {
 		// destroying a card doesn't do anything.
 		// Only the accompanying discard actually does something
-		this.card = this.card.snapshot();
 	}
 
 	isImpossible(timing) {
-		if (this.card.zone?.type == "partner") {
+		if (this.discard.card.zone?.type == "partner") {
 			return true;
 		}
 		return false;
@@ -511,5 +510,55 @@ export class SetAttackTarget extends Action {
 		if (this.timing.game.currentAttackDeclaration) {
 			this.timing.game.currentAttackDeclaration.target = this.oldTarget;
 		}
+	}
+}
+
+export class SelectEquipableUnit extends Action {
+	constructor(spellItem, player) {
+		super();
+		this.spellItem = spellItem;
+		this.player = player;
+		this.chosenUnit = null;
+	}
+
+	* run() {
+		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null), [1], "equipTarget:" + this.spellItem.cardId);
+		let responses = yield [selectionRequest];
+		if (responses.length != 1) {
+			throw new Error("Incorrect number of responses supplied when selecting unit to equip to. (expected 1, got " + responses.length + " instead)");
+		}
+		if (responses[0].type != "chooseCards") {
+			throw new Error("Incorrect response type supplied when selecting unit to equip to. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
+		}
+		this.chosenUnit = requests.chooseCards.validate(responses[0].value, selectionRequest)[0];
+	}
+
+	isImpossible(timing) {
+		return this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null).length == 0;
+	}
+}
+
+export class EquipCard extends Action {
+	constructor(equipment, target, player) {
+		super();
+		this.equipment = equipment;
+		this.target = target;
+		this.player = player;
+	}
+
+	* run() {
+		this.equipment = this.equipment.snapshot();
+		this.target = this.target.snapshot();
+		this.equipment.cardRef.equippedTo = this.target.cardRef;
+		this.target.cardRef.equipments.push(this.equipment.cardRef);
+	}
+
+	undo() {
+		this.target.cardRef.equipments.pop();
+		this.equipment.equippedTo = null;
+	}
+
+	isImpossible(timing) {
+		return !this.equipment.equipableTo.evalFull(this.spellItem, this.player, null).includes(this.target);
 	}
 }

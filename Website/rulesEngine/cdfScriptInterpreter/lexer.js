@@ -2,6 +2,8 @@ let keywordTokenTypes = {
 	from: "from",
 	where: "where",
 	thisCard: "thisCard",
+	equippedUnit: "equippedUnit",
+	equipments: "equipments",
 	attackTarget: "attackTarget",
 	attackers: "attackers",
 	currentPhase: "currentPhase",
