@@ -79,10 +79,14 @@ export class StackPhase extends Phase {
 		for (let card of player.handZone.cards) {
 			if (card.values.cardTypes.includes("spell")) {
 				let eligible = true;
-				for (let ability of card.values.abilities) {
-					if (ability instanceof abilities.CastAbility && !ability.canActivate(card, player)) {
-						eligible = false;
-						break;
+				if (card.values.cardTypes.includes("enchantSpell") && card.equipableTo.evalFull(card, player, null).length == 0) {
+					eligible = false;
+				} else {
+					for (let ability of card.values.abilities) {
+						if (ability instanceof abilities.CastAbility && !ability.canActivate(card, player)) {
+							eligible = false;
+							break;
+						}
 					}
 				}
 				if (eligible) {
@@ -287,10 +291,14 @@ export class MainPhase extends StackPhase {
 		for (let card of this.turn.player.handZone.cards) {
 			if (card.values.cardTypes.includes("item")) {
 				let eligible = true;
-				for (let ability of card.values.abilities) {
-					if (ability instanceof abilities.DeployAbility && !ability.canActivate(card, this.turn.player)) {
-						eligible = false;
-						break;
+				if (card.values.cardTypes.includes("equipableItem") && card.equipableTo.evalFull(card, this.turn.player, null).length == 0) {
+					eligible = false;
+				} else {
+					for (let ability of card.values.abilities) {
+						if (ability instanceof abilities.DeployAbility && !ability.canActivate(card, this.turn.player)) {
+							eligible = false;
+							break;
+						}
 					}
 				}
 				if (eligible) {
