@@ -1,24 +1,28 @@
 let keywordTokenTypes = {
 	from: "from",
 	where: "where",
+	if: "if",
+
 	thisCard: "thisCard",
 	equippedUnit: "equippedUnit",
 	equipments: "equipments",
 	attackTarget: "attackTarget",
 	attackers: "attackers",
+
 	currentPhase: "currentPhase",
 	currentTurn: "currentTurn",
 	turn: "turn",
+
 	any: "anyAmount",
 	allTypes: "allTypes",
-	life: "playerLife",
-	mana: "playerMana",
 
 	yes: "bool",
 	no: "bool",
 
 	you: "player",
 	opponent: "player",
+	life: "playerLife",
+	mana: "playerMana",
 
 	name: "cardProperty",
 	baseName: "cardProperty",

@@ -61,7 +61,7 @@ export class CardModifier {
 		let values = toBaseValues? card.baseValues : card.values;
 		ast.setCurrentImplicitCard(card);
 		for (let modification of this.modifications) {
-			if (toBaseValues == modification.toBaseValues) {
+			if (toBaseValues === modification.toBaseValues && (modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability))) {
 				values = modification.modify(values, this.card, this.player, this.ability);
 			}
 		}
@@ -86,6 +86,9 @@ export class CardModifier {
 }
 
 export class ValueModification {
+	constructor(condition) {
+		this.condition = condition;
+	}
 	modify(values, card, player, ability) {
 		return values;
 	}
@@ -100,8 +103,8 @@ export class ValueModification {
 }
 
 export class ValueSetModification extends ValueModification {
-	constructor(value, newValue, toBaseValues) {
-		super();
+	constructor(value, newValue, toBaseValues, condition) {
+		super(condition);
 		this.value = value;
 		this.newValue = newValue;
 		this.toBaseValues = toBaseValues;
@@ -121,7 +124,7 @@ export class ValueSetModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new ValueSetModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+		return new ValueSetModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -130,8 +133,8 @@ export class ValueSetModification extends ValueModification {
 }
 
 export class ValueAppendModification extends ValueModification {
-	constructor(value, newValues, toBaseValues) {
-		super();
+	constructor(value, newValues, toBaseValues, condition) {
+		super(condition);
 		this.value = value;
 		this.newValues = newValues;
 		this.toBaseValues = toBaseValues;
@@ -151,7 +154,7 @@ export class ValueAppendModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -160,8 +163,8 @@ export class ValueAppendModification extends ValueModification {
 }
 
 export class NumericChangeModification extends ValueModification {
-	constructor(value, amount, toBaseValues) {
-		super();
+	constructor(value, amount, toBaseValues, condition) {
+		super(condition);
 		this.value = value;
 		this.amount = amount;
 		this.toBaseValues = toBaseValues;
@@ -177,7 +180,7 @@ export class NumericChangeModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new NumericChangeModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+		return new NumericChangeModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -186,8 +189,8 @@ export class NumericChangeModification extends ValueModification {
 }
 
 export class NumericDivideModification extends ValueModification {
-	constructor(value, byAmount, toBaseValues) {
-		super();
+	constructor(value, byAmount, toBaseValues, condition) {
+		super(condition);
 		this.value = value;
 		this.byAmount = byAmount;
 		this.toBaseValues = toBaseValues;
@@ -203,7 +206,7 @@ export class NumericDivideModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new NumericDivideModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues);
+		return new NumericDivideModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -212,8 +215,8 @@ export class NumericDivideModification extends ValueModification {
 }
 
 export class ValueSwapModification extends ValueModification {
-	constructor(valueA, valueB, toBaseValues) {
-		super();
+	constructor(valueA, valueB, toBaseValues, condition) {
+		super(condition);
 		this.valueA = valueA;
 		this.valueB = valueB;
 		this.toBaseValues = toBaseValues;

@@ -149,7 +149,9 @@ export class Timing {
 			}
 		}
 		yield* recalculateCardValues(this.game);
-		yield events;
+		if (events.length > 0) {
+			yield events;
+		}
 	}
 
 	valueOf() {

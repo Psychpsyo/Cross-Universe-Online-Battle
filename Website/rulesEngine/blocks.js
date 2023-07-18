@@ -48,7 +48,7 @@ class Block {
 			timing = yield* this.getNextTiming(this.costTimingGenerator, timing);
 		}
 		if (!costTimingSuccess) {
-			yield* this.undoCost();
+			await (yield* this.undoCost());
 		}
 		return costTimingSuccess;
 	}

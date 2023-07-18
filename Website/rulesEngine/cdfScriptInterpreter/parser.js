@@ -150,7 +150,7 @@ function parseExpression() {
 		pos++;
 	}
 	let expression = [];
-	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator"].includes(tokens[pos].type)) {
+	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator", "if"].includes(tokens[pos].type)) {
 		expression.push(parseValue());
 		if (tokens[pos]) {
 			switch (tokens[pos].type) {
@@ -562,24 +562,42 @@ function parseModifier() {
 		if (valueIdentifier == "name") {
 			valueIdentifier = "names";
 		}
-
 		pos++;
+
 		if (!["equals", "plusAssignment", "minusAssignment", "divideAssignment", "swapAssignment"].includes(tokens[pos].type)) {
 			throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' token as operator in modifier syntax.");
 		}
 		let assignmentType = tokens[pos].type;
-
 		pos++;
+
+		let rightHandSide;
+		if (assignmentType != "swapAssignment") {
+			rightHandSide = parseExpression();
+		} else {
+			if (tokens[pos].type != "cardProperty") {
+				throw new ScriptParserError("Modifier can only swap card properties with other card properties. (Got '" + tokens[pos].type + "' token instead.)");
+			}
+			rightHandSide = tokens[pos].value;
+			pos++;
+		}
+
+		// maybe parse if condition
+		let condition = null;
+		if (tokens[pos].type == "if") {
+			pos++;
+			condition = parseExpression();
+		}
+
 		switch (assignmentType) {
 			case "equals": {
-				valueModifications.push(new cardValues.ValueSetModification(valueIdentifier, parseExpression(), toBaseValues));
+				valueModifications.push(new cardValues.ValueSetModification(valueIdentifier, rightHandSide, toBaseValues, condition));
 				break;
 			}
 			case "plusAssignment": {
 				if (["level", "attack", "defense"].includes(valueIdentifier)) {
-					valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, parseExpression(), toBaseValues));
+					valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, rightHandSide, toBaseValues, condition));
 				} else {
-					valueModifications.push(new cardValues.ValueAppendModification(valueIdentifier, parseExpression(), toBaseValues));
+					valueModifications.push(new cardValues.ValueAppendModification(valueIdentifier, rightHandSide, toBaseValues, condition));
 				}
 				break;
 			}
@@ -587,29 +605,24 @@ function parseModifier() {
 				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
 					throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.");
 				}
-				valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(parseExpression()), toBaseValues));
+				valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(rightHandSide), toBaseValues, condition));
 				break;
 			}
 			case "divideAssignment": {
 				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
 					throw new ScriptParserError("Modifier cannot divide non-number card property '" + valueIdentifier + "'.");
 				}
-				valueModifications.push(new cardValues.NumericDivideModification(valueIdentifier, parseExpression(), toBaseValues));
+				valueModifications.push(new cardValues.NumericDivideModification(valueIdentifier, rightHandSide, toBaseValues, condition));
 				break;
 			}
 			case "swapAssignment": {
-				if (tokens[pos].type != "cardProperty") {
-					throw new ScriptParserError("Modifier can only swap card properties with other card properties. (Got '" + tokens[pos].type + "' token instead.)");
-				}
-				let otherIdentifier = tokens[pos].value;
-				pos++;
-				if (otherIdentifier.startsWith("base") != toBaseValues) {
+				if (rightHandSide.startsWith("base") != toBaseValues) {
 					throw new ScriptParserError("Modifier cannot swap base value with non-base value.");
 				}
 				if (toBaseValues) {
-					otherIdentifier = otherIdentifier[4].toLowerCase() + otherIdentifier.substr(5);
+					rightHandSide = rightHandSide[4].toLowerCase() + rightHandSide.substr(5);
 				}
-				valueModifications.push(new cardValues.ValueSwapModification(valueIdentifier, otherIdentifier, toBaseValues));
+				valueModifications.push(new cardValues.ValueSwapModification(valueIdentifier, rightHandSide, toBaseValues, condition));
 				break;
 			}
 		}
