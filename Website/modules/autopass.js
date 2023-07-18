@@ -151,7 +151,7 @@ function isImportant(request) {
 function isSpellItemTriggered(card) {
 	for (let ability of card.values.abilities) {
 		if (ability instanceof abilities.CastAbility || ability instanceof abilities.DeployAbility) {
-			if (ability.trigger || hasTimeSensitiveCondition(ability.condition)) {
+			if (ability.after || hasTimeSensitiveCondition(ability.condition)) {
 				return true;
 			}
 		}

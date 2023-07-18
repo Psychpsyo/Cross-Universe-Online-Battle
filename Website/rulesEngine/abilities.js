@@ -49,42 +49,42 @@ export class Ability extends BaseAbility {
 }
 
 export class CastAbility extends Ability {
-	constructor(id, game, exec, cost, condition, trigger) {
+	constructor(id, game, exec, cost, condition, after) {
 		super(id, game, exec, cost, condition);
-		this.trigger = null;
-		if (trigger) {
-			this.trigger = interpreter.buildAST("trigger", id, trigger, game);
+		this.after = null;
+		if (after) {
+			this.after = interpreter.buildAST("trigger", id, trigger, game);
 		}
 		this.triggerMet = false;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) && (this.trigger == null || this.triggerMet);
+		return super.canActivate(card, player) && (this.after == null || this.triggerMet);
 	}
 
 	checkTrigger(card, player) {
-		if (this.trigger == null || this.trigger.evalFull(card, player, this)) {
+		if (this.after == null || this.after.evalFull(card, player, this)) {
 			this.triggerMet = true;
 		}
 	}
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, game, exec, cost, condition, trigger) {
+	constructor(id, game, exec, cost, condition, after) {
 		super(id, game, exec, cost, condition);
-		this.trigger = null;
-		if (trigger) {
-			this.trigger = interpreter.buildAST("trigger", id, trigger, game);
+		this.after = null;
+		if (after) {
+			this.after = interpreter.buildAST("trigger", id, trigger, game);
 		}
 		this.triggerMet = false;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) && (this.trigger == null || this.triggerMet);
+		return super.canActivate(card, player) && (this.after == null || this.triggerMet);
 	}
 
 	checkTrigger(card, player) {
-		if (this.trigger == null || this.trigger.evalFull(card, player, this)) {
+		if (this.after == null || this.after.evalFull(card, player, this)) {
 			this.triggerMet = true;
 		}
 	}
@@ -123,7 +123,7 @@ export class FastAbility extends Ability {
 }
 
 export class TriggerAbility extends Ability {
-	constructor(id, game, exec, cost, mandatory, turnLimit, during, trigger, condition) {
+	constructor(id, game, exec, cost, mandatory, turnLimit, during, after, condition) {
 		super(id, game, exec, cost, condition);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
@@ -132,9 +132,9 @@ export class TriggerAbility extends Ability {
 			this.during = interpreter.buildAST("during", id, during, game);
 		}
 		this.usedDuring = false;
-		this.trigger = null;
-		if (trigger) {
-			this.trigger = interpreter.buildAST("trigger", id, trigger, game);
+		this.after = null;
+		if (after) {
+			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
 		this.triggerMet = false;
 		this.activationCount = 0;
@@ -147,10 +147,10 @@ export class TriggerAbility extends Ability {
 	}
 
 	checkTrigger(card, player) {
-		if (!this.trigger) {
+		if (!this.after) {
 			return;
 		}
-		if (this.trigger.evalFull(card, player, this)) {
+		if (this.after.evalFull(card, player, this)) {
 			this.triggerMet = true;
 		}
 	}
