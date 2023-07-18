@@ -53,6 +53,9 @@
 
 			"errors": {
 				"generic": "Das Deck konnte aufgrund eines unbekannten Fehlers nicht geladen werden.",
+				"tooManyCards": "Das Deck konnte nicht geladen werden, weil es mehr als {#DECKLIMIT} Karten enthält.",
+				"notEnoughCards": "Das Deck konnte nicht geladen werden, weil es weniger als {#DECKLIMIT} Karten enthält.",
+				"tooManyOfCard": "Das Deck konnte nicht geladen werden, weil es zu viele '{#CARDNAME}' enthält.",
 				"unsupportedInAutomatic": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält. Diese Karte existiert im automatischen Modus noch nicht."
 			}
 		},

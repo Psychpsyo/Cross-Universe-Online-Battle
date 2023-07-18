@@ -53,6 +53,9 @@
 
 			"errors": {
 				"generic": null,
+				"tooManyCards": null,
+				"notEnoughCards": null,
+				"tooManyOfCard": null,
 				"unsupportedInAutomatic": null
 			}
 		},

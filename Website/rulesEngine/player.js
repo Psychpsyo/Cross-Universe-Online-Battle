@@ -2,6 +2,7 @@
 
 import {Card} from "./card.js";
 import {Zone, FieldZone, DeckZone} from "./zones.js";
+import * as deckErrors from "./deckErrors.js";
 
 export class Player {
 	constructor(game) {
@@ -27,9 +28,37 @@ export class Player {
 	}
 
 	setDeck(cdfList) {
+		if (cdfList.length < this.game.config.lowerDeckLimit) {
+			throw new deckErrors.DeckSizeError("Deck has not enough cards!", false);
+		}
+		if (cdfList.length > this.game.config.upperDeckLimit) {
+			throw new deckErrors.DeckSizeError("Deck has too many cards!", true);
+		}
+		let cardList = [];
+		let cardAmounts = {}
+		let exampleCards = {}
+		for (const cdf of cdfList) {
+			let card = new Card(this, cdf, true);
+			cardList.push(card);
+			if (!(card.cardId in exampleCards)) {
+				exampleCards[card.cardId] = card;
+				cardAmounts[card.cardId] = 1;
+			} else {
+				cardAmounts[card.cardId]++;
+			}
+		}
+		if (this.game.config.validateCardAmounts) {
+			for (const cardId of Object.keys(exampleCards)) {
+				if (exampleCards[cardId].deckLimit < cardAmounts[cardId]) {
+					throw new deckErrors.CardAmountError(cardId);
+				}
+			}
+		}
+
+		// valid deck was loaded
 		this.game.replay.players[this.index].deckList = cdfList;
-		for (let cdf of cdfList) {
-			this.deckZone.add(new Card(this, cdf, true), this.deckZone.cards.length);
+		for (const card of cardList) {
+			this.deckZone.add(card, this.deckZone.cards.length);
 		}
 	}
 

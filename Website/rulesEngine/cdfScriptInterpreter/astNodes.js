@@ -575,7 +575,7 @@ export class AnyAmountNode extends AstNode {
 
 export class AllTypesNode extends AstNode {
 	* eval(card, player, ability) {
-		return player.game.allTypes;
+		return player.game.config.allTypes;
 	}
 }
 

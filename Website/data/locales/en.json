@@ -53,6 +53,9 @@
 
 			"errors": {
 				"generic": "The deck could not be loaded because of an unknown error.",
+				"tooManyCards": "The deck could not be loaded because it has more than {#DECKLIMIT} cards.",
+				"notEnoughCards": "The deck could not be loaded because it has less than {#DECKLIMIT} cards.",
+				"tooManyOfCard": "The deck could not be loaded because it contains too many copies of '{#CARDNAME}'.",
 				"unsupportedInAutomatic": "The deck could not be loaded because it contains '{#CARDNAME}', which is currently unsupported in automatic games."
 			}
 		},

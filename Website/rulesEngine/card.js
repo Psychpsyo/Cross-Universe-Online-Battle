@@ -5,10 +5,11 @@ import * as abilities from "./abilities.js";
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
 
 class BaseCard {
-	constructor(player, cardId, hidden, initialValues, equipableTo) {
+	constructor(player, cardId, hidden, initialValues, deckLimit, equipableTo) {
 		this.owner = player;
 		this.cardId = cardId;
-		this.hidden = hidden;
+		this.deckLimit = deckLimit;
+		this.equipableTo = equipableTo;
 
 		this.initialValues = initialValues;
 		this.values = initialValues;
@@ -17,14 +18,15 @@ class BaseCard {
 
 		this.zone = null;
 		this.index = -1;
-		this.equipableTo = equipableTo;
 		this.equippedTo = null;
 		this.equipments = [];
 		this.attackCount = 0;
 		this.isAttacking = false;
 		this.isAttackTarget = false;
 		this.inRetire = null;
+
 		this.cardRef = this;
+		this.hidden = hidden;
 	}
 
 	sharesTypeWith(card) {
@@ -80,6 +82,7 @@ export class Card extends BaseCard {
 				data.defense ?? 0,
 				data.abilities.map(ability => makeAbility(ability, player.game))
 			),
+			data.deckLimit,
 			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game)
 		);
 		this.snapshots = [];
@@ -121,15 +124,7 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 export class SnapshotCard extends BaseCard {
 	constructor(card, equippedToSnapshot) {
-		super(card.owner, card.cardId, card.hidden, card.initialValues.clone());
-		this.equipableTo = card.equipableTo;
-		if (equippedToSnapshot) {
-			this.equippedTo = equippedToSnapshot;
-		} else if (card.equippedTo) {
-			this.equippedTo = new SnapshotCard(card.equippedTo);
-		}
-		this.equipments = card.equipments.map(equipment => new SnapshotCard(equipment, card));
-
+		super(card.owner, card.cardId, card.hidden, card.initialValues.clone(), card.deckLimit, card.equipableTo);
 		this.values = card.values.clone();
 		this.baseValues = card.baseValues.clone();
 		this.modifierStack = [...card.modifierStack];
@@ -145,12 +140,19 @@ export class SnapshotCard extends BaseCard {
 		this.baseValues.abilities = this.baseValues.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
 		this.values.abilities = this.values.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
 
+		if (equippedToSnapshot) {
+			this.equippedTo = equippedToSnapshot;
+		} else if (card.equippedTo) {
+			this.equippedTo = new SnapshotCard(card.equippedTo);
+		}
+		this.equipments = card.equipments.map(equipment => new SnapshotCard(equipment, card));
 		this.zone = card.zone;
 		this.index = card.index;
 		this.attackCount = card.attackCount;
 		this.isAttacking = card.isAttacking;
 		this.isAttackTarget = card.isAttackTarget;
 		this.inRetire = card.inRetire;
+
 		this.cardRef = card;
 		this.permanentCardRef = card; // will not be cleared by card moving and is only for restoring a card on undo
 	}
@@ -200,6 +202,7 @@ export class SnapshotCard extends BaseCard {
 function parseCdfValues(cdf) {
 	let data = {
 		abilities: [],
+		deckLimit: 3,
 		equipableTo: "[from field where cardType = unit]"
 	};
 	let lines = cdf.replaceAll("\r", "").split("\n");
@@ -311,6 +314,10 @@ function parseCdfValues(cdf) {
 			}
 			case "defense": {
 				data.defense = parseInt(parts[1]);
+				break;
+			}
+			case "deckLimit": {
+				data.deckLimit = parts[1] == "any"? Infinity : parseInt(parts[1]);
 				break;
 			}
 			case "equipableTo": {

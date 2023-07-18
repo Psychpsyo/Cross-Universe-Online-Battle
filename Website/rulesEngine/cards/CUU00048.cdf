@@ -5,3 +5,4 @@ level: 0
 types: Fire, Ghost
 attack: 50
 defense: 0
+deckLimit: any

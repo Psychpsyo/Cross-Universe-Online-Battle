@@ -42,13 +42,17 @@ export async function registerCustomCard(cardData, player) {
 
 export async function getManualCdf(cardId) {
 	let cardData = await getCardInfo(cardId);
-	return `id:CU${cardId}
+	let cdf = `id:CU${cardId}
 cardType:${cardData.cardType}
 name:CU${cardId}
 level:${cardData.level}
 types:${cardData.types.join(",")}
 attack:${cardData.attack ?? 0}
-defense:${cardData.defense ?? 0}`
+defense:${cardData.defense ?? 0}`;
+	if (cardData.deckLimit) {
+		cdf += "\ndeckLimit: " + (cardData.deckLimit == 50? Infinity : cardData.deckLimit);
+	}
+	return cdf;
 }
 
 function generateCustomCardCdf(cardId) {

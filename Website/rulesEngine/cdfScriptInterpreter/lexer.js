@@ -269,7 +269,7 @@ export function tokenize(code, game) {
 						tokens.push({type: keywordTokenTypes[word], value: word});
 					} else if (word.startsWith("CU")) {
 						tokens.push({type: "cardId", value: code.substr(pos + 2, wordLength - 2)});
-					} else if (game.allTypes.includes(word)) {
+					} else if (game.config.allTypes.includes(word)) {
 						tokens.push({type: "type", value: word});
 					} else {
 						tokens.push({type: "name", value: word});

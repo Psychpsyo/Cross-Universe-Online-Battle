@@ -5,6 +5,7 @@ level: 1
 types: Water
 attack: 100
 defense: 0
+deckLimit: any
 o: trigger
 mandatory: yes
 after: discarded = thisCard

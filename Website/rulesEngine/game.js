@@ -68,14 +68,17 @@ export class Game {
 		this.nextTimingIndex = 1;
 
 		this.rng = new CURandom(); // the random number source for this game
-		this.allTypes = baseTypes; // all types that the game is aware of. This may be extended by custom types to allow for custom cards.
-		this.startingPlayerChooses = false; // whether or not the randomly selected starting player gets to choose the actual starting player
-		this.startingHandSize = 5; // how many hand cards each player draws at the beginning of the game
+		this.config = {
+			allTypes: baseTypes, // all types that the game is aware of. This may be extended by custom types to allow for custom cards.
+			startingPlayerChooses: false, // whether or not the randomly selected starting player gets to choose the actual starting player
+			validateCardAmounts: true, // whether or not deck card counts should be validated
+			lowerDeckLimit: 30, // the minimum number of cards a deck needs
+			upperDeckLimit: 50, // the maximum number of cards a deck can have
+			startingHandSize: 5 // how many hand cards each player draws at the beginning of the game
+		}
 
 		this.replay = {
-			allTypes: this.allTypes,
-			startingHandSize: this.startingHandSize,
-			startingPlayerChooses: this.startingPlayerChooses,
+			config: this.config,
 			players: [{deckList: [], partnerIndex: -1}, {deckList: [], partnerIndex: -1}],
 			inputLog: [],
 			rngLog: []
@@ -87,10 +90,6 @@ export class Game {
 
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.
 	async* begin() {
-		this.replay.allTypes = this.allTypes;
-		this.replay.startingPlayerChooses = this.startingPlayerChooses;
-		this.replay.startingHandSize = this.startingHandSize;
-
 		let currentPlayer = await this.randomPlayer();
 
 		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
@@ -109,7 +108,7 @@ export class Game {
 
 		// RULES: Randomly decide the first player and the second player.
 		// not rules: starting player may be manually chosen.
-		if (this.startingPlayerChooses) {
+		if (this.config.startingPlayerChooses) {
 			let selectionRequest = new requests.choosePlayer.create(currentPlayer, "chooseStartingPlayer");
 			let responses = yield [selectionRequest];
 			if (responses.length != 1) {
@@ -126,7 +125,7 @@ export class Game {
 		let drawHandEvents = [];
 		for (let player of this.players) {
 			let drawnCards = 0;
-			for (let i = 0; i < this.startingHandSize && player.deckZone.cards.length > 0; i++) {
+			for (let i = 0; i < this.config.startingHandSize && player.deckZone.cards.length > 0; i++) {
 				player.handZone.add(player.deckZone.cards[player.deckZone.cards.length - 1], player.handZone.cards.length);
 				if (player.isViewable) {
 					player.handZone.cards[player.handZone.cards.length - 1].hidden = false;
@@ -186,9 +185,7 @@ export class Game {
 
 	setReplay(replay) {
 		this.replay = replay;
-		this.allTypes = replay.allTypes;
-		this.startingPlayerChooses = replay.startingPlayerChooses;
-		this.startingHandSize = replay.startingHandSize;
+		this.config = replay.config;
 		this.isReplaying = true;
 		this.replayPosition = 0;
 		this.replayRngPosition = 0;

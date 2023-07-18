@@ -17,6 +17,8 @@ export class DraftState extends GameState {
 		super();
 		gameState = this;
 
+		game.config.validateCardAmounts = false;
+
 		this.format = basicFormat;
 		this.currentBooster = [];
 		this.takenCards = 0;

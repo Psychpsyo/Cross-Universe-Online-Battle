@@ -8,6 +8,7 @@ import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
 import {previewCard} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
+import * as deckErrors from "/rulesEngine/deckErrors.js";
 
 let builtInDecks = [];
 let currentDeckList = "default";
@@ -225,12 +226,29 @@ export class DeckState extends GameState {
 		try {
 			localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
 		} catch (e) {
-			if (e instanceof cardLoader.UnsupportedCardError) {
-				let cardInfo = await cardLoader.getCardInfo(e.cardId);
-				alert(locale.game.deckSelect.errors.unsupportedInAutomatic.replaceAll("{#CARDNAME}", cardInfo.name));
-			} else {
-				console.error(e, e.stack);
-				alert(locale.game.deckSelect.errors.generic);
+			switch (true) {
+				case e instanceof cardLoader.UnsupportedCardError: {
+					let cardInfo = await cardLoader.getCardInfo(e.cardId);
+					alert(locale.game.deckSelect.errors.unsupportedInAutomatic.replaceAll("{#CARDNAME}", cardInfo.name));
+					break;
+				}
+				case e instanceof deckErrors.DeckSizeError: {
+					if (e.tooMany) {
+						alert(locale.game.deckSelect.errors.tooManyCards.replaceAll("{#DECKLIMIT}", game.config.upperDeckLimit));
+					} else {
+						alert(locale.game.deckSelect.errors.notEnoughCards.replaceAll("{#DECKLIMIT}", game.config.lowerDeckLimit));
+					}
+					break;
+				}
+				case e instanceof deckErrors.CardAmountError: {
+					let cardInfo = await cardLoader.getCardInfo(e.cardId);
+					alert(locale.game.deckSelect.errors.tooManyOfCard.replaceAll("{#CARDNAME}", cardInfo.name));
+					break;
+				}
+				default: {
+					console.error(e, e.stack);
+					alert(locale.game.deckSelect.errors.generic);
+				}
 			}
 			return;
 		}
