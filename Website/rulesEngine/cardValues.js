@@ -57,12 +57,15 @@ export class CardModifier {
 		this.ability = ability;
 	}
 
-	modify(values, isBaseValues) {
+	modify(card, toBaseValues) {
+		let values = toBaseValues? card.baseValues : card.values;
+		ast.setCurrentImplicitCard(card);
 		for (let modification of this.modifications) {
-			if (isBaseValues == modification.toBaseValues) {
+			if (toBaseValues == modification.toBaseValues) {
 				values = modification.modify(values, this.card, this.player, this.ability);
 			}
 		}
+		ast.setCurrentImplicitCard(null);
 		return values;
 	}
 

@@ -40,11 +40,11 @@ class BaseCard {
 	recalculateModifiedValues() {
 		this.baseValues = this.initialValues.clone();
 		for (let modifier of this.modifierStack) {
-			this.baseValues = modifier.modify(this.baseValues, true);
+			this.baseValues = modifier.modify(this, true);
 		}
 		this.values = this.baseValues.clone();
 		for (let modifier of this.modifierStack) {
-			this.values = modifier.modify(this.values, false);
+			this.values = modifier.modify(this, false);
 		}
 	}
 

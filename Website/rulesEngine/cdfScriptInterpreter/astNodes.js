@@ -8,6 +8,9 @@ import {CardModifier} from "../cardValues.js";
 import {Zone} from "../zones.js";
 
 let currentImplicitCard = null;
+export function setCurrentImplicitCard(card) {
+	currentImplicitCard = card;
+}
 let currentImplicitActions = null;
 
 class AstNode {
