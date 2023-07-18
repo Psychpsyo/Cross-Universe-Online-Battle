@@ -53,7 +53,7 @@ export class CastAbility extends Ability {
 		super(id, game, exec, cost, condition);
 		this.after = null;
 		if (after) {
-			this.after = interpreter.buildAST("trigger", id, trigger, game);
+			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
 		this.triggerMet = false;
 	}
@@ -74,7 +74,7 @@ export class DeployAbility extends Ability {
 		super(id, game, exec, cost, condition);
 		this.after = null;
 		if (after) {
-			this.after = interpreter.buildAST("trigger", id, trigger, game);
+			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
 		this.triggerMet = false;
 	}

@@ -10,7 +10,7 @@ export class Zone {
 	}
 
 	// returns the index at which the card was inserted.
-	add(card, index) {
+	add(card, index, clearValues = true) {
 		if (card.zone === this && card.index < index) {
 			index--;
 		}
@@ -25,38 +25,40 @@ export class Zone {
 		}
 		card.zone = this;
 
-		// remove this card from relevant actions
-		if (card.inRetire) {
-			card.inRetire.units.splice(card.inRetire.units.indexOf(card), 1);
-			card.inRetire = null;
-		}
-		card.attackCount = 0;
-		if (this.player.game.currentAttackDeclaration) {
-			if (this.player.game.currentAttackDeclaration.target == card) {
-				this.player.game.currentAttackDeclaration.target = null;
-				card.isAttackTarget = false;
+		if (clearValues) {
+			// remove this card from relevant actions
+			if (card.inRetire) {
+				card.inRetire.units.splice(card.inRetire.units.indexOf(card), 1);
+				card.inRetire = null;
 			}
-			let attackerIndex = this.player.game.currentAttackDeclaration.attackers.indexOf(card);
-			if (attackerIndex != -1) {
-				this.player.game.currentAttackDeclaration.attackers.splice(attackerIndex, 1);
-				card.isAttacking = false;
+			card.attackCount = 0;
+			if (this.player.game.currentAttackDeclaration) {
+				if (this.player.game.currentAttackDeclaration.target == card) {
+					this.player.game.currentAttackDeclaration.target = null;
+					card.isAttackTarget = false;
+				}
+				let attackerIndex = this.player.game.currentAttackDeclaration.attackers.indexOf(card);
+				if (attackerIndex != -1) {
+					this.player.game.currentAttackDeclaration.attackers.splice(attackerIndex, 1);
+					card.isAttacking = false;
+				}
 			}
-		}
-		// All of the card's trigger abilities aren't met anymore.
-		for (let ability of card.values.abilities) {
-			if (ability instanceof TriggerAbility) {
-				ability.triggerMet = false;
+			// All of the card's trigger abilities aren't met anymore.
+			for (let ability of card.values.abilities) {
+				if (ability instanceof TriggerAbility) {
+					ability.triggerMet = false;
+				}
 			}
+			// Effects that applied to the card before stop applying.
+			card.modifierStack = [];
+			// equipments get unequipped
+			if (card.equippedTo) {
+				card.equippedTo.equipments.splice(card.equippedTo.equipments.indexOf(card), 1);
+			}
+			card.equipments = [];
+			// Snapshots pointing to this card become invalid. (The card stops being tracked as that specific instance)
+			card.invalidateSnapshots();
 		}
-		// Effects that applied to the card before stop applying.
-		card.modifierStack = [];
-		// equipments get unequipped
-		if (card.equippedTo) {
-			card.equippedTo.equipments.splice(card.equippedTo.equipments.indexOf(card), 1);
-		}
-		card.equipments = [];
-		// Snapshots pointing to this card become invalid. (The card stops being tracked as that specific instance)
-		card.invalidateSnapshots();
 		return index;
 	}
 
@@ -110,7 +112,7 @@ export class FieldZone extends Zone {
 	}
 
 	// returns the index at which the card was inserted.
-	add(card, index) {
+	add(card, index, clearValues = true) {
 		if (this.cards[index] !== null) {
 			return this.cards[index] === card? index : -1;
 		}
@@ -124,9 +126,11 @@ export class FieldZone extends Zone {
 		if (card.zone && card.zone.cards.includes(card)) {
 			card.zone.remove(card);
 		}
-		// If the card came from outside the field, it stops being tracked as itself.
-		if (!(card.zone instanceof FieldZone)) {
-			card.invalidateSnapshots();
+		if (clearValues) {
+			// If the card came from outside the field, it stops being tracked as itself.
+			if (!(card.zone instanceof FieldZone)) {
+				card.invalidateSnapshots();
+			}
 		}
 		this.cards[index] = card;
 		card.zone = this;

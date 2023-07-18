@@ -163,8 +163,7 @@ export class SnapshotCard extends BaseCard {
 			this.permanentCardRef.zone.remove(this.permanentCardRef);
 			return;
 		}
-		this.zone.add(this.permanentCardRef, this.index);
-		this.permanentCardRef.invalidatedSnapshotLists.pop();
+		this.zone.add(this.permanentCardRef, this.index, false);
 		if (!this.cardRef) {
 			this.permanentCardRef.undoInvalidateSnapshots();
 		}

@@ -202,7 +202,7 @@ export class ManualController extends InteractionController {
 
 		let source = card.zone;
 		let sourceIndex = card.index;
-		let insertedIndex = zone.add(card, index);
+		let insertedIndex = zone.add(card, index, false);
 		if (card.zone === zone) {
 			if (source) {
 				gameUI.removeCard(source, sourceIndex);
@@ -263,7 +263,7 @@ export class ManualController extends InteractionController {
 			socket.send("[drawCard]");
 		}
 		let card = player.deckZone.cards[player.deckZone.cards.length - 1];
-		let insertedIndex = player.handZone.add(card, player.handZone.cards.length);
+		let insertedIndex = player.handZone.add(card, player.handZone.cards.length, false);
 		if (player == localPlayer || this.opponentHandShown) {
 			card.hidden = false;
 		}
@@ -327,7 +327,7 @@ export class ManualController extends InteractionController {
 		}
 		let card = deckZone.cards[deckZone.cards.length - 1];
 		let presentedZone = this.playerInfos[player.index].presentedZone;
-		let insertedIndex = presentedZone.add(card, presentedZone.cards.length);
+		let insertedIndex = presentedZone.add(card, presentedZone.cards.length, false);
 		if (player == localPlayer) {
 			card.hidden = false;
 		}
@@ -340,7 +340,7 @@ export class ManualController extends InteractionController {
 		}
 		while (zone.cards.length > 0) {
 			zone.cards[0].hidden = true;
-			zone.player.deckZone.add(zone.cards[0], 0);
+			zone.player.deckZone.add(zone.cards[0], 0, false);
 			gameUI.removeCard(zone, 0);
 			gameUI.insertCard(zone.player.deckZone, 0);
 		}

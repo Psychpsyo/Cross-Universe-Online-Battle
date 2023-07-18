@@ -6,4 +6,4 @@ types: Wind, Katana
 o: static
 applyTo: equippedUnit
 condition: thisCard.zone = field
-modifier: {attack += 300, attack += 100 if types = Wind}
+modifier: {attack += 300, attack += 100 if types = Samurai}
