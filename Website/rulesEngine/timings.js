@@ -16,6 +16,7 @@ export class Timing {
 		}
 		this.costCompletions = [];
 		this.successful = false;
+		this.followupTimings = [];
 	}
 
 	// returns whether or not any substitutions were handled
@@ -96,7 +97,7 @@ export class Timing {
 		this.game.currentPhase().lastActionList = this.actions;
 		let events = [];
 		for (let action of this.actions) {
-			let event = yield* action.run();
+			let event = await (yield* action.run());
 			if (event) {
 				events.push(event);
 			}
@@ -131,6 +132,8 @@ export class Timing {
 				}
 			}
 		}
+
+		this.followupTimings = await (yield* runFollowupTimings(this.block, this.game));
 	}
 
 	async* undo() {
@@ -152,6 +155,30 @@ export class Timing {
 	valueOf() {
 		return this.index;
 	}
+}
+
+export async function* runFollowupTimings(block, game) {
+	let timings = [];
+	let interjected = getFollowupTiming(block, game);
+	while (interjected) {
+		timings.push(interjected);
+		await (yield* interjected.run());
+		interjected = getFollowupTiming(block, game);
+	}
+	return timings;
+}
+function getFollowupTiming(block, game) {
+	let invalidEquipments = [];
+	for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
+		if (equipment && !equipment.equipableTo.evalFull(equipment, equipment.zone.player, null).includes(equipment.equippedTo)) {
+			invalidEquipments.push(equipment);
+		}
+	}
+	if (invalidEquipments.length > 0) {
+		let discards = invalidEquipments.map(equipment => new actions.Discard(equipment));
+		return new Timing(game, discards.concat(discards.map(discard => new actions.Destroy(discard))), block);
+	}
+	return null;
 }
 
 function* checkGameOver(game) {

@@ -113,9 +113,7 @@ export class StackPhase extends Phase {
 		for (let card of player.getActiveCards()) {
 			let cardAbilities = card.values.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
-				console.log(cardAbilities[i]);
 				if (cardAbilities[i] instanceof abilities.TriggerAbility && cardAbilities[i].canActivate(card, player)) {
-					console.log("possible!");
 					eligibleAbilities.push({card: card, index: i});
 				}
 			}
@@ -151,13 +149,13 @@ export class ManaSupplyPhase extends Phase {
 		}
 		if (reduceManaActions.length > 0) {
 			this.timings.push(new Timing(this.turn.game, reduceManaActions, null));
-			yield* this.timings[this.timings.length - 1].run();
+			await (yield* this.runTiming());
 		}
 
 		// RULES: Next, the active player gains 5 mana.
 		let turnPlayer = this.turn.player;
 		this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5)], null));
-		yield* this.timings[this.timings.length - 1].run();
+		await (yield* this.runTiming());
 
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
 		let partnerLevel = turnPlayer.partnerZone.cards[0].values.level;
@@ -170,13 +168,13 @@ export class ManaSupplyPhase extends Phase {
 			}
 		} else {
 			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, -partnerLevel)], null));
-			yield* this.timings[this.timings.length - 1].run();
+			await (yield* this.runTiming());
 		}
 
 		// RULES: If they still have more than 5 mana, it will again be reduced to 5.
 		if (turnPlayer.mana > 5) {
 			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5 - turnPlayer.mana)], null));
-			yield* this.timings[this.timings.length - 1].run();
+			await (yield* this.runTiming());
 		}
 
 		// RULES: At the end of the mana supply phase, any player with more than 8 hand cards discards down to 8.
@@ -189,8 +187,13 @@ export class ManaSupplyPhase extends Phase {
 		if (cardChoiceRequests.length > 0) {
 			let chosenCards = (yield cardChoiceRequests).filter(choice => choice !== undefined).map((choice, i) => requests.chooseCards.validate(choice.value, cardChoiceRequests[i]));
 			this.timings.push(new Timing(this.turn.game, chosenCards.flat().map(card => new actions.Discard(card)), null));
-			yield* this.timings[this.timings.length - 1].run();
+			await (yield* this.runTiming());
 		}
+	}
+
+	async* runTiming() {
+		await (yield* this.timings[this.timings.length - 1].run());
+		this.timings.push(...this.timings[this.timings.length - 1].followupTimings);
 	}
 
 	getTimings() {
@@ -334,8 +337,10 @@ export class EndPhase extends StackPhase {
 
 			let timings = this.turn.endOfTurnTimings;
 			this.turn.endOfTurnTimings = []; // might be filled with new timings by what happens
-			for (let timing of timings) {
-				yield* timing.run();
+			for (let i = 0; i < timings.length; i++) {
+				await (yield* timings[i].run());
+				timings.splice(i + 1, 0, ...timings[i].followupTimings);
+				i += additional.length;
 			}
 		} while (this.triggerAbilitiesMet());
 	}
