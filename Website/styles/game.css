@@ -259,11 +259,13 @@ dialog #cardDetails {
 
 #playerGrids {
 	display: flex;
-	align-items: center;
-
 	flex-direction: column;
-	height: 100%;
+	align-items: center;
 	justify-content: space-between;
+
+	height: 100%;
+	aspect-ratio: 1308 / 1024;
+	margin: auto;
 }
 
 .playerGrid {

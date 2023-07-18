@@ -268,3 +268,12 @@ export function createCardValueChangedEvent(card, valueName, isBaseValue) {
 		"isBaseValue": isBaseValue
 	}
 }
+
+export function createCardEquippedEvent(equipment, target) {
+	return {
+		"nature": "event",
+		"type": "cardEquipped",
+		"equipment": equipment,
+		"target": target
+	}
+}

@@ -549,8 +549,10 @@ export class EquipCard extends Action {
 	* run() {
 		this.equipment = this.equipment.snapshot();
 		this.target = this.target.snapshot();
+		let event = events.createCardEquippedEvent(this.equipment, this.target);
 		this.equipment.cardRef.equippedTo = this.target.cardRef;
 		this.target.cardRef.equipments.push(this.equipment.cardRef);
+		return event;
 	}
 
 	undo() {

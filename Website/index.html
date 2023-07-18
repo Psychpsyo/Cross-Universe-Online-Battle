@@ -11,6 +11,7 @@
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="entryPage.css">
 		<link rel="stylesheet" href="styles/game.css">
+		<link rel="stylesheet" href="styles/fieldOverlay.css">
 		<link rel="stylesheet" href="styles/manualGame.css">
 		<link rel="stylesheet" href="styles/automaticGame.css">
 		<link rel="stylesheet" href="styles/drafts.css">
@@ -403,6 +404,8 @@
 									<div id="opponentTurnDisplayLabel" class="turnDisplayLabel hidden">Opponent's Turn</div>
 								</div>
 							</div>
+
+							<svg id="fieldSvg" viewBox="0 -512 1308 1024" role="img"></svg>
 
 							<!--cards held up by players-->
 							<div id="presentedCards0" class="presentedCards manualOnly"></div>
