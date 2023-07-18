@@ -2,7 +2,6 @@ import {cardActions} from "/modules/cardActions.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
-import {FieldZone} from "/rulesEngine/zones.js";
 import {getCardImage, getCardImageFromID} from "/modules/cardLoader.js";
 import {Card} from "/rulesEngine/card.js";
 
@@ -368,12 +367,13 @@ function setCardDragEvent(element, uiCardSlot) {
 		e.preventDefault();
 	});
 	element.addEventListener("pointerdown", function(e) {
-		e.target.releasePointerCapture(e.pointerId);
+		element.setPointerCapture(e.pointerId);
 	});
 	element.addEventListener("pointermove", function(e) {
-		if (e.buttons == 0) {
+		if (e.buttons == 0 || !element.hasPointerCapture(e.pointerId)) {
 			return;
 		}
+		e.target.releasePointerCapture(e.pointerId);
 		e.preventDefault();
 		if (grabCard(localPlayer, uiCardSlot.zone, uiCardSlot.index) || uiCardSlot.zone == gameState.controller.tokenZone) {
 			if (uiCardSlot instanceof CardSelectorSlot) {
