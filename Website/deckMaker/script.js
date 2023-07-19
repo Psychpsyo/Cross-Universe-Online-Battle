@@ -352,7 +352,10 @@ document.getElementById("cardInfoIdea").addEventListener("click", function() {
 
 //hotkeys
 document.addEventListener("keyup", function(e) {
-	if (document.activeElement.tagName.toLowerCase() == "input" || document.activeElement.tagName.toLowerCase() == "textarea") {
+	if (document.activeElement.tagName.toLowerCase() == "input" ||
+		document.activeElement.tagName.toLowerCase() == "textarea" ||
+		e.metaKey || e.shiftKey // TODO: shift is a workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1557094 since my main concern is Win+Shift+S
+	) {
 		return;
 	}
 

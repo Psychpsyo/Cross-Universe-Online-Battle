@@ -141,7 +141,7 @@ enableScriptingToggle.addEventListener("change", function() {
 
 // effect editor
 if (!effectEditor.isContentEditable) {
-	// Workarounds for browsers that don't yet support contenteditable="plaintext-only" (Firefox)
+	// TODO: Workarounds for browsers that don't yet support contenteditable="plaintext-only" (Firefox)
 	effectEditor.contentEditable = "true";
 	function typeNode(node) {
 		let selection = window.getSelection();

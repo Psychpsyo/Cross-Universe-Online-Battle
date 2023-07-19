@@ -16,7 +16,7 @@ async function hotkeyToString(hotkey) {
 	}
 	let keyName = locale.settings.hotkeys.keys[hotkey.keyCode];
 	if ("keyboard" in navigator) {
-		// Keyboard API works on Chrome already, but not in Firefox. :(
+		// TODO: Keyboard API works on Chrome already, but not in Firefox. :(
 		// My own system is used in addition to it since, even on Chrome, the API has far from all the keys.
 		keyName = keyName ?? (await navigator.keyboard.getLayoutMap()).get(hotkey.keyCode);
 	}

@@ -109,7 +109,6 @@ export function init() {
 	});
 	document.getElementById("deckSearchBtn").addEventListener("click", function() {
 		gameUI.openCardSelect(localPlayer.deckZone);
-		document.getElementById("deckHoverBtns1").style.display = "none"; //workaround for bug in Firefox (at least) where mouseleave does not fire when element is covered by another. (in this case the card selector)
 	});
 
 	game.players.forEach(player => {
