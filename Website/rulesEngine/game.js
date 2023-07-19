@@ -74,6 +74,7 @@ export class Game {
 			validateCardAmounts: true, // whether or not deck card counts should be validated
 			lowerDeckLimit: 30, // the minimum number of cards a deck needs
 			upperDeckLimit: 50, // the maximum number of cards a deck can have
+			enforceRank: false, // whether or not a player's rank should be enforced as a maximum card level during deck verification
 			startingHandSize: 5 // how many hand cards each player draws at the beginning of the game
 		}
 

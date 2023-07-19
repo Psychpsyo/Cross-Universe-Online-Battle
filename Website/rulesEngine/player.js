@@ -8,6 +8,7 @@ export class Player {
 	constructor(game) {
 		this.game = game;
 		this.index = game.players.length;
+		this.rank = 10; // In the novel rank 10 is the maximum even though this disallows Level 11 & 12 cards
 		this.mana = 0;
 		this.life = 1000;
 		this.lost = false;
@@ -51,6 +52,13 @@ export class Player {
 			for (const cardId of Object.keys(exampleCards)) {
 				if (exampleCards[cardId].deckLimit < cardAmounts[cardId]) {
 					throw new deckErrors.CardAmountError(cardId);
+				}
+			}
+		}
+		if (this.game.config.enforceRank) {
+			for (const card of cardList) {
+				if (card.initialValues.level > this.rank) {
+					throw new deckErrors.InsufficientRankError(card.cardId);
 				}
 			}
 		}
