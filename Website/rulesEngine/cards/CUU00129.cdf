@@ -8,4 +8,4 @@ defense: 0
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field
-modifier: {attack += COUNT([from you.discard where types = Fire]) * 50, defense += COUNT([from you.discard where types = Fire]) * 50}
+modifier: {attack, defense += COUNT([from you.discard where types = Fire]) * 50}

@@ -3,6 +3,23 @@ import * as requests from "./inputRequests.js";
 import * as zones from "./zones.js";
 import {Timing} from "./timings.js";
 
+// helper functions
+function getAvailableZoneSlots(zone) {
+	let slots = [];
+	for (let i = 0; i < zone.cards.length; i++) {
+		let slotCard = zone.get(i);
+		if (slotCard === null) {
+			slots.push(i);
+		}
+	}
+	return slots;
+}
+function* queryZoneSlot(player, zone) {
+	let zoneSlotRequest = new requests.chooseZoneSlot.create(player, zone, getAvailableZoneSlots(zone));
+	let zoneSlotResponse = (yield [zoneSlotRequest])[0];
+	return requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
+}
+
 // Base class for any action in the game.
 export class Action {
 	constructor() {
@@ -127,10 +144,7 @@ export class Place extends Action {
 	}
 
 	* run() {
-		let zoneSlotRequest = new requests.chooseZoneSlot.create(this.player, this.zone, this.getAvailableZoneSlots());
-		let zoneSlotResponse = (yield [zoneSlotRequest])[0];
-		this.targetIndex = requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
-
+		this.targetIndex = yield* queryZoneSlot(this.player, this.zone);
 		this.card = this.card.snapshot();
 		this.card.cardRef.hidden = false;
 		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex);
@@ -147,18 +161,7 @@ export class Place extends Action {
 	}
 
 	isImpossible(timing) {
-		return this.getAvailableZoneSlots().length < timing.actions.filter(action => action instanceof Place).length;
-	}
-
-	getAvailableZoneSlots() {
-		let slots = [];
-		for (let i = 0; i < this.zone.cards.length; i++) {
-			let slotCard = this.zone.get(i);
-			if (slotCard === null || slotCard === this.card) {
-				slots.push(i);
-			}
-		}
-		return slots;
+		return getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Place).length;
 	}
 }
 
@@ -246,6 +249,50 @@ export class Cast extends Action {
 	isImpossible(timing) {
 		let slotCard = this.zone.get(this.zoneIndex);
 		return slotCard != null && slotCard != this.spell;
+	}
+}
+
+export class Move extends Action {
+	constructor(player, card, zone, targetIndex) {
+		super();
+		this.player = player;
+		this.card = card;
+		this.zone = zone;
+		this.targetIndex = targetIndex;
+	}
+
+	* run() {
+		if (this.targetIndex === null) {
+			this.targetIndex = yield* queryZoneSlot(this.player, this.zone);
+		} else if (this.targetIndex === -1) {
+			this.targetIndex = this.zone.cards.length;
+		}
+		let cardRef = this.card;
+		this.card = this.card.snapshot();
+		this.card.cardRef.hidden = this.zone.type == "deck" || (!this.zone.player.isViewable && this.zone.type == "hand");
+		let cardMovedEvent = events.createCardMovedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex, this.card);
+		this.zone.add(this.card.cardRef, this.targetIndex);
+		this.card.cardRef = cardRef;
+		cardRef.snapshots.push(this.card);
+		return cardMovedEvent;
+	}
+
+	undo() {
+		let event = events.createUndoCardsMovedEvent([
+			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
+		]);
+		this.card.restore();
+		return event;
+	}
+
+	isImpossible(timing) {
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length) {
+			return true;
+		}
+		if (this.card.zone?.type == "partner") {
+			return true;
+		}
+		return false;
 	}
 }
 

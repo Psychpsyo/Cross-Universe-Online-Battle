@@ -7,4 +7,4 @@ o: cast
 cost:
 EXILE(SELECT(1, [from you.discard where types = Electric & cardType = unit]))
 exec:
-APPLY(SELECT(1, [from field where level < 8]), {attack /= 2, defense /= 2}, endOfTurn)
+APPLY(SELECT(1, [from field where level < 8]), {attack, defense /= 2}, endOfTurn)

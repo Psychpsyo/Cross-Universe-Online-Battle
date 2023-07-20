@@ -348,7 +348,7 @@ export class EndPhase extends StackPhase {
 			for (let i = 0; i < timings.length; i++) {
 				await (yield* timings[i].run());
 				timings.splice(i + 1, 0, ...timings[i].followupTimings);
-				i += additional.length;
+				i += timings[i].followupTimings.length;
 			}
 		} while (this.triggerAbilitiesMet());
 	}

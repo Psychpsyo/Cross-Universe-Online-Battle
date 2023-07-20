@@ -207,6 +207,19 @@ export function createCardCastEvent(player, fromZone, fromIndex, toZone, toIndex
 	}
 }
 
+export function createCardMovedEvent(player, fromZone, fromIndex, toZone, toIndex, card) {
+	return {
+		"nature": "event",
+		"type": "cardMoved",
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"toIndex": toIndex,
+		"card": card
+	}
+}
+
 export function createAttackDeclarationEstablishedEvent(player, targetZone, targetIndex) {
 	return {
 		"nature": "event",

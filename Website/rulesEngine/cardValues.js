@@ -59,13 +59,13 @@ export class CardModifier {
 
 	modify(card, toBaseValues) {
 		let values = toBaseValues? card.baseValues : card.values;
-		ast.setCurrentImplicitCard(card);
+		ast.setImplicitCard(card);
 		for (let modification of this.modifications) {
-			if (toBaseValues === modification.toBaseValues && (modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability))) {
-				values = modification.modify(values, this.card, this.player, this.ability);
+			if (modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)) {
+				values = modification.modify(values, this.card, this.player, this.ability, toBaseValues);
 			}
 		}
-		ast.setCurrentImplicitCard(null);
+		ast.clearImplicitCard();
 		return values;
 	}
 
@@ -89,7 +89,7 @@ export class ValueModification {
 	constructor(condition) {
 		this.condition = condition;
 	}
-	modify(values, card, player, ability) {
+	modify(values, card, player, ability, toBaseValues) {
 		return values;
 	}
 
@@ -103,18 +103,23 @@ export class ValueModification {
 }
 
 export class ValueSetModification extends ValueModification {
-	constructor(value, newValue, toBaseValues, condition) {
+	constructor(values, newValue, toBaseValues, condition) {
 		super(condition);
-		this.value = value;
+		this.values = values;
 		this.newValue = newValue;
 		this.toBaseValues = toBaseValues;
 	}
 
-	modify(values, card, player, ability) {
-		if (["level", "attack", "defense"].includes(this.value)) {
-			values[this.value] = this.newValue.evalFull(card, player, ability)[0];
-		} else {
-			values[this.value] = this.newValue.evalFull(card, player, ability);
+	modify(values, card, player, ability, toBaseValues) {
+		let newValue = this.newValue.evalFull(card, player, ability);
+		for (let i = 0; i < this.values.length; i++) {
+			if (toBaseValues === this.toBaseValues[i]) {
+				if (["level", "attack", "defense"].includes(this.values[i])) {
+					values[this.values[i]] = newValue[0];
+				} else {
+					values[this.values[i]] = newValue;
+				}
+			}
 		}
 		return values;
 	}
@@ -124,7 +129,7 @@ export class ValueSetModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new ValueSetModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new ValueSetModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -133,17 +138,23 @@ export class ValueSetModification extends ValueModification {
 }
 
 export class ValueAppendModification extends ValueModification {
-	constructor(value, newValues, toBaseValues, condition) {
+	constructor(values, newValues, toBaseValues, condition) {
 		super(condition);
-		this.value = value;
+		this.values = values;
 		this.newValues = newValues;
 		this.toBaseValues = toBaseValues;
 	}
 
-	modify(values, card, player, ability) {
-		for (let newValue of this.newValues.evalFull(card, player, ability)) {
-			if (!values[this.value].includes(newValue)) {
-				values[this.value].push(newValue);
+	modify(values, card, player, ability, toBaseValues) {
+		let newValues = this.newValues.evalFull(card, player, ability);
+		for (let i = 0; i < this.values.length; i++) {
+			if (toBaseValues === this.toBaseValues[i]) {
+				for (let newValue of newValues) {
+					if (!values[this.values[i]].includes(newValue)) {
+						values[this.values[i]].push(newValue);
+					}
+				}
+
 			}
 		}
 		return values;
@@ -154,7 +165,7 @@ export class ValueAppendModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new ValueAppendModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -163,15 +174,20 @@ export class ValueAppendModification extends ValueModification {
 }
 
 export class NumericChangeModification extends ValueModification {
-	constructor(value, amount, toBaseValues, condition) {
+	constructor(values, amount, toBaseValues, condition) {
 		super(condition);
-		this.value = value;
+		this.values = values;
 		this.amount = amount;
 		this.toBaseValues = toBaseValues;
 	}
 
-	modify(values, card, player, ability) {
-		values[this.value] = Math.max(0, values[this.value] + this.amount.evalFull(card, player, ability)[0]);
+	modify(values, card, player, ability, toBaseValues) {
+		let amount = this.amount.evalFull(card, player, ability)[0];
+		for (let i = 0; i < this.values.length; i++) {
+			if (toBaseValues === this.toBaseValues[i]) {
+				values[this.values[i]] = Math.max(0, values[this.values[i]] + amount);
+			}
+		}
 		return values;
 	}
 
@@ -180,7 +196,7 @@ export class NumericChangeModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new NumericChangeModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new NumericChangeModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -189,15 +205,20 @@ export class NumericChangeModification extends ValueModification {
 }
 
 export class NumericDivideModification extends ValueModification {
-	constructor(value, byAmount, toBaseValues, condition) {
+	constructor(values, byAmount, toBaseValues, condition) {
 		super(condition);
-		this.value = value;
+		this.values = values;
 		this.byAmount = byAmount;
 		this.toBaseValues = toBaseValues;
 	}
 
-	modify(values, card, player, ability) {
-		values[this.value] = Math.ceil(values[this.value] / this.byAmount.evalFull(card, player, ability)[0]);
+	modify(values, card, player, ability, toBaseValues) {
+		let byAmount = this.byAmount.evalFull(card, player, ability)[0];
+		for (let i = 0; i < this.values.length; i++) {
+			if (toBaseValues === this.toBaseValues[i]) {
+				values[this.values[i]] = Math.ceil(values[this.values[i]] / byAmount);
+			}
+		}
 		return values;
 	}
 
@@ -206,7 +227,7 @@ export class NumericDivideModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new NumericDivideModification(this.value, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new NumericDivideModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
 
 	hasAllTargets(card, player, ability) {
@@ -215,17 +236,21 @@ export class NumericDivideModification extends ValueModification {
 }
 
 export class ValueSwapModification extends ValueModification {
-	constructor(valueA, valueB, toBaseValues, condition) {
+	constructor(leftValues, rightValues, toBaseValues, condition) {
 		super(condition);
-		this.valueA = valueA;
-		this.valueB = valueB;
+		this.leftValues = leftValues;
+		this.rightValues = rightValues;
 		this.toBaseValues = toBaseValues;
 	}
 
-	modify(values) {
-		let temp = values[this.valueA];
-		values[this.valueA] = values[this.valueB];
-		values[this.valueB] = temp;
+	modify(values, card, player, ability, toBaseValues) {
+		for (let i = 0; i < this.leftValues.length; i++) {
+			if (toBaseValues === this.toBaseValues[i]) {
+				let temp = values[this.leftValues[i]];
+				values[this.leftValues[i]] = values[this.rightValues[i]];
+				values[this.rightValues[i]] = temp;
+			}
+		}
 		return values;
 	}
 }

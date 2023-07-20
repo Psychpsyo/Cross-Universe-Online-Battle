@@ -8,4 +8,4 @@ defense: 0
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field
-modifier: {attack += COUNT([from you.field where self != thisCard & name = CUU00121]) * 100, defense += COUNT([from you.field where self != thisCard & name = CUU00121]) * 100}
+modifier: {attack, defense += COUNT([from you.field where self != thisCard & name = CUU00121]) * 100}

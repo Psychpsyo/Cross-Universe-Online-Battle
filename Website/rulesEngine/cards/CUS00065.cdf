@@ -7,4 +7,4 @@ equipableTo: types = Spirit & zone = you.unitZone
 o: static
 applyTo: equippedUnit
 condition: thisCard.zone = field
-modifier: {attack += 100, defense += 100, level += 2}
+modifier: {attack, defense += 100, level += 2}

@@ -11,6 +11,7 @@ import * as generalUI from "/modules/generalUI.js";
 import * as actions from "/rulesEngine/actions.js";
 import * as blocks from "/rulesEngine/blocks.js";
 import * as cardLoader from "/modules/cardLoader.js";
+import * as zones from "/rulesEngine/zones.js";
 
 export class AutomaticController extends InteractionController {
 	constructor() {
@@ -294,11 +295,11 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "cardDiscarded":
-			case "cardDestroyed":
-			case "cardExiled": {
+			case "cardExiled":
+			case "cardMoved": {
 				gameUI.removeCard(event.fromZone, event.fromIndex);
-				if (!event.card.values.cardTypes.includes("token")) {
-					gameUI.insertCard(event.toZone, event.toZone.cards.length - 1);
+				if (!event.card.values.cardTypes.includes("token") || event.toZone instanceof zones.FieldZone) {
+					gameUI.insertCard(event.toZone, event.card.cardRef.index);
 				}
 				return this.gameSleep(.5);
 			}
