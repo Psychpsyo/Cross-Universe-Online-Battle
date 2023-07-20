@@ -10,18 +10,18 @@
 
 #fieldSvg .equipLine {
 	stroke-width: 10;
-	stroke: #fff8;
+	stroke: #0005;
 	stroke-linecap: round;
 	filter: blur(.2vh);
 }
 
 #fieldSvg .equipDashes {
-	stroke-width: 5;
+	stroke-width: 8;
 	stroke: white;
 	stroke-linecap: round;
-	stroke-dasharray: .1;
-	animation: dashMovement 10s infinite linear;
-	filter: blur(.3vh);
+	stroke-dasharray: 20 25;
+	animation: dashMovement 2s infinite linear;
+	filter: blur(.2vh);
 }
 
 @keyframes dashMovement {
@@ -29,6 +29,6 @@
 		stroke-dashoffset: 0;
 	}
 	to {
-		stroke-dashoffset: -1;
+		stroke-dashoffset: -90;
 	}
 }

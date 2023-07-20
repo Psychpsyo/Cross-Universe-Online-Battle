@@ -1,5 +1,7 @@
 // This file handles displaying lines on the field (for equipable items and stuff) by modifying an SVG element.
 
+import {FieldZone} from "/rulesEngine/zones.js";
+
 // the field graphic is 70vh tall so card slots are positioned relative to that.
 let vh = 1024 / 70;
 let cardXdist = 84.75 * vh / 7; // all 7 columns of card slots together are 84.75vh wide.
@@ -10,7 +12,7 @@ let yOuter = 512 - cardYdist / 2; // the very top and bottom of the SVG are Y = 
 // slotX and slotY range from -2 to 2. Providing slotY = 0 will return a point in the vertical center of the field.
 function getSlotXY(slotX, slotY) {
 	let xPos = xMiddle + slotX * cardXdist;
-	let yPos = yOuter * Math.sign(slotY) - (2 - slotY) * cardYdist;
+	let yPos = yOuter * Math.sign(slotY) - (2 * Math.sign(slotY) - slotY) * cardYdist;
 	return [xPos, yPos];
 }
 function getCardXY(card) {
@@ -35,8 +37,9 @@ function getCardXY(card) {
 			break;
 		}
 	}
-	if (card.slot.player !== localPlayer) {
+	if (card.zone.player !== localPlayer) {
 		slotX *= -1;
+		slotY *= -1;
 	}
 	return [slotX, slotY];
 }
@@ -45,6 +48,9 @@ function getCardSlotXY(card) {
 }
 
 export function equipLine(fromCard, toCard) {
+	if (!(fromCard.zone instanceof FieldZone && toCard.zone instanceof FieldZone)) {
+		return null;
+	}
 	let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
 	let start = getCardSlotXY(fromCard);
 	let end = getCardSlotXY(toCard);
@@ -56,7 +62,6 @@ export function equipLine(fromCard, toCard) {
 	let dashes = line.cloneNode();
 	line.classList.add("equipLine");
 	dashes.classList.add("equipDashes");
-	dashes.setAttribute("pathLength", 1);
 
 	let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
 	g.appendChild(line);

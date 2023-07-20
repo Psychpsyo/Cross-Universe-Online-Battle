@@ -4,6 +4,7 @@ import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 import {getCardImage, getCardImageFromID} from "/modules/cardLoader.js";
 import {Card} from "/rulesEngine/card.js";
+import * as fieldOverlay from "/modules/fieldOverlay.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -436,6 +437,7 @@ class FieldCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 		this.fieldSlot = document.getElementById("field" + fieldSlotIndexFromZone(zone, index));
+		this.equipLines = [];
 
 		setCardDragEvent(this.fieldSlot, this);
 		this.fieldSlot.addEventListener("click", function(e) {
@@ -451,6 +453,24 @@ class FieldCardSlot extends UiCardSlot {
 			e.stopPropagation();
 			dropCard(localPlayer, zone, index);
 		});
+
+		// equipment lines
+		this.fieldSlot.addEventListener("pointerenter", function() {
+			let card = this.zone.get(this.index);
+			if (card) {
+				if (card.equippedTo) {
+					this.equipLines.push(fieldOverlay.equipLine(card, card.equippedTo));
+				}
+				for (const equipment of card.equipments) {
+					this.equipLines.push(fieldOverlay.equipLine(equipment, card));
+				}
+			}
+		}.bind(this));
+		this.fieldSlot.addEventListener("pointerleave", function() {
+			while (this.equipLines.length > 0) {
+				this.equipLines.pop()?.remove();
+			}
+		}.bind(this));
 	}
 
 	makeDragSource(player) {
