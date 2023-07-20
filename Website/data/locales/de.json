@@ -47,7 +47,7 @@
 			"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
 
 			"deckListDefault": "Default",
-			"deckListLegacy": "Legacy",
+			"deckListLegacy": "Legacy (alt)",
 			"deckListLoadSelected": "Gewähltes Deck laden",
 			"deckListCardAmount": "{#CARDS} Karten",
 

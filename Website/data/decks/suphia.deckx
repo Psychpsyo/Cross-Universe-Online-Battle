@@ -8,6 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
+		"en": "This deck aims to summon level 7 and 10 units by reducing the mana required with the effect of Sylpheed.\nThe basic idea is to use Spring's First Storm and Unit Select to get units into your hand and spells into your discard pile.\n① Summon Storm Caller to use Spring's First Storm repeatedly.\n② Summon Sylpheed with Spring's First Storm or Blood Contract in your opponent's end phase.\n③ Summon level 7 units by reducing the mana cost with Sylpheed's effect.",
 		"ja": "《疾風のシルフィード》の効果で魔力軽減を狙い、レベル7、レベル10の召喚を狙うデッキ\n《春一番》《ユニットセレクト》《血の契約》でユニットを手札に加え、《春風の天使》の効果で召喚を狙いつつ、捨て山にスペルト貯めるのが基本ムーブ\n①《嵐を呼ぶ者》を召喚し、《春一番》を連打\n②相手のエンドステップに《春一番》か《血の契約》で《疾風のシルフィード》を召喚\n③《疾風のシルフィード》の効果で魔力を軽減し、レベル7を召喚"
 	},
 	"suggestedPartner": "U00127",

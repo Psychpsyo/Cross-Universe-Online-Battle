@@ -8,7 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
-		"en": "This deck summons high-level dragons by reducing their mana cost with the effect of 'Dragongod Priestess'.\nBy discarding 'Treasure Unearthed' or 'Dropped from Heaven' you can do so without impacting the number of cards in your hand.\nThe deck also has multiple Electric-type cards to cover the costs of 'Lightning Dragon'.",
+		"en": "This deck summons high-level dragons by reducing their mana cost with the effect of Dragongod Priestess.\nBy discarding Treasure Unearthed or Dropped from Heaven you can do so without impacting the number of cards in your hand.\nThe deck also has multiple Electric-type cards to cover the costs of Lightning Dragon.",
 		"ja": "《神龍の巫女》の効果で魔力軽減して高レベルドラゴンを召喚するデッキ。\n効果のコストに《財宝の発掘》や《天の落としもの》を捨てれば手札を減らさずに済む。\n《ライトニング・ドラゴン》のコストのため、汎用性の高いタイプ「雷」カードを複数採用してるのもポイント。"
 	},
 	"suggestedPartner": "U00132",

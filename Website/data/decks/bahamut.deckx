@@ -8,7 +8,8 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
-		"ja": "序盤は、《トーテム・ワーム》や《ライトニング・ラット》等で場を持たせ、《神の選別》で相手ユニットを処理していく。\n最終ムーブは、《神のサイコロ》を使い《海統龍 バハムート》や《ディーペスト・ホエール》の召喚を狙うとよい。"
+		"en": "Early on you can survive by summoning the weaker units of the deck and using Divine Selection to handle your opponent's units.\nThen aim to use Fate's Dice to summon Bahamut, the Leviathan or Deepest Whale.",
+		"ja": "序盤は、《トーテム・ワーム》や《ライトニング・ラット》等で場を持たせ、《神の選別》で相手ユニットを処理していく。\n最終ムーブは、《運命のサイコロ》を使い《海統龍 バハムート》や《ディーペスト・ホエール》の召喚を狙うとよい。"
 	},
 	"suggestedPartner": "U00128",
 	"cards": [

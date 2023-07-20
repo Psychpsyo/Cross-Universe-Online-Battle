@@ -8,6 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
+		"en": "This deck mainly fights with Totem Worm and aims to summon Myth-type units.\nThe end goal is to summon Deepest Whale to crush the opponent units.\n\nThe basic moves are:\n① Search for Deepest Whale with Storm Caller.\n② Discard Rufurok and Deepest Whale.\n③ Summon Totem Worm with Rising from the Deep.",
 		"ja": "《トーテム・ワーム》を主軸に戦い、神話ユニットの召喚を狙うデッキ。\n最終目標は、《ディーペスト・ホエール》を召喚し相手ユニットを圧殺します。\n\n基本的な動きは、\n①《嵐を呼ぶ者》で《トーテム・ワーム》をサーチ\n②捨て山に《豪風鳥帝　ルフロク》《ディーペスト・ホエール》を送る\n③《深海からの浮上》で《トーテム・ワーム》を召喚"
 	},
 	"suggestedPartner": "U00065",

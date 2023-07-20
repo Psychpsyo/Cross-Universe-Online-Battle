@@ -8,6 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
+		"en": "The end goal is to use Impact One Shot while having many Wrath Counters on Wrathful God's Statues to get a one-shot-kill on your opponent.\n\nYou'll want to deploy Wrathful God's Statue early and from there on proceed as follows.\n① Summon Undine, Water Walker with Rising from the Deep.\n② Use Undine to summon Ralt.\n③ Use the Undine that's your partner to summon Pandemic Rat.\n④ Use Pandemic Rat to place a Weakness Counter on Undine.\n⑤ Get the Undine with a counter on it destroyed to summon more rats.\n\nUse this and Reactive Circle - Thun Roar to survive while you accumulate hand cards and Wrath Counters.\nIdeally you'd use 2 Wrathful God Statues while getting the 3rd from your deck as a backup.\nYou could also add 'Interference Prohibited' to the deck but as long as you can activate Impact One Shot in your battle phase, you should be able to win.",
 		"ja": "最終目標は、《祟り神の石像》に祟りカウンターを大量に乗せた状態で《ファイナル・インパクト》を発動し、怪異トークでワンショットキルをする。\n\n動かし方は、まず《石像》を使用するところから始まる。\n理想ムーブは、\n①《深海からの浮上》で《水面のウンディーネ》を召喚。\n②《ウンディーネ》で《ラルト》を召喚。\n③パートナーの《ウンディーネ》で《パンデミック・ラット》を召喚。\n④《ラット》の効果で、ユニットゾーンの《ウンディーネ》に衰弱カウンターを乗せる。\n⑤カウンターの乗った《ウンディーネ》で自爆特攻し、《ラット》を召喚\n\n《反応型魔法陣-雷轟-》やユニットを大量に並べて遅延しながら、手札と祟りカウンターを貯める。\nおすすめの動きは《石像》を2枚使用し、1枚は即サーチすることで手札確保と圧縮を図る。\n《妨害禁止》を入れるのもあり。バトルステップ中に《インパクト》を発動できさえすれば、ほぼ勝利を手に入れることができる。"
 	},
 	"suggestedPartner": "U00007",

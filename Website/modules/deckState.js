@@ -70,9 +70,7 @@ function loadDeckPreview(deck) {
 //loading decks into the deck list
 async function addDecksToDeckSelector(deckList) {
 	//empty the deck selector
-	while (document.getElementById("deckList").firstChild) {
-		document.getElementById("deckList").firstChild.remove();
-	}
+	document.getElementById("deckList").innerHTML = "";
 	currentDeckList = deckList;
 
 	let deckPromises = [];
@@ -113,9 +111,8 @@ async function addDecksToDeckSelector(deckList) {
 	}
 
 	//also remove all cards still on the right side, as selectedDeck will be wiped
-	while (document.getElementById("deckSelectorCardGrid").firstChild) {
-		document.getElementById("deckSelectorCardGrid").firstChild.remove();
-	}
+	deckSelectorCardGrid.innerHTML = "";
+	deckSelectorDescription.innerHTML = "";
 }
 
 export class DeckState extends GameState {
@@ -123,7 +120,7 @@ export class DeckState extends GameState {
 		super();
 		gameState = this;
 
-		fetch(automatic? "data/deckListAutomatic.json" : "data/deckList.json")
+		fetch("data/deckList.json")
 		.then(response => response.json())
 		.then(decks => {
 			builtInDecks = decks;

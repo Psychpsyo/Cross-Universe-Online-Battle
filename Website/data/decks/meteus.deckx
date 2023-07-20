@@ -8,6 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
+		"en": "In the end you'll want 1 Himiko, 1 Eerie Night, 2 Life's Return, 1 Blazing Library and 3 Shinki, Immaterial Dragons on the field.\n① Use Blazing Library to add Eerie Night to your hand and to discard Shinki.\n② Eerie Night gets triggered by the 200 effect damage from Blazing Library and summons Shinki from the discard pile while reducing the mana cost to 4.\n③ Use Life's Return to regain life every turn to summon Shinki.\n④ Retire Shinki to summon Meteus, the First Fire and discard your opponent's deck so he can deal massive amounts of damage.",
 		"ja": "最終の構えは、フィールドに《火姫女》×1、《妖の夜》×1、《生命回帰》×2、《燃え盛りし資料庫》×1、《霊幻竜 シンキ》×3である\n①《燃え盛りし資料庫》で《妖の夜》を手札に、《霊幻竜 シンキ》を捨て山に送る\n②《燃え盛りし資料庫》の200ダメージをトリガーに、《妖の夜》の効果で魔力を2軽減し《霊幻竜 シンキ》を召喚\n③《生命回帰》で回復しつつ、毎ターン《霊幻竜 シンキ》を召喚し圧殺する\n④《霊幻竜 シンキ》をリターンし《原初の炎神 メテウス》を召喚、デッキ破壊＆バーンダメージを与える"
 	},
 	"suggestedPartner": "U00027",

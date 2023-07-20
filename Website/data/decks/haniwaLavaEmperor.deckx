@@ -8,6 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
+		"en": "This deck aims to win by using the effect damage from 'Lava Emperor', 'Haniwa Soldier' and 'Haniwa Cavalry'.\n\nThe basic moves are:\n① Deal damage with Lava Emperor and by destroying Haniwa Soldier and Haniwa Cavalry.\n② Use 'Ancient King's Command' to bring the Haniwa back to your field.",
 		"ja": "《溶岩帝》と《はにわ兵》《はにわ騎兵》の効果ダメージで勝利を狙うデッキ\n\n基本ムーブは\n①《溶岩帝》の効果でダメージを与えつつ、《はにわ兵》《はにわ騎兵》を捨て山に送る\n②《古代王の号令》を詠唱にフィールドに召喚"
 	},
 	"suggestedPartner": "U00062",

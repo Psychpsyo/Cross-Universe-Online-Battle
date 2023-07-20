@@ -8,7 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
-		"en": "A basic Fire-type deck.\nThe ability of 'Himiko, Fire Princess' lets you constantly deal effect damage and recover life. In doing so, you can use 'Life Compensation' multiple times and easily draw a lot of cards.\nRetiring your units with high Defense lets you summon 'Orochi, Inferno Serpent' and come out on top.",
+		"en": "A basic Fire-type deck.\nThe ability of Himiko, Fire Princess lets you constantly deal effect damage and recover life. In doing so, you can use Life Compensation multiple times and easily draw a lot of cards.\nRetiring your units with high Defense lets you summon Orochi, Inferno Serpent and come out on top.",
 		"ja": "タイプ「炎」をメインとしたデッキの基本形です。\n《火巫女》の効果で効果ダメージとライフ回復を継続的に行えます。 ライフ回復をすることで《命の対価》の複数回の使用が可能になり、手札補充が容易に行えます。\n防御力の高いユニットをリターンして《灼熱の大蛇 オロチ》を召喚して戦いを有利に進めましょう。"
 	},
 	"suggestedPartner": "U00027",

@@ -8,7 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
-		"en": "A basic Wind-type deck.\nThe ability of 'Storm Caller' lets you add the cards you need to your hand to adjust to any situation.\nUse that same ability to discard a lot of spell cards and strengthen the effect of 'Sylpheed, of the Swift Wind'.",
+		"en": "A basic Wind-type deck.\nThe ability of Storm Caller lets you add the cards you need to your hand to adjust to any situation.\nUse that same ability to discard a lot of spell cards and strengthen the effect of Sylpheed, of the Swift Wind.",
 		"ja": "タイプ「風」をメインとしたデッキの基本形です。\n《嵐を呼ぶ者》の効果を使い必要なカードを手札に加え、状況に応じて柔軟に戦えます。\nまた、上記の効果でスペルカードを捨て山に貯めることで《疾風のシルフィード》の効果を最大限に利用できます。"
 	},
 	"suggestedPartner": "U00065",

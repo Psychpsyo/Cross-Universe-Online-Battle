@@ -8,7 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
-		"en": "A 'Baton Touch' deck with 'Tornado Spirit' as the partner.\nThe basic idea is to enchant 'Tornado Spirit' as your partner with 'Tailwind' and then use 'Baton Touch' to switch to 'Samurai Swallow' in the second half.\n'Card Seal' can be used multiple times through the effect of 'Large Eerie Flapper'.",
+		"en": "A Baton Touch deck with Tornado Spirit as the partner.\nThe basic idea is to enchant Tornado Spirit as your partner with Tailwind and then use Baton Touch to switch to Samurai Swallow in the second half.\nAdditionally, you can use Card Seal multiple times through the effect of Large Eerie Flapper.",
 		"ja": "《トルネード・スピリット》をパートナーにした、パートナービートデッキの亜種である。\n基本ムーブは、パートナーの《トルネード・スピリット》に《追い風》を付与し、後半に《バトンタッチ》を詠唱し《侍ツバメ》に切り替える\n《カードの封印》は、《羽ばたく大怪鳥》で戻すことで再利用が可能となっている。"
 	},
 	"suggestedPartner": "U00043",

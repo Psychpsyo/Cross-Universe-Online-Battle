@@ -8,7 +8,7 @@
 		"ja": "クロス・ユニバース"
 	},
 	"description": {
-		"en": "A basic Water-type deck.\nUse 'Rifle Fish' to discard both your and your opponent's hand cards.\nOnce enough cards have been discarded, 'Marine Snow Sacrifice' and 'Rising from the Deep' come into play.",
+		"en": "A basic Water-type deck.\nUse Rifle Fish to discard both your and your opponent's hand cards.\nOnce enough cards have been discarded, you can make good use of Marine Snow Sacrifice and Rising from the Deep.",
 		"ja": "タイプ「水」をメインとしたデッキの基本形です。\n《ライフル・フィッシュ》の効果で相手の手札を減らしながら、捨て山にカードを貯めるデッキです。\n十分な量のカードが捨て山に溜まったら、《マリンスノー・サクリファイス》や《深海からの浮上》の本領発揮です。"
 	},
 	"suggestedPartner": "U00072",
