@@ -32,7 +32,47 @@ export function setImplicitActions(actions) {
 export function clearImplicitActions() {
 	implicitActions.pop();
 }
+// generates every possible combination [A1, A2, A3 ... Ax] so that An is from
+// the n-th array that was passed in and x is the amount of input arrays.
+function cartesianProduct(arrays) {
+	if (arrays.length == 0) {
+		return [];
+	}
+	let products = arrays[0].map(elem => [elem]);
+	for (let i = 1; i < arrays.length; i++) {
+		let newProducts = [];
+		for (const elemA of products) {
+			for (const elemB of arrays[i]) {
+				newProducts.push([...elemA, elemB]);
+			}
+		}
+		products = newProducts;
+	}
+	return products;
+}
+// returns all possible ways to choose k elements from a list of n elements.
+function nChooseK(n, k) {
+	let choices = [];
+	for (let i = k - 1; i >= 0; i--) {
+		choices.push(i);
+	}
+	let combinations = [];
 
+	combinations.push([...choices]);
+	while (choices[choices.length - 1] < n - k) {
+		for (let i = 0; i < k; i++) {
+			if (choices[i] < n - 1 - i) {
+				choices[i]++;
+				for (let j = 1; j <= i; j++) {
+					choices[i - j] = choices[i] + j;
+				}
+				combinations.push([...choices]);
+				break;
+			}
+		}
+	}
+	return combinations;
+}
 
 class AstNode {
 	* eval(card, player, ability) {}
@@ -45,6 +85,9 @@ class AstNode {
 			next = generator.next();
 		} while (!next.done);
 		return next.value;
+	}
+	evalPossibilities(card, player, ability) {
+		return [this.evalFull(card, player, ability)];
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
 	hasAllTargets(card, player, ability) {
@@ -80,6 +123,38 @@ export class ScriptRootNode extends AstNode {
 			yield* step.eval(card, player, ability);
 		}
 	}
+	// whether or not all actions in this tree have enough targets to specify the target availability rule.
+	hasAllTargets(card, player, ability) {
+		for (let i = 0; i < this.steps.length; i++) {
+			if (!this.steps[i].hasAllTargets(card, player, ability)) {
+				return false;
+			}
+			// If this step is a variable assignment, we need to enumerate all possible values
+			// of the right-hand expression (as it may depend on player choice) and then
+			// check target availability for the rest of the script with those choices made.
+			// If just one of those branches has all targets, the ability is said to have all targets.
+			if (this.steps[i].assignTo) {
+				let oldVarValue = ability.scriptVariables[this.steps[i].assignTo];
+				let foundValidBranch = false;
+				for (const possibility of this.steps[i].evalPossibilities(card, player, ability)) {
+					if (possibility.length > 0 && possibility[0] instanceof actions.Action) {
+						// TODO: Check if these actions need to be processed somehow or if using un-executed actions works just fine.
+					}
+					ability.scriptVariables[this.steps[i].assignTo] = possibility;
+					for (let j = i + 1; j < this.steps.length; j++) {
+						if (!this.steps[j].hasAllTargets(card, player, ability)) {
+							continue;
+						} else if (j == this.steps.length - 1) {
+							foundValidBranch = true;
+						}
+					}
+				}
+				ability.scriptVariables[this.steps[i].assignTo] = oldVarValue;
+				return foundValidBranch;
+			}
+		}
+		return true;
+	}
 	getChildNodes() {
 		return this.steps;
 	}
@@ -104,6 +179,14 @@ export class LineNode extends AstNode {
 		if (this.assignTo) {
 			ability.scriptVariables[this.assignTo] = returnValues;
 		}
+	}
+	evalPossibilities(card, player, ability) {
+		// This must return all possible combinations of the possible values for every action on this line.
+		let possibilityLists = [];
+		for (let part of this.parts) {
+			possibilityLists.push(part.evalPossibilities(card, player, ability));
+		}
+		return cartesianProduct(possibilityLists).map(list => list.flat(1));
 	}
 	getChildNodes() {
 		return this.parts;
@@ -238,7 +321,7 @@ export class FunctionNode extends AstNode {
 				return moveActions;
 			}
 			case "SELECT": {
-				let responseCounts = yield* this.parameters[0].eval(card, player, ability);
+				let choiceAmount = yield* this.parameters[0].eval(card, player, ability);
 				let eligibleCards = yield* this.parameters[1].eval(card, player, ability);
 				if (eligibleCards.length == 0) {
 					return [];
@@ -246,7 +329,7 @@ export class FunctionNode extends AstNode {
 				for (let card of eligibleCards) {
 					card.hidden = false;
 				}
-				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, responseCounts == "any"? [] : responseCounts, "cardEffect:" + ability.id);
+				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
 				if (responses.length != 1) {
 					throw new Error("Incorrect number of responses supplied during card selection. (expected 1, got " + responses.length + " instead)");
@@ -336,6 +419,39 @@ attack: ${attack}
 defense: ${defense}`, false));
 				}
 				return cards;
+			}
+		}
+	}
+	evalPossibilities(card, player, ability) {
+		// TODO: Probably best to implement these on a case-by-case basis when cards actually need them
+		switch (this.functionName) {
+			case "SELECT": {
+				let choiceAmounts = this.parameters[0].evalFull(card, player, ability);
+				let eligibleCards = this.parameters[1].evalFull(card, player, ability);
+				if (eligibleCards.length == 0) {
+					return [[]];
+				}
+				if (choiceAmounts === "any") {
+					choiceAmounts = [];
+					for (let i = 1; i <= eligibleCards.length; i++) {
+						choiceAmounts.push(i);
+					}
+				}
+
+				let combinations = [];
+				for (const amount of choiceAmounts) {
+					combinations = combinations.concat(nChooseK(eligibleCards.length, amount));
+				}
+
+				for (const combination of combinations) {
+					for (let i = 0; i < combination.length; i++) {
+						combination[i] = eligibleCards[combination[i]];
+					}
+				}
+				return combinations;
+			}
+			default: {
+				return [this.evalFull(card, player, ability)];
 			}
 		}
 	}
@@ -546,62 +662,68 @@ export class CardPropertyNode extends AstNode {
 	}
 
 	* eval(card, player, ability) {
-		return (yield* this.cards.eval(card, player, ability)).map(card => {
-			switch(this.property) {
-				case "name": {
-					return card.values.names;
-				}
-				case "baseName": {
-					return card.baseValues.names;
-				}
-				case "level": {
-					return card.values.level;
-				}
-				case "baseLevel": {
-					return card.baseValues.level;
-				}
-				case "types": {
-					return card.values.types;
-				}
-				case "baseTypes": {
-					return card.baseValues.types;
-				}
-				case "attack": {
-					return card.values.attack;
-				}
-				case "baseAttack": {
-					return card.baseValues.attack;
-				}
-				case "defense": {
-					return card.values.defense;
-				}
-				case "baseDefense": {
-					return card.baseValues.defense;
-				}
-				case "cardType": {
-					return card.values.cardTypes;
-				}
-				case "baseCardType": {
-					return card.baseValues.cardTypes;
-				}
-				case "baseOwner": {
-					return card.owner;
-				}
-				case "owner": {
-					return card.zone?.player ?? card.owner;
-				}
-				case "self": {
-					return card;
-				}
-				case "zone": {
-					return card.zone;
-				}
-			}
-		}).flat();
+		return (yield* this.cards.eval(card, player, ability)).map(card => this.accessProperty(card)).flat();
+	}
+
+	evalPossibilities(card, player, ability) {
+		return this.cards.evalPossibilities(card, player, ability).map(possibility => possibility.map(card => this.accessProperty(card)).flat());
 	}
 
 	getChildNodes() {
 		return [this.cards];
+	}
+
+	accessProperty(card) {
+		switch(this.property) {
+			case "name": {
+				return card.values.names;
+			}
+			case "baseName": {
+				return card.baseValues.names;
+			}
+			case "level": {
+				return card.values.level;
+			}
+			case "baseLevel": {
+				return card.baseValues.level;
+			}
+			case "types": {
+				return card.values.types;
+			}
+			case "baseTypes": {
+				return card.baseValues.types;
+			}
+			case "attack": {
+				return card.values.attack;
+			}
+			case "baseAttack": {
+				return card.baseValues.attack;
+			}
+			case "defense": {
+				return card.values.defense;
+			}
+			case "baseDefense": {
+				return card.baseValues.defense;
+			}
+			case "cardType": {
+				return card.values.cardTypes;
+			}
+			case "baseCardType": {
+				return card.baseValues.cardTypes;
+			}
+			case "baseOwner": {
+				return card.owner;
+			}
+			case "owner": {
+				return card.zone?.player ?? card.owner;
+			}
+			case "self": {
+				return card;
+			}
+			case "zone": {
+				return card.zone;
+			}
+		}
 	}
 }
 
@@ -647,9 +769,27 @@ export class MathNode extends AstNode {
 		this.leftSide = leftSide;
 		this.rightSide = rightSide;
 	}
+	* eval(card, player, ability) {
+		let left = (yield* this.leftSide.eval(card, player, ability));
+		let right = (yield* this.rightSide.eval(card, player, ability));
+		return this.doOperation(left, right);
+	}
+	evalPossibilities(card, player, ability) {
+		let left = this.leftSide.evalPossibilities(card, player, ability);
+		let right = this.rightSide.evalPossibilities(card, player, ability);
+		let possibilities = [];
+		for (const left of left) {
+			for (const right of right) {
+				possibilities.push(left[0], right[0])
+			}
+		}
+		return this.doOperation(left, right);
+	}
 	getChildNodes() {
 		return [this.leftSide, this.rightSide];
 	}
+
+	doOperation(left, right) {}
 }
 export class DashMathNode extends MathNode {
 	constructor(leftSide, rightSide) {
@@ -660,11 +800,9 @@ export class PlusNode extends DashMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		let left = (yield* this.leftSide.eval(card, player, ability))[0];
-		let right = (yield* this.rightSide.eval(card, player, ability))[0];
-		if (typeof left == "number" && typeof right == "number") {
-			return [left + right];
+	doOperation(left, right) {
+		if (typeof left[0] == "number" && typeof right[0] == "number") {
+			return [left[0] + right[0]];
 		}
 		return [NaN];
 	}
@@ -673,11 +811,9 @@ export class MinusNode extends DashMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		let left = (yield* this.leftSide.eval(card, player, ability))[0];
-		let right = (yield* this.rightSide.eval(card, player, ability))[0];
-		if (typeof left == "number" && typeof right == "number") {
-			return [left - right];
+	doOperation(left, right) {
+		if (typeof left[0] == "number" && typeof right[0] == "number") {
+			return [left[0] - right[0]];
 		}
 		return [NaN];
 	}
@@ -691,39 +827,33 @@ export class MultiplyNode extends DotMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		let left = (yield* this.leftSide.eval(card, player, ability))[0];
-		let right = (yield* this.rightSide.eval(card, player, ability))[0];
-		if (typeof left != "number" || typeof right != "number") {
+	doOperation(left, right) {
+		if (typeof left[0] != "number" || typeof right[0] != "number") {
 			return [NaN];
 		}
-		return [left * right];
+		return [left[0] * right[0]];
 	}
 }
 export class DivideNode extends DotMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		let left = (yield* this.leftSide.eval(card, player, ability))[0];
-		let right = (yield* this.rightSide.eval(card, player, ability))[0];
-		if (typeof left != "number" || typeof right != "number") {
+	doOperation(left, right) {
+		if (typeof left[0] != "number" || typeof right[0] != "number") {
 			return [NaN];
 		}
-		return [left / right];
+		return [left[0] / right[0]];
 	}
 }
 export class FloorDivideNode extends DotMathNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		let left = (yield* this.leftSide.eval(card, player, ability))[0];
-		let right = (yield* this.rightSide.eval(card, player, ability))[0];
-		if (typeof left != "number" || typeof right != "number") {
+	doOperation(left, right) {
+		if (typeof left[0] != "number" || typeof right[0] != "number") {
 			return [NaN];
 		}
-		return [Math.floor(left / right)];
+		return [Math.floor(left[0] / right[0])];
 	}
 }
 export class ComparisonNode extends MathNode {
@@ -735,10 +865,9 @@ export class EqualsNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		let rightSideElements = yield* this.rightSide.eval(card, player, ability);
-		for (let element of yield* this.leftSide.eval(card, player, ability)) {
-			if (rightSideElements.some(elem => equalityCompare(elem, element))) {
+	doOperation(left, right) {
+		for (let element of left) {
+			if (right.some(elem => equalityCompare(elem, element))) {
 				return true;
 			}
 		}
@@ -749,10 +878,9 @@ export class NotEqualsNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		let rightSideElements = yield* this.rightSide.eval(card, player, ability);
-		for (let element of yield* this.leftSide.eval(card, player, ability)) {
-			if (rightSideElements.some(elem => equalityCompare(elem, element))) {
+	doOperation(left, right) {
+		for (let element of left) {
+			if (right.some(elem => equalityCompare(elem, element))) {
 				return false;
 			}
 		}
@@ -763,9 +891,9 @@ export class GreaterThanNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		for (let rightSide of yield* this.rightSide.eval(card, player, ability)) {
-			for (let leftSide of yield* this.leftSide.eval(card, player, ability)) {
+	doOperation(left, right) {
+		for (let rightSide of right) {
+			for (let leftSide of left) {
 				if (leftSide > rightSide) {
 					return true;
 				}
@@ -778,9 +906,9 @@ export class LessThanNode extends ComparisonNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		for (let rightSide of yield* this.rightSide.eval(card, player, ability)) {
-			for (let leftSide of yield* this.leftSide.eval(card, player, ability)) {
+	doOperation(left, right) {
+		for (let rightSide of right) {
+			for (let leftSide of left) {
 				if (leftSide < rightSide) {
 					return true;
 				}
@@ -798,16 +926,16 @@ export class AndNode extends LogicNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		return (yield* this.leftSide.eval(card, player, ability)) && (yield* this.rightSide.eval(card, player, ability));
+	doOperation(left, right) {
+		return left && right;
 	}
 }
 export class OrNode extends LogicNode {
 	constructor(leftSide, rightSide) {
 		super(leftSide, rightSide);
 	}
-	* eval(card, player, ability) {
-		return (yield* this.leftSide.eval(card, player, ability)) || (yield* this.rightSide.eval(card, player, ability));
+	doOperation(left, right) {
+		return left || right;
 	}
 }
 
@@ -820,6 +948,9 @@ export class UnaryMinusNode extends AstNode {
 	* eval(card, player, ability) {
 		return (yield* this.operand.eval(card, player, ability)).map(value => -value);
 	}
+	evalPossibilities(card, player, ability) {
+		return this.operand.evalPossibilities(card, player, ability).map(values => values.map(value => -value));
+	}
 	getChildNodes() {
 		return [this.operand];
 	}
@@ -831,6 +962,9 @@ export class UnaryNotNode extends AstNode {
 	}
 	* eval(card, player, ability) {
 		return !(yield* this.operand.eval(card, player, ability));
+	}
+	evalPossibilities(card, player, ability) {
+		return this.operand.evalPossibilities(card, player, ability).map(value => !value);
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -884,6 +1018,24 @@ export class ZoneNode extends AstNode {
 	* eval(card, player, ability) {
 		if (this.playerNode) {
 			player = (yield* this.playerNode.eval(card, player, ability))[0];
+		}
+		return this.getZone(player);
+	}
+	evalPossibilities(card, player, ability) {
+		let players;
+		if (this.playerNode) {
+			players = this.playerNode.evalPossibilities(card, player, ability);
+		} else {
+			players = [player];
+		}
+		return players.map(player => this.getZone(player));
+	}
+	getChildNodes() {
+		return this.playerNode? [this.playerNode] : [];
+	}
+
+	getZone(player) {
+		if (this.playerNode) {
 			return ({
 				field: [player.unitZone, player.spellItemZone, player.partnerZone],
 				deck: [player.deckZone],
@@ -906,9 +1058,6 @@ export class ZoneNode extends AstNode {
 			partnerZone: [player.partnerZone, player.next().partnerZone]
 		})[this.zoneIdentifier];
 	}
-	getChildNodes() {
-		return this.playerNode? [this.playerNode] : [];
-	}
 }
 export class DeckPositionNode extends AstNode {
 	constructor(playerNode, position) {
@@ -918,6 +1067,9 @@ export class DeckPositionNode extends AstNode {
 	}
 	* eval(card, player, ability) {
 		return [(yield* this.playerNode.eval(card, player, ability))[0].deckZone];
+	}
+	evalPossibilities(card, player, ability) {
+		return this.playerNode.evalPossibilities(card, player, ability).map(player => [player[0].deckZone]);
 	}
 	getChildNodes() {
 		return [this.playerNode];
