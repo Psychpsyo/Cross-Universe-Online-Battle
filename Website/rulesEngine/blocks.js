@@ -393,7 +393,7 @@ export class CastSpell extends Block {
 	constructor(stack, player, card) {
 		let placeAction = new actions.Place(player, card, player.spellItemZone);
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.Place(player, card, player.spellItemZone),
+			placeAction,
 			new actions.ChangeMana(player, -card.values.level)
 		]])];
 		let execTimingGenerators = [
