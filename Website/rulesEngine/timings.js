@@ -133,7 +133,7 @@ export class Timing {
 			}
 		}
 
-		this.followupTimings = await (yield* runFollowupTimings(this.block, this.game));
+		this.followupTimings = await (yield* runFollowupTimings(this.block, this.game, this));
 	}
 
 	async* undo() {
@@ -159,17 +159,44 @@ export class Timing {
 	}
 }
 
-export async function* runFollowupTimings(block, game) {
+export async function* runFollowupTimings(block, game, timing = null) {
 	let timings = [];
-	let interjected = getFollowupTiming(block, game);
+	let interjected = getFollowupTiming(block, game, timing);
 	while (interjected) {
 		timings.push(interjected);
 		await (yield* interjected.run());
-		interjected = getFollowupTiming(block, game);
+		interjected = getFollowupTiming(block, game, interjected);
 	}
 	return timings;
 }
-function getFollowupTiming(block, game) {
+function getFollowupTiming(block, game, timing) {
+	if (timing) {
+		// decks need to be shuffled after cards are added to them.
+		let unshuffledDecks = [];
+		for (const action of timing.actions) {
+			if (action instanceof actions.Move && action.zone.type === "deck" && action.targetIndex === null) {
+				if (unshuffledDecks.indexOf(action.zone) === -1) {
+					unshuffledDecks.push(action.zone);
+				}
+			}
+		}
+
+		// cards need to be revealed if added from deck to hand
+		let unrevealedCards = [];
+		for (const action of timing.actions) {
+			if (action instanceof actions.Move && action.zone.type === "hand" && action.card.zone.type === "deck") {
+				if (unrevealedCards.indexOf(action.card) === -1) {
+					unrevealedCards.push(action.card);
+				}
+			}
+		}
+
+		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.Reveal(card)));
+		if (allActions.length > 0) {
+			return new Timing(game, allActions, block);
+		}
+	}
+
 	let invalidEquipments = [];
 	for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
 		if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&

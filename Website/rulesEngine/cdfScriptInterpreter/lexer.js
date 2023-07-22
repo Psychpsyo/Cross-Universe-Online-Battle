@@ -70,7 +70,7 @@ let keywordTokenTypes = {
 	item: "cardType",
 	standardItem: "cardType",
 	continuousItem: "cardType",
-	enchantItem: "cardType",
+	equipableItem: "cardType",
 
 	APPLY: "function",
 	CANCELATTACK: "function",

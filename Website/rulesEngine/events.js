@@ -290,3 +290,11 @@ export function createCardEquippedEvent(equipment, target) {
 		"target": target
 	}
 }
+
+export function createCardRevealedEvent(card) {
+	return {
+		"nature": "event",
+		"type": "cardRevealed",
+		"card": card
+	}
+}

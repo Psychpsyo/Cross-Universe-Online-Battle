@@ -246,7 +246,7 @@ export class MainPhase extends StackPhase {
 						if (this.turn.game.turns.lenght > 1) {
 							recentTurnActions = this.turn.game.turns[this.turn.game.turns.length - 2].getActions().concat(recentTurnActions);
 						}
-						let summons = recentTurnActions.filter(action => action instanceof actions.Summon && action.unit.cardRef === card);
+						let summons = recentTurnActions.filter(action => action instanceof actions.Summon && action.placeAction.card.cardRef === card);
 						if (summons.length > 0) {
 							continue;
 						}

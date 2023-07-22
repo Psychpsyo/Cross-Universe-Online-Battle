@@ -147,7 +147,7 @@ export class TriggerAbility extends Ability {
 	}
 
 	checkTrigger(card, player) {
-		if (!this.after) {
+		if (this.after === null) {
 			return;
 		}
 		if (this.after.evalFull(card, player, this)) {

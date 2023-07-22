@@ -228,6 +228,9 @@ export class AutomaticController extends InteractionController {
 				gameUI.updateCard(event.player.partnerZone, 0);
 				return this.gameSleep();
 			}
+			case "cardRevealed": {
+				return this.gameSleep();
+			}
 			case "turnStarted": {
 				autoUI.startTurn();
 				return this.gameSleep();

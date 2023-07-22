@@ -8,5 +8,4 @@ defense: 500
 o: trigger
 mandatory: no
 after: summoned = thisCard
-condition: thisCard.zone = field
 MOVE(SELECT(1, [from you.discard where level < 2 & cardType = spell]), baseOwner.hand)

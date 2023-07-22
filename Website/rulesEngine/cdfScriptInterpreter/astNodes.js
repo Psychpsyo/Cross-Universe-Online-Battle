@@ -3,9 +3,9 @@
 import * as actions from "../actions.js";
 import * as requests from "../inputRequests.js";
 import * as blocks from "../blocks.js";
+import * as zones from "../zones.js";
 import {Card, SnapshotCard} from "../card.js";
 import {CardModifier} from "../cardValues.js";
-import {FieldZone, Zone} from "../zones.js";
 
 let implicitCard = [null];
 let implicitActions = [null];
@@ -219,7 +219,7 @@ export class ApplyTargetRootNode extends AstNode {
 	* eval(card, player, ability) {
 		let cardList = yield* this.expression.eval(card, player, ability);
 
-		if (cardList.length > 0 && cardList[0] instanceof Zone) {
+		if (cardList.length > 0 && cardList[0] instanceof zones.Zone) {
 			cardList = cardList.map(zone => zone.cards).flat();
 		}
 		return cardList;
@@ -260,7 +260,7 @@ export class FunctionNode extends AstNode {
 				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - (yield* this.parameters[0].eval(card, player, ability))[0]), player.deckZone.cards.length);
 			}
 			case "DESTROY": {
-				let cards = yield* this.parameters[0].eval(card, player, ability);
+				let cards = (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef);
 				let discards = cards.map(card => new actions.Discard(card.cardRef));
 				return discards.concat(discards.map(discard => new actions.Destroy(discard)));
 			}
@@ -281,7 +281,7 @@ export class FunctionNode extends AstNode {
 				return true;
 			}
 			case "DISCARD": {
-				return (yield* this.parameters[0].eval(card, player, ability)).map(card => new actions.Discard(card.cardRef));
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef));
 			}
 			case "DRAW": {
 				let amount = (yield* this.parameters[0].eval(card, player, ability))[0];
@@ -291,7 +291,7 @@ export class FunctionNode extends AstNode {
 				return [new actions.Draw(player, amount)];
 			}
 			case "EXILE": {
-				return (yield* this.parameters[0].eval(card, player, ability)).map(card => new actions.Exile(card.cardRef));
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Exile(card.cardRef));
 			}
 			case "GAINLIFE": {
 				return [new actions.ChangeLife(player, (yield* this.parameters[0].eval(card, player, ability))[0])];
@@ -309,9 +309,12 @@ export class FunctionNode extends AstNode {
 				let cards = yield* this.parameters[0].eval(card, player, ability);
 				let moveActions = [];
 				for (const card of cards) {
+					if (card.cardRef === null) {
+						continue;
+					}
 					setImplicitCard(card);
 					let zone = (yield* this.parameters[1].eval(card, player, ability))[0];
-					let index = zone instanceof FieldZone? null : -1;
+					let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 					if (this.parameters[1] instanceof DeckPositionNode) {
 						index = this.parameters[1].top? -1 : 0;
 					}
@@ -340,7 +343,7 @@ export class FunctionNode extends AstNode {
 				for (let card of eligibleCards) {
 					card.hidden = card.zone.type == "deck" || (card.zone.type == "hand" && !card.zone.player.isViewable);
 				}
-				return requests.chooseCards.validate(responses[0].value, selectionRequest);
+				return requests.chooseCards.validate(responses[0].value, selectionRequest).map(card => card.snapshot());
 			}
 			case "SELECTPLAYER": {
 				let selectionRequest = new requests.choosePlayer.create(player, "cardEffect:" + ability.id);
@@ -354,7 +357,8 @@ export class FunctionNode extends AstNode {
 				return requests.choosePlayer.validate(responses[0].value, selectionRequest);
 			}
 			case "SETATTACKTARGET": {
-				return [new actions.SetAttackTarget((yield* this.parameters[0].eval(card, player, ability))[0])];
+				let card = (yield* this.parameters[0].eval(card, player, ability))[0];
+				return card.cardRef? [new actions.SetAttackTarget(card.cardRef)] : [];
 			}
 			case "SUM": {
 				let list = yield* this.parameters[0].eval(card, player, ability);
@@ -370,7 +374,11 @@ export class FunctionNode extends AstNode {
 				let payCost = yield* this.parameters[2].eval(card, player, ability);
 
 				let costs = [];
+				let placeActions = [];
 				for (let i = 0; i < cards.length; i++) {
+					if (cards[i].cardRef === null) {
+						continue;
+					}
 					let availableZoneSlots = [];
 					for (let i = 0; i < zone.cards.length; i++) {
 						if (zone.get(i) === null) {
@@ -383,6 +391,8 @@ export class FunctionNode extends AstNode {
 					let placeCost = new actions.Place(player, cards[i].cardRef, zone);
 					placeCost.costIndex = i;
 					costs.push(placeCost);
+					placeActions.push(placeCost);
+
 
 					if (payCost) {
 						let manaCost = new actions.ChangeMana(player, -cards[i].cardRef.values.level);
@@ -394,7 +404,7 @@ export class FunctionNode extends AstNode {
 				let summons = [];
 				for (let i = 0; i < timing.costCompletions.length; i++) {
 					if (timing.costCompletions[i]) {
-						summons.push(new actions.Summon(player, cards[i].cardRef, zone, timing.actions.find(action => action instanceof actions.Place && action.costIndex == i).targetIndex));
+						summons.push(new actions.Summon(player, placeActions[i]));
 					}
 				}
 				return  summons;
@@ -585,7 +595,7 @@ export class CardMatchNode extends AstNode {
 		let matchingCards = [];
 		for (let cardList of this.cardListNodes) {
 			cardList = yield* cardList.eval(card, player, ability);
-			if (cardList.length > 0 && (cardList[0] instanceof Zone)) {
+			if (cardList.length > 0 && (cardList[0] instanceof zones.Zone)) {
 				cards.push(...(cardList.map(zone => zone.cards).flat()));
 			} else {
 				cards.push(...cardList);
@@ -1131,7 +1141,7 @@ export class ActionAccessorNode extends AstNode {
 			switch (this.accessor) {
 				case "cast": {
 					if (action instanceof actions.Cast) {
-						values.push(action.spell)
+						values.push(action.placeAction.card);
 					}
 					break;
 				}
@@ -1151,7 +1161,7 @@ export class ActionAccessorNode extends AstNode {
 				}
 				case "deployed": {
 					if (action instanceof actions.Deploy) {
-						values.push(action.item);
+						values.push(action.placeAction.card);
 					}
 					break;
 				}
@@ -1190,7 +1200,7 @@ export class ActionAccessorNode extends AstNode {
 				}
 				case "summoned": {
 					if (action instanceof actions.Summon) {
-						values.push(action.unit);
+						values.push(action.placeAction.card);
 					}
 					break;
 				}

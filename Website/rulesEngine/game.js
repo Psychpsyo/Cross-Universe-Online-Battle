@@ -223,6 +223,10 @@ export class Game {
 		this.replayRngPosition++;
 		return this.players[result];
 	}
+	undoRandom() {
+		this.replayRngPosition--;
+		return this.replay.rngLog.pop();
+	}
 
 	getPhases() {
 		return this.turns.map(turn => turn.phases).flat();

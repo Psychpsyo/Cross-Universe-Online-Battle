@@ -98,6 +98,17 @@ export class DeckZone extends Zone {
 		}
 		this.reindex();
 	}
+
+	undoShuffle() {
+		let randomValues = this.player.game.undoRandom();
+		// reverse Fisher-Yates shuffle
+		for (let i = 1; i < this.cards.length; i++) {
+			// pick a random element and swap it with the current element
+			let rand = randomValues.pop();
+			[this.cards[i], this.cards[rand]] = [this.cards[rand], this.cards[i]];
+		}
+		this.reindex();
+	}
 }
 
 export class FieldZone extends Zone {

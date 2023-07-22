@@ -131,18 +131,17 @@ export class StandardDraw extends Block {
 
 export class StandardSummon extends Block {
 	constructor(stack, player, card) {
-		let summonAction = new actions.Summon(player, card, player.unitZone, 0);
+		let placeAction = new actions.Place(player, card, player.unitZone);
 		super(stack, player,
 			arrayTimingGenerator([
-				[summonAction]
+				[new actions.Summon(player, placeAction)]
 			]),
 			arrayTimingGenerator([[
-				new actions.Place(player, card, player.unitZone),
+				placeAction,
 				new actions.ChangeMana(player, -card.values.level)
 			]]
 		));
 		this.card = card;
-		this.summonAction = summonAction;
 	}
 
 	async* runCost() {
@@ -153,7 +152,6 @@ export class StandardSummon extends Block {
 		}
 		this.card = this.card.snapshot();
 		this.stack.phase.turn.hasStandardSummoned = this.card;
-		this.summonAction.zoneIndex = this.getCostActions().find(action => action instanceof actions.Place).targetIndex;
 		return true;
 	}
 }
@@ -333,13 +331,13 @@ function* equipTimingGenerator(equipChoiceAction, player) {
 
 export class DeployItem extends Block {
 	constructor(stack, player, card) {
-		let deployAction = new actions.Deploy(player, card, player.spellItemZone, 0);
+		let placeAction = new actions.Place(player, card, player.spellItemZone);
 		let costTimingGenerators = [arrayTimingGenerator([[
-			new actions.Place(player, card, player.spellItemZone),
+			placeAction,
 			new actions.ChangeMana(player, -card.values.level)
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[deployAction]])
+			arrayTimingGenerator([[new actions.Deploy(player, placeAction)]])
 		];
 		if (card.values.cardTypes.includes("equipableItem")) {
 			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
@@ -371,7 +369,6 @@ export class DeployItem extends Block {
 		);
 		this.card = card;
 		this.deployAbility = deployAbility;
-		this.deployAction = deployAction;
 	}
 
 	async* runCost() {
@@ -388,20 +385,19 @@ export class DeployItem extends Block {
 		}
 
 		this.card = this.card.snapshot();
-		this.deployAction.zoneIndex = this.getCostActions().find(action => action instanceof actions.Place).targetIndex;
 		return true;
 	}
 }
 
 export class CastSpell extends Block {
 	constructor(stack, player, card) {
-		let castAction = new actions.Cast(player, card, player.spellItemZone, 0);
+		let placeAction = new actions.Place(player, card, player.spellItemZone);
 		let costTimingGenerators = [arrayTimingGenerator([[
 			new actions.Place(player, card, player.spellItemZone),
 			new actions.ChangeMana(player, -card.values.level)
 		]])];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[castAction]])
+			arrayTimingGenerator([[new actions.Cast(player, placeAction)]])
 		];
 		if (card.values.cardTypes.includes("enchantSpell")) {
 			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
@@ -433,7 +429,6 @@ export class CastSpell extends Block {
 		);
 		this.card = card;
 		this.castAbility = castAbility;
-		this.castAction = castAction;
 	}
 
 	async* runCost() {
@@ -450,7 +445,6 @@ export class CastSpell extends Block {
 		}
 
 		this.card = this.card.snapshot();
-		this.castAction.zoneIndex = this.getCostActions().find(action => action instanceof actions.Place).targetIndex;
 		return true;
 	}
 }
