@@ -36,7 +36,8 @@
 		"playerInfo": {
 			"life": "Lp：",
 			"mana": "魔力：",
-			"vs": "VS"
+			"vs": "VS",
+			"viewDeck": null
 		},
 
 		"deckSelect": {
@@ -45,6 +46,7 @@
 			"waitingForOpponent": null,
 			"dropYourDeck": "デッキをドラック＆ドロップしてください。",
 			"useOfficialDeck": "もしくは、公式デッキを選択してください。",
+			"dialogHeader": null,
 
 			"deckListDefault": "参考デッキ",
 			"deckListLegacy": "過去のデッキ",
@@ -221,10 +223,12 @@
 		"opponentsTurn": null,
 		"packNumber": null,
 		"amountTaken": null,
+		"settingUpDecks": null,
 		"finished": null,
 		"startGame": null,
 		"waitingForOpponent": null,
 		"deckName": "ドラフトデッキ",
+		"deckDescription": null,
 		"yourDeck": "自分のデッキ",
 		"opponentDeck": "相手のデッキ"
 	},

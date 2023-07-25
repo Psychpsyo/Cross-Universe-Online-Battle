@@ -1,6 +1,8 @@
 
 import {locale} from "/modules/locale.js";
-import {getCardInfo, getCardImage} from "/modules/cardLoader.js";
+import {deckToCardIdList} from "/modules/deckUtils.js";
+import {Card} from "/rulesEngine/card.js";
+import * as cardLoader from "/modules/cardLoader.js";
 
 let currentPreviewedCard = null;
 
@@ -12,6 +14,22 @@ cardDetailsDefense.textContent = locale.cardDetailsDefense;
 cardDetailsLevel.textContent = locale.cardDetailsLevel;
 cardDetailsLevelTypeSeparator.textContent = locale.cardDetailsLevelTypeSeparator;
 cardDetailsTypes.textContent = locale.cardDetailsTypes;
+
+infoPanelVS.textContent = locale.game.playerInfo.vs;
+for (let i = 0; i < 2; i++) {
+	document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
+	document.getElementById("playerDeckButtonImage" + i).alt = locale.game.playerInfo.viewDeck;
+	document.getElementById("playerDeckButton" + i).addEventListener("click", function() {
+		let deck = players[i].deck;
+		if (deck.name) {
+			deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
+		} else {
+			deckViewTitle.textContent = "";
+		}
+		loadDeckPreview(deck);
+		openDeckView();
+	});
+}
 
 // chat box
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
@@ -83,7 +101,7 @@ export async function previewCard(card, specific = true) {
 	currentPreviewedCard = card;
 
 	// set the image preview
-	cardDetailsImage.style.backgroundImage = "url(" + (await getCardImage(card)) + ")";
+	cardDetailsImage.style.backgroundImage = "url(" + (await cardLoader.getCardImage(card)) + ")";
 
 	return updateCardPreview(card);
 }
@@ -93,7 +111,7 @@ export async function updateCardPreview(card) {
 		return;
 	}
 	// general info
-	insertCardValueList(card, "names", cardDetailsName, "/", async (name) => (await getCardInfo(name)).name);
+	insertCardValueList(card, "names", cardDetailsName, "/", async (name) => (await cardLoader.getCardInfo(name)).name);
 
 	let cardTypes = [...card.values.cardTypes];
 	if (cardTypes.includes("token")) {
@@ -123,7 +141,7 @@ export async function updateCardPreview(card) {
 	// effects
 	cardDetailsEffectList.innerHTML = "";
 	if (!card.cardId.startsWith("C")) {
-		let effects = (await getCardInfo(card.cardId)).effects;
+		let effects = (await cardLoader.getCardInfo(card.cardId)).effects;
 		cardDetailsEffectList.innerHTML = "";
 		for (let effect of effects) {
 			let effectDiv = document.createElement("div");
@@ -226,3 +244,53 @@ function insertCardValueList(card, valueName, target, separator, localizer, none
 		insertCardValueText(noneText, target, "valueAdded");
 	}
 }
+
+// showing a deck in the deck view
+export function loadDeckPreview(deck) {
+	// remove existing cards
+	document.getElementById("deckSelectorCardGrid").innerHTML = "";
+	document.getElementById("deckSelectorCardGrid").scrollTop = 0;
+
+	//add new cards
+	let partnerAdded = false;
+	deckToCardIdList(deck).forEach(cardId => {
+		let cardImg = document.createElement("img");
+		cardImg.src = cardLoader.getCardImageFromID(cardId);
+		cardImg.dataset.cardId = cardId;
+
+		// make partner card glow
+		if (cardId == deck.suggestedPartner && !partnerAdded) {
+			partnerAdded = true;
+			cardImg.classList.add("cardHighlight");
+		}
+
+		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
+		cardImg.addEventListener("click", async function(e) {
+			e.stopPropagation();
+			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
+		});
+	});
+
+	// set the description
+	if (deck.description) {
+		deckSelectorDescription.textContent = deck.description[locale.code] ?? deck.description.en ?? deck.description[Object.keys(deck.description)[0]] ?? "";
+	} else {
+		deckSelectorDescription.textContent = "";
+	}
+}
+
+export function openDeckView() {
+	deckSelector.showModal();
+	deckSelector.appendChild(cardDetails);
+}
+export function closeDeckView() {
+	gameFlexBox.appendChild(cardDetails);
+	deckSelector.close();
+}
+
+// selecting deck from the deck list
+deckSelector.addEventListener("click", function(e) {
+	if (e.target == document.getElementById("deckSelector")) {
+		closeDeckView();
+	}
+});

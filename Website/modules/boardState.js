@@ -94,7 +94,7 @@ export class BoardState extends GameState {
 
 	givePartnerChoice() {
 		// do partner select
-		if (localPlayer.deck.suggestedPartner) {
+		if (players[localPlayer.index].deck.suggestedPartner) {
 			if (localStorage.getItem("partnerChoiceToggle") === "true") {
 				ui.askQuestion(locale.game.partnerSelect.useSuggestedQuestion, locale.game.partnerSelect.useSuggested, locale.game.partnerSelect.selectManually).then(result => {
 					if (result) {
@@ -131,7 +131,7 @@ export class BoardState extends GameState {
 	getPartnerFromDeck(partnerPosInDeck = -1) {
 		mainGameBlackoutContent.textContent = locale.game.partnerSelect.waitingForOpponent;
 		if (partnerPosInDeck == -1) {
-			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == game.players[localPlayer.index].deck["suggestedPartner"]});
+			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == players[localPlayer.index].deck.suggestedPartner});
 		}
 		socket.send("[choosePartner]" + partnerPosInDeck);
 		this.setPartner(localPlayer, partnerPosInDeck);

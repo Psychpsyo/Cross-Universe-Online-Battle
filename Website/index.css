@@ -113,6 +113,29 @@ textarea {
 	background-color: var(--theme-disabled-background-color);
 }
 
+.svgButton {
+	background-color: transparent;
+	border: 0;
+	padding: 0;
+}
+.svgButton > img {
+	height: 2.5em;
+}
+.svgButton:hover > img {
+	transform: translateY(-.1em);
+	filter: drop-shadow(0 .2em .1em #0008);
+}
+.svgButton:active > img {
+	transform: translateY(.1em);
+	filter: drop-shadow(0 0 .1em #0008);
+}
+.svgButton > img, .svgButton:disabled > img {
+	transform: translateY(0);
+	filter: drop-shadow(0 .1em .1em #0008);
+}
+.svgButton:disabled {
+	opacity: 50%;
+}
 
 /* dialogs */
 dialog {
@@ -121,7 +144,6 @@ dialog {
 
 .centerDialog {
 	max-height: fit-content;
-	overflow: hidden;
 
 	text-align: center;
 	padding: 0;
@@ -137,6 +159,8 @@ dialog {
 	height: max-content;
 	max-height: 90vh;
 	width: 100%;
+	overflow: hidden;
+	border-radius: 1em;
 }
 
 .centerDialog::backdrop {

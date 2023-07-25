@@ -36,7 +36,8 @@
 		"playerInfo": {
 			"life": "Life:",
 			"mana": "Mana:",
-			"vs": "VS"
+			"vs": "VS",
+			"viewDeck": "View Deck"
 		},
 
 		"deckSelect": {
@@ -45,6 +46,7 @@
 			"waitingForOpponent": "Waiting for opponent to choose their deck...",
 			"dropYourDeck": "Drag & drop your deck here.",
 			"useOfficialDeck": "Or choose one of the official ones.",
+			"dialogHeader": "Select a Deck",
 
 			"deckListDefault": "Default",
 			"deckListLegacy": "Legacy (old)",
@@ -221,10 +223,12 @@
 		"opponentsTurn": "Your opponent is picking a card.",
 		"packNumber": "Pack {#CURRENT}/{#TOTAL}",
 		"amountTaken": "{#CURRENT}/{#TOTAL} Taken",
+		"settingUpDecks": "Setting up Decks...",
 		"finished": "Draft finished. You can start the game now.",
 		"startGame": "Start Game",
 		"waitingForOpponent": "Waiting for Opponent...",
 		"deckName": "Draft Deck",
+		"deckDescription": "This deck was made at the start of a draft game.",
 		"yourDeck": "Your Deck",
 		"opponentDeck": "Opponent Deck"
 	},

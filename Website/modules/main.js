@@ -10,11 +10,13 @@ window.youAre = null; // Whether this client is player 0 or player 1. (Mainly fo
 window.players = [
 	{
 		name: locale.chat.opponent,
-		profilePicture: "S00093"
+		profilePicture: "S00093",
+		deck: null
 	},
 	{
 		name: localStorage.getItem("username"),
-		profilePicture: localStorage.getItem("profilePicture")
+		profilePicture: localStorage.getItem("profilePicture"),
+		deck: null
 	}
 ];
 if (players[1].name == "") {

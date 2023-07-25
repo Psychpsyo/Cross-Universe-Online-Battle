@@ -25,7 +25,6 @@ for (const elem of Array.from(document.querySelectorAll(".manaTitle"))) {
 }
 
 cardChoiceConfirm.textContent = locale.game.cardChoice.confirm;
-infoPanelVS.textContent = locale.game.playerInfo.vs;
 
 if (localStorage.getItem("fieldLabelToggle") == "true") {
 	document.querySelectorAll(".fieldLabelUnitZone").forEach(label => {
@@ -364,9 +363,7 @@ export function clearCardButtons(zone, index, type) {
 }
 
 function setCardDragEvent(element, uiCardSlot) {
-	element.addEventListener("dragstart", function(e) {
-		e.preventDefault();
-	});
+	element.draggable = false;
 	element.addEventListener("pointerdown", function(e) {
 		element.setPointerCapture(e.pointerId);
 	});
@@ -563,9 +560,6 @@ class DeckCardSlot extends UiCardSlot {
 		super(zone, -1);
 		this.cardCount = zone.cards.length;
 
-		document.getElementById("deck" + this.zone.player.index).addEventListener("dragstart", function(e) {
-			e.preventDefault();
-		});
 		document.getElementById("deck" + this.zone.player.index).addEventListener("pointerup", function(e) {
 			if (e.pointerId != currentPointer) {
 				return;
@@ -934,6 +928,7 @@ function animate(currentTime) {
 		if (uiPlayer.life.value == 0) {
 			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "grayscale(100%)";
 			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "opacity(50%)";
+			playerDeckButton0.disabled = false;
 		} else {
 			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "";
 			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "";

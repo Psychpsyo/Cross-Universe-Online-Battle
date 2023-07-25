@@ -36,7 +36,8 @@
 		"playerInfo": {
 			"life": "LP:",
 			"mana": "Mana:",
-			"vs": "VS"
+			"vs": "VS",
+			"viewDeck": "View Deck"
 		},
 
 		"deckSelect": {
@@ -45,6 +46,7 @@
 			"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
 			"dropYourDeck": "Deck per Drag & Drop hier ablegen.",
 			"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+			"dialogHeader": "Wähle ein Deck",
 
 			"deckListDefault": "Default",
 			"deckListLegacy": "Legacy (alt)",
@@ -221,10 +223,12 @@
 		"opponentsTurn": "Dein Gegner wählt eine Karte.",
 		"packNumber": "Booster {#CURRENT}/{#TOTAL}",
 		"amountTaken": "{#CURRENT}/{#TOTAL} genommen",
+		"settingUpDecks": "Decks werden geladen...",
 		"finished": "Draft beendet. Ihr könnt das Spiel nun starten.",
 		"startGame": "Spiel Starten",
 		"waitingForOpponent": "Warte auf Gegner...",
 		"deckName": "Draft Deck",
+		"deckDescription": "Dieses Deck wurde zu Anfang eines Drafts erstellt.",
 		"yourDeck": "Dein Deck",
 		"opponentDeck": "Gegnerisches Deck"
 	},

@@ -146,6 +146,7 @@
 }
 #stackDisplayHolder img {
 	height: 6em;
+	user-select: none;
 }
 #stackDisplayHolder span {
 	position: absolute;

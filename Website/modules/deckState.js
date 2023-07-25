@@ -1,27 +1,16 @@
 // This module exports the DeckState class which is the state at the beginning of a (non-draft) match where players select their decks.
 import {GameState} from "/modules/gameState.js";
 import {BoardState} from "/modules/boardState.js";
-import {Card} from "/rulesEngine/card.js";
 import {locale} from "/modules/locale.js";
 import {socket} from "/modules/netcode.js";
-import {toDeckx, deckToCardIdList, countDeckCards} from "/modules/deckUtils.js";
-import {previewCard} from "/modules/generalUI.js";
+import {toDeckx, countDeckCards} from "/modules/deckUtils.js";
+import {loadDeckPreview, openDeckView, closeDeckView} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 import * as deckErrors from "/rulesEngine/deckErrors.js";
 
 let builtInDecks = [];
 let currentDeckList = "default";
-
-
-function openDeckSelect() {
-	deckSelector.showModal();
-	deckSelector.appendChild(cardDetails);
-}
-function closeDeckSelect() {
-	gameFlexBox.appendChild(cardDetails);
-	deckSelector.close();
-}
 
 function loadDeckFile(file) {
 	let reader = new FileReader();
@@ -32,39 +21,6 @@ function loadDeckFile(file) {
 
 	reader.fileName = file["name"];
 	reader.readAsText(file);
-}
-
-//loading card list in the deck selector
-function loadDeckPreview(deck) {
-	//add card list on the right
-	//remove all cards already there
-	document.getElementById("deckSelectorCardGrid").innerHTML = "";
-
-	//scroll the list to top
-	document.getElementById("deckSelectorCardGrid").scrollTop = 0;
-
-	//add the cards
-	let partnerAdded = false;
-	deckToCardIdList(builtInDecks[currentDeckList][deck]).forEach(cardId => {
-		let cardImg = document.createElement("img");
-		cardImg.src = cardLoader.getCardImageFromID(cardId);
-		cardImg.dataset.cardId = cardId;
-
-		//make partner card glow
-		if (cardId == builtInDecks[currentDeckList][deck]["suggestedPartner"] && !partnerAdded) {
-			partnerAdded = true;
-			cardImg.classList.add("cardHighlight");
-		}
-
-		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
-		cardImg.addEventListener("click", async function(e) {
-			e.stopPropagation();
-			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
-		});
-	});
-
-	// set the description
-	document.getElementById("deckSelectorDescription").textContent = builtInDecks[currentDeckList][deck]["description"][locale.code] ?? builtInDecks[currentDeckList][deck]["description"]["en"] ?? builtInDecks[currentDeckList][deck]["description"]["ja"];
 }
 
 //loading decks into the deck list
@@ -102,7 +58,7 @@ async function addDecksToDeckSelector(deckList) {
 				document.getElementById("selectedDeck").id = "";
 			}
 			this.id = "selectedDeck";
-			loadDeckPreview(this.dataset.deck);
+			loadDeckPreview(builtInDecks[currentDeckList][this.dataset.deck]);
 		});
 
 		deckDiv.appendChild(document.createElement("br"));
@@ -150,19 +106,12 @@ export class DeckState extends GameState {
 			loadDeckFile(this.files[0]);
 		});
 
-		// selecting deck from the deck list
-		deckSelector.addEventListener("click", function(e) {
-			if (e.target == document.getElementById("deckSelector")) {
-				closeDeckSelect();
-			}
-		});
-
 		document.getElementById("loadSelectedDeckBtn").addEventListener("click", function() {
 			if (!document.getElementById("selectedDeck")) {
 				return;
 			}
 
-			closeDeckSelect();
+			closeDeckView();
 			this.loadDeck(builtInDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
 		}.bind(this));
 
@@ -171,7 +120,7 @@ export class DeckState extends GameState {
 			e.stopPropagation();
 			currentDeckList = "default";
 			addDecksToDeckSelector(currentDeckList);
-			openDeckSelect();
+			openDeckView();
 		});
 		// deck selector deck list buttons
 		document.getElementById("defaultDecksBtn").addEventListener("click", function() {
@@ -190,6 +139,7 @@ export class DeckState extends GameState {
 		// show game area
 		dropDeckHereLabel.textContent = locale.game.deckSelect.dropYourDeck;
 		deckSelectSpan.textContent = locale.game.deckSelect.useOfficialDeck;
+		deckViewTitle.textContent = locale.game.deckSelect.dialogHeader;
 		defaultDecksBtn.textContent = locale.game.deckSelect.deckListDefault;
 		legacyDecksBtn.textContent = locale.game.deckSelect.deckListLegacy;
 		loadSelectedDeckBtn.textContent = locale.game.deckSelect.deckListLoadSelected;
@@ -203,7 +153,7 @@ export class DeckState extends GameState {
 			case "deck": {
 				let deck = JSON.parse(message);
 				cardLoader.deckToCdfList(deck, this.automatic, game.players[0]).then(cdfList => {
-					game.players[0].deck = deck;
+					players[0].deck = deck;
 					game.players[0].setDeck(cdfList);
 					gameUI.updateCard(game.players[0].deckZone, -1);
 					gameState.checkReadyConditions();
@@ -252,21 +202,23 @@ export class DeckState extends GameState {
 
 		// deck selection elements aren't needed anymore.
 		deckDropzone.remove();
-		deckSelector.remove();
+		deckSelector.classList.add("deckListDisable");
 
 		// sync and load the deck
 		socket.send("[deck]" + JSON.stringify(deck));
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
-		localPlayer.deck = deck;
+		players[localPlayer.index].deck = deck;
 
 		gameUI.updateCard(localPlayer.deckZone, -1);
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
+
+		playerDeckButton1.disabled = false;
 
 		this.checkReadyConditions();
 	}
 
 	checkReadyConditions() {
-		if (!game.players.find(player => player.deck == null)) {
+		if (!players.find(player => player.deck == null)) {
 			if (!this.ready) {
 				socket.send("[ready]");
 				this.ready = true;

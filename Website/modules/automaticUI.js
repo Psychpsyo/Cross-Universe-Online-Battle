@@ -157,13 +157,11 @@ export function newBlock(block) {
 	let visual = document.createElement("div");
 
 	let img = document.createElement("img");
+	img.draggable = false;
 	visual.appendChild(img);
 	img.addEventListener("click", function(e) {
 		e.stopPropagation();
 		previewCard(card.cardRef);
-	});
-	img.addEventListener("dragstart", function(e) {
-		e.preventDefault();
 	});
 	cardLoader.getCardImage(card).then(src => {
 		img.src = src;

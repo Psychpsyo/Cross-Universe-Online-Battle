@@ -65,22 +65,28 @@
 			<div id="gameFlexBox">
 				<div id="leftPanel">
 					<div id="infoPanel">
-						<div id="playerInfoHolder1" class="playerInfoHolder">
-							<div class="profilePictureHolder">
-								<div id="profilePicture1" class="profilePicture"></div>
-								<span id="username1" class="username overlayText"></span>
+						<div id="playerInfoSide1" class="playerInfoSide">
+							<div id="playerInfoHolder1" class="playerInfoHolder">
+								<div class="profilePictureHolder">
+									<div id="profilePicture1" class="profilePicture"></div>
+									<span id="username1" class="username overlayText"></span>
+								</div>
+								<div class="playerInfoValueHolder"><span class="lifeTitle"></span><span id="lifeDisplay1">1000</span></div>
+								<div class="playerInfoValueHolder"><span class="manaTitle"></span><span id="manaDisplay1">0</span></div>
 							</div>
-							<div class="playerInfoValueHolder"><span class="lifeTitle"></span><span id="lifeDisplay1">1000</span></div>
-							<div class="playerInfoValueHolder"><span class="manaTitle"></span><span id="manaDisplay1">0</span></div>
+							<button id="playerDeckButton1" class="playerDeckButton svgButton" autocomplete="off" disabled><img id="playerDeckButtonImage1" src="images/icons/deck.svg" alt="" draggable="false"></button>
 						</div>
 						<hr>
-						<div id="playerInfoHolder0" class="playerInfoHolder">
-							<div class="profilePictureHolder">
-								<div id="profilePicture0" class="profilePicture"></div>
-								<span id="username0" class="username overlayText"></span>
+						<div id="playerInfoSide0" class="playerInfoSide">
+							<div id="playerInfoHolder0" class="playerInfoHolder">
+								<div class="profilePictureHolder">
+									<div id="profilePicture0" class="profilePicture"></div>
+									<span id="username0" class="username overlayText"></span>
+								</div>
+								<div class="playerInfoValueHolder"><span class="lifeTitle"></span><span id="lifeDisplay0">1000</span></div>
+								<div class="playerInfoValueHolder"><span class="manaTitle"></span><span id="manaDisplay0">0</span></div>
 							</div>
-							<div class="playerInfoValueHolder"><span class="lifeTitle"></span><span id="lifeDisplay0">1000</span></div>
-							<div class="playerInfoValueHolder"><span class="manaTitle"></span><span id="manaDisplay0">0</span></div>
+							<button id="playerDeckButton0" class="playerDeckButton svgButton" autocomplete="off" disabled><img id="playerDeckButtonImage0" src="images/icons/deck.svg" alt="" draggable="false"></button>
 						</div>
 						<div id="infoPanelVS" class="overlayText"></div>
 					</div>
@@ -163,7 +169,7 @@
 								<div id="p0Grid" class="playerGrid">
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelDeck"></div>
-										<img src="images/cardHidden.png" id="deck0" class="card" alt="">
+										<img src="images/cardHidden.png" id="deck0" class="card" alt="" draggable="false">
 										<div id="deckDropOptions0" class="cardBtns manualOnly">
 											<button id="deckTopBtn0"></button><br>
 											<button id="deckShuffleInBtn0"></button><br>
@@ -369,7 +375,7 @@
 									</div>
 									<div class="fieldCardContainer">
 										<div class="fieldLabel fieldLabelDeck"></div>
-										<img src="images/cardHidden.png" id="deck1" class="card" alt="">
+										<img src="images/cardHidden.png" id="deck1" class="card" alt="" draggable="false">
 										<div id="deckDropOptions1" class="cardBtns">
 											<button id="deckTopBtn1"></button><br>
 											<button id="deckShuffleInBtn1"></button><br>
@@ -464,6 +470,7 @@
 			<!--Deck Selector-->
 			<dialog id="deckSelector" class="centerDialog popupSelectMenu">
 				<section class="dialogContent">
+					<header><h1 id="deckViewTitle"></h1></header>
 					<div id="deckSelectorFlex">
 						<div id="deckSelectorList">
 							<div id="deckListHeader">

@@ -183,18 +183,26 @@ dialog #cardDetails {
 	position: relative;
 	display: flex;
 	white-space: nowrap;
-	user-select: none;
 }
 #infoPanel > hr {
-	margin: 0 .3em;
+	margin: 0;
+}
+.playerInfoSide {
+	position: relative;
+	width: 50%;
+	padding: .6em;
+}
+#playerInfoSide0 {
+	padding-left: .9em;
+}
+#playerInfoSide1 {
+	padding-right: .9em;
 }
 .playerInfoHolder {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	width: 50%;
 	text-align: center;
-	padding: .6em;
 	transition: filter 1s;
 }
 .profilePictureHolder {
@@ -222,6 +230,11 @@ dialog #cardDetails {
 	width: 80%;
 	display: flex;
 	justify-content: space-between;
+}
+.playerDeckButton {
+	position: absolute;
+	top: .6em;
+	left: .6em;
 }
 #infoPanelVS {
 	position: absolute;
@@ -360,12 +373,11 @@ img[src$="cardBackFrameP1.png"] {
 
 
 .overlayText {
+	color: #eee;
 	font-weight: bold;
-	pointer-events: none;
 	filter: drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em black) drop-shadow(0 0 .3em black);
 }
 .fieldCardAmountDisplay {
-	color: #eee;
 	position: absolute;
 	text-align: center;
 	left: 0;
@@ -373,6 +385,7 @@ img[src$="cardBackFrameP1.png"] {
 	top: 50%;
 	transform: translateY(-50%);
 	font-size: 1.3em;
+	pointer-events: none;
 	z-index: 2;
 }
 
@@ -620,9 +633,13 @@ dialog.popupSelectMenu {
 }
 
 #deckSelectorList {
-	flex-grow: 1;
 	display: flex;
 	flex-direction: column;
+	min-width: 35%;
+	border-right: 2px var(--theme-border-color) solid;
+}
+.deckListDisable #deckSelectorList {
+	display: none;
 }
 
 #deckList {
@@ -637,7 +654,6 @@ dialog.popupSelectMenu {
 #deckListHeader {
 	display: flex;
 	height: 2em;
-	border-top-left-radius: 1em;
 	align-items: stretch;
 }
 
@@ -648,7 +664,6 @@ dialog.popupSelectMenu {
 }
 
 #deckListHeader > :first-child {
-	border-top-left-radius: 1em;
 	border-left: none;
 }
 
@@ -678,12 +693,10 @@ dialog.popupSelectMenu {
 }
 
 #deckSelectorRight {
-	flex-basis: 65%;
-	border-left: 2px var(--theme-border-color) solid;
-	border-radius: 0 1em 1em 0;
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	flex-grow: 1;
 }
 
 #deckSelectorRight > div {
@@ -691,7 +704,7 @@ dialog.popupSelectMenu {
 }
 
 #deckSelectorCardGrid {
-	height: 70%;
+	flex-grow: 1;
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
 
@@ -701,13 +714,16 @@ dialog.popupSelectMenu {
 }
 
 #deckSelectorDescription {
-	height: 30%;
+	min-height: 30%;
 	padding: .25em .5em;
 	box-sizing: border-box;
 	border-top: 2px solid var(--theme-border-color);
 	white-space: pre-wrap;
 	text-align: left;
 	font-size: .8em;
+}
+.deckListDisable #deckSelectorDescription {
+	min-height: 20%;
 }
 
 #questionPopup {

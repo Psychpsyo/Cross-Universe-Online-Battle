@@ -1,11 +1,13 @@
 // Utility functions for handling and converting decks
 import {locale} from "/modules/locale.js";
 
-export function deckFromCardList(cards, name) {
+export function deckFromCardList(cards, name, description) {
 	let deck = {};
-	deck["name"] = {};
-	deck["name"][locale.code] = name;
-	deck["cards"] = [];
+	deck.name = {};
+	deck.name[locale.code] = name ?? "";
+	deck.description = {};
+	deck.description[locale.code] = description ?? "";
+	deck.cards = [];
 
 	//add the cards
 	for (const card of cards) {
