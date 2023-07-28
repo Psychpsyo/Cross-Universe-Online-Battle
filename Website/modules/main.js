@@ -46,6 +46,7 @@ deckMakerButton.textContent = locale.mainMenu.deckCreatorButton;
 
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
+loadingIndicator.classList.remove("active");
 
 // randomize default room code
 function randomizeRoomcode() {

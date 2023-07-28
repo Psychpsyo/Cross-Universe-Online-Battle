@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="145"
+   height="145"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <g id="triangles">
+    <animateTransform attributeName="transform" attributeType="XML" type="rotate" dur="10s" from="0 50 50" to="360 50 50" repeatCount="indefinite"></animateTransform>
+    <path
+       style="fill:#ffffff;fill-opacity:0;stroke:#ffffff;stroke-width:1.41959;stroke-dasharray:none;stroke-opacity:1"
+       id="path17"
+       d="m 48.417135,43.677258 -22.135265,0 11.067633,-19.169702 z"
+       transform="matrix(2.4303852,0,0,2.4277396,-40.773682,-40.5343)" />
+    <path
+       style="fill:#ffffff;fill-opacity:0;stroke:#ffffff;stroke-width:1.41959;stroke-dasharray:none;stroke-opacity:1"
+       id="path18"
+       d="m 48.417135,43.677258 -22.135265,0 11.067633,-19.169702 z"
+       transform="matrix(-2.4303852,0,0,-2.4277396,140.77367,140.51369)" />
+  </g>
+  <g id="squares">
+    <animateTransform attributeName="transform" attributeType="XML" type="rotate" dur="15s" from="0 50 50" to="-360 50 50" repeatCount="indefinite"></animateTransform>
+    <rect
+       style="fill:#ffffff;fill-opacity:0;stroke:#ffffff;stroke-width:3.44828;stroke-dasharray:none;stroke-opacity:1"
+       id="rect7"
+       width="65.517235"
+       height="65.517235"
+       x="17.241385"
+       y="-82.758621"
+       transform="rotate(90)" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0;stroke:#ffffff;stroke-width:3.44828;stroke-dasharray:none;stroke-opacity:1"
+       id="rect8"
+       width="65.517235"
+       height="65.517235"
+       x="-32.758617"
+       y="-103.46929"
+       transform="rotate(135)" />
+  </g>
+  <g id="circles">
+    <circle
+       style="fill:none;fill-opacity:0;stroke:#ffffff;stroke-width:3.44828;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="ellipse3"
+       cx="50"
+       cy="50"
+       r="48.27586" />
+    <circle
+       style="fill:none;fill-opacity:0;stroke:#ffffff;stroke-width:3.44828;stroke-dasharray:none;stroke-opacity:1"
+       id="circle6"
+       cx="70.710678"
+       cy="3.029751e-06"
+       r="32.769459"
+       transform="rotate(45)" />
+  </g>
+</svg>

@@ -170,6 +170,8 @@ export class DeckState extends GameState {
 	}
 
 	async loadDeck(deck) {
+		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
+		loadingIndicator.classList.add("active");
 		try {
 			localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
 		} catch (e) {
@@ -197,7 +199,10 @@ export class DeckState extends GameState {
 					alert(locale.game.deckSelect.errors.generic);
 				}
 			}
+			mainGameBlackoutContent.textContent = locale.game.deckSelect.chooseYourDeck;
 			return;
+		} finally {
+			loadingIndicator.classList.remove("active");
 		}
 
 		// deck selection elements aren't needed anymore.
@@ -206,7 +211,6 @@ export class DeckState extends GameState {
 
 		// sync and load the deck
 		socket.send("[deck]" + JSON.stringify(deck));
-		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
 		players[localPlayer.index].deck = deck;
 
 		gameUI.updateCard(localPlayer.deckZone, -1);

@@ -170,7 +170,9 @@ export class DraftState extends GameState {
 					document.getElementById("playerDeckButton" + i).disabled = false;
 				}));
 			}
+			loadingIndicator.classList.add("active");
 			await Promise.all(deckSetupPromises);
+			loadingIndicator.classList.remove("active");
 
 			// show start button
 			draftMainInfo.textContent = locale.draft.finished;
