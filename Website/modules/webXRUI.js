@@ -54,7 +54,7 @@ fieldMesh.rotation.x = Math.PI / 2;
 
 // card-related stuff
 let cardProxies = [];
-const cardBackTexture = textureLoader.load("/images/cardBack.png");
+const cardBackTexture = textureLoader.load("/images/cardBack.jpg");
 cardBackTexture.wrapS = THREE.RepeatWrapping;
 cardBackTexture.repeat.x = - 1;
 const cardBackMaterial = new THREE.MeshBasicMaterial({map: cardBackTexture, side: THREE.BackSide});
