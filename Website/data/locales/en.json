@@ -47,6 +47,8 @@
 			"dropYourDeck": "Drag & drop your deck here.",
 			"useOfficialDeck": "Or choose one of the official ones.",
 			"dialogHeader": "Select a Deck",
+			"unnamedDeck": "Unnamed Deck",
+			"noDescriptionSet": "No description set.",
 
 			"deckListDefault": "Default",
 			"deckListLegacy": "Legacy (old)",

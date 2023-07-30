@@ -47,6 +47,8 @@
 			"dropYourDeck": "デッキをドラック＆ドロップしてください。",
 			"useOfficialDeck": "もしくは、公式デッキを選択してください。",
 			"dialogHeader": null,
+			"unnamedDeck": null,
+			"noDescriptionSet": null,
 
 			"deckListDefault": "参考デッキ",
 			"deckListLegacy": "過去のデッキ",

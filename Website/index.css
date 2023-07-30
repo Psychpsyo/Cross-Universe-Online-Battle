@@ -183,3 +183,8 @@ dialog {
 	border-bottom-left-radius: 1em;
 	border-bottom-right-radius: 1em;
 }
+
+.greyedOut {
+	opacity: 0.5;
+	font-style: italic;
+}
