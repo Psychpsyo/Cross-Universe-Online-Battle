@@ -34,10 +34,10 @@
 			<div id="centerDiv">
 				<img id="mainLogo" src="./images/logo.png" alt="">
 				<main id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
-					<span id="roomCodeInputFieldSpan">
+					<div id="roomCodeInputFieldHolder">
 						<h1 id="roomCodeInputTitle"></h1><br>
 						<label for="roomCodeInputField" id="roomCodeInputLabel"></label>
-						<span><input id="roomCodeInputField" aria-atomic="true"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
+						<span><input id="roomCodeInputField" aria-atomic="true" autocomplete="off"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
 						<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
 						<select id="gameModeSelect">
 							<option id="gameModeNormalOption" value="normal"></option>
@@ -45,11 +45,14 @@
 							<option id="gameModeNormalAutomaticOption" value="normalAutomatic"></option>
 						</select><br>
 						<button id="connectBtn"></button>
-					</span>
-					<span id="waitingForOpponentSpan" hidden>
-						<span id="trWaitingForOpponent" aria-live="polite" aria-atomic="true"></span><br>
-						<button id="cancelWaitingBtn"></button>
-					</span>
+					</div>
+					<div id="waitingForOpponentHolder" hidden>
+						<span id="waitingForOpponentText" aria-live="polite" aria-atomic="true"></span>
+						<div id="waitingBtnSpan">
+							<button id="copyInviteLink"></button>
+							<button id="cancelWaitingBtn"></button>
+						</div>
+					</div>
 				</main>
 				<nav id="mainNavigation">
 					<a id="rulesButton" class="bigButton" target="_blank"></a>

@@ -7,6 +7,8 @@
 		"rerollRoomcode": "Generate random room code",
 		"connectToRoom": "Connect",
 		"waitingForOpponent": "Waiting for Opponent...",
+		"copyInviteLink": "Copy Invite Link",
+		"inviteLinkCopied": "Copied!",
 		"cancelWaiting": "Cancel",
 		"rulesButton": "Game Rules",
 		"rulesLink": "https://crossuniverse.net/rules",

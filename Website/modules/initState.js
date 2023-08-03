@@ -132,8 +132,8 @@ export class InitState extends GameState {
 
 	cancel() {
 		socket.close();
-		waitingForOpponentSpan.hidden = true;
-		roomCodeInputFieldSpan.hidden = false;
+		waitingForOpponentHolder.hidden = true;
+		roomCodeInputFieldHolder.hidden = false;
 		roomCodeInputField.focus();
 		gameState = null;
 	}

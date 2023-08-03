@@ -55,6 +55,11 @@ h1 {
 	width: 2em;
 }
 
+#waitingBtnSpan {
+	display: flex;
+	justify-content: space-evenly;
+}
+
 #mainNavigation {
 	width: 100%;
 	min-height: 5em

@@ -23,6 +23,52 @@ if (players[1].name == "") {
 	players[1].name = locale.chat.you;
 }
 
+// randomizing the default room code
+function randomizeRoomcode() {
+	let roomcode = 10000 + (Math.floor(Math.random() * 90000));
+	roomCodeInputField.placeholder = roomcode;
+	roomCodeInputField.value = roomcode;
+}
+
+function getRoomcode() {
+	return roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value;
+}
+
+// connecting
+export function connect() {
+	// hide input field and show waiting indicator
+	roomCodeInputFieldHolder.hidden = true;
+	waitingForOpponentHolder.hidden = false;
+	// refresh the "Waiting for Opponent" text so screen readers read it out.
+	setTimeout(() => {
+		if (typeof waitingForOpponentText !== undefined) {
+			waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;
+			cancelWaitingBtn.focus();
+		}
+	}, 100);
+
+	// I don't want to import this up-front on pageload since it imports a bunch of other stuff itself.
+	import("/modules/initState.js").then(initModule => {
+		new initModule.InitState(getRoomcode(), gameModeSelect.value);
+	});
+}
+
+
+// check if a room code is given in the query string
+let queryString = new URLSearchParams(window.location.search);
+if (queryString.get("id")) {
+	roomCodeInputField.placeholder = queryString.get("id");
+	let gameMode = queryString.get("m");
+	if (!["normal", "draft", "normalAutomatic"].includes(gameMode)) {
+		gameMode = "normal";
+	}
+	gameModeSelect.value = gameMode;
+	connect();
+} else {
+	randomizeRoomcode();
+}
+
+
 // translate main menu
 roomCodeInputTitle.textContent = locale.mainMenu.roomCodeInputTitle;
 roomCodeInputLabel.textContent = locale.mainMenu.enterRoomcode;
@@ -34,7 +80,8 @@ gameModeDraftOption.textContent = locale.mainMenu.gamemodes.draft;
 gameModeNormalAutomaticOption.textContent = locale.mainMenu.gamemodes.normalAutomatic;
 
 connectBtn.textContent = locale.mainMenu.connectToRoom;
-trWaitingForOpponent.textContent = locale.mainMenu.waitingForOpponent;
+waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;
+copyInviteLink.textContent = locale.mainMenu.copyInviteLink;
 cancelWaitingBtn.textContent = locale.mainMenu.cancelWaiting;
 unofficialNotice.innerHTML = locale.mainMenu.unofficialNotice;
 rulesButton.textContent = locale.mainMenu.rulesButton;
@@ -48,49 +95,39 @@ document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 loadingIndicator.classList.remove("active");
 
-// randomize default room code
-function randomizeRoomcode() {
-	let roomcode = 10000 + (Math.floor(Math.random() * 90000));
-	roomCodeInputField.placeholder = roomcode;
-	roomCodeInputField.value = roomcode;
-}
+// randomize roomcode button
 roomCodeRefresh.addEventListener("click", function() {
 	randomizeRoomcode();
 	roomCodeInputField.setAttribute("aria-live", "polite");
 });
-randomizeRoomcode();
 
-// connecting
-export function connect() {
-	// hide input field and show waiting indicator
-	roomCodeInputFieldSpan.hidden = true;
-	waitingForOpponentSpan.hidden = false;
-	// refresh the "Waiting for Opponent" text so screen readers read it out.
-	setTimeout(() => {
-		if (typeof trWaitingForOpponent !== undefined) {
-			trWaitingForOpponent.textContent = locale.mainMenu.waitingForOpponent;
-			cancelWaitingBtn.focus();
-		}
-	}, 100);
-
-	// I don't want to import this up-front on pageload since it imports a bunch of other stuff itself.
-	import("/modules/initState.js").then(initModule => {
-		new initModule.InitState(roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value, gameModeSelect.value);
-	});
-}
 // pressing enter in the roomcode entry field to connect
-document.getElementById("roomCodeInputField").addEventListener("keyup", function(e) {
+roomCodeInputField.addEventListener("keyup", function(e) {
 	if (e.code == "Enter") {
 		connect();
 	}
 });
 // clicking the connect button to connect
-document.getElementById("connectBtn").addEventListener("click", connect);
+connectBtn.addEventListener("click", connect);
 
 // canceling a connection
-document.getElementById("cancelWaitingBtn").addEventListener("click", function() {
+cancelWaitingBtn.addEventListener("click", function() {
 	gameState.cancel();
 	gameState = null;
+});
+// generating an invite link
+copyInviteLink.addEventListener("click", function() {
+	let inviteURL = "https://battle.crossuniverse.net?id=" + encodeURIComponent(getRoomcode());
+	if (gameModeSelect.value !== "normal") {
+		inviteURL += "&m=" + encodeURIComponent(gameModeSelect.value);
+	}
+	navigator.clipboard.writeText(inviteURL);
+	copyInviteLink.textContent = locale.mainMenu.inviteLinkCopied;
+});
+copyInviteLink.addEventListener("mouseleave", function() {
+	setTimeout(function() {
+		copyInviteLink.textContent = locale.mainMenu.copyInviteLink;
+	}, 500);
 });
 
 // handle hotkeys
