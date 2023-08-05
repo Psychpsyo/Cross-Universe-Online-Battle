@@ -134,6 +134,14 @@ export async function isCardScripted(cardId) {
 	if (cardId.startsWith("C")) {
 		return "cdfScriptEffects" in cardInfoCache[cardId];
 	}
+	if (cardId.startsWith("T")) {
+		for (let summonerId of (await getCardInfo(cardId)).summonedBy) {
+			if (await isCardScripted(summonerId)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	if (!scriptedCardList) {
 		scriptedCardList = (async() => {
 			let response = await fetch("/data/scriptedCardsList.json");

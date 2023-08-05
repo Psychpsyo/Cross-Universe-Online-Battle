@@ -150,6 +150,7 @@ function setLanguage(language) {
 		cardImageUrlInput.title = locale.settings.advanced.cardImageUrlTitle;
 		cardDataApiUrlLabel.textContent = locale.settings.advanced.cardDataApiUrl;
 		cardDataApiUrlInput.title = locale.settings.advanced.cardDataApiUrlTitle;
+		devModeToggleLabel.textContent = locale.settings.advanced.devMode;
 
 		relabelAllHotkeys();
 		refetchCardData();
@@ -257,6 +258,9 @@ cardImageUrlInput.addEventListener("change", function() {
 });
 cardDataApiUrlInput.addEventListener("change", function() {
 	localStorage.setItem("cardDataApiUrl", this.value);
+});
+devModeToggle.addEventListener("change", function() {
+	localStorage.setItem("devMode", this.checked);
 });
 
 // for hotkeys

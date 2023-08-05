@@ -463,7 +463,8 @@
 			"cardImageUrl": "URL für Kartenbilder:",
 			"cardImageUrlTitle": "Hier kannst du einen Override für den Server einstellen, von dem Kartenbilder geladen werden. Solch ein Server sollte in der Lage sein sowohl Englische als auch Japanische Kartenbilder zu liefern und sollte einen /random Endpoint anbieten, welcher auf ein zufälliges Kartenbild verweist.",
 			"cardDataApiUrl": "URL für Kartendaten API:",
-			"cardDataApiUrlTitle": "Hier kannst du einen Override für den Server einstellen, von welchem die Kartendaten geladen werden. Dieser Server wird sowohl vom Deck Editor als auch vom Spiel verwendet."
+			"cardDataApiUrlTitle": "Hier kannst du einen Override für den Server einstellen, von welchem die Kartendaten geladen werden. Dieser Server wird sowohl vom Deck Editor als auch vom Spiel verwendet.",
+			"devMode": "Entwickleroptionen"
 		}
 	},
 
@@ -519,7 +520,8 @@
 			"supportedIn": "Verfügbar in:",
 			"supportedInAnywhere": "egal",
 			"supportedInManual": "Manuell",
-			"supportedInAutomatic": "Automatisch"
+			"supportedInAutomatic": "Automatisch",
+			"supportedInUnimplemented": "Unimplmentiert"
 		},
 
 		"cardInfo": {

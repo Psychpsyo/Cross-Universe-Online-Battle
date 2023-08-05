@@ -463,7 +463,8 @@
 			"cardImageUrl": "Card Images URL:",
 			"cardImageUrlTitle": "This lets you override the server that card images are loaded from. This server should be able to provide English and Japanese card images and provide a /random endpoint which redirects to a random card image.",
 			"cardDataApiUrl": "Card Data API URL:",
-			"cardDataApiUrlTitle": "This lets you override the API endpoint that is used to query card data. This is used by both the deck creator and the main game."
+			"cardDataApiUrlTitle": "This lets you override the API endpoint that is used to query card data. This is used by both the deck creator and the main game.",
+			"devMode": "Developer Options"
 		}
 	},
 
@@ -519,7 +520,8 @@
 			"supportedIn": "Supported in:",
 			"supportedInAnywhere": "anywhere",
 			"supportedInManual": "manual",
-			"supportedInAutomatic": "automatic"
+			"supportedInAutomatic": "automatic",
+			"supportedInUnimplemented": "unimplemented"
 		},
 
 		"cardInfo": {

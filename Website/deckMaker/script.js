@@ -96,6 +96,11 @@ searchSupportedInAnywhere.textContent = locale.deckMaker.searchMenu.supportedInA
 searchSupportedInManual.textContent = locale.deckMaker.searchMenu.supportedInManual;
 searchSupportedInAutomatic.textContent = locale.deckMaker.searchMenu.supportedInAutomatic;
 
+if (localStorage.getItem("devMode") === "true") {
+	searchSupportedInUnimplemented.textContent = locale.deckMaker.searchMenu.supportedInUnimplemented;
+	searchSupportedInUnimplemented.hidden = false;
+}
+
 //sort the types alphabetically
 let sortedOptions = Array.from(cardSearchTypeInput.children).sort(function(a, b) {
 	let typeSortNames = locale.optional.typeSortNames ?? locale.types;
@@ -191,19 +196,16 @@ function searchCards(query) {
 
 			let display = true;
 			switch (cardSearchSupportInput.value) {
-				case "automatic": {
+				case "automatic":{
 					display = await cardLoader.isCardScripted(card.cardID);
-					if (card.cardType == "token") {
-						for (let cardId of card.summonedBy) {
-							if (await cardLoader.isCardScripted(cardId)) {
-								display = true;
-							}
-						}
-					}
 					break;
 				}
 				case "neos": {
 					display = await cardLoader.isInNeos(card.cardID);
+					break;
+				}
+				case "unimplemented": {
+					display = !(await cardLoader.isCardScripted(card.cardID));
 					break;
 				}
 			}

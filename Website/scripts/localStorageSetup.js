@@ -7,6 +7,7 @@ localStorage.setItem("cardDataApiUrl", localStorage.getItem("cardDataApiUrl") ??
 localStorage.setItem("cardImageUrl", localStorage.getItem("cardImageUrl") ?? "");
 localStorage.setItem("customCards", localStorage.getItem("customCards") ?? "[]");
 localStorage.setItem("customFont", localStorage.getItem("customFont") ?? "");
+localStorage.setItem("devMode", localStorage.getItem("devMode") ?? false);
 localStorage.setItem("fieldLabelToggle", localStorage.getItem("fieldLabelToggle") ?? true);
 localStorage.setItem("fieldLeftToggle", localStorage.getItem("fieldLeftToggle") ?? false);
 localStorage.setItem("language", localStorage.getItem("language") ?? (navigator.language.startsWith("ja")? "ja" : "en"));

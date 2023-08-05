@@ -463,7 +463,8 @@
 			"cardImageUrl": null,
 			"cardImageUrlTitle": null,
 			"cardDataApiUrl": null,
-			"cardDataApiUrlTitle": null
+			"cardDataApiUrlTitle": null,
+			"devMode": null
 		}
 	},
 
@@ -519,7 +520,8 @@
 			"supportedIn": null,
 			"supportedInAnywhere": null,
 			"supportedInManual": null,
-			"supportedInAutomatic": null
+			"supportedInAutomatic": null,
+			"supportedInUnimplemented": null
 		},
 
 		"cardInfo": {
