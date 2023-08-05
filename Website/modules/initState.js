@@ -9,14 +9,14 @@ import {putChatMessage} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
 
 export class InitState extends GameState {
-	constructor(roomcode, gameMode) {
+	constructor(roomcode, gameMode, websocketUrl) {
 		super();
 		gameState = this;
 
 		this.gameMode = gameMode;
 		this.opponentReady = false;
 
-		connectTo(roomcode + gameMode);
+		connectTo(roomcode + gameMode, websocketUrl );
 	}
 
 	receiveMessage(command, message) {

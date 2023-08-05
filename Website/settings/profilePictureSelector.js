@@ -18,7 +18,7 @@ fetch("../data/profilePictureGroups.json")
 let cardNames = {};
 let allCardButtonsCreated = false;
 export function refetchCardData() {
-	fetch("https://crossuniverse.net/cardInfo", {
+	fetch(localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl"), {
 		method: "POST",
 		body: JSON.stringify({
 			"language": localStorage.getItem("language"),

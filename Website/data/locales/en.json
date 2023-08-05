@@ -454,6 +454,16 @@
 				"F23": "F23",
 				"F24": "F24"
 			}
+		},
+
+		"advanced": {
+			"title": "Advanced",
+			"websocketUrl": "Websocket URL:",
+			"websocketUrlTitle": "This lets you override the server that is used to establish and proxy game sessions.\nIf this is not the same as your opponent's you WILL NOT be able to connect.",
+			"cardImageUrl": "Card Images URL:",
+			"cardImageUrlTitle": "This lets you override the server that card images are loaded from. This server should be able to provide English and Japanese card images and provide a /random endpoint which redirects to a random card image.",
+			"cardDataApiUrl": "Card Data API URL:",
+			"cardDataApiUrlTitle": "This lets you override the API endpoint that is used to query card data. This is used by both the deck creator and the main game."
 		}
 	},
 

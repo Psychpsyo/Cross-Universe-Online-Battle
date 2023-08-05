@@ -454,6 +454,16 @@
 				"F23": "F23",
 				"F24": "F24"
 			}
+		},
+
+		"advanced": {
+			"title": null,
+			"websocketUrl": null,
+			"websocketUrlTitle": null,
+			"cardImageUrl": null,
+			"cardImageUrlTitle": null,
+			"cardDataApiUrl": null,
+			"cardDataApiUrlTitle": null
 		}
 	},
 

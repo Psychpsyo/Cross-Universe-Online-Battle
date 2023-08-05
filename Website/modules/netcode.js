@@ -1,7 +1,6 @@
 import {putChatMessage} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 
-export let roomcode = "";
 export let socket = null;
 
 export function zoneToLocal(name) {
@@ -13,11 +12,10 @@ export function zoneToLocal(name) {
 	return gameState.zones[name + playerIndex];
 }
 
-export function connectTo(targetRoomcode) {
-	roomcode = targetRoomcode;
-	socket = new WebSocket("wss://battle.crossuniverse.net:443/ws");
+export function connectTo(targetRoomcode, websocketUrl) {
+	socket = new WebSocket(websocketUrl);
 	socket.addEventListener("open", function (event) {
-		socket.send("[roomcode]" + roomcode);
+		socket.send("[roomcode]" + targetRoomcode);
 	});
 
 	socket.addEventListener("message", receiveMessage);

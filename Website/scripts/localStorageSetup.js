@@ -3,6 +3,8 @@ localStorage.setItem("alwaysShowCardButtons", localStorage.getItem("alwaysShowCa
 localStorage.setItem("autoClosePreview", localStorage.getItem("autoClosePreview") ?? false);
 localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("cardBackToggle", localStorage.getItem("cardBackToggle") ?? false);
+localStorage.setItem("cardDataApiUrl", localStorage.getItem("cardDataApiUrl") ?? "");
+localStorage.setItem("cardImageUrl", localStorage.getItem("cardImageUrl") ?? "");
 localStorage.setItem("customCards", localStorage.getItem("customCards") ?? "[]");
 localStorage.setItem("customFont", localStorage.getItem("customFont") ?? "");
 localStorage.setItem("fieldLabelToggle", localStorage.getItem("fieldLabelToggle") ?? true);
@@ -16,6 +18,7 @@ localStorage.setItem("passOnStackTwo", localStorage.getItem("passOnStackTwo") ??
 localStorage.setItem("passOnOnlyOption", localStorage.getItem("passOnOnlyOption") ?? true);
 localStorage.setItem("profilePicture", localStorage.getItem("profilePicture") ?? ["U00004", "U00009", "U00031", "U00039", "U00047", "U00049", "U00053", "U00121", "U00212"][Math.floor(Math.random() * 8)]);
 localStorage.setItem("username", localStorage.getItem("username") ?? "");
+localStorage.setItem("websocketUrl", localStorage.getItem("websocketUrl") ?? "");
 
 // themes
 var themes = {

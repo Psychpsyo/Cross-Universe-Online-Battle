@@ -18,12 +18,16 @@ export class UnsupportedCardError extends Error {
 }
 
 export function getCardImageFromID(cardId) {
-	return "https://crossuniverse.net/images/cards/" + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
+	return (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")) + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
 }
 
 export async function getCardInfo(cardId) {
 	if (!cardInfoCache[cardId]) {
-		const response = await fetch("https://crossuniverse.net/cardInfo/?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId, {cache: "force-cache"});
+		let cardInfoEndpoint = localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl");
+		const response = await fetch(
+			cardInfoEndpoint + "?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId,
+			{cache: "force-cache"}
+		);
 		cardInfoCache[cardId] = await response.json();
 		cardInfoCache[cardId].imageSrc = getCardImageFromID(cardId);
 	}

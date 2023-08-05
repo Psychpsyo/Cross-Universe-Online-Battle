@@ -143,6 +143,14 @@ function setLanguage(language) {
 		hotkeyPreviewHandLabel.textContent = locale.settings.hotkeys.previewHandCard;
 		resetDefaultHotkeys.textContent = locale.settings.hotkeys.resetHotkeys;
 
+		advancedHeading.textContent = locale.settings.advanced.title;
+		websocketUrlLabel.textContent = locale.settings.advanced.websocketUrl;
+		websocketUrlInput.title = locale.settings.advanced.websocketUrlTitle;
+		cardImageUrlLabel.textContent = locale.settings.advanced.cardImageUrl;
+		cardImageUrlInput.title = locale.settings.advanced.cardImageUrlTitle;
+		cardDataApiUrlLabel.textContent = locale.settings.advanced.cardDataApiUrl;
+		cardDataApiUrlInput.title = locale.settings.advanced.cardDataApiUrlTitle;
+
 		relabelAllHotkeys();
 		refetchCardData();
 
@@ -173,6 +181,10 @@ passOnOnlyOptionToggle.checked = localStorage.getItem("passOnOnlyOption") === "t
 passInDrawPhaseToggle.checked = localStorage.getItem("passInDrawPhase") === "true";
 passInEndPhaseToggle.checked = localStorage.getItem("passInEndPhase") === "true";
 passOnStackTwoToggle.checked = localStorage.getItem("passOnStackTwo") === "true";
+
+websocketUrlInput.value = localStorage.getItem("websocketUrl");
+cardImageUrlInput.value = localStorage.getItem("cardImageUrl");
+cardDataApiUrlInput.value = localStorage.getItem("cardDataApiUrl");
 
 setLanguage(languageSelector.value);
 validateHotkeys();
@@ -235,6 +247,16 @@ passInEndPhaseToggle.addEventListener("change", function() {
 });
 passOnStackTwoToggle.addEventListener("change", function() {
 	localStorage.setItem("passOnStackTwo", this.checked);
+});
+
+websocketUrlInput.addEventListener("change", function() {
+	localStorage.setItem("websocketUrl", this.value);
+});
+cardImageUrlInput.addEventListener("change", function() {
+	localStorage.setItem("cardImageUrl", this.value);
+});
+cardDataApiUrlInput.addEventListener("change", function() {
+	localStorage.setItem("cardDataApiUrl", this.value);
 });
 
 // for hotkeys

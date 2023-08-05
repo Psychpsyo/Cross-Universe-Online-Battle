@@ -35,24 +35,32 @@ function getRoomcode() {
 }
 
 // connecting
-export function connect() {
+function connect(websocketUrl) {
 	// hide input field and show waiting indicator
 	roomCodeInputFieldHolder.hidden = true;
 	waitingForOpponentHolder.hidden = false;
 	// refresh the "Waiting for Opponent" text so screen readers read it out.
 	setTimeout(() => {
-		if (typeof waitingForOpponentText !== undefined) {
+		if (typeof waitingForOpponentText !== "undefined") {
 			waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;
 			cancelWaitingBtn.focus();
 		}
 	}, 100);
 
-	// I don't want to import this up-front on pageload since it imports a bunch of other stuff itself.
+	websocketUrl ??= localStorage.getItem("websocketUrl") === ""? "wss://battle.crossuniverse.net:443/ws/" : localStorage.getItem("websocketUrl");
+
+	// This is not imported up-front on pageload since it imports a bunch of other stuff itself
+	// and is not needed right away.
 	import("/modules/initState.js").then(initModule => {
-		new initModule.InitState(getRoomcode(), gameModeSelect.value);
+		try {
+			new initModule.InitState(getRoomcode(), gameModeSelect.value, websocketUrl);
+		} catch {
+			roomCodeInputFieldHolder.hidden = false;
+			waitingForOpponentHolder.hidden = true;
+			alert("Failed to connect to '" + websocketUrl + "'.");
+		}
 	});
 }
-
 
 // check if a room code is given in the query string
 let queryString = new URLSearchParams(window.location.search);
@@ -63,7 +71,7 @@ if (queryString.get("id")) {
 		gameMode = "normal";
 	}
 	gameModeSelect.value = gameMode;
-	connect();
+	connect(queryString.get("s"));
 } else {
 	randomizeRoomcode();
 }
@@ -108,7 +116,7 @@ roomCodeInputField.addEventListener("keyup", function(e) {
 	}
 });
 // clicking the connect button to connect
-connectBtn.addEventListener("click", connect);
+connectBtn.addEventListener("click", () => connect());
 
 // canceling a connection
 cancelWaitingBtn.addEventListener("click", function() {

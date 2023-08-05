@@ -19,7 +19,7 @@ function spawnCard(parentElement) {
 		position += 70;
 	}
 	card.style.left = position + "%";
-	card.style.backgroundImage = "url('https://crossuniverse.net/images/cards/random?lang=" + locale.code + "&num=" + cardsSoFar + "')"
+	card.style.backgroundImage = "url('" + (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")) + "random?lang=" + locale.code + "&num=" + cardsSoFar + "')"
 	cardsSoFar++;
 
 	parentElement.appendChild(card);

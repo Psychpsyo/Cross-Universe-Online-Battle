@@ -181,8 +181,10 @@ function searchCards(query) {
 	});
 	closeAllDeckMakerOverlays();
 
-	fetch("https://crossuniverse.net/cardInfo", {method: "POST", body: JSON.stringify(query)})
-	.then(response => response.text())
+	fetch(
+		localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl"),
+		{method: "POST", body: JSON.stringify(query)}
+	).then(response => response.text())
 	.then(async (response) => {
 		for (let card of JSON.parse(response)) {
 			cardLoader.cardInfoCache[card.cardID] = card;
