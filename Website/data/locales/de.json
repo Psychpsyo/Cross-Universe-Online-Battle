@@ -62,6 +62,7 @@
 				"tooManyCards": "Das Deck konnte nicht geladen werden, weil es mehr als {#DECKLIMIT} Karten enthält.",
 				"notEnoughCards": "Das Deck konnte nicht geladen werden, weil es weniger als {#DECKLIMIT} Karten enthält.",
 				"tooManyOfCard": "Das Deck konnte nicht geladen werden, weil es zu viele '{#CARDNAME}' enthält.",
+				"hasToken": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält.\n(Decks dürfen keine Token-Karten enthalten.)",
 				"unsupportedInAutomatic": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält. Diese Karte existiert im automatischen Modus noch nicht."
 			}
 		},
@@ -457,7 +458,7 @@
 		},
 
 		"advanced": {
-			"title": "Advanced",
+			"title": "Technisches",
 			"websocketUrl": "Websocket URL:",
 			"websocketUrlTitle": "Hier kannst du einen Override für den Server einstellen, durch welchen Spiele verbunden und geproxied werden.\nWenn du hier nicht das Gleiche, wie dein Gegner eingibst, könnt ihr NICHT miteinander spielen.",
 			"cardImageUrl": "URL für Kartenbilder:",

@@ -40,6 +40,9 @@ export class Player {
 		let exampleCards = {}
 		for (const cdf of cdfList) {
 			let card = new Card(this, cdf, true);
+			if (card.initialValues.cardTypes.includes("token")) {
+				throw new deckErrors.DeckTokenError(card.cardId);
+			}
 			cardList.push(card);
 			if (!(card.cardId in exampleCards)) {
 				exampleCards[card.cardId] = card;

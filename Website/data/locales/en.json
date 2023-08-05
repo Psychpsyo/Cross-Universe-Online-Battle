@@ -62,6 +62,7 @@
 				"tooManyCards": "The deck could not be loaded because it has more than {#DECKLIMIT} cards.",
 				"notEnoughCards": "The deck could not be loaded because it has less than {#DECKLIMIT} cards.",
 				"tooManyOfCard": "The deck could not be loaded because it contains too many copies of '{#CARDNAME}'.",
+				"hasToken": "The deck could not be loaded because it contains '{#CARDNAME}'.\n(Token cards may not be added to decks.)",
 				"unsupportedInAutomatic": "The deck could not be loaded because it contains '{#CARDNAME}', which is currently unsupported in automatic games."
 			}
 		},

@@ -194,6 +194,11 @@ export class DeckState extends GameState {
 					alert(locale.game.deckSelect.errors.tooManyOfCard.replaceAll("{#CARDNAME}", cardInfo.name));
 					break;
 				}
+				case e instanceof deckErrors.DeckTokenError: {
+					let cardInfo = await cardLoader.getCardInfo(e.cardId);
+					alert(locale.game.deckSelect.errors.hasToken.replaceAll("{#CARDNAME}", cardInfo.name));
+					break;
+				}
 				default: {
 					console.error(e, e.stack);
 					alert(locale.game.deckSelect.errors.generic);
