@@ -360,8 +360,17 @@ function parseValue() {
 			return new ast.CurrentPhaseNode();
 		}
 		case "currentTurn": {
+			let node = new ast.CurrentTurnNode();
 			pos++;
-			return new ast.CurrentTurnNode();
+			if (tokens[pos] && tokens[pos].type == "dotOperator") {
+				pos++;
+				if (tokens[pos].type == "actionAccessor") {
+					return parseActionAccessor(node);
+				} else {
+					throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access property of a currentTurn.");
+				}
+			}
+			return node;
 		}
 		case "leftBrace": {
 			return parseModifier();

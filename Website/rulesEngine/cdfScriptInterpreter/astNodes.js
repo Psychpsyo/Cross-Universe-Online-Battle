@@ -468,6 +468,27 @@ defense: ${defense}`, false));
 			case "DISCARD": {
 				return this.parameters[0].evalPossibilities(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
 			}
+			case "MOVE": {
+				let cardPossibilities = this.parameters[0].evalPossibilities(card, player, ability);
+				let moveActions = [];
+				for (let cards of cardPossibilities) {
+					moveActions.push([]);
+					for (const card of cards) {
+						if (card.cardRef === null) {
+							continue;
+						}
+						setImplicitCard(card);
+						let zone = (this.parameters[1].evalPossibilities(card, player, ability))[0][0]; // TODO: this might need to handle multiple zone possibilities
+						let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
+						if (this.parameters[1] instanceof DeckPositionNode) {
+							index = this.parameters[1].top? -1 : 0;
+						}
+						moveActions[moveActions.length - 1].push(new actions.Move(player, card.cardRef, zone, index));
+						clearImplicitCard();
+					}
+				}
+				return moveActions;
+			}
 			default: {
 				return [this.evalFull(card, player, ability)];
 			}
@@ -1133,7 +1154,7 @@ export class CurrentPhaseNode extends AstNode {
 }
 export class CurrentTurnNode extends AstNode {
 	* eval(card, player, ability) {
-		return [player == game.currentTurn().player? "yourTurn" : "opponentTurn"];
+		return [player == player.game.currentTurn().player? "yourTurn" : "opponentTurn"];
 	}
 }
 
@@ -1145,7 +1166,13 @@ export class ActionAccessorNode extends AstNode {
 	}
 	* eval(card, player, ability) {
 		let values = [];
-		for (let action of yield* this.actionsNode.eval(card, player, ability)) {
+		let actionList = [];
+		if (this.actionsNode instanceof CurrentTurnNode) {
+			actionList = game.currentTurn().getActions();
+		} else {
+			actionList = yield* this.actionsNode.eval(card, player, ability);
+		}
+		for (let action of actionList) {
 			switch (this.accessor) {
 				case "cast": {
 					if (action instanceof actions.Cast) {

@@ -191,7 +191,7 @@ function getFollowupTiming(block, game, timing) {
 			}
 		}
 
-		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.Reveal(card)));
+		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.Reveal(card.cardRef)));
 		if (allActions.length > 0) {
 			return new Timing(game, allActions, block);
 		}
