@@ -160,6 +160,9 @@ function isSpellItemTriggered(card) {
 }
 // returns whether or not the abilities condition depends on the current phase or attacking units / attack target
 function hasTimeSensitiveCondition(node) {
+	if (!node) {
+		return false;
+	}
 	if (node instanceof ast.CurrentPhaseNode || node instanceof ast.AttackersNode || node instanceof ast.AttackTargetNode) {
 		return true;
 	}
@@ -168,9 +171,13 @@ function hasTimeSensitiveCondition(node) {
 			return true;
 		}
 	}
+	return false;
 }
 
 function hasPhaseEqualityCondition(node) {
+	if (!node) {
+		return false;
+	}
 	if (node instanceof ast.EqualsNode && (node.leftSide instanceof ast.CurrentPhaseNode || node.rightSide instanceof ast.CurrentPhaseNode)) {
 		return true;
 	}
@@ -179,4 +186,5 @@ function hasPhaseEqualityCondition(node) {
 			return true;
 		}
 	}
+	return false;
 }

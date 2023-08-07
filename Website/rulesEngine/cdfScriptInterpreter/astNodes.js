@@ -330,7 +330,9 @@ export class FunctionNode extends AstNode {
 					return [];
 				}
 				for (let card of eligibleCards) {
-					card.hidden = false;
+					if (!(["deck", "hand"].includes(card.zone.type) && !card.zone.player.isViewable)) {
+						card.hidden = false;
+					}
 				}
 				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ability.id);
 				let responses = yield [selectionRequest];
@@ -359,6 +361,9 @@ export class FunctionNode extends AstNode {
 			case "SETATTACKTARGET": {
 				let card = (yield* this.parameters[0].eval(card, player, ability))[0];
 				return card.cardRef? [new actions.SetAttackTarget(card.cardRef)] : [];
+			}
+			case "SHUFFLE": {
+				return [new actions.Shuffle(player)];
 			}
 			case "SUM": {
 				let list = yield* this.parameters[0].eval(card, player, ability);
@@ -459,6 +464,9 @@ defense: ${defense}`, false));
 					}
 				}
 				return combinations;
+			}
+			case "DISCARD": {
+				return this.parameters[0].evalPossibilities(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
 			}
 			default: {
 				return [this.evalFull(card, player, ability)];

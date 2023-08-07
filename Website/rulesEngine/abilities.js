@@ -1,4 +1,5 @@
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
+import * as blocks from "./blocks.js";
 
 export class BaseAbility {
 	constructor(id, game, condition) {
@@ -15,6 +16,10 @@ export class BaseAbility {
 
 	snapshot() {
 		return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+	}
+
+	getCardId() {
+		return this.id.substr(0, 6);
 	}
 }
 
@@ -49,17 +54,20 @@ export class Ability extends BaseAbility {
 }
 
 export class CastAbility extends Ability {
-	constructor(id, game, exec, cost, condition, after) {
+	constructor(id, game, exec, cost, condition, after, turnLimit) {
 		super(id, game, exec, cost, condition);
 		this.after = null;
 		if (after) {
 			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
+		this.turnLimit = turnLimit;
 		this.triggerMet = false;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) && (this.after == null || this.triggerMet);
+		return super.canActivate(card, player) &&
+			(this.after == null || this.triggerMet) &&
+			(player.game.currentTurn().getBlocks().filter(block => {block instanceof blocks.CastSpell && block.card.cardId === this.getCardId()}).length < this.turnLimit);
 	}
 
 	checkTrigger(card, player) {
@@ -70,17 +78,20 @@ export class CastAbility extends Ability {
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, game, exec, cost, condition, after) {
+	constructor(id, game, exec, cost, condition, after, turnLimit) {
 		super(id, game, exec, cost, condition);
 		this.after = null;
 		if (after) {
 			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
+		this.turnLimit = turnLimit;
 		this.triggerMet = false;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) && (this.after == null || this.triggerMet);
+		return super.canActivate(card, player) &&
+			(this.after == null || this.triggerMet) &&
+			(player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.getCardId()).length < this.turnLimit);
 	}
 
 	checkTrigger(card, player) {

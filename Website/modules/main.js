@@ -134,7 +134,9 @@ copyInviteLink.addEventListener("click", function() {
 });
 copyInviteLink.addEventListener("mouseleave", function() {
 	setTimeout(function() {
-		copyInviteLink.textContent = locale.mainMenu.copyInviteLink;
+		if (typeof copyInviteLink !== "undefined") {
+			copyInviteLink.textContent = locale.mainMenu.copyInviteLink;
+		}
 	}, 500);
 });
 

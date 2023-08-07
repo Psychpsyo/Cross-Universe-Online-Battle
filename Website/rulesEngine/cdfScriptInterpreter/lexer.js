@@ -90,6 +90,7 @@ let keywordTokenTypes = {
 	SELECT: "function",
 	SELECTPLAYER: "function",
 	SETATTACKTARGET: "function",
+	SHUFFLE: "function",
 	SUM: "function",
 	SUMMON: "function",
 	TOKENS: "function",

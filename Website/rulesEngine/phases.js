@@ -125,6 +125,9 @@ export class StackPhase extends Phase {
 		return eligibleAbilities;
 	}
 
+	getBlocks() {
+		return this.stacks.map(stack => stack.blocks).flat();
+	}
 	getTimings() {
 		return this.stacks.map(stack => stack.getTimings()).flat();
 	}

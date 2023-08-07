@@ -325,7 +325,13 @@ function parseCdfValues(cdf) {
 			}
 			case "o": {
 				if (!["cast", "deploy", "optional", "fast", "trigger", "static"].includes(parts[1])) {
-					throw new Error("CDF Parser Error: " + parts[0] + " is an invalid ability type.");
+					throw new Error("CDF Parser Error: " + parts[1] + " is an invalid ability type.");
+				}
+				if (parts[1] == "cast" && !["standardSpell", "continuousSpell", "enchantSpell"].includes(data.cardType)) {
+					throw new Error("CDF Parser Error: Only spells can have cast abilities.");
+				}
+				if (parts[1] == "deploy" && !["standardItem", "continuousItem", "equipableItem"].includes(data.cardType)) {
+					throw new Error("CDF Parser Error: Only items can have deploy abilities.");
 				}
 				data.abilities.push({
 					id: data.id + ":" + data.abilities.length,
@@ -353,10 +359,10 @@ function parseCdfValues(cdf) {
 function makeAbility(ability, game) {
 	switch (ability.type) {
 		case "cast": {
-			return new abilities.CastAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
+			return new abilities.CastAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after, ability.turnLimit);
 		}
 		case "deploy": {
-			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
+			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after, ability.turnLimit);
 		}
 		case "optional": {
 			return new abilities.OptionalAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.condition);
