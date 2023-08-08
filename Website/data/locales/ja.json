@@ -190,6 +190,16 @@
 				"opponent": null
 			},
 
+			"opponentActions": {
+				"selectingCards": null,
+				"effectSelectingCards": null,
+				"selectingHandDiscard": null,
+				"selectingAttackTarget": null,
+				"selectingPlayer": null,
+				"effectSelectingPlayer": null,
+				"selectingStartingPlayer": null
+			},
+
 			"gameOver": {
 				"youWon": null,
 				"youLost": null,

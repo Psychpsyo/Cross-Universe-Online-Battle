@@ -79,6 +79,7 @@ export class AutomaticController extends InteractionController {
 					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
 
 					autoUI.clearYourMove();
+					autoUI.clearOpponentAction();
 					this.waitingForOpponentInput = false;
 					for (let playerInfo of this.playerInfos) {
 						playerInfo.canStandardSummon = [];
@@ -370,8 +371,43 @@ export class AutomaticController extends InteractionController {
 		}
 
 		if (request.player != localPlayer) {
+			// show opponent action indicator
+			switch (request.type) {
+				case "chooseCards": {
+					let message = locale.game.automatic.opponentActions.selectingCards;
+					switch (request.reason) {
+						case "handTooFull": {
+							message = locale.game.automatic.opponentActions.selectingHandDiscard;
+							break;
+						}
+						case "selectAttackTarget": {
+							message = locale.game.automatic.opponentActions.selectingAttackTarget;
+							break;
+						}
+						default: {
+							if (request.reason.startsWith("cardEffect:")) {
+								message = locale.game.automatic.opponentActions.effectSelectingCards.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+							}
+						}
+					}
+					autoUI.showOpponentAction(message);
+					break;
+				}
+				case "choosePlayer": {
+					let message = locale.game.automatic.opponentActions.selectingPlayer;
+					if (request.reason == "chooseStartingPlayer") {
+						message = locale.game.automatic.opponentActions.selectingStartingPlayer;
+					} else if (request.reason.startsWith("cardEffect:")) {
+						message = locale.game.automatic.opponentActions.effectSelectingPlayer.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+					}
+					autoUI.showOpponentAction(message);
+					break;
+				}
+			}
+
 			// If this is not directed at the local player, we might need to wait for an opponent input.
-			// Only the first input request is allowed to take this, all others can and must reject since the engine wants only one action per player per request.
+			// 'Might' because only the first input request is allowed to take this, all others can and
+			// must reject since the engine wants only one action per player per request.
 			return new Promise((resolve, reject) => {
 				if (this.waitingForOpponentInput) {
 					reject("Already looking for an opponent input at this time.");

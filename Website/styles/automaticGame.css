@@ -185,3 +185,30 @@
 	justify-content: space-around;
 	padding: .25em;
 }
+
+#opponentActionHolder {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	pointer-events: none;
+}
+#opponentActionDisplay {
+	position: absolute;
+	top: 15%;
+	left: 0;
+	z-index: 100;
+	transform: translate(-100%, -50%);
+	max-width: 50%;
+	background-color: #000A;
+	border-radius: 0 1em 1em 0;
+	padding: .1em .5em;
+	transition: transform 0.2s ease-out;
+	pointer-events: all;
+}
+
+#opponentActionDisplay.shown {
+	transform: translate(0, -50%);
+}

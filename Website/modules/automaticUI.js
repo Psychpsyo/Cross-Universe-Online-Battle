@@ -293,3 +293,11 @@ export async function revealHandCard(card) {
 	cardImg.src = cardLoader.getCardImage(card.cardRef);
 	cardImg.classList.remove("revealed");
 }
+export function showOpponentAction(message) {
+	opponentActionDisplay.textContent = message;
+	opponentActionDisplay.classList.add("shown");
+}
+
+export function clearOpponentAction() {
+	opponentActionDisplay.classList.remove("shown");
+}
