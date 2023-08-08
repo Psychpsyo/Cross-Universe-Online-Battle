@@ -294,6 +294,8 @@
 			"title": "Customization",
 			"fieldLabels": "Show Field Labels",
 			"disableCardBacks": "Disable Opponent Card Backs",
+			"opponentCardLanguage": "Show Opponent Cards in their Language",
+			"previewCardLanguage": "Also Show Card Preview in that Language",
 			"leftField": "Place Field on The Left Side of your Screen",
 			"theme": "Theme:",
 			"themes": {

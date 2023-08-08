@@ -171,6 +171,9 @@
 	box-sizing: border-box;
 	filter: opacity(50%);
 	transition: color .5s, border-color .5s, filter .5s;
+	word-break: keep-all;
+	text-align: center;
+	overflow: hidden;
 }
 #stackDisplayHolder.yourMove::after {
 	color: orange;

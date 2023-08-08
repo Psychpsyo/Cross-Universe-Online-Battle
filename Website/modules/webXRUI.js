@@ -2,7 +2,7 @@ import * as THREE from "three";
 import {VRButton} from "three/addons/webxr/VRButton.js";
 import {XRControllerModelFactory} from 'three/addons/webxr/XRControllerModelFactory';
 import WebXRPolyfill from "webxr-polyfill";
-import {getCardInfo} from "/modules/cardLoader.js";
+import {getCardImageFromID} from "/modules/cardLoader.js";
 
 const polyfill = new WebXRPolyfill();
 const textureLoader = new THREE.TextureLoader();
@@ -61,7 +61,7 @@ const cardBackMaterial = new THREE.MeshBasicMaterial({map: cardBackTexture, side
 const cardFrontMaterials = {};
 async function getCardFrontMaterial(cardId) {
 	if (!cardFrontMaterials[cardId]) {
-		cardFrontMaterials[cardId] = new THREE.MeshBasicMaterial({map: textureLoader.load((await getCardInfo(cardId)).imageSrc), side: THREE.FrontSide});
+		cardFrontMaterials[cardId] = new THREE.MeshBasicMaterial({map: textureLoader.load(getCardImageFromID(cardId)), side: THREE.FrontSide});
 	}
 	return cardFrontMaterials[cardId];
 }

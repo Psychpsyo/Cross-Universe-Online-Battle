@@ -7,7 +7,10 @@ export let cardInfoCache = {};
 let cdfCache = {};
 let scriptedCardList = null;
 let nextCustomCardIDs = [1, 2];
+let customCardURLs = [];
 let neosAvailability = null;
+
+const cardLanguages = ["en", "ja"];
 
 export class UnsupportedCardError extends Error {
 	constructor(cardId) {
@@ -17,8 +20,11 @@ export class UnsupportedCardError extends Error {
 	}
 }
 
-export function getCardImageFromID(cardId) {
-	return (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")) + (locale.warnings.includes("noCards")? "en" : locale.code) + "/" + cardId + ".jpg";
+export function getCardImageFromID(cardId, language = localStorage.getItem("language")) {
+	if (cardId.startsWith("C")) {
+		return customCardURLs[parseInt(cardId.substr(1))];
+	}
+	return (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")) + (cardLanguages.includes(language)? language : "en") + "/" + cardId + ".jpg";
 }
 
 export async function getCardInfo(cardId) {
@@ -29,7 +35,6 @@ export async function getCardInfo(cardId) {
 			{cache: "force-cache"}
 		);
 		cardInfoCache[cardId] = await response.json();
-		cardInfoCache[cardId].imageSrc = getCardImageFromID(cardId);
 	}
 	return cardInfoCache[cardId];
 }
@@ -37,7 +42,7 @@ export async function getCardInfo(cardId) {
 export async function registerCustomCard(cardData, player) {
 	let canvas = document.createElement("canvas");
 	await renderCard(cardData, canvas);
-	cardData.imageSrc = canvas.toDataURL();
+	customCardURLs[nextCustomCardIDs[player.index]] = canvas.toDataURL();
 	let cardId = "C" + String(nextCustomCardIDs[player.index]).padStart(5, "0");
 	cardInfoCache[cardId] = cardData;
 	nextCustomCardIDs[player.index] += nextCustomCardIDs.length;
@@ -102,11 +107,12 @@ export async function getCdf(cardId) {
 	return cdfCache[cardId];
 }
 
-export async function getCardImage(card) {
+export async function getCardImage(card, useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true") {
 	if (!card) {
 		return "images/cardHidden.png";
 	}
-	return card.hidden? "images/cardBackFrameP" + card.owner.index + ".png" : (await getCardInfo(card.cardId)).imageSrc;
+	let language = (useOwnerLanguage? players[card.owner.index].language : null) ?? localStorage.getItem("language");
+	return card.hidden? "images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
 }
 
 export async function deckToCdfList(deck, automatic, player) {

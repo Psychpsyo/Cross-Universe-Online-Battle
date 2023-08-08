@@ -106,6 +106,8 @@ function setLanguage(language) {
 		customizationHeading.textContent = locale.settings.customization.title;
 		fieldLabelToggleLabel.textContent = locale.settings.customization.fieldLabels;
 		cardBackToggleLabel.textContent = locale.settings.customization.disableCardBacks;
+		opponentCardLanguageToggleLabel.textContent = locale.settings.customization.opponentCardLanguage;
+		previewCardLanguageToggleLabel.textContent = locale.settings.customization.previewCardLanguage;
 		fieldLeftToggleLabel.textContent = locale.settings.customization.leftField;
 		themeSelectorLabel.textContent = locale.settings.customization.theme;
 		Array.from(themeSelector.children).forEach(theme => {
@@ -171,6 +173,8 @@ customCardBack.value = localStorage.getItem("cardBack");
 
 fieldLabelToggle.checked = localStorage.getItem("fieldLabelToggle") === "true";
 cardBackToggle.checked = localStorage.getItem("cardBackToggle") === "true";
+opponentCardLanguageToggle.checked = localStorage.getItem("opponentCardLanguage") === "true";
+previewCardLanguageToggle.checked = localStorage.getItem("previewCardLanguage") === "true";
 fieldLeftToggle.checked = localStorage.getItem("fieldLeftToggle") === "true";
 themeSelector.value = localStorage.getItem("theme");
 menuCardsToggle.checked = localStorage.getItem("mainMenuCards") === "true";
@@ -219,6 +223,12 @@ fieldLeftToggle.addEventListener("change", function() {
 });
 cardBackToggle.addEventListener("change", function() {
 	localStorage.setItem("cardBackToggle", this.checked);
+});
+opponentCardLanguageToggle.addEventListener("change", function() {
+	localStorage.setItem("opponentCardLanguage", this.checked);
+});
+previewCardLanguageToggle.addEventListener("change", function() {
+	localStorage.setItem("previewCardLanguage", this.checked);
 });
 themeSelector.addEventListener("change", function() {
 	applyTheme(this.value);

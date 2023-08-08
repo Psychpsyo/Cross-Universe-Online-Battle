@@ -61,7 +61,7 @@ export class DraftState extends GameState {
 	receiveMessage(command, message) {
 		switch (command) {
 			case "picked": {
-				this.addToDeck(draftCardSelection.childNodes.item(message), 1);
+				this.addToDeck(draftCardSelection.childNodes.item(message), 0);
 				return true;
 			}
 			case "reroll": {
@@ -130,7 +130,7 @@ export class DraftState extends GameState {
 
 					// sync this to the opponent first, since this element may get destroyed by draftAddToDeck if that triggers a reroll.
 					socket.send("[picked]" + Array.from(this.parentElement.childNodes).indexOf(this));
-					gameState.addToDeck(this, 0);
+					gameState.addToDeck(this, 1);
 				});
 				draftCardSelection.appendChild(card);
 			}.bind(this), (i + 1) * 50);

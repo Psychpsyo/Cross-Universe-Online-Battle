@@ -294,6 +294,8 @@
 			"title": "Display & Themes",
 			"fieldLabels": "Feldbeschriftung zeigen",
 			"disableCardBacks": "Gegnerische Kartenrücken deaktivieren",
+			"opponentCardLanguage": "Zeige Karten des Gegners in der Sprache des Gegners",
+			"previewCardLanguage": "Kartenvorschau auch in anderen Sprache zeigen",
 			"leftField": "Feld links auf dem Bildschirm platzieren",
 			"theme": "Theme:",
 			"themes": {

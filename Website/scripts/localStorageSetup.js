@@ -12,11 +12,13 @@ localStorage.setItem("fieldLabelToggle", localStorage.getItem("fieldLabelToggle"
 localStorage.setItem("fieldLeftToggle", localStorage.getItem("fieldLeftToggle") ?? false);
 localStorage.setItem("language", localStorage.getItem("language") ?? (navigator.language.startsWith("ja")? "ja" : "en"));
 localStorage.setItem("mainMenuCards", localStorage.getItem("mainMenuCards") ?? true);
+localStorage.setItem("opponentCardLanguage", localStorage.getItem("opponentCardLanguage") ?? true);
 localStorage.setItem("partnerChoiceToggle", localStorage.getItem("partnerChoiceToggle") ?? false);
 localStorage.setItem("passInDrawPhase", localStorage.getItem("passInDrawPhase") ?? true);
 localStorage.setItem("passInEndPhase", localStorage.getItem("passInEndPhase") ?? true);
 localStorage.setItem("passOnStackTwo", localStorage.getItem("passOnStackTwo") ?? true);
 localStorage.setItem("passOnOnlyOption", localStorage.getItem("passOnOnlyOption") ?? true);
+localStorage.setItem("previewCardLanguage", localStorage.getItem("previewCardLanguage") ?? false);
 localStorage.setItem("profilePicture", localStorage.getItem("profilePicture") ?? ["U00004", "U00009", "U00031", "U00039", "U00047", "U00049", "U00053", "U00121", "U00212"][Math.floor(Math.random() * 8)]);
 localStorage.setItem("username", localStorage.getItem("username") ?? "");
 localStorage.setItem("websocketUrl", localStorage.getItem("websocketUrl") ?? "");

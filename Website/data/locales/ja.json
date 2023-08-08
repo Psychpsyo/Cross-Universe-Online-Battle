@@ -142,7 +142,7 @@
 			"stacks": {
 				"title": "テーブル{#NUM}：",
 				"manaSupplyPhase": "魔力ステップ：",
-				"block": "ブロック{#NUM}"
+				"block": "ブロック\n{#NUM}"
 			},
 			"blocks": {
 				"draw": "ドロー",
@@ -294,6 +294,8 @@
 			"title": null,
 			"fieldLabels": null,
 			"disableCardBacks": null,
+			"opponentCardLanguage": null,
+			"previewCardLanguage": null,
 			"leftField": null,
 			"theme": null,
 			"themes": {

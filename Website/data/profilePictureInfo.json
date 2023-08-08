@@ -28,7 +28,7 @@
 	"U00038": {"left": 65},
 	"U00039": {"flip": true, "left": 47},
 	"U00043": {"flip": true},
-	"U00048": {"flip": true, "left": 55},
+	"U00048": {"flip": true, "left": 45},
 	"U00050": {"flip": true},
 	"U00051": {"flip": true, "left": 25},
 	"U00052": {"neverFlip": true},

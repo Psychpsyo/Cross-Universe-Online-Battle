@@ -32,6 +32,7 @@ export class InitState extends GameState {
 				if (localStorage.getItem("cardBack") !== "") {
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
+				socket.send("[language]" + localStorage.getItem("language"));
 
 				game = new Game();
 				localPlayer = game.players[1];
@@ -61,6 +62,10 @@ export class InitState extends GameState {
 				if (localStorage.getItem("cardBackToggle") == "false") {
 					document.documentElement.style.setProperty("--p0-card-back", "url('" + message + "')");
 				}
+				return true;
+			}
+			case "language": {
+				players[0].language = message;
 				return true;
 			}
 			case "ready": {

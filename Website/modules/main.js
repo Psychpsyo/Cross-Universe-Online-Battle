@@ -11,12 +11,14 @@ window.players = [
 	{
 		name: locale.chat.opponent,
 		profilePicture: "S00093",
-		deck: null
+		deck: null,
+		language: null
 	},
 	{
 		name: localStorage.getItem("username"),
 		profilePicture: localStorage.getItem("profilePicture"),
-		deck: null
+		deck: null,
+		language: localStorage.getItem("language")
 	}
 ];
 if (players[1].name == "") {

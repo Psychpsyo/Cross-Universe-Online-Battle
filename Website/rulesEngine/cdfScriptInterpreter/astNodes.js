@@ -90,7 +90,7 @@ class AstNode {
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
 	hasAllTargets(card, player, ability) {
 		for (let childNode of this.getChildNodes()) {
-			if (!childNode.hasAllTargets(card, player, ability)) {
+			if (childNode && !childNode.hasAllTargets(card, player, ability)) {
 				return false;
 			}
 		}
@@ -640,8 +640,13 @@ defense: ${defense}`, false));
 				if (this.parameters[0] instanceof AnyAmountNode && availableOptions.find(list => list.length > 0) !== undefined) {
 					return true;
 				}
-				let amountsRequired = this.parameters[0].evalFull(card, player, ability).flat();
-				return Math.min(...amountsRequired) <= availableAmount;
+				let amountsRequired = this.parameters[0].evalFull(card, player, ability);
+				for (let i = 0; i < availableOptions.length; i++) {
+					if (Math.min(...amountsRequired[i]) <= availableOptions[i].length) {
+						return true;
+					}
+				}
+				return false;
 			}
 			case "SETATTACKTARGET": {
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
