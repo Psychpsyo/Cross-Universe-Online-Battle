@@ -77,6 +77,10 @@ export class Zone {
 	get(index) {
 		return this.cards[index];
 	}
+
+	getFreeSpaceCount() {
+		return Infinity;
+	}
 }
 
 export class DeckZone extends Zone {
@@ -167,5 +171,15 @@ export class FieldZone extends Zone {
 
 	get(index) {
 		return this.placed[index] ?? this.cards[index];
+	}
+
+	getFreeSpaceCount() {
+		let count = 0;
+		for (let card of this.placed) {
+			if (card === null) {
+				count++;
+			}
+		}
+		return count;
 	}
 }

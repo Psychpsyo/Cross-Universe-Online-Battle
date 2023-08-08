@@ -22,6 +22,7 @@ export function parseScript(tokenList, newEffectId, type) {
 			return new ast.ApplyTargetRootNode(parseExpression());
 		}
 		case "equipableTo":
+		case "cardCondition":
 		case "during":
 		case "condition": {
 			return parseExpression();

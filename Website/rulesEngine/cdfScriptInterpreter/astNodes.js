@@ -77,17 +77,15 @@ function nChooseK(n, k) {
 class AstNode {
 	* eval(card, player, ability) {}
 	// evalFull() does the same as eval without being a generator function itself.
-	// This means that player input and events generated inside of evalFull() will be ignored.
+	// This means that it will return an array of all possible return values for every combination of choices
+	// that the player could make.
 	evalFull(card, player, ability) {
 		let generator = this.eval(card, player, ability);
 		let next;
 		do {
 			next = generator.next();
 		} while (!next.done);
-		return next.value;
-	}
-	evalPossibilities(card, player, ability) {
-		return [this.evalFull(card, player, ability)];
+		return [next.value];
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
 	hasAllTargets(card, player, ability) {
@@ -136,7 +134,7 @@ export class ScriptRootNode extends AstNode {
 			if (this.steps[i].assignTo) {
 				let oldVarValue = ability.scriptVariables[this.steps[i].assignTo];
 				let foundValidBranch = false;
-				for (const possibility of this.steps[i].evalPossibilities(card, player, ability)) {
+				for (const possibility of this.steps[i].evalFull(card, player, ability)) {
 					if (possibility.length > 0 && possibility[0] instanceof actions.Action) {
 						// TODO: Check if these actions need to be processed somehow or if using un-executed actions works just fine.
 					}
@@ -180,11 +178,11 @@ export class LineNode extends AstNode {
 			ability.scriptVariables[this.assignTo] = returnValues;
 		}
 	}
-	evalPossibilities(card, player, ability) {
+	evalFull(card, player, ability) {
 		// This must return all possible combinations of the possible values for every action on this line.
 		let possibilityLists = [];
 		for (let part of this.parts) {
-			possibilityLists.push(part.evalPossibilities(card, player, ability));
+			possibilityLists.push(part.evalFull(card, player, ability));
 		}
 		return cartesianProduct(possibilityLists).map(list => list.flat(1));
 	}
@@ -306,6 +304,7 @@ export class FunctionNode extends AstNode {
 				return [new actions.ChangeMana(player, -(yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
 			case "MOVE": {
+				// TODO: Make player choose which cards to move if only a limited amount can be moved
 				let cards = yield* this.parameters[0].eval(card, player, ability);
 				let moveActions = [];
 				for (const card of cards) {
@@ -374,6 +373,7 @@ export class FunctionNode extends AstNode {
 				return [sum];
 			}
 			case "SUMMON": {
+				// TODO: Make player choose which cards to summon if only a limited amount can be summoned
 				let cards = yield* this.parameters[0].eval(card, player, ability);
 				let zone = (yield* this.parameters[1].eval(card, player, ability))[0];
 				let payCost = yield* this.parameters[2].eval(card, player, ability);
@@ -437,12 +437,12 @@ defense: ${defense}`, false));
 			}
 		}
 	}
-	evalPossibilities(card, player, ability) {
+	evalFull(card, player, ability) {
 		// TODO: Probably best to implement these on a case-by-case basis when cards actually need them
 		switch (this.functionName) {
 			case "SELECT": {
-				let choiceAmounts = this.parameters[0].evalFull(card, player, ability);
-				let eligibleCards = this.parameters[1].evalFull(card, player, ability);
+				let choiceAmounts = this.parameters[0].evalFull(card, player, ability)[0];
+				let eligibleCards = this.parameters[1].evalFull(card, player, ability)[0];
 				if (eligibleCards.length == 0) {
 					return [[]];
 				}
@@ -466,10 +466,13 @@ defense: ${defense}`, false));
 				return combinations;
 			}
 			case "DISCARD": {
-				return this.parameters[0].evalPossibilities(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
+			}
+			case "EXILE": {
+				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Exile(card.cardRef)));
 			}
 			case "MOVE": {
-				let cardPossibilities = this.parameters[0].evalPossibilities(card, player, ability);
+				let cardPossibilities = this.parameters[0].evalFull(card, player, ability);
 				let moveActions = [];
 				for (let cards of cardPossibilities) {
 					moveActions.push([]);
@@ -478,7 +481,7 @@ defense: ${defense}`, false));
 							continue;
 						}
 						setImplicitCard(card);
-						let zone = (this.parameters[1].evalPossibilities(card, player, ability))[0][0]; // TODO: this might need to handle multiple zone possibilities
+						let zone = (this.parameters[1].evalFull(card, player, ability))[0][0]; // TODO: this might need to handle multiple zone possibilities
 						let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 						if (this.parameters[1] instanceof DeckPositionNode) {
 							index = this.parameters[1].top? -1 : 0;
@@ -490,12 +493,16 @@ defense: ${defense}`, false));
 				return moveActions;
 			}
 			default: {
-				return [this.evalFull(card, player, ability)];
+				return super.evalFull(card, player, ability);
 			}
 		}
 	}
 	hasAllTargets(card, player, ability) {
-		player = this.player.evalFull(card, player, ability)[0];
+		player = this.player.evalFull(card, player, ability)[0][0];
+		// check if all child nodes have their targets
+		if (!super.hasAllTargets(card, player, ability)) {
+			return false;
+		}
 		switch (this.functionName) {
 			case "CANCELATTACK":
 			case "COUNT":
@@ -512,44 +519,58 @@ defense: ${defense}`, false));
 				return true;
 			}
 			case "APPLY": {
-				return this.parameters[0].hasAllTargets(card, player, ability) && this.parameters[1].hasAllTargets(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
 					return player.deckZone.cards.length > 0;
 				}
-				return player.deckZone.cards.length >= this.parameters[0].evalFull(card, player, ability)[0];
+				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
+					if (player.deckZone.cards.length >= amount[0]) {
+						return true;
+					}
+				}
+				return false;
 			}
 			case "DESTROY": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "DISCARD": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "EXILE": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "MOVE": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SELECT": {
-				let availableAmount = this.parameters[1].evalFull(card, player, ability).length;
-				if (this.parameters[0] instanceof AnyAmountNode && availableAmount > 0) {
+				let availableOptions = this.parameters[1].evalFull(card, player, ability);
+				if (this.parameters[0] instanceof AnyAmountNode && availableOptions.find(list => list.length > 0) !== undefined) {
 					return true;
 				}
 				let amountsRequired = this.parameters[0].evalFull(card, player, ability);
-				return Math.min(...amountsRequired) <= availableAmount && this.parameters[0].hasAllTargets(card, player, ability);
+				for (let i = 0; i < availableOptions.length; i++) {
+					if (Math.min(...amountsRequired[i]) <= availableOptions[i].length) {
+						return true;
+					}
+				}
+				return false;
 			}
 			case "SETATTACKTARGET": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SUMMON": {
-				return this.parameters[0].hasAllTargets(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 		}
 	}
 	canDoInFull(card, player, ability) {
-		player = this.player.evalFull(card, player, ability)[0];
+		player = this.player.evalFull(card, player, ability)[0][0];
+		// check if all child nodes can be done in full
+		if (!super.canDoInFull(card, player, ability)) {
+			return false;
+		}
 		switch (this.functionName) {
 			case "CANCELATTACK":
 			case "COUNT":
@@ -564,47 +585,78 @@ defense: ${defense}`, false));
 				return true;
 			}
 			case "APPLY": {
-				return this.parameters[0].canDoInFull(card, player, ability) && this.parameters[1].canDoInFull(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
 					return player.deckZone.cards.length > 0;
 				}
-				return player.deckZone.cards.length >= this.parameters[0].evalFull(card, player, ability)[0];
+				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
+					if (player.deckZone.cards.length >= amount[0]) {
+						return true;
+					}
+				}
+				return false;
 			}
 			case "DESTROY": {
-				return this.parameters[0].canDoInFull(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "DISCARD": {
-				return this.parameters[0].canDoInFull(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "EXILE": {
-				return this.parameters[0].canDoInFull(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "LOSELIFE": {
-				return player.life + this.parameters[0].evalFull(card, player, ability)[0] >= 0;
+				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
+					if (player.life + amount[0] >= 0) {
+						return true;
+					}
+				}
+				return false;
 			}
 			case "LOSEMANA": {
-				return player.mana + this.parameters[0].evalFull(card, player, ability)[0] >= 0;
+				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
+					if (player.mana + amount[0] >= 0) {
+						return true;
+					}
+				}
+				return false;
 			}
 			case "MOVE": {
-				// TODO: technically this should check for slot availability in the target zone
-				return this.parameters[0].canDoInFull(card, player, ability);
+				let freeZoneSlots = this.parameters[1].evalFull(card, player, ability).map(zones => zones.map(zone => zone.getFreeSpaceCount()).flat());
+				let moveAmounts = this.parameters[0].evalFull(card, player, ability).map(list => list.length);
+				for (let free of freeZoneSlots) {
+					for (let moveAmount of moveAmounts) {
+						if (moveAmount > 0 && (free >= moveAmount || (free > 0 && this.asManyAsPossible))) {
+							return true;
+						}
+					}
+				}
+				return false;
 			}
 			case "SELECT": {
-				let availableAmount = this.parameters[1].evalFull(card, player, ability).length;
-				if (this.parameters[0] instanceof AnyAmountNode && availableAmount > 0) {
+				let availableOptions = this.parameters[1].evalFull(card, player, ability);
+				if (this.parameters[0] instanceof AnyAmountNode && availableOptions.find(list => list.length > 0) !== undefined) {
 					return true;
 				}
-				let amountsRequired = this.parameters[0].evalFull(card, player, ability);
-				return Math.min(...amountsRequired) <= availableAmount && this.parameters[0].canDoInFull(card, player, ability);
+				let amountsRequired = this.parameters[0].evalFull(card, player, ability).flat();
+				return Math.min(...amountsRequired) <= availableAmount;
 			}
 			case "SETATTACKTARGET": {
-				return this.parameters[0].canDoInFull(card, player, ability);
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SUMMON": {
-				// TODO: technically this should check for slot availability in the target zone
-				return this.parameters[0].canDoInFull(card, player, ability);
+				let freeZoneSlots = this.parameters[1].evalFull(card, player, ability).map(zones => zones.map(zone => zone.getFreeSpaceCount()).flat());
+				let summonAmounts = this.parameters[0].evalFull(card, player, ability).map(list => list.length);
+				for (let free of freeZoneSlots) {
+					for (let summonAmount of summonAmounts) {
+						if (summonAmount > 0 && (free >= summonAmount || (free > 0 && this.asManyAsPossible))) {
+							return true;
+						}
+					}
+				}
+				return false;
 			}
 		}
 	}
@@ -643,9 +695,6 @@ export class CardMatchNode extends AstNode {
 			clearImplicitCard();
 		}
 		return matchingCards;
-	}
-	hasAllTargets(card, player, ability) {
-		return this.evalFull(card, player, ability).length > 0;
 	}
 	getChildNodes() {
 		return this.cardListNodes.concat(this.conditions);
@@ -704,8 +753,8 @@ export class CardPropertyNode extends AstNode {
 		return (yield* this.cards.eval(card, player, ability)).map(card => this.accessProperty(card)).flat();
 	}
 
-	evalPossibilities(card, player, ability) {
-		return this.cards.evalPossibilities(card, player, ability).map(possibility => possibility.map(card => this.accessProperty(card)).flat());
+	evalFull(card, player, ability) {
+		return this.cards.evalFull(card, player, ability).map(possibility => possibility.map(card => this.accessProperty(card)).flat());
 	}
 
 	getChildNodes() {
@@ -813,16 +862,16 @@ export class MathNode extends AstNode {
 		let right = (yield* this.rightSide.eval(card, player, ability));
 		return this.doOperation(left, right);
 	}
-	evalPossibilities(card, player, ability) {
-		let left = this.leftSide.evalPossibilities(card, player, ability);
-		let right = this.rightSide.evalPossibilities(card, player, ability);
-		let possibilities = [];
-		for (const left of left) {
-			for (const right of right) {
-				possibilities.push(left[0], right[0])
+	evalFull(card, player, ability) {
+		let left = this.leftSide.evalFull(card, player, ability);
+		let right = this.rightSide.evalFull(card, player, ability);
+		let results = [];
+		for (const leftValue of left) {
+			for (const rightValue of right) {
+				results.push(this.doOperation(leftValue, rightValue))
 			}
 		}
-		return this.doOperation(left, right);
+		return results;
 	}
 	getChildNodes() {
 		return [this.leftSide, this.rightSide];
@@ -987,8 +1036,8 @@ export class UnaryMinusNode extends AstNode {
 	* eval(card, player, ability) {
 		return (yield* this.operand.eval(card, player, ability)).map(value => -value);
 	}
-	evalPossibilities(card, player, ability) {
-		return this.operand.evalPossibilities(card, player, ability).map(values => values.map(value => -value));
+	evalFull(card, player, ability) {
+		return this.operand.evalFull(card, player, ability).map(values => values.map(value => -value));
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -1002,8 +1051,8 @@ export class UnaryNotNode extends AstNode {
 	* eval(card, player, ability) {
 		return !(yield* this.operand.eval(card, player, ability));
 	}
-	evalPossibilities(card, player, ability) {
-		return this.operand.evalPossibilities(card, player, ability).map(value => !value);
+	evalFull(card, player, ability) {
+		return this.operand.evalFull(card, player, ability).map(value => !value);
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -1060,10 +1109,10 @@ export class ZoneNode extends AstNode {
 		}
 		return this.getZone(player);
 	}
-	evalPossibilities(card, player, ability) {
+	evalFull(card, player, ability) {
 		let players;
 		if (this.playerNode) {
-			players = this.playerNode.evalPossibilities(card, player, ability);
+			players = this.playerNode.evalFull(card, player, ability);
 		} else {
 			players = [player];
 		}
@@ -1107,8 +1156,8 @@ export class DeckPositionNode extends AstNode {
 	* eval(card, player, ability) {
 		return [(yield* this.playerNode.eval(card, player, ability))[0].deckZone];
 	}
-	evalPossibilities(card, player, ability) {
-		return this.playerNode.evalPossibilities(card, player, ability).map(player => [player[0].deckZone]);
+	evalFull(card, player, ability) {
+		return this.playerNode.evalFull(card, player, ability).map(player => [player[0].deckZone]);
 	}
 	getChildNodes() {
 		return [this.playerNode];

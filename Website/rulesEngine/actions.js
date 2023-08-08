@@ -565,7 +565,7 @@ export class SelectEquipableUnit extends Action {
 	}
 
 	async* run() {
-		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null), [1], "equipTarget:" + this.spellItem.cardId);
+		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0], [1], "equipTarget:" + this.spellItem.cardId);
 		let responses = yield [selectionRequest];
 		if (responses.length != 1) {
 			throw new Error("Incorrect number of responses supplied when selecting unit to equip to. (expected 1, got " + responses.length + " instead)");
@@ -577,7 +577,7 @@ export class SelectEquipableUnit extends Action {
 	}
 
 	isImpossible(timing) {
-		return this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null).length == 0;
+		return this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0].length == 0;
 	}
 }
 
@@ -604,7 +604,7 @@ export class EquipCard extends Action {
 	}
 
 	isImpossible(timing) {
-		return !this.equipment.equipableTo.evalFull(this.spellItem, this.player, null).includes(this.target);
+		return !this.equipment.equipableTo.evalFull(this.spellItem, this.player, null)[0].includes(this.target);
 	}
 }
 

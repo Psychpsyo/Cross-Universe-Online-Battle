@@ -283,7 +283,7 @@ export function tokenize(code, game) {
 					} else if (game.config.allTypes.includes(word)) {
 						tokens.push({type: "type", value: word});
 					} else {
-						tokens.push({type: "name", value: word});
+						throw new Error("Found unknown word while tokenizing: " + word);
 					}
 					pos += wordLength;
 					break;

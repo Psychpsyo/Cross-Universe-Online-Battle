@@ -5,11 +5,13 @@ import * as abilities from "./abilities.js";
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
 
 class BaseCard {
-	constructor(player, cardId, hidden, initialValues, deckLimit, equipableTo) {
+	constructor(player, cardId, hidden, initialValues, deckLimit, equipableTo, turnLimit, condition) {
 		this.owner = player;
 		this.cardId = cardId;
 		this.deckLimit = deckLimit;
 		this.equipableTo = equipableTo;
+		this.turnLimit = turnLimit;
+		this.condition = condition;
 
 		this.initialValues = initialValues;
 		this.values = initialValues;
@@ -83,7 +85,9 @@ export class Card extends BaseCard {
 				data.abilities.map(ability => makeAbility(ability, player.game))
 			),
 			data.deckLimit,
-			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game)
+			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game),
+			data.turnLimit,
+			data.condition? interpreter.buildAST("cardCondition", data.id, data.condition, player.game) : null
 		);
 		this.snapshots = [];
 		this.invalidatedSnapshotLists = [];
@@ -124,7 +128,7 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 export class SnapshotCard extends BaseCard {
 	constructor(card, equippedToSnapshot) {
-		super(card.owner, card.cardId, card.hidden, card.initialValues.clone(), card.deckLimit, card.equipableTo);
+		super(card.owner, card.cardId, card.hidden, card.initialValues.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
 		this.values = card.values.clone();
 		this.baseValues = card.baseValues.clone();
 		this.modifierStack = [...card.modifierStack];
@@ -202,7 +206,9 @@ function parseCdfValues(cdf) {
 	let data = {
 		abilities: [],
 		deckLimit: 3,
-		equipableTo: "[from field where cardType = unit]"
+		equipableTo: "[from field where cardType = unit]",
+		turnLimit: Infinity,
+		condition: null
 	};
 	let lines = cdf.replaceAll("\r", "").split("\n");
 	let inAbility = false;
@@ -323,6 +329,14 @@ function parseCdfValues(cdf) {
 				data.equipableTo = "[from field where cardType = unit & " + parts[1] + "]";
 				break;
 			}
+			case "turnLimit": {
+				data.turnLimit = parseInt(parts[1]);
+				break;
+			}
+			case "condition": {
+				data.condition = parts[1];
+				break;
+			}
 			case "o": {
 				if (!["cast", "deploy", "optional", "fast", "trigger", "static"].includes(parts[1])) {
 					throw new Error("CDF Parser Error: " + parts[1] + " is an invalid ability type.");
@@ -359,10 +373,10 @@ function parseCdfValues(cdf) {
 function makeAbility(ability, game) {
 	switch (ability.type) {
 		case "cast": {
-			return new abilities.CastAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after, ability.turnLimit);
+			return new abilities.CastAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
 		}
 		case "deploy": {
-			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after, ability.turnLimit);
+			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
 		}
 		case "optional": {
 			return new abilities.OptionalAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.condition);

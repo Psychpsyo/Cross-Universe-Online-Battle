@@ -200,7 +200,7 @@ function getFollowupTiming(block, game, timing) {
 	let invalidEquipments = [];
 	for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
 		if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
-			!equipment.equipableTo.evalFull(equipment, equipment.zone.player, null).includes(equipment.equippedTo)
+			!equipment.equipableTo.evalFull(equipment, equipment.zone.player, null)[0].includes(equipment.equippedTo)
 		) {
 			invalidEquipments.push(equipment);
 		}

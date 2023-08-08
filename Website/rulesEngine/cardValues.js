@@ -61,7 +61,7 @@ export class CardModifier {
 		let values = toBaseValues? card.baseValues : card.values;
 		ast.setImplicitCard(card);
 		for (let modification of this.modifications) {
-			if (modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)) {
+			if (modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)[0]) {
 				values = modification.modify(values, this.card, this.player, this.ability, toBaseValues);
 			}
 		}
@@ -111,7 +111,7 @@ export class ValueSetModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let newValue = this.newValue.evalFull(card, player, ability);
+		let newValue = this.newValue.evalFull(card, player, ability)[0];
 		for (let i = 0; i < this.values.length; i++) {
 			if (toBaseValues === this.toBaseValues[i]) {
 				if (["level", "attack", "defense"].includes(this.values[i])) {
@@ -125,7 +125,7 @@ export class ValueSetModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.newValue.evalFull(card, player, ability);
+		let valueArray = this.newValue.evalFull(card, player, ability)[0];
 		if (valueArray.length == 0) {
 			return null;
 		}
@@ -133,7 +133,7 @@ export class ValueSetModification extends ValueModification {
 	}
 
 	hasAllTargets(card, player, ability) {
-		return this.newValue.evalFull(card, player, ability).length > 0;
+		return this.newValue.evalFull(card, player, ability)[0].length > 0;
 	}
 }
 
@@ -146,7 +146,7 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let newValues = this.newValues.evalFull(card, player, ability);
+		let newValues = this.newValues.evalFull(card, player, ability)[0];
 		for (let i = 0; i < this.values.length; i++) {
 			if (toBaseValues === this.toBaseValues[i]) {
 				for (let newValue of newValues) {
@@ -161,7 +161,7 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.newValues.evalFull(card, player, ability);
+		let valueArray = this.newValues.evalFull(card, player, ability)[0];
 		if (valueArray.length == 0) {
 			return null;
 		}
@@ -169,7 +169,7 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	hasAllTargets(card, player, ability) {
-		return this.newValues.evalFull(card, player, ability).length > 0;
+		return this.newValues.evalFull(card, player, ability)[0].length > 0;
 	}
 }
 
@@ -182,7 +182,7 @@ export class NumericChangeModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let amount = this.amount.evalFull(card, player, ability)[0];
+		let amount = this.amount.evalFull(card, player, ability)[0][0];
 		for (let i = 0; i < this.values.length; i++) {
 			if (toBaseValues === this.toBaseValues[i]) {
 				values[this.values[i]] = Math.max(0, values[this.values[i]] + amount);
@@ -192,7 +192,7 @@ export class NumericChangeModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.amount.evalFull(card, player, ability);
+		let valueArray = this.amount.evalFull(card, player, ability)[0];
 		if (valueArray.length == 0) {
 			return null;
 		}
@@ -200,7 +200,7 @@ export class NumericChangeModification extends ValueModification {
 	}
 
 	hasAllTargets(card, player, ability) {
-		return this.amount.evalFull(card, player, ability).length > 0;
+		return this.amount.evalFull(card, player, ability)[0].length > 0;
 	}
 }
 
@@ -213,7 +213,7 @@ export class NumericDivideModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let byAmount = this.byAmount.evalFull(card, player, ability)[0];
+		let byAmount = this.byAmount.evalFull(card, player, ability)[0][0];
 		for (let i = 0; i < this.values.length; i++) {
 			if (toBaseValues === this.toBaseValues[i]) {
 				values[this.values[i]] = Math.ceil(values[this.values[i]] / byAmount);
@@ -223,7 +223,7 @@ export class NumericDivideModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.byAmount.evalFull(card, player, ability);
+		let valueArray = this.byAmount.evalFull(card, player, ability)[0];
 		if (valueArray.length == 0) {
 			return null;
 		}
@@ -231,7 +231,7 @@ export class NumericDivideModification extends ValueModification {
 	}
 
 	hasAllTargets(card, player, ability) {
-		return this.byAmount.evalFull(card, player, ability).length > 0;
+		return this.byAmount.evalFull(card, player, ability)[0].length > 0;
 	}
 }
 

@@ -11,15 +11,11 @@ export class BaseAbility {
 	}
 
 	canActivate(card, player) {
-		return this.condition === null || this.condition.evalFull(card, player, this);
+		return this.condition === null || this.condition.evalFull(card, player, this)[0];
 	}
 
 	snapshot() {
 		return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
-	}
-
-	getCardId() {
-		return this.id.substr(0, 6);
 	}
 }
 
@@ -54,48 +50,42 @@ export class Ability extends BaseAbility {
 }
 
 export class CastAbility extends Ability {
-	constructor(id, game, exec, cost, condition, after, turnLimit) {
+	constructor(id, game, exec, cost, condition, after) {
 		super(id, game, exec, cost, condition);
 		this.after = null;
 		if (after) {
 			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
-		this.turnLimit = turnLimit;
 		this.triggerMet = false;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) &&
-			(this.after == null || this.triggerMet) &&
-			(player.game.currentTurn().getBlocks().filter(block => {block instanceof blocks.CastSpell && block.card.cardId === this.getCardId()}).length < this.turnLimit);
+		return super.canActivate(card, player) && (this.after == null || this.triggerMet);
 	}
 
 	checkTrigger(card, player) {
-		if (this.after == null || this.after.evalFull(card, player, this)) {
+		if (this.after == null || this.after.evalFull(card, player, this)[0]) {
 			this.triggerMet = true;
 		}
 	}
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, game, exec, cost, condition, after, turnLimit) {
+	constructor(id, game, exec, cost, condition, after) {
 		super(id, game, exec, cost, condition);
 		this.after = null;
 		if (after) {
 			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
-		this.turnLimit = turnLimit;
 		this.triggerMet = false;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) &&
-			(this.after == null || this.triggerMet) &&
-			(player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.getCardId()).length < this.turnLimit);
+		return super.canActivate(card, player) && (this.after == null || this.triggerMet);
 	}
 
 	checkTrigger(card, player) {
-		if (this.after == null || this.after.evalFull(card, player, this)) {
+		if (this.after == null || this.after.evalFull(card, player, this)[0]) {
 			this.triggerMet = true;
 		}
 	}
@@ -161,7 +151,7 @@ export class TriggerAbility extends Ability {
 		if (this.after === null) {
 			return;
 		}
-		if (this.after.evalFull(card, player, this)) {
+		if (this.after.evalFull(card, player, this)[0]) {
 			this.triggerMet = true;
 		}
 	}
@@ -170,7 +160,7 @@ export class TriggerAbility extends Ability {
 		if (!this.during) {
 			return;
 		}
-		if (!this.during.evalFull(card, player, this)) {
+		if (!this.during.evalFull(card, player, this)[0]) {
 			this.triggerMet = false;
 			this.usedDuring = false;
 		} else if (!this.usedDuring) {
@@ -196,12 +186,12 @@ export class StaticAbility extends BaseAbility {
 
 	getTargetCards(card, player) {
 		if (this.canActivate(card, player)) {
-			return this.applyTo.evalFull(card, player, this);
+			return this.applyTo.evalFull(card, player, this)[0];
 		}
 		return [];
 	}
 
 	getModifier(card, player) {
-		return this.modifier.evalFull(card, player, this);
+		return this.modifier.evalFull(card, player, this)[0];
 	}
 }

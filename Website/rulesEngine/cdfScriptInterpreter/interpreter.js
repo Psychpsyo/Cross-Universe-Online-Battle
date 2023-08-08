@@ -10,7 +10,8 @@ let alreadyParsed = {
 	applyTarget: {},
 	modifier: {},
 	applyTarger: {},
-	equipableTo: {}
+	equipableTo: {},
+	cardCondition: {}
 };
 
 export function buildAST(type, effectId, cdfScript, game) {
