@@ -107,7 +107,7 @@ export async function getCdf(cardId) {
 	return cdfCache[cardId];
 }
 
-export async function getCardImage(card, useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true") {
+export function getCardImage(card, useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true") {
 	if (!card) {
 		return "images/cardHidden.png";
 	}

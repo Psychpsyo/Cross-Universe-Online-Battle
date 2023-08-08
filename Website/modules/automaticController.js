@@ -229,6 +229,11 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "cardRevealed": {
+				switch (event.card.zone.type) {
+					case "hand": {
+						return autoUI.revealHandCard(event.card);
+					}
+				}
 				return this.gameSleep();
 			}
 			case "turnStarted": {

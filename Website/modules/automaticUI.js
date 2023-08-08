@@ -157,14 +157,12 @@ export function newBlock(block) {
 	let visual = document.createElement("div");
 
 	let img = document.createElement("img");
+	img.src = cardLoader.getCardImage(card);
 	img.draggable = false;
 	visual.appendChild(img);
 	img.addEventListener("click", function(e) {
 		e.stopPropagation();
 		previewCard(card.cardRef);
-	});
-	cardLoader.getCardImage(card).then(src => {
-		img.src = src;
 	});
 
 	let labelElem = document.createElement("span");
@@ -282,4 +280,16 @@ export async function activate(card) {
 		slot.classList.remove("activating");
 	}, gameState.controller.gameSpeed * 1000);
 	return new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1000));
+}
+
+export async function revealHandCard(card) {
+	let cardImg = document.getElementById("hand" + card.zone.player.index).children.item(card.index);
+	cardImg.classList.add("revealed");
+	cardImg.src = cardLoader.getCardImage(card);
+	if (card.zone.player.index === 0) {
+		previewCard(card);
+	}
+	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1000));
+	cardImg.src = cardLoader.getCardImage(card.cardRef);
+	cardImg.classList.remove("revealed");
 }

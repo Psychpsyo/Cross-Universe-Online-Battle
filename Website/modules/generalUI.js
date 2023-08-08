@@ -106,7 +106,7 @@ export async function previewCard(card, specific = true) {
 	currentPreviewedCard = card;
 
 	// set the image preview
-	cardDetailsImage.style.backgroundImage = "url(" + (await cardLoader.getCardImage(card, localStorage.getItem("opponentCardLanguage") === "true" && localStorage.getItem("previewCardLanguage") === "true")) + ")";
+	cardDetailsImage.style.backgroundImage = "url(" + cardLoader.getCardImage(card, localStorage.getItem("opponentCardLanguage") === "true" && localStorage.getItem("previewCardLanguage") === "true") + ")";
 
 	return updateCardPreview(card);
 }
