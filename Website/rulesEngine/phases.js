@@ -81,7 +81,7 @@ export class StackPhase extends Phase {
 			if (card.values.cardTypes.includes("spell")) {
 				let eligible = true;
 				if (
-					(this.turn.getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === card.cardId).length >= card.turnLimit) ||
+					(this.turn.getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === card.cardId && block.player === player).length >= card.turnLimit) ||
 					(card.condition !== null && !card.condition.evalFull(card, player, null)[0]) ||
 					(card.values.cardTypes.includes("enchantSpell") && card.equipableTo.evalFull(card, player, null)[0].length == 0)
 				) {
@@ -300,7 +300,7 @@ export class MainPhase extends StackPhase {
 			if (card.values.cardTypes.includes("item")) {
 				let eligible = true;
 				if (
-					(this.turn.getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === card.cardId).length < card.turnLimit) ||
+					(this.turn.getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === card.cardId).length >= card.turnLimit) ||
 					(card.condition !== null && !card.condition.evalFull(card, this.turn.player, null)[0]) ||
 					(card.values.cardTypes.includes("equipableItem") && card.equipableTo.evalFull(card, this.turn.player, null)[0].length === 0)) {
 					eligible = false;
