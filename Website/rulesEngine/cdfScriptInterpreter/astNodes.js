@@ -322,8 +322,8 @@ export class FunctionNode extends AstNode {
 				}
 				return moveActions;
 			}
-			case "REVEAL": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef));
+			case "VIEW": {
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.View(card.cardRef, player));
 			}
 			case "SELECT": {
 				let choiceAmount = yield* this.parameters[0].eval(card, player, ability);
@@ -334,6 +334,8 @@ export class FunctionNode extends AstNode {
 				for (let card of eligibleCards) {
 					if (!(["deck", "hand"].includes(card.zone.type) && !card.zone.player.isViewable)) {
 						card.hidden = false;
+					} else {
+						card.hidden = true;
 					}
 				}
 				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ability.id);
@@ -495,8 +497,8 @@ defense: ${defense}`, false));
 				}
 				return moveActions;
 			}
-			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef)));
+			case "VIEW": {
+				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.View(card.cardRef, player)));
 			}
 			default: {
 				return super.evalFull(card, player, ability);
@@ -550,7 +552,7 @@ defense: ${defense}`, false));
 			case "MOVE": {
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
-			case "REVEAL": {
+			case "VIEW": {
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SELECT": {
@@ -644,7 +646,7 @@ defense: ${defense}`, false));
 				}
 				return false;
 			}
-			case "REVEAL": {
+			case "VIEW": {
 				// TODO: maybe needs to check if card is already visible to opponent
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
@@ -1300,8 +1302,8 @@ export class ActionAccessorNode extends AstNode {
 					}
 					break;
 				}
-				case "revealed": {
-					if (action instanceof actions.Reveal) {
+				case "viewed": {
+					if (action instanceof actions.View) {
 						values.push(action.card);
 					}
 					break;

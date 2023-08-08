@@ -229,7 +229,7 @@ export class AutomaticController extends InteractionController {
 				gameUI.updateCard(event.player.partnerZone, 0);
 				return this.gameSleep();
 			}
-			case "cardRevealed": {
+			case "cardViewed": {
 				switch (event.card.zone.type) {
 					case "hand": {
 						return autoUI.revealHandCard(event.card);

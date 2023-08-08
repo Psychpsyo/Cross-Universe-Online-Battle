@@ -8,5 +8,5 @@ defense: 500
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-$reveals = REVEAL(SELECT(any, [from you.hand where types = Light & cardType = unit]))
-GAINLIFE(COUNT($reveals.revealed) * 50)
+$views = opponent.VIEW(opponent.SELECT(any, [from you.hand where types = Light & cardType = unit]))
+GAINLIFE(COUNT($views.viewed) * 50)

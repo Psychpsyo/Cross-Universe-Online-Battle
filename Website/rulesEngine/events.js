@@ -291,10 +291,11 @@ export function createCardEquippedEvent(equipment, target) {
 	}
 }
 
-export function createCardRevealedEvent(card) {
+export function createCardViewedEvent(player, card) {
 	return {
 		"nature": "event",
-		"type": "cardRevealed",
+		"type": "cardViewed",
+		"player": player,
 		"card": card
 	}
 }

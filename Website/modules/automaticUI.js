@@ -289,7 +289,7 @@ export async function revealHandCard(card) {
 	if (card.zone.player.index === 0) {
 		previewCard(card);
 	}
-	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1000));
+	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1500));
 	cardImg.src = cardLoader.getCardImage(card.cardRef);
 	cardImg.classList.remove("revealed");
 }

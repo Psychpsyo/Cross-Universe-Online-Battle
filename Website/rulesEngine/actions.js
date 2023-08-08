@@ -624,17 +624,20 @@ export class Shuffle extends Action {
 	}
 }
 
-export class Reveal extends Action {
-	constructor(card) {
+export class View extends Action {
+	constructor(card, player) {
 		super();
 		this.card = card;
+		this.player = player;
 	}
 
 	async* run() {
 		let wasHidden = this.card.hidden;
-		this.card.hidden = false;
+		if (this.player.isViewable) {
+			this.card.hidden = false;
+		}
 		this.card = this.card.snapshot();
 		this.card.cardRef.hidden = wasHidden;
-		return events.createCardRevealedEvent(this.card);
+		return events.createCardViewedEvent(this.player, this.card);
 	}
 }

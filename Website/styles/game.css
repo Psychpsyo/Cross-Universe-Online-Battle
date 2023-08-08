@@ -463,11 +463,17 @@ img[src$="cardBackFrameP1.png"] {
 	margin-left: .5vw;
 }
 
-#hand0.shown .card:hover, #hand0 .card.revealed  {
+#hand0.shown .card:hover  {
 	transform: rotate(180deg) translateY(-15%);
 }
-#hand1 .card:hover, #hand1 .card.revealed {
+#hand0 .card.revealed {
+	transform: rotate(180deg) translateY(-25%);
+}
+#hand1 .card:hover {
 	transform: translateY(-15%);
+}
+#hand1 .card.revealed {
+	transform: translateY(-25%);
 }
 
 #hand0 {
