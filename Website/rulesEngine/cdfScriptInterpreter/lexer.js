@@ -87,6 +87,7 @@ let keywordTokenTypes = {
 	LOSELIFE: "function",
 	LOSEMANA: "function",
 	MOVE: "function",
+	REVEAL: "function",
 	SELECT: "function",
 	SELECTPLAYER: "function",
 	SETATTACKTARGET: "function",
@@ -105,6 +106,7 @@ let keywordTokenTypes = {
 	exiled: "actionAccessor",
 	moved: "actionAccessor",
 	retired: "actionAccessor",
+	revealed: "actionAccessor",
 	summoned: "actionAccessor",
 	targeted: "actionAccessor",
 

@@ -322,6 +322,9 @@ export class FunctionNode extends AstNode {
 				}
 				return moveActions;
 			}
+			case "REVEAL": {
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef));
+			}
 			case "SELECT": {
 				let choiceAmount = yield* this.parameters[0].eval(card, player, ability);
 				let eligibleCards = yield* this.parameters[1].eval(card, player, ability);
@@ -492,6 +495,9 @@ defense: ${defense}`, false));
 				}
 				return moveActions;
 			}
+			case "REVEAL": {
+				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef)));
+			}
 			default: {
 				return super.evalFull(card, player, ability);
 			}
@@ -542,6 +548,9 @@ defense: ${defense}`, false));
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "MOVE": {
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+			}
+			case "REVEAL": {
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SELECT": {
@@ -634,6 +643,10 @@ defense: ${defense}`, false));
 					}
 				}
 				return false;
+			}
+			case "REVEAL": {
+				// TODO: maybe needs to check if card is already visible to opponent
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SELECT": {
 				let availableOptions = this.parameters[1].evalFull(card, player, ability);
@@ -1283,6 +1296,12 @@ export class ActionAccessorNode extends AstNode {
 				}
 				case "retired": {
 					if (action instanceof actions.Discard && action.timing.block instanceof blocks.Retire) {
+						values.push(action.card);
+					}
+					break;
+				}
+				case "revealed": {
+					if (action instanceof actions.Reveal) {
 						values.push(action.card);
 					}
 					break;
