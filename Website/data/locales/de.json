@@ -63,6 +63,7 @@
 				"notEnoughCards": "Das Deck konnte nicht geladen werden, weil es weniger als {#DECKLIMIT} Karten enthält.",
 				"tooManyOfCard": "Das Deck konnte nicht geladen werden, weil es zu viele '{#CARDNAME}' enthält.",
 				"hasToken": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält.\n(Decks dürfen keine Token-Karten enthalten.)",
+				"insufficientRank": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält, welches ein höheres Level hat als dein Rang. (Lv{#LEVEL} > Rang{#RANK})",
 				"unsupportedInAutomatic": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält. Diese Karte existiert im automatischen Modus noch nicht."
 			}
 		},

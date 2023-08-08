@@ -63,6 +63,7 @@
 				"notEnoughCards": null,
 				"tooManyOfCard": null,
 				"hasToken": null,
+				"insufficientRank": null,
 				"unsupportedInAutomatic": null
 			}
 		},

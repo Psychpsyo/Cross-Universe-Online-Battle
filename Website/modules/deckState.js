@@ -199,6 +199,11 @@ export class DeckState extends GameState {
 					alert(locale.game.deckSelect.errors.hasToken.replaceAll("{#CARDNAME}", cardInfo.name));
 					break;
 				}
+				case e instanceof deckErrors.InsufficientRankError: {
+					let cardInfo = await cardLoader.getCardInfo(e.cardId);
+					alert(locale.game.deckSelect.errors.insufficientRank.replaceAll("{#CARDNAME}", cardInfo.name).replaceAll("{#LEVEL}", cardInfo.level).replaceAll("{#RANK}", localPlayer.rank));
+					break;
+				}
 				default: {
 					console.error(e, e.stack);
 					alert(locale.game.deckSelect.errors.generic);
