@@ -99,7 +99,7 @@ class AstNode {
 	// Wether or not all actions in this tree can be done fully (as a cost)
 	canDoInFull(card, player, ability) {
 		for (let childNode of this.getChildNodes()) {
-			if (!childNode.canDoInFull(card, player, ability)) {
+			if (childNode && !childNode.canDoInFull(card, player, ability)) {
 				return false;
 			}
 		}
@@ -227,6 +227,31 @@ export class ApplyTargetRootNode extends AstNode {
 	}
 }
 
+// Used by the MOVE() function, primarily to figure out which field zone a given card needs to move to.
+function getZoneForCard(zoneList, card) {
+	for (let zone of zoneList) {
+		if (zone instanceof zones.FieldZone) {
+			switch (zone.type) {
+				case "unit":
+				case "partner": {
+					if (card.values.cardTypes.includes("unit")) {
+						return zone;
+					}
+					break;
+				}
+				case "spellItem": {
+					if (card.values.cardTypes.includes("spell") || card.values.cardTypes.includes("item")) {
+						return zone;
+					}
+					break;
+				}
+			}
+		} else {
+			return zone;
+		}
+	}
+}
+
 // Represents the language's built-in functions
 export class FunctionNode extends AstNode {
 	constructor(functionName, parameters, player, asManyAsPossible) {
@@ -312,7 +337,7 @@ export class FunctionNode extends AstNode {
 						continue;
 					}
 					setImplicitCard(card);
-					let zone = (yield* this.parameters[1].eval(card, player, ability))[0];
+					let zone = getZoneForCard(yield* this.parameters[1].eval(card, player, ability), card);
 					let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 					if (this.parameters[1] instanceof DeckPositionNode) {
 						index = this.parameters[1].top? -1 : 0;
@@ -486,7 +511,8 @@ defense: ${defense}`, false));
 							continue;
 						}
 						setImplicitCard(card);
-						let zone = (this.parameters[1].evalFull(card, player, ability))[0][0]; // TODO: this might need to handle multiple zone possibilities
+						// TODO: this might need to handle multiple zone possibilities
+						let zone = getZoneForCard((this.parameters[1].evalFull(card, player, ability))[0], card);
 						let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 						if (this.parameters[1] instanceof DeckPositionNode) {
 							index = this.parameters[1].top? -1 : 0;
@@ -635,13 +661,31 @@ defense: ${defense}`, false));
 				return false;
 			}
 			case "MOVE": {
-				let freeZoneSlots = this.parameters[1].evalFull(card, player, ability).map(zones => zones.map(zone => zone.getFreeSpaceCount()).flat());
-				let moveAmounts = this.parameters[0].evalFull(card, player, ability).map(list => list.length);
-				for (let free of freeZoneSlots) {
-					for (let moveAmount of moveAmounts) {
-						if (moveAmount > 0 && (free >= moveAmount || (free > 0 && this.asManyAsPossible))) {
-							return true;
+				let cardPossibilities = this.parameters[0].evalFull(card, player, ability);
+				for (let cards of cardPossibilities) {
+					let targetZones = [];
+					for (const card of cards) {
+						if (card.cardRef === null) {
+							continue;
 						}
+						setImplicitCard(card);
+						// TODO: this might need to handle multiple zone possibilities
+						targetZones.push(getZoneForCard((this.parameters[1].evalFull(card, player, ability))[0], card));
+						clearImplicitCard();
+					}
+					let zoneCardCounts = new Map();
+					for (const zone of targetZones) {
+						zoneCardCounts.set(zone, (zoneCardCounts.get(zone) ?? 0) + 1);
+					}
+					let enoughSpace = true;
+					for (const [key, value] of zoneCardCounts) {
+						if (key.getFreeSpaceCount() < value) {
+							enoughSpace = false;
+							break;
+						}
+					}
+					if (enoughSpace) {
+						return true;
 					}
 				}
 				return false;

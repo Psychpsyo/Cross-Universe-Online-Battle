@@ -92,42 +92,54 @@ export class DeployAbility extends Ability {
 }
 
 export class OptionalAbility extends Ability {
-	constructor(id, game, exec, cost, turnLimit, condition) {
+	constructor(id, game, exec, cost, turnLimit, globalTurnLimit, gameLimit, condition) {
 		super(id, game, exec, cost, condition);
 		this.turnLimit = turnLimit;
-		this.activationCount = 0;
+		this.globalTurnLimit = globalTurnLimit;
+		this.gameLimit = gameLimit;
+		this.turnActivationCount = 0;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) && this.activationCount < this.turnLimit;
+		return super.canActivate(card, player) &&
+		this.turnActivationCount < this.turnLimit &&
+		(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
+		(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit);
 	}
 
 	successfulActivation() {
-		this.activationCount++;
+		this.turnActivationCount++;
 	}
 }
 
 export class FastAbility extends Ability {
-	constructor(id, game, exec, cost, turnLimit, condition) {
+	constructor(id, game, exec, cost, turnLimit, globalTurnLimit, gameLimit, condition) {
 		super(id, game, exec, cost, condition);
 		this.turnLimit = turnLimit;
-		this.activationCount = 0;
+		this.globalTurnLimit = globalTurnLimit;
+		this.gameLimit = gameLimit;
+		this.turnActivationCount = 0;
 	}
 
 	canActivate(card, player) {
-		return super.canActivate(card, player) && this.activationCount < this.turnLimit;
-	}
+		return super.canActivate(card, player) &&
+		this.turnActivationCount < this.turnLimit &&
+		(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
+		(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit);
+}
 
 	successfulActivation() {
-		this.activationCount++;
+		this.turnActivationCount++;
 	}
 }
 
 export class TriggerAbility extends Ability {
-	constructor(id, game, exec, cost, mandatory, turnLimit, during, after, condition) {
+	constructor(id, game, exec, cost, mandatory, turnLimit, globalTurnLimit, gameLimit, during, after, condition) {
 		super(id, game, exec, cost, condition);
 		this.mandatory = mandatory;
 		this.turnLimit = turnLimit;
+		this.globalTurnLimit = globalTurnLimit;
+		this.gameLimit = gameLimit;
 		this.during = null;
 		if (during) {
 			this.during = interpreter.buildAST("during", id, during, game);
@@ -138,12 +150,14 @@ export class TriggerAbility extends Ability {
 			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
 		this.triggerMet = false;
-		this.activationCount = 0;
+		this.turnActivationCount = 0;
 	}
 
 	canActivate(card, player) {
 		return super.canActivate(card, player) &&
-			this.activationCount < this.turnLimit &&
+			this.turnActivationCount < this.turnLimit &&
+			(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
+			(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit) &&
 			this.triggerMet;
 	}
 
@@ -169,7 +183,7 @@ export class TriggerAbility extends Ability {
 	}
 
 	successfulActivation() {
-		this.activationCount++;
+		this.turnActivationCount++;
 		this.triggerMet = false;
 		if (this.during) {
 			this.usedDuring = true;

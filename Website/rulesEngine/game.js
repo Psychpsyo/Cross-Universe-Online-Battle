@@ -234,6 +234,9 @@ export class Game {
 	getStacks() {
 		return this.turns.map(turn => turn.getStacks()).flat();
 	}
+	getBlocks() {
+		return this.turns.map(turn => turn.getBlocks()).flat();
+	}
 	getTimings() {
 		return this.turns.map(turn => turn.getTimings()).flat();
 	}

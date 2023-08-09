@@ -119,7 +119,7 @@ export class Card extends BaseCard {
 		this.attackCount = 0;
 		for (let ability of this.values.abilities) {
 			if (ability instanceof abilities.OptionalAbility || ability instanceof abilities.FastAbility || ability instanceof abilities.TriggerAbility) {
-				ability.activationCount = 0;
+				ability.turnActivationCount = 0;
 			}
 		}
 	}
@@ -220,6 +220,14 @@ function parseCdfValues(cdf) {
 			switch (parts[0]) {
 				case "turnLimit": {
 					ability.turnLimit = parseInt(parts[1]);
+					break;
+				}
+				case "globalTurnLimit": {
+					ability.globalTurnLimit = parseInt(parts[1]);
+					break;
+				}
+				case "gameLimit": {
+					ability.gameLimit = parseInt(parts[1]);
 					break;
 				}
 				case "condition": {
@@ -351,6 +359,8 @@ function parseCdfValues(cdf) {
 					id: data.id + ":" + data.abilities.length,
 					type: parts[1],
 					turnLimit: Infinity,
+					globalTurnLimit: Infinity,
+					gameLimit: Infinity,
 					during: null,
 					after: null,
 					condition: null,
@@ -379,13 +389,13 @@ function makeAbility(ability, game) {
 			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
 		}
 		case "optional": {
-			return new abilities.OptionalAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.condition);
+			return new abilities.OptionalAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.condition);
 		}
 		case "fast": {
-			return new abilities.FastAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.condition);
+			return new abilities.FastAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.condition);
 		}
 		case "trigger": {
-			return new abilities.TriggerAbility(ability.id, game, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.during, ability.after, ability.condition);
+			return new abilities.TriggerAbility(ability.id, game, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.during, ability.after, ability.condition);
 		}
 		case "static": {
 			return new abilities.StaticAbility(ability.id, game, ability.modifier, ability.applyTo, ability.condition);
