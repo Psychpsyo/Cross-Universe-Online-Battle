@@ -732,7 +732,7 @@ dialog.popupSelectMenu {
 	min-height: 20%;
 }
 
-#questionPopup {
+.queryPopup {
 	padding: 1em;
 }
 #questionPopupBtns {

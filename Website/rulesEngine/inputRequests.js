@@ -41,6 +41,24 @@ export const choosePlayer = {
 	}
 }
 
+export const chooseType = {
+	create: function(player, effect, types) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "chooseType",
+			"effect": effect,
+			"from": types
+		}
+	},
+	validate: function(response, request) {
+		if (response < 0 || response >= request.from.length) {
+			throw new Error("Chose an invalid type index: " + response);
+		}
+		return request.from[response];
+	}
+}
+
 export const enterBattlePhase = {
 	create: function(player) {
 		return {

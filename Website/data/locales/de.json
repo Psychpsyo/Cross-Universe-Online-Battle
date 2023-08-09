@@ -196,12 +196,13 @@
 
 			"opponentActions": {
 				"selectingCards": "Dein Gegner wählt Karte(n).",
-				"effectSelectingCards": "Dein Gegner wählt Karte(n) für den Effekt von '{#CARDNAME}'",
+				"effectSelectingCards": "Dein Gegner wählt Karte(n) für den Effekt von '{#CARDNAME}'.",
 				"selectingHandDiscard": "Dein Gegner wählt Handkarte(n), weil er mehr als 8 hat.",
 				"selectingAttackTarget": "Dein Gegner wählt eine Einheit zum Angriff aus.",
 				"selectingPlayer": "Dein Gegner wählt einen Spieler.",
-				"effectSelectingPlayer": "Dein Gegner wählt einen Spieler für den Effekt von '{'CARDNAME}'",
-				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt."
+				"effectSelectingPlayer": "Dein Gegner wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
+				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt.",
+				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'."
 			},
 
 			"gameOver": {

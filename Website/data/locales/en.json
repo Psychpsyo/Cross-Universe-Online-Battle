@@ -194,14 +194,17 @@
 				"opponent": "Your Opponent"
 			},
 
+			"typeSelect": "Select a type for the effect of '{#CARDNAME}':",
+
 			"opponentActions": {
 				"selectingCards": "Your opponent is selecting card(s).",
-				"effectSelectingCards": "Your opponent is selecting card(s) for the effect of '{#CARDNAME}'",
+				"effectSelectingCards": "Your opponent is selecting card(s) for the effect of '{#CARDNAME}'.",
 				"selectingHandDiscard": "Your opponent is selecting card(s) from hand to discard down to 8.",
 				"selectingAttackTarget": "Your opponent is selecting the attack target.",
 				"selectingPlayer": "Your opponent is selecting a player.",
-				"effectSelectingPlayer": "Your opponent is selecting a player for the effect of '{'CARDNAME}'",
-				"selectingStartingPlayer": "Your opponent is selecting who goes first."
+				"effectSelectingPlayer": "Your opponent is selecting a player for the effect of '{#CARDNAME}'.",
+				"selectingStartingPlayer": "Your opponent is selecting who goes first.",
+				"selectingType": "Your opponent is selecting a type for the effect of '{#CARDNAME}'."
 			},
 
 			"gameOver": {

@@ -502,11 +502,17 @@
 				</section>
 			</dialog>
 
-			<!--Partner Selector-->
-			<dialog id="questionPopup" class="centerDialog">
+			<!--Yes/No question modal-->
+			<dialog id="questionPopup" class="centerDialog queryPopup">
 				<span id="questionPopupText"></span><br>
 				<br>
 				<div id="questionPopupBtns"><button id="questionPopupYesButton"></button><button id="questionPopupNoButton"></button></div>
+			</dialog>
+
+			<dialog id="typeSelectPopup" class="centerDialog queryPopup automaticOnly">
+				<span id="typeSelectPopupText"></span><br>
+				<br>
+				<select id="typePopupSelection"></select><button id="typePopupConfirm">Select</button>
 			</dialog>
 
 			<!--Generic Card Choice Dialogue-->

@@ -303,3 +303,22 @@ export function showOpponentAction(message) {
 export function clearOpponentAction() {
 	opponentActionDisplay.classList.remove("shown");
 }
+
+export async function promptTypeSelection(message, types) {
+	typeSelectPopupText.textContent = message;
+	typePopupSelection.innerHTML = "";
+	for (let i = 0; i < types.length; i++) {
+		let option = document.createElement("option");
+		option.value = i;
+		option.textContent = locale.types[types[i]];
+		typePopupSelection.add(option);
+	}
+	typeSelectPopup.showModal();
+
+	return new Promise(resolve => {
+		typePopupConfirm.addEventListener("click", function() {
+			typeSelectPopup.close();
+			resolve(typePopupSelection.value);
+		}, {once: true});
+	});
+}

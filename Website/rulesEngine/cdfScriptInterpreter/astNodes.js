@@ -387,6 +387,17 @@ export class FunctionNode extends AstNode {
 				}
 				return requests.choosePlayer.validate(responses[0].value, selectionRequest);
 			}
+			case "SELECTTYPE": {
+				let selectionRequest = new requests.chooseType.create(player, ability.id, yield* this.parameters[0].eval(card, player, ability));
+				let responses = yield [selectionRequest];
+				if (responses.length != 1) {
+					throw new Error("Incorrect number of responses supplied during type selection. (expected 1, got " + responses.length + " instead)");
+				}
+				if (responses[0].type != "chooseType") {
+					throw new Error("Incorrect response type supplied during type selection. (expected \"chooseType\", got \"" + responses[0].type + "\" instead)");
+				}
+				return [requests.chooseType.validate(responses[0].value, selectionRequest)];
+			}
 			case "SETATTACKTARGET": {
 				let card = (yield* this.parameters[0].eval(card, player, ability))[0];
 				return card.cardRef? [new actions.SetAttackTarget(card.cardRef)] : [];
@@ -548,6 +559,7 @@ defense: ${defense}`, false));
 			case "LOSELIFE":
 			case "LOSEMANA":
 			case "SELECTPLAYER":
+			case "SELECTTYPE":
 			case "SUM":
 			case "TOKENS": {
 				return true;
@@ -617,6 +629,7 @@ defense: ${defense}`, false));
 			case "GAINMANA":
 			case "DRAW":
 			case "SELECTPLAYER":
+			case "SELECTTYPE":
 			case "SUM":
 			case "TOKENS": {
 				return true;

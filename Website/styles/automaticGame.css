@@ -212,3 +212,7 @@
 #opponentActionDisplay.shown {
 	transform: translate(0, -50%);
 }
+
+#typePopupSelection {
+	min-width: 10em;
+}

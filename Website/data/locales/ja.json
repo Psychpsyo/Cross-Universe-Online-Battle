@@ -201,7 +201,8 @@
 				"selectingAttackTarget": null,
 				"selectingPlayer": null,
 				"effectSelectingPlayer": null,
-				"selectingStartingPlayer": null
+				"selectingStartingPlayer": null,
+				"selectingType": null
 			},
 
 			"gameOver": {

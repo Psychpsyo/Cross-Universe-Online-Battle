@@ -386,7 +386,7 @@ export class AutomaticController extends InteractionController {
 						}
 						default: {
 							if (request.reason.startsWith("cardEffect:")) {
-								message = locale.game.automatic.opponentActions.effectSelectingCards.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+								message = locale.game.automatic.opponentActions.effectSelectingCards.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 							}
 						}
 					}
@@ -398,9 +398,13 @@ export class AutomaticController extends InteractionController {
 					if (request.reason == "chooseStartingPlayer") {
 						message = locale.game.automatic.opponentActions.selectingStartingPlayer;
 					} else if (request.reason.startsWith("cardEffect:")) {
-						message = locale.game.automatic.opponentActions.effectSelectingPlayer.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+						message = locale.game.automatic.opponentActions.effectSelectingPlayer.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 					}
 					autoUI.showOpponentAction(message);
+					break;
+				}
+				case "chooseType": {
+					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingType.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
 					break;
 				}
 			}
@@ -447,7 +451,7 @@ export class AutomaticController extends InteractionController {
 					}
 					default: {
 						if (request.reason.startsWith("cardEffect:")) {
-							title = locale.game.cardChoice.cardEffect.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+							title = locale.game.cardChoice.cardEffect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 						}
 					}
 				}
@@ -459,9 +463,13 @@ export class AutomaticController extends InteractionController {
 				if (request.reason == "chooseStartingPlayer") {
 					question = locale.game.automatic.playerSelect.startingPlayerQuestion;
 				} else if (request.reason.startsWith("cardEffect:")) {
-					question = locale.game.automatic.playerSelect.cardEffectQuestion.replace("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+					question = locale.game.automatic.playerSelect.cardEffectQuestion.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 				}
 				response.value = (await gameUI.askQuestion(question, locale.game.automatic.playerSelect.you, locale.game.automatic.playerSelect.opponent))? 1 : 0;
+				break;
+			}
+			case "chooseType": {
+				response.value = await autoUI.promptTypeSelection(locale.game.automatic.typeSelect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name), request.from);
 				break;
 			}
 			case "pass": {
