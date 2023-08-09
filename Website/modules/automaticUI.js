@@ -15,6 +15,8 @@ export function init() {
 	for (const [key, value] of Object.entries(locale.game.automatic.phases)) {
 		document.getElementById(key + "Indicator").textContent = value;
 	}
+	yourTurnDisplayLabel.textContent = locale.game.automatic.turns.you;
+	opponentTurnDisplayLabel.textContent = locale.game.automatic.turns.opponent;
 
 	retireCancelBtn.textContent = locale.game.automatic.retire.dropCancel;
 	passBtn.textContent = locale.game.automatic.actions.pass;

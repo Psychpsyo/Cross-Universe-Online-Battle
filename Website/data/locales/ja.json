@@ -156,6 +156,10 @@
 				"fight": "戦闘処理"
 			},
 
+			"turns": {
+				"you": "自分のターン",
+				"opponent": "相手のターン"
+			},
 			"phases": {
 				"manaSupplyPhase": "魔力\nステップ",
 				"drawPhase": "ドロー\nステップ",

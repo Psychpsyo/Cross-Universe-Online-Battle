@@ -156,6 +156,10 @@
 				"fight": "Kampf"
 			},
 
+			"turns": {
+				"you": "Dein Zug",
+				"opponent": "Gegnerischer Zug"
+			},
 			"phases": {
 				"manaSupplyPhase": "Mana\nSupply Phase",
 				"drawPhase": "Draw\nPhase",
