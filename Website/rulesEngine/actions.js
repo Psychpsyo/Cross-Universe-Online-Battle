@@ -111,9 +111,7 @@ export class Draw extends Action {
 			this.drawnCards.push(drawCard.snapshot());
 			drawCardRefs.push(drawCard);
 			this.player.handZone.add(drawCard, this.player.handZone.cards.length);
-			if (this.player.isViewable) {
-				drawCard.hidden = false;
-			}
+			drawCard.showTo(this.player)
 		}
 		for (let i = 0; i < drawCardRefs.length; i++) {
 			this.drawnCards[i].cardRef = drawCardRefs[i];
@@ -146,7 +144,7 @@ export class Place extends Action {
 	async* run() {
 		this.targetIndex = yield* queryZoneSlot(this.player, this.zone);
 		this.card = this.card.snapshot();
-		this.card.cardRef.hidden = false;
+		this.card.cardRef.hiddenFor = [];
 		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex);
 		this.zone.place(this.card.cardRef, this.targetIndex);
 		return cardPlacedEvent;
@@ -265,7 +263,6 @@ export class Move extends Action {
 		}
 		let cardRef = this.card;
 		this.card = this.card.snapshot();
-		this.card.cardRef.hidden = this.zone.type == "deck" || (!this.zone.player.isViewable && this.zone.type == "hand");
 		let cardMovedEvent = events.createCardMovedEvent(this.player, this.card.zone, this.card.index, this.zone, this.insertedIndex, this.card);
 		this.zone.add(this.card.cardRef, this.insertedIndex);
 		this.card.cardRef = cardRef;
@@ -369,7 +366,6 @@ export class Discard extends Action {
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
 		this.card.cardRef = cardRef;
 		cardRef.snapshots.push(this.card);
-		cardRef.hidden = false;
 		if (this.timing.block?.type == "retire") {
 			this.timing.block.stack.phase.turn.hasRetired.push(this.card);
 		}
@@ -424,7 +420,6 @@ export class Exile extends Action {
 		this.card.owner.exileZone.add(this.card.cardRef, this.card.owner.exileZone.cards.length);
 		this.card.cardRef = cardRef;
 		cardRef.snapshots.push(this.card);
-		cardRef.hidden = false;
 		return event;
 	}
 
@@ -632,12 +627,12 @@ export class View extends Action {
 	}
 
 	async* run() {
-		let wasHidden = this.card.hidden;
-		if (this.player.isViewable) {
-			this.card.hidden = false;
-		}
+		let wasHidden = this.card.hiddenFor.includes(this.player);
+		this.card.showTo(this.player);
 		this.card = this.card.snapshot();
-		this.card.cardRef.hidden = wasHidden;
+		if (wasHidden) {
+			this.card.cardRef.hideFrom(this.player);
+		}
 		return events.createCardViewedEvent(this.player, this.card);
 	}
 }

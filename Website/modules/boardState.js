@@ -42,7 +42,7 @@ export class BoardState extends GameState {
 				return true;
 			}
 			case "revealPartner": { // opponent revealed their partner
-				game.players[0].partnerZone.cards[0].hidden = false;
+				game.players[0].partnerZone.cards[0].hiddenFor = [];
 				ui.updateCard(game.players[0].partnerZone, 0);
 				return true;
 			}
@@ -118,11 +118,11 @@ export class BoardState extends GameState {
 	}
 	openPartnerSelect() {
 		for (let card of localPlayer.deckZone.cards) {
-			card.hidden = false;
+			card.showTo(localPlayer);
 		}
 		ui.presentCardChoice(localPlayer.deckZone.cards, locale.game.partnerSelect.popupTitle, card => card.values.cardTypes.includes("unit") && card.values.level < 6).then(cards => {
 			for (let card of localPlayer.deckZone.cards) {
-				card.hidden = true;
+				card.hideFrom(localPlayer);
 			}
 			gameState.getPartnerFromDeck(cards[0]);
 		});

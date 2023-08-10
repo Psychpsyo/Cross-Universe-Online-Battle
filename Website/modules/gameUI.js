@@ -482,7 +482,7 @@ class FieldCardSlot extends UiCardSlot {
 		if (card) {
 			this.fieldSlot.src = getCardImage(card);
 			// add card action buttons
-			if (!gameState.automatic && !card.hidden) {
+			if (!gameState.automatic && !card.hiddenFor.includes(localPlayer)) {
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
 						this.addCardButton(locale.cardActions[card.cardId][key], "cardSpecific", value);
@@ -633,12 +633,13 @@ class PresentedCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 
-		this.isRevealed = false;
-		this.zoneElem = document.getElementById("presentedCards" + this.zone.player.index);
+		console.log(zone.get(index), [...zone.get(index).hiddenFor]);
+		this.isRevealed = !zone.get(index).hiddenFor.includes(game.players[0]);
+		this.zoneElem = document.getElementById("presentedCards" + zone.player.index);
 		this.cardElem = document.createElement("div");
 
 		this.cardImg = document.createElement("img");
-		this.cardImg.src = getCardImage(this.zone.get(index));
+		this.cardImg.src = getCardImage(zone.get(index));
 		this.cardImg.addEventListener("click", function(e) {
 			e.stopPropagation();
 			previewCard(this.zone.get(this.index));
@@ -648,16 +649,11 @@ class PresentedCardSlot extends UiCardSlot {
 
 		if (this.zone.player === localPlayer) {
 			this.revealBtn = document.createElement("button");
-			this.revealBtn.textContent = locale.game.manual.presented.reveal;
+			this.revealBtn.textContent = locale.game.manual.presented[this.isRevealed? "hide" : "reveal"];
 			this.revealBtn.addEventListener("click", function() {
 				this.isRevealed = !this.isRevealed;
-				if (this.isRevealed) {
-					socket?.send("[revealCard]" + this.index);
-					this.revealBtn.textContent = locale.game.manual.presented.hide;
-				} else {
-					socket?.send("[unrevealCard]" + this.index);
-					this.revealBtn.textContent = locale.game.manual.presented.reveal;
-				}
+				socket?.send((this.isRevealed? "[revealCard]" : "[unrevealCard]") + this.index);
+				this.revealBtn.textContent = locale.game.manual.presented[this.isRevealed? "hide" : "reveal"];
 			}.bind(this));
 			this.cardElem.appendChild(this.revealBtn);
 		}
@@ -748,7 +744,7 @@ class CardSelectorMainSlot extends UiCardSlot {
 
 	remove(index) {}
 	insert(index) {
-		this.zone.cards[index].hidden = false;
+		this.zone.cards[index].showTo(localPlayer);
 		cardSelectorSlots.push(new CardSelectorSlot(this.zone, index));
 	}
 }
@@ -772,7 +768,7 @@ export function openCardSelect(zone) {
 		});
 	}
 	for (const card of cards) {
-		card[1].hidden = false;
+		card[1].showTo(localPlayer);
 		cardSelectorSlots.push(new CardSelectorSlot(zone, card[0]));
 	}
 
@@ -793,7 +789,7 @@ export function openCardSelect(zone) {
 export function closeCardSelect() {
 	if (cardSelectorMainSlot.zone.type =="deck") {
 		for (let card of cardSelectorMainSlot.zone.cards) {
-			card.hidden = true;
+			card.hideFrom(localPlayer);
 		}
 	}
 	cardSelectorMainSlot.zone = null;

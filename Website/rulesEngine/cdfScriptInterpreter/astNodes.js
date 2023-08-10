@@ -357,10 +357,11 @@ export class FunctionNode extends AstNode {
 					return [];
 				}
 				for (let card of eligibleCards) {
-					if (!(["deck", "hand"].includes(card.zone.type) && !card.zone.player.isViewable)) {
-						card.hidden = false;
+					if (card.zone.player === player || !(["deck", "hand"].includes(card.zone.type))) {
+						card.showTo(player);
 					} else {
-						card.hidden = true;
+						// selections from revealed hands are still random.
+						card.hideFrom(player);
 					}
 				}
 				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ability.id);
@@ -372,7 +373,9 @@ export class FunctionNode extends AstNode {
 					throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
 				}
 				for (let card of eligibleCards) {
-					card.hidden = card.zone.type == "deck" || (card.zone.type == "hand" && !card.zone.player.isViewable);
+					if (card.zone.type == "deck" || (card.zone.type == "hand" && !card.zone.player !== player)) {
+						card.hideFrom(player);
+					}
 				}
 				return requests.chooseCards.validate(responses[0].value, selectionRequest).map(card => card.snapshot());
 			}
@@ -472,7 +475,7 @@ name: CU${name}
 level: ${level}
 types: ${types.join(",")}
 attack: ${attack}
-defense: ${defense}`, false));
+defense: ${defense}`));
 				}
 				return cards;
 			}

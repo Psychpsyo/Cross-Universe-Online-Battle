@@ -83,9 +83,33 @@ export class Zone {
 	}
 }
 
+export class HandZone extends Zone {
+	constructor(player) {
+		super(player, "hand");
+	}
+
+	add(card, index, clearValues = true) {
+		let insertedIndex = super.add(card, index, clearValues);
+		for (const player of game.players) {
+			if (player === this.player) {
+				card.showTo(player);
+			} else {
+				card.hideFrom(player);
+			}
+		}
+		return insertedIndex;
+	}
+}
+
 export class DeckZone extends Zone {
 	constructor(player) {
 		super(player, "deck");
+	}
+
+	add(card, index, clearValues = true) {
+		let insertedIndex = super.add(card, index, clearValues);
+		card.hiddenFor = [...card.owner.game.players];
+		return insertedIndex;
 	}
 
 	async shuffle() {
@@ -112,6 +136,18 @@ export class DeckZone extends Zone {
 			[this.cards[i], this.cards[rand]] = [this.cards[rand], this.cards[i]];
 		}
 		this.reindex();
+	}
+}
+
+export class PileZone extends Zone {
+	constructor(player, type) {
+		super(player, type);
+	}
+
+	add(card, index, clearValues = true) {
+		let insertedIndex = super.add(card, index, clearValues);
+		card.hiddenFor = [];
+		return insertedIndex;
 	}
 }
 
@@ -150,6 +186,7 @@ export class FieldZone extends Zone {
 		this.cards[index] = card;
 		card.zone = this;
 		card.index = index;
+		card.hiddenFor = [];
 		return index;
 	}
 

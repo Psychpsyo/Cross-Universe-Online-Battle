@@ -11,7 +11,6 @@ export class ReplayInitState extends GameState {
 
 		game = new Game();
 		localPlayer = game.players[1];
-		game.players[1].isViewable = true;
 		game.setReplay(replay);
 
 		gameUI.init();

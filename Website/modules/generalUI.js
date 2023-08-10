@@ -95,7 +95,7 @@ export function closeCardPreview() {
 
 // previews a card
 export async function previewCard(card, specific = true) {
-	if (!card?.cardId || card.hidden) {
+	if (!card?.cardId || card.hiddenFor.includes(localPlayer)) {
 		return;
 	}
 	// if the already shown card was clicked again
@@ -272,7 +272,7 @@ export function loadDeckPreview(deck) {
 		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
 		cardImg.addEventListener("click", async function(e) {
 			e.stopPropagation();
-			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
+			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId)), false);
 		});
 	});
 

@@ -1,7 +1,7 @@
 // This module exports the Player class which holds all data relevant to one player in a game.
 
 import {Card} from "./card.js";
-import {Zone, FieldZone, DeckZone} from "./zones.js";
+import * as zones from "./zones.js";
 import * as deckErrors from "./deckErrors.js";
 
 export class Player {
@@ -16,15 +16,14 @@ export class Player {
 		this.won = false;
 		this.winReason = "";
 
-		this.deckZone = new DeckZone(this);
-		this.handZone = new Zone(this, "hand");
-		this.unitZone = new FieldZone(this, "unit", 5);
-		this.spellItemZone = new FieldZone(this, "spellItem", 4);
-		this.partnerZone = new FieldZone(this, "partner", 1);
-		this.discardPile = new Zone(this, "discard");
-		this.exileZone = new Zone(this, "exile");
+		this.deckZone = new zones.DeckZone(this);
+		this.handZone = new zones.HandZone(this);
+		this.unitZone = new zones.FieldZone(this, "unit", 5);
+		this.spellItemZone = new zones.FieldZone(this, "spellItem", 4);
+		this.partnerZone = new zones.FieldZone(this, "partner", 1);
+		this.discardPile = new zones.PileZone(this, "discard");
+		this.exileZone = new zones.PileZone(this, "exile");
 
-		this.isViewable = false; // determines whether or not this player's cards should be visible locally.
 		this.aiSystem = null;
 	}
 
@@ -39,7 +38,8 @@ export class Player {
 		let cardAmounts = {}
 		let exampleCards = {}
 		for (const cdf of cdfList) {
-			let card = new Card(this, cdf, true);
+			let card = new Card(this, cdf);
+			card.hiddenFor = [...this.game.players];
 			if (card.initialValues.cardTypes.includes("token")) {
 				throw new deckErrors.DeckTokenError(card.cardId);
 			}
@@ -75,7 +75,9 @@ export class Player {
 
 	setPartner(partnerPosInDeck) {
 		this.game.replay.players[this.index].partnerIndex = partnerPosInDeck;
-		this.partnerZone.add(this.deckZone.cards[partnerPosInDeck], 0);
+		let partner = this.deckZone.cards[partnerPosInDeck];
+		this.partnerZone.add(partner, 0);
+		partner.hiddenFor = [...this.game.players];
 	}
 
 	// returns all cards that aren't currently in deck. (cards that could have available abilities on them.)

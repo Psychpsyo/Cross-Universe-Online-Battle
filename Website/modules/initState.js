@@ -36,7 +36,6 @@ export class InitState extends GameState {
 
 				game = new Game();
 				localPlayer = game.players[1];
-				game.players[1].isViewable = true;
 				socket.send("[ready]");
 				this.checkReadyConditions();
 

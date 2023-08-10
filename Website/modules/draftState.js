@@ -115,7 +115,7 @@ export class DraftState extends GameState {
 				card.addEventListener("click", async function(e) {
 					if (e.shiftKey || e.ctrlKey || e.altKey) {
 						e.stopPropagation();
-						previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
+						previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId)), false);
 						return;
 					}
 
@@ -151,7 +151,7 @@ export class DraftState extends GameState {
 
 		deckCard.addEventListener("click", async function(e) {
 			e.stopPropagation();
-			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId), false), false);
+			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId)), false);
 		});
 
 		// check if all cards have been taken.

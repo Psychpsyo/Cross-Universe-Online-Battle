@@ -128,9 +128,6 @@ export class Game {
 			let drawnCards = 0;
 			for (let i = 0; i < this.config.startingHandSize && player.deckZone.cards.length > 0; i++) {
 				player.handZone.add(player.deckZone.cards[player.deckZone.cards.length - 1], player.handZone.cards.length);
-				if (player.isViewable) {
-					player.handZone.cards[player.handZone.cards.length - 1].hidden = false;
-				}
 				drawnCards++;
 			}
 			drawHandEvents.push(createCardsDrawnEvent(player, drawnCards));
@@ -140,7 +137,7 @@ export class Game {
 		// RULES: Both players reveal their partner...
 		let partnerRevealEvents = [];
 		for (let player of this.players) {
-			player.partnerZone.cards[0].hidden = false;
+			player.partnerZone.cards[0].hiddenFor = [];
 			partnerRevealEvents.push(createPartnerRevealedEvent(player));
 		}
 		yield partnerRevealEvents;

@@ -112,7 +112,7 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 		return "images/cardHidden.png";
 	}
 	let language = (useOwnerLanguage? players[card.owner.index].language : null) ?? localStorage.getItem("language");
-	return card.hidden? "images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
+	return card.hiddenFor.includes(localPlayer)? "images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
 }
 
 export async function deckToCdfList(deck, automatic, player) {

@@ -5,7 +5,7 @@ import * as abilities from "./abilities.js";
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
 
 class BaseCard {
-	constructor(player, cardId, hidden, initialValues, deckLimit, equipableTo, turnLimit, condition) {
+	constructor(player, cardId, initialValues, deckLimit, equipableTo, turnLimit, condition) {
 		this.owner = player;
 		this.cardId = cardId;
 		this.deckLimit = deckLimit;
@@ -27,8 +27,8 @@ class BaseCard {
 		this.isAttackTarget = false;
 		this.inRetire = null;
 
+		this.hiddenFor = [];
 		this.cardRef = this;
-		this.hidden = hidden;
 	}
 
 	sharesTypeWith(card) {
@@ -52,6 +52,18 @@ class BaseCard {
 		}
 	}
 
+	hideFrom(player) {
+		if (!this.hiddenFor.includes(player)) {
+			this.hiddenFor.push(player);
+		}
+	}
+	showTo(player) {
+		let index = this.hiddenFor.indexOf(player);
+		if (index >= 0) {
+			this.hiddenFor.splice(index, 1);
+		}
+	}
+
 	static sort(a, b) {
 		if (a.cardId < b.cardId) {
 			return -1;
@@ -64,7 +76,7 @@ class BaseCard {
 }
 
 export class Card extends BaseCard {
-	constructor(player, cdf, hidden) {
+	constructor(player, cdf) {
 		let data = parseCdfValues(cdf);
 		let baseCardTypes = [data.cardType];
 		if (data.cardType == "token") {
@@ -74,7 +86,7 @@ export class Card extends BaseCard {
 		} else if (["standardItem", "continuousItem", "equipableItem"].includes(data.cardType)) {
 			baseCardTypes.push("item");
 		}
-		super(player, data.id, hidden,
+		super(player, data.id,
 			new CardValues(
 				baseCardTypes,
 				[data.name ?? data.id],
@@ -128,7 +140,7 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 export class SnapshotCard extends BaseCard {
 	constructor(card, equippedToSnapshot) {
-		super(card.owner, card.cardId, card.hidden, card.initialValues.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
+		super(card.owner, card.cardId, card.initialValues.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
 		this.values = card.values.clone();
 		this.baseValues = card.baseValues.clone();
 		this.modifierStack = [...card.modifierStack];
@@ -157,6 +169,7 @@ export class SnapshotCard extends BaseCard {
 		this.isAttackTarget = card.isAttackTarget;
 		this.inRetire = card.inRetire;
 
+		this.hiddenFor = [...card.hiddenFor];
 		this.cardRef = card;
 		this.permanentCardRef = card; // will not be cleared by card moving and is only for restoring a card on undo
 	}
@@ -175,7 +188,7 @@ export class SnapshotCard extends BaseCard {
 		// now that this snapshot is no longer invalidated, we can use this.cardRef instead of the permanent one.
 
 		this.cardRef.undoSnapshot();
-		this.cardRef.hidden = this.hidden;
+		this.cardRef.hiddenFor = [...this.hiddenFor];
 
 		this.cardRef.initialValues = this.initialValues;
 		this.cardRef.values = this.values;

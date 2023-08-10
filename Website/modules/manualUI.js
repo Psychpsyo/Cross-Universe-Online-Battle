@@ -182,13 +182,13 @@ export function receiveMessage(command, message) {
 		}
 		case "revealCard": { // opponent revealed a presented card
 			let index = parseInt(message);
-			gameState.controller.playerInfos[0].presentedZone.cards[index].hidden = false;
+			gameState.controller.playerInfos[0].presentedZone.cards[index].showTo(localPlayer);
 			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
 			return true;
 		}
 		case "unrevealCard": { // opponent hid a presented card
 			let index = parseInt(message);
-			gameState.controller.playerInfos[0].presentedZone.cards[index].hidden = true;
+			gameState.controller.playerInfos[0].presentedZone.cards[index].hideFrom(localPlayer);
 			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
 			return true;
 		}
