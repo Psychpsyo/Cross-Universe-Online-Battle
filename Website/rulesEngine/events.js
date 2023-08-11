@@ -299,3 +299,11 @@ export function createCardViewedEvent(player, card) {
 		"card": card
 	}
 }
+
+export function createCardRevealedEvent(card) {
+	return {
+		"nature": "event",
+		"type": "cardViewed",
+		"card": card
+	}
+}

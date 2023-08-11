@@ -479,6 +479,9 @@ defense: ${defense}`));
 				}
 				return cards;
 			}
+			case "REVEAL": {
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef));
+			}
 		}
 	}
 	evalFull(card, player, ability) {
@@ -537,6 +540,9 @@ defense: ${defense}`));
 				}
 				return moveActions;
 			}
+			case "REVEAL": {
+				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef)));
+			}
 			case "VIEW": {
 				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.View(card.cardRef, player)));
 			}
@@ -593,7 +599,7 @@ defense: ${defense}`));
 			case "MOVE": {
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
-			case "VIEW": {
+			case "REVEAL": {
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SELECT": {
@@ -613,6 +619,9 @@ defense: ${defense}`));
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 			case "SUMMON": {
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+			}
+			case "VIEW": {
 				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 		}
@@ -706,9 +715,8 @@ defense: ${defense}`));
 				}
 				return false;
 			}
-			case "VIEW": {
-				// TODO: maybe needs to check if card is already visible to opponent
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+			case "REVEAL": {
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0 && list.find(card => card.hiddenFor.length == 0) === undefined) !== undefined;
 			}
 			case "SELECT": {
 				let availableOptions = this.parameters[1].evalFull(card, player, ability);
@@ -737,6 +745,9 @@ defense: ${defense}`));
 					}
 				}
 				return false;
+			}
+			case "VIEW": {
+				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
 			}
 		}
 	}

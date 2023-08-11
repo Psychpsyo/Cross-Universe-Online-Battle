@@ -636,3 +636,26 @@ export class View extends Action {
 		return events.createCardViewedEvent(this.player, this.card);
 	}
 }
+
+export class Reveal extends Action {
+	constructor(card) {
+		super();
+		this.card = card;
+		this.oldHiddenState = null;
+	}
+
+	async* run() {
+		this.oldHiddenState = this.card.hiddenFor;
+		this.card.hiddenFor = [];
+		this.card = this.card.snapshot();
+		return events.createCardRevealedEvent(this.card);
+	}
+
+	undo() {
+		this.card.cardRef.hiddenFor = this.oldHiddenState;
+	}
+
+	isImpossible(timing) {
+		return this.card.hiddenFor.length == 0;
+	}
+}

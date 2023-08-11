@@ -87,7 +87,7 @@ let keywordTokenTypes = {
 	LOSELIFE: "function",
 	LOSEMANA: "function",
 	MOVE: "function",
-	VIEW: "function",
+	REVEAL: "function",
 	SELECT: "function",
 	SELECTPLAYER: "function",
 	SELECTTYPE: "function",
@@ -96,6 +96,7 @@ let keywordTokenTypes = {
 	SUM: "function",
 	SUMMON: "function",
 	TOKENS: "function",
+	VIEW: "function",
 
 	attacked: "actionAccessor",
 	cast: "actionAccessor",
