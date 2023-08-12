@@ -38,8 +38,8 @@ for (let i = 0; i < 2; i++) {
 
 // chat box
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
-export function putChatMessage(message, type) {
-	let messageSpan = document.createElement("div");
+export function putChatMessage(message, type, cards) {
+	let messageDiv = document.createElement("div");
 
 	while (message.indexOf(":") != -1) {
 		if (message.indexOf(":", message.indexOf(":") + 1) == -1) {
@@ -47,26 +47,40 @@ export function putChatMessage(message, type) {
 		}
 		let foundEmoji = message.substr(message.indexOf(":") + 1, message.indexOf(":", message.indexOf(":") + 1) - (message.indexOf(":") + 1));
 		if (allEmoji.includes(foundEmoji)) {
-			messageSpan.appendChild(document.createTextNode(message.substr(0, message.indexOf(":"))));
+			messageDiv.appendChild(document.createTextNode(message.substr(0, message.indexOf(":"))));
 			let emojiImg = document.createElement("img");
 			emojiImg.src = "images/emoji/" + foundEmoji + ".png";
 			emojiImg.classList.add("emoji");
 			emojiImg.alt = ":" + foundEmoji + ":";
 			emojiImg.title = ":" + foundEmoji + ":";
 			emojiImg.draggable = false;
-			messageSpan.appendChild(emojiImg);
+			messageDiv.appendChild(emojiImg);
 			message = message.substr(message.indexOf(":", message.indexOf(":") + 1) + 1);
 		} else {
-			messageSpan.appendChild(document.createTextNode(message.substr(0, message.indexOf(":", message.indexOf(":") + 1))));
+			messageDiv.appendChild(document.createTextNode(message.substr(0, message.indexOf(":", message.indexOf(":") + 1))));
 			message = message.substr(message.indexOf(":", message.indexOf(":") + 1));
 		}
 	}
+	messageDiv.appendChild(document.createTextNode(message));
 
-	messageSpan.appendChild(document.createTextNode(message));
-	if (type) {
-		messageSpan.classList.add(type);
+	if (cards) {
+		let cardHolder = document.createElement("div");
+		cardHolder.classList.add("chatCardHolder");
+		for (const card of cards) {
+			let cardImg = document.createElement("img");
+			cardImg.src = cardLoader.getCardImage(card);
+			cardImg.addEventListener("click", function () {
+				previewCard(card);
+			});
+			cardHolder.appendChild(cardImg);
+		}
+		messageDiv.appendChild(cardHolder);
 	}
-	chatBox.appendChild(messageSpan);
+
+	if (type) {
+		messageDiv.classList.add(type);
+	}
+	chatBox.appendChild(messageDiv);
 	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight
 }
 
