@@ -753,18 +753,10 @@ export function openCardSelect(zone) {
 		closeCardSelect();
 	}
 	cardSelectorMainSlot.zone = zone;
-	cardSelectorSorted = false;
-	let cards = [];
-	for (const [index, element] of zone.cards.entries()) {
-		cards.push([index, element]);
-		if (element.hidden) {
-			cardSelectorSorted = true;
-		}
-	}
-	if (cardSelectorSorted) {
-		cards.sort(function(a, b) {
-			return Card.sort(a[1], b[1]);
-		});
+	let cards = Array.from(zone.cards.entries());
+	if (zone.type === "deck") {
+		cardSelectorSorted = true;
+		cards.sort((a, b) => Card.sort(a[1], b[1]));
 	}
 	for (const card of cards) {
 		card[1].showTo(localPlayer);
