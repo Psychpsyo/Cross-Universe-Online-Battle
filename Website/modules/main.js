@@ -127,7 +127,7 @@ cancelWaitingBtn.addEventListener("click", function() {
 });
 // generating an invite link
 copyInviteLink.addEventListener("click", function() {
-	let inviteURL = "https://battle.crossuniverse.net?id=" + encodeURIComponent(getRoomcode());
+	let inviteURL = location.origin + "?id=" + encodeURIComponent(getRoomcode());
 	if (gameModeSelect.value !== "normal") {
 		inviteURL += "&m=" + encodeURIComponent(gameModeSelect.value);
 	}
