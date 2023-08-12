@@ -4,6 +4,7 @@ import * as actions from "../actions.js";
 import * as requests from "../inputRequests.js";
 import * as blocks from "../blocks.js";
 import * as zones from "../zones.js";
+import * as events from "../events.js";
 import {Card, SnapshotCard} from "../card.js";
 import {CardModifier} from "../cardValues.js";
 
@@ -373,11 +374,13 @@ export class FunctionNode extends AstNode {
 					throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
 				}
 				for (let card of eligibleCards) {
-					if (card.zone.type == "deck" || (card.zone.type == "hand" && !card.zone.player !== player)) {
+					if (card.zone.type === "deck" || (card.zone.type === "hand" && card.zone.player !== player)) {
 						card.hideFrom(player);
 					}
 				}
-				return requests.chooseCards.validate(responses[0].value, selectionRequest).map(card => card.snapshot());
+				let cards = requests.chooseCards.validate(responses[0].value, selectionRequest).map(card => card.snapshot());
+				yield [events.createCardsSelectedEvent(player, cards)];
+				return cards;
 			}
 			case "SELECTPLAYER": {
 				let selectionRequest = new requests.choosePlayer.create(player, "cardEffect:" + ability.id);
@@ -388,7 +391,9 @@ export class FunctionNode extends AstNode {
 				if (responses[0].type != "choosePlayer") {
 					throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + responses[0].type + "\" instead)");
 				}
-				return requests.choosePlayer.validate(responses[0].value, selectionRequest);
+				let chosenPlayer = requests.choosePlayer.validate(responses[0].value, selectionRequest);
+				yield [events.createPlayerSelectedEvent(player, chosenPlayer)];
+				return chosenPlayer;
 			}
 			case "SELECTTYPE": {
 				let selectionRequest = new requests.chooseType.create(player, ability.id, yield* this.parameters[0].eval(card, player, ability));
@@ -399,7 +404,9 @@ export class FunctionNode extends AstNode {
 				if (responses[0].type != "chooseType") {
 					throw new Error("Incorrect response type supplied during type selection. (expected \"chooseType\", got \"" + responses[0].type + "\" instead)");
 				}
-				return [requests.chooseType.validate(responses[0].value, selectionRequest)];
+				let type = requests.chooseType.validate(responses[0].value, selectionRequest);
+				yield [events.createTypeSelectedEvent(player, type)];
+				return [type];
 			}
 			case "SETATTACKTARGET": {
 				let card = (yield* this.parameters[0].eval(card, player, ability))[0];

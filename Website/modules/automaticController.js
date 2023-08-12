@@ -348,6 +348,18 @@ export class AutomaticController extends InteractionController {
 				autoUI.newStack(event.stack.index);
 				return;
 			}
+			case "playerSelected": {
+				if (event.player !== localPlayer) {
+					generalUI.putChatMessage(game.players[event.chosenPlayer] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
+				}
+				break;
+			}
+			case "typeSelected": {
+				if (event.player !== localPlayer) {
+					generalUI.putChatMessage(locale.game.notices.opponentChoseType.replaceAll("{#TYPE}", locale.types[event.chosenType]), "notice");
+				}
+				break;
+			}
 		}
 	}
 
@@ -470,7 +482,7 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "chooseType": {
-				response.value = await autoUI.promptTypeSelection(locale.game.automatic.typeSelect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name), request.from);
+				response.value = await autoUI.promptTypeSelection(locale.game.automatic.typeSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name), request.from);
 				break;
 			}
 			case "pass": {
@@ -642,6 +654,10 @@ export class AutomaticController extends InteractionController {
 				}
 				// TODO: Let player choose one here.
 				response.value = 0;
+				break;
+			}
+			case "chooseAbilityOrder": {
+				response.value = await autoUI.promptAbilityOrderSelection(request.applyTo, request.abilities);
 				break;
 			}
 		}

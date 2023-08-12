@@ -22,6 +22,9 @@ export function init() {
 	passBtn.textContent = locale.game.automatic.actions.pass;
 	attackBtn.textContent = locale.game.automatic.actions.attack;
 
+	typePopupConfirm.textContent = locale.game.automatic.typeSelect.select;
+	abilityOrderConfirm.textContent = locale.game.automatic.abilityOrderSelect.confirm;
+
 	passBtn.addEventListener("click", function() {
 		this.disabled = true;
 	});
@@ -319,6 +322,56 @@ export async function promptTypeSelection(message, types) {
 		typePopupConfirm.addEventListener("click", function() {
 			typeSelectPopup.close();
 			resolve(typePopupSelection.value);
+		}, {once: true});
+	});
+}
+
+export async function promptAbilityOrderSelection(applyTo, abilities) {
+	abilityOrderPopupText.textContent = locale.game.automatic.abilityOrderSelect.prompt.replaceAll("{#CARDNAME}", (await Promise.all(applyTo.values.names.map(name => cardLoader.getCardInfo(applyTo.values.names[0])))).map(info => info.name).join("/"));
+	abilityOrderConfirm.disabled = true;
+
+	for (const ability of abilities) {
+		let abilityOption = document.createElement("div");
+		abilityOption.classList.add("bigButton");
+		abilityOption.classList.add("abilityOrderItem");
+		abilityOption.textContent = await cardLoader.getAbilityText(ability.id);
+		abilityOption.addEventListener("click", function() {
+			// either add or remove the index from this element.
+			if (this.dataset.index) {
+				// when removing all higher indices must be adjusted.
+				for (const ability of Array.from(abilityOrderList.children)) {
+					if (ability.dataset.index > this.dataset.index) {
+						ability.dataset.index -= 1;
+					}
+				}
+				this.removeAttribute("data-index");
+				abilityOrderConfirm.disabled = true;
+			} else {
+				let indexCount = 0;
+				for (const ability of Array.from(abilityOrderList.children)) {
+					if (ability.dataset.index !== undefined) {
+						indexCount += 1;
+					}
+				}
+				this.dataset.index = indexCount + 1;
+				if (indexCount + 1 === abilityOrderList.children.length) {
+					abilityOrderConfirm.disabled = false;
+				}
+			}
+		});
+		abilityOrderList.appendChild(abilityOption);
+	}
+	abilityOrderPopup.showModal();
+
+	return new Promise(resolve => {
+		abilityOrderConfirm.addEventListener("click", function() {
+			abilityOrderPopup.close();
+			let order = [];
+			for (const ability of Array.from(abilityOrderList.children)) {
+				order.push(ability.dataset.index - 1);
+			}
+			abilityOrderList.innerHTML = "";
+			resolve(order);
 		}, {once: true});
 	});
 }

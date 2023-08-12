@@ -291,3 +291,27 @@ export const chooseZoneSlot = {
 		return request.eligibleSlots[response];
 	}
 }
+
+export const chooseAbilityOrder = {
+	create: function(player, card, abilities) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "chooseAbilityOrder",
+			"abilities": abilities,
+			"applyTo": card
+		}
+	},
+	validate: function(response, request) {
+		if (response.length != request.abilities.length) {
+			throw new Error("Supplied incorrect amount of abilities to order. Got " + response.length + " when it should have been between " + request.abilities.length + ".");
+		}
+		let sortedResponse = response.toSorted();
+		for (let i = 0; i < response.length; i++) {
+			if (i != sortedResponse[i]) {
+				throw new Error("Supplied incorrect ability ordering indices. Got a " + sortedResponse[i] + " when there should have been a " + i + ".");
+			}
+		}
+		return response;
+	}
+}

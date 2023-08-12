@@ -102,10 +102,10 @@ textarea {
 
 	user-select: none;
 }
-.bigButton:enabled {
+.bigButton {
 	cursor: pointer;
 }
-.bigButton:hover:enabled {
+.bigButton:hover {
 	background-color: var(--theme-button-hover-color);
 }
 .bigButton:disabled {

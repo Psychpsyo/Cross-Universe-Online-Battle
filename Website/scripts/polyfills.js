@@ -3,3 +3,9 @@ if (!Array.prototype.toReversed) {
 		return [...this].reverse();
 	}
 }
+
+if (!Array.prototype.toSorted) {
+	Array.prototype.toSorted = function() {
+		return [...this].sort();
+	}
+}

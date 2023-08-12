@@ -3,6 +3,7 @@ import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent,
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
 import * as actions from "./actions.js";
+import {chooseAbilityOrder} from "./inputRequests.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
@@ -64,6 +65,7 @@ export class Timing {
 	// returns whether or not the timing completed sucessfully
 	async* run() {
 		this.index = this.game.nextTimingIndex;
+		this.game.nextTimingIndex++;
 
 		for (let action of this.actions) {
 			if (action.costIndex >= this.costCompletions.length) {
@@ -76,7 +78,6 @@ export class Timing {
 		if (this.costCompletions.length > 0) {
 			// empty costs count as successful completion
 			if (this.actions.length == 0 && this.costCompletions.includes(true)) {
-				this.game.nextTimingIndex++;
 				this.successful = true;
 				return;
 			}
@@ -91,6 +92,7 @@ export class Timing {
 		}
 		// empty timings are not successful, they interrupt their block or indicate that paying all costs failed.
 		if (this.actions.length == 0) {
+			this.game.nextTimingIndex--;
 			return;
 		}
 
@@ -105,7 +107,6 @@ export class Timing {
 		if (events.length > 0) {
 			yield events;
 		}
-		this.game.nextTimingIndex++;
 		this.successful = true;
 
 		yield* recalculateCardValues(this.game);
@@ -113,7 +114,7 @@ export class Timing {
 		// static abilities and win/lose condition checks
 		let staticsChanged = true;
 		while (staticsChanged) {
-			staticsChanged = phaseStaticAbilities(this.game);
+			staticsChanged = yield* phaseStaticAbilities(this.game);
 			yield* recalculateCardValues(this.game);
 			yield* checkGameOver(this.game);
 		}
@@ -239,9 +240,10 @@ function* checkGameOver(game) {
 }
 
 // iterates over all static abilities and activates/deactivates those that need it.
-function phaseStaticAbilities(game) {
+function* phaseStaticAbilities(game) {
 	let abilitiesChanged = false;
 	let activeCards = game.players.map(player => player.getActiveCards()).flat();
+	let newApplications = new Map();
 	for (let currentCard of activeCards) {
 		for (let ability of currentCard.values.abilities) {
 			if (ability instanceof abilities.StaticAbility) {
@@ -249,7 +251,13 @@ function phaseStaticAbilities(game) {
 				for (let otherCard of activeCards) {
 					if (eligibleCards.includes(otherCard)) {
 						if (!otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
-							otherCard.modifierStack.push(ability.getModifier(currentCard, currentCard.zone.player));
+							// abilities are just dumped in a list here to be sorted later.
+							let modifiers = newApplications.get(otherCard) ?? [];
+							modifiers.push({
+								ability: ability,
+								source: currentCard
+							});
+							newApplications.set(otherCard, modifiers);
 							abilitiesChanged = true;
 						}
 					} else {
@@ -259,6 +267,44 @@ function phaseStaticAbilities(game) {
 							abilitiesChanged = true;
 						}
 					}
+				}
+			}
+		}
+	}
+
+	for (const [card, value] of newApplications) {
+		let fieldEnterBuckets = [{}, {}];
+		for (let i = value.length - 1; i >= 0; i--) {
+			if (value[i].source === card) {
+				card.modifierStack.push(value[i].ability.getModifier(value[i].source, value[i].source.zone.player));
+				value.splice(i, 1);
+			} else {
+				let fieldIndex = value[i].source.zone.player.index;
+				let lastMoved = value[i].source.lastMoveTimingIndex;
+				if (fieldEnterBuckets[fieldIndex][lastMoved] === undefined) {
+					fieldEnterBuckets[fieldIndex][lastMoved] = [];
+				}
+				fieldEnterBuckets[fieldIndex][lastMoved].push(value[i]);
+			}
+		}
+
+		for (const fieldIndex of [card.zone.player.index, card.zone.player.next().index]) {
+			for (const timing of Object.keys(fieldEnterBuckets[fieldIndex]).sort()) {
+				let orderedAbilities = [0];
+				if (fieldEnterBuckets[fieldIndex][timing].length !== 1) {
+					let request = chooseAbilityOrder.create(game.players[fieldIndex], card, fieldEnterBuckets[fieldIndex][timing].map(elem => elem.ability));
+					let responses = yield [request];
+					if (responses.length != 1) {
+						throw new Error("Incorrect number of responses supplied during ability ordering. (expected 1, got " + responses.length + " instead)");
+					}
+					if (responses[0].type != "chooseAbilityOrder") {
+						throw new Error("Wrong response type supplied during ability ordering (expected 'chooseAbilityOrder', got '" + responses[0].type + "')");
+					}
+					orderedAbilities = chooseAbilityOrder.validate(responses[0].value, request);
+				}
+				for (let index of orderedAbilities) {
+					let application = fieldEnterBuckets[fieldIndex][timing][index];
+					card.modifierStack.push(application.ability.getModifier(application.source, application.source.zone.player));
 				}
 			}
 		}

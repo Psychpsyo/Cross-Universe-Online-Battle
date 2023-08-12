@@ -633,7 +633,6 @@ class PresentedCardSlot extends UiCardSlot {
 	constructor(zone, index) {
 		super(zone, index);
 
-		console.log(zone.get(index), [...zone.get(index).hiddenFor]);
 		this.isRevealed = !zone.get(index).hiddenFor.includes(game.players[0]);
 		this.zoneElem = document.getElementById("presentedCards" + zone.player.index);
 		this.cardElem = document.createElement("div");

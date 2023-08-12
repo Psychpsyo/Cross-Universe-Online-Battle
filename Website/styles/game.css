@@ -568,6 +568,9 @@ label[for="fileSelectDeckLoader"] {
 #chatBox > .error {
 	background-color: #802929;
 }
+.chatCardHolder > img {
+	max-height: 5em;
+}
 
 .emoji {
 	height: 32px;

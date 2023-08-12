@@ -24,6 +24,7 @@ export class Zone {
 			index = -1;
 		}
 		card.zone = this;
+		card.lastMoveTimingIndex = card.owner.game.nextTimingIndex - 1;
 
 		if (clearValues) {
 			// remove this card from relevant actions

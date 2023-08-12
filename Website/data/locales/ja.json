@@ -32,7 +32,8 @@
 			"yourDeckShuffled": null,
 			"opponentDeckShuffled": null,
 			"opponentChoseYou": null,
-			"opponentChoseSelf": null
+			"opponentChoseSelf": null,
+			"opponentChoseType": null
 		},
 
 		"playerInfo": {
@@ -192,6 +193,16 @@
 				"question": null,
 				"you": null,
 				"opponent": null
+			},
+
+			"typeSelect": {
+				"prompt": null,
+				"select": null
+			},
+
+			"abilityOrderSelect": {
+				"prompt": null,
+				"confirm": null
 			},
 
 			"opponentActions": {

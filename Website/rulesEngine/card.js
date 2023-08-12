@@ -14,12 +14,14 @@ class BaseCard {
 		this.condition = condition;
 
 		this.initialValues = initialValues;
-		this.values = initialValues;
 		this.baseValues = initialValues;
+		this.values = initialValues;
 		this.modifierStack = [];
 
 		this.zone = null;
 		this.index = -1;
+		this.lastMoveTimingIndex = 0;
+
 		this.equippedTo = null;
 		this.equipments = [];
 		this.attackCount = 0;
@@ -164,6 +166,8 @@ export class SnapshotCard extends BaseCard {
 		this.equipments = card.equipments.map(equipment => new SnapshotCard(equipment, card));
 		this.zone = card.zone;
 		this.index = card.index;
+		this.lastMoveTimingIndex = card.lastMoveTimingIndex;
+
 		this.attackCount = card.attackCount;
 		this.isAttacking = card.isAttacking;
 		this.isAttackTarget = card.isAttackTarget;

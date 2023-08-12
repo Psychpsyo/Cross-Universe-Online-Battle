@@ -216,3 +216,29 @@
 #typePopupSelection {
 	min-width: 10em;
 }
+
+#abilityOrderList {
+	display: flex;
+	flex-direction: column;
+	gap: .5em;
+	margin: .5em 0;
+}
+.abilityOrderItem {
+	text-align: left;
+	white-space: pre;
+	border-radius: .5em;
+	padding: .25em;
+}
+.abilityOrderItem[data-index]::after {
+	content: attr(data-index);
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	right: .3em;
+	border: 2px var(--theme-border-color) solid;
+	width: 1em;
+	height: 1em;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 100%;
+}

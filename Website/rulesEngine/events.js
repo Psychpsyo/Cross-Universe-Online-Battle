@@ -307,3 +307,30 @@ export function createCardRevealedEvent(card) {
 		"card": card
 	}
 }
+
+export function createCardsSelectedEvent(player, chosenCards) {
+	return {
+		"nature": "event",
+		"type": "cardsSelected",
+		"player": player,
+		"chosenCards": chosenCards
+	}
+}
+
+export function createPlayerSelectedEvent(player, chosenPlayer) {
+	return {
+		"nature": "event",
+		"type": "playerSelected",
+		"player": player,
+		"chosenPlayer": chosenPlayer
+	}
+}
+
+export function createTypeSelectedEvent(player, chosenType) {
+	return {
+		"nature": "event",
+		"type": "typeSelected",
+		"player": player,
+		"chosenType": chosenType
+	}
+}

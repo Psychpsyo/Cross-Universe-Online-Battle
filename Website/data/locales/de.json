@@ -32,7 +32,8 @@
 			"yourDeckShuffled": "Dein Deck wurde gemischt.",
 			"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
 			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
-			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt."
+			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt.",
+			"opponentChoseType": "Dein Gegner hat Typ {#TYPE} gewählt."
 		},
 
 		"playerInfo": {
@@ -192,6 +193,16 @@
 				"startingPlayerQuestion": "Wähle, welcher Spieler anfängt:",
 				"you": "Du selbst",
 				"opponent": "Dein Gegner"
+			},
+
+			"typeSelect": {
+				"prompt": "Wähle einen Typ für den Effekt von '{#CARDNAME}':",
+				"select": "Auswählen"
+			},
+
+			"abilityOrderSelect": {
+				"prompt": "Wähle, in welcher Reihenfolge diese Statischen Fähigkeiten auf '{#CARDNAME}' angewandt werden sollen:",
+				"confirm": "Bestätigen"
 			},
 
 			"opponentActions": {

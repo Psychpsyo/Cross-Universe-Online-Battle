@@ -115,6 +115,12 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 	return card.hiddenFor.includes(localPlayer)? "images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
 }
 
+export async function getAbilityText(abilityID) {
+	let abilityInfo = abilityID.split(":");
+	let cardInfo = await getCardInfo(abilityInfo[0]);
+	return cardInfo.effects[abilityInfo[1]].text;
+}
+
 export async function deckToCdfList(deck, automatic, player) {
 	let deckList = deckToCardIdList(deck);
 	for (let i = 0; i < deckList.length; i++) {
