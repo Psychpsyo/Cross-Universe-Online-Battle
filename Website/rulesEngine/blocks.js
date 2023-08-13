@@ -1,52 +1,24 @@
 
-import {Timing} from "./timings.js";
-import {FieldZone} from "./zones.js";
-import {createCardsAttackedEvent} from "./events.js";
 import * as game from "./game.js";
 import * as actions from "./actions.js";
 import * as abilities from "./abilities.js";
-
-function* arrayTimingGenerator(actionArrays) {
-	for (let actionList of actionArrays) {
-		yield actionList;
-	}
-}
+import * as timingGenerators from "./timingGenerators.js";
 
 // Base class for all blocks
 class Block {
-	constructor(stack, player, timingGenerator, costTimingGenerator = null) {
+	constructor(stack, player, timingRunner, costTimingRunner = null) {
 		this.player = player;
 		this.stack = stack;
-		this.costTimingGenerator = costTimingGenerator;
-		this.costTimings = [];
-		this.timingGenerator = timingGenerator;
-		this.executionTimings = [];
+		this.timingRunner = timingRunner;
+		this.costTimingRunner = costTimingRunner;
 		this.isCancelled = false;
 	}
 
 	async* runCost() {
-		if (!this.costTimingGenerator) {
+		if (!this.costTimingRunner) {
 			return true;
 		}
-		let costTimingSuccess = true;
-		let timing = yield* this.getNextTiming(this.costTimingGenerator, null);
-		while (timing) {
-			for (let action of timing.actions) {
-				action.costIndex = 0;
-			}
-			this.costTimings.push(timing);
-			await (yield* timing.run());
-			for (const followup of timing.followupTimings) {
-				this.costTimings.push(followup);
-			}
-			if (!timing.successful) {
-				costTimingSuccess = false;
-				// We only need to pop 1 since unsuccessful timings never have followups
-				this.costTimings.pop();
-				break;
-			}
-			timing = yield* this.getNextTiming(this.costTimingGenerator, timing);
-		}
+		let costTimingSuccess = yield* this.costTimingRunner.run(this, true);
 		if (!costTimingSuccess) {
 			await (yield* this.undoCost());
 		}
@@ -57,67 +29,47 @@ class Block {
 		if (this.getIsCancelled()) {
 			return;
 		}
-		let timing = yield* this.getNextTiming(this.timingGenerator, null);
-		while(timing) {
-			this.executionTimings.push(timing);
-			await (yield* timing.run());
-			for (const followup of timing.followupTimings) {
-				this.executionTimings.push(followup);
-			}
-			if (!timing.successful) {
-				// We only need to pop 1 since unsuccessful timings never have followups
-				this.executionTimings.pop();
-			}
-			timing = yield* this.getNextTiming(this.timingGenerator, timing);
-		}
-	}
-
-	* getNextTiming(timingGenerator, previousTiming) {
-		let generatorOutput = timingGenerator.next(previousTiming);
-		while (!generatorOutput.done && (generatorOutput.value.length == 0 || !(generatorOutput.value[0] instanceof actions.Action))) {
-			generatorOutput = timingGenerator.next(yield generatorOutput.value);
-		}
-		if (generatorOutput.done) {
-			return null;
-		}
-		return new Timing(this.stack.phase.turn.game, generatorOutput.value, this);
+		yield* this.timingRunner.run(this, false);
 	}
 
 	async* undoCost() {
-		for (let i = this.costTimings.length - 1; i >= 0; i--) {
-			yield* this.costTimings[i].undo();
-		}
+		yield* this.costTimingRunner.undo();
 	}
 
 	async* undoExecution() {
-		for (let i = this.executionTimings.length - 1; i >= 0; i--) {
-			yield* this.executionTimings[i].undo();
-		}
+		yield* this.timingRunner.undo();
 	}
 
+	// might be overwritten by subclasses to implement more complex checks.
 	getIsCancelled() {
 		return this.isCancelled;
 	}
 
 	getCostTimings() {
-		return this.costTimings;
+		return this.costTimingRunner?.timings ?? [];
 	}
 	getExecutionTimings() {
-		return this.executionTimings;
+		return this.timingRunner.timings;
 	}
 	getCostActions() {
-		return this.costTimings.map(timing => timing.actions).flat();
+		if (this.costTimingRunner) {
+			return this.costTimingRunner.timings.map(timing => timing.actions).flat();
+		} else {
+			return [];
+		}
 	}
 	getExecutionActions() {
-		return this.executionTimings.map(timing => timing.actions).flat();
+		return this.timingRunner.timings.map(timing => timing.actions).flat();
 	}
 }
 
 export class StandardDraw extends Block {
 	constructor(stack, player) {
-		super(stack, player, arrayTimingGenerator([
-			[new actions.Draw(player, 1)]
-		]));
+		super(stack, player, new timingGenerators.TimingRunner(
+			timingGenerators.arrayTimingGenerator([
+				[new actions.Draw(player, 1)]
+			])
+		));
 	}
 
 	async* runCost() {
@@ -133,14 +85,20 @@ export class StandardSummon extends Block {
 	constructor(stack, player, card) {
 		let placeAction = new actions.Place(player, card, player.unitZone);
 		super(stack, player,
-			arrayTimingGenerator([
-				[new actions.Summon(player, placeAction)]
-			]),
-			arrayTimingGenerator([[
-				placeAction,
-				new actions.ChangeMana(player, -card.values.level)
-			]]
-		));
+			new timingGenerators.TimingRunner(
+				timingGenerators.arrayTimingGenerator([
+					[new actions.Summon(player, placeAction)]
+				])
+			),
+			new timingGenerators.TimingRunner(
+				timingGenerators.combinedTimingGenerator([
+					card.getSummoningCost(player),
+					timingGenerators.arrayTimingGenerator([[
+						placeAction
+					]])
+				])
+			)
+		);
 		this.card = card;
 	}
 
@@ -156,23 +114,9 @@ export class StandardSummon extends Block {
 	}
 }
 
-function* retireTimingGenerator(player, units) {
-	let discardTiming = yield units.map(unit => new actions.Discard(unit));
-
-	let gainedMana = 0;
-	for (const action of discardTiming.actions) {
-		if (action instanceof actions.Discard) {
-			gainedMana += action.card.values.level;
-		}
-	}
-	if (gainedMana > 0) {
-		yield [new actions.ChangeMana(player, gainedMana)];
-	}
-}
-
 export class Retire extends Block {
 	constructor(stack, player, units) {
-		super(stack, player, retireTimingGenerator(player, units));
+		super(stack, player, new timingGenerators.TimingRunner(timingGenerators.retireTimingGenerator(player, units)));
 		this.units = units;
 		for (let unit of units) {
 			unit.inRetire = this;
@@ -191,73 +135,28 @@ export class Retire extends Block {
 
 export class AttackDeclaration extends Block {
 	constructor(stack, player, attackers) {
-		super(stack, player, arrayTimingGenerator([
-			[new actions.EstablishAttackDeclaration(player, attackers)]
-		]));
+		let establishAction = new actions.EstablishAttackDeclaration(player, attackers);
+		super(stack, player, new timingGenerators.TimingRunner(
+			timingGenerators.arrayTimingGenerator([
+				[establishAction]
+			])
+		));
 		this.attackers = attackers;
+		this.establishAction = establishAction;
 	}
 
 	async* run() {
 		yield* super.run();
 
-		this.attackTarget = this.executionTimings[0].actions[0].attackTarget; // already a snapshot
-		this.stack.phase.turn.game.currentAttackDeclaration = new game.AttackDeclaration(this.stack.phase.turn.game, this.attackers, this.attackTarget.cardRef);
+		this.attackTarget = this.establishAction.attackTarget; // already a snapshot
+		this.player.game.currentAttackDeclaration = new game.AttackDeclaration(this.player.game, this.attackers, this.attackTarget.cardRef);
 		this.attackers = this.attackers.map(attacker => attacker.snapshot());
-	}
-}
-
-function* fightTimingGenerator(attackDeclaration) {
-	if (!attackDeclaration.isValid()) {
-		return;
-	}
-	// RULES: Compare the attacker’s Attack to the target’s Defense.
-	let totalAttack = 0;
-	for (const unit of attackDeclaration.attackers) {
-		totalAttack += unit.values.attack;
-	}
-
-	// RULES: If the Attack is greater the attacker destroys the target.
-	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
-	if (totalAttack > attackDeclaration.target.values.defense) {
-		let discard = new actions.Discard(attackDeclaration.target);
-		let actionList = [new actions.Destroy(discard), discard];
-		if (attackDeclaration.target.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(attackDeclaration.target.zone.player, totalAttack - attackDeclaration.target.values.defense));
-		}
-		yield actionList;
-	}
-
-	// RULES: If the unit wasn't destoyed, a 'counterattack' occurs.
-	if (!(attackDeclaration.target.zone instanceof FieldZone)) {
-		return;
-	}
-
-	let counterattackTarget;
-	if (attackDeclaration.attackers.length == 1) {
-		counterattackTarget = attackDeclaration.attackers[0];
-	} else {
-		for (const unit of attackDeclaration.attackers) {
-			if (unit.zone.type == "partner") {
-				counterattackTarget = unit;
-				break;
-			}
-		}
-	}
-
-	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
-	if (attackDeclaration.target.values.attack > counterattackTarget.values.defense) {
-		let discard = new actions.Discard(counterattackTarget);
-		let actionList = [new actions.Destroy(discard), discard];
-		if (counterattackTarget.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(counterattackTarget.zone.player, attackDeclaration.target.values.attack - counterattackTarget.values.defense));
-		}
-		yield actionList;
 	}
 }
 
 export class Fight extends Block {
 	constructor(stack, player) {
-		super(stack, player, fightTimingGenerator(stack.phase.turn.game.currentAttackDeclaration));
+		super(stack, player, new timingGenerators.TimingRunner(timingGenerators.fightTimingGenerator(stack.phase.turn.game.currentAttackDeclaration)));
 		this.attackDeclaration = stack.phase.turn.game.currentAttackDeclaration;
 	}
 
@@ -276,28 +175,16 @@ export class Fight extends Block {
 	}
 }
 
-function* abilityTimingGenerator(ability, card, player) {
-	let timingGenerator = ability.run(card, player);
-	let timing;
-	let actionList;
-	do {
-		actionList = timingGenerator.next(timing);
-		if (!actionList.done) {
-			if (actionList.value.length == 0) {
-				return;
-			}
-			timing = yield actionList.value;
-		}
-	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));
-}
-
-function* abilityCostTimingGenerator(ability, card, player) {
-	return yield* ability.runCost(card, player);
-}
-
 export class AbilityActivation extends Block {
 	constructor(stack, player, card, ability) {
-		super(stack, player, abilityTimingGenerator(ability, card, player), abilityCostTimingGenerator(ability, card, player));
+		super(stack, player,
+			new timingGenerators.TimingRunner(
+				timingGenerators.abilityTimingGenerator(ability, card, player)
+			),
+			new timingGenerators.TimingRunner(
+				timingGenerators.abilityCostTimingGenerator(ability, card, player)
+			)
+		);
 		this.card = card;
 		this.ability = ability;
 	}
@@ -319,53 +206,40 @@ export class AbilityActivation extends Block {
 	}
 }
 
-function* combinedTimingGenerator(generators) {
-	for (let timingGenerator of generators) {
-		yield* timingGenerator;
-	}
-}
-
-function* equipTimingGenerator(equipChoiceAction, player) {
-	yield [new actions.EquipCard(equipChoiceAction.spellItem.cardRef, equipChoiceAction.chosenUnit.cardRef, player)];
-}
-
 export class DeployItem extends Block {
 	constructor(stack, player, card) {
 		let placeAction = new actions.Place(player, card, player.spellItemZone);
-		let costTimingGenerators = [arrayTimingGenerator([[
-			placeAction,
-			new actions.ChangeMana(player, -card.values.level)
-		]])];
+		let costTimingGenerators = [
+			card.getDeploymentCost(player),
+			timingGenerators.arrayTimingGenerator([[placeAction]])
+		];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Deploy(player, placeAction)]])
+			timingGenerators.arrayTimingGenerator([[new actions.Deploy(player, placeAction)]])
 		];
 		if (card.values.cardTypes.includes("equipableItem")) {
 			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
-			costTimingGenerators.unshift(arrayTimingGenerator([[selectEquipableAction]]));
-			execTimingGenerators.unshift(equipTimingGenerator(selectEquipableAction, player));
+			costTimingGenerators.unshift(timingGenerators.arrayTimingGenerator([[selectEquipableAction]]));
+			execTimingGenerators.unshift(timingGenerators.equipTimingGenerator(selectEquipableAction, player));
 		}
 		let deployAbility = null;
 		for (let ability of card.values.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
 				deployAbility = ability;
-				if (ability.cost) {
-					costTimingGenerators.push(abilityCostTimingGenerator(ability, card, player));
-				}
 				if (card.values.cardTypes.includes("standardItem")) {
 					// standard items first activate and are only treated as briefly on the field after
-					execTimingGenerators.unshift(abilityTimingGenerator(ability, card, player));
+					execTimingGenerators.unshift(timingGenerators.abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
-					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(card)]]));
+					execTimingGenerators.push(timingGenerators.arrayTimingGenerator([[new actions.Discard(card)]]));
 				} else {
-					execTimingGenerators.push(abilityTimingGenerator(ability, card, player));
+					execTimingGenerators.push(timingGenerators.abilityTimingGenerator(ability, card, player));
 				}
 				// cards only ever have one of these
 				break;
 			}
 		}
 		super(stack, player,
-			combinedTimingGenerator(execTimingGenerators),
-			combinedTimingGenerator(costTimingGenerators)
+			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(execTimingGenerators)),
+			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(costTimingGenerators))
 		);
 		this.card = card;
 		this.deployAbility = deployAbility;
@@ -392,40 +266,37 @@ export class DeployItem extends Block {
 export class CastSpell extends Block {
 	constructor(stack, player, card) {
 		let placeAction = new actions.Place(player, card, player.spellItemZone);
-		let costTimingGenerators = [arrayTimingGenerator([[
-			placeAction,
-			new actions.ChangeMana(player, -card.values.level)
-		]])];
+		let costTimingGenerators = [
+			card.getCastingCost(player),
+			timingGenerators.arrayTimingGenerator([[placeAction]])
+		];
 		let execTimingGenerators = [
-			arrayTimingGenerator([[new actions.Cast(player, placeAction)]])
+			timingGenerators.arrayTimingGenerator([[new actions.Cast(player, placeAction)]])
 		];
 		if (card.values.cardTypes.includes("enchantSpell")) {
 			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
-			costTimingGenerators.unshift(arrayTimingGenerator([[selectEquipableAction]]));
-			execTimingGenerators.unshift(equipTimingGenerator(selectEquipableAction, player));
+			costTimingGenerators.unshift(timingGenerators.arrayTimingGenerator([[selectEquipableAction]]));
+			execTimingGenerators.unshift(timingGenerators.equipTimingGenerator(selectEquipableAction, player));
 		}
 		let castAbility = null;
 		for (let ability of card.values.abilities) {
 			if (ability instanceof abilities.CastAbility) {
 				castAbility = ability;
-				if (ability.cost) {
-					costTimingGenerators.push(abilityCostTimingGenerator(ability, card, player));
-				}
 				if (card.values.cardTypes.includes("standardSpell")) {
 					// standard spells first activate and are only treated as briefly on the field after
-					execTimingGenerators.unshift(abilityTimingGenerator(ability, card, player));
+					execTimingGenerators.unshift(timingGenerators.abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
-					execTimingGenerators.push(arrayTimingGenerator([[new actions.Discard(card)]]));
+					execTimingGenerators.push(timingGenerators.arrayTimingGenerator([[new actions.Discard(card)]]));
 				} else {
-					execTimingGenerators.push(abilityTimingGenerator(ability, card, player));
+					execTimingGenerators.push(timingGenerators.abilityTimingGenerator(ability, card, player));
 				}
 				// cards only ever have one of these
 				break;
 			}
 		}
 		super(stack, player,
-			combinedTimingGenerator(execTimingGenerators),
-			combinedTimingGenerator(costTimingGenerators)
+			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(execTimingGenerators)),
+			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(costTimingGenerators))
 		);
 		this.card = card;
 		this.castAbility = castAbility;

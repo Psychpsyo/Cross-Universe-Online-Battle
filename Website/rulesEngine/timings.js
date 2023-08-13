@@ -125,8 +125,7 @@ export class Timing {
 				for (let card of player.getActiveCards()) {
 					for (let ability of card.values.abilities) {
 						if (ability instanceof abilities.TriggerAbility ||
-							ability instanceof abilities.CastAbility ||
-							ability instanceof abilities.DeployAbility) {
+							ability instanceof abilities.CastAbility) {
 							ability.checkTrigger(card, player);
 						}
 					}

@@ -361,7 +361,7 @@ export class FunctionNode extends AstNode {
 					if (card.zone.player === player || !(["deck", "hand"].includes(card.zone.type))) {
 						card.showTo(player);
 					} else {
-						// selections from revealed hands are still random.
+						// selecting from revealed hands is still random.
 						card.hideFrom(player);
 					}
 				}

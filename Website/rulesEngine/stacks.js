@@ -130,7 +130,7 @@ export class Stack {
 	}
 
 	async* undoCreateBlock() {
-		this.blocks.pop().undoCost();
+		yield* this.blocks.pop().undoCost();
 	}
 
 	async* undoExecuteBlocks() {

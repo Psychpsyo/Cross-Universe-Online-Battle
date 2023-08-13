@@ -5,7 +5,6 @@ import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
 import * as abilities from "./abilities.js";
-import * as blocks from "./blocks.js";
 
 // Base class for all phases
 class Phase {
@@ -75,31 +74,8 @@ export class StackPhase extends Phase {
 	}
 
 	getCastableSpells(stack) {
-		let spells = [];
 		let player = stack.getNextPlayer();
-		for (let card of player.handZone.cards) {
-			if (card.values.cardTypes.includes("spell")) {
-				let eligible = true;
-				if (
-					(this.turn.getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === card.cardId && block.player === player).length >= card.turnLimit) ||
-					(card.condition !== null && !card.condition.evalFull(card, player, null)[0]) ||
-					(card.values.cardTypes.includes("enchantSpell") && card.equipableTo.evalFull(card, player, null)[0].length == 0)
-				) {
-					eligible = false;
-				} else {
-					for (let ability of card.values.abilities) {
-						if (ability instanceof abilities.CastAbility && !ability.canActivate(card, player)) {
-							eligible = false;
-							break;
-						}
-					}
-				}
-				if (eligible) {
-					spells.push(card);
-				}
-			}
-		}
-		return spells;
+		return player.handZone.cards.filter(card => card.canCast(player));
 	}
 
 	getActivatableFastAbilities(stack) {
@@ -285,39 +261,11 @@ export class MainPhase extends StackPhase {
 	}
 
 	getSummonableUnits() {
-		let units = [];
-		for (let card of this.turn.player.handZone.cards) {
-			if (card.values.cardTypes.includes("unit")) {
-				units.push(card);
-			}
-		}
-		return units;
+		return this.turn.player.handZone.cards.filter(card => card.canSummon(this.turn.player));
 	}
 
 	getDeployableItems() {
-		let items = [];
-		for (let card of this.turn.player.handZone.cards) {
-			if (card.values.cardTypes.includes("item")) {
-				let eligible = true;
-				if (
-					(this.turn.getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === card.cardId).length >= card.turnLimit) ||
-					(card.condition !== null && !card.condition.evalFull(card, this.turn.player, null)[0]) ||
-					(card.values.cardTypes.includes("equipableItem") && card.equipableTo.evalFull(card, this.turn.player, null)[0].length === 0)) {
-					eligible = false;
-				} else {
-					for (let ability of card.values.abilities) {
-						if (ability instanceof abilities.DeployAbility && !ability.canActivate(card, this.turn.player) ) {
-							eligible = false;
-							break;
-						}
-					}
-				}
-				if (eligible) {
-					items.push(card);
-				}
-			}
-		}
-		return items;
+		return this.turn.player.handZone.cards.filter(card => card.canDeploy(this.turn.player));
 	}
 }
 

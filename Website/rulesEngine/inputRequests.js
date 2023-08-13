@@ -1,4 +1,28 @@
-// input request definitions for passing out of the engine
+// This file input request definitions for passing out of the engine
+
+// returns all possible ways to choose k elements from a list of n elements.
+function nChooseK(n, k) {
+	let choices = [];
+	for (let i = k - 1; i >= 0; i--) {
+		choices.push(i);
+	}
+	let combinations = [];
+
+	combinations.push([...choices]);
+	while (choices[choices.length - 1] < n - k) {
+		for (let i = 0; i < k; i++) {
+			if (choices[i] < n - 1 - i) {
+				choices[i]++;
+				for (let j = 1; j <= i; j++) {
+					choices[i - j] = choices[i] + j;
+				}
+				combinations.push([...choices]);
+				break;
+			}
+		}
+	}
+	return combinations;
+}
 
 export const chooseCards = {
 	create: function(player, cards, validAmounts, reason) {
@@ -21,6 +45,13 @@ export const chooseCards = {
 			}
 		}
 		return response.map(cardIndex => request.from[cardIndex]);
+	},
+	generateValidResponses: function(request) {
+		let combinations = [];
+		for (const amount of request.validAmounts) {
+			combinations = combinations.concat(nChooseK(request.from.length, amount));
+		}
+		return combinations;
 	}
 }
 
@@ -38,6 +69,9 @@ export const choosePlayer = {
 			throw new Error("Chose an invalid player index: " + response);
 		}
 		return request.player.game.players[response];
+	},
+	generateValidResponses: function(request) {
+		return [0, 1];
 	}
 }
 
@@ -56,6 +90,13 @@ export const chooseType = {
 			throw new Error("Chose an invalid type index: " + response);
 		}
 		return request.from[response];
+	},
+	generateValidResponses: function(request) {
+		let options = [];
+		for (let i = 0; i < request.from.length; i++) {
+			options.push(i);
+		}
+		return options;
 	}
 }
 
@@ -289,6 +330,9 @@ export const chooseZoneSlot = {
 			throw new Error("Supplied out-of-range zone slot index '" + response + "'. It should have been between 0 and " + request.eligibleSlots.length + ".");
 		}
 		return request.eligibleSlots[response];
+	},
+	generateValidResponses: function(request) {
+		return request.eligibleSlots;
 	}
 }
 

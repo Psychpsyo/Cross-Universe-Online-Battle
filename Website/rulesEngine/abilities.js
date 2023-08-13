@@ -43,7 +43,6 @@ export class Ability extends BaseAbility {
 
 	* run(card, player) {
 		yield* this.exec.eval(card, player, this);
-		this.scriptVariables = {};
 	}
 
 	successfulActivation() {}
@@ -71,23 +70,8 @@ export class CastAbility extends Ability {
 }
 
 export class DeployAbility extends Ability {
-	constructor(id, game, exec, cost, condition, after) {
+	constructor(id, game, exec, cost, condition) {
 		super(id, game, exec, cost, condition);
-		this.after = null;
-		if (after) {
-			this.after = interpreter.buildAST("trigger", id, after, game);
-		}
-		this.triggerMet = false;
-	}
-
-	canActivate(card, player) {
-		return super.canActivate(card, player) && (this.after == null || this.triggerMet);
-	}
-
-	checkTrigger(card, player) {
-		if (this.after == null || this.after.evalFull(card, player, this)[0]) {
-			this.triggerMet = true;
-		}
 	}
 }
 
@@ -155,10 +139,10 @@ export class TriggerAbility extends Ability {
 
 	canActivate(card, player) {
 		return super.canActivate(card, player) &&
+			this.triggerMet &&
 			this.turnActivationCount < this.turnLimit &&
 			(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
-			(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit) &&
-			this.triggerMet;
+			(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit);
 	}
 
 	checkTrigger(card, player) {

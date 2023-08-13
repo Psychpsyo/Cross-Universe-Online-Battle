@@ -3,6 +3,9 @@
 import {CardValues} from "./cardValues.js";
 import * as abilities from "./abilities.js";
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
+import * as blocks from "./blocks.js";
+import * as actions from "./actions.js";
+import * as timingGenerators from "./timingGenerators.js";
 
 class BaseCard {
 	constructor(player, cardId, initialValues, deckLimit, equipableTo, turnLimit, condition) {
@@ -64,6 +67,93 @@ class BaseCard {
 		if (index >= 0) {
 			this.hiddenFor.splice(index, 1);
 		}
+	}
+
+	getSummoningCost(player) {
+		return timingGenerators.arrayTimingGenerator([
+			[new actions.ChangeMana(player, -this.values.level)]
+		]);
+	}
+	getCastingCost(player) {
+		let generators = [
+			timingGenerators.arrayTimingGenerator([
+				[new actions.ChangeMana(player, -this.values.level)]
+			])
+		];
+		for (let ability of this.values.abilities) {
+			if (ability instanceof abilities.CastAbility) {
+				if (ability.cost) {
+					generators.push(timingGenerators.abilityCostTimingGenerator(ability, this, player));
+				}
+				break;
+			}
+		}
+		return timingGenerators.combinedTimingGenerator(generators);
+	}
+	getDeploymentCost(player) {
+		let generators = [
+			timingGenerators.arrayTimingGenerator([
+				[new actions.ChangeMana(player, -this.values.level)]
+			])
+		];
+		for (let ability of this.values.abilities) {
+			if (ability instanceof abilities.DeployAbility) {
+				if (ability.cost) {
+					generators.push(timingGenerators.abilityCostTimingGenerator(ability, this, player));
+				}
+				break;
+			}
+		}
+		return timingGenerators.combinedTimingGenerator(generators);
+	}
+
+	canSummon(player) {
+		if (!this.values.cardTypes.includes("unit")) {
+			return false;
+		}
+		return true;
+	}
+	canCast(player) {
+		if (!this.values.cardTypes.includes("spell")) {
+			return false;
+		}
+		let eligible = true;
+		if (
+			(player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
+			(this.condition !== null && !this.condition.evalFull(this, player, null)[0]) ||
+			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(this, player, null)[0].length == 0)
+		) {
+			eligible = false;
+		} else {
+			for (let ability of this.values.abilities) {
+				if (ability instanceof abilities.CastAbility && !ability.canActivate(this, player)) {
+					eligible = false;
+					break;
+				}
+			}
+		}
+		return eligible;
+	}
+	canDeploy(player) {
+		if (!this.values.cardTypes.includes("item")) {
+			return false;
+		}
+		let eligible = true;
+		if (
+			(player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
+			(this.condition !== null && !this.condition.evalFull(this, player, null)[0]) ||
+			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(this, player, null)[0].length == 0)
+		) {
+			eligible = false;
+		} else {
+			for (let ability of this.values.abilities) {
+				if (ability instanceof abilities.DeployAbility && !ability.canActivate(this, player)) {
+					eligible = false;
+					break;
+				}
+			}
+		}
+		return eligible;
 	}
 
 	static sort(a, b) {
