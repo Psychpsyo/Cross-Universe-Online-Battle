@@ -94,7 +94,8 @@
 			"genericTitle": "Wähle Karte(n):",
 			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:",
 			"attackTarget": "Wähle, wen du angreifst:",
-			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':"
+			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':",
+			"cardEffectMove": "Wähle welche Karte(n) für den Effekt von '{#CARDNAME}' verschoben werden sollen:"
 		},
 
 		"fieldLabels": {
@@ -208,6 +209,7 @@
 			"opponentActions": {
 				"selectingCards": "Dein Gegner wählt Karte(n).",
 				"effectSelectingCards": "Dein Gegner wählt Karte(n) für den Effekt von '{#CARDNAME}'.",
+				"effectMoveSelectingCards": "Dein Gegner wählt aus, welche Karte(n) durch den Effekt von '{#CARDNAME}' verschoben werden sollen.",
 				"selectingHandDiscard": "Dein Gegner wählt Handkarte(n), weil er mehr als 8 hat.",
 				"selectingAttackTarget": "Dein Gegner wählt eine Einheit zum Angriff aus.",
 				"selectingPlayer": "Dein Gegner wählt einen Spieler.",
@@ -220,6 +222,7 @@
 				"youWon": "Gewonnen!",
 				"youLost": "Verloren!",
 				"draw": "Unentschieden!",
+				"bothWon": "Beide Spieler haben gewonnen.",
 				"winReasons": {
 					"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
 					"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
@@ -231,12 +234,6 @@
 					"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
 					"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
 					"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
-				},
-				"drawReasons": {
-					"bothWon": "Beide Spieler haben gewonnen.",
-					"bothLost": "Beide Spieler haben verloren.",
-					"youWonAndLost": "Du hast gleichzeitig gewonnen und verloren.",
-					"opponentWonAndLost": "Dein Gegner hat gleichzeitig gewonnen und verloren."
 				}
 			}
 		}

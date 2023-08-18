@@ -195,7 +195,7 @@ export function* fightTimingGenerator(attackDeclaration) {
 	}
 
 	// RULES: If the unit wasn't destoyed, a 'counterattack' occurs.
-	if (!(attackDeclaration.target.zone instanceof FieldZone)) {
+	if (attackDeclaration.target === null) {
 		return;
 	}
 

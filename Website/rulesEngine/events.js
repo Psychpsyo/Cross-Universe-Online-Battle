@@ -102,14 +102,6 @@ export function createPlayerWonEvent(player) {
 	}
 }
 
-export function createPlayerLostEvent(player) {
-	return {
-		"nature": "event",
-		"type": "playerLost",
-		"player": player
-	}
-}
-
 export function createGameDrawnEvent() {
 	return {
 		"nature": "event",

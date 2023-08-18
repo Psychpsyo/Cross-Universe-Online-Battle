@@ -1,5 +1,5 @@
 
-import {createActionCancelledEvent, createPlayerLostEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
+import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
 import * as actions from "./actions.js";
@@ -217,19 +217,11 @@ function getFollowupTiming(block, game, timing) {
 	return null;
 }
 
-// TODO: refactor to only victory conditions, loss conditions do not exist
 function* checkGameOver(game) {
 	let gameOverEvents = [];
 	for (let player of game.players) {
-		if (player.lost) {
-			if (player.next().lost || player.won) {
-				gameOverEvents.push(createGameDrawnEvent());
-				break;
-			}
-			gameOverEvents.push(createPlayerLostEvent(player));
-		}
 		if (player.won) {
-			if (player.next().won || player.lost) {
+			if (player.next().won) {
 				gameOverEvents.push(createGameDrawnEvent());
 				break;
 			}

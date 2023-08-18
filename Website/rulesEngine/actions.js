@@ -78,6 +78,10 @@ export class ChangeLife extends Action {
 
 	async* run() {
 		this.player.life += this.amount;
+		if (this.player.life === 0) {
+			this.player.next().won = true;
+			this.player.next().victoryConditions.push("lifeZero");
+		}
 		return events.createLifeChangedEvent(this.player);
 	}
 
@@ -101,8 +105,8 @@ export class Draw extends Action {
 
 	async* run() {
 		if (this.amount > this.player.deckZone.cards.length) {
-			this.player.lost = true;
-			this.player.loseReason = "drawFromEmptyDeck";
+			this.player.next().won = true;
+			this.player.next().victoryConditions.push("drawFromEmptyDeck");
 			return null;
 		}
 		let drawCardRefs = [];
@@ -341,8 +345,8 @@ export class DealDamage extends Action {
 		this.oldAmount = this.player.life;
 		this.player.life = Math.max(this.player.life - this.amount, 0);
 		if (this.player.life == 0) {
-			this.player.lost = true;
-			this.player.loseReason = "lifeZero";
+			this.player.next().won = true;
+			this.player.next().victoryConditions.push("lifeZero");
 		}
 		return events.createDamageDealtEvent(this.player, this.amount);
 	}

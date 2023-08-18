@@ -94,7 +94,8 @@
 			"genericTitle": "Select card(s):",
 			"handDiscard": "Discard your hand down to 8:",
 			"attackTarget": "Select the attack target:",
-			"cardEffect": "Select card(s) for the effect of '{#CARDNAME}':"
+			"cardEffect": "Select card(s) for the effect of '{#CARDNAME}':",
+			"cardEffectMove": "Select which card(s) to move for the effect of '{#CARDNAME}':"
 		},
 
 		"fieldLabels": {
@@ -208,6 +209,7 @@
 			"opponentActions": {
 				"selectingCards": "Your opponent is selecting card(s).",
 				"effectSelectingCards": "Your opponent is selecting card(s) for the effect of '{#CARDNAME}'.",
+				"effectMoveSelectingCards": "Your opponent is selecting which card(s) should be moved for the effect of '{#CARDNAME}'.",
 				"selectingHandDiscard": "Your opponent is selecting card(s) from hand to discard down to 8.",
 				"selectingAttackTarget": "Your opponent is selecting the attack target.",
 				"selectingPlayer": "Your opponent is selecting a player.",
@@ -220,6 +222,7 @@
 				"youWon": "You Won!",
 				"youLost": "You Lost!",
 				"draw": "Draw!",
+				"bothWon": "Both players won.",
 				"winReasons": {
 					"lifeZero": "Your opponent ran out of life points.",
 					"partnerCostTooHigh": "Your opponent couldn't pay for their partner.",
@@ -231,12 +234,6 @@
 					"partnerCostTooHigh": "You couldn't pay for your partner.",
 					"drawFromEmptyDeck": "You drew from an empty deck.",
 					"cardEffect": "Your opponent won due to the effect of {#CARDNAME}."
-				},
-				"drawReasons": {
-					"bothWon": "Both players won.",
-					"bothLost": "Both players lost.",
-					"youWonAndLost": "You won and lost at the same time.",
-					"opponentWonAndLost": "Your opponent won and lost at the same time."
 				}
 			}
 		}

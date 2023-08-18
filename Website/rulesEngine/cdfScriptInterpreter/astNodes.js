@@ -324,6 +324,7 @@ export class FunctionNode extends AstNode {
 				// TODO: Make player choose which cards to move if only a limited amount can be moved
 				let cards = yield* this.parameters[0].eval(card, player, ability);
 				let moveActions = [];
+				let zoneMoveCards = new Map();
 				for (const card of cards) {
 					if (card.cardRef === null) {
 						continue;
@@ -335,8 +336,30 @@ export class FunctionNode extends AstNode {
 						index = this.parameters[1].top? -1 : 0;
 					}
 					moveActions.push(new actions.Move(player, card.cardRef, zone, index));
+					zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.cardRef));
 					clearImplicitCard();
 				}
+
+				for (const [zone, cards] of zoneMoveCards.entries()) {
+					let freeSlots = zone.getFreeSpaceCount();
+					if (freeSlots < cards.length) {
+						let selectionRequest = new requests.chooseCards.create(player, cards, [freeSlots], "cardEffectMove:" + ability.id);
+						let responses = yield [selectionRequest];
+						if (responses.length != 1) {
+							throw new Error("Incorrect number of responses supplied during card move selection. (expected 1, got " + responses.length + " instead)");
+						}
+						if (responses[0].type != "chooseCards") {
+							throw new Error("Incorrect response type supplied during card move selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
+						}
+						let movedCards = requests.chooseCards.validate(responses[0].value, selectionRequest);
+						for (let i = moveActions.length - 1; i >= 0; i--) {
+							if (moveActions[i].zone === zone && !movedCards.includes(moveActions[i].card)) {
+								moveActions.splice(i, 1);
+							}
+						}
+					}
+				}
+
 				return moveActions;
 			}
 			case "VIEW": {

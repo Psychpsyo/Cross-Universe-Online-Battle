@@ -154,9 +154,10 @@ export class ManaSupplyPhase extends Phase {
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
 		let partnerLevel = turnPlayer.partnerZone.cards[0].values.level;
 		if (turnPlayer.mana < partnerLevel) {
-			turnPlayer.lost = true;
-			turnPlayer.loseReason = "partnerCostTooHigh";
-			yield [createPlayerLostEvent(turnPlayer)];
+			let winner = turnPlayer.next();
+			winner.won = true;
+			winner.victoryConditions.push("partnerCostTooHigh");
+			yield [createPlayerWonEvent(winner)];
 			while (true) {
 				yield [];
 			}
@@ -172,16 +173,14 @@ export class ManaSupplyPhase extends Phase {
 		}
 
 		// RULES: At the end of the mana supply phase, any player with more than 8 hand cards discards down to 8.
-		let cardChoiceRequests = [];
-		for (let player of this.turn.game.players) {
+		// (turn player chooses first)
+		for (let player of [turnPlayer, turnPlayer.next()]) {
 			if (player.handZone.cards.length > 8) {
-				cardChoiceRequests.push(requests.chooseCards.create(player, player.handZone.cards, [player.handZone.cards.length - 8], "handTooFull"));
+				let choiceRequest = requests.chooseCards.create(player, player.handZone.cards, [player.handZone.cards.length - 8], "handTooFull");
+				let chosenCards = requests.chooseCards.validate((yield [choiceRequest])[0].value, choiceRequest);
+				this.timings.push(new Timing(this.turn.game, chosenCards.map(card => new actions.Discard(card)), null));
+				await (yield* this.runTiming());
 			}
-		}
-		if (cardChoiceRequests.length > 0) {
-			let chosenCards = (yield cardChoiceRequests).filter(choice => choice !== undefined).map((choice, i) => requests.chooseCards.validate(choice.value, cardChoiceRequests[i]));
-			this.timings.push(new Timing(this.turn.game, chosenCards.flat().map(card => new actions.Discard(card)), null));
-			await (yield* this.runTiming());
 		}
 	}
 

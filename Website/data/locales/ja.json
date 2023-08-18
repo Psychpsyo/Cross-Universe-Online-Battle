@@ -94,7 +94,8 @@
 			"genericTitle": null,
 			"handDiscard": null,
 			"attackTarget": null,
-			"cardEffect": null
+			"cardEffect": null,
+			"cardEffectMove": null
 		},
 
 		"fieldLabels": {
@@ -208,6 +209,7 @@
 			"opponentActions": {
 				"selectingCards": null,
 				"effectSelectingCards": null,
+				"effectMoveSelectingCards": null,
 				"selectingHandDiscard": null,
 				"selectingAttackTarget": null,
 				"selectingPlayer": null,
@@ -220,6 +222,7 @@
 				"youWon": null,
 				"youLost": null,
 				"draw": null,
+				"bothWon": null,
 				"winReasons": {
 					"lifeZero": null,
 					"partnerCostTooHigh": null,
@@ -231,12 +234,6 @@
 					"partnerCostTooHigh": null,
 					"drawFromEmptyDeck": null,
 					"cardEffect": null
-				},
-				"drawReasons": {
-					"bothWon": null,
-					"bothLost": null,
-					"youWonAndLost": null,
-					"opponentWonAndLost": null
 				}
 			}
 		}

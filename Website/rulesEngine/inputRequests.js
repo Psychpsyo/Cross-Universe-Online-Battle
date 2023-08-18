@@ -49,6 +49,9 @@ export const chooseCards = {
 	generateValidResponses: function(request) {
 		let combinations = [];
 		for (const amount of request.validAmounts) {
+			if (amount > request.from.length) {
+				continue;
+			}
 			combinations = combinations.concat(nChooseK(request.from.length, amount));
 		}
 		return combinations;

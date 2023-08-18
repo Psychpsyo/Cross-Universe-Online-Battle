@@ -11,10 +11,8 @@ export class Player {
 		this.rank = 10; // In the novel rank 10 is the maximum even though this disallows Level 11 & 12 cards
 		this.mana = 0;
 		this.life = 1000;
-		this.lost = false;
-		this.loseReason = "";
 		this.won = false;
-		this.winReason = "";
+		this.victoryConditions = [];
 
 		this.deckZone = new zones.DeckZone(this);
 		this.handZone = new zones.HandZone(this);

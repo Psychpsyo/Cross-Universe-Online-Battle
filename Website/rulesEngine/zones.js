@@ -45,8 +45,8 @@ export class Zone {
 				}
 			}
 			// All of the card's trigger abilities aren't met anymore.
-			for (let ability of card.values.abilities) {
-				if (ability instanceof TriggerAbility || ability instanceof CastAbility) {
+			for (const ability of card.values.abilities) {
+				if (ability instanceof TriggerAbility) {
 					ability.triggerMet = false;
 				}
 			}
@@ -217,8 +217,8 @@ export class FieldZone extends Zone {
 
 	getFreeSpaceCount() {
 		let count = 0;
-		for (let card of this.placed) {
-			if (card === null) {
+		for (let i = 0; i < this.cards.length; i++) {
+			if (this.get(i) === null) {
 				count++;
 			}
 		}
