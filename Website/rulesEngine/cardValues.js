@@ -74,15 +74,6 @@ export class CardModifier {
 		let bakedModifications = this.modifications.map(modification => modification.bake(this.card, this.player, this.ability)).filter(modification => modification !== null);
 		return new CardModifier(bakedModifications, this.card, this.player, this.ability);
 	}
-
-	hasAllTargets(card, player, ability) {
-		for (let childNode of this.modifications) {
-			if (!childNode.hasAllTargets(card, player, ability)) {
-				return false;
-			}
-		}
-		return true;
-	}
 }
 
 export class ValueModification {
@@ -95,10 +86,6 @@ export class ValueModification {
 
 	bake(card, player, ability) {
 		return this;
-	}
-
-	hasAllTargets(card, player, ability) {
-		return true;
 	}
 }
 
@@ -130,10 +117,6 @@ export class ValueSetModification extends ValueModification {
 			return null;
 		}
 		return new ValueSetModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
-	}
-
-	hasAllTargets(card, player, ability) {
-		return this.newValue.evalFull(card, player, ability)[0].length > 0;
 	}
 }
 
@@ -167,10 +150,6 @@ export class ValueAppendModification extends ValueModification {
 		}
 		return new ValueAppendModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
-
-	hasAllTargets(card, player, ability) {
-		return this.newValues.evalFull(card, player, ability)[0].length > 0;
-	}
 }
 
 export class NumericChangeModification extends ValueModification {
@@ -198,10 +177,6 @@ export class NumericChangeModification extends ValueModification {
 		}
 		return new NumericChangeModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
 	}
-
-	hasAllTargets(card, player, ability) {
-		return this.amount.evalFull(card, player, ability)[0].length > 0;
-	}
 }
 
 export class NumericDivideModification extends ValueModification {
@@ -228,10 +203,6 @@ export class NumericDivideModification extends ValueModification {
 			return null;
 		}
 		return new NumericDivideModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
-	}
-
-	hasAllTargets(card, player, ability) {
-		return this.byAmount.evalFull(card, player, ability)[0].length > 0;
 	}
 }
 

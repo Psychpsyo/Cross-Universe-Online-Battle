@@ -80,7 +80,9 @@ class AstNode {
 	// evalFull() does the same as eval without being a generator function itself.
 	// This means that it will return an array of all possible return values for every combination of choices
 	// that the player could make.
-	evalFull(card, player, ability) {
+	// If run with an evaluatingPlayer, information that is hidden from that player is ignored.
+	// This means that card matchers, for example, will always return hidden cards, no matter if they actually match.
+	evalFull(card, player, ability, evaluatingPlayer = null) {
 		let generator = this.eval(card, player, ability);
 		let next;
 		do {
@@ -89,9 +91,9 @@ class AstNode {
 		return [next.value];
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
-	hasAllTargets(card, player, ability) {
+	hasAllTargets(card, player, ability, evaluatingPlayer) {
 		for (let childNode of this.getChildNodes()) {
-			if (childNode && !childNode.hasAllTargets(card, player, ability)) {
+			if (childNode && !childNode.hasAllTargets(card, player, ability, evaluatingPlayer)) {
 				return false;
 			}
 		}
@@ -114,9 +116,9 @@ export class ScriptRootNode extends AstNode {
 		}
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
-	hasAllTargets(card, player, ability) {
+	hasAllTargets(card, player, ability, evaluatingPlayer) {
 		for (let i = 0; i < this.steps.length; i++) {
-			if (!this.steps[i].hasAllTargets(card, player, ability)) {
+			if (!this.steps[i].hasAllTargets(card, player, ability, evaluatingPlayer)) {
 				return false;
 			}
 			// If this step is a variable assignment, we need to enumerate all possible values
@@ -132,7 +134,7 @@ export class ScriptRootNode extends AstNode {
 					}
 					ability.scriptVariables[this.steps[i].assignTo] = possibility;
 					for (let j = i + 1; j < this.steps.length; j++) {
-						if (!this.steps[j].hasAllTargets(card, player, ability)) {
+						if (!this.steps[j].hasAllTargets(card, player, ability, evaluatingPlayer)) {
 							continue;
 						} else if (j == this.steps.length - 1) {
 							foundValidBranch = true;
@@ -170,11 +172,11 @@ export class LineNode extends AstNode {
 			ability.scriptVariables[this.assignTo] = returnValues;
 		}
 	}
-	evalFull(card, player, ability) {
+	evalFull(card, player, ability, evaluatingPlayer = null) {
 		// This must return all possible combinations of the possible values for every action on this line.
 		let possibilityLists = [];
 		for (let part of this.parts) {
-			possibilityLists.push(part.evalFull(card, player, ability));
+			possibilityLists.push(part.evalFull(card, player, ability, evaluatingPlayer));
 		}
 		return cartesianProduct(possibilityLists).map(list => list.flat(1));
 	}
@@ -504,12 +506,12 @@ defense: ${defense}`));
 			}
 		}
 	}
-	evalFull(card, player, ability) {
+	evalFull(card, player, ability, evaluatingPlayer = null) {
 		// TODO: Probably best to implement these on a case-by-case basis when cards actually need them
 		switch (this.functionName) {
 			case "SELECT": {
-				let choiceAmounts = this.parameters[0].evalFull(card, player, ability)[0];
-				let eligibleCards = this.parameters[1].evalFull(card, player, ability)[0];
+				let choiceAmounts = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer)[0];
+				let eligibleCards = this.parameters[1].evalFull(card, player, ability, evaluatingPlayer)[0];
 				if (eligibleCards.length == 0) {
 					return [[]];
 				}
@@ -533,13 +535,13 @@ defense: ${defense}`));
 				return combinations;
 			}
 			case "DISCARD": {
-				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
 			}
 			case "EXILE": {
-				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Exile(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Exile(card.cardRef)));
 			}
 			case "MOVE": {
-				let cardPossibilities = this.parameters[0].evalFull(card, player, ability);
+				let cardPossibilities = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer);
 				let moveActions = [];
 				for (let cards of cardPossibilities) {
 					moveActions.push([]);
@@ -549,7 +551,7 @@ defense: ${defense}`));
 						}
 						setImplicitCard(card);
 						// TODO: this might need to handle multiple zone possibilities
-						let zone = getZoneForCard((this.parameters[1].evalFull(card, player, ability))[0], card);
+						let zone = getZoneForCard((this.parameters[1].evalFull(card, player, ability, evaluatingPlayer))[0], card);
 						let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 						if (this.parameters[1] instanceof DeckPositionNode) {
 							index = this.parameters[1].top? -1 : 0;
@@ -561,20 +563,20 @@ defense: ${defense}`));
 				return moveActions;
 			}
 			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef)));
 			}
 			case "VIEW": {
-				return this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef).map(card => new actions.View(card.cardRef, player)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.View(card.cardRef, player)));
 			}
 			default: {
-				return super.evalFull(card, player, ability);
+				return super.evalFull(card, player, ability, evaluatingPlayer);
 			}
 		}
 	}
-	hasAllTargets(card, player, ability) {
-		player = this.player.evalFull(card, player, ability)[0][0];
+	hasAllTargets(card, player, ability, evaluatingPlayer) {
+		player = this.player.evalFull(card, player, ability, evaluatingPlayer)[0][0];
 		// check if all child nodes have their targets
-		if (!super.hasAllTargets(card, player, ability)) {
+		if (!super.hasAllTargets(card, player, ability, evaluatingPlayer)) {
 			return false;
 		}
 		switch (this.functionName) {
@@ -594,13 +596,13 @@ defense: ${defense}`));
 				return true;
 			}
 			case "APPLY": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
 					return player.deckZone.cards.length > 0;
 				}
-				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
+				for (let amount of this.parameters[0].evalFull(card, player, ability, evaluatingPlayer)) {
 					if (player.deckZone.cards.length >= amount[0]) {
 						return true;
 					}
@@ -608,26 +610,26 @@ defense: ${defense}`));
 				return false;
 			}
 			case "DESTROY": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "DISCARD": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "EXILE": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "MOVE": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "SELECT": {
-				let availableOptions = this.parameters[1].evalFull(card, player, ability);
+				let availableOptions = this.parameters[1].evalFull(card, player, ability, evaluatingPlayer);
 				if (this.parameters[0] instanceof AnyAmountNode && availableOptions.find(list => list.length > 0) !== undefined) {
 					return true;
 				}
-				let amountsRequired = this.parameters[0].evalFull(card, player, ability);
+				let amountsRequired = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer);
 				for (let i = 0; i < availableOptions.length; i++) {
 					if (Math.min(...amountsRequired[i]) <= availableOptions[i].length) {
 						return true;
@@ -636,13 +638,13 @@ defense: ${defense}`));
 				return false;
 			}
 			case "SETATTACKTARGET": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "SUMMON": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "VIEW": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 		}
 	}
@@ -658,6 +660,21 @@ export class CardMatchNode extends AstNode {
 		this.conditions = conditions;
 	}
 	* eval(card, player, ability) {
+		return yield* this.getMatchingCards(card, player, ability);
+	}
+	evalFull(card, player, ability, evaluatingPlayer = null) {
+		let generator = this.getMatchingCards(card, player, ability, evaluatingPlayer);
+		let next;
+		do {
+			next = generator.next();
+		} while (!next.done);
+		return [next.value];
+	}
+	getChildNodes() {
+		return this.cardListNodes.concat(this.conditions);
+	}
+
+	* getMatchingCards(card, player, ability, evaluatingPlayer = null) {
 		let cards = [];
 		let matchingCards = [];
 		for (let cardList of this.cardListNodes) {
@@ -672,6 +689,11 @@ export class CardMatchNode extends AstNode {
 			if (checkCard == null) {
 				continue;
 			}
+			// If the evaluating player can't see the cards, they should all be treated as valid / matching.
+			if (checkCard.hiddenFor.includes(evaluatingPlayer) && checkCard.zone !== evaluatingPlayer.deckZone) {
+				matchingCards.push(checkCard);
+				continue;
+			}
 			setImplicitCard(checkCard);
 			if ((!this.conditions || (yield* this.conditions.eval(card, player, ability)))) {
 				matchingCards.push(checkCard);
@@ -681,9 +703,6 @@ export class CardMatchNode extends AstNode {
 			clearImplicitCard();
 		}
 		return matchingCards;
-	}
-	getChildNodes() {
-		return this.cardListNodes.concat(this.conditions);
 	}
 }
 export class ThisCardNode extends AstNode {
@@ -739,8 +758,8 @@ export class CardPropertyNode extends AstNode {
 		return (yield* this.cards.eval(card, player, ability)).map(card => this.accessProperty(card)).flat();
 	}
 
-	evalFull(card, player, ability) {
-		return this.cards.evalFull(card, player, ability).map(possibility => possibility.map(card => this.accessProperty(card)).flat());
+	evalFull(card, player, ability, evaluatingPlayer = null) {
+		return this.cards.evalFull(card, player, ability, evaluatingPlayer).map(possibility => possibility.map(card => this.accessProperty(card)).flat());
 	}
 
 	getChildNodes() {
@@ -848,9 +867,9 @@ export class MathNode extends AstNode {
 		let right = (yield* this.rightSide.eval(card, player, ability));
 		return this.doOperation(left, right);
 	}
-	evalFull(card, player, ability) {
-		let left = this.leftSide.evalFull(card, player, ability);
-		let right = this.rightSide.evalFull(card, player, ability);
+	evalFull(card, player, ability, evaluatingPlayer = null) {
+		let left = this.leftSide.evalFull(card, player, ability, evaluatingPlayer);
+		let right = this.rightSide.evalFull(card, player, ability, evaluatingPlayer);
 		let results = [];
 		for (const leftValue of left) {
 			for (const rightValue of right) {
@@ -1022,8 +1041,8 @@ export class UnaryMinusNode extends AstNode {
 	* eval(card, player, ability) {
 		return (yield* this.operand.eval(card, player, ability)).map(value => -value);
 	}
-	evalFull(card, player, ability) {
-		return this.operand.evalFull(card, player, ability).map(values => values.map(value => -value));
+	evalFull(card, player, ability, evaluatingPlayer = null) {
+		return this.operand.evalFull(card, player, ability, evaluatingPlayer).map(values => values.map(value => -value));
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -1037,8 +1056,8 @@ export class UnaryNotNode extends AstNode {
 	* eval(card, player, ability) {
 		return !(yield* this.operand.eval(card, player, ability));
 	}
-	evalFull(card, player, ability) {
-		return this.operand.evalFull(card, player, ability).map(value => !value);
+	evalFull(card, player, ability, evaluatingPlayer = null) {
+		return this.operand.evalFull(card, player, ability, evaluatingPlayer).map(value => !value);
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -1095,10 +1114,10 @@ export class ZoneNode extends AstNode {
 		}
 		return this.getZone(player);
 	}
-	evalFull(card, player, ability) {
+	evalFull(card, player, ability, evaluatingPlayer = null) {
 		let players;
 		if (this.playerNode) {
-			players = this.playerNode.evalFull(card, player, ability);
+			players = this.playerNode.evalFull(card, player, ability, evaluatingPlayer);
 		} else {
 			players = [player];
 		}
@@ -1142,8 +1161,8 @@ export class DeckPositionNode extends AstNode {
 	* eval(card, player, ability) {
 		return [(yield* this.playerNode.eval(card, player, ability))[0].deckZone];
 	}
-	evalFull(card, player, ability) {
-		return this.playerNode.evalFull(card, player, ability).map(player => [player[0].deckZone]);
+	evalFull(card, player, ability, evaluatingPlayer = null) {
+		return this.playerNode.evalFull(card, player, ability, evaluatingPlayer).map(player => [player[0].deckZone]);
 	}
 	getChildNodes() {
 		return [this.playerNode];

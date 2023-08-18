@@ -116,7 +116,7 @@ class BaseCard {
 		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, () => true);
 		return costOptionTree.valid;
 	}
-	async canCast(player) {
+	async canCast(player, evaluatingPlayer = player) {
 		if (!this.values.cardTypes.includes("spell")) {
 			return false;
 		}
@@ -130,10 +130,10 @@ class BaseCard {
 		let endOfTreeCheck = () => true;
 		for (const ability of this.values.abilities) {
 			if (ability instanceof abilities.CastAbility) {
-				if (!ability.canActivate(this, player)) {
+				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
 				}
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability);
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer);
 			}
 		}
 
@@ -142,7 +142,7 @@ class BaseCard {
 		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, endOfTreeCheck);
 		return costOptionTree.valid;
 	}
-	async canDeploy(player) {
+	async canDeploy(player, evaluatingPlayer = player) {
 		if (!this.values.cardTypes.includes("item")) {
 			return false;
 		}
@@ -156,10 +156,10 @@ class BaseCard {
 		let endOfTreeCheck = () => true;
 		for (const ability of this.values.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
-				if (!ability.canActivate(this, player)) {
+				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
 				}
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability);
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer);
 			}
 		}
 

@@ -209,7 +209,7 @@ export class AbilityActivation extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.ability.exec && !this.ability.exec.hasAllTargets(this.card, this.player, this.ability)) {
+		if (this.ability.exec && !this.ability.exec.hasAllTargets(this.card, this.player, this.ability, this.player)) {
 			yield* this.undoCost();
 			return false;
 		}
@@ -265,7 +265,7 @@ export class DeployItem extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.deployAbility && this.deployAbility.exec && !this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility)) {
+		if (this.deployAbility && this.deployAbility.exec && !this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility, this.player)) {
 			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;
@@ -322,7 +322,7 @@ export class CastSpell extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.castAbility && this.castAbility.exec && !this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility)) {
+		if (this.castAbility && this.castAbility.exec && !this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility, this.player)) {
 			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;
