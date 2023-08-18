@@ -25,7 +25,7 @@ export class Stack {
 			}
 		}
 		while (true) {
-			let inputRequests = this.phase.getBlockOptions(this);
+			let inputRequests = await this.phase.getBlockOptions(this);
 			let responses = (yield inputRequests).filter(choice => choice !== undefined);
 
 			if (responses.length != 1) {
@@ -112,8 +112,7 @@ export class Stack {
 			for (let card of player.getActiveCards()) {
 				for (let ability of card.values.abilities) {
 					if ((ability instanceof abilities.TriggerAbility ||
-						ability instanceof abilities.CastAbility ||
-						ability instanceof abilities.DeployAbility) &&
+						ability instanceof abilities.CastAbility) &&
 						ability.after
 					) {
 						ability.triggerMet = false;

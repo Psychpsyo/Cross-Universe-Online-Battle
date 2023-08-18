@@ -97,15 +97,6 @@ class AstNode {
 		}
 		return true;
 	}
-	// Wether or not all actions in this tree can be done fully (as a cost)
-	canDoInFull(card, player, ability) {
-		for (let childNode of this.getChildNodes()) {
-			if (childNode && !childNode.canDoInFull(card, player, ability)) {
-				return false;
-			}
-		}
-		return true;
-	}
 	getChildNodes() {
 		return [];
 	}
@@ -449,7 +440,6 @@ export class FunctionNode extends AstNode {
 					costs.push(placeCost);
 					placeActions.push(placeCost);
 
-
 					if (payCost) {
 						let manaCost = new actions.ChangeMana(player, -cards[i].cardRef.values.level);
 						manaCost.costIndex = i;
@@ -633,131 +623,6 @@ defense: ${defense}`));
 			}
 		}
 	}
-	canDoInFull(card, player, ability) {
-		player = this.player.evalFull(card, player, ability)[0][0];
-		// check if all child nodes can be done in full
-		if (!super.canDoInFull(card, player, ability)) {
-			return false;
-		}
-		switch (this.functionName) {
-			case "CANCELATTACK":
-			case "COUNT":
-			case "DAMAGE":
-			case "DIFFERENT":
-			case "GAINLIFE":
-			case "GAINMANA":
-			case "DRAW":
-			case "SELECTPLAYER":
-			case "SELECTTYPE":
-			case "SUM":
-			case "TOKENS": {
-				return true;
-			}
-			case "APPLY": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
-			}
-			case "DECKTOP": {
-				if (this.asManyAsPossible) {
-					return player.deckZone.cards.length > 0;
-				}
-				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
-					if (player.deckZone.cards.length >= amount[0]) {
-						return true;
-					}
-				}
-				return false;
-			}
-			case "DESTROY": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
-			}
-			case "DISCARD": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
-			}
-			case "EXILE": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
-			}
-			case "LOSELIFE": {
-				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
-					if (player.life + amount[0] >= 0) {
-						return true;
-					}
-				}
-				return false;
-			}
-			case "LOSEMANA": {
-				for (let amount of this.parameters[0].evalFull(card, player, ability)) {
-					if (player.mana + amount[0] >= 0) {
-						return true;
-					}
-				}
-				return false;
-			}
-			case "MOVE": {
-				let cardPossibilities = this.parameters[0].evalFull(card, player, ability);
-				for (let cards of cardPossibilities) {
-					let targetZones = [];
-					for (const card of cards) {
-						if (card.cardRef === null) {
-							continue;
-						}
-						setImplicitCard(card);
-						// TODO: this might need to handle multiple zone possibilities
-						targetZones.push(getZoneForCard((this.parameters[1].evalFull(card, player, ability))[0], card));
-						clearImplicitCard();
-					}
-					let zoneCardCounts = new Map();
-					for (const zone of targetZones) {
-						zoneCardCounts.set(zone, (zoneCardCounts.get(zone) ?? 0) + 1);
-					}
-					let enoughSpace = true;
-					for (const [key, value] of zoneCardCounts) {
-						if (key.getFreeSpaceCount() < value) {
-							enoughSpace = false;
-							break;
-						}
-					}
-					if (enoughSpace) {
-						return true;
-					}
-				}
-				return false;
-			}
-			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0 && list.find(card => card.hiddenFor.length == 0) === undefined) !== undefined;
-			}
-			case "SELECT": {
-				let availableOptions = this.parameters[1].evalFull(card, player, ability);
-				if (this.parameters[0] instanceof AnyAmountNode && availableOptions.find(list => list.length > 0) !== undefined) {
-					return true;
-				}
-				let amountsRequired = this.parameters[0].evalFull(card, player, ability);
-				for (let i = 0; i < availableOptions.length; i++) {
-					if (Math.min(...amountsRequired[i]) <= availableOptions[i].length) {
-						return true;
-					}
-				}
-				return false;
-			}
-			case "SETATTACKTARGET": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
-			}
-			case "SUMMON": {
-				let freeZoneSlots = this.parameters[1].evalFull(card, player, ability).map(zones => zones.map(zone => zone.getFreeSpaceCount()).flat());
-				let summonAmounts = this.parameters[0].evalFull(card, player, ability).map(list => list.length);
-				for (let free of freeZoneSlots) {
-					for (let summonAmount of summonAmounts) {
-						if (summonAmount > 0 && (free >= summonAmount || (free > 0 && this.asManyAsPossible))) {
-							return true;
-						}
-					}
-				}
-				return false;
-			}
-			case "VIEW": {
-				return this.parameters[0].evalFull(card, player, ability).find(list => list.length > 0) !== undefined;
-			}
-		}
-	}
 	getChildNodes() {
 		return this.parameters.concat([this.player]);
 	}
@@ -826,7 +691,7 @@ export class EquipmentsNode extends AstNode {
 }
 export class EquippedToNode extends AstNode {
 	* eval(card, player, ability) {
-		return [card.equippedTo];
+		return card.equippedTo? [card.equippedTo] : [];
 	}
 }
 export class ImplicitCardNode extends AstNode {

@@ -99,14 +99,18 @@ export class Player {
 			}
 		}
 		for (let card of this.discardPile.cards) {
-			if (card) {
-				cards.push(card);
-			}
+			cards.push(card);
 		}
 		for (let card of this.exileZone.cards) {
-			if (card) {
-				cards.push(card);
-			}
+			cards.push(card);
+		}
+		return cards;
+	}
+
+	getAllCards() {
+		let cards = this.getActiveCards();
+		for (let card of this.deckZone.cards) {
+			cards.push(card);
 		}
 		return cards;
 	}

@@ -4,54 +4,123 @@ import {Timing} from "./timings.js";
 import {FieldZone} from "./zones.js";
 import {createCardsAttackedEvent} from "./events.js";
 import * as actions from "./actions.js";
+import * as requests from "./inputRequests.js";
 
 export class TimingRunner {
-	constructor(generator) {
-		this.generator = generator;
+	constructor(generatorFunction, game, isPrediction = false) {
+		this.generatorFunction = generatorFunction;
+		this.game = game;
+		this.isPrediction = isPrediction;
+		this.block = null;
+		this.isCost = false;
 		this.timings = [];
 	}
 
-	async* run(block, asCost) {
-		let timing = yield* getNextTiming(this.generator, null, block);
+	async* run() {
+		let generator = this.generatorFunction();
+		let timing = yield* this.getNextTiming(generator, null);
 		while(timing) {
-			if (asCost) {
+			if (this.isCost) {
 				for (let action of timing.actions) {
 					action.costIndex = 0;
 				}
 			}
 			this.timings.push(timing);
-			await (yield* timing.run());
+			await (yield* timing.run(this.isPrediction));
 			for (const followup of timing.followupTimings) {
 				this.timings.push(followup);
 			}
 			if (!timing.successful) {
 				// We only need to pop 1 since unsuccessful timings never have followups
 				this.timings.pop();
-				if (asCost) {
+				if (this.isCost) {
 					return false;
 				}
 			}
-			timing = yield* getNextTiming(this.generator, timing, block);
+			timing = yield* this.getNextTiming(generator, timing);
 		}
 		return true;
 	}
 
-	async* undo() {
+	* getNextTiming(timingGenerator, previousTiming) {
+		let generatorOutput = timingGenerator.next(previousTiming);
+		while (!generatorOutput.done && (generatorOutput.value.length == 0 || !(generatorOutput.value[0] instanceof actions.Action))) {
+			generatorOutput = timingGenerator.next(yield generatorOutput.value);
+		}
+		if (generatorOutput.done) {
+			return null;
+		}
+		return new Timing(this.game, generatorOutput.value, this.block);
+	}
+
+	* undo() {
 		for (let i = this.timings.length - 1; i >= 0; i--) {
 			yield* this.timings[i].undo();
 		}
+		this.timings = [];
+	}
+
+	// starts a new generator and plays it through with the given player choices, then returns it.
+	async fastForward(playerChoices) {
+		let generator = this.run();
+		let events = await generator.next();
+		while (!events.done && (playerChoices.length > 0 || events.value[0].nature !== "request")) {
+			if (events.value[0].nature === "request") {
+				events = await generator.next([playerChoices.shift()]);
+			} else {
+				events = await generator.next();
+			}
+		}
+		return generator;
 	}
 }
 
-export function* getNextTiming(timingGenerator, previousTiming, block) {
-	let generatorOutput = timingGenerator.next(previousTiming);
-	while (!generatorOutput.done && (generatorOutput.value.length == 0 || !(generatorOutput.value[0] instanceof actions.Action))) {
-		generatorOutput = timingGenerator.next(yield generatorOutput.value);
+class OptionTreeNode {
+	constructor(parent, choice) {
+		this.parent = parent;
+		this.choice = choice;
+		this.childNodes = [];
+		this.valid = false;
 	}
-	if (generatorOutput.done) {
-		return null;
+}
+
+// Generates a tree of all player choices for a TimingRunner, tagged for validity, based on endOfTreeCheck
+// Branches in which the runner does not complete sucessfully are also tagged as invalid.
+export async function generateOptionTree(runner, endOfTreeCheck, generator = null, lastNode = null, lastChoice = null) {
+	if (generator === null) {
+		generator = runner.run();
 	}
-	return new Timing(block.player.game, generatorOutput.value, block);
+	let node = new OptionTreeNode(lastNode, lastChoice);
+	let events = await generator.next([lastChoice]);
+	// go to next user input request
+	while (!events.done && events.value[0].nature !== "request") {
+		events = await generator.next();
+	}
+	// if we are at a user input request, generate child nodes
+	if (!events.done) {
+		let validResponses = requests[events.value[0].type].generateValidResponses(events.value[0]);
+		for (const response of validResponses) {
+			let child = await generateOptionTree(runner, endOfTreeCheck, generator, node, {type: events.value[0].type, value: response});
+			node.childNodes.push(child);
+			if (child.valid) {
+				node.valid = true;
+			}
+			// and then we need to advance the branch to this node again.
+			let currentNode = node;
+			let responses = [];
+			while (currentNode.parent) {
+				responses.push(currentNode.choice);
+				currentNode = currentNode.parent;
+			}
+			generator = await runner.fastForward(responses.reverse());
+		}
+	} else {
+		// this tree branch is done.
+		node.valid = events.value && endOfTreeCheck();
+	}
+	let undoGenerator = runner.undo();
+	while(!undoGenerator.next().done) {}
+	return node;
 }
 
 // It follows: all different types of timing generators

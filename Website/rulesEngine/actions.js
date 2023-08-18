@@ -366,9 +366,6 @@ export class Discard extends Action {
 		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
 		this.card.cardRef = cardRef;
 		cardRef.snapshots.push(this.card);
-		if (this.timing.block?.type == "retire") {
-			this.timing.block.stack.phase.turn.hasRetired.push(this.card);
-		}
 		return event;
 	}
 

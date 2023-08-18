@@ -10,7 +10,12 @@ class Block {
 		this.player = player;
 		this.stack = stack;
 		this.timingRunner = timingRunner;
+		this.timingRunner.block = this;
 		this.costTimingRunner = costTimingRunner;
+		if (this.costTimingRunner) {
+			this.costTimingRunner.block = this;
+			this.costTimingRunner.isCost = true;
+		}
 		this.isCancelled = false;
 	}
 
@@ -65,10 +70,11 @@ class Block {
 
 export class StandardDraw extends Block {
 	constructor(stack, player) {
-		super(stack, player, new timingGenerators.TimingRunner(
+		super(stack, player, new timingGenerators.TimingRunner(() =>
 			timingGenerators.arrayTimingGenerator([
 				[new actions.Draw(player, 1)]
-			])
+			]),
+			player.game
 		));
 	}
 
@@ -85,18 +91,20 @@ export class StandardSummon extends Block {
 	constructor(stack, player, card) {
 		let placeAction = new actions.Place(player, card, player.unitZone);
 		super(stack, player,
-			new timingGenerators.TimingRunner(
+			new timingGenerators.TimingRunner(() =>
 				timingGenerators.arrayTimingGenerator([
 					[new actions.Summon(player, placeAction)]
-				])
+				]),
+				player.game
 			),
-			new timingGenerators.TimingRunner(
+			new timingGenerators.TimingRunner(() =>
 				timingGenerators.combinedTimingGenerator([
 					card.getSummoningCost(player),
 					timingGenerators.arrayTimingGenerator([[
 						placeAction
 					]])
-				])
+				]),
+				player.game
 			)
 		);
 		this.card = card;
@@ -109,14 +117,14 @@ export class StandardSummon extends Block {
 			return false;
 		}
 		this.card = this.card.snapshot();
-		this.stack.phase.turn.hasStandardSummoned = this.card;
+		this.stack.phase.turn.hasStandardSummoned = true;
 		return true;
 	}
 }
 
 export class Retire extends Block {
 	constructor(stack, player, units) {
-		super(stack, player, new timingGenerators.TimingRunner(timingGenerators.retireTimingGenerator(player, units)));
+		super(stack, player, new timingGenerators.TimingRunner(() => timingGenerators.retireTimingGenerator(player, units), player.game));
 		this.units = units;
 		for (let unit of units) {
 			unit.inRetire = this;
@@ -128,7 +136,7 @@ export class Retire extends Block {
 		if (!paid) {
 			return false;
 		}
-		this.stack.phase.turn.hasRetired = [];
+		this.stack.phase.turn.hasRetired = true;
 		return true;
 	}
 }
@@ -136,10 +144,11 @@ export class Retire extends Block {
 export class AttackDeclaration extends Block {
 	constructor(stack, player, attackers) {
 		let establishAction = new actions.EstablishAttackDeclaration(player, attackers);
-		super(stack, player, new timingGenerators.TimingRunner(
+		super(stack, player, new timingGenerators.TimingRunner(() =>
 			timingGenerators.arrayTimingGenerator([
 				[establishAction]
-			])
+			]),
+			player.game
 		));
 		this.attackers = attackers;
 		this.establishAction = establishAction;
@@ -156,13 +165,15 @@ export class AttackDeclaration extends Block {
 
 export class Fight extends Block {
 	constructor(stack, player) {
-		super(stack, player, new timingGenerators.TimingRunner(timingGenerators.fightTimingGenerator(stack.phase.turn.game.currentAttackDeclaration)));
+		super(stack, player, new timingGenerators.TimingRunner(() => {
+			return timingGenerators.fightTimingGenerator(stack.phase.turn.game.currentAttackDeclaration);
+		}, player.game));
 		this.attackDeclaration = stack.phase.turn.game.currentAttackDeclaration;
 	}
 
 	async* run() {
-		this.attackDeclaration.clear();
 		yield* super.run();
+		this.attackDeclaration.clear();
 	}
 
 	async* undoExecution() {
@@ -178,11 +189,13 @@ export class Fight extends Block {
 export class AbilityActivation extends Block {
 	constructor(stack, player, card, ability) {
 		super(stack, player,
-			new timingGenerators.TimingRunner(
-				timingGenerators.abilityTimingGenerator(ability, card, player)
+			new timingGenerators.TimingRunner(() =>
+				timingGenerators.abilityTimingGenerator(ability, card, player),
+				player.game
 			),
-			new timingGenerators.TimingRunner(
-				timingGenerators.abilityCostTimingGenerator(ability, card, player)
+			new timingGenerators.TimingRunner(() =>
+				timingGenerators.abilityCostTimingGenerator(ability, card, player),
+				player.game
 			)
 		);
 		this.card = card;
@@ -196,7 +209,7 @@ export class AbilityActivation extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.ability.exec && !(await this.ability.exec.hasAllTargets(this.card, this.player, this.ability))) {
+		if (this.ability.exec && !this.ability.exec.hasAllTargets(this.card, this.player, this.ability)) {
 			yield* this.undoCost();
 			return false;
 		}
@@ -238,8 +251,8 @@ export class DeployItem extends Block {
 			}
 		}
 		super(stack, player,
-			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(execTimingGenerators)),
-			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(costTimingGenerators))
+			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(execTimingGenerators), player.game),
+			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(costTimingGenerators), player.game)
 		);
 		this.card = card;
 		this.deployAbility = deployAbility;
@@ -252,7 +265,7 @@ export class DeployItem extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.deployAbility && this.deployAbility.exec && !(await this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility))) {
+		if (this.deployAbility && this.deployAbility.exec && !this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility)) {
 			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;
@@ -295,8 +308,8 @@ export class CastSpell extends Block {
 			}
 		}
 		super(stack, player,
-			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(execTimingGenerators)),
-			new timingGenerators.TimingRunner(timingGenerators.combinedTimingGenerator(costTimingGenerators))
+			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(execTimingGenerators), player.game),
+			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(costTimingGenerators), player.game)
 		);
 		this.card = card;
 		this.castAbility = castAbility;
@@ -309,7 +322,7 @@ export class CastSpell extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.castAbility && this.castAbility.exec && !(await this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility))) {
+		if (this.castAbility && this.castAbility.exec && !this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility)) {
 			yield* this.undoCost();
 			this.card.zone.add(this.card, this.card.index);
 			return false;

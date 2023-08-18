@@ -55,6 +55,10 @@ export class Zone {
 			// equipments get unequipped
 			if (card.equippedTo) {
 				card.equippedTo.equipments.splice(card.equippedTo.equipments.indexOf(card), 1);
+				card.equippedTo = null;
+			}
+			for (const equipment of card.equipments) {
+				equipment.equippedTo = null;
 			}
 			card.equipments = [];
 			// Snapshots pointing to this card become invalid. (The card stops being tracked as that specific instance)

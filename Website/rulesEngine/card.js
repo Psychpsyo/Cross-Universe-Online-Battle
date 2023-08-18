@@ -107,53 +107,66 @@ class BaseCard {
 		return timingGenerators.combinedTimingGenerator(generators);
 	}
 
-	canSummon(player) {
+	async canSummon(player) {
 		if (!this.values.cardTypes.includes("unit")) {
 			return false;
 		}
-		return true;
+		let timingRunner = new timingGenerators.TimingRunner(() => this.getSummoningCost(player), player.game, true);
+		timingRunner.isCost = true;
+		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, () => true);
+		return costOptionTree.valid;
 	}
-	canCast(player) {
+	async canCast(player) {
 		if (!this.values.cardTypes.includes("spell")) {
 			return false;
 		}
-		let eligible = true;
-		if (
-			(player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
+		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
 			(this.condition !== null && !this.condition.evalFull(this, player, null)[0]) ||
 			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(this, player, null)[0].length == 0)
 		) {
-			eligible = false;
-		} else {
-			for (let ability of this.values.abilities) {
-				if (ability instanceof abilities.CastAbility && !ability.canActivate(this, player)) {
-					eligible = false;
-					break;
+			return false;
+		}
+		// find cast ability
+		let endOfTreeCheck = () => true;
+		for (const ability of this.values.abilities) {
+			if (ability instanceof abilities.CastAbility) {
+				if (!ability.canActivate(this, player)) {
+					return false;
 				}
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability);
 			}
 		}
-		return eligible;
+
+		let timingRunner = new timingGenerators.TimingRunner(() => this.getCastingCost(player), player.game, true);
+		timingRunner.isCost = true;
+		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, endOfTreeCheck);
+		return costOptionTree.valid;
 	}
-	canDeploy(player) {
+	async canDeploy(player) {
 		if (!this.values.cardTypes.includes("item")) {
 			return false;
 		}
-		let eligible = true;
-		if (
-			(player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
+		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
 			(this.condition !== null && !this.condition.evalFull(this, player, null)[0]) ||
 			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(this, player, null)[0].length == 0)
 		) {
-			eligible = false;
-		} else {
-			for (let ability of this.values.abilities) {
-				if (ability instanceof abilities.DeployAbility && !ability.canActivate(this, player)) {
-					eligible = false;
-					break;
+			return false;
+		}
+		// find deploy ability
+		let endOfTreeCheck = () => true;
+		for (const ability of this.values.abilities) {
+			if (ability instanceof abilities.DeployAbility) {
+				if (!ability.canActivate(this, player)) {
+					return false;
 				}
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability);
 			}
 		}
-		return eligible;
+
+		let timingRunner = new timingGenerators.TimingRunner(() => this.getDeploymentCost(player), player.game, true);
+		timingRunner.isCost = true;
+		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, endOfTreeCheck);
+		return costOptionTree.valid;
 	}
 
 	static sort(a, b) {

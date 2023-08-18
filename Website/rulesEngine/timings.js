@@ -63,7 +63,7 @@ export class Timing {
 	}
 
 	// returns whether or not the timing completed sucessfully
-	async* run() {
+	async* run(isPrediction = false) {
 		this.index = this.game.nextTimingIndex;
 		this.game.nextTimingIndex++;
 
@@ -116,13 +116,15 @@ export class Timing {
 		while (staticsChanged) {
 			staticsChanged = yield* phaseStaticAbilities(this.game);
 			yield* recalculateCardValues(this.game);
-			yield* checkGameOver(this.game);
+			if (!this.isPrediction) {
+				yield* checkGameOver(this.game);
+			}
 		}
 
 		// check trigger ability conditions
-		if (this.game.currentPhase() instanceof phases.StackPhase) {
+		if (!isPrediction && this.game.currentPhase() instanceof phases.StackPhase) {
 			for (let player of game.players) {
-				for (let card of player.getActiveCards()) {
+				for (let card of player.getAllCards()) {
 					for (let ability of card.values.abilities) {
 						if (ability instanceof abilities.TriggerAbility ||
 							ability instanceof abilities.CastAbility) {
@@ -136,10 +138,13 @@ export class Timing {
 		this.followupTimings = await (yield* runFollowupTimings(this.block, this.game, this));
 	}
 
-	async* undo() {
+	* undo() {
 		// check if this timing actually ran
 		if (!this.successful) {
 			return;
+		}
+		for (let i = this.followupTimings.length - 1; i >= 0; i--) {
+			yield* this.followupTimings[i].undo();
 		}
 		let events = [];
 		for (let action of this.actions) {
@@ -200,7 +205,7 @@ function getFollowupTiming(block, game, timing) {
 	let invalidEquipments = [];
 	for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
 		if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
-			!equipment.equipableTo.evalFull(equipment, equipment.zone.player, null)[0].includes(equipment.equippedTo)
+			(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.zone.player, null)[0].includes(equipment.equippedTo))
 		) {
 			invalidEquipments.push(equipment);
 		}
@@ -212,6 +217,7 @@ function getFollowupTiming(block, game, timing) {
 	return null;
 }
 
+// TODO: refactor to only victory conditions, loss conditions do not exist
 function* checkGameOver(game) {
 	let gameOverEvents = [];
 	for (let player of game.players) {

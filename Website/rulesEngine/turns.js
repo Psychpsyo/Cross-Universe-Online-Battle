@@ -10,8 +10,8 @@ export class Turn {
 		this.index = game.turns.length;
 
 		this.hasStandardDrawn = false;
-		this.hasStandardSummoned = null;
-		this.hasRetired = null;
+		this.hasStandardSummoned = false;
+		this.hasRetired = false;
 
 		this.endOfTurnTimings = endOfTurnTimings;
 	}
