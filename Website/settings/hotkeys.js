@@ -97,7 +97,7 @@ document.addEventListener("keydown", function(e) {
 		case "ControlRight":
 		case "AltLeft":
 		case "AltRight": {
-			document.getElementById(editingHotkey).textContent = (e.ctrlKey? locale.settings.hotkeys.keyCtrl + " + " : "") + (e.shiftKey? locale.settings.hotkeys.keyShift + " + " : "") + (e.altKey? locale.settings.hotkeys.keyAlt + " + " : "");
+			document.getElementById(editingHotkey + "Button").textContent = (e.ctrlKey? locale.settings.hotkeys.keyCtrl + " + " : "") + (e.shiftKey? locale.settings.hotkeys.keyShift + " + " : "") + (e.altKey? locale.settings.hotkeys.keyAlt + " + " : "");
 			return;
 		}
 		default: {
@@ -128,9 +128,9 @@ document.addEventListener("keyup", function(e) {
 		case "ControlRight":
 		case "AltLeft":
 		case "AltRight": {
-			document.getElementById(editingHotkey).textContent = (e.ctrlKey? locale.settings.hotkeys.keyCtrl + " + " : "") + (e.shiftKey? locale.settings.hotkeys.keyShift + " + " : "") + (e.altKey? locale.settings.hotkeys.keyAlt + " + " : "");
-			if (document.getElementById(editingHotkey).textContent == "") {
-				document.getElementById(editingHotkey).textContent = locale.settings.hotkeys.pressKey;
+			document.getElementById(editingHotkey + "Button").textContent = (e.ctrlKey? locale.settings.hotkeys.keyCtrl + " + " : "") + (e.shiftKey? locale.settings.hotkeys.keyShift + " + " : "") + (e.altKey? locale.settings.hotkeys.keyAlt + " + " : "");
+			if (document.getElementById(editingHotkey + "Button").textContent == "") {
+				document.getElementById(editingHotkey + "Button").textContent = locale.settings.hotkeys.pressKey;
 			}
 			return;
 		}
