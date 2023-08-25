@@ -1,10 +1,12 @@
 // general
 localStorage.setItem("alwaysShowCardButtons", localStorage.getItem("alwaysShowCardButtons") ?? true);
 localStorage.setItem("autoClosePreview", localStorage.getItem("autoClosePreview") ?? false);
+localStorage.setItem("autoWarning", localStorage.getItem("autoWarning") ?? false);
 localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("cardBackToggle", localStorage.getItem("cardBackToggle") ?? false);
 localStorage.setItem("cardDataApiUrl", localStorage.getItem("cardDataApiUrl") ?? "");
 localStorage.setItem("cardImageUrl", localStorage.getItem("cardImageUrl") ?? "");
+localStorage.setItem("compactMode", localStorage.getItem("compactMode") ?? false);
 localStorage.setItem("customCards", localStorage.getItem("customCards") ?? "[]");
 localStorage.setItem("customFont", localStorage.getItem("customFont") ?? "");
 localStorage.setItem("devMode", localStorage.getItem("devMode") ?? false);

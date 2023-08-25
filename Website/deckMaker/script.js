@@ -135,6 +135,10 @@ document.documentElement.removeAttribute("aria-busy");
 window.deckList = [];
 recalculateDeckStats();
 
+if (localStorage.getItem("compactMode") === "true") {
+	document.documentElement.classList.add("compact");
+}
+
 // make dialogs work
 Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 	elem.addEventListener("click", function(e) {
@@ -599,12 +603,13 @@ async function recalculateDeckStats() {
 	document.getElementById("cardMaxWarning").style.display = deckList.length < 51? "none" : "block";
 	document.getElementById("partnerWarning").style.display = document.getElementById("deckMakerDetailsPartnerSelect").value == ""? "block" : "none";
 	document.getElementById("unsupportedWarning").style.display = "none";
-	for (const cardId of deckList) {
-		if (!(await cardLoader.isCardScripted(cardId))) {
-			document.getElementById("unsupportedWarning").style.display = "block";
+	if (localStorage.getItem("autoWarning") === "true") {
+		for (const cardId of deckList) {
+			if (!(await cardLoader.isCardScripted(cardId))) {
+				document.getElementById("unsupportedWarning").style.display = "block";
+			}
 		}
 	}
-
 }
 
 async function addRecentCard(cardId) {

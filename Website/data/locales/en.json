@@ -278,7 +278,7 @@
 				"partialCards": "Not all cards are available in this language. Missing cards will be in English."
 			},
 			"languageWarningName": "Note:",
-			"partnerChoice": "Always give Partner Choice",
+			"partnerChoiceToggle": "Always give Partner Choice",
 			"autoClosePreview": "Close Card Preview When Clicking off of It",
 			"alwaysShowCardButtons": "Show Card Interaction Buttons without Hovering"
 		},
@@ -287,9 +287,9 @@
 			"title": "Profile",
 			"username": "Your Username:",
 			"usernamePlaceholder": "No username set.",
-			"profilePicture": {
-				"label": "Profile Picture:",
-				"button": "Change Profile Picture...",
+			"profilePicture": "Profile Picture:",
+			"profilePictureButton": "Change Profile Picture...",
+			"profilePictureMenu": {
 				"header": "Choose a Profile Picture",
 				"categoriesTab": "Categorized",
 				"allCardsTab": "All Cards",
@@ -310,19 +310,19 @@
 					"cardGameDystopia": "I'm a Girl?! In this Dystopian Future Ruled by Cards"
 				}
 			},
-			"cardBackLink": "Custom Card Back Link:",
-			"cardBackLinkPlaceholder": "No card back set."
+			"cardBack": "Custom Card Back Link:",
+			"cardBackPlaceholder": "No card back set."
 		},
 
 		"customization": {
 			"title": "Customization",
-			"fieldLabels": "Show Field Labels",
-			"disableCardBacks": "Disable Opponent Card Backs",
+			"fieldLabelToggle": "Show Field Labels",
+			"cardBackToggle": "Disable Opponent Card Backs",
 			"opponentCardLanguage": "Show Opponent Cards in their Language",
 			"previewCardLanguage": "Also Show Card Preview in that Language",
-			"leftField": "Place Field on The Left Side of your Screen",
+			"fieldLeftToggle": "Place Field on The Left Side of your Screen",
 			"theme": "Theme:",
-			"themes": {
+			"themeOptions": {
 				"default": "Default",
 				"light": "Light",
 				"worldTree": "The World Tree",
@@ -334,7 +334,7 @@
 		"accessibility": {
 			"title": "Accessibility",
 			"font": "Font:",
-			"fonts": {
+			"fontOptions": {
 				"default": "Default",
 				"atkinsonHyperlegible": "Atkinson Hyperlegible",
 				"openDyslexic": "OpenDyslexic",
@@ -360,19 +360,20 @@
 			"keyCtrl": "Ctrl",
 			"keyShift": "Shift",
 			"keyAlt": "Alt",
-			"showYourDiscardPile": "Show Your Discard Pile:",
-			"showOpponentDiscardPile": "Show Opponent Discard Pile:",
-			"showYourExileZone": "Show Your Exile Zone:",
-			"showOpponentExileZone": "Show Opponent Exile Zone:",
-			"searchYourDeck": "Search Your Deck:",
-			"tokenSelector": "Open Token Selector:",
+			"showYourDiscard": "Show Your Discard Pile:",
+			"showOpponentDiscard": "Show Opponent Discard Pile:",
+			"showYourExile": "Show Your Exile Zone:",
+			"showOpponentExile": "Show Opponent Exile Zone:",
+			"showDeck": "Search Your Deck:",
+			"selectToken": "Open Token Selector:",
 			"showField": "Show Field:",
-			"destroyGrabbedToken": "Destroy Grabbed Token:",
-			"writeChatMessage": "Write Chat Message:",
+			"destroyToken": "Destroy Grabbed Token:",
+			"chat": "Write Chat Message:",
 			"drawCard": "Draw Card:",
 			"shuffleDeck": "Shuffle Your Deck:",
 			"showDeckTop": "View Top Card of Deck:",
-			"previewHandCard": "Preview Hand Cards:",
+			"previewHand": "Preview Hand Cards:",
+			"previewHandButton": "1 - 9",
 
 			"keys": {
 				"KeyA": "A",
@@ -481,6 +482,12 @@
 				"F23": "F23",
 				"F24": "F24"
 			}
+		},
+
+		"deckMaker": {
+			"title": "Deck Maker",
+			"compactMode": "Compact Mode",
+			"autoWarning": "Warn about decks unsupported in automatic mode"
 		},
 
 		"advanced": {

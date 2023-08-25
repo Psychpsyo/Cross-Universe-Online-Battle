@@ -278,7 +278,7 @@
 				"partialCards": "Es gibt in dieser Sprache nicht alle Karten. Fehlende Karten werden auf Englisch sein."
 			},
 			"languageWarningName": "Achtung:",
-			"partnerChoice": "Immer die Wahl des Partners geben",
+			"partnerChoiceToggle": "Immer die Wahl des Partners geben",
 			"autoClosePreview": "Kartenvorschau durch Danebenklicken schließen",
 			"alwaysShowCardButtons": "Karteninteraktionsbuttons auch ohne hovern zeigen"
 		},
@@ -287,9 +287,9 @@
 			"title": "Profil",
 			"username": "Dein Nutzername:",
 			"usernamePlaceholder": "Kein Nutzername gewählt.",
-			"profilePicture": {
-				"label": "Profilbild:",
-				"button": "Profilbild ändern...",
+			"profilePicture": "Profilbild:",
+			"profilePictureButton": "Profilbild ändern...",
+			"profilePictureMenu": {
 				"header": "Wähle ein Profilbild",
 				"categoriesTab": "Kategorisiert",
 				"allCardsTab": "Alle Karten",
@@ -310,19 +310,19 @@
 					"cardGameDystopia": "I'm a Girl?! In this Dystopian Future Ruled by Cards"
 				}
 			},
-			"cardBackLink": "Link für einen Kartenrücken:",
-			"cardBackLinkPlaceholder": "Kein Kartenrücken gewählt."
+			"cardBack": "Link für einen Kartenrücken:",
+			"cardBackPlaceholder": "Kein Kartenrücken gewählt."
 		},
 
 		"customization": {
 			"title": "Display & Themes",
-			"fieldLabels": "Feldbeschriftung zeigen",
-			"disableCardBacks": "Gegnerische Kartenrücken deaktivieren",
+			"fieldLabelToggle": "Feldbeschriftung zeigen",
+			"cardBackToggle": "Gegnerische Kartenrücken deaktivieren",
 			"opponentCardLanguage": "Zeige Karten des Gegners in der Sprache des Gegners",
 			"previewCardLanguage": "Kartenvorschau auch in anderen Sprache zeigen",
-			"leftField": "Feld links auf dem Bildschirm platzieren",
+			"fieldLeftToggle": "Feld links auf dem Bildschirm platzieren",
 			"theme": "Theme:",
-			"themes": {
+			"themeOptions": {
 				"default": "Standard",
 				"light": "Hell",
 				"worldTree": "Der World Tree",
@@ -334,7 +334,7 @@
 		"accessibility": {
 			"title": "Barrierefreiheit",
 			"font": "Schriftart:",
-			"fonts": {
+			"fontOptions": {
 				"default": "Standard",
 				"atkinsonHyperlegible": "Atkinson Hyperlegible",
 				"openDyslexic": "OpenDyslexic",
@@ -360,19 +360,20 @@
 			"keyCtrl": "Strg",
 			"keyShift": "Shift",
 			"keyAlt": "Alt",
-			"showYourDiscardPile": "Eigenen Ablagestapel zeigen:",
-			"showOpponentDiscardPile": "Gegnerischen Ablagestapel zeigen:",
-			"showYourExileZone": "Eigenes Exil zeigen:",
-			"showOpponentExileZone": "Gegnerisches Exil zeigen:",
-			"searchYourDeck": "Dein Deck durchsuchen:",
-			"tokenSelector": "Token-Menü öffnen:",
+			"showYourDiscard": "Eigenen Ablagestapel zeigen:",
+			"showOpponentDiscard": "Gegnerischen Ablagestapel zeigen:",
+			"showYourExile": "Eigenes Exil zeigen:",
+			"showOpponentExile": "Gegnerisches Exil zeigen:",
+			"showDeck": "Dein Deck durchsuchen:",
+			"selectToken": "Token-Menü öffnen:",
 			"showField": "Feld zeigen:",
-			"destroyGrabbedToken": "Gehaltenes Token zerstören:",
-			"writeChatMessage": "Chat-Nachricht schreiben:",
+			"destroyToken": "Gehaltenes Token zerstören:",
+			"chat": "Chat-Nachricht schreiben:",
 			"drawCard": "Karte ziehen:",
 			"shuffleDeck": "Eigenes Deck mischen:",
 			"showDeckTop": "Oberste Karte im Deck zeigen:",
-			"previewHandCard": "Handkarten anzeigen:",
+			"previewHand": "Handkarten anzeigen:",
+			"previewHandButton": "1 - 9",
 
 			"keys": {
 				"KeyA": "A",
@@ -481,6 +482,12 @@
 				"F23": "F23",
 				"F24": "F24"
 			}
+		},
+
+		"deckMaker": {
+			"title": "Deck Editor",
+			"compactMode": "Kompaktmodus",
+			"autoWarning": "Warnung anzeigen, wenn ein Deck nicht in automatischen Spielen nutzbar ist."
 		},
 
 		"advanced": {

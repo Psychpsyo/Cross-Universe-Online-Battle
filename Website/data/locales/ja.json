@@ -278,7 +278,7 @@
 				"partialCards": null
 			},
 			"languageWarningName": null,
-			"partnerChoice": null,
+			"partnerChoiceToggle": null,
 			"autoClosePreview": null,
 			"alwaysShowCardButtons": null
 		},
@@ -287,9 +287,9 @@
 			"title": null,
 			"username": null,
 			"usernamePlaceholder": null,
-			"profilePicture": {
-				"label": null,
-				"button": null,
+			"profilePicture": null,
+			"profilePictureButton": null,
+			"profilePictureMenu": {
 				"header": null,
 				"categoriesTab": null,
 				"allCardsTab": null,
@@ -310,19 +310,19 @@
 					"cardGameDystopia": "俺が少女！？ここはカードに支配されたディストピアな未来世界"
 				}
 			},
-			"cardBackLink": null,
-			"cardBackLinkPlaceholder": null
+			"cardBack": null,
+			"cardBackPlaceholder": null
 		},
 
 		"customization": {
 			"title": null,
-			"fieldLabels": null,
-			"disableCardBacks": null,
+			"fieldLabelToggle": null,
+			"cardBackToggle": null,
 			"opponentCardLanguage": null,
 			"previewCardLanguage": null,
-			"leftField": null,
+			"fieldLeftToggle": null,
 			"theme": null,
-			"themes": {
+			"themeOptions": {
 				"default": null,
 				"light": null,
 				"worldTree": "神聖樹",
@@ -334,7 +334,7 @@
 		"accessibility": {
 			"title": null,
 			"font": "フォント：",
-			"fonts": {
+			"fontOptions": {
 				"default": null,
 				"atkinsonHyperlegible": "Atkinson Hyperlegible",
 				"openDyslexic": "OpenDyslexic",
@@ -360,19 +360,20 @@
 			"keyCtrl": "Ctrl",
 			"keyShift": "Shift",
 			"keyAlt": "Alt",
-			"showYourDiscardPile": null,
-			"showOpponentDiscardPile": null,
-			"showYourExileZone": null,
-			"showOpponentExileZone": null,
-			"searchYourDeck": null,
-			"tokenSelector": null,
+			"showYourDiscard": null,
+			"showOpponentDiscard": null,
+			"showYourExile": null,
+			"showOpponentExile": null,
+			"showDeck": null,
+			"selectToken": null,
 			"showField": null,
-			"destroyGrabbedToken": null,
-			"writeChatMessage": null,
+			"destroyToken": null,
+			"chat": null,
 			"drawCard": null,
 			"shuffleDeck": null,
 			"showDeckTop": null,
 			"previewHandCard": null,
+			"previewHandButton": "1 - 9",
 
 			"keys": {
 				"KeyA": "A",
@@ -481,6 +482,12 @@
 				"F23": "F23",
 				"F24": "F24"
 			}
+		},
+
+		"deckMaker": {
+			"title": null,
+			"compactMode": null,
+			"autoWarning": null
 		},
 
 		"advanced": {

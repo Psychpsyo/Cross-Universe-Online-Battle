@@ -96,14 +96,14 @@ function addProfilePictureList(name, cardIdList, targetDiv) {
 	let h2 = document.createElement("h2");
 	if (name in categoryLinks) {
 		let a = document.createElement("a");
-		a.textContent = locale.settings.profile.profilePicture.categories[name];
+		a.textContent = locale.settings.profile.profilePictureMenu.categories[name];
 		a.href = categoryLinks[name];
 		a.target = "_blank";
 		a.classList.add("profilePictureCategoryName");
 		a.dataset.category = name;
 		h2.appendChild(a);
 	} else {
-		h2.textContent = locale.settings.profile.profilePicture.categories[name];
+		h2.textContent = locale.settings.profile.profilePictureMenu.categories[name];
 		h2.classList.add("profilePictureCategoryName");
 		h2.dataset.category = name;
 	}
@@ -120,10 +120,6 @@ profilePictureDialog.addEventListener("click", function(e) {
 	if (e.target === profilePictureDialog) {
 		closeProfilePictureSelector();
 	}
-});
-profilePictureButton.addEventListener("click", function() {
-	profilePictureDialog.showModal();
-	document.documentElement.classList.add("dialogOpen");
 });
 
 profilePicturesAllBtn.addEventListener("click", function() {
