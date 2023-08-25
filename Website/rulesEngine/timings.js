@@ -122,13 +122,15 @@ export class Timing {
 		}
 
 		// check trigger ability conditions
-		if (!isPrediction && this.game.currentPhase() instanceof phases.StackPhase) {
-			for (let player of game.players) {
-				for (let card of player.getAllCards()) {
-					for (let ability of card.values.abilities) {
-						if (ability instanceof abilities.TriggerAbility ||
-							ability instanceof abilities.CastAbility) {
-							ability.checkTrigger(card, player);
+		if (!this.isPrediction) {
+			if (!isPrediction && this.game.currentPhase() instanceof phases.StackPhase) {
+				for (let player of game.players) {
+					for (let card of player.getAllCards()) {
+						for (let ability of card.values.abilities) {
+							if (ability instanceof abilities.TriggerAbility ||
+								ability instanceof abilities.CastAbility) {
+								ability.checkTrigger(card, player);
+							}
 						}
 					}
 				}
@@ -239,7 +241,7 @@ function* checkGameOver(game) {
 // iterates over all static abilities and activates/deactivates those that need it.
 function* phaseStaticAbilities(game) {
 	let abilitiesChanged = false;
-	let activeCards = game.players.map(player => player.getActiveCards()).flat();
+	let activeCards = game.players.map(player => player.getAllCards()).flat();
 	let newApplications = new Map();
 	for (let currentCard of activeCards) {
 		for (let ability of currentCard.values.abilities) {
