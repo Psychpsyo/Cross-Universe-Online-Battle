@@ -5,7 +5,7 @@ let editingHotkey = "";
 
 // Exports
 export function editHotkey() {
-	editingHotkey = this.id;
+	editingHotkey = this.id.substring(0, this.id.length - 6);
 	this.classList.remove("invalidHotkey");
 	this.textContent = locale.settings.hotkeys.pressKey;
 }
@@ -68,7 +68,7 @@ async function setHotkey(name, newHotkey) {
 	let hotkeys = JSON.parse(localStorage.getItem("hotkeys"));
 	hotkeys[name] = newHotkey;
 	localStorage.setItem("hotkeys", JSON.stringify(hotkeys));
-	document.getElementById(editingHotkey).textContent = await hotkeyToString(newHotkey);
+	document.getElementById(editingHotkey + "Button").textContent = await hotkeyToString(newHotkey);
 }
 
 
