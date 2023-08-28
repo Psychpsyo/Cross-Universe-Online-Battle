@@ -350,7 +350,8 @@
 			"passOnOnlyOption": null,
 			"passInDrawPhase": null,
 			"passInEndPhase": null,
-			"passOnStackTwo": null
+			"passOnStackTwo": null,
+			"passOnAttackDeclaration": null
 		},
 
 		"hotkeys": {

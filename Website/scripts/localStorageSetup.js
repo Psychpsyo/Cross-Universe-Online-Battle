@@ -18,6 +18,7 @@ localStorage.setItem("opponentCardLanguage", localStorage.getItem("opponentCardL
 localStorage.setItem("partnerChoiceToggle", localStorage.getItem("partnerChoiceToggle") ?? false);
 localStorage.setItem("passInDrawPhase", localStorage.getItem("passInDrawPhase") ?? true);
 localStorage.setItem("passInEndPhase", localStorage.getItem("passInEndPhase") ?? true);
+localStorage.setItem("passOnAttackDeclaration", localStorage.getItem("passOnAttackDeclaration") ?? true);
 localStorage.setItem("passOnStackTwo", localStorage.getItem("passOnStackTwo") ?? true);
 localStorage.setItem("passOnOnlyOption", localStorage.getItem("passOnOnlyOption") ?? true);
 localStorage.setItem("previewCardLanguage", localStorage.getItem("previewCardLanguage") ?? false);

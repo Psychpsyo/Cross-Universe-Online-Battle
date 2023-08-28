@@ -4,6 +4,7 @@
 import * as phases from "/rulesEngine/phases.js";
 import * as abilities from "/rulesEngine/abilities.js";
 import * as ast from "/rulesEngine/cdfScriptInterpreter/astNodes.js";
+import * as blocks from "/rulesEngine/blocks.js";
 
 // track ctrl to disable the autoresponder when it's held
 let ctrlHeld = false;
@@ -59,6 +60,13 @@ export function getAutoResponse(requests) {
 		return null;
 	}
 
+	if (localStorage.getItem("passOnAttackDeclaration") === "true") {
+		let currentStack = game.currentStack();
+		if (currentStack.blocks[0] instanceof blocks.AttackDeclaration) {
+			return {type: "pass"};
+		}
+	}
+
 	let importantRequests = 0;
 	for (let request of requests) {
 		if (isImportant(request)) {
@@ -111,7 +119,7 @@ function isImportant(request) {
 	}
 
 	if (localStorage.getItem("passOnStackTwo") === "true") {
-		let currentStack = game.currentStack()
+		let currentStack = game.currentStack();
 		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
 			if (request.type != "activateTriggerAbility" &&
 				(request.type != "castSpell" || request.eligibleSpells.find(isSpellItemTriggered) === undefined) &&

@@ -350,7 +350,8 @@
 			"passOnOnlyOption": "Auto-passen wenn es die einzige vernünftige Option ist",
 			"passInDrawPhase": "In der Drawphase auto-passen, wenn du keine Drawphase-spezifischen Optionen oder Trigger hast",
 			"passInEndPhase": "In der Endphase auto-passen, wenn du keine Endphase-spezifischen Optionen oder Trigger hast",
-			"passOnStackTwo": "Auf leeren Stacks 2+ auto-passen, wenn du keine Trigger-Fähigkeiten oder konditionsbedingte Zauber hast"
+			"passOnStackTwo": "Auf leeren Stacks 2+ auto-passen, wenn du keine Trigger-Fähigkeiten oder konditionsbedingte Zauber hast",
+			"passOnAttackDeclaration": "Als Antwort auf Angriffsdeklarationen passen"
 		},
 
 		"hotkeys": {

@@ -6,7 +6,7 @@ const languageNames = {
 	en: "🇺🇸 English",
 	de: "🇩🇪 Deutsch",
 	ja: "🇯🇵 日本語"
-}
+};
 
 const settings = {
 	general: [
@@ -86,24 +86,6 @@ const settings = {
 		{
 			id: "customFont",
 			type: "text"
-		}
-	],
-	auto: [
-		{
-			id: "passOnOnlyOption",
-			type: "toggle"
-		},
-		{
-			id: "passInDrawPhase",
-			type: "toggle"
-		},
-		{
-			id: "passInEndPhase",
-			type: "toggle"
-		},
-		{
-			id: "passOnStackTwo",
-			type: "toggle"
 		}
 	],
 	hotkeys: [
@@ -187,6 +169,28 @@ const settings = {
 			type: "toggle"
 		}
 	],
+	auto: [
+		{
+			id: "passOnOnlyOption",
+			type: "toggle"
+		},
+		{
+			id: "passInDrawPhase",
+			type: "toggle"
+		},
+		{
+			id: "passInEndPhase",
+			type: "toggle"
+		},
+		{
+			id: "passOnStackTwo",
+			type: "toggle"
+		},
+		{
+			id: "passOnAttackDeclaration",
+			type: "toggle"
+		}
+	],
 	advanced: [
 		{
 			id: "websocketUrl",
@@ -205,7 +209,7 @@ const settings = {
 			type: "toggle"
 		}
 	]
-}
+};
 
 for (const [id, options] of Object.entries(settings)) {
 	let section = document.createElement("section");
