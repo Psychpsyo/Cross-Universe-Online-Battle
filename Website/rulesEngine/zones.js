@@ -33,6 +33,7 @@ export class Zone {
 				card.inRetire = null;
 			}
 			card.attackCount = 0;
+			card.canAttackAgain = false;
 			if (this.player.game.currentAttackDeclaration) {
 				if (this.player.game.currentAttackDeclaration.target == card) {
 					this.player.game.currentAttackDeclaration.target = null;

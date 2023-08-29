@@ -4,11 +4,11 @@ name: CUI00035
 level: 0
 types: Earth, Katana
 o: static
-applyTo: equippedUnit
+applyTo: thisCard.equippedUnit
 condition: thisCard.zone = field
 modifier: {attack += 200}
 o: trigger
 mandatory: yes
 during: currentPhase = endPhase
-condition: thisCard.zone = field & equippedUnit.types != Samurai
+condition: thisCard.zone = field & thisCard.equippedUnit.types != Samurai
 DESTROY(thisCard)

@@ -4,11 +4,11 @@ name: CUI00015
 level: 2
 types: Earth
 o: static
-applyTo: equippedUnit
+applyTo: thisCard.equippedUnit
 condition: thisCard.zone = field
 modifier: {attack += 200}
 o: optional
-condition: thisCard.zone = field & equippedUnit.types = Earth
+condition: thisCard.zone = field & thisCard.equippedUnit.types = Earth
 cost:
 DISCARD(thisCard)
 exec:

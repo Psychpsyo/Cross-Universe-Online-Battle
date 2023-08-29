@@ -1,22 +1,20 @@
 // This file contains timing generator functions and related utility functions
 
 import {Timing} from "./timings.js";
-import {FieldZone} from "./zones.js";
 import {createCardsAttackedEvent} from "./events.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
 
 export class TimingRunner {
-	constructor(generatorFunction, game, isPrediction = false) {
+	constructor(generatorFunction, game) {
 		this.generatorFunction = generatorFunction;
 		this.game = game;
-		this.isPrediction = isPrediction;
 		this.block = null;
 		this.isCost = false;
 		this.timings = [];
 	}
 
-	async* run() {
+	async* run(isPrediction = false) {
 		let generator = this.generatorFunction();
 		let timing = yield* this.getNextTiming(generator, null);
 		while(timing) {
@@ -26,7 +24,7 @@ export class TimingRunner {
 				}
 			}
 			this.timings.push(timing);
-			await (yield* timing.run(this.isPrediction));
+			await (yield* timing.run(isPrediction));
 			for (const followup of timing.followupTimings) {
 				this.timings.push(followup);
 			}
@@ -88,7 +86,7 @@ class OptionTreeNode {
 // Branches in which the runner does not complete sucessfully are also tagged as invalid.
 export async function generateOptionTree(runner, endOfTreeCheck, generator = null, lastNode = null, lastChoice = null) {
 	if (generator === null) {
-		generator = runner.run();
+		generator = runner.run(true);
 	}
 	let node = new OptionTreeNode(lastNode, lastChoice);
 	let events = await generator.next([lastChoice]);

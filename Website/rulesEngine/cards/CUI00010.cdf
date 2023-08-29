@@ -4,7 +4,7 @@ name: CUI00010
 level: 1
 types: Light, Sword
 o: static
-applyTo: equippedUnit
+applyTo: thisCard.equippedUnit
 condition: thisCard.zone = field
 modifier: {attack += 100}
 o: trigger

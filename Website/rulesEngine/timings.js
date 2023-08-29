@@ -116,13 +116,13 @@ export class Timing {
 		while (staticsChanged) {
 			staticsChanged = yield* phaseStaticAbilities(this.game);
 			yield* recalculateCardValues(this.game);
-			if (!this.isPrediction) {
+			if (!isPrediction) {
 				yield* checkGameOver(this.game);
 			}
 		}
 
 		// check trigger ability conditions
-		if (!this.isPrediction) {
+		if (!isPrediction) {
 			if (!isPrediction && this.game.currentPhase() instanceof phases.StackPhase) {
 				for (let player of game.players) {
 					for (let card of player.getAllCards()) {
@@ -137,7 +137,18 @@ export class Timing {
 			}
 		}
 
-		this.followupTimings = await (yield* runFollowupTimings(this.block, this.game, this));
+		await (yield* this.runFollowupTimings(isPrediction));
+	}
+
+	async* runFollowupTimings(isPrediction) {
+		let timings = [];
+		let interjected = this.getFollowupTiming();
+		while (interjected) {
+			timings.push(interjected);
+			await (yield* interjected.run(isPrediction));
+			interjected = interjected.getFollowupTiming();
+		}
+		this.followupTimings = timings;
 	}
 
 	* undo() {
@@ -164,23 +175,11 @@ export class Timing {
 	valueOf() {
 		return this.index;
 	}
-}
 
-export async function* runFollowupTimings(block, game, timing = null) {
-	let timings = [];
-	let interjected = getFollowupTiming(block, game, timing);
-	while (interjected) {
-		timings.push(interjected);
-		await (yield* interjected.run());
-		interjected = getFollowupTiming(block, game, interjected);
-	}
-	return timings;
-}
-function getFollowupTiming(block, game, timing) {
-	if (timing) {
+	getFollowupTiming() {
 		// decks need to be shuffled after cards are added to them.
 		let unshuffledDecks = [];
-		for (const action of timing.actions) {
+		for (const action of this.actions) {
 			if (action instanceof actions.Move && action.zone.type === "deck" && action.targetIndex === null) {
 				if (unshuffledDecks.indexOf(action.zone) === -1) {
 					unshuffledDecks.push(action.zone);
@@ -190,7 +189,7 @@ function getFollowupTiming(block, game, timing) {
 
 		// cards need to be revealed if added from deck to hand
 		let unrevealedCards = [];
-		for (const action of timing.actions) {
+		for (const action of this.actions) {
 			if (action instanceof actions.Move && action.zone.type === "hand" && action.card.zone.type === "deck") {
 				if (unrevealedCards.indexOf(action.card) === -1) {
 					unrevealedCards.push(action.card);
@@ -200,30 +199,30 @@ function getFollowupTiming(block, game, timing) {
 
 		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.cardRef, card.zone.player.next())));
 		if (allActions.length > 0) {
-			return new Timing(game, allActions, block);
+			return new Timing(this.game, allActions, this.block);
 		}
-	}
 
-	let invalidEquipments = [];
-	for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
-		if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
-			(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.zone.player, null)[0].includes(equipment.equippedTo))
-		) {
-			invalidEquipments.push(equipment);
+		let invalidEquipments = [];
+		for (const equipment of this.game.players.map(player => player.spellItemZone.cards).flat()) {
+			if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
+				(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.zone.player, null)[0].includes(equipment.equippedTo))
+			) {
+				invalidEquipments.push(equipment);
+			}
 		}
+		if (invalidEquipments.length > 0) {
+			let discards = invalidEquipments.map(equipment => new actions.Discard(equipment));
+			return new Timing(this.game, discards.concat(discards.map(discard => new actions.Destroy(discard))), this.block);
+		}
+		return null;
 	}
-	if (invalidEquipments.length > 0) {
-		let discards = invalidEquipments.map(equipment => new actions.Discard(equipment));
-		return new Timing(game, discards.concat(discards.map(discard => new actions.Destroy(discard))), block);
-	}
-	return null;
 }
 
 function* checkGameOver(game) {
 	let gameOverEvents = [];
 	for (let player of game.players) {
-		if (player.won) {
-			if (player.next().won) {
+		if (player.victoryConditions.length > 0) {
+			if (player.next().victoryConditions.length > 0) {
 				gameOverEvents.push(createGameDrawnEvent());
 				break;
 			}

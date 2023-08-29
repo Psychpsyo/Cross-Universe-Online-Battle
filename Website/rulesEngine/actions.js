@@ -74,19 +74,23 @@ export class ChangeLife extends Action {
 		super();
 		this.player = player;
 		this.amount = amount;
+		this.oldAmount = null;
 	}
 
 	async* run() {
-		this.player.life += this.amount;
+		this.oldAmount = this.player.life;
+		this.player.life = Math.max(this.player.life + this.amount, 0);
 		if (this.player.life === 0) {
-			this.player.next().won = true;
 			this.player.next().victoryConditions.push("lifeZero");
 		}
 		return events.createLifeChangedEvent(this.player);
 	}
 
 	undo() {
-		this.player.life -= this.amount;
+		if (this.player.life === 0) {
+			this.player.next().victoryConditions.pop();
+		}
+		this.player.life = this.oldAmount;
 		return events.createLifeChangedEvent(this.player);
 	}
 
@@ -105,7 +109,6 @@ export class Draw extends Action {
 
 	async* run() {
 		if (this.amount > this.player.deckZone.cards.length) {
-			this.player.next().won = true;
 			this.player.next().victoryConditions.push("drawFromEmptyDeck");
 			return null;
 		}
@@ -125,13 +128,18 @@ export class Draw extends Action {
 	}
 
 	undo() {
-		let movedCards = [];
-		for (let i = this.drawnCards.length - 1; i >= 0; i++) {
-			let card = this.drawnCards[i];
-			movedCards.push({fromZone: card.cardRef.zone, fromIndex: card.cardRef.index, toZone: card.zone, toIndex: card.index});
-			card.restore();
+		if (this.drawnCards.length > 0) {
+			let movedCards = [];
+			for (let i = this.drawnCards.length - 1; i >= 0; i--) {
+				let card = this.drawnCards[i];
+				movedCards.push({fromZone: card.cardRef.zone, fromIndex: card.cardRef.index, toZone: card.zone, toIndex: card.index});
+				card.restore();
+			}
+			return events.createUndoCardsMovedEvent(movedCards);
 		}
-		return events.createUndoCardsMovedEvent(movedCards);
+		if (this.amount > this.player.deckZone.cards.length) {
+			this.player.next().victoryConditions.pop();
+		}
 	}
 }
 
@@ -319,17 +327,22 @@ export class EstablishAttackDeclaration extends Action {
 		}
 		this.attackTarget = requests.chooseCards.validate(responses[0].value, targetSelectRequest)[0];
 
-		// finish
-		for (let attacker of this.attackers) {
-			attacker.attackCount++;
-		}
+		// handle remaining attack rights
 		this.attackers = this.attackers.map(attacker => attacker.snapshot());
 		this.attackTarget = this.attackTarget.snapshot();
+		for (let attacker of this.attackers) {
+			attacker.cardRef.attackCount++;
+			attacker.cardRef.canAttackAgain = false;
+		}
+
 		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget.zone, this.attackTarget.index);
 	}
 
 	undo() {
-		// This actually does not do anything noteworthy. Huh.
+		for (let attacker of this.attackers) {
+			attacker.cardRef.attackCount--;
+			attacker.cardRef.canAttackAgain = attacker.canAttackAgain;
+		}
 	}
 }
 
@@ -345,13 +358,15 @@ export class DealDamage extends Action {
 		this.oldAmount = this.player.life;
 		this.player.life = Math.max(this.player.life - this.amount, 0);
 		if (this.player.life == 0) {
-			this.player.next().won = true;
 			this.player.next().victoryConditions.push("lifeZero");
 		}
 		return events.createDamageDealtEvent(this.player, this.amount);
 	}
 
 	undo() {
+		if (this.player.life === 0) {
+			this.player.next().victoryConditions.pop();
+		}
 		this.player.life = this.oldAmount;
 		return events.createLifeChangedEvent(this.player);
 	}
@@ -482,7 +497,18 @@ export class ApplyCardStatChange extends Action {
 	}
 
 	isImpossible(timing) {
-		return !(this.card.zone instanceof zones.FieldZone) || this.modifier.modifications.length == 0;
+		// cannot apply stat-changes to cards that are not on the field
+		if (!(this.card.zone instanceof zones.FieldZone)) {
+			return;
+		}
+		// certain stat-changes can only be applied to units
+		let validModifications = 0;
+		for (const modification of this.modifier.modifications) {
+			if (this.card.values.cardTypes.includes("unit") || !modification.isUnitSpecific()) {
+				validModifications++;
+			}
+		}
+		return validModifications === 0;
 	}
 }
 
@@ -537,11 +563,7 @@ export class SetAttackTarget extends Action {
 	async* run() {
 		if (this.timing.game.currentAttackDeclaration) {
 			this.oldTarget = this.timing.game.currentAttackDeclaration.target;
-			if (this.newTarget.zone instanceof zones.FieldZone) {
-				this.timing.game.currentAttackDeclaration.target = this.newTarget;
-			} else {
-				this.timing.game.currentAttackDeclaration.target = null;
-			}
+			this.timing.game.currentAttackDeclaration.target = this.newTarget;
 		}
 	}
 
@@ -549,6 +571,31 @@ export class SetAttackTarget extends Action {
 		if (this.timing.game.currentAttackDeclaration) {
 			this.timing.game.currentAttackDeclaration.target = this.oldTarget;
 		}
+	}
+
+	isImpossible(timing) {
+		return !(this.newTarget.values.cardTypes.includes("unit") && this.newTarget.zone instanceof zones.FieldZone);
+	}
+}
+
+export class GainAttack extends Action {
+	constructor(card) {
+		super();
+		this.card = card;
+		this.oldCanAttackAgain = null;
+	}
+
+	async* run() {
+		this.oldCanAttackAgain = this.card.canAttackAgain;
+		this.card.canAttackAgain = true;
+	}
+
+	undo() {
+		this.card.canAttackAgain = this.oldCanAttackAgain;
+	}
+
+	isImpossible(timing) {
+		return !this.card.values.cardTypes.includes("unit");
 	}
 }
 

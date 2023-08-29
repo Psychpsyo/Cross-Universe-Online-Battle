@@ -28,6 +28,7 @@ class BaseCard {
 		this.equippedTo = null;
 		this.equipments = [];
 		this.attackCount = 0;
+		this.canAttackAgain = false;
 		this.isAttacking = false;
 		this.isAttackTarget = false;
 		this.inRetire = null;
@@ -46,14 +47,35 @@ class BaseCard {
 		return false;
 	}
 
+	// Whenever a card's values change, this function re-evaluates the modifier stack to figure out what the new value should be.
+	// In doing so, it also takes care of spells & items losing their unit-specific modifications
 	recalculateModifiedValues() {
+		// handle base value changes
 		this.baseValues = this.initialValues.clone();
-		for (let modifier of this.modifierStack) {
+		for (const modifier of this.modifierStack) {
 			this.baseValues = modifier.modify(this, true);
 		}
+		if (!this.baseValues.cardTypes.includes("unit")) {
+			this.baseValues.attack = null;
+			this.baseValues.defense = null;
+			this.baseValues.attackRights = null;
+		}
+		// handle main value changes
 		this.values = this.baseValues.clone();
-		for (let modifier of this.modifierStack) {
+		for (const modifier of this.modifierStack) {
 			this.values = modifier.modify(this, false);
+		}
+		if (!this.values.cardTypes.includes("unit")) {
+			this.values.attack = null;
+			this.values.defense = null;
+			this.values.attackRights = null;
+			this.canAttackAgain = false;
+
+			for (let i = this.modifierStack.length - 1; i >= 0; i--) {
+				if (this.modifierStack[i].removeUnitSpecificModifications()) {
+					this.modifierStack.splice(i, 1);
+				}
+			}
 		}
 	}
 
@@ -111,7 +133,7 @@ class BaseCard {
 		if (!this.values.cardTypes.includes("unit")) {
 			return false;
 		}
-		let timingRunner = new timingGenerators.TimingRunner(() => this.getSummoningCost(player), player.game, true);
+		let timingRunner = new timingGenerators.TimingRunner(() => this.getSummoningCost(player), player.game);
 		timingRunner.isCost = true;
 		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, () => true);
 		return costOptionTree.valid;
@@ -137,7 +159,7 @@ class BaseCard {
 			}
 		}
 
-		let timingRunner = new timingGenerators.TimingRunner(() => this.getCastingCost(player), player.game, true);
+		let timingRunner = new timingGenerators.TimingRunner(() => this.getCastingCost(player), player.game);
 		timingRunner.isCost = true;
 		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, endOfTreeCheck);
 		return costOptionTree.valid;
@@ -163,7 +185,7 @@ class BaseCard {
 			}
 		}
 
-		let timingRunner = new timingGenerators.TimingRunner(() => this.getDeploymentCost(player), player.game, true);
+		let timingRunner = new timingGenerators.TimingRunner(() => this.getDeploymentCost(player), player.game);
 		timingRunner.isCost = true;
 		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, endOfTreeCheck);
 		return costOptionTree.valid;
@@ -197,9 +219,10 @@ export class Card extends BaseCard {
 				[data.name ?? data.id],
 				data.level ?? 0,
 				data.types ?? [],
-				data.attack ?? 0,
-				data.defense ?? 0,
-				data.abilities.map(ability => makeAbility(ability, player.game))
+				data.attack ?? null,
+				data.defense ?? null,
+				data.abilities.map(ability => makeAbility(ability, player.game)),
+				baseCardTypes.includes("unit")? 1 : null
 			),
 			data.deckLimit,
 			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game),
@@ -234,6 +257,7 @@ export class Card extends BaseCard {
 
 	endOfTurnReset() {
 		this.attackCount = 0;
+		this.canAttackAgain = false;
 		for (let ability of this.values.abilities) {
 			if (ability instanceof abilities.OptionalAbility || ability instanceof abilities.FastAbility || ability instanceof abilities.TriggerAbility) {
 				ability.turnActivationCount = 0;
@@ -272,6 +296,7 @@ export class SnapshotCard extends BaseCard {
 		this.lastMoveTimingIndex = card.lastMoveTimingIndex;
 
 		this.attackCount = card.attackCount;
+		this.canAttackAgain = card.canAttackAgain;
 		this.isAttacking = card.isAttacking;
 		this.isAttackTarget = card.isAttackTarget;
 		this.inRetire = card.inRetire;
@@ -305,6 +330,7 @@ export class SnapshotCard extends BaseCard {
 		this.cardRef.equippedTo = this.equippedTo?.permanentCardRef ?? null;
 		this.cardRef.equipments = this.equipments.map(equipment => equipment.permanentCardRef);
 		this.cardRef.attackCount = this.attackCount;
+		this.cardRef.canAttackAgain = this.canAttackAgain;
 		this.cardRef.isAttackTarget = this.isAttackTarget;
 		this.cardRef.isAttacking = this.isAttacking;
 		if (this.isAttackTarget) {

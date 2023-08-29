@@ -2,7 +2,7 @@
 import * as ast from "./cdfScriptInterpreter/astNodes.js";
 
 export class CardValues {
-	constructor(cardTypes, names, level, types, attack, defense, abilities) {
+	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights) {
 		this.cardTypes = cardTypes;
 		this.names = names;
 		this.level = level;
@@ -10,6 +10,7 @@ export class CardValues {
 		this.attack = attack;
 		this.defense = defense;
 		this.abilities = abilities;
+		this.attackRights = attackRights;
 	}
 
 	clone() {
@@ -20,14 +21,15 @@ export class CardValues {
 			[...this.types],
 			this.attack,
 			this.defense,
-			[...this.abilities]
+			[...this.abilities],
+			this.attackRights
 		);
 	}
 
 	// returns a list of all properties that are different between this and other
 	compareTo(other) {
 		let differences = [];
-		for (let property of ["level", "attack", "defense"]) {
+		for (let property of ["level", "attack", "defense", "attackRights"]) {
 			if (this[property] != other[property]) {
 				differences.push(property);
 			}
@@ -69,6 +71,17 @@ export class CardModifier {
 		return values;
 	}
 
+	// Removes all unit-specific modifications from this modifier and returns true if that empties the modifier entirely.
+	// This is for cleaning up the modifier stack on cards that ceased being units.
+	removeUnitSpecificModifications() {
+		for (let i = this.modifications.length - 1; i >= 0; i--) {
+			if (this.modifications[i].isUnitSpecific()) {
+				this.modifications.splice(i, 1);
+			}
+		}
+		return this.modifications.length === 0;
+	}
+
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
 	bake() {
 		let bakedModifications = this.modifications.map(modification => modification.bake(this.card, this.player, this.ability)).filter(modification => modification !== null);
@@ -77,7 +90,9 @@ export class CardModifier {
 }
 
 export class ValueModification {
-	constructor(condition) {
+	constructor(value, toBase, condition) {
+		this.value = value;
+		this.toBase = toBase;
 		this.condition = condition;
 	}
 	modify(values, card, player, ability, toBaseValues) {
@@ -87,25 +102,25 @@ export class ValueModification {
 	bake(card, player, ability) {
 		return this;
 	}
+
+	isUnitSpecific() {
+		return ["attack", "defense", "attackRights"].includes(this.value);
+	}
 }
 
 export class ValueSetModification extends ValueModification {
-	constructor(values, newValue, toBaseValues, condition) {
-		super(condition);
-		this.values = values;
+	constructor(value, newValue, toBase, condition) {
+		super(value, toBase, condition);
 		this.newValue = newValue;
-		this.toBaseValues = toBaseValues;
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
 		let newValue = this.newValue.evalFull(card, player, ability)[0];
-		for (let i = 0; i < this.values.length; i++) {
-			if (toBaseValues === this.toBaseValues[i]) {
-				if (["level", "attack", "defense"].includes(this.values[i])) {
-					values[this.values[i]] = newValue[0];
-				} else {
-					values[this.values[i]] = newValue;
-				}
+		if (toBaseValues === this.toBase) {
+			if (["level", "attack", "defense"].includes(this.value)) {
+				values[this.value] = newValue[0];
+			} else {
+				values[this.value] = newValue;
 			}
 		}
 		return values;
@@ -116,28 +131,23 @@ export class ValueSetModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new ValueSetModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new ValueSetModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
 	}
 }
 
 export class ValueAppendModification extends ValueModification {
-	constructor(values, newValues, toBaseValues, condition) {
-		super(condition);
-		this.values = values;
+	constructor(value, newValues, toBase, condition) {
+		super(value, toBase, condition);
 		this.newValues = newValues;
-		this.toBaseValues = toBaseValues;
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
 		let newValues = this.newValues.evalFull(card, player, ability)[0];
-		for (let i = 0; i < this.values.length; i++) {
-			if (toBaseValues === this.toBaseValues[i]) {
-				for (let newValue of newValues) {
-					if (!values[this.values[i]].includes(newValue)) {
-						values[this.values[i]].push(newValue);
-					}
+		if (toBaseValues === this.toBase) {
+			for (let newValue of newValues) {
+				if (!values[this.value].includes(newValue)) {
+					values[this.value].push(newValue);
 				}
-
 			}
 		}
 		return values;
@@ -148,24 +158,20 @@ export class ValueAppendModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new ValueAppendModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
 	}
 }
 
 export class NumericChangeModification extends ValueModification {
-	constructor(values, amount, toBaseValues, condition) {
-		super(condition);
-		this.values = values;
+	constructor(value, amount, toBase, condition) {
+		super(value, toBase, condition);
 		this.amount = amount;
-		this.toBaseValues = toBaseValues;
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
 		let amount = this.amount.evalFull(card, player, ability)[0][0];
-		for (let i = 0; i < this.values.length; i++) {
-			if (toBaseValues === this.toBaseValues[i]) {
-				values[this.values[i]] = Math.max(0, values[this.values[i]] + amount);
-			}
+		if (toBaseValues === this.toBase) {
+			values[this.value] = Math.max(0, values[this.value] + amount);
 		}
 		return values;
 	}
@@ -175,24 +181,20 @@ export class NumericChangeModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new NumericChangeModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new NumericChangeModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
 	}
 }
 
 export class NumericDivideModification extends ValueModification {
-	constructor(values, byAmount, toBaseValues, condition) {
-		super(condition);
-		this.values = values;
+	constructor(value, byAmount, toBase, condition) {
+		super(value, toBase, condition);
 		this.byAmount = byAmount;
-		this.toBaseValues = toBaseValues;
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
 		let byAmount = this.byAmount.evalFull(card, player, ability)[0][0];
-		for (let i = 0; i < this.values.length; i++) {
-			if (toBaseValues === this.toBaseValues[i]) {
-				values[this.values[i]] = Math.ceil(values[this.values[i]] / byAmount);
-			}
+		if (toBaseValues === this.toBase) {
+			values[this.value] = Math.ceil(values[this.value] / byAmount);
 		}
 		return values;
 	}
@@ -202,25 +204,21 @@ export class NumericDivideModification extends ValueModification {
 		if (valueArray.length == 0) {
 			return null;
 		}
-		return new NumericDivideModification(this.values, new ast.ValueArrayNode(valueArray), this.toBaseValues, this.condition);
+		return new NumericDivideModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
 	}
 }
 
 export class ValueSwapModification extends ValueModification {
-	constructor(leftValues, rightValues, toBaseValues, condition) {
-		super(condition);
-		this.leftValues = leftValues;
-		this.rightValues = rightValues;
-		this.toBaseValues = toBaseValues;
+	constructor(value, other, toBase, condition) {
+		super(value, toBase, condition);
+		this.other = other;
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		for (let i = 0; i < this.leftValues.length; i++) {
-			if (toBaseValues === this.toBaseValues[i]) {
-				let temp = values[this.leftValues[i]];
-				values[this.leftValues[i]] = values[this.rightValues[i]];
-				values[this.rightValues[i]] = temp;
-			}
+		if (toBaseValues === this.toBase) {
+			let temp = values[this.value];
+			values[this.value] = values[this.other];
+			values[this.other] = temp;
 		}
 		return values;
 	}

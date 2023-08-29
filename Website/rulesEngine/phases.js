@@ -155,7 +155,6 @@ export class ManaSupplyPhase extends Phase {
 		let partnerLevel = turnPlayer.partnerZone.cards[0].values.level;
 		if (turnPlayer.mana < partnerLevel) {
 			let winner = turnPlayer.next();
-			winner.won = true;
 			winner.victoryConditions.push("partnerCostTooHigh");
 			yield [createPlayerWonEvent(winner)];
 			while (true) {
@@ -301,7 +300,7 @@ export class BattlePhase extends StackPhase {
 
 			// find eligible attackers
 			let eligibleAttackers = this.turn.player.partnerZone.cards.concat(this.turn.player.unitZone.cards.filter(card => card !== null));
-			eligibleAttackers = eligibleAttackers.filter(card => card.attackCount == 0);
+			eligibleAttackers = eligibleAttackers.filter(card => card.attackCount < card.values.attackRights || card.canAttackAgain);
 			if (eligibleAttackers.length > 0) {
 				options.push(requests.doAttackDeclaration.create(this.turn.player, eligibleAttackers));
 			}

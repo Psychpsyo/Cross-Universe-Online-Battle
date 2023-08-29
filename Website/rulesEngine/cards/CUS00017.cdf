@@ -4,6 +4,6 @@ name: CUS00017
 level: 0
 types: Gravity
 o: static
-applyTo: equippedUnit
+applyTo: thisCard.equippedUnit
 condition: thisCard.zone = field
 modifier: {attack -= level * 50}

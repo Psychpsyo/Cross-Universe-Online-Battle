@@ -316,6 +316,10 @@ export class FunctionNode extends AstNode {
 			case "GAINMANA": {
 				return [new actions.ChangeMana(player, (yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
+			case "GIVEATTACK": {
+				let target = (yield* this.parameters[0].eval(card, player, ability))[0];
+				return target.cardRef? [new actions.GainAttack(target.cardRef)] : [];
+			}
 			case "LOSELIFE": {
 				return [new actions.ChangeLife(player, -(yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
@@ -425,8 +429,8 @@ export class FunctionNode extends AstNode {
 				return [type];
 			}
 			case "SETATTACKTARGET": {
-				let card = (yield* this.parameters[0].eval(card, player, ability))[0];
-				return card.cardRef? [new actions.SetAttackTarget(card.cardRef)] : [];
+				let newTarget = (yield* this.parameters[0].eval(card, player, ability))[0];
+				return newTarget.cardRef? [new actions.SetAttackTarget(newTarget.cardRef)] : [];
 			}
 			case "SHUFFLE": {
 				return [new actions.Shuffle(player)];
@@ -466,9 +470,14 @@ export class FunctionNode extends AstNode {
 					placeActions.push(placeCost);
 
 					if (payCost) {
-						let manaCost = new actions.ChangeMana(player, -cards[i].cardRef.values.level);
-						manaCost.costIndex = i;
-						costs.push(manaCost);
+						let costActions = cards[i].getSummoningCost(player);
+						// TODO: Figure out if this needs to account for multi-action costs and how to handle those.
+						for (const actionList of costActions) {
+							for (const action of actionList) {
+								action.costIndex = i;
+								costs.push(action);
+							}
+						}
 					}
 				}
 				let timing = yield costs;
@@ -533,6 +542,14 @@ defense: ${defense}`));
 					}
 				}
 				return combinations;
+			}
+			case "DESTROY": {
+				let cardLists = this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef));
+				let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(card.cardRef)));
+				return discardLists.map(discards => discards.concat(discards.map(discard => new actions.Destroy(discard))));
+			}
+			case "DESTROY": {
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Destroy(card.cardRef)));
 			}
 			case "DISCARD": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
@@ -616,6 +633,9 @@ defense: ${defense}`));
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "EXILE": {
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
+			}
+			case "GIVEATTACK": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "MOVE": {
@@ -726,16 +746,6 @@ export class AttackersNode extends AstNode {
 		return [];
 	}
 }
-export class EquipmentsNode extends AstNode {
-	* eval(card, player, ability) {
-		return card.equipments;
-	}
-}
-export class EquippedToNode extends AstNode {
-	* eval(card, player, ability) {
-		return card.equippedTo? [card.equippedTo] : [];
-	}
-}
 export class ImplicitCardNode extends AstNode {
 	* eval(card, player, ability) {
 		return [implicitCard[implicitCard.length - 1]];
@@ -809,6 +819,18 @@ export class CardPropertyNode extends AstNode {
 			}
 			case "owner": {
 				return card.zone?.player ?? card.owner;
+			}
+			case "equippedUnit": {
+				return card.equippedTo? [card.equippedTo] : [];
+			}
+			case "equipments": {
+				return card.equipments;
+			}
+			case "attackRights": {
+				return card.values.attackRights;
+			}
+			case "attacksMade": {
+				return card.attackCount;
 			}
 			case "self": {
 				return card;

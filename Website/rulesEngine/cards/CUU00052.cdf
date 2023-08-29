@@ -8,4 +8,4 @@ defense: 100
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field
-modifier: {attack += COUNT([from equipments where cardType = equipableItem]) * 100}
+modifier: {attack += COUNT([from thisCard.equipments where cardType = equipableItem]) * 100}

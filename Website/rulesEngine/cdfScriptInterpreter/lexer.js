@@ -4,8 +4,6 @@ let keywordTokenTypes = {
 	if: "if",
 
 	thisCard: "thisCard",
-	equippedUnit: "equippedUnit",
-	equipments: "equipments",
 	attackTarget: "attackTarget",
 	attackers: "attackers",
 
@@ -38,6 +36,10 @@ let keywordTokenTypes = {
 	baseCardType: "cardProperty",
 	owner: "cardProperty",
 	baseOwner: "cardProperty",
+	equippedUnit: "cardProperty",
+	equipments: "cardProperty",
+	attackRights: "cardProperty",
+	attacksMade: "cardProperty",
 	self: "cardProperty",
 	zone: "cardProperty",
 
@@ -84,6 +86,7 @@ let keywordTokenTypes = {
 	EXILE: "function",
 	GAINLIFE: "function",
 	GAINMANA: "function",
+	GIVEATTACK: "function",
 	LOSELIFE: "function",
 	LOSEMANA: "function",
 	MOVE: "function",
