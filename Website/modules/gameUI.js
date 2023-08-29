@@ -928,7 +928,7 @@ function animate(currentTime) {
 
 // card choice modal (blocking card selector)
 export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1]) {
-	return new Promise((resolve, reject) => {
+	return new Promise(resolve => {
 		let validOptions = 0;
 		for (let i = 0; i < cards.length; i++) {
 			if (i > 0 && cards[i].zone != cards[i-1].zone) {
@@ -964,7 +964,8 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 			cardChoiceGrid.appendChild(cardImg);
 		}
 		if (validAmounts.length > 0 && validOptions < Math.min(...validAmounts)) {
-			reject(new Error("Not enough valid choices were passed to the card choice dialogue"));
+			// if too many cards are expected, assume that choosing all is a valid option
+			validAmounts = [validOptions];
 		}
 		cardChoiceMenu.addEventListener("close", function() {
 			resolve(this.returnValue.split("|").map(val => parseInt(val)));
@@ -985,7 +986,7 @@ export async function askQuestion(question, yesButton, noButton) {
 	questionPopupNoButton.textContent = noButton;
 	questionPopup.showModal();
 
-	return new Promise((resolve, reject) => {
+	return new Promise(resolve => {
 		questionPopupYesButton.addEventListener("click", function() {
 			questionPopup.close();
 			resolve(true);

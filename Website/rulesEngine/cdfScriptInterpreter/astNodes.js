@@ -288,8 +288,8 @@ export class FunctionNode extends AstNode {
 						if (i == j) {
 							continue;
 						}
-						for (element of list[j]) {
-							if (list[i].some(elem => equalityCompare(elem, element))) {
+						for (const element of list[j]) {
+							if (equalityCompare(list[i], element)) {
 								return false;
 							}
 						}
@@ -374,9 +374,6 @@ export class FunctionNode extends AstNode {
 			case "SELECT": {
 				let choiceAmount = yield* this.parameters[0].eval(card, player, ability);
 				let eligibleCards = yield* this.parameters[1].eval(card, player, ability);
-				if (eligibleCards.length == 0) {
-					return [];
-				}
 				for (let card of eligibleCards) {
 					if (card.zone.player === player || !(["deck", "hand"].includes(card.zone.type))) {
 						card.showTo(player);
