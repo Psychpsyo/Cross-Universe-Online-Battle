@@ -373,9 +373,10 @@ export class DealDamage extends Action {
 }
 
 export class Discard extends Action {
-	constructor(card) {
+	constructor(card, isRetire = false) {
 		super();
 		this.card = card;
+		this.isRetire = isRetire;
 	}
 
 	async* run() {

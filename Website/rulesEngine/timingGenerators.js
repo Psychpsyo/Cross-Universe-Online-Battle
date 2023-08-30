@@ -158,7 +158,7 @@ export function* equipTimingGenerator(equipChoiceAction, player) {
 }
 
 export function* retireTimingGenerator(player, units) {
-	let discardTiming = yield units.map(unit => new actions.Discard(unit));
+	let discardTiming = yield units.map(unit => new actions.Discard(unit, true));
 
 	let gainedMana = 0;
 	for (const action of discardTiming.actions) {

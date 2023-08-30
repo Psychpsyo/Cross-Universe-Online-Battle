@@ -1301,7 +1301,7 @@ export class ActionAccessorNode extends AstNode {
 					break;
 				}
 				case "retired": {
-					if (action instanceof actions.Discard && action.timing.block instanceof blocks.Retire) {
+					if (action instanceof actions.Discard && action.isRetire) {
 						values.push(action.card);
 					}
 					break;
