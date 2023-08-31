@@ -32,19 +32,11 @@ export class Zone {
 				card.inRetire.units.splice(card.inRetire.units.indexOf(card), 1);
 				card.inRetire = null;
 			}
-			card.attackCount = 0;
-			card.canAttackAgain = false;
-			if (this.player.game.currentAttackDeclaration) {
-				if (this.player.game.currentAttackDeclaration.target == card) {
-					this.player.game.currentAttackDeclaration.target = null;
-					card.isAttackTarget = false;
-				}
-				let attackerIndex = this.player.game.currentAttackDeclaration.attackers.indexOf(card);
-				if (attackerIndex != -1) {
-					this.player.game.currentAttackDeclaration.attackers.splice(attackerIndex, 1);
-					card.isAttacking = false;
-				}
+			if (card.isAttacking || card.isAttackTarget) {
+				this.player.game.currentAttackDeclaration?.removeCard(card);
 			}
+			card.attackCount = 0; // reset AFTER removing card from the attack since removing it increases the attackCount
+			card.canAttackAgain = false;
 			// All of the card's trigger abilities aren't met anymore.
 			for (const ability of card.values.abilities) {
 				if (ability instanceof TriggerAbility) {

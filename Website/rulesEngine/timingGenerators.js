@@ -172,7 +172,7 @@ export function* retireTimingGenerator(player, units) {
 }
 
 export function* fightTimingGenerator(attackDeclaration) {
-	if (!attackDeclaration.isValid()) {
+	if (attackDeclaration.target === null || attackDeclaration.attackers.length === 0) {
 		return;
 	}
 	// RULES: Compare the attacker’s Attack to the target’s Defense.

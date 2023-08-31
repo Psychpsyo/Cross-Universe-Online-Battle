@@ -331,7 +331,6 @@ export class EstablishAttackDeclaration extends Action {
 		this.attackers = this.attackers.map(attacker => attacker.snapshot());
 		this.attackTarget = this.attackTarget.snapshot();
 		for (let attacker of this.attackers) {
-			attacker.cardRef.attackCount++;
 			attacker.cardRef.canAttackAgain = false;
 		}
 
@@ -340,7 +339,6 @@ export class EstablishAttackDeclaration extends Action {
 
 	undo() {
 		for (let attacker of this.attackers) {
-			attacker.cardRef.attackCount--;
 			attacker.cardRef.canAttackAgain = attacker.canAttackAgain;
 		}
 	}

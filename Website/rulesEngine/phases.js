@@ -1,6 +1,6 @@
 // This file contains definitions for all phases in the game.
 import {Stack} from "./stacks.js";
-import {createStackCreatedEvent} from "./events.js";
+import {createStackCreatedEvent, createPlayerWonEvent} from "./events.js";
 import {Timing} from "./timings.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";

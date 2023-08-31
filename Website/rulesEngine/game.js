@@ -260,6 +260,7 @@ export class AttackDeclaration {
 		this.attackers = attackers;
 		this.target = target;
 		this.isCancelled = false;
+		this.invalidAttackerRemoveUndoStack = [];
 
 		for (let attacker of attackers) {
 			attacker.isAttacking = true;
@@ -267,10 +268,20 @@ export class AttackDeclaration {
 		target.isAttackTarget = true;
 	}
 
+	removeAttacker(card) {
+		let attackerIndex = this.attackers.indexOf(card);
+		if (attackerIndex != -1) {
+			this.attackers.splice(attackerIndex, 1);
+			card.isAttacking = false;
+			card.attackCount++;
+		}
+	}
+
 	clear() {
 		this.game.currentAttackDeclaration = null;
 		for (let attacker of this.attackers) {
 			attacker.isAttacking = false;
+			attacker.attackCount++;
 		}
 		if (this.target) {
 			this.target.isAttackTarget = false;
@@ -287,21 +298,39 @@ export class AttackDeclaration {
 		this.game.currentAttackDeclaration = this;
 	}
 
-	isValid() {
-		if (this.target == null || this.attackers.length == 0) {
-			return false;
+	removeCard(card) {
+		if (card === this.target) {
+			this.target = null;
+			card.isAttackTarget = false;
+		}
+		this.removeAttacker(card);
+	}
+
+	removeInvalidAttackers() {
+		let removed = [];
+		for (let i = this.attackers.length - 1; i >= 0; i--) {
+			if (!this.attackers[i].values.cardTypes.includes("unit")) {
+				removed.push(this.attackers[i]);
+				this.removeAttacker(this.attackers[i]);
+			}
 		}
 		if (this.attackers.length > 1) {
 			let partner = this.attackers.find(unit => unit.zone.type == "partner");
-			if (!partner) {
-				return false;
-			}
-			for (const unit of this.attackers) {
-				if (!partner.sharesTypeWith(unit)) {
-					return false;
+			for (let i = this.attackers.length - 1; i >= 0; i--) {
+				if (!partner?.sharesTypeWith(this.attackers[i])) {
+					removed.push(this.attackers[i]);
+					this.removeAttacker(this.attackers[i]);
 				}
 			}
 		}
-		return true;
+		this.invalidAttackerRemoveUndoStack.push(removed);
+	}
+
+	undoRemoveInvalidAttackers() {
+		for (const unit of invalidAttackerRemoveUndoStack.pop()) {
+			this.attackers.push(unit);
+			unit.isAttacking = true;
+			unit.attackCount--;
+		}
 	}
 }

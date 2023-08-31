@@ -109,13 +109,17 @@ export class Timing {
 		}
 		this.successful = true;
 
+		// TODO: None of thes following things have proper undo support yet.
+		// This *should* only matter when units turn into spells/items so for now it does not matter(?)
 		yield* recalculateCardValues(this.game);
+		this.game.currentAttackDeclaration?.removeInvalidAttackers();
 
 		// static abilities and win/lose condition checks
 		let staticsChanged = true;
 		while (staticsChanged) {
 			staticsChanged = yield* phaseStaticAbilities(this.game);
 			yield* recalculateCardValues(this.game);
+			this.game.currentAttackDeclaration?.removeInvalidAttackers();
 			if (!isPrediction) {
 				yield* checkGameOver(this.game);
 			}
@@ -315,7 +319,17 @@ function* recalculateCardValues(game) {
 		for (let card of player.getActiveCards()) {
 			let cardBaseValues = card.baseValues;
 			let cardValues = card.values;
+			let wasUnit = card.values.cardTypes.includes("unit");
 			card.recalculateModifiedValues();
+			// once done, unit specific modifications may need to be removed.
+			if (wasUnit && !card.values.cardTypes.includes("unit")) {
+				card.canAttackAgain = false;
+				for (let i = card.modifierStack.length - 1; i >= 0; i--) {
+					if (card.modifierStack[i].removeUnitSpecificModifications()) {
+						card.modifierStack.splice(i, 1);
+					}
+				}
+			}
 
 			let valueChangeEvents = [];
 			for (let property of cardBaseValues.compareTo(card.baseValues)) {

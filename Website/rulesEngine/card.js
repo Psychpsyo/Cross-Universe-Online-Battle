@@ -65,17 +65,11 @@ class BaseCard {
 		for (const modifier of this.modifierStack) {
 			this.values = modifier.modify(this, false);
 		}
+		// non-units only have base attack/defense
 		if (!this.values.cardTypes.includes("unit")) {
 			this.values.attack = null;
 			this.values.defense = null;
 			this.values.attackRights = null;
-			this.canAttackAgain = false;
-
-			for (let i = this.modifierStack.length - 1; i >= 0; i--) {
-				if (this.modifierStack[i].removeUnitSpecificModifications()) {
-					this.modifierStack.splice(i, 1);
-				}
-			}
 		}
 	}
 
