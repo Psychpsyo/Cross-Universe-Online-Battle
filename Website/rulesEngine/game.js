@@ -259,6 +259,7 @@ export class AttackDeclaration {
 		this.game = game;
 		this.attackers = attackers;
 		this.target = target;
+		this.isCombined = attackers.length > 1;
 		this.isCancelled = false;
 		this.invalidAttackerRemoveUndoStack = [];
 
@@ -314,10 +315,10 @@ export class AttackDeclaration {
 				this.removeAttacker(this.attackers[i]);
 			}
 		}
-		if (this.attackers.length > 1) {
+		if (this.isCombined) {
 			let partner = this.attackers.find(unit => unit.zone.type == "partner");
 			for (let i = this.attackers.length - 1; i >= 0; i--) {
-				if (!partner?.sharesTypeWith(this.attackers[i])) {
+				if (!partner || !partner.sharesTypeWith(this.attackers[i])) {
 					removed.push(this.attackers[i]);
 					this.removeAttacker(this.attackers[i]);
 				}
