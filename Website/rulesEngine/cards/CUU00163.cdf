@@ -5,6 +5,7 @@ level: 0
 types: Light, Angel, Machine, Curse
 attack: 0
 defense: 0
+
 o: trigger
 mandatory: yes
 during: currentPhase = endPhase & COUNT([from currentTurn.destroyed where owner = you & level > 0 & types = Machine & types = Angel & cardType = unit]) > 0

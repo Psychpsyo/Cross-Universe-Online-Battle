@@ -5,6 +5,7 @@ level: 9
 types: Water, Ghost
 attack: 500
 defense: 500
+
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field

@@ -3,6 +3,7 @@ cardType: standardSpell
 name: CUS00178
 level: 1
 types: Curse
+
 o: cast
 cost:
 LOSELIFE(100)

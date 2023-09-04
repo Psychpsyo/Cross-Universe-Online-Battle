@@ -5,6 +5,7 @@ level: 2
 types: Dark, Bird, Curse
 attack: 0
 defense: 100
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
@@ -13,6 +14,7 @@ $card = SELECT(1, [from field where types = Curse])
 exec:
 MOVE(thisCard, baseOwner.deck)
 DESTROY($card)
+
 o: trigger
 mandatory: yes
 during: currentPhase = you.endPhase

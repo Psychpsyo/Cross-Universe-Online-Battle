@@ -5,6 +5,7 @@ level: 3
 types: Water, Dragon
 attack: 300
 defense: 50
+
 o: trigger
 gameLimit: 1
 mandatory: no

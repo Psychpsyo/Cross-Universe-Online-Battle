@@ -5,6 +5,7 @@ level: 2
 types: Water, Light, Fish
 attack: 100
 defense: 100
+
 o: trigger
 mandatory: no
 after: destroyed = thisCard

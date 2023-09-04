@@ -5,6 +5,7 @@ level: 4
 types: Ice, Dragon
 attack: 300
 defense: 400
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

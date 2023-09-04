@@ -5,11 +5,13 @@ level: 7
 types: Wind, Bug, Ghost
 attack: 700
 defense: 600
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 $destroy = DESTROY(SELECT(1, [from you.field where self != thisCard & cardType = unit]))
 APPLY(thisCard, {attack += $destroy.destroyed.level * 100}, endOfTurn)
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

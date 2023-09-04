@@ -5,6 +5,7 @@ level: 2
 types: Ice, Mage
 attack: 0
 defense: 200
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

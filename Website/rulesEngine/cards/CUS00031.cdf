@@ -3,6 +3,7 @@ cardType: standardSpell
 name: CUS00031
 level: 1
 types:
+
 o: cast
 cost:
 LOSELIFE(50)

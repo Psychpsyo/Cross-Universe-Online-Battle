@@ -5,6 +5,7 @@ level: 0
 types: Ice, Angel, Plant
 attack: 0
 defense: 0
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
@@ -12,6 +13,7 @@ cost:
 DISCARD(SELECT(1, [from you.hand where types = Ice]))
 exec:
 APPLY([from you.field where types = Ice & cardType = token], {level += 1}, forever)
+
 o: trigger
 mandatory: no
 during: currentPhase = you.endPhase

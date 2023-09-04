@@ -5,6 +5,7 @@ level: 3
 types: Fire, Earth, Rock, Figure
 attack: 100
 defense: 300
+
 o: trigger
 mandatory: yes
 after: destroyed = thisCard

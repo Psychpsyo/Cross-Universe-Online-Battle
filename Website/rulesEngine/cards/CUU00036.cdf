@@ -5,6 +5,7 @@ level: 5
 types: Light, Earth, Plant
 attack: 0
 defense: 500
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

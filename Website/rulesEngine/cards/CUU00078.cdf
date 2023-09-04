@@ -5,6 +5,7 @@ level: 2
 types: Electric, Beast
 attack: 200
 defense: 100
+
 o: trigger
 mandatory: no
 after: declared.owner = opponent

@@ -5,6 +5,7 @@ level: 6
 types: Ice, Demon, Samurai
 attack: 600
 defense: 500
+
 o: optional
 turnLimit: 2
 condition: thisCard.zone = field

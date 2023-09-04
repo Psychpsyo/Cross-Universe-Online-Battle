@@ -5,6 +5,7 @@ level: 7
 types: Dark, Wind, Bug, Curse
 attack: 600
 defense: 700
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

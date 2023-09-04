@@ -359,6 +359,9 @@ function parseCdfValues(cdf) {
 	let inAbility = false;
 	let abilitySection = "";
 	for (let line of lines) {
+		if (line === "") {
+			continue;
+		}
 		let parts = line.split(/:(.*)/).map(part => part.trim());
 		if (inAbility && parts[0] != "o") {
 			let ability = data.abilities[data.abilities.length - 1];

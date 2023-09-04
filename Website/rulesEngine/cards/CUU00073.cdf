@@ -5,6 +5,7 @@ level: 3
 types: Water, Fish
 attack: 100
 defense: 200
+
 o: trigger
 mandatory: no
 after: summoned = thisCard

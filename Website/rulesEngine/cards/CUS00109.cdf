@@ -4,6 +4,7 @@ name: CUS00109
 level: 1
 types: Fire, Wind
 condition: currentTurn = you.turn
+
 o: trigger
 turnLimit: 1
 mandatory: no

@@ -3,6 +3,7 @@ cardType: standardItem
 name: CUI00095
 level: 4
 types: Earth, Myth
+
 o: deploy
 condition: you.life > 1999
 cost:

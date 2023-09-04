@@ -5,6 +5,7 @@ level: 3
 types: Fire, Ghost
 attack: 100
 defense: 0
+
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field

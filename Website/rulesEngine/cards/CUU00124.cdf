@@ -5,6 +5,7 @@ level: 1
 types: Electric, Spirit
 attack: 100
 defense: 0
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field & DIFFERENT([from you.field].name)

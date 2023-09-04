@@ -3,6 +3,7 @@ cardType: continuousSpell
 name: CUS00146
 level: 0
 types:
+
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field

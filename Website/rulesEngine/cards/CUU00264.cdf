@@ -5,6 +5,7 @@ level: 2
 types: Water, Plant, Bug
 attack: 100
 defense: 100
+
 o: trigger
 mandatory: no
 after: declared = thisCard

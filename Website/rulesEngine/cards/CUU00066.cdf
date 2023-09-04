@@ -5,6 +5,7 @@ level: 1
 types: Wind, Warrior
 attack: 100
 defense: 100
+
 o: trigger
 mandatory: no
 after: COUNT([from discarded where self = thisCard & zone = hand]) > 0

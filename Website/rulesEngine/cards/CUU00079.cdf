@@ -5,6 +5,7 @@ level: 1
 types: Dark, Bug, Curse
 attack: 0
 defense: 100
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

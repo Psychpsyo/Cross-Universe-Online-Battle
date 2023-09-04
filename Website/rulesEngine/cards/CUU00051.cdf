@@ -5,6 +5,7 @@ level: 1
 types: Earth, Warrior
 attack: 100
 defense: 100
+
 o: trigger
 mandatory: no
 after: retired = thisCard

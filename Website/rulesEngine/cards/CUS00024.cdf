@@ -3,6 +3,7 @@ cardType: standardSpell
 name: CUS00024
 level: 0
 types:
+
 o: cast
 cost:
 $unit = SELECT(1, [from field where cardType = unit])

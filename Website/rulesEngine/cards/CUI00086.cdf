@@ -3,6 +3,7 @@ cardType: continuousItem
 name: CUI00086
 level: 2
 types: Illusion, Light, Structure
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

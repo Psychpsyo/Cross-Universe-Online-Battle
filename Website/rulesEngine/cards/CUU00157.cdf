@@ -5,6 +5,7 @@ level: 3
 types: Dark, Mage, Warrior
 attack: 300
 defense: 200
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

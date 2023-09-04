@@ -5,6 +5,7 @@ level: 0
 types: Electric
 attack: 0
 defense: 0
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

@@ -3,6 +3,7 @@ cardType: equipableItem
 name: CUI00016
 level: 2
 types: Wind, Katana
+
 o: static
 applyTo: thisCard.equippedUnit
 condition: thisCard.zone = field

@@ -5,6 +5,7 @@ level: 1
 types: Fire, Wind, Bird
 attack: 100
 defense: 100
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

@@ -5,6 +5,7 @@ level: 7
 types: Ice, Mage
 attack: 700
 defense: 400
+
 o: trigger
 during: attackers.owner = opponent
 condition: thisCard.zone = field

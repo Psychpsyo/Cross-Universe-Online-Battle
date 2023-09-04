@@ -5,6 +5,7 @@ level: 3
 types: Light, Mage
 attack: 300
 defense: 250
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

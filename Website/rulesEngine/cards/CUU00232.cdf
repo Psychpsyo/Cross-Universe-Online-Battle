@@ -5,6 +5,7 @@ level: 2
 types: Electric, Beast
 attack: 200
 defense: 0
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
@@ -12,6 +13,7 @@ cost:
 DISCARD(SELECT(1, [from you.hand where types = thisCard.types]))
 exec:
 SUMMON(SELECT(1, [from you.deck where name = CUU00232]), you.unitZone, yes)
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field & currentTurn.summoned != thisCard

@@ -5,6 +5,7 @@ level: 0
 types: Earth, Ghost
 attack: 0
 defense: 0
+
 o: trigger
 globalTurnLimit: 1
 mandatory: no

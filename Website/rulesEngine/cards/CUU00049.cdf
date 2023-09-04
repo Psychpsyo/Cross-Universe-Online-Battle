@@ -5,6 +5,7 @@ level: 1
 types: Light, Warrior
 attack: 100
 defense: 100
+
 o: trigger
 mandatory: no
 after: destroyed = thisCard

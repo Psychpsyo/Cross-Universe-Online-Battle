@@ -5,10 +5,12 @@ level: 1
 types: Light, Bug
 attack: 50
 defense: 0
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 GAINLIFE(50)
+
 o: trigger
 mandatory: no
 after: destroyed = thisCard

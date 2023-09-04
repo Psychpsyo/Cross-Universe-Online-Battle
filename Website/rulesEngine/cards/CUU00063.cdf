@@ -5,6 +5,7 @@ level: 4
 types: Fire, Beast
 attack: 200
 defense: 600
+
 o: trigger
 mandatory: yes
 during: currentPhase = endPhase

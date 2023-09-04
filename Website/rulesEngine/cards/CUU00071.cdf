@@ -5,6 +5,7 @@ level: 0
 types: Water, Dark
 attack: 0
 defense: 0
+
 o: trigger
 mandatory: no
 after: destroyed = thisCard

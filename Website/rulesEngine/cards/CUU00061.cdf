@@ -5,10 +5,12 @@ level: 4
 types: Dark, Beast
 attack: 400
 defense: 300
+
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field
 modifier: {attack += COUNT([from discard where name = CUU00061]) * 50}
+
 o: trigger
 after: destroyed = thisCard
 mandatory: no

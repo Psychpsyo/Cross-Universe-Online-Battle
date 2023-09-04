@@ -3,6 +3,7 @@ cardType: standardItem
 name: CUI00005
 level: 0
 types: Medicine
+
 o: deploy
 cost:
 $unit = SELECT(1, [from field where cardType = unit])

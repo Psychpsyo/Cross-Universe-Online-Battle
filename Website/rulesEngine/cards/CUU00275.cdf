@@ -5,6 +5,7 @@ level: 2
 types: Earth, Beast, Machine
 attack: 200
 defense: 100
+
 o: trigger
 mandatory: no
 after: COUNT([from destroyed where zone = you.field & self != thisCard & types = Beast & cardType = unit]) > 0

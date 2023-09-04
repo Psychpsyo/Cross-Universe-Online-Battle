@@ -5,6 +5,7 @@ level: 7
 types: Light, Illusion, Rock
 attack: 0
 defense: 700
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

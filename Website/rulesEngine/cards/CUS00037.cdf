@@ -3,5 +3,6 @@ cardType: standardSpell
 name: CUS00037
 level: 0
 types: Wind
+
 o: cast
 SUMMON(SELECT(1, [from you.hand where cardType = unit]), you.unitZone, yes)

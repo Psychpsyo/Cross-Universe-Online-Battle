@@ -5,6 +5,7 @@ level: 3
 types: Fire, Earth, Dragon, Warrior
 attack: 100
 defense: 300
+
 o: trigger
 mandatory: no
 after: targeted = thisCard

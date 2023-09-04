@@ -3,6 +3,7 @@ cardType: continuousSpell
 name: CUS00145
 level: 1
 types: Water
+
 o: trigger
 mandatory: yes
 after: COUNT([from destroyed where zone = field & cardType = unit]) > 0

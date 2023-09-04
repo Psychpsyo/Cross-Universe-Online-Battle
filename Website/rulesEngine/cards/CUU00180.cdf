@@ -5,6 +5,7 @@ level: 1
 types: Dark, Demon
 attack: 0
 defense: 0
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

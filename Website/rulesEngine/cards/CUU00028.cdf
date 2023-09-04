@@ -5,6 +5,7 @@ level: 2
 types: Fire, Psychic
 attack: 200
 defense: 100
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field & currentTurn.summoned != thisCard

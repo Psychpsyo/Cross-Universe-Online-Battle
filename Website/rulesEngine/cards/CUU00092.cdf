@@ -5,6 +5,7 @@ level: 4
 types: Ice, Beast
 attack: 400
 defense: 300
+
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field

@@ -3,6 +3,7 @@ cardType: continuousSpell
 name: CUS00107
 level: 0
 types: Fire
+
 o: trigger
 mandatory: no
 turnLimit: 2

@@ -5,6 +5,7 @@ level: 8
 types: Dark, Machine, Dragon
 attack: 800
 defense: 800
+
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field

@@ -3,6 +3,7 @@ cardType: standardSpell
 name: CUS00134
 level: 1
 types: Electric
+
 o: cast
 after: declared.owner = opponent
 cost:

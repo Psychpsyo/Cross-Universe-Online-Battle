@@ -3,6 +3,7 @@ cardType: standardItem
 name: CUI00068
 level: 0
 types: Illusion, Rock
+
 o: deploy
 cost:
 LOSELIFE(100)

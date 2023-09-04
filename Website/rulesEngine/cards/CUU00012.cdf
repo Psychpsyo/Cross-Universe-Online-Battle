@@ -5,11 +5,13 @@ level: 8
 types: Earth, Rock, Myth
 attack: 800
 defense: 700
+
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field
 $discards = DISCARD(SELECT(any, [from you.hand where types = Earth]))
 APPLY(thisCard, {defense += COUNT($discards.discarded) * 100}, endOfNextTurn)
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

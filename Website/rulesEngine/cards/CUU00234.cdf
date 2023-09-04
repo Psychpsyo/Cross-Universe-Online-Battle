@@ -5,6 +5,7 @@ level: 3
 types: Fire, Earth, Demon, Rock
 attack: 250
 defense: 200
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

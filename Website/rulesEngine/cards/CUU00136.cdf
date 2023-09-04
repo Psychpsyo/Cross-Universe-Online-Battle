@@ -5,6 +5,7 @@ level: 5
 types: Fire, Wind, Ghost
 attack: 400
 defense: 500
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

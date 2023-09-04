@@ -5,6 +5,7 @@ level: 2
 types: Earth, Machine
 attack: 200
 defense: 200
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

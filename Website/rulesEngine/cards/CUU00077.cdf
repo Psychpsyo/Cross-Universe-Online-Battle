@@ -5,6 +5,7 @@ level: 4
 types: Fire, Water, Rock
 attack: 100
 defense: 500
+
 o: trigger
 mandatory: yes
 after: destroyed = thisCard

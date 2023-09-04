@@ -3,6 +3,7 @@ cardType: continuousItem
 name: CUI00034
 level: 0
 types: Earth, Plant, Structure
+
 o: optional
 turnLimit: 2
 condition: thisCard.zone = field

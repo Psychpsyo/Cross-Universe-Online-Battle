@@ -3,6 +3,7 @@ cardType: standardSpell
 name: CUS00025
 level: 0
 types: Gravity
+
 o: cast
 condition: attackers.owner = opponent
 cost:

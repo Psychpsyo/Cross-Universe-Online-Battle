@@ -3,6 +3,7 @@ cardType: standardItem
 name: CUI00044
 level: 1
 types: Fire
+
 o: deploy
 cost:
 LOSELIFE(100)

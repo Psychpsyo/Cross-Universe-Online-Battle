@@ -5,6 +5,7 @@ level: 3
 types: Ice, Warrior
 attack: 250
 defense: 250
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
@@ -12,6 +13,7 @@ cost:
 DISCARD(SELECT(1, [from you.hand where types = Ice]))
 exec:
 SUMMON(SELECT(1, [from you.deck where name = CUU00121]), you.unitZone, yes)
+
 o: trigger
 during: attackers = thisCard
 condition: thisCard.zone = field

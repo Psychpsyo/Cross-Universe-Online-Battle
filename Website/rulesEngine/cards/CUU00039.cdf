@@ -5,6 +5,7 @@ level: 0
 types: Illusion, Ghost
 attack: 0
 defense: 0
+
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field

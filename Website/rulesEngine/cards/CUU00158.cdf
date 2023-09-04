@@ -5,6 +5,7 @@ level: 9
 types: Wind, Dragon, Warrior
 attack: 800
 defense: 700
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field

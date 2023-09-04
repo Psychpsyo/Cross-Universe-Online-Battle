@@ -3,6 +3,7 @@ cardType: continuousSpell
 name: CUS00115
 level: 1
 types: Electric, Wind
+
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field

@@ -5,6 +5,7 @@ level: 2
 types: Wind, Bird, Samurai
 attack: 100
 defense: 100
+
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field

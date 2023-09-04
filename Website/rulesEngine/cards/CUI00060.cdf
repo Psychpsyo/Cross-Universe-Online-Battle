@@ -3,6 +3,7 @@ cardType: continuousItem
 name: CUI00060
 level: 0
 types: Dark, Rock
+
 o: trigger
 mandatory: no
 turnLimit: 1

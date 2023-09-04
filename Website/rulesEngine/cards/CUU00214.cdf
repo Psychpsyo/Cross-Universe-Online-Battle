@@ -5,6 +5,7 @@ level: 2
 types: Dark, Demon
 attack: 100
 defense: 200
+
 o: trigger
 mandatory: no
 after: COUNT([from discarded where self = thisCard & zone = [hand, field]]) > 0

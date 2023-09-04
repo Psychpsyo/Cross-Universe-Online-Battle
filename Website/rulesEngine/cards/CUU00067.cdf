@@ -5,6 +5,7 @@ level: 3
 types: Wind, Demon
 attack: 300
 defense: 0
+
 o: trigger
 turnLimit: 1
 mandatory: no

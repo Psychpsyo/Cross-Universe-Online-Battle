@@ -5,6 +5,7 @@ level: 3
 types: Earth, Demon
 attack: 300
 defense: 200
+
 o: trigger
 mandatory: no
 after: summoned = thisCard

@@ -3,6 +3,7 @@ cardType: standardSpell
 name: CUS00154
 level: 2
 types:
+
 o: cast
 condition: COUNT(attackers) = 1 & attackers.owner = you
 DESTROY(attackers)

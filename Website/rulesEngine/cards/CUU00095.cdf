@@ -5,6 +5,7 @@ level: 7
 types: Water, Demon, Psychic
 attack: 600
 defense: 700
+
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field

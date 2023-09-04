@@ -5,6 +5,7 @@ level: 3
 types: Water
 attack: 0
 defense: 0
+
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
@@ -13,6 +14,7 @@ LOSELIFE(200)
 exec:
 $destroys = DESTROY(SELECT(1, [from field where level < thisCard.level & cardType = [spell, item]]))
 APPLY(thisCard, {level += $destroys.destroyed.level}, forever)
+
 o: static
 applyTo: thisCard
 condition: thisCard.zone = field
