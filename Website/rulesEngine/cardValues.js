@@ -59,15 +59,36 @@ export class CardModifier {
 		this.ability = ability;
 	}
 
-	modify(card, toBaseValues) {
+	modify(card, toBaseValues, unaffections, toUnaffections) {
 		let values = toBaseValues? card.baseValues : card.values;
-		ast.setImplicitCard(card);
 		for (let modification of this.modifications) {
-			if (modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)[0]) {
-				values = modification.modify(values, this.card, this.player, this.ability, toBaseValues);
+			let worksOnCard = true;
+			ast.setImplicitCard(this.card);
+			for (const unaffection of unaffections) {
+				if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0]) {
+					worksOnCard = false;
+					break;
+				}
 			}
+			ast.clearImplicitCard();
+			ast.setImplicitCard(card);
+			if (worksOnCard &&
+				modification instanceof ValueUnaffectedModification === toUnaffections &&
+				(modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)[0])
+			) {
+				if (toUnaffections) {
+					unaffections.push({
+						value: modification.value,
+						by: modification.unaffectedBy,
+						sourceCard: this.card,
+						sourceAbility: this.ability
+					});
+				} else {
+					values = modification.modify(values, this.card, this.player, this.ability, toBaseValues);
+				}
+			}
+			ast.clearImplicitCard();
 		}
-		ast.clearImplicitCard();
 		return values;
 	}
 
@@ -106,6 +127,19 @@ export class ValueModification {
 	isUnitSpecific() {
 		return ["attack", "defense", "attackRights"].includes(this.value);
 	}
+}
+
+export class ValueUnaffectedModification extends ValueModification {
+	constructor(value, unaffectedBy, toBase, condition) {
+		super(value, toBase, condition);
+		this.unaffectedBy = unaffectedBy;
+	}
+
+	// Note: baking this currently isn't needed by any card.
+	// If it becomes necessary there would need to be a rules
+	// clarification on whether or not the cards something
+	// is unaffected by should be baked at application time
+	// or not.
 }
 
 export class ValueSetModification extends ValueModification {

@@ -598,7 +598,7 @@ function parseModifier() {
 			}
 		}
 
-		if (!["equals", "plusAssignment", "minusAssignment", "divideAssignment", "swapAssignment"].includes(tokens[pos].type)) {
+		if (!["immunityAssignment", "equals", "plusAssignment", "minusAssignment", "divideAssignment", "swapAssignment"].includes(tokens[pos].type)) {
 			throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' token as operator in modifier syntax.");
 		}
 		let assignmentType = tokens[pos].type;
@@ -624,6 +624,10 @@ function parseModifier() {
 
 		for (const [i, valueIdentifier] of valueIdentifiers.entries()) {
 			switch (assignmentType) {
+				case "immunityAssignment": {
+					valueModifications.push(new cardValues.ValueUnaffectedModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+					break;
+				}
 				case "equals": {
 					valueModifications.push(new cardValues.ValueSetModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 					break;

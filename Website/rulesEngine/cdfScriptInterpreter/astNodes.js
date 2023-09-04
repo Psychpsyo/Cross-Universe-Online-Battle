@@ -2,7 +2,6 @@
 
 import * as actions from "../actions.js";
 import * as requests from "../inputRequests.js";
-import * as blocks from "../blocks.js";
 import * as zones from "../zones.js";
 import * as events from "../events.js";
 import {Card, SnapshotCard} from "../card.js";

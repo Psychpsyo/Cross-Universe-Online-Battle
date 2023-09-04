@@ -50,10 +50,15 @@ class BaseCard {
 	// Whenever a card's values change, this function re-evaluates the modifier stack to figure out what the new value should be.
 	// In doing so, it also takes care of spells & items losing their unit-specific modifications
 	recalculateModifiedValues() {
+		let unaffectedBy = [];
+		// values being unaffected by cards
+		for (const modifier of this.modifierStack) {
+			modifier.modify(this, false, unaffectedBy, true);
+		}
 		// handle base value changes
 		this.baseValues = this.initialValues.clone();
 		for (const modifier of this.modifierStack) {
-			this.baseValues = modifier.modify(this, true);
+			this.baseValues = modifier.modify(this, true, unaffectedBy, false);
 		}
 		if (!this.baseValues.cardTypes.includes("unit")) {
 			this.baseValues.attack = null;
@@ -63,7 +68,7 @@ class BaseCard {
 		// handle main value changes
 		this.values = this.baseValues.clone();
 		for (const modifier of this.modifierStack) {
-			this.values = modifier.modify(this, false);
+			this.values = modifier.modify(this, false, unaffectedBy, false);
 		}
 		// non-units only have base attack/defense
 		if (!this.values.cardTypes.includes("unit")) {

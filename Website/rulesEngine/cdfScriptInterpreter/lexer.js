@@ -2,6 +2,7 @@ let keywordTokenTypes = {
 	from: "from",
 	where: "where",
 	if: "if",
+	unaffectedBy: "immunityAssignment",
 
 	thisCard: "thisCard",
 	attackTarget: "attackTarget",
