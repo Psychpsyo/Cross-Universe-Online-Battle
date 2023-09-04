@@ -38,7 +38,9 @@ export const chooseCards = {
 	validate: function(response, request) {
 		// If a valid amount could have been selected, it should have been selected.
 		// Otherwise, all available cards should have been selected.
-		if (request.validAmounts.some(amount => amount <= request.from.length)) {
+		if (request.from.length > 0 && (
+			request.validAmounts.length === 0 || request.validAmounts.some(amount => amount <= request.from.length)
+		)) {
 			if (!request.validAmounts.includes(response.length) && request.validAmounts.length > 0) {
 				throw new Error("Chose invalid amount of cards.");
 			}
