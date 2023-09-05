@@ -90,7 +90,7 @@ function parseFunction() {
 	let player;
 	switch (tokens[pos].type) {
 		case "function": {
-			player = new ast.PlayerNode("you");
+			player = new ast.PlayerNode("self");
 			break;
 		}
 		case "player": {

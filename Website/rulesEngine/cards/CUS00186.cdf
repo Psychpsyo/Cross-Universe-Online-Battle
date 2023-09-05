@@ -5,7 +5,7 @@ level: 0
 types: Water
 
 o: cast
-MOVE(opponent.SELECT(1, [from you.discard]), baseOwner.deck)
+MOVE(opponent.SELECT(1, [from opponent.discard]), baseOwner.deck)
 GAINLIFE(200)
 
 o: trigger

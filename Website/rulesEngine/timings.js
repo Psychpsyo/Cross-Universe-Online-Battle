@@ -201,7 +201,7 @@ export class Timing {
 			}
 		}
 
-		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.cardRef, card.zone.player.next())));
+		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.current(), card.zone.player.next())));
 		if (allActions.length > 0) {
 			return new Timing(this.game, allActions, this.block);
 		}

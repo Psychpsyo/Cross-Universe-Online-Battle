@@ -305,7 +305,7 @@ export class AutomaticController extends InteractionController {
 			case "cardMoved": {
 				gameUI.removeCard(event.fromZone, event.fromIndex);
 				if (!event.card.values.cardTypes.includes("token") || event.toZone instanceof zones.FieldZone) {
-					gameUI.insertCard(event.toZone, event.card.cardRef.index);
+					gameUI.insertCard(event.toZone, event.toIndex);
 				}
 				return this.gameSleep(.5);
 			}

@@ -87,6 +87,12 @@ export class Game {
 		this.isReplaying = false;
 		this.replayPosition = 0;
 		this.replayRngPosition = 0;
+
+		// These keep track of the current numerical IDs assigned to cards over the course of the game.
+		// These IDs are used for equality checking since a card, as soon as it moves to a new zone,
+		// is considered to be a different card even though it is still the same Card object.
+		this.lastGlobalCardId = 0;
+		this.currentCards = new Map();
 	}
 
 	// Iterate over this function after setting the decks of both players and putting their partners into the partner zones.

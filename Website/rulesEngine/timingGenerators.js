@@ -154,7 +154,7 @@ export function* abilityTimingGenerator(ability, card, player) {
 }
 
 export function* equipTimingGenerator(equipChoiceAction, player) {
-	yield [new actions.EquipCard(equipChoiceAction.spellItem.cardRef, equipChoiceAction.chosenUnit.cardRef, player)];
+	yield [new actions.EquipCard(equipChoiceAction.spellItem.current(), equipChoiceAction.chosenUnit.current(), player)];
 }
 
 export function* retireTimingGenerator(player, units) {

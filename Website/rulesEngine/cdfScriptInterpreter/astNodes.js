@@ -4,7 +4,7 @@ import * as actions from "../actions.js";
 import * as requests from "../inputRequests.js";
 import * as zones from "../zones.js";
 import * as events from "../events.js";
-import {Card, SnapshotCard} from "../card.js";
+import {Card, BaseCard, SnapshotCard} from "../card.js";
 import {CardModifier} from "../cardValues.js";
 
 let implicitCard = [null];
@@ -12,13 +12,10 @@ let implicitActions = [null];
 
 // helper functions
 function equalityCompare(a, b) {
-	if (a instanceof SnapshotCard && a.cardRef) {
-		a = a.cardRef;
+	if (a instanceof BaseCard && b instanceof BaseCard) {
+		return a.globalId === b.globalId;
 	}
-	if (b instanceof SnapshotCard && b.cardRef) {
-		b = b.cardRef;
-	}
-	return a == b;
+	return a === b;
 }
 export function setImplicitCard(card) {
 	implicitCard.push(card);
@@ -116,7 +113,14 @@ export class ScriptRootNode extends AstNode {
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
 	hasAllTargets(card, player, ability, evaluatingPlayer) {
-		for (let i = 0; i < this.steps.length; i++) {
+		return this.hasAllTargetsFromStep(0, card, player, ability, evaluatingPlayer);
+	}
+	getChildNodes() {
+		return this.steps;
+	}
+
+	hasAllTargetsFromStep(i, card, player, ability, evaluatingPlayer) {
+		for (; i < this.steps.length; i++) {
 			if (!this.steps[i].hasAllTargets(card, player, ability, evaluatingPlayer)) {
 				return false;
 			}
@@ -132,12 +136,9 @@ export class ScriptRootNode extends AstNode {
 						// TODO: Check if these actions need to be processed somehow or if using un-executed actions works just fine.
 					}
 					ability.scriptVariables[this.steps[i].assignTo] = possibility;
-					for (let j = i + 1; j < this.steps.length; j++) {
-						if (!this.steps[j].hasAllTargets(card, player, ability, evaluatingPlayer)) {
-							continue;
-						} else if (j == this.steps.length - 1) {
-							foundValidBranch = true;
-						}
+					if (this.hasAllTargetsFromStep(i + 1, card, player, ability, evaluatingPlayer)) {
+						foundValidBranch = true;
+						break;
 					}
 				}
 				ability.scriptVariables[this.steps[i].assignTo] = oldVarValue;
@@ -145,9 +146,6 @@ export class ScriptRootNode extends AstNode {
 			}
 		}
 		return true;
-	}
-	getChildNodes() {
-		return this.steps;
 	}
 }
 
@@ -260,7 +258,7 @@ export class FunctionNode extends AstNode {
 			case "APPLY": {
 				let modifier = (yield* this.parameters[1].eval(card, player, ability)).bake();
 				let until = yield* this.parameters[2].eval(card, player, ability);
-				return (yield* this.parameters[0].eval(card, player, ability)).map(card => new actions.ApplyCardStatChange(card.cardRef, modifier, until));
+				return (yield* this.parameters[0].eval(card, player, ability)).map(card => new actions.ApplyCardStatChange(card.current(), modifier, until));
 			}
 			case "CANCELATTACK": {
 				return [new actions.CancelAttack()];
@@ -276,8 +274,8 @@ export class FunctionNode extends AstNode {
 				return player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - (yield* this.parameters[0].eval(card, player, ability))[0]), player.deckZone.cards.length);
 			}
 			case "DESTROY": {
-				let cards = (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef);
-				let discards = cards.map(card => new actions.Discard(card.cardRef));
+				let cards = (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current());
+				let discards = cards.map(card => new actions.Discard(card.current()));
 				return discards.concat(discards.map(discard => new actions.Destroy(discard)));
 			}
 			case "DIFFERENT": {
@@ -297,7 +295,7 @@ export class FunctionNode extends AstNode {
 				return true;
 			}
 			case "DISCARD": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef));
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Discard(card.current()));
 			}
 			case "DRAW": {
 				let amount = (yield* this.parameters[0].eval(card, player, ability))[0];
@@ -307,7 +305,7 @@ export class FunctionNode extends AstNode {
 				return [new actions.Draw(player, amount)];
 			}
 			case "EXILE": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Exile(card.cardRef));
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Exile(card.current()));
 			}
 			case "GAINLIFE": {
 				return [new actions.ChangeLife(player, (yield* this.parameters[0].eval(card, player, ability))[0])];
@@ -317,7 +315,7 @@ export class FunctionNode extends AstNode {
 			}
 			case "GIVEATTACK": {
 				let target = (yield* this.parameters[0].eval(card, player, ability))[0];
-				return target.cardRef? [new actions.GainAttack(target.cardRef)] : [];
+				return target.current()? [new actions.GainAttack(target.current())] : [];
 			}
 			case "LOSELIFE": {
 				return [new actions.ChangeLife(player, -(yield* this.parameters[0].eval(card, player, ability))[0])];
@@ -331,7 +329,7 @@ export class FunctionNode extends AstNode {
 				let moveActions = [];
 				let zoneMoveCards = new Map();
 				for (const card of cards) {
-					if (card.cardRef === null) {
+					if (card.current() === null) {
 						continue;
 					}
 					setImplicitCard(card);
@@ -340,8 +338,8 @@ export class FunctionNode extends AstNode {
 					if (this.parameters[1] instanceof DeckPositionNode) {
 						index = this.parameters[1].top? -1 : 0;
 					}
-					moveActions.push(new actions.Move(player, card.cardRef, zone, index));
-					zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.cardRef));
+					moveActions.push(new actions.Move(player, card.current(), zone, index));
+					zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.current()));
 					clearImplicitCard();
 				}
 
@@ -368,7 +366,7 @@ export class FunctionNode extends AstNode {
 				return moveActions;
 			}
 			case "VIEW": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.View(card.cardRef, player));
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.View(card.current(), player));
 			}
 			case "SELECT": {
 				let choiceAmount = yield* this.parameters[0].eval(card, player, ability);
@@ -394,7 +392,7 @@ export class FunctionNode extends AstNode {
 						card.hideFrom(player);
 					}
 				}
-				let cards = requests.chooseCards.validate(responses[0].value, selectionRequest).map(card => card.snapshot());
+				let cards = requests.chooseCards.validate(responses[0].value, selectionRequest).map(card => new SnapshotCard(card.current()));
 				yield [events.createCardsSelectedEvent(player, cards)];
 				return cards;
 			}
@@ -426,7 +424,7 @@ export class FunctionNode extends AstNode {
 			}
 			case "SETATTACKTARGET": {
 				let newTarget = (yield* this.parameters[0].eval(card, player, ability))[0];
-				return newTarget.cardRef? [new actions.SetAttackTarget(newTarget.cardRef)] : [];
+				return newTarget.current()? [new actions.SetAttackTarget(newTarget.current())] : [];
 			}
 			case "SHUFFLE": {
 				return [new actions.Shuffle(player)];
@@ -448,7 +446,7 @@ export class FunctionNode extends AstNode {
 				let costs = [];
 				let placeActions = [];
 				for (let i = 0; i < cards.length; i++) {
-					if (cards[i].cardRef === null) {
+					if (cards[i].current() === null) {
 						continue;
 					}
 					let availableZoneSlots = [];
@@ -460,7 +458,7 @@ export class FunctionNode extends AstNode {
 					if (availableZoneSlots.length == 0) {
 						break;
 					}
-					let placeCost = new actions.Place(player, cards[i].cardRef, zone);
+					let placeCost = new actions.Place(player, cards[i].current(), zone);
 					placeCost.costIndex = i;
 					costs.push(placeCost);
 					placeActions.push(placeCost);
@@ -507,7 +505,7 @@ defense: ${defense}`));
 				return cards;
 			}
 			case "REVEAL": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef));
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Reveal(card.current()));
 			}
 		}
 	}
@@ -540,18 +538,18 @@ defense: ${defense}`));
 				return combinations;
 			}
 			case "DESTROY": {
-				let cardLists = this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.cardRef));
-				let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(card.cardRef)));
+				let cardLists = this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.current()));
+				let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(card.current())));
 				return discardLists.map(discards => discards.concat(discards.map(discard => new actions.Destroy(discard))));
 			}
 			case "DESTROY": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Destroy(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.Destroy(card.current())));
 			}
 			case "DISCARD": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Discard(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.Discard(card.current())));
 			}
 			case "EXILE": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Exile(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.Exile(card.current())));
 			}
 			case "MOVE": {
 				let cardPossibilities = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer);
@@ -559,7 +557,7 @@ defense: ${defense}`));
 				for (let cards of cardPossibilities) {
 					moveActions.push([]);
 					for (const card of cards) {
-						if (card.cardRef === null) {
+						if (card.current() === null) {
 							continue;
 						}
 						setImplicitCard(card);
@@ -569,17 +567,17 @@ defense: ${defense}`));
 						if (this.parameters[1] instanceof DeckPositionNode) {
 							index = this.parameters[1].top? -1 : 0;
 						}
-						moveActions[moveActions.length - 1].push(new actions.Move(player, card.cardRef, zone, index));
+						moveActions[moveActions.length - 1].push(new actions.Move(player, card.current(), zone, index));
 						clearImplicitCard();
 					}
 				}
 				return moveActions;
 			}
 			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.Reveal(card.cardRef)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.Reveal(card.current())));
 			}
 			case "VIEW": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.cardRef).map(card => new actions.View(card.cardRef, player)));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.View(card.current(), player)));
 			}
 			default: {
 				return super.evalFull(card, player, ability, evaluatingPlayer);
@@ -926,7 +924,14 @@ export class MinusNode extends DashMathNode {
 		if (typeof left[0] == "number" && typeof right[0] == "number") {
 			return [left[0] - right[0]];
 		}
-		return [NaN];
+		// for non-number types this subtracts the right list from the left one.
+		let outputList = [];
+		for (let element of left) {
+			if (!right.some(elem => equalityCompare(elem, element))) {
+				outputList.push(element);
+			}
+		}
+		return outputList;
 	}
 }
 export class DotMathNode extends MathNode {
@@ -1098,7 +1103,18 @@ export class PlayerNode extends AstNode {
 		this.playerKeyword = playerKeyword;
 	}
 	* eval(card, player, ability) {
-		return this.playerKeyword == "you"? [player] : [player.next()];
+		// a card that is not in a zone belongs to its owner as it is in the process of being summoned/cast/deployed
+		let you = card.zone?.player ?? card.owner;
+		switch(this.playerKeyword) {
+			case "you":
+				return [you];
+			case "opponent":
+				return [you.next()];
+			case "both":
+				return [you, you.next()];
+			case "self":
+				return [player];
+		}
 	}
 }
 export class LifeNode extends AstNode {
@@ -1230,6 +1246,12 @@ export class CurrentTurnNode extends AstNode {
 	}
 }
 
+// for the action accessor; pushes card to array if it is not in there yet.
+function pushCardUnique(array, card) {
+	if (array.findIndex(c => c.globalId === card.globalId) === -1) {
+		array.push(card);
+	}
+}
 export class ActionAccessorNode extends AstNode {
 	constructor(actionsNode, accessor) {
 		super();
@@ -1248,45 +1270,45 @@ export class ActionAccessorNode extends AstNode {
 			switch (this.accessor) {
 				case "cast": {
 					if (action instanceof actions.Cast) {
-						values.push(action.placeAction.card);
+						pushCardUnique(values, action.placeAction.card);
 					}
 					break;
 				}
 				case "chosenTarget": {
 					if (action instanceof actions.EstablishAttackDeclaration) {
-						values.push(action.attackTarget);
+						pushCardUnique(values, action.attackTarget);
 					}
 					break;
 				}
 				case "declared": {
 					if (action instanceof actions.EstablishAttackDeclaration) {
 						for (let attacker of action.attackers) {
-							values.push(attacker);
+							pushCardUnique(values, attacker);
 						}
 					}
 					break;
 				}
 				case "deployed": {
 					if (action instanceof actions.Deploy) {
-						values.push(action.placeAction.card);
+						pushCardUnique(values, action.placeAction.card);
 					}
 					break;
 				}
 				case "destroyed": {
 					if (action instanceof actions.Destroy) {
-						values.push(action.discard.card);
+						pushCardUnique(values, action.discard.card);
 					}
 					break;
 				}
 				case "discarded": {
 					if (action instanceof actions.Discard) {
-						values.push(action.card);
+						pushCardUnique(values, action.card);
 					}
 					break;
 				}
 				case "exiled": {
 					if (action instanceof actions.Exile) {
-						values.push(action.card);
+						pushCardUnique(values, action.card);
 					}
 					break;
 				}
@@ -1295,33 +1317,33 @@ export class ActionAccessorNode extends AstNode {
 				//       Though the exact behavior here would probably need to be clarified by a new ruling.
 				case "moved": {
 					if (action instanceof actions.Move) {
-						values.push(action.card);
+						pushCardUnique(values, action.card);
 					}
 					break;
 				}
 				case "retired": {
 					if (action instanceof actions.Discard && action.isRetire) {
-						values.push(action.card);
+						pushCardUnique(values, action.card);
 					}
 					break;
 				}
 				case "viewed": {
 					if (action instanceof actions.View) {
-						values.push(action.card);
+						pushCardUnique(values, action.card);
 					}
 					break;
 				}
 				case "summoned": {
 					if (action instanceof actions.Summon) {
-						values.push(action.placeAction.card);
+						pushCardUnique(values, action.placeAction.card);
 					}
 					break;
 				}
 				case "targeted": {
 					if (action instanceof actions.EstablishAttackDeclaration) {
-						values.push(action.attackTarget);
+						pushCardUnique(values, action.attackTarget);
 					} else if (action instanceof actions.SetAttackTarget) {
-						values.push(action.newTarget);
+						pushCardUnique(values, action.newTarget);
 					}
 					break;
 				}

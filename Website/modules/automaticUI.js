@@ -167,7 +167,7 @@ export function newBlock(block) {
 	visual.appendChild(img);
 	img.addEventListener("click", function(e) {
 		e.stopPropagation();
-		previewCard(card.cardRef);
+		previewCard(card.current());
 	});
 
 	let labelElem = document.createElement("span");
@@ -275,7 +275,7 @@ export async function revealHandCard(card) {
 		previewCard(card);
 	}
 	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1500));
-	cardImg.src = cardLoader.getCardImage(card.cardRef);
+	cardImg.src = cardLoader.getCardImage(card.current());
 	cardImg.classList.remove("revealed");
 }
 export function showOpponentAction(message) {

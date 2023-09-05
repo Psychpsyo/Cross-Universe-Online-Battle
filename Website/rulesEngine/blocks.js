@@ -3,6 +3,7 @@ import * as game from "./game.js";
 import * as actions from "./actions.js";
 import * as abilities from "./abilities.js";
 import * as timingGenerators from "./timingGenerators.js";
+import {SnapshotCard} from "./card.js";
 
 // Base class for all blocks
 class Block {
@@ -116,7 +117,7 @@ export class StandardSummon extends Block {
 			this.card.zone.add(this.card, this.card.index);
 			return false;
 		}
-		this.card = this.card.snapshot();
+		this.card = new SnapshotCard(this.card);
 		this.stack.phase.turn.hasStandardSummoned = true;
 		return true;
 	}
@@ -158,8 +159,8 @@ export class AttackDeclaration extends Block {
 		yield* super.run();
 
 		this.attackTarget = this.establishAction.attackTarget; // already a snapshot
-		this.player.game.currentAttackDeclaration = new game.AttackDeclaration(this.player.game, this.attackers, this.attackTarget.cardRef);
-		this.attackers = this.attackers.map(attacker => attacker.snapshot());
+		this.player.game.currentAttackDeclaration = new game.AttackDeclaration(this.player.game, this.attackers, this.attackTarget.current());
+		this.attackers = this.attackers.map(attacker => new SnapshotCard(attacker));
 	}
 }
 
@@ -203,7 +204,7 @@ export class AbilityActivation extends Block {
 	}
 
 	async* runCost() {
-		this.card = this.card.snapshot();
+		this.card = new SnapshotCard(this.card);
 		if (!(await (yield* super.runCost()))) {
 			return false;
 		}
@@ -271,7 +272,7 @@ export class DeployItem extends Block {
 			return false;
 		}
 
-		this.card = this.card.snapshot();
+		this.card = new SnapshotCard(this.card);
 		return true;
 	}
 }
@@ -328,7 +329,7 @@ export class CastSpell extends Block {
 			return false;
 		}
 
-		this.card = this.card.snapshot();
+		this.card = new SnapshotCard(this.card);
 		return true;
 	}
 }

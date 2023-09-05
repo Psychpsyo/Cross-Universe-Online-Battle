@@ -2,6 +2,7 @@ import * as events from "./events.js";
 import * as requests from "./inputRequests.js";
 import * as zones from "./zones.js";
 import {Timing} from "./timings.js";
+import {SnapshotCard} from "./card.js";
 
 // helper functions
 function getAvailableZoneSlots(zone) {
@@ -112,17 +113,16 @@ export class Draw extends Action {
 			this.player.next().victoryConditions.push("drawFromEmptyDeck");
 			return null;
 		}
-		let drawCardRefs = [];
+		let drawnCards = [];
 		for (let i = 0; i < this.amount; i++) {
-			let drawCard = this.player.deckZone.cards[this.player.deckZone.cards.length - 1];
-			this.drawnCards.push(drawCard.snapshot());
-			drawCardRefs.push(drawCard);
-			this.player.handZone.add(drawCard, this.player.handZone.cards.length);
-			drawCard.showTo(this.player)
+			let drawnCard = this.player.deckZone.cards[this.player.deckZone.cards.length - 1];
+			this.drawnCards.push(new SnapshotCard(drawnCard));
+			drawnCards.push(drawnCard);
+			this.player.handZone.add(drawnCard, this.player.handZone.cards.length);
+			drawnCard.showTo(this.player);
 		}
-		for (let i = 0; i < drawCardRefs.length; i++) {
-			this.drawnCards[i].cardRef = drawCardRefs[i];
-			drawCardRefs[i].snapshots.push(this.drawnCards[i]);
+		for (let i = 0; i < drawnCards.length; i++) {
+			this.drawnCards[i].globalId = drawnCards[i].globalId;
 		}
 		return events.createCardsDrawnEvent(this.player, this.amount);
 	}
@@ -132,7 +132,7 @@ export class Draw extends Action {
 			let movedCards = [];
 			for (let i = this.drawnCards.length - 1; i >= 0; i--) {
 				let card = this.drawnCards[i];
-				movedCards.push({fromZone: card.cardRef.zone, fromIndex: card.cardRef.index, toZone: card.zone, toIndex: card.index});
+				movedCards.push({fromZone: card.current().zone, fromIndex: card.current().index, toZone: card.zone, toIndex: card.index});
 				card.restore();
 			}
 			return events.createUndoCardsMovedEvent(movedCards);
@@ -155,10 +155,10 @@ export class Place extends Action {
 
 	async* run() {
 		this.targetIndex = yield* queryZoneSlot(this.player, this.zone);
-		this.card = this.card.snapshot();
-		this.card.cardRef.hiddenFor = [];
+		this.card = new SnapshotCard(this.card);
+		this.card.current().hiddenFor = [];
 		let cardPlacedEvent = events.createCardPlacedEvent(this.player, this.card.zone, this.card.index, this.zone, this.targetIndex);
-		this.zone.place(this.card.cardRef, this.targetIndex);
+		this.zone.place(this.card.current(), this.targetIndex);
 		return cardPlacedEvent;
 	}
 
@@ -183,21 +183,20 @@ export class Summon extends Action {
 	}
 
 	async* run() {
-		let summonEvent = events.createCardSummonedEvent(this.player, this.placeAction.card.cardRef.zone, this.placeAction.card.cardRef.index, this.placeAction.zone, this.placeAction.targetIndex);
-		let cardRef = this.placeAction.card.cardRef;
-		this.placeAction.zone.add(this.placeAction.card.cardRef, this.placeAction.targetIndex);
-		this.placeAction.card.cardRef = cardRef;
-		cardRef.snapshots.push(this.placeAction.card);
+		let card = this.placeAction.card.current();
+		let summonEvent = events.createCardSummonedEvent(this.player, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
+		this.placeAction.zone.add(card, this.placeAction.targetIndex);
+		this.placeAction.card.globalId = card.globalId;
 		return summonEvent;
 	}
 
 	undo() {
-		this.zone.remove(this.placeAction.card.cardRef, this.placeAction.targetIndex);
+		this.zone.remove(this.placeAction.card.current(), this.placeAction.targetIndex);
 	}
 
 	isImpossible(timing) {
 		let slotCard = this.placeAction.zone.get(this.placeAction.targetIndex);
-		return slotCard != null && slotCard != this.placeAction.card.cardRef;
+		return slotCard != null && slotCard != this.placeAction.card.current();
 	}
 }
 
@@ -209,21 +208,20 @@ export class Deploy extends Action {
 	}
 
 	async* run() {
-		let deployEvent = events.createCardDeployedEvent(this.player, this.placeAction.card.cardRef.zone, this.placeAction.card.cardRef.index, this.placeAction.zone, this.placeAction.targetIndex);
-		let cardRef = this.placeAction.card.cardRef;
-		this.placeAction.zone.add(this.placeAction.card.cardRef, this.placeAction.targetIndex);
-		this.placeAction.card.cardRef = cardRef;
-		cardRef.snapshots.push(this.placeAction.card);
+		let card = this.placeAction.card.current();
+		let deployEvent = events.createCardDeployedEvent(this.player, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
+		this.placeAction.zone.add(card, this.placeAction.targetIndex);
+		this.placeAction.card.globalId = card.globalId;
 		return deployEvent;
 	}
 
 	undo() {
-		this.zone.remove(this.placeAction.card.cardRef, this.placeAction.targetIndex);
+		this.zone.remove(this.placeAction.card.current(), this.placeAction.targetIndex);
 	}
 
 	isImpossible(timing) {
 		let slotCard = this.placeAction.zone.get(this.placeAction.targetIndex);
-		return slotCard != null && slotCard != this.placeAction.card.cardRef;
+		return slotCard != null && slotCard != this.placeAction.card.current();
 	}
 }
 
@@ -235,21 +233,20 @@ export class Cast extends Action {
 	}
 
 	async* run() {
-		let castEvent = events.createCardCastEvent(this.player, this.placeAction.card.cardRef.zone, this.placeAction.card.cardRef.index, this.placeAction.zone, this.placeAction.targetIndex);
-		let cardRef = this.placeAction.card.cardRef;
-		this.placeAction.zone.add(this.placeAction.card.cardRef, this.placeAction.targetIndex);
-		this.placeAction.card.cardRef = cardRef;
-		cardRef.snapshots.push(this.placeAction.card);
+		let card = this.placeAction.card.current();
+		let castEvent = events.createCardCastEvent(this.player, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
+		this.placeAction.zone.add(card, this.placeAction.targetIndex);
+		this.placeAction.card.globalId = card.globalId;
 		return castEvent;
 	}
 
 	undo() {
-		this.zone.remove(this.placeAction.card.cardRef, this.placeAction.targetIndex);
+		this.zone.remove(this.placeAction.card.current(), this.placeAction.targetIndex);
 	}
 
 	isImpossible(timing) {
 		let slotCard = this.placeAction.zone.get(this.placeAction.targetIndex);
-		return slotCard != null && slotCard != this.placeAction.card.cardRef;
+		return slotCard != null && slotCard != this.placeAction.card.current();
 	}
 }
 
@@ -273,18 +270,17 @@ export class Move extends Action {
 		} else if (this.targetIndex === -1) {
 			this.insertedIndex = this.zone.cards.length;
 		}
-		let cardRef = this.card;
-		this.card = this.card.snapshot();
+		let card = this.card;
+		this.card = new SnapshotCard(this.card);
 		let cardMovedEvent = events.createCardMovedEvent(this.player, this.card.zone, this.card.index, this.zone, this.insertedIndex, this.card);
-		this.zone.add(this.card.cardRef, this.insertedIndex);
-		this.card.cardRef = cardRef;
-		cardRef.snapshots.push(this.card);
+		this.zone.add(this.card.current(), this.insertedIndex);
+		this.card.globalId = card.globalId;
 		return cardMovedEvent;
 	}
 
 	undo() {
 		let event = events.createUndoCardsMovedEvent([
-			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
+			{fromZone: this.card.current().zone, fromIndex: this.card.current().index, toZone: this.card.zone, toIndex: this.card.index}
 		]);
 		this.card.restore();
 		return event;
@@ -328,10 +324,10 @@ export class EstablishAttackDeclaration extends Action {
 		this.attackTarget = requests.chooseCards.validate(responses[0].value, targetSelectRequest)[0];
 
 		// handle remaining attack rights
-		this.attackers = this.attackers.map(attacker => attacker.snapshot());
-		this.attackTarget = this.attackTarget.snapshot();
+		this.attackers = this.attackers.map(attacker => new SnapshotCard(attacker));
+		this.attackTarget = new SnapshotCard(this.attackTarget);
 		for (let attacker of this.attackers) {
-			attacker.cardRef.canAttackAgain = false;
+			attacker.current().canAttackAgain = false;
 		}
 
 		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget.zone, this.attackTarget.index);
@@ -339,7 +335,7 @@ export class EstablishAttackDeclaration extends Action {
 
 	undo() {
 		for (let attacker of this.attackers) {
-			attacker.cardRef.canAttackAgain = attacker.canAttackAgain;
+			attacker.current().canAttackAgain = attacker.canAttackAgain;
 		}
 	}
 }
@@ -378,18 +374,17 @@ export class Discard extends Action {
 	}
 
 	async* run() {
-		let cardRef = this.card;
-		this.card = this.card.snapshot();
+		let card = this.card;
+		this.card = new SnapshotCard(this.card);
 		let event = events.createCardDiscardedEvent(this.card.zone, this.card.index, this.card.owner.discardPile, this.card);
-		this.card.owner.discardPile.add(this.card.cardRef, this.card.owner.discardPile.cards.length);
-		this.card.cardRef = cardRef;
-		cardRef.snapshots.push(this.card);
+		this.card.owner.discardPile.add(this.card.current(), this.card.owner.discardPile.cards.length);
+		this.card.globalId = card.globalId;
 		return event;
 	}
 
 	undo() {
 		let event = events.createUndoCardsMovedEvent([
-			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
+			{fromZone: this.card.current().zone, fromIndex: this.card.current().index, toZone: this.card.zone, toIndex: this.card.index}
 		]);
 		this.card.restore();
 		return event;
@@ -429,18 +424,17 @@ export class Exile extends Action {
 	}
 
 	async* run() {
-		let cardRef = this.card;
-		this.card = this.card.snapshot();
+		let card = this.card;
+		this.card = new SnapshotCard(this.card);
 		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone, this.card);
-		this.card.owner.exileZone.add(this.card.cardRef, this.card.owner.exileZone.cards.length);
-		this.card.cardRef = cardRef;
-		cardRef.snapshots.push(this.card);
+		this.card.owner.exileZone.add(this.card.current(), this.card.owner.exileZone.cards.length);
+		this.card.globalId = card.globalId;
 		return event;
 	}
 
 	undo() {
 		let event = events.createUndoCardsMovedEvent([
-			{fromZone: this.card.cardRef.zone, fromIndex: this.card.cardRef.index, toZone: this.card.zone, toIndex: this.card.index}
+			{fromZone: this.card.current().zone, fromIndex: this.card.current().index, toZone: this.card.zone, toIndex: this.card.index}
 		]);
 		this.card.restore();
 		return event;
@@ -463,12 +457,12 @@ export class ApplyCardStatChange extends Action {
 	}
 
 	async* run() {
-		this.card = this.card.snapshot();
-		this.card.cardRef.modifierStack.push(this.modifier);
+		this.card = new SnapshotCard(this.card);
+		this.card.current().modifierStack.push(this.modifier);
 		if (this.until == "forever") {
 			return;
 		}
-		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.card.cardRef, this.modifier)], null);
+		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.card.current(), this.modifier)], null);
 		switch (this.until) {
 			case "endOfTurn": {
 				this.card.owner.game.currentTurn().endOfTurnTimings.push(removalTiming);
@@ -492,7 +486,7 @@ export class ApplyCardStatChange extends Action {
 	}
 
 	undo() {
-		this.card.cardRef.modifierStack.pop();
+		this.card.current().modifierStack.pop();
 	}
 
 	isImpossible(timing) {
@@ -520,15 +514,15 @@ export class RemoveCardStatChange extends Action {
 	}
 
 	async* run() {
-		this.card = this.card.snapshot();
-		this.index = this.card.cardRef.modifierStack.indexOf(this.modifier);
+		this.card = new SnapshotCard(this.card);
+		this.index = this.card.current().modifierStack.indexOf(this.modifier);
 		if (this.index != -1) {
-			this.card.cardRef.modifierStack.splice(this.index, 1);
+			this.card.current().modifierStack.splice(this.index, 1);
 		}
 	}
 
 	undo() {
-		this.card.cardRef.modifierStack.splice(this.index, 0, this.modifier);
+		this.card.current().modifierStack.splice(this.index, 0, this.modifier);
 	}
 }
 
@@ -632,16 +626,16 @@ export class EquipCard extends Action {
 	}
 
 	async* run() {
-		this.equipment = this.equipment.snapshot();
-		this.target = this.target.snapshot();
+		this.equipment = new SnapshotCard(this.equipment);
+		this.target = new SnapshotCard(this.target);
 		let event = events.createCardEquippedEvent(this.equipment, this.target);
-		this.equipment.cardRef.equippedTo = this.target.cardRef;
-		this.target.cardRef.equipments.push(this.equipment.cardRef);
+		this.equipment.current().equippedTo = this.target.current();
+		this.target.current().equipments.push(this.equipment.current());
 		return event;
 	}
 
 	undo() {
-		this.target.cardRef.equipments.pop();
+		this.target.current().equipments.pop();
 		this.equipment.equippedTo = null;
 	}
 
@@ -676,9 +670,9 @@ export class View extends Action {
 	async* run() {
 		let wasHidden = this.card.hiddenFor.includes(this.player);
 		this.card.showTo(this.player);
-		this.card = this.card.snapshot();
+		this.card = new SnapshotCard(this.card);
 		if (wasHidden) {
-			this.card.cardRef.hideFrom(this.player);
+			this.card.current().hideFrom(this.player);
 		}
 		return events.createCardViewedEvent(this.player, this.card);
 	}
@@ -694,12 +688,12 @@ export class Reveal extends Action {
 	async* run() {
 		this.oldHiddenState = this.card.hiddenFor;
 		this.card.hiddenFor = [];
-		this.card = this.card.snapshot();
+		this.card = new SnapshotCard(this.card);
 		return events.createCardRevealedEvent(this.card);
 	}
 
 	undo() {
-		this.card.cardRef.hiddenFor = this.oldHiddenState;
+		this.card.current().hiddenFor = this.oldHiddenState;
 	}
 
 	isImpossible(timing) {

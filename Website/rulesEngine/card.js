@@ -7,7 +7,7 @@ import * as blocks from "./blocks.js";
 import * as actions from "./actions.js";
 import * as timingGenerators from "./timingGenerators.js";
 
-class BaseCard {
+export class BaseCard {
 	constructor(player, cardId, initialValues, deckLimit, equipableTo, turnLimit, condition) {
 		this.owner = player;
 		this.cardId = cardId;
@@ -34,7 +34,12 @@ class BaseCard {
 		this.inRetire = null;
 
 		this.hiddenFor = [];
-		this.cardRef = this;
+		this.globalId = 0;
+	}
+
+	// always returns the current, non-snapshot version of a card or null if that doesn't exist.
+	current() {
+		return this.owner.game.currentCards.get(this.globalId) ?? null;
 	}
 
 	sharesTypeWith(card) {
@@ -228,30 +233,22 @@ export class Card extends BaseCard {
 			data.turnLimit,
 			data.condition? interpreter.buildAST("cardCondition", data.id, data.condition, player.game) : null
 		);
-		this.snapshots = [];
-		this.invalidatedSnapshotLists = [];
+		this.globalId = ++player.game.lastGlobalCardId;
+		player.game.currentCards.set(this.globalId, this);
+		this.globalIdHistory = [];
 	}
 
-	snapshot() {
-		let snapshot = new SnapshotCard(this);
-		this.snapshots.push(snapshot);
-		return snapshot;
-	}
-	undoSnapshot() {
-		this.snapshots.pop();
-	}
 	invalidateSnapshots() {
-		for (let snapshot of this.snapshots) {
-			snapshot.cardRef = null;
-		}
-		this.invalidatedSnapshotLists.push(this.snapshots);
-		this.snapshots = [];
+		this.globalIdHistory.push(this.globalId);
+		this.owner.game.currentCards.delete(this.globalId);
+		this.globalId = ++this.owner.game.lastGlobalCardId;
+		this.owner.game.currentCards.set(this.globalId, this);
 	}
 	undoInvalidateSnapshots() {
-		this.snapshots = this.invalidatedSnapshotLists.pop();
-		for (const snapshot of this.snapshots) {
-			snapshot.cardRef = this;
-		}
+		this.owner.game.currentCards.delete(this.globalId);
+		this.globalId = this.globalIdHistory.pop();
+		this.owner.game.currentCards.set(this.globalId, this);
+		this.owner.game.lastGlobalCardId--;
 	}
 
 	endOfTurnReset() {
@@ -301,48 +298,45 @@ export class SnapshotCard extends BaseCard {
 		this.inRetire = card.inRetire;
 
 		this.hiddenFor = [...card.hiddenFor];
-		this.cardRef = card;
-		this.permanentCardRef = card; // will not be cleared by card moving and is only for restoring a card on undo
+		this.globalId = card.globalId;
+		this._actualCard = card; // will not be cleared by card moving and is only for restoring a card on undo
 	}
 
 	restore() {
 		// tokens might need to be restored back to non-existance
 		if (this.zone === null) {
-			this.permanentCardRef.zone.remove(this.permanentCardRef);
+			this._actualCard.zone.remove(this._actualCard);
 			return;
 		}
-		this.zone.add(this.permanentCardRef, this.index, false);
-		if (!this.cardRef) {
-			this.permanentCardRef.undoInvalidateSnapshots();
+		this.zone.add(this._actualCard, this.index, false);
+		if (this._actualCard.globalId != this.globalId) {
+			this._actualCard.undoInvalidateSnapshots();
 		}
 
-		// now that this snapshot is no longer invalidated, we can use this.cardRef instead of the permanent one.
+		this._actualCard.hiddenFor = [...this.hiddenFor];
 
-		this.cardRef.undoSnapshot();
-		this.cardRef.hiddenFor = [...this.hiddenFor];
+		this._actualCard.initialValues = this.initialValues;
+		this._actualCard.values = this.values;
+		this._actualCard.baseValues = this.baseValues;
+		this._actualCard.modifierStack = this.modifierStack;
 
-		this.cardRef.initialValues = this.initialValues;
-		this.cardRef.values = this.values;
-		this.cardRef.baseValues = this.baseValues;
-		this.cardRef.modifierStack = this.modifierStack;
-
-		this.cardRef.equippedTo = this.equippedTo?.permanentCardRef ?? null;
-		this.cardRef.equipments = this.equipments.map(equipment => equipment.permanentCardRef);
-		this.cardRef.attackCount = this.attackCount;
-		this.cardRef.canAttackAgain = this.canAttackAgain;
-		this.cardRef.isAttackTarget = this.isAttackTarget;
-		this.cardRef.isAttacking = this.isAttacking;
+		this._actualCard.equippedTo = this.equippedTo?._actualCard ?? null;
+		this._actualCard.equipments = this.equipments.map(equipment => equipment._actualCard);
+		this._actualCard.attackCount = this.attackCount;
+		this._actualCard.canAttackAgain = this.canAttackAgain;
+		this._actualCard.isAttackTarget = this.isAttackTarget;
+		this._actualCard.isAttacking = this.isAttacking;
 		if (this.isAttackTarget) {
-			this.owner.game.currentAttackDeclaration.target = this.cardRef;
+			this.owner.game.currentAttackDeclaration.target = this._actualCard;
 		}
 		if (this.isAttacking) {
-			if (this.owner.game.currentAttackDeclaration.attackers.indexOf(this.cardRef) == -1) {
-				this.owner.game.currentAttackDeclaration.attackers.push(this.cardRef);
+			if (this.owner.game.currentAttackDeclaration.attackers.indexOf(this._actualCard) == -1) {
+				this.owner.game.currentAttackDeclaration.attackers.push(this._actualCard);
 			}
 		}
-		this.cardRef.inRetire = this.inRetire;
+		this._actualCard.inRetire = this.inRetire;
 		if (this.inRetire) {
-			this.inRetire.units.push(this.cardRef);
+			this.inRetire.units.push(this._actualCard);
 		}
 	}
 }

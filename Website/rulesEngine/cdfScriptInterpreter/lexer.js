@@ -20,6 +20,7 @@ let keywordTokenTypes = {
 
 	you: "player",
 	opponent: "player",
+	both: "player",
 	life: "playerLife",
 	mana: "playerMana",
 
