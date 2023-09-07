@@ -505,7 +505,7 @@ defense: ${defense}`));
 				return cards;
 			}
 			case "REVEAL": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Reveal(card.current()));
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Reveal(card.current(), player));
 			}
 		}
 	}
@@ -574,7 +574,7 @@ defense: ${defense}`));
 				return moveActions;
 			}
 			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.Reveal(card.current())));
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.Reveal(card.current(), player)));
 			}
 			case "VIEW": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.View(card.current(), player)));

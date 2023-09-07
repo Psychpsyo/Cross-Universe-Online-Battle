@@ -142,12 +142,12 @@ export function createUndoCardsMovedEvent(movedCards) {
 	}
 }
 
-export function createCardsDrawnEvent(player, amount) {
+export function createCardsDrawnEvent(player, cards) {
 	return {
 		"nature": "event",
 		"type": "cardsDrawn",
 		"player": player,
-		"amount": amount
+		"cards": cards
 	}
 }
 
@@ -163,10 +163,11 @@ export function createCardPlacedEvent(player, fromZone, fromIndex, toZone, toInd
 	}
 }
 
-export function createCardSummonedEvent(player, fromZone, fromIndex, toZone, toIndex) {
+export function createCardSummonedEvent(player, card, fromZone, fromIndex, toZone, toIndex) {
 	return {
 		"nature": "event",
 		"type": "cardSummoned",
+		"card": card,
 		"player": player,
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
@@ -175,22 +176,24 @@ export function createCardSummonedEvent(player, fromZone, fromIndex, toZone, toI
 	}
 }
 
-export function createCardDeployedEvent(player, fromZone, fromIndex, toZone, toIndex) {
-	return {
-		"nature": "event",
-		"type": "cardDeployed",
-		"player": player,
-		"fromZone": fromZone,
-		"fromIndex": fromIndex,
-		"toZone": toZone,
-		"toIndex": toIndex
-	}
-}
-
-export function createCardCastEvent(player, fromZone, fromIndex, toZone, toIndex) {
+export function createCardCastEvent(player, card, fromZone, fromIndex, toZone, toIndex) {
 	return {
 		"nature": "event",
 		"type": "cardCast",
+		"card": card,
+		"player": player,
+		"fromZone": fromZone,
+		"fromIndex": fromIndex,
+		"toZone": toZone,
+		"toIndex": toIndex
+	}
+}
+
+export function createCardDeployedEvent(player, card, fromZone, fromIndex, toZone, toIndex) {
+	return {
+		"nature": "event",
+		"type": "cardDeployed",
+		"card": card,
 		"player": player,
 		"fromZone": fromZone,
 		"fromIndex": fromIndex,
@@ -292,10 +295,11 @@ export function createCardViewedEvent(player, card) {
 	}
 }
 
-export function createCardRevealedEvent(card) {
+export function createCardRevealedEvent(player, card) {
 	return {
 		"nature": "event",
-		"type": "cardViewed",
+		"type": "cardRevealed",
+		"player": player,
 		"card": card
 	}
 }

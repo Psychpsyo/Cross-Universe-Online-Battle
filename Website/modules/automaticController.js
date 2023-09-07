@@ -5,6 +5,7 @@ import {InteractionController} from "/modules/interactionController.js";
 import {socket} from "/modules/netcode.js";
 import {DistRandom} from "/modules/distributedRandom.js";
 import {getAutoResponse} from "/modules/autopass.js";
+import {SnapshotCard} from "/rulesEngine/card.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
 import * as generalUI from "/modules/generalUI.js";
@@ -49,10 +50,12 @@ export class AutomaticController extends InteractionController {
 			let returnValues;
 			switch (updates.value[0].nature) {
 				case "event": {
-					await Promise.all(updates.value.map(event => this.handleEvent(event)));
+					let groupedEvents = Object.groupBy(updates.value, event => event.type);
+					await Promise.all(Object.entries(groupedEvents).map(keyValue => this.handleEvents(keyValue[0], keyValue[1])));
 					break;
 				}
 				case "request": {
+					// This code is way more general than it needs to be since there is never cases where both players need to act at the same time.
 					let localRequests = [];
 					let playerPromises = [];
 					for (let i = 0; i < game.players.length; i++) {
@@ -207,57 +210,84 @@ export class AutomaticController extends InteractionController {
 		gameUI.clearDragSource(card.zone, card.index, player);
 	}
 
-	async handleEvent(event) {
-		switch (event.type) {
+	async handleEvents(type, events) {
+		switch (type) {
 			case "deckShuffled": {
-				generalUI.putChatMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+				for (const event of events) {
+					generalUI.putChatMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+				}
 				return this.gameSleep();
 			}
 			case "startingPlayerSelected": {
-				generalUI.putChatMessage(event.player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
+				generalUI.putChatMessage(events[0].player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
-				for (let i = event.amount; i > 0; i--) {
-					gameUI.removeCard(event.player.deckZone, event.player.deckZone.cards.length + i - 1);
-					gameUI.insertCard(event.player.handZone, event.player.handZone.cards.length - i);
-					await this.gameSleep(.5);
+				for (const [playerIndex, cards] of Object.entries(Object.groupBy(events.map(event => event.cards).flat().map(card => new SnapshotCard(card.current())), card => card.owner.index))) {
+					generalUI.putChatMessage(locale.game.notices[playerIndex == localPlayer.index? "youDrew" : "opponentDrew"], "notice", cards);
 				}
+				await Promise.all(events.map(async event => {
+					for (let i = event.cards.length; i > 0; i--) {
+						gameUI.removeCard(event.player.deckZone, event.player.deckZone.cards.length + i - 1);
+						gameUI.insertCard(event.player.handZone, event.player.handZone.cards.length - i);
+						await this.gameSleep(.5);
+					}
+				}));
 				return this.gameSleep(.5);
 			}
 			case "partnerRevealed": {
-				gameUI.updateCard(event.player.partnerZone, 0);
-				return this.gameSleep();
-			}
-			case "cardRevealed":
-			case "cardViewed": {
-				switch (event.card.zone.type) {
-					case "hand": {
-						return autoUI.revealHandCard(event.card);
-					}
+				for (const event of events) {
+					gameUI.updateCard(event.player.partnerZone, 0);
 				}
 				return this.gameSleep();
+			}
+			case "cardRevealed": {
+				for (const [playerIndex, events] of Object.entries(Object.groupBy(events, event => event.player.index))) {
+					generalUI.putChatMessage(locale.game.notices[playerIndex == localPlayer.index? "youRevealed" : "opponentRevealed"], "notice", events.map(event => event.card));
+				}
+				await Promise.all(events.map(async event => {
+					switch (event.card.zone.type) {
+						case "hand": {
+							return autoUI.revealHandCard(event.card);
+						}
+					}
+				}));
+				return this.gameSleep(events.length);
+			}
+			case "cardViewed": {
+				let localPlayerViewed = events.filter(event => event.player === localPlayer);
+				if (localPlayerViewed.length > 0) {
+					generalUI.putChatMessage(locale.game.notices.viewed, "notice", localPlayerViewed.map(event => event.card));
+				}
+				await Promise.all(events.map(async event => {
+					switch (event.card.zone.type) {
+						case "hand": {
+							return autoUI.revealHandCard(event.card);
+						}
+					}
+				}));
+				return this.gameSleep(events.length);
 			}
 			case "turnStarted": {
 				autoUI.startTurn();
 				return this.gameSleep();
 			}
 			case "phaseStarted": {
-				autoUI.startPhase(event.phase.types[0]);
+				autoUI.startPhase(events[0].phase.types[0]);
 				return this.gameSleep();
 			}
 			case "blockCreationAborted": {
-				if (event.block instanceof blocks.StandardSummon ||
-					event.block instanceof blocks.DeployItem ||
-					event.block instanceof blocks.CastSpell
+				if (events[0].block instanceof blocks.StandardSummon ||
+					events[0].block instanceof blocks.DeployItem ||
+					events[0].block instanceof blocks.CastSpell
 				) {
-					gameUI.clearDragSource(event.block.card.zone, event.block.card.index, event.block.player);
+					gameUI.clearDragSource(events[0].block.card.zone, events[0].block.card.index, events[0].block.player);
 					return;
 				}
 				return;
 			}
 			case "playerWon": {
-				await autoUI.playerWon(event.player);
+				await autoUI.playerWon(events[0].player);
 				return;
 			}
 			case "gameDrawn": {
@@ -265,94 +295,116 @@ export class AutomaticController extends InteractionController {
 				return;
 			}
 			case "damageDealt": {
-				if (event.amount == 0) {
-					return;
+				for (const event of events) {
+					if (event.amount == 0) {
+						return;
+					}
+					await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
 				}
-				await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
 				return this.gameSleep();
 			}
 			case "lifeChanged": {
-				await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+				for (const event of events) {
+					await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+				}
 				return this.gameSleep();
 			}
 			case "manaChanged": {
-				await gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
+				for (const event of events) {
+					await gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
+				}
 				return this.gameSleep();
 			}
 			case "cardValueChanged": {
-				generalUI.updateCardPreview(event.card);
+				for (const event of events) {
+					generalUI.updateCardPreview(event.card);
+				}
 				return;
 			}
 			case "cardPlaced": {
-				gameUI.insertCard(event.toZone, event.toIndex);
-				if (event.fromZone) {
-					gameUI.removeCard(event.fromZone, event.fromIndex);
+				for (const event of events) {
+					gameUI.insertCard(event.toZone, event.toIndex);
+					if (event.fromZone) {
+						gameUI.removeCard(event.fromZone, event.fromIndex);
+					}
 				}
 				return this.gameSleep();
 			}
 			case "cardCast":
 			case "cardDeployed":
 			case "cardSummoned": {
-				gameUI.insertCard(event.toZone, event.toIndex);
-				gameUI.clearDragSource(event.toZone, event.toIndex, event.player);
-				if (event.fromZone) {
-					gameUI.removeCard(event.fromZone, event.fromIndex);
+				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
+					generalUI.putChatMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", eventList.map(event => new SnapshotCard(event.card.current())));
+				}
+				for (const event of events) {
+					gameUI.insertCard(event.toZone, event.toIndex);
+					gameUI.clearDragSource(event.toZone, event.toIndex, event.player);
+					if (event.fromZone) {
+						gameUI.removeCard(event.fromZone, event.fromIndex);
+					}
 				}
 				return this.gameSleep();
 			}
 			case "cardDiscarded":
 			case "cardExiled":
 			case "cardMoved": {
-				gameUI.removeCard(event.fromZone, event.fromIndex);
-				if (!event.card.values.cardTypes.includes("token") || event.toZone instanceof zones.FieldZone) {
-					gameUI.insertCard(event.toZone, event.toIndex);
+				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => new SnapshotCard(event.card.current())));
+				for (const event of events) {
+					gameUI.removeCard(event.fromZone, event.fromIndex);
+					if (!event.card.values.cardTypes.includes("token") || event.toZone instanceof zones.FieldZone) {
+						gameUI.insertCard(event.toZone, event.toIndex);
+					}
 				}
 				return this.gameSleep(.5);
 			}
 			case "undoCardsMoved": {
-				for (let card of event.movedCards) {
-					gameUI.removeCard(card.fromZone, card.fromIndex);
-					if (card.toZone) {
-						gameUI.insertCard(card.toZone, card.toIndex);
+				for (const event of events) {
+					for (let card of event.movedCards) {
+						gameUI.removeCard(card.fromZone, card.fromIndex);
+						if (card.toZone) {
+							gameUI.insertCard(card.toZone, card.toIndex);
+						}
 					}
 				}
 				return;
 			}
 			case "actionCancelled": {
-				// units that got excluded from retires
-				if (event.action instanceof actions.Discard && event.action.timing?.block instanceof blocks.Retire) {
-					gameUI.clearDragSource(
-						event.action.card.zone,
-						event.action.card.index,
-						event.action.timing.block.player
-					);
+				for (const event of events) {
+					// units that got excluded from retires
+					if (event.action instanceof actions.Discard && event.action.timing?.block instanceof blocks.Retire) {
+						gameUI.clearDragSource(
+							event.action.card.zone,
+							event.action.card.index,
+							event.action.timing.block.player
+						);
+					}
 				}
 				return;
 			}
 			case "cardsAttacked": {
-				autoUI.setAttackTarget(event.target);
-				return autoUI.attack(event.attackers);
+				autoUI.setAttackTarget(events[0].target);
+				return autoUI.attack(events[0].attackers);
 			}
 			case "blockCreated": {
-				if (event.block instanceof blocks.AbilityActivation) {
-					await autoUI.activate(event.block.card);
+				if (events[0].block instanceof blocks.AbilityActivation) {
+					await autoUI.activate(events[0].block.card);
 				}
-				autoUI.newBlock(event.block);
+				autoUI.newBlock(events[0].block);
 				return;
 			}
 			case "stackCreated": {
-				autoUI.newStack(event.stack.index);
+				autoUI.newStack(events[0].stack.index);
 				return;
 			}
 			case "playerSelected": {
-				if (event.player !== localPlayer) {
-					generalUI.putChatMessage(game.players[event.chosenPlayer] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
+				if (events[0].player !== localPlayer) {
+					generalUI.putChatMessage(game.players[events[0].chosenPlayer] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
 				}
 				break;
 			}
 			case "typeSelected": {
-				if (event.player !== localPlayer) {
-					generalUI.putChatMessage(locale.game.notices.opponentChoseType.replaceAll("{#TYPE}", locale.types[event.chosenType]), "notice");
+				if (events[0].player !== localPlayer) {
+					generalUI.putChatMessage(locale.game.notices.opponentChoseType.replaceAll("{#TYPE}", locale.types[events[0].chosenType]), "notice");
 				}
 				break;
 			}

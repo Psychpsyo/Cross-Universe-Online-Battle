@@ -33,7 +33,22 @@
 			"opponentDeckShuffled": "Your opponent's deck was shuffled.",
 			"opponentChoseYou": "Your opponent chose you.",
 			"opponentChoseSelf": "Your opponent chose themselves.",
-			"opponentChoseType": "Your opponent chose {#TYPE}-type."
+			"opponentChoseType": "Your opponent chose {#TYPE}-type.",
+
+			"youDrew": "You drew:",
+			"opponentDrew": "Your opponent drew:",
+			"youSummoned": "You summoned:",
+			"opponentSummoned": "Your opponent summoned:",
+			"youCast": "You cast:",
+			"opponentCast": "Your opponent cast:",
+			"youDeployed": "You deployed:",
+			"opponentDeployed": "Your opponent deployed:",
+			"youRevealed": "You revealed:",
+			"opponentRevealed": "Your opponent revealed:",
+			"discarded": "Discarded:",
+			"exiled": "Exiled:",
+			"moved": "Moved:",
+			"viewed": "Looked at:"
 		},
 
 		"playerInfo": {

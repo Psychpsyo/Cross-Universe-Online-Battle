@@ -124,7 +124,7 @@ export class Draw extends Action {
 		for (let i = 0; i < drawnCards.length; i++) {
 			this.drawnCards[i].globalId = drawnCards[i].globalId;
 		}
-		return events.createCardsDrawnEvent(this.player, this.amount);
+		return events.createCardsDrawnEvent(this.player, this.drawnCards);
 	}
 
 	undo() {
@@ -184,7 +184,7 @@ export class Summon extends Action {
 
 	async* run() {
 		let card = this.placeAction.card.current();
-		let summonEvent = events.createCardSummonedEvent(this.player, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
+		let summonEvent = events.createCardSummonedEvent(this.player, this.placeAction.card, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
 		this.placeAction.zone.add(card, this.placeAction.targetIndex);
 		this.placeAction.card.globalId = card.globalId;
 		return summonEvent;
@@ -209,7 +209,7 @@ export class Deploy extends Action {
 
 	async* run() {
 		let card = this.placeAction.card.current();
-		let deployEvent = events.createCardDeployedEvent(this.player, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
+		let deployEvent = events.createCardDeployedEvent(this.player, this.placeAction.card, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
 		this.placeAction.zone.add(card, this.placeAction.targetIndex);
 		this.placeAction.card.globalId = card.globalId;
 		return deployEvent;
@@ -234,7 +234,7 @@ export class Cast extends Action {
 
 	async* run() {
 		let card = this.placeAction.card.current();
-		let castEvent = events.createCardCastEvent(this.player, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
+		let castEvent = events.createCardCastEvent(this.player, this.placeAction.card, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
 		this.placeAction.zone.add(card, this.placeAction.targetIndex);
 		this.placeAction.card.globalId = card.globalId;
 		return castEvent;
@@ -679,7 +679,7 @@ export class View extends Action {
 }
 
 export class Reveal extends Action {
-	constructor(card) {
+	constructor(card, player) {
 		super();
 		this.card = card;
 		this.oldHiddenState = null;
@@ -689,7 +689,7 @@ export class Reveal extends Action {
 		this.oldHiddenState = this.card.hiddenFor;
 		this.card.hiddenFor = [];
 		this.card = new SnapshotCard(this.card);
-		return events.createCardRevealedEvent(this.card);
+		return events.createCardRevealedEvent(this.player, this.card);
 	}
 
 	undo() {

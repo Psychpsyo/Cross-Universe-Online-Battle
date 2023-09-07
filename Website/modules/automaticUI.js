@@ -167,7 +167,7 @@ export function newBlock(block) {
 	visual.appendChild(img);
 	img.addEventListener("click", function(e) {
 		e.stopPropagation();
-		previewCard(card.current());
+		previewCard(card.current() ?? card);
 	});
 
 	let labelElem = document.createElement("span");

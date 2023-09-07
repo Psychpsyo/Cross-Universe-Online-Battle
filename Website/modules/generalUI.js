@@ -72,6 +72,7 @@ export function putChatMessage(message, type, cards) {
 			cardImg.addEventListener("click", function () {
 				previewCard(card);
 			});
+			cardImg.addEventListener("dragstart", e => e.preventDefault());
 			cardHolder.appendChild(cardImg);
 		}
 		messageDiv.appendChild(cardHolder);

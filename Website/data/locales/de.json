@@ -33,7 +33,22 @@
 			"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
 			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
 			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt.",
-			"opponentChoseType": "Dein Gegner hat Typ {#TYPE} gewählt."
+			"opponentChoseType": "Dein Gegner hat Typ {#TYPE} gewählt.",
+
+			"youDrew": "Du hast gezogen:",
+			"opponentDrew": "Dein Gegner hat gezogen:",
+			"youSummoned": "Du hast beschworen:",
+			"opponentSummoned": "Dein Gegner hat beschworen:",
+			"youCast": "Du hast gecasted:",
+			"opponentCast": "Dein Gegner hat gecasted:",
+			"youDeployed": "Du hast deployed:",
+			"opponentDeployed": "Dein Gegner hat deployed:",
+			"youRevealed": "Du hast gezeigt:",
+			"opponentRevealed": "Dein Gegner hat gezeigt:",
+			"discarded": "Abgeworfen:",
+			"exiled": "Ins Exil geschickt:",
+			"moved": "Verschoben:",
+			"viewed": "Angesehen:"
 		},
 
 		"playerInfo": {

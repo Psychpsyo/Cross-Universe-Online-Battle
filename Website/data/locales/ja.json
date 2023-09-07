@@ -33,7 +33,22 @@
 			"opponentDeckShuffled": null,
 			"opponentChoseYou": null,
 			"opponentChoseSelf": null,
-			"opponentChoseType": null
+			"opponentChoseType": null,
+
+			"youDrew": null,
+			"opponentDrew": null,
+			"youSummoned": null,
+			"opponentSummoned": null,
+			"youCast": null,
+			"opponentCast": null,
+			"youDeployed": null,
+			"opponentDeployed": null,
+			"youRevealed": null,
+			"opponentRevealed": null,
+			"discarded": null,
+			"exiled": null,
+			"moved": null,
+			"viewed": null
 		},
 
 		"playerInfo": {
