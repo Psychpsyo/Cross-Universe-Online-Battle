@@ -602,6 +602,7 @@ defense: ${defense}`));
 			case "LOSEMANA":
 			case "SELECTPLAYER":
 			case "SELECTTYPE":
+			case "SHUFFLE":
 			case "SUM":
 			case "TOKENS": {
 				return true;
@@ -913,7 +914,8 @@ export class PlusNode extends DashMathNode {
 		if (typeof left[0] == "number" && typeof right[0] == "number") {
 			return [left[0] + right[0]];
 		}
-		return [NaN];
+		// for non-number types this concatenates the two lists.
+		return left.concat(right);
 	}
 }
 export class MinusNode extends DashMathNode {
