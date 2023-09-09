@@ -602,7 +602,6 @@ defense: ${defense}`));
 			case "LOSEMANA":
 			case "SELECTPLAYER":
 			case "SELECTTYPE":
-			case "SHUFFLE":
 			case "SUM":
 			case "TOKENS": {
 				return true;
@@ -654,6 +653,10 @@ defense: ${defense}`));
 			}
 			case "SETATTACKTARGET": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
+			}
+			case "SHUFFLE": {
+				let excludableCardAmounts = this.parameters[0]?.evalFull(card, player, ability, evaluatingPlayer)?.map(cardList => cardList.length) ?? [0];
+				return player.deckZone.cards.length > Math.min(...excludableCardAmounts);
 			}
 			case "SUMMON": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;

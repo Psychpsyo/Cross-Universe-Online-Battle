@@ -18,5 +18,5 @@ cost:
 DISCARD(thisCard)
 exec:
 $spell = SELECT(1, [from you.deck where types = Psychic & cardType = spell])
-SHUFFLE()
+SHUFFLE($spell)
 MOVE($spell, you.deckTop)
