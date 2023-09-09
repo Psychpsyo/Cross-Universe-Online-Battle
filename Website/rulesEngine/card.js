@@ -264,7 +264,7 @@ export class Card extends BaseCard {
 
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 export class SnapshotCard extends BaseCard {
-	constructor(card, equippedToSnapshot) {
+	constructor(card, equippedToSnapshot, equipmentSnapshot) {
 		super(card.owner, card.cardId, card.initialValues.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
 		this.values = card.values.clone();
 		this.baseValues = card.baseValues.clone();
@@ -284,9 +284,14 @@ export class SnapshotCard extends BaseCard {
 		if (equippedToSnapshot) {
 			this.equippedTo = equippedToSnapshot;
 		} else if (card.equippedTo) {
-			this.equippedTo = new SnapshotCard(card.equippedTo);
+			this.equippedTo = new SnapshotCard(card.equippedTo, undefined, this);
 		}
-		this.equipments = card.equipments.map(equipment => new SnapshotCard(equipment, card));
+		this.equipments = card.equipments.map((equipment => {
+			if (equipmentSnapshot === equipment) {
+				return equipmentSnapshot;
+			}
+			return new SnapshotCard(equipment, this);
+		}).bind(this));
 		this.zone = card.zone;
 		this.index = card.index;
 		this.lastMoveTimingIndex = card.lastMoveTimingIndex;
@@ -321,7 +326,13 @@ export class SnapshotCard extends BaseCard {
 		this._actualCard.modifierStack = this.modifierStack;
 
 		this._actualCard.equippedTo = this.equippedTo?._actualCard ?? null;
+		if (this.equippedTo && !this._actualCard.equippedTo.equipments.includes(this._actualCard)) {
+			this._actualCard.equippedTo.equipments.push(this._actualCard);
+		}
 		this._actualCard.equipments = this.equipments.map(equipment => equipment._actualCard);
+		for (const equipment of this._actualCard.equipments) {
+			equipment.equippedTo = this._actualCard;
+		}
 		this._actualCard.attackCount = this.attackCount;
 		this._actualCard.canAttackAgain = this.canAttackAgain;
 		this._actualCard.isAttackTarget = this.isAttackTarget;
