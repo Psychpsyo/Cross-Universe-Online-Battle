@@ -61,6 +61,20 @@ export class StackPhase extends Phase {
 				yield [createStackCreatedEvent(this.currentStack())];
 				yield* this.currentStack().run();
 			} while (this.currentStack().blocks.length > 0);
+
+			// reset on what stacks trigger abilities were met since we're going back to stack 1.
+			for (let player of this.turn.game.players) {
+				for (let card of player.getActiveCards()) {
+					for (let ability of card.values.abilities) {
+						if ((ability instanceof abilities.TriggerAbility ||
+							ability instanceof abilities.CastAbility) &&
+							ability.after
+						) {
+							ability.triggerMetOnStack = -1;
+						}
+					}
+				}
+			}
 		} while (currentStackIndex > 1);
 	}
 
@@ -332,7 +346,7 @@ export class EndPhase extends StackPhase {
 		for (let player of this.turn.game.players) {
 			for (let card of player.getActiveCards()) {
 				for (let ability of card.values.abilities) {
-					if (ability instanceof abilities.TriggerAbility && ability.after && ability.triggerMet) {
+					if (ability instanceof abilities.TriggerAbility && ability.after && ability.triggerMetOnStack !== -1) {
 						return true;
 					}
 				}

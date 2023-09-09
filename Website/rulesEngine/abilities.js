@@ -65,18 +65,18 @@ export class CastAbility extends Ability {
 		if (after) {
 			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
-		this.triggerMet = false;
+		this.triggerMetOnStack = -1;
 	}
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during spell casting
 	canActivate(card, player, evaluatingPlayer = player) {
 		return (this.condition === null || this.condition.evalFull(card, player, this)[0]) &&
-			(this.after === null || this.triggerMet);
+			(this.after === null || this.triggerMetOnStack === player.game.currentStack().index - 1);
 	}
 
 	checkTrigger(card, player) {
 		if (this.after == null || this.after.evalFull(card, player, this)[0]) {
-			this.triggerMet = true;
+			this.triggerMetOnStack = player.game.currentStack().index;
 		}
 	}
 }
@@ -150,12 +150,12 @@ export class TriggerAbility extends Ability {
 		if (after) {
 			this.after = interpreter.buildAST("trigger", id, after, game);
 		}
-		this.triggerMet = false;
+		this.triggerMetOnStack = -1;
 		this.turnActivationCount = 0;
 	}
 
 	async canActivate(card, player, evaluatingPlayer = player) {
-		return this.triggerMet &&
+		return this.triggerMetOnStack === player.game.currentStack().index - 1 &&
 			this.turnActivationCount < this.turnLimit &&
 			(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
 			(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit) &&
@@ -167,7 +167,7 @@ export class TriggerAbility extends Ability {
 			return;
 		}
 		if (this.after.evalFull(card, player, this)[0]) {
-			this.triggerMet = true;
+			this.triggerMetOnStack = player.game.currentStack().index;
 		}
 	}
 
@@ -176,16 +176,16 @@ export class TriggerAbility extends Ability {
 			return;
 		}
 		if (!this.during.evalFull(card, player, this)[0]) {
-			this.triggerMet = false;
+			this.triggerMetOnStack = -1;
 			this.usedDuring = false;
 		} else if (!this.usedDuring) {
-			this.triggerMet = true;
+			this.triggerMetOnStack = player.game.currentStack().index - 1;
 		}
 	}
 
 	successfulActivation() {
 		this.turnActivationCount++;
-		this.triggerMet = false;
+		this.triggerMetOnStack = -1;
 		if (this.during) {
 			this.usedDuring = true;
 		}

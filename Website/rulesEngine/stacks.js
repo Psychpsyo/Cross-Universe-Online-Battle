@@ -107,20 +107,6 @@ export class Stack {
 	}
 
 	async* executeBlocks() {
-		// unmeet trigger abilities
-		for (let player of this.phase.turn.game.players) {
-			for (let card of player.getActiveCards()) {
-				for (let ability of card.values.abilities) {
-					if ((ability instanceof abilities.TriggerAbility ||
-						ability instanceof abilities.CastAbility) &&
-						ability.after
-					) {
-						ability.triggerMet = false;
-					}
-				}
-			}
-		}
-
 		for (let i = this.blocks.length - 1; i >= 0; i--) {
 			yield [createBlockStartedEvent(this.blocks[i])];
 			yield* this.blocks[i].run();

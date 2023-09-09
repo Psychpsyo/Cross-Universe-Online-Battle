@@ -40,7 +40,7 @@ export class Zone {
 			// All of the card's trigger abilities aren't met anymore.
 			for (const ability of card.values.abilities) {
 				if (ability instanceof TriggerAbility) {
-					ability.triggerMet = false;
+					ability.triggerMetOnStack = -1;
 				}
 			}
 			// Effects that applied to the card before stop applying.
