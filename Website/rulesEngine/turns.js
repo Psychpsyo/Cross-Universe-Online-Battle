@@ -24,7 +24,7 @@ export class Turn {
 		yield* this.runPhase(new MainPhase(this));
 
 		if (this.index > 0) {
-			let battlePhase = (yield [enterBattlePhase.create(this.player)]).filter(choice => choice !== undefined)[0];
+			let battlePhase = yield [enterBattlePhase.create(this.player)];
 			battlePhase.value = enterBattlePhase.validate(battlePhase.value);
 			if (battlePhase.value) {
 				yield* this.runPhase(new BattlePhase(this));

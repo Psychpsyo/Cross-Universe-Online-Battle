@@ -111,6 +111,33 @@ export const chooseType = {
 	}
 }
 
+export const orderCards = {
+	create: function(player, cards, reason) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "orderCards",
+			"cards": cards,
+			"reason": reason
+		}
+	},
+	validate: function(response, request) {
+		if (response.length != request.cards.length) {
+			throw new Error("Supplied an incorrect amount of cards to order. Got " + response.length + " when it should have been between " + request.cards.length + ".");
+		}
+		let sortedResponse = response.toSorted();
+		for (let i = 0; i < response.length; i++) {
+			if (i != sortedResponse[i]) {
+				throw new Error("Supplied incorrect card ordering indices. Got a " + sortedResponse[i] + " when there should have been a " + i + ".");
+			}
+		}
+		return response.map(cardIndex => request.cards[cardIndex]);
+	},
+	generateValidResponses: function(request) {
+		return nChooseK(request.cards.length, request.cards.length);
+	}
+}
+
 export const enterBattlePhase = {
 	create: function(player) {
 		return {

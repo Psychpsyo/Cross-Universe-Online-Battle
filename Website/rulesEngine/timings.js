@@ -295,14 +295,11 @@ function* phaseStaticAbilities(game) {
 				let orderedAbilities = [0];
 				if (fieldEnterBuckets[fieldIndex][timing].length !== 1) {
 					let request = chooseAbilityOrder.create(game.players[fieldIndex], card, fieldEnterBuckets[fieldIndex][timing].map(elem => elem.ability));
-					let responses = yield [request];
-					if (responses.length != 1) {
-						throw new Error("Incorrect number of responses supplied during ability ordering. (expected 1, got " + responses.length + " instead)");
+					let response = yield [request];
+					if (response.type != "chooseAbilityOrder") {
+						throw new Error("Wrong response type supplied during ability ordering (expected 'chooseAbilityOrder', got '" + response.type + "')");
 					}
-					if (responses[0].type != "chooseAbilityOrder") {
-						throw new Error("Wrong response type supplied during ability ordering (expected 'chooseAbilityOrder', got '" + responses[0].type + "')");
-					}
-					orderedAbilities = chooseAbilityOrder.validate(responses[0].value, request);
+					orderedAbilities = chooseAbilityOrder.validate(response.value, request);
 				}
 				for (let index of orderedAbilities) {
 					let application = fieldEnterBuckets[fieldIndex][timing][index];

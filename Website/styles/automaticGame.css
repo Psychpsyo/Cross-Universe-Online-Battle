@@ -217,19 +217,19 @@
 	min-width: 10em;
 }
 
-#abilityOrderList {
+#itemOrderList {
 	display: flex;
 	flex-direction: column;
 	gap: .5em;
 	margin: .5em 0;
 }
-.abilityOrderItem {
+.itemOrderText {
 	text-align: left;
 	white-space: pre;
 	border-radius: .5em;
 	padding: .25em;
 }
-.abilityOrderItem[data-index]::after {
+.itemOrderText[data-index]::after {
 	content: attr(data-index);
 	position: absolute;
 	top: 50%;

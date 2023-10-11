@@ -216,9 +216,10 @@
 				"select": "Select"
 			},
 
-			"abilityOrderSelect": {
-				"prompt": "Select the order in which to apply these static abilities to '{#CARDNAME}':",
-				"confirm": "Confirm"
+			"orderSelect": {
+				"confirm": "Confirm",
+				"abilityPrompt": "Select the order in which to apply these static abilities to '{#CARDNAME}':",
+				"cardPrompt": "Order these cards for the effect of '{#CARDNAME}':"
 			},
 
 			"opponentActions": {

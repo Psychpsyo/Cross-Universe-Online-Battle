@@ -347,14 +347,11 @@ export class FunctionNode extends AstNode {
 					let freeSlots = zone.getFreeSpaceCount();
 					if (freeSlots < cards.length) {
 						let selectionRequest = new requests.chooseCards.create(player, cards, [freeSlots], "cardEffectMove:" + ability.id);
-						let responses = yield [selectionRequest];
-						if (responses.length != 1) {
-							throw new Error("Incorrect number of responses supplied during card move selection. (expected 1, got " + responses.length + " instead)");
+						let response = yield [selectionRequest];
+						if (response.type != "chooseCards") {
+							throw new Error("Incorrect response type supplied during card move selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 						}
-						if (responses[0].type != "chooseCards") {
-							throw new Error("Incorrect response type supplied during card move selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
-						}
-						let movedCards = requests.chooseCards.validate(responses[0].value, selectionRequest);
+						let movedCards = requests.chooseCards.validate(response.value, selectionRequest);
 						for (let i = moveActions.length - 1; i >= 0; i--) {
 							if (moveActions[i].zone === zone && !movedCards.includes(moveActions[i].card)) {
 								moveActions.splice(i, 1);
@@ -365,8 +362,17 @@ export class FunctionNode extends AstNode {
 
 				return moveActions;
 			}
-			case "VIEW": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.View(card.current(), player));
+			case "ORDER": {
+				let toOrder = yield* this.parameters[0].eval(card, player, ability);
+				let orderRequest = new requests.orderCards.create(player, toOrder, "cardEffect:" + ability.id);
+				let response = yield [orderRequest];
+				if (response.type != "orderCards") {
+					throw new Error("Incorrect response type supplied during card ordering. (expected \"orderCards\", got \"" + response.type + "\" instead)");
+				}
+				return requests.orderCards.validate(response.value, orderRequest).map(card => new SnapshotCard(card.current()));
+			}
+			case "REVEAL": {
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Reveal(card.current(), player));
 			}
 			case "SELECT": {
 				let choiceAmount = yield* this.parameters[0].eval(card, player, ability);
@@ -380,45 +386,36 @@ export class FunctionNode extends AstNode {
 					}
 				}
 				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ability.id);
-				let responses = yield [selectionRequest];
-				if (responses.length != 1) {
-					throw new Error("Incorrect number of responses supplied during card selection. (expected 1, got " + responses.length + " instead)");
-				}
-				if (responses[0].type != "chooseCards") {
-					throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
+				let response = yield [selectionRequest];
+				if (response.type != "chooseCards") {
+					throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 				}
 				for (let card of eligibleCards) {
 					if (card.zone.type === "deck" || (card.zone.type === "hand" && card.zone.player !== player)) {
 						card.hideFrom(player);
 					}
 				}
-				let cards = requests.chooseCards.validate(responses[0].value, selectionRequest).map(card => new SnapshotCard(card.current()));
+				let cards = requests.chooseCards.validate(response.value, selectionRequest).map(card => new SnapshotCard(card.current()));
 				yield [events.createCardsSelectedEvent(player, cards)];
 				return cards;
 			}
 			case "SELECTPLAYER": {
 				let selectionRequest = new requests.choosePlayer.create(player, "cardEffect:" + ability.id);
-				let responses = yield [selectionRequest];
-				if (responses.length != 1) {
-					throw new Error("Incorrect number of responses supplied during player selection. (expected 1, got " + responses.length + " instead)");
+				let response = yield [selectionRequest];
+				if (response.type != "choosePlayer") {
+					throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + response.type + "\" instead)");
 				}
-				if (responses[0].type != "choosePlayer") {
-					throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + responses[0].type + "\" instead)");
-				}
-				let chosenPlayer = requests.choosePlayer.validate(responses[0].value, selectionRequest);
+				let chosenPlayer = requests.choosePlayer.validate(response.value, selectionRequest);
 				yield [events.createPlayerSelectedEvent(player, chosenPlayer)];
 				return chosenPlayer;
 			}
 			case "SELECTTYPE": {
 				let selectionRequest = new requests.chooseType.create(player, ability.id, yield* this.parameters[0].eval(card, player, ability));
-				let responses = yield [selectionRequest];
-				if (responses.length != 1) {
-					throw new Error("Incorrect number of responses supplied during type selection. (expected 1, got " + responses.length + " instead)");
+				let response = yield [selectionRequest];
+				if (response.type != "chooseType") {
+					throw new Error("Incorrect response type supplied during type selection. (expected \"chooseType\", got \"" + response.type + "\" instead)");
 				}
-				if (responses[0].type != "chooseType") {
-					throw new Error("Incorrect response type supplied during type selection. (expected \"chooseType\", got \"" + responses[0].type + "\" instead)");
-				}
-				let type = requests.chooseType.validate(responses[0].value, selectionRequest);
+				let type = requests.chooseType.validate(response.value, selectionRequest);
 				yield [events.createTypeSelectedEvent(player, type)];
 				return [type];
 			}
@@ -504,39 +501,14 @@ defense: ${defense}`));
 				}
 				return cards;
 			}
-			case "REVEAL": {
-				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Reveal(card.current(), player));
+			case "VIEW": {
+				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.View(card.current(), player));
 			}
 		}
 	}
 	evalFull(card, player, ability, evaluatingPlayer = null) {
 		// TODO: Probably best to implement these on a case-by-case basis when cards actually need them
 		switch (this.functionName) {
-			case "SELECT": {
-				let choiceAmounts = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer)[0];
-				let eligibleCards = this.parameters[1].evalFull(card, player, ability, evaluatingPlayer)[0];
-				if (eligibleCards.length == 0) {
-					return [[]];
-				}
-				if (choiceAmounts === "any") {
-					choiceAmounts = [];
-					for (let i = 1; i <= eligibleCards.length; i++) {
-						choiceAmounts.push(i);
-					}
-				}
-
-				let combinations = [];
-				for (const amount of choiceAmounts) {
-					combinations = combinations.concat(nChooseK(eligibleCards.length, amount));
-				}
-
-				for (const combination of combinations) {
-					for (let i = 0; i < combination.length; i++) {
-						combination[i] = eligibleCards[combination[i]];
-					}
-				}
-				return combinations;
-			}
 			case "DESTROY": {
 				let cardLists = this.parameters[0].evalFull(card, player, ability).map(option => option.filter(card => card.current()));
 				let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(card.current())));
@@ -573,8 +545,35 @@ defense: ${defense}`));
 				}
 				return moveActions;
 			}
+			case "ORDER": {
+				let toOrder = this.parameters[0].evalFull(card, player, ability);
+				let options = [];
+				for (const cards of toOrder) {
+					options = options.concat(nChooseK(cards.length, cards.length).map(i => toOrder[i]));
+				}
+				return options;
+			}
 			case "REVEAL": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.Reveal(card.current(), player)));
+			}
+			case "SELECT": {
+				let choiceAmounts = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer)[0];
+				let eligibleCards = this.parameters[1].evalFull(card, player, ability, evaluatingPlayer)[0];
+				if (eligibleCards.length == 0) {
+					return [[]];
+				}
+				if (choiceAmounts === "any") {
+					choiceAmounts = [];
+					for (let i = 1; i <= eligibleCards.length; i++) {
+						choiceAmounts.push(i);
+					}
+				}
+
+				let combinations = [];
+				for (const amount of choiceAmounts) {
+					combinations = combinations.concat(nChooseK(eligibleCards.length, amount).map(i => eligibleCards[i]));
+				}
+				return combinations;
 			}
 			case "VIEW": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => option.filter(card => card.current()).map(card => new actions.View(card.current(), player)));
@@ -600,6 +599,7 @@ defense: ${defense}`));
 			case "GAINMANA":
 			case "LOSELIFE":
 			case "LOSEMANA":
+			case "ORDER": // technically can't order nothing but that should never matter in practice
 			case "SELECTPLAYER":
 			case "SELECTTYPE":
 			case "SUM":

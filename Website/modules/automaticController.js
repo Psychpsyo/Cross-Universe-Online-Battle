@@ -47,7 +47,7 @@ export class AutomaticController extends InteractionController {
 		let updates = await updateGenerator.next();
 
 		while (!updates.done) {
-			let returnValues;
+			let returnValue;
 			switch (updates.value[0].nature) {
 				case "event": {
 					let groupedEvents = Object.groupBy(updates.value, event => event.type);
@@ -79,7 +79,7 @@ export class AutomaticController extends InteractionController {
 
 					let responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
 
-					returnValues = responsePromises.map(promise => promise.value).filter(value => value !== undefined);
+					returnValue = responsePromises.map(promise => promise.value).filter(value => value !== undefined)[0];
 
 					autoUI.clearYourMove();
 					autoUI.clearOpponentAction();
@@ -101,7 +101,7 @@ export class AutomaticController extends InteractionController {
 					break;
 				}
 			}
-			updates = await updateGenerator.next(returnValues);
+			updates = await updateGenerator.next(returnValue);
 		}
 	}
 
@@ -709,7 +709,19 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "chooseAbilityOrder": {
-				response.value = await autoUI.promptAbilityOrderSelection(request.applyTo, request.abilities);
+				response.value = await autoUI.promptOrderSelection(
+					locale.game.automatic.orderSelect.abilityPrompt.replaceAll("{#CARDNAME}", (await Promise.all(request.applyTo.values.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					(await Promise.allSettled(request.abilities.map(ability => cardLoader.getAbilityText(ability.id)))).map(promise => promise.value),
+					locale.game.automatic.orderSelect.confirm
+				);
+				break;
+			}
+			case "orderCards": {
+				response.value = await autoUI.promptOrderSelection(
+					locale.game.automatic.orderSelect.cardPrompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name),
+					(await Promise.allSettled(request.cards.map(card => cardLoader.getCardInfo(card.values.names[0])))).map(promise => promise.value.name),
+					locale.game.automatic.orderSelect.confirm
+				);
 				break;
 			}
 		}

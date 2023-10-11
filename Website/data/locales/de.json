@@ -216,9 +216,10 @@
 				"select": "Auswählen"
 			},
 
-			"abilityOrderSelect": {
-				"prompt": "Wähle, in welcher Reihenfolge diese Statischen Fähigkeiten auf '{#CARDNAME}' angewandt werden sollen:",
-				"confirm": "Bestätigen"
+			"orderSelect": {
+				"confirm": "Bestätigen",
+				"abilityPrompt": "Wähle, in welcher Reihenfolge diese Statischen Fähigkeiten auf '{#CARDNAME}' angewandt werden sollen:",
+				"cardPrompt": "Wähle die Reihenfolge dieser Karten für den Effekt von '{#CARDNAME}':"
 			},
 
 			"opponentActions": {

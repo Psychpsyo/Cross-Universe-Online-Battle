@@ -92,6 +92,7 @@ let keywordTokenTypes = {
 	LOSELIFE: "function",
 	LOSEMANA: "function",
 	MOVE: "function",
+	ORDER: "function",
 	REVEAL: "function",
 	SELECT: "function",
 	SELECTPLAYER: "function",

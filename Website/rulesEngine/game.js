@@ -118,14 +118,11 @@ export class Game {
 		// not rules: starting player may be manually chosen.
 		if (this.config.startingPlayerChooses) {
 			let selectionRequest = new requests.choosePlayer.create(currentPlayer, "chooseStartingPlayer");
-			let responses = yield [selectionRequest];
-			if (responses.length != 1) {
-				throw new Error("Incorrect number of responses supplied during player selection. (expected 1, got " + responses.length + " instead)");
+			let response = yield [selectionRequest];
+			if (response.type != "choosePlayer") {
+				throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + response.type + "\" instead)");
 			}
-			if (responses[0].type != "choosePlayer") {
-				throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + responses[0].type + "\" instead)");
-			}
-			currentPlayer = requests.choosePlayer.validate(responses[0].value, selectionRequest);
+			currentPlayer = requests.choosePlayer.validate(response.value, selectionRequest);
 		}
 		yield [createStartingPlayerSelectedEvent(currentPlayer)];
 

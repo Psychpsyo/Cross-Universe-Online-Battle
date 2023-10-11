@@ -17,7 +17,7 @@ function getAvailableZoneSlots(zone) {
 }
 function* queryZoneSlot(player, zone) {
 	let zoneSlotRequest = new requests.chooseZoneSlot.create(player, zone, getAvailableZoneSlots(zone));
-	let zoneSlotResponse = (yield [zoneSlotRequest])[0];
+	let zoneSlotResponse = yield [zoneSlotRequest];
 	return requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
 }
 
@@ -314,14 +314,11 @@ export class EstablishAttackDeclaration extends Action {
 
 		// send selection request
 		let targetSelectRequest = new requests.chooseCards.create(this.player, eligibleUnits, [1], "selectAttackTarget");
-		let responses = (yield [targetSelectRequest]);
-		if (responses.length != 1) {
-			throw new Error("Incorrect number of responses supplied during attack target selection. (expected 1, got " + responses.length + " instead)");
+		let response = yield [targetSelectRequest];
+		if (response.type != "chooseCards") {
+			throw new Error("Incorrect response type supplied during attack target selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 		}
-		if (responses[0].type != "chooseCards") {
-			throw new Error("Incorrect response type supplied during attack target selection. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
-		}
-		this.attackTarget = requests.chooseCards.validate(responses[0].value, targetSelectRequest)[0];
+		this.attackTarget = requests.chooseCards.validate(response.value, targetSelectRequest)[0];
 
 		// handle remaining attack rights
 		this.attackers = this.attackers.map(attacker => new SnapshotCard(attacker));
@@ -602,14 +599,11 @@ export class SelectEquipableUnit extends Action {
 
 	async* run() {
 		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0], [1], "equipTarget:" + this.spellItem.cardId);
-		let responses = yield [selectionRequest];
-		if (responses.length != 1) {
-			throw new Error("Incorrect number of responses supplied when selecting unit to equip to. (expected 1, got " + responses.length + " instead)");
+		let response = yield [selectionRequest];
+		if (response.type != "chooseCards") {
+			throw new Error("Incorrect response type supplied when selecting unit to equip to. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 		}
-		if (responses[0].type != "chooseCards") {
-			throw new Error("Incorrect response type supplied when selecting unit to equip to. (expected \"chooseCards\", got \"" + responses[0].type + "\" instead)");
-		}
-		this.chosenUnit = requests.chooseCards.validate(responses[0].value, selectionRequest)[0];
+		this.chosenUnit = requests.chooseCards.validate(response.value, selectionRequest)[0];
 	}
 
 	isImpossible(timing) {

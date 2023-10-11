@@ -216,9 +216,10 @@
 				"select": null
 			},
 
-			"abilityOrderSelect": {
-				"prompt": null,
-				"confirm": null
+			"orderSelect": {
+				"confirm": null,
+				"abilityPrompt": null,
+				"cardPrompt": null
 			},
 
 			"opponentActions": {

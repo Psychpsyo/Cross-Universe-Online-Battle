@@ -26,13 +26,8 @@ export class Stack {
 		}
 		while (true) {
 			let inputRequests = await this.phase.getBlockOptions(this);
-			let responses = (yield inputRequests).filter(choice => choice !== undefined);
+			let response = yield inputRequests;
 
-			if (responses.length != 1) {
-				throw new Error("Incorrect number of responses supplied during block creation. (expected 1, got " + responses.length + " instead)");
-			}
-
-			let response = responses[0];
 			let responseValue = requests[response.type].validate(response.value, inputRequests.find(request => request.type == response.type));
 
 			let nextBlock;
