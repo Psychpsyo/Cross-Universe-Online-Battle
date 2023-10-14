@@ -88,11 +88,14 @@ let keywordTokenTypes = {
 	EXILE: "function",
 	GAINLIFE: "function",
 	GAINMANA: "function",
+	GETCOUNTERS: "function",
 	GIVEATTACK: "function",
 	LOSELIFE: "function",
 	LOSEMANA: "function",
 	MOVE: "function",
 	ORDER: "function",
+	PUTCOUNTERS: "function",
+	REMOVECOUNTERS: "function",
 	REVEAL: "function",
 	SELECT: "function",
 	SELECTPLAYER: "function",
@@ -292,6 +295,8 @@ export function tokenize(code, game) {
 						tokens.push({type: "cardId", value: code.substr(pos + 2, wordLength - 2)});
 					} else if (game.config.allTypes.includes(word)) {
 						tokens.push({type: "type", value: word});
+					} else if (game.config.allCounters.includes(word)) {
+						tokens.push({type: "counter", value: word});
 					} else {
 						throw new Error("Found unknown word while tokenizing: " + word);
 					}

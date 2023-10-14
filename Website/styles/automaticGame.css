@@ -223,13 +223,15 @@
 	gap: .5em;
 	margin: .5em 0;
 }
-.itemOrderText {
+.itemOrderAbility {
 	text-align: left;
-	white-space: pre;
+	white-space: pre-wrap;
 	border-radius: .5em;
 	padding: .25em;
+	text-indent: -2em;
+	padding-left: 2.25em;
 }
-.itemOrderText[data-index]::after {
+.itemOrderAbility[data-index]::after {
 	content: attr(data-index);
 	position: absolute;
 	top: 50%;

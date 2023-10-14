@@ -118,7 +118,16 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 export async function getAbilityText(abilityID) {
 	let abilityInfo = abilityID.split(":");
 	let cardInfo = await getCardInfo(abilityInfo[0]);
-	return cardInfo.effects[abilityInfo[1]].text;
+	let currentAbility = -1;
+	for (const effect of cardInfo.effects) {
+		if (effect.type !== "rule") {
+			currentAbility++;
+			if (currentAbility == abilityInfo[1]) {
+				return effect.text;
+			}
+		}
+	}
+	throw new Error("Card does not have an effect with id " + abilityID + "!");
 }
 
 export async function deckToCdfList(deck, automatic, player) {

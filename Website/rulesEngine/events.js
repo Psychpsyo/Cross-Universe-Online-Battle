@@ -330,3 +330,12 @@ export function createTypeSelectedEvent(player, chosenType) {
 		"chosenType": chosenType
 	}
 }
+
+export function createCountersChangedEvent(card, type) {
+	return {
+		"nature": "event",
+		"type": "countersChanged",
+		"card": card,
+		"type": type
+	}
+}

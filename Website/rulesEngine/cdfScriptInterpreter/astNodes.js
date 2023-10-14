@@ -313,6 +313,19 @@ export class FunctionNode extends AstNode {
 			case "GAINMANA": {
 				return [new actions.ChangeMana(player, (yield* this.parameters[0].eval(card, player, ability))[0])];
 			}
+			case "GETCOUNTERS": {
+				let cards = (yield* this.parameters[0].eval(card, player, ability));
+				let type = (yield* this.parameters[1].eval(card, player, ability))[0];
+
+				let total = 0;
+				for (let card of cards) {
+					if (card.counters[type]) {
+						total += card.counters[type];
+					}
+				}
+
+				return [total];
+			}
 			case "GIVEATTACK": {
 				let target = (yield* this.parameters[0].eval(card, player, ability))[0];
 				return target.current()? [new actions.GainAttack(target.current())] : [];
@@ -370,6 +383,20 @@ export class FunctionNode extends AstNode {
 					throw new Error("Incorrect response type supplied during card ordering. (expected \"orderCards\", got \"" + response.type + "\" instead)");
 				}
 				return requests.orderCards.validate(response.value, orderRequest).map(card => new SnapshotCard(card.current()));
+			}
+			case "PUTCOUNTERS": {
+				let cards = (yield* this.parameters[0].eval(card, player, ability));
+				let type = (yield* this.parameters[1].eval(card, player, ability))[0];
+				let amount = (yield* this.parameters[2].eval(card, player, ability))[0];
+
+				return cards.map(card => new actions.ChangeCounters(card, type, amount));
+			}
+			case "REMOVECOUNTERS": {
+				let cards = (yield* this.parameters[0].eval(card, player, ability));
+				let type = (yield* this.parameters[1].eval(card, player, ability))[0];
+				let amount = (yield* this.parameters[2].eval(card, player, ability))[0];
+
+				return cards.map(card => new actions.ChangeCounters(card, type, -amount));
 			}
 			case "REVEAL": {
 				return (yield* this.parameters[0].eval(card, player, ability)).filter(card => card.current()).map(card => new actions.Reveal(card.current(), player));
@@ -597,6 +624,7 @@ defense: ${defense}`));
 			case "DRAW":
 			case "GAINLIFE":
 			case "GAINMANA":
+			case "GETCOUNTERS":
 			case "LOSELIFE":
 			case "LOSEMANA":
 			case "ORDER": // technically can't order nothing but that should never matter in practice
@@ -633,6 +661,12 @@ defense: ${defense}`));
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "MOVE": {
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
+			}
+			case "PUTCOUNTERS": {
+				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
+			}
+			case "REMOVECOUNTERS": {
 				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.length > 0) !== undefined;
 			}
 			case "REVEAL": {

@@ -676,6 +676,7 @@ export class Reveal extends Action {
 	constructor(card, player) {
 		super();
 		this.card = card;
+		this.player = player;
 		this.oldHiddenState = null;
 	}
 
@@ -692,5 +693,37 @@ export class Reveal extends Action {
 
 	isImpossible(timing) {
 		return this.card.hiddenFor.length == 0;
+	}
+}
+
+export class ChangeCounters extends Action {
+	constructor(card, type, amount) {
+		super();
+		this.card = card;
+		this.type = type;
+		this.amount = amount;
+		this.oldAmount = null;
+	}
+
+	async* run() {
+		this.card = new SnapshotCard(this.card);
+		let card = this.card.current();
+		if (!card.counters[this.type]) {
+			card.counters[this.type] = 0;
+		}
+		this.oldAmount = card.counters[this.type];
+		card.counters[this.type] += this.amount;
+		return events.createCountersChangedEvent(this.card, this.type);
+	}
+
+	undo() {
+		this.card.current().counters[this.type] = this.oldAmount;
+	}
+
+	isImpossible(timing) {
+		return (this.card.counters[this.type] ?? 0) == 0 && this.amount < 0;
+	}
+	isFullyPossible(timing) {
+		return (this.card.counters[this.type] ?? 0) + this.amount >= 0;
 	}
 }

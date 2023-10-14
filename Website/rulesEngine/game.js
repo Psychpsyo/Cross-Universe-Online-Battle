@@ -49,6 +49,20 @@ export const baseTypes = [
 	"Water",
 	"Wind"
 ];
+export const baseCounters = [
+	"Charge",
+	"Chaos",
+	"Ember",
+	"Emergence",
+	"Heaven",
+	"Invasion",
+	"Protection",
+	"Rose",
+	"Stinger",
+	"Time",
+	"Weakness",
+	"Wrath"
+];
 
 export const novelTypes = [
 	"Ninja",
@@ -56,6 +70,7 @@ export const novelTypes = [
 	"Ninjutsu",
 	"Song"
 ];
+export const novelCounters = [];
 
 export class Game {
 	constructor() {
@@ -71,6 +86,7 @@ export class Game {
 		this.rng = new CURandom(); // the random number source for this game
 		this.config = {
 			allTypes: baseTypes, // all types that the game is aware of. This may be extended by custom types to allow for custom cards.
+			allCounters: baseCounters, // all counters that the game is aware of. This may be extended by custom counters to allow for custom cards.
 			startingPlayerChooses: false, // whether or not the randomly selected starting player gets to choose the actual starting player
 			validateCardAmounts: true, // whether or not deck card counts should be validated
 			lowerDeckLimit: 30, // the minimum number of cards a deck needs

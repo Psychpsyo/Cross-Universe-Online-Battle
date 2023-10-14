@@ -25,6 +25,7 @@ export class BaseCard {
 		this.index = -1;
 		this.lastMoveTimingIndex = 0;
 
+		this.counters = {};
 		this.equippedTo = null;
 		this.equipments = [];
 		this.attackCount = 0;

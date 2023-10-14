@@ -280,6 +280,7 @@ function parseValue() {
 		}
 		case "cardType":
 		case "cardId":
+		case "counter":
 		case "type": {
 			return parseValueArray();
 		}

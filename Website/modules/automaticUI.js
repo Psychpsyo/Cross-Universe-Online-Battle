@@ -313,7 +313,7 @@ export async function promptOrderSelection(title, labels, confirmLabel) {
 	for (const label of labels) {
 		let orderItem = document.createElement("div");
 		orderItem.classList.add("bigButton");
-		orderItem.classList.add("itemOrderText");
+		orderItem.classList.add("itemOrderAbility");
 		orderItem.textContent = label;
 		orderItem.addEventListener("click", function() {
 			// either add or remove the index from this element.

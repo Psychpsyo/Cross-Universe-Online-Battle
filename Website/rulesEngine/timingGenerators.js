@@ -64,7 +64,7 @@ export class TimingRunner {
 		let events = await generator.next();
 		while (!events.done && (playerChoices.length > 0 || events.value[0].nature !== "request")) {
 			if (events.value[0].nature === "request") {
-				events = await generator.next([playerChoices.shift()]);
+				events = await generator.next(playerChoices.shift());
 			} else {
 				events = await generator.next();
 			}
@@ -89,7 +89,7 @@ export async function generateOptionTree(runner, endOfTreeCheck, generator = nul
 		generator = runner.run(true);
 	}
 	let node = new OptionTreeNode(lastNode, lastChoice);
-	let events = await generator.next([lastChoice]);
+	let events = await generator.next(lastChoice);
 	// go to next user input request
 	while (!events.done && events.value[0].nature !== "request") {
 		events = await generator.next();

@@ -183,6 +183,7 @@ export class FieldZone extends Zone {
 		}
 		this.cards[index] = card;
 		card.zone = this;
+		card.lastMoveTimingIndex = card.owner.game.nextTimingIndex - 1;
 		card.index = index;
 		card.hiddenFor = [];
 		return index;
