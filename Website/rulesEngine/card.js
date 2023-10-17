@@ -303,6 +303,9 @@ export class SnapshotCard extends BaseCard {
 		this.index = card.index;
 		this.lastMoveTimingIndex = card.lastMoveTimingIndex;
 
+		for (const [counter, amount] of Object.entries(card.counters)) {
+			this.counters[counter] = amount;
+		}
 		this.attackCount = card.attackCount;
 		this.canAttackAgain = card.canAttackAgain;
 		this.isAttacking = card.isAttacking;
@@ -340,6 +343,10 @@ export class SnapshotCard extends BaseCard {
 		this._actualCard.equipments = this.equipments.map(equipment => equipment._actualCard);
 		for (const equipment of this._actualCard.equipments) {
 			equipment.equippedTo = this._actualCard;
+		}
+
+		for (const [counter, amount] of Object.entries(this.counters)) {
+			this._actualCard.counters[counter] = amount;
 		}
 		this._actualCard.attackCount = this.attackCount;
 		this._actualCard.canAttackAgain = this.canAttackAgain;
