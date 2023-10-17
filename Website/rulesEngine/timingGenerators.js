@@ -154,11 +154,11 @@ export function* abilityTimingGenerator(ability, card, player) {
 }
 
 export function* equipTimingGenerator(equipChoiceAction, player) {
-	yield [new actions.EquipCard(equipChoiceAction.spellItem.current(), equipChoiceAction.chosenUnit.current(), player)];
+	yield [new actions.EquipCard(player, equipChoiceAction.spellItem.current(), equipChoiceAction.chosenUnit.current())];
 }
 
 export function* retireTimingGenerator(player, units) {
-	let discardTiming = yield units.map(unit => new actions.Discard(unit, true));
+	let discardTiming = yield units.map(unit => new actions.Discard(player, unit, true));
 
 	let gainedMana = 0;
 	for (const action of discardTiming.actions) {
@@ -184,10 +184,10 @@ export function* fightTimingGenerator(attackDeclaration) {
 	// RULES: If the Attack is greater the attacker destroys the target.
 	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
 	if (totalAttack > attackDeclaration.target.values.defense) {
-		let discard = new actions.Discard(attackDeclaration.target);
+		let discard = new actions.Discard(attackDeclaration.target.owner, attackDeclaration.target);
 		let actionList = [new actions.Destroy(discard), discard];
 		if (attackDeclaration.target.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(attackDeclaration.target.zone.player, totalAttack - attackDeclaration.target.values.defense));
+			actionList.push(new actions.DealDamage(attackDeclaration.target.currentOwner(), totalAttack - attackDeclaration.target.values.defense));
 		}
 		yield actionList;
 	}
@@ -211,10 +211,10 @@ export function* fightTimingGenerator(attackDeclaration) {
 
 	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
 	if (attackDeclaration.target.values.attack > counterattackTarget.values.defense) {
-		let discard = new actions.Discard(counterattackTarget);
+		let discard = new actions.Discard(counterattackTarget.owner, counterattackTarget);
 		let actionList = [new actions.Destroy(discard), discard];
 		if (counterattackTarget.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(counterattackTarget.zone.player, attackDeclaration.target.values.attack - counterattackTarget.values.defense));
+			actionList.push(new actions.DealDamage(counterattackTarget.currentOwner(), attackDeclaration.target.values.attack - counterattackTarget.values.defense));
 		}
 		yield actionList;
 	}

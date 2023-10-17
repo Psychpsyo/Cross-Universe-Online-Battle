@@ -201,7 +201,7 @@ export class Timing {
 			}
 		}
 
-		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.current(), card.zone.player.next())));
+		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.currentOwner().next(), card.current())));
 		if (allActions.length > 0) {
 			return new Timing(this.game, allActions, this.block);
 		}
@@ -209,13 +209,13 @@ export class Timing {
 		let invalidEquipments = [];
 		for (const equipment of this.game.players.map(player => player.spellItemZone.cards).flat()) {
 			if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
-				(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.zone.player, null)[0].includes(equipment.equippedTo))
+				(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.currentOwner(), null)[0].get(equipment.currentOwner()).includes(equipment.equippedTo))
 			) {
 				invalidEquipments.push(equipment);
 			}
 		}
 		if (invalidEquipments.length > 0) {
-			let discards = invalidEquipments.map(equipment => new actions.Discard(equipment));
+			let discards = invalidEquipments.map(equipment => new actions.Discard(equipment.owner, equipment));
 			return new Timing(this.game, discards.concat(discards.map(discard => new actions.Destroy(discard))), this.block);
 		}
 		return null;
@@ -249,7 +249,7 @@ function* phaseStaticAbilities(game) {
 	for (let currentCard of activeCards) {
 		for (let ability of currentCard.values.abilities) {
 			if (ability instanceof abilities.StaticAbility) {
-				let eligibleCards = ability.getTargetCards(currentCard, currentCard.zone.player);
+				let eligibleCards = ability.getTargetCards(currentCard, currentCard.currentOwner());
 				for (let otherCard of activeCards) {
 					if (eligibleCards.includes(otherCard)) {
 						if (!otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
@@ -278,10 +278,10 @@ function* phaseStaticAbilities(game) {
 		let fieldEnterBuckets = [{}, {}];
 		for (let i = value.length - 1; i >= 0; i--) {
 			if (value[i].source === card) {
-				card.modifierStack.push(value[i].ability.getModifier(value[i].source, value[i].source.zone.player));
+				card.modifierStack.push(value[i].ability.getModifier(value[i].source, value[i].source.currentOwner()));
 				value.splice(i, 1);
 			} else {
-				let fieldIndex = value[i].source.zone.player.index;
+				let fieldIndex = value[i].source.currentOwner().index;
 				let lastMoved = value[i].source.lastMoveTimingIndex;
 				if (fieldEnterBuckets[fieldIndex][lastMoved] === undefined) {
 					fieldEnterBuckets[fieldIndex][lastMoved] = [];
@@ -290,7 +290,7 @@ function* phaseStaticAbilities(game) {
 			}
 		}
 
-		for (const fieldIndex of [card.zone.player.index, card.zone.player.next().index]) {
+		for (const fieldIndex of [card.currentOwner().index, card.currentOwner().next().index]) {
 			for (const timing of Object.keys(fieldEnterBuckets[fieldIndex]).sort()) {
 				let orderedAbilities = [0];
 				if (fieldEnterBuckets[fieldIndex][timing].length !== 1) {
@@ -303,7 +303,7 @@ function* phaseStaticAbilities(game) {
 				}
 				for (let index of orderedAbilities) {
 					let application = fieldEnterBuckets[fieldIndex][timing][index];
-					card.modifierStack.push(application.ability.getModifier(application.source, application.source.zone.player));
+					card.modifierStack.push(application.ability.getModifier(application.source, application.source.currentOwner()));
 				}
 			}
 		}

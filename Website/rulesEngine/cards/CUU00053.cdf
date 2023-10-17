@@ -9,4 +9,4 @@ defense: 100
 o: trigger
 mandatory: yes
 after: destroyed = thisCard
-DAMAGE(100) & opponent.DAMAGE(100)
+both.DAMAGE(100)

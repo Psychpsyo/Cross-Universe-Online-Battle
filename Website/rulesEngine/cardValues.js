@@ -65,7 +65,7 @@ export class CardModifier {
 			let worksOnCard = true;
 			ast.setImplicitCard(this.card);
 			for (const unaffection of unaffections) {
-				if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0]) {
+				if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
 					worksOnCard = false;
 					break;
 				}
@@ -74,7 +74,7 @@ export class CardModifier {
 			ast.setImplicitCard(card);
 			if (worksOnCard &&
 				modification instanceof ValueUnaffectedModification === toUnaffections &&
-				(modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)[0])
+				(modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)[0].get(this.player))
 			) {
 				if (toUnaffections) {
 					unaffections.push({
@@ -149,7 +149,7 @@ export class ValueSetModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let newValue = this.newValue.evalFull(card, player, ability)[0];
+		let newValue = this.newValue.evalFull(card, player, ability)[0].get(player);
 		if (toBaseValues === this.toBase) {
 			if (["level", "attack", "defense"].includes(this.value)) {
 				values[this.value] = newValue[0];
@@ -161,7 +161,7 @@ export class ValueSetModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.newValue.evalFull(card, player, ability)[0];
+		let valueArray = this.newValue.evalFull(card, player, ability)[0].get(player);
 		if (valueArray.length == 0) {
 			return null;
 		}
@@ -176,7 +176,7 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let newValues = this.newValues.evalFull(card, player, ability)[0];
+		let newValues = this.newValues.evalFull(card, player, ability)[0].get(player);
 		if (toBaseValues === this.toBase) {
 			for (let newValue of newValues) {
 				if (!values[this.value].includes(newValue)) {
@@ -188,7 +188,7 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.newValues.evalFull(card, player, ability)[0];
+		let valueArray = this.newValues.evalFull(card, player, ability)[0].get(player);
 		if (valueArray.length == 0) {
 			return null;
 		}
@@ -203,7 +203,7 @@ export class NumericChangeModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let amount = this.amount.evalFull(card, player, ability)[0][0];
+		let amount = this.amount.evalFull(card, player, ability)[0].get(player)[0];
 		if (toBaseValues === this.toBase) {
 			values[this.value] = Math.max(0, values[this.value] + amount);
 		}
@@ -211,7 +211,7 @@ export class NumericChangeModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.amount.evalFull(card, player, ability)[0];
+		let valueArray = this.amount.evalFull(card, player, ability)[0].get(player);
 		if (valueArray.length == 0) {
 			return null;
 		}
@@ -226,7 +226,7 @@ export class NumericDivideModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let byAmount = this.byAmount.evalFull(card, player, ability)[0][0];
+		let byAmount = this.byAmount.evalFull(card, player, ability)[0].get(player)[0];
 		if (toBaseValues === this.toBase) {
 			values[this.value] = Math.ceil(values[this.value] / byAmount);
 		}
@@ -234,7 +234,7 @@ export class NumericDivideModification extends ValueModification {
 	}
 
 	bake(card, player, ability) {
-		let valueArray = this.byAmount.evalFull(card, player, ability)[0];
+		let valueArray = this.byAmount.evalFull(card, player, ability)[0].get(player);
 		if (valueArray.length == 0) {
 			return null;
 		}

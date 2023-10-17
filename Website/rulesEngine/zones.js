@@ -1,6 +1,6 @@
 // This module exports zone-related classes which define single zones as per the Cross Universe rules.
 
-import {TriggerAbility, CastAbility} from "./abilities.js";
+import {TriggerAbility} from "./abilities.js";
 
 export class Zone {
 	constructor(player, type) {
@@ -16,6 +16,10 @@ export class Zone {
 		}
 		if (card.zone && card.zone.cards.includes(card)) {
 			card.zone.remove(card);
+		}
+		if (card.placedTo) {
+			card.placedTo.placed[card.index] = null;
+			card.placedTo = null;
 		}
 		if (!card.values.cardTypes.includes("token")) {
 			this.cards.splice(index, 0, card);
@@ -175,6 +179,10 @@ export class FieldZone extends Zone {
 		if (card.zone && card.zone.cards.includes(card)) {
 			card.zone.remove(card);
 		}
+		if (card.placedTo) {
+			card.placedTo.placed[card.index] = null;
+			card.placedTo = null;
+		}
 		if (clearValues) {
 			// If the card came from outside the field, it stops being tracked as itself.
 			if (!(card.zone instanceof FieldZone)) {
@@ -202,6 +210,8 @@ export class FieldZone extends Zone {
 		if (this.get(index) == null) {
 			card.zone?.remove(card);
 			this.placed[index] = card;
+			card.placedTo = this;
+			card.index = index;
 		}
 	}
 

@@ -37,7 +37,7 @@ function getCardXY(card) {
 			break;
 		}
 	}
-	if (card.zone.player !== localPlayer) {
+	if (card.currentOwner() !== localPlayer) {
 		slotX *= -1;
 		slotY *= -1;
 	}

@@ -18,9 +18,7 @@ export function parseScript(tokenList, newEffectId, type) {
 	pos = 0;
 
 	switch (type) {
-		case "applyTarget": {
-			return new ast.ApplyTargetRootNode(parseExpression());
-		}
+		case "applyTarget":
 		case "equipableTo":
 		case "cardCondition":
 		case "during":
@@ -48,49 +46,19 @@ export function parseScript(tokenList, newEffectId, type) {
 }
 
 function parseLine() {
-	let actionNodes = [];
 	let variableName = null;
-	do {
-		switch (tokens[pos].type) {
-			case "function": {
-				actionNodes.push(parseFunction());
-				break;
-			}
-			case "variable": {
-				switch (tokens[pos+1].type) {
-					case "equals": {
-						variableName = tokens[pos].value;
-						pos += 2;
-						actionNodes.push(parseExpression());
-						break;
-					}
-					case "dotOperator": {
-						actionNodes.push(parseFunction());
-						break;
-					}
-					default: {
-						throw new ScriptParserError("Line starting with 'variable' token continues with unwanted '" + tokens[pos+1].type + "'.");
-					}
-				}
-				break;
-			}
-			case "player": {
-				actionNodes.push(parseFunction());
-				break;
-			}
-			default: {
-				throw new ScriptParserError("'" + tokens[pos].type + "' is not a valid token at the start of a line.");
-			}
-		}
-	} while (pos < tokens.length - 1 && tokens[pos++].type == "andOperator");
-	return new ast.LineNode(actionNodes, variableName);
+	if (tokens[pos].type === "variable" && tokens[pos+1].type === "equals") {
+		variableName = tokens[pos].value;
+		pos += 2;
+	}
+	return new ast.LineNode(parseExpression(), variableName);
 }
 
 function parseFunction() {
 	let player;
 	switch (tokens[pos].type) {
 		case "function": {
-			player = new ast.PlayerNode("self");
+			player = new ast.PlayerNode("own");
 			break;
 		}
 		case "player": {

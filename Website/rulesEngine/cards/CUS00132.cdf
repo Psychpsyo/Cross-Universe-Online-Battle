@@ -13,4 +13,4 @@ mandatory: yes
 after: COUNT([from discarded where self = thisCard & zone = [hand, deck]]) > 0
 condition: [from you.partnerZone].types = Fire
 DAMAGE(100)
-DRAW(1) & opponent.DRAW(1)
+both.DRAW(1)

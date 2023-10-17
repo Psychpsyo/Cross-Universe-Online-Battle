@@ -22,6 +22,7 @@ export class BaseCard {
 		this.modifierStack = [];
 
 		this.zone = null;
+		this.placedTo = null;
 		this.index = -1;
 		this.lastMoveTimingIndex = 0;
 
@@ -51,6 +52,10 @@ export class BaseCard {
 			}
 		}
 		return false;
+	}
+
+	currentOwner() {
+		return this.zone?.player ?? this.placedTo?.player ?? this.owner;
 	}
 
 	// Whenever a card's values change, this function re-evaluates the modifier stack to figure out what the new value should be.
@@ -148,8 +153,8 @@ export class BaseCard {
 			return false;
 		}
 		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
-			(this.condition !== null && !this.condition.evalFull(this, player, null)[0]) ||
-			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(this, player, null)[0].length == 0)
+			(this.condition !== null && !this.condition.evalFull(this, player, null)[0].get(player)) ||
+			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(this, player, null)[0].get(player).length == 0)
 		) {
 			return false;
 		}
@@ -174,8 +179,8 @@ export class BaseCard {
 			return false;
 		}
 		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
-			(this.condition !== null && !this.condition.evalFull(this, player, null)[0]) ||
-			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(this, player, null)[0].length == 0)
+			(this.condition !== null && !this.condition.evalFull(this, player, null)[0].get(player)) ||
+			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(this, player, null)[0].get(player).length == 0)
 		) {
 			return false;
 		}
@@ -294,6 +299,7 @@ export class SnapshotCard extends BaseCard {
 			return new SnapshotCard(equipment, this);
 		}).bind(this));
 		this.zone = card.zone;
+		this.placedTo = card.placedTo;
 		this.index = card.index;
 		this.lastMoveTimingIndex = card.lastMoveTimingIndex;
 
@@ -310,11 +316,12 @@ export class SnapshotCard extends BaseCard {
 
 	restore() {
 		// tokens might need to be restored back to non-existance
-		if (this.zone === null) {
+		if (this.zone === null && this.placedTo === null) {
 			this._actualCard.zone.remove(this._actualCard);
 			return;
 		}
-		this.zone.add(this._actualCard, this.index, false);
+		this.zone?.add(this._actualCard, this.index, false);
+		this.placedTo?.place(this._actualCard, this.index);
 		if (this._actualCard.globalId != this.globalId) {
 			this._actualCard.undoInvalidateSnapshots();
 		}

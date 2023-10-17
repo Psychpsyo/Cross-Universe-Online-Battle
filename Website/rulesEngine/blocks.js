@@ -243,7 +243,7 @@ export class DeployItem extends Block {
 					// standard items first activate and are only treated as briefly on the field after
 					execTimingGenerators.unshift(timingGenerators.abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
-					execTimingGenerators.push(timingGenerators.arrayTimingGenerator([[new actions.Discard(card)]]));
+					execTimingGenerators.push(timingGenerators.arrayTimingGenerator([[new actions.Discard(player, card)]]));
 				} else {
 					execTimingGenerators.push(timingGenerators.abilityTimingGenerator(ability, card, player));
 				}
@@ -300,7 +300,7 @@ export class CastSpell extends Block {
 					// standard spells first activate and are only treated as briefly on the field after
 					execTimingGenerators.unshift(timingGenerators.abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
-					execTimingGenerators.push(timingGenerators.arrayTimingGenerator([[new actions.Discard(card)]]));
+					execTimingGenerators.push(timingGenerators.arrayTimingGenerator([[new actions.Discard(player, card)]]));
 				} else {
 					execTimingGenerators.push(timingGenerators.abilityTimingGenerator(ability, card, player));
 				}

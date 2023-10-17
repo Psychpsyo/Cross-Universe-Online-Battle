@@ -18,4 +18,4 @@ o: trigger
 mandatory: yes
 during: currentPhase = endPhase
 condition: thisCard.zone = field
-DAMAGE(50) & opponent.DAMAGE(50)
+both.DAMAGE(50)

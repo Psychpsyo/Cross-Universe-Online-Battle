@@ -191,7 +191,7 @@ export class ManaSupplyPhase extends Phase {
 			if (player.handZone.cards.length > 8) {
 				let choiceRequest = requests.chooseCards.create(player, player.handZone.cards, [player.handZone.cards.length - 8], "handTooFull");
 				let chosenCards = requests.chooseCards.validate((yield [choiceRequest])[0].value, choiceRequest);
-				this.timings.push(new Timing(this.turn.game, chosenCards.map(card => new actions.Discard(card)), null));
+				this.timings.push(new Timing(this.turn.game, chosenCards.map(card => new actions.Discard(player, card)), null));
 				await (yield* this.runTiming());
 			}
 		}

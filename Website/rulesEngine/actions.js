@@ -23,7 +23,8 @@ function* queryZoneSlot(player, zone) {
 
 // Base class for any action in the game.
 export class Action {
-	constructor() {
+	constructor(player) {
+		this.player = player;
 		this.timing = null; // Is set by the Timing itself
 		this.costIndex = -1; // If this is positive, it indicates that this action is to be treated as a cost, together with other actions of the same costIndex
 	}
@@ -47,8 +48,7 @@ export class Action {
 
 export class ChangeMana extends Action {
 	constructor(player, amount) {
-		super();
-		this.player = player;
+		super(player);
 		this.amount = amount;
 	}
 
@@ -72,8 +72,7 @@ export class ChangeMana extends Action {
 
 export class ChangeLife extends Action {
 	constructor(player, amount) {
-		super();
-		this.player = player;
+		super(player);
 		this.amount = amount;
 		this.oldAmount = null;
 	}
@@ -102,8 +101,7 @@ export class ChangeLife extends Action {
 
 export class Draw extends Action {
 	constructor(player, amount) {
-		super();
-		this.player = player;
+		super(player);
 		this.amount = amount;
 		this.drawnCards = [];
 	}
@@ -146,8 +144,7 @@ export class Draw extends Action {
 // places a card on the field without moving it there yet.
 export class Place extends Action {
 	constructor(player, card, zone) {
-		super();
-		this.player = player;
+		super(player);
 		this.card = card;
 		this.zone = zone;
 		this.targetIndex = null;
@@ -177,8 +174,7 @@ export class Place extends Action {
 
 export class Summon extends Action {
 	constructor(player, placeAction) {
-		super();
-		this.player = player;
+		super(player);
 		this.placeAction = placeAction;
 	}
 
@@ -202,16 +198,17 @@ export class Summon extends Action {
 
 export class Deploy extends Action {
 	constructor(player, placeAction) {
-		super();
-		this.player = player;
+		super(player);
 		this.placeAction = placeAction;
 	}
 
 	async* run() {
-		let card = this.placeAction.card.current();
+		let card = this.placeAction.card.current() ?? this.placeAction.card;
 		let deployEvent = events.createCardDeployedEvent(this.player, this.placeAction.card, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
-		this.placeAction.zone.add(card, this.placeAction.targetIndex);
-		this.placeAction.card.globalId = card.globalId;
+		if (this.placeAction.card.current()) {
+			this.placeAction.zone.add(card, this.placeAction.targetIndex);
+			this.placeAction.card.globalId = card.globalId;
+		}
 		return deployEvent;
 	}
 
@@ -227,16 +224,17 @@ export class Deploy extends Action {
 
 export class Cast extends Action {
 	constructor(player, placeAction) {
-		super();
-		this.player = player;
+		super(player);
 		this.placeAction = placeAction;
 	}
 
 	async* run() {
-		let card = this.placeAction.card.current();
+		let card = this.placeAction.card.current() ?? this.placeAction.card;
 		let castEvent = events.createCardCastEvent(this.player, this.placeAction.card, card.zone, card.index, this.placeAction.zone, this.placeAction.targetIndex);
-		this.placeAction.zone.add(card, this.placeAction.targetIndex);
-		this.placeAction.card.globalId = card.globalId;
+		if (this.placeAction.card.current()) {
+			this.placeAction.zone.add(card, this.placeAction.targetIndex);
+			this.placeAction.card.globalId = card.globalId;
+		}
 		return castEvent;
 	}
 
@@ -252,8 +250,7 @@ export class Cast extends Action {
 
 export class Move extends Action {
 	constructor(player, card, zone, targetIndex) {
-		super();
-		this.player = player;
+		super(player);
 		this.card = card;
 		this.zone = zone;
 		this.targetIndex = targetIndex;
@@ -299,8 +296,7 @@ export class Move extends Action {
 
 export class EstablishAttackDeclaration extends Action {
 	constructor(player, attackers) {
-		super();
-		this.player = player;
+		super(player);
 		this.attackers = attackers;
 		this.attackTarget = null;
 	}
@@ -339,8 +335,7 @@ export class EstablishAttackDeclaration extends Action {
 
 export class DealDamage extends Action {
 	constructor(player, amount) {
-		super();
-		this.player = player;
+		super(player);
 		this.amount = amount;
 		this.oldAmount = null;
 	}
@@ -364,8 +359,8 @@ export class DealDamage extends Action {
 }
 
 export class Discard extends Action {
-	constructor(card, isRetire = false) {
-		super();
+	constructor(player, card, isRetire = false) {
+		super(player);
 		this.card = card;
 		this.isRetire = isRetire;
 	}
@@ -388,7 +383,7 @@ export class Discard extends Action {
 	}
 
 	isImpossible(timing) {
-		if (this.card.zone?.type == "partner") {
+		if (this.card.zone?.type === "partner") {
 			return true;
 		}
 		return false;
@@ -397,7 +392,7 @@ export class Discard extends Action {
 
 export class Destroy extends Action {
 	constructor(discard) {
-		super();
+		super(discard.player);
 		this.discard = discard;
 	}
 
@@ -415,8 +410,8 @@ export class Destroy extends Action {
 }
 
 export class Exile extends Action {
-	constructor(card) {
-		super();
+	constructor(player, card) {
+		super(player);
 		this.card = card;
 	}
 
@@ -438,7 +433,7 @@ export class Exile extends Action {
 	}
 
 	isImpossible(timing) {
-		if (this.card.zone.type == "partner") {
+		if (this.card.zone?.type === "partner") {
 			return true;
 		}
 		return false;
@@ -446,8 +441,8 @@ export class Exile extends Action {
 }
 
 export class ApplyCardStatChange extends Action {
-	constructor(card, modifier, until) {
-		super();
+	constructor(player, card, modifier, until) {
+		super(player);
 		this.card = card;
 		this.modifier = modifier;
 		this.until = until;
@@ -459,7 +454,7 @@ export class ApplyCardStatChange extends Action {
 		if (this.until == "forever") {
 			return;
 		}
-		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.card.current(), this.modifier)], null);
+		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.player, this.card.current(), this.modifier)], null);
 		switch (this.until) {
 			case "endOfTurn": {
 				this.card.owner.game.currentTurn().endOfTurnTimings.push(removalTiming);
@@ -470,12 +465,12 @@ export class ApplyCardStatChange extends Action {
 				break;
 			}
 			case "endOfYourNextTurn": {
-				let currentlyYourTurn = this.card.owner.game.currentTurn().player == this.modifier.card.zone.player;
+				let currentlyYourTurn = this.card.owner.game.currentTurn().player == this.modifier.card.currentOwner();
 				this.card.owner.game.endOfUpcomingTurnTimings[currentlyYourTurn? 1 : 0].push(removalTiming);
 				break;
 			}
 			case "endOfOpponentNextTurn": {
-				let currentlyOpponentTurn = this.card.owner.game.currentTurn().player != this.modifier.card.zone.player;
+				let currentlyOpponentTurn = this.card.owner.game.currentTurn().player != this.modifier.card.currentOwner();
 				this.card.owner.game.endOfUpcomingTurnTimings[currentlyOpponentTurn? 1 : 0].push(removalTiming);
 				break;
 			}
@@ -503,8 +498,8 @@ export class ApplyCardStatChange extends Action {
 }
 
 export class RemoveCardStatChange extends Action {
-	constructor(card, modifier) {
-		super();
+	constructor(player, card, modifier) {
+		super(player);
 		this.card = card;
 		this.modifier = modifier;
 		this.index = -1;
@@ -524,8 +519,8 @@ export class RemoveCardStatChange extends Action {
 }
 
 export class CancelAttack extends Action {
-	constructor() {
-		super();
+	constructor(player) {
+		super(player);
 		this.wasCancelled = null;
 	}
 
@@ -544,8 +539,8 @@ export class CancelAttack extends Action {
 }
 
 export class SetAttackTarget extends Action {
-	constructor(newTarget) {
-		super();
+	constructor(player, newTarget) {
+		super(player);
 		this.newTarget = newTarget;
 		this.oldTarget = null;
 	}
@@ -568,9 +563,9 @@ export class SetAttackTarget extends Action {
 	}
 }
 
-export class GainAttack extends Action {
-	constructor(card) {
-		super();
+export class GiveAttack extends Action {
+	constructor(player, card) {
+		super(player);
 		this.card = card;
 		this.oldCanAttackAgain = null;
 	}
@@ -590,15 +585,14 @@ export class GainAttack extends Action {
 }
 
 export class SelectEquipableUnit extends Action {
-	constructor(spellItem, player) {
-		super();
+	constructor(player, spellItem) {
+		super(player);
 		this.spellItem = spellItem;
-		this.player = player;
 		this.chosenUnit = null;
 	}
 
 	async* run() {
-		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0], [1], "equipTarget:" + this.spellItem.cardId);
+		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0].get(this.player), [1], "equipTarget:" + this.spellItem.cardId);
 		let response = yield [selectionRequest];
 		if (response.type != "chooseCards") {
 			throw new Error("Incorrect response type supplied when selecting unit to equip to. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
@@ -607,16 +601,15 @@ export class SelectEquipableUnit extends Action {
 	}
 
 	isImpossible(timing) {
-		return this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0].length == 0;
+		return this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0].get(this.player).length == 0;
 	}
 }
 
 export class EquipCard extends Action {
-	constructor(equipment, target, player) {
-		super();
+	constructor(player, equipment, target) {
+		super(player);
 		this.equipment = equipment;
 		this.target = target;
-		this.player = player;
 	}
 
 	async* run() {
@@ -634,14 +627,13 @@ export class EquipCard extends Action {
 	}
 
 	isImpossible(timing) {
-		return !this.equipment.equipableTo.evalFull(this.spellItem, this.player, null)[0].includes(this.target);
+		return !this.equipment.equipableTo.evalFull(this.spellItem, this.player, null)[0].get(this.player).includes(this.target);
 	}
 }
 
 export class Shuffle extends Action {
 	constructor(player) {
-		super();
-		this.player = player;
+		super(player);
 	}
 
 	async* run() {
@@ -655,10 +647,9 @@ export class Shuffle extends Action {
 }
 
 export class View extends Action {
-	constructor(card, player) {
-		super();
+	constructor(player, card) {
+		super(player);
 		this.card = card;
-		this.player = player;
 	}
 
 	async* run() {
@@ -673,10 +664,9 @@ export class View extends Action {
 }
 
 export class Reveal extends Action {
-	constructor(card, player) {
-		super();
+	constructor(player, card) {
+		super(player);
 		this.card = card;
-		this.player = player;
 		this.oldHiddenState = null;
 	}
 
@@ -697,8 +687,8 @@ export class Reveal extends Action {
 }
 
 export class ChangeCounters extends Action {
-	constructor(card, type, amount) {
-		super();
+	constructor(player, card, type, amount) {
+		super(player);
 		this.card = card;
 		this.type = type;
 		this.amount = amount;

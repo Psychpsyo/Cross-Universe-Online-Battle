@@ -12,7 +12,7 @@ export class BaseAbility {
 	}
 
 	canActivate(card, player, evaluatingPlayer = player) {
-		return this.condition === null || this.condition.evalFull(card, player, this)[0];
+		return this.condition === null || this.condition.evalFull(card, player, this)[0].get(player);
 	}
 
 	snapshot() {
@@ -70,12 +70,12 @@ export class CastAbility extends Ability {
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during spell casting
 	canActivate(card, player, evaluatingPlayer = player) {
-		return (this.condition === null || this.condition.evalFull(card, player, this)[0]) &&
+		return (this.condition === null || this.condition.evalFull(card, player, this)[0].get(player)) &&
 			(this.after === null || this.triggerMetOnStack === player.game.currentStack().index - 1);
 	}
 
 	checkTrigger(card, player) {
-		if (this.after == null || this.after.evalFull(card, player, this)[0]) {
+		if (this.after == null || this.after.evalFull(card, player, this)[0].get(player)) {
 			this.triggerMetOnStack = player.game.currentStack().index;
 		}
 	}
@@ -88,7 +88,7 @@ export class DeployAbility extends Ability {
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during item deployment
 	canActivate(card, player, evaluatingPlayer = player) {
-		return (this.condition === null || this.condition.evalFull(card, player, this)[0]);
+		return (this.condition === null || this.condition.evalFull(card, player, this)[0].get(player));
 	}
 }
 
@@ -102,10 +102,10 @@ export class OptionalAbility extends Ability {
 	}
 
 	async canActivate(card, player, evaluatingPlayer = player) {
-		return await (super.canActivate(card, player, evaluatingPlayer)) &&
-		this.turnActivationCount < this.turnLimit &&
+		return this.turnActivationCount < this.turnLimit &&
 		(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
-		(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit);
+		(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit) &&
+		await (super.canActivate(card, player, evaluatingPlayer));
 	}
 
 	successfulActivation() {
@@ -123,10 +123,10 @@ export class FastAbility extends Ability {
 	}
 
 	async canActivate(card, player, evaluatingPlayer = player) {
-		return (await super.canActivate(card, player, evaluatingPlayer)) &&
-		this.turnActivationCount < this.turnLimit &&
+		return this.turnActivationCount < this.turnLimit &&
 		(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
-		(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit);
+		(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit) &&
+		await super.canActivate(card, player, evaluatingPlayer);
 }
 
 	successfulActivation() {
@@ -166,7 +166,7 @@ export class TriggerAbility extends Ability {
 		if (this.after === null) {
 			return;
 		}
-		if (this.after.evalFull(card, player, this)[0]) {
+		if (this.after.evalFull(card, player, this)[0].get(player)) {
 			this.triggerMetOnStack = player.game.currentStack().index;
 		}
 	}
@@ -175,7 +175,7 @@ export class TriggerAbility extends Ability {
 		if (!this.during) {
 			return;
 		}
-		if (!this.during.evalFull(card, player, this)[0]) {
+		if (!this.during.evalFull(card, player, this)[0].get(player)) {
 			this.triggerMetOnStack = -1;
 			this.usedDuring = false;
 		} else if (!this.usedDuring) {
@@ -201,12 +201,12 @@ export class StaticAbility extends BaseAbility {
 
 	getTargetCards(card, player, evaluatingPlayer = player) {
 		if (this.canActivate(card, player, evaluatingPlayer = player)) {
-			return this.applyTo.evalFull(card, player, this)[0];
+			return this.applyTo.evalFull(card, player, this)[0].get(player);
 		}
 		return [];
 	}
 
 	getModifier(card, player) {
-		return this.modifier.evalFull(card, player, this)[0];
+		return this.modifier.evalFull(card, player, this)[0].get(player);
 	}
 }

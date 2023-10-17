@@ -223,7 +223,7 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
-				for (const [playerIndex, cards] of Object.entries(Object.groupBy(events.map(event => event.cards).flat().map(card => new SnapshotCard(card.current())), card => card.owner.index))) {
+				for (const [playerIndex, cards] of Object.entries(Object.groupBy(events.map(event => event.cards).flat().map(card => card.current()? new SnapshotCard(card.current()) : card), card => card.owner.index))) {
 					generalUI.putChatMessage(locale.game.notices[playerIndex == localPlayer.index? "youDrew" : "opponentDrew"], "notice", cards);
 				}
 				await Promise.all(events.map(async event => {
@@ -334,7 +334,7 @@ export class AutomaticController extends InteractionController {
 			case "cardDeployed":
 			case "cardSummoned": {
 				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
-					generalUI.putChatMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", eventList.map(event => new SnapshotCard(event.card.current())));
+					generalUI.putChatMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", eventList.map(event => event.card.current()? new SnapshotCard(event.card.current()) : event.card));
 				}
 				for (const event of events) {
 					gameUI.insertCard(event.toZone, event.toIndex);
@@ -348,7 +348,7 @@ export class AutomaticController extends InteractionController {
 			case "cardDiscarded":
 			case "cardExiled":
 			case "cardMoved": {
-				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => new SnapshotCard(event.card.current())));
+				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => event.card.current()? new SnapshotCard(event.card.current()) : event.card));
 				for (const event of events) {
 					gameUI.removeCard(event.fromZone, event.fromIndex);
 					if (!event.card.values.cardTypes.includes("token") || event.toZone instanceof zones.FieldZone) {
