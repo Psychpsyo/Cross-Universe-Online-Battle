@@ -323,7 +323,7 @@ export class EstablishAttackDeclaration extends Action {
 			attacker.current().canAttackAgain = false;
 		}
 
-		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget.zone, this.attackTarget.index);
+		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget, this.attackers);
 	}
 
 	undo() {

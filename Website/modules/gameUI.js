@@ -93,20 +93,21 @@ function hideCursor() {
 	socket?.send("[hideCursor]");
 }
 
-let profilePictureInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
+// used for profile pictures here but also used for things like the cool attack visuals by automatic games
+export const cardAlignmentInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
 
 export function init() {
 	for (let i = 0; i < 2; i++) {
 		document.getElementById("username" + i).textContent = players[i].name;
 		document.getElementById("profilePicture" + i).style.backgroundImage = "url('" + getCardImageFromID(players[i].profilePicture) + "')";
-		if (profilePictureInfo[players[i].profilePicture]?.left) {
-			document.getElementById("profilePicture" + i).style.backgroundPositionX = profilePictureInfo[players[i].profilePicture].left + "%";
+		if (cardAlignmentInfo[players[i].profilePicture]?.left) {
+			document.getElementById("profilePicture" + i).style.backgroundPositionX = cardAlignmentInfo[players[i].profilePicture].left + "%";
 		}
 	}
-	if (!profilePictureInfo[players[0].profilePicture]?.flip && !profilePictureInfo[players[0].profilePicture]?.neverFlip) {
+	if (!cardAlignmentInfo[players[0].profilePicture]?.flip && !cardAlignmentInfo[players[0].profilePicture]?.neverFlip) {
 		profilePicture0.style.transform = "scaleX(-1)";
 	}
-	if (profilePictureInfo[players[1].profilePicture]?.flip) {
+	if (cardAlignmentInfo[players[1].profilePicture]?.flip) {
 		profilePicture1.style.transform = "scaleX(-1)";
 	}
 

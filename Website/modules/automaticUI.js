@@ -249,7 +249,7 @@ export async function attack(units) {
 			slot.classList.remove("attacking");
 		}, gameState.controller.gameSpeed * 400);
 		animPromises.push(new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 400)));
-		await gameState.controller.gameSleep(.6);
+		await gameState.controller.gameSleep(.3);
 	}
 	return Promise.all(animPromises);
 }
@@ -260,10 +260,8 @@ export async function activate(card) {
 	}
 	let slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
 	slot.classList.add("activating");
-	window.setTimeout(function() {
-		slot.classList.remove("activating");
-	}, gameState.controller.gameSpeed * 1000);
-	return new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1000));
+	await gameState.controller.gameSleep(1);
+	slot.classList.remove("activating");
 }
 
 export async function revealHandCard(card) {
@@ -354,4 +352,41 @@ export async function promptOrderSelection(title, labels, confirmLabel) {
 			resolve(order);
 		}, {once: true});
 	});
+}
+
+// cool attack animation
+export async function showCoolAttackAnim(defender, attackers) {
+	coolAttackVisual.style.setProperty("--attacker-count", attackers.length);
+	coolAttackVisual.classList.add("visible");
+	document.querySelectorAll(".coolAttackSlot").forEach((slot, i) => {
+		slot.style.display = i > attackers.length? "none" : "block";
+	});
+
+	const imgs = document.querySelectorAll(".coolAttackImgHolder > img");
+	imgs[0].src = cardLoader.getCardImage(defender);
+	imgs[0].style.setProperty("--left", -(gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
+	for (let i = 0; i < attackers.length; i++) {
+		imgs[i+1].src = cardLoader.getCardImage(attackers[i]);
+		imgs[i+1].style.setProperty("--left", -(gameUI.cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
+		if (!gameUI.cardAlignmentInfo[attackers[i].cardId]?.flip && !gameUI.cardAlignmentInfo[attackers[i].cardId]?.neverFlip) {
+			imgs[i+1].style.transform = "scaleX(-1)";
+		} else {
+			imgs[i+1].style.transform = "";
+		}
+	}
+
+	const slots = document.getElementsByClassName("coolAttackSlot");
+	for (let i = 0; i < slots.length; i++) {
+		slots[i].classList.remove("coolAttackAnimEnd"); // still there from last time
+		slots[i].classList.add("coolAttackAnimBegin");
+		await gameState.controller.gameSleep(i == 0? .4 : .15);
+	}
+	await gameState.controller.gameSleep(.4 + attackers.length * .05);
+
+	for (const slot of slots) {
+		slot.classList.remove("coolAttackAnimBegin");
+		slot.classList.add("coolAttackAnimEnd");
+	}
+
+	coolAttackVisual.classList.remove("visible");
 }

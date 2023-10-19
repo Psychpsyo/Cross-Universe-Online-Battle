@@ -215,13 +215,13 @@ export function createCardMovedEvent(player, fromZone, fromIndex, toZone, toInde
 	}
 }
 
-export function createAttackDeclarationEstablishedEvent(player, targetZone, targetIndex) {
+export function createAttackDeclarationEstablishedEvent(player, target, attackers) {
 	return {
 		"nature": "event",
 		"type": "attackDeclarationEstablished",
 		"player": player,
-		"targetZone": targetZone,
-		"targetIndex": targetIndex
+		"target": target,
+		"attackers": attackers
 	}
 }
 

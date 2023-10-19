@@ -230,10 +230,10 @@ export class AutomaticController extends InteractionController {
 					for (let i = event.cards.length; i > 0; i--) {
 						gameUI.removeCard(event.player.deckZone, event.player.deckZone.cards.length + i - 1);
 						gameUI.insertCard(event.player.handZone, event.player.handZone.cards.length - i);
-						await this.gameSleep(.5);
+						await this.gameSleep(.25);
 					}
 				}));
-				return this.gameSleep(.5);
+				return this.gameSleep(.25);
 			}
 			case "partnerRevealed": {
 				for (const event of events) {
@@ -252,7 +252,7 @@ export class AutomaticController extends InteractionController {
 						}
 					}
 				}));
-				return this.gameSleep(events.length);
+				return this.gameSleep(events.length / 2);
 			}
 			case "cardViewed": {
 				let localPlayerViewed = events.filter(event => event.player === localPlayer);
@@ -266,7 +266,7 @@ export class AutomaticController extends InteractionController {
 						}
 					}
 				}));
-				return this.gameSleep(events.length);
+				return this.gameSleep(events.length / 2);
 			}
 			case "turnStarted": {
 				autoUI.startTurn();
@@ -355,7 +355,7 @@ export class AutomaticController extends InteractionController {
 						gameUI.insertCard(event.toZone, event.toIndex);
 					}
 				}
-				return this.gameSleep(.5);
+				return this.gameSleep(.25);
 			}
 			case "undoCardsMoved": {
 				for (const event of events) {
@@ -379,6 +379,10 @@ export class AutomaticController extends InteractionController {
 						);
 					}
 				}
+				return;
+			}
+			case "attackDeclarationEstablished": {
+				autoUI.showCoolAttackAnim(events[0].target, events[0].attackers);
 				return;
 			}
 			case "cardsAttacked": {
@@ -733,8 +737,8 @@ export class AutomaticController extends InteractionController {
 		return response;
 	}
 
-	async gameSleep(duration = 1) {
-		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * 500 * duration));
+	async gameSleep(duration = .5) {
+		return new Promise(resolve => setTimeout(resolve, this.gameSpeed * 1000 * duration));
 	}
 
 	cancelRetire(player) {
