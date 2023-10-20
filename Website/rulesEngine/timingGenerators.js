@@ -2,6 +2,7 @@
 
 import {Timing} from "./timings.js";
 import {createCardsAttackedEvent} from "./events.js";
+import {FieldZone} from "./zones.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
 
@@ -217,5 +218,11 @@ export function* fightTimingGenerator(attackDeclaration) {
 			actionList.push(new actions.DealDamage(counterattackTarget.currentOwner(), attackDeclaration.target.values.attack - counterattackTarget.values.defense));
 		}
 		yield actionList;
+	}
+}
+
+export function* spellItemDiscardGenerator(player, spellItem) {
+	if (spellItem.zone instanceof FieldZone) {
+		yield [new actions.Discard(player, spellItem)];
 	}
 }
