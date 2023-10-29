@@ -382,8 +382,7 @@ export class AutomaticController extends InteractionController {
 				return;
 			}
 			case "attackDeclarationEstablished": {
-				autoUI.showCoolAttackAnim(events[0].target, events[0].attackers);
-				return;
+				return autoUI.showCoolAttackAnim(events[0].target, events[0].attackers);
 			}
 			case "cardsAttacked": {
 				autoUI.setAttackTarget(events[0].target);
@@ -713,9 +712,6 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "chooseAbilityOrder": {
-				for (const ability of request.abilities) {
-					console.log(ability);
-				}
 				response.value = await autoUI.promptOrderSelection(
 					locale.game.automatic.orderSelect.abilityPrompt.replaceAll("{#CARDNAME}", (await Promise.all(request.applyTo.values.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
 					(await Promise.allSettled(request.abilities.map(ability => cardLoader.getAbilityText(ability.id)))).map(promise => promise.value),

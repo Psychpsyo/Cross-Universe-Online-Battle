@@ -1,5 +1,6 @@
 // This file holds definitions for the CardValues class and modifiers for the card's modifier stacks.
 import * as ast from "./cdfScriptInterpreter/astNodes.js";
+import * as abilities from "./abilities.js";
 import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 
 export class CardValues {
@@ -63,25 +64,28 @@ export class CardModifier {
 		this.ability = ability;
 	}
 
-	modify(card, toBaseValues, unaffections, toUnaffections) {
+	modify(card, toBaseValues, toUnaffections) {
 		let values = toBaseValues? card.baseValues : card.values;
 		for (let modification of this.modifications) {
 			let worksOnCard = true;
-			ast.setImplicitCard(this.card);
-			for (const unaffection of unaffections) {
-				if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
-					worksOnCard = false;
-					break;
+			// only static abilities are influenced by unaffections when already on a card
+			if (this.ability instanceof abilities.StaticAbility) {
+				ast.setImplicitCard(this.card);
+				for (const unaffection of card.unaffectedBy) {
+					if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
+						worksOnCard = false;
+						break;
+					}
 				}
+				ast.clearImplicitCard();
 			}
-			ast.clearImplicitCard();
 			ast.setImplicitCard(card);
 			if (worksOnCard &&
 				modification instanceof ValueUnaffectedModification === toUnaffections &&
 				(modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)[0].get(this.player))
 			) {
 				if (toUnaffections) {
-					unaffections.push({
+					card.unaffectedBy.push({
 						value: modification.value,
 						by: modification.unaffectedBy,
 						sourceCard: this.card,

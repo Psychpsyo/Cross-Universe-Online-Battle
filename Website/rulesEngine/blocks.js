@@ -231,7 +231,7 @@ export class DeployItem extends Block {
 			timingGenerators.arrayTimingGenerator([[new actions.Deploy(player, placeAction)]])
 		];
 		if (card.values.cardTypes.includes("equipableItem")) {
-			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
+			let selectEquipableAction = new actions.SelectEquipableUnit(player, card);
 			costTimingGenerators.unshift(timingGenerators.arrayTimingGenerator([[selectEquipableAction]]));
 			execTimingGenerators.unshift(timingGenerators.equipTimingGenerator(selectEquipableAction, player));
 		}
@@ -288,7 +288,7 @@ export class CastSpell extends Block {
 			timingGenerators.arrayTimingGenerator([[new actions.Cast(player, placeAction)]])
 		];
 		if (card.values.cardTypes.includes("enchantSpell")) {
-			let selectEquipableAction = new actions.SelectEquipableUnit(card, player);
+			let selectEquipableAction = new actions.SelectEquipableUnit(player, card);
 			costTimingGenerators.unshift(timingGenerators.arrayTimingGenerator([[selectEquipableAction]]));
 			execTimingGenerators.unshift(timingGenerators.equipTimingGenerator(selectEquipableAction, player));
 		}

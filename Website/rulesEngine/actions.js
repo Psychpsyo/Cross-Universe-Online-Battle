@@ -1,3 +1,4 @@
+import * as ast from "./cdfScriptInterpreter/astNodes.js";
 import * as events from "./events.js";
 import * as requests from "./inputRequests.js";
 import * as zones from "./zones.js";
@@ -449,6 +450,22 @@ export class ApplyCardStatChange extends Action {
 	}
 
 	async* run() {
+		// remove invalid modifications
+		ast.setImplicitCard(this.card);
+		for (let i = this.modifier.modifications.length - 1; i >= 0; i--) {
+			if (this.modifier.modifications[i].isUnitSpecific() && !this.card.values.cardTypes.includes("unit")) {
+				this.modifier.modifications.splice(i, 1);
+				continue;
+			}
+			for (const unaffection of this.card.unaffectedBy) {
+				if (unaffection.value === this.modifier.modifications[i].value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
+					this.modifier.modifications.splice(i, 1);
+					continue;
+				}
+			}
+		}
+		ast.clearImplicitCard();
+
 		this.card = new SnapshotCard(this.card);
 		this.card.current().modifierStack.push(this.modifier);
 		if (this.until == "forever") {
@@ -488,11 +505,19 @@ export class ApplyCardStatChange extends Action {
 		}
 		// certain stat-changes can only be applied to units
 		let validModifications = 0;
+		ast.setImplicitCard(this.card);
 		for (const modification of this.modifier.modifications) {
-			if (this.card.values.cardTypes.includes("unit") || !modification.isUnitSpecific()) {
-				validModifications++;
+			if (modification.isUnitSpecific() && !this.card.values.cardTypes.includes("unit")) {
+				continue;
 			}
+			for (const unaffection of this.card.unaffectedBy) {
+				if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
+					continue;
+				}
+			}
+			validModifications++;
 		}
+		ast.clearImplicitCard();
 		return validModifications === 0;
 	}
 }
