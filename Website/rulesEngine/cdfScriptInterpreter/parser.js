@@ -13,6 +13,9 @@ class ScriptParserError extends Error {
 }
 
 export function parseScript(tokenList, newEffectId, type) {
+	if (tokenList.length == 0) {
+		return null;
+	}
 	effectId = newEffectId;
 	tokens = tokenList;
 	pos = 0;

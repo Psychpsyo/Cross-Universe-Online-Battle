@@ -1,5 +1,6 @@
 // This file holds definitions for the CardValues class and modifiers for the card's modifier stacks.
 import * as ast from "./cdfScriptInterpreter/astNodes.js";
+import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 
 export class CardValues {
 	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights) {
@@ -13,6 +14,9 @@ export class CardValues {
 		this.attackRights = attackRights;
 	}
 
+	// Clones these values WITHOUT cloning contained abilities by design.
+	// This is because usually initial, base and final values are cloned together
+	// and shouldn't all get different copies of an ability.
 	clone() {
 		return new CardValues(
 			[...this.cardTypes],
@@ -191,6 +195,10 @@ export class ValueAppendModification extends ValueModification {
 		let valueArray = this.newValues.evalFull(card, player, ability)[0].get(player);
 		if (valueArray.length == 0) {
 			return null;
+		}
+		// construct ability instances now
+		if (this.value === "abilities") {
+			valueArray = valueArray.map(val => makeAbility(val.id));
 		}
 		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
 	}

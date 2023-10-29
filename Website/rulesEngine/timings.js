@@ -282,7 +282,7 @@ function* phaseStaticAbilities(game) {
 				value.splice(i, 1);
 			} else {
 				let fieldIndex = value[i].source.currentOwner().index;
-				let lastMoved = value[i].source.lastMoveTimingIndex;
+				let lastMoved = value[i].ability.zoneEnterTimingIndex;
 				if (fieldEnterBuckets[fieldIndex][lastMoved] === undefined) {
 					fieldEnterBuckets[fieldIndex][lastMoved] = [];
 				}

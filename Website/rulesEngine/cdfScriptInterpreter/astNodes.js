@@ -829,6 +829,8 @@ export class CardPropertyNode extends AstNode {
 			"baseLevel": "number",
 			"types": "type",
 			"baseTypes": "type",
+			"abilities": "ability",
+			"baseAbilities": "ability",
 			"attack": "number",
 			"baseAttack": "number",
 			"defense": "number",
@@ -877,6 +879,12 @@ export class CardPropertyNode extends AstNode {
 			}
 			case "baseTypes": {
 				return card.baseValues.types;
+			}
+			case "abilities": {
+				return card.values.abilities;
+			}
+			case "baseAbilities": {
+				return card.values.abilities;
 			}
 			case "attack": {
 				return card.values.attack;

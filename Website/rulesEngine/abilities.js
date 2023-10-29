@@ -56,6 +56,8 @@ export class Ability extends BaseAbility {
 	}
 
 	successfulActivation() {}
+
+	// TODO: Override snapshot() to properly snapshot scriptVariables since it does not create a deep copy.
 }
 
 export class CastAbility extends Ability {
@@ -127,7 +129,7 @@ export class FastAbility extends Ability {
 		(this.gameLimit === Infinity || player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.gameLimit) &&
 		(this.globalTurnLimit === Infinity || player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length < this.globalTurnLimit) &&
 		await super.canActivate(card, player, evaluatingPlayer);
-}
+	}
 
 	successfulActivation() {
 		this.turnActivationCount++;
@@ -197,6 +199,7 @@ export class StaticAbility extends BaseAbility {
 		super(id, game, condition);
 		this.modifier = interpreter.buildAST("modifier", id, modifier, game);
 		this.applyTo = interpreter.buildAST("applyTarget", id, applyTo, game);
+		this.zoneEnterTimingIndex = 0;
 	}
 
 	getTargetCards(card, player, evaluatingPlayer = player) {

@@ -3,6 +3,16 @@ import {locale} from "/modules/locale.js";
 import {deckToCardIdList} from "/modules/deckUtils.js";
 import {Card} from "/rulesEngine/card.js";
 import * as cardLoader from "/modules/cardLoader.js";
+import * as abilities from "/rulesEngine/abilities.js";
+
+const abilityTypes = new Map([
+	[abilities.CastAbility, "cast"],
+	[abilities.DeployAbility, "deploy"],
+	[abilities.FastAbility, "fast"],
+	[abilities.OptionalAbility, "optional"],
+	[abilities.StaticAbility, "static"],
+	[abilities.TriggerAbility, "trigger"]
+])
 
 let currentPreviewedCard = null;
 
@@ -161,48 +171,71 @@ export async function updateCardPreview(card) {
 	// effects
 	cardDetailsEffectList.innerHTML = "";
 	if (!card.cardId.startsWith("C")) {
+		// insert rule sections from the API since the card object does not specify how many there are.
 		let effects = (await cardLoader.getCardInfo(card.cardId)).effects;
-		cardDetailsEffectList.innerHTML = "";
-		for (let effect of effects) {
-			let effectDiv = document.createElement("div");
-			effectDiv.classList.add("cardDetailsEffect");
-
-			if (effect.type != "rule") { // 'rule' effects get no title
-				let effectTitle = document.createElement("span");
-				effectTitle.textContent = locale[effect.type + "CardDetailEffect"];
-				effectDiv.appendChild(effectTitle);
-				effectDiv.appendChild(document.createElement("br"));
+		for (const effect of effects) {
+			if (effect.type === "rule") {
+				insertEffect(effect.type, effect.text);
 			}
+		}
 
-			let indentCount = 0;
-			let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
-			effect.text.split("\n").forEach(line => {
-				let lineDiv = document.createElement("div");
-				lineDiv.textContent = line;
-
-				// recalculate indentation if necessary
-				if (indentChars.includes(line[0])) {
-					// recalculate indentation amount
-					indentCount = 0;
-					while (indentChars.includes(line[indentCount])) {
-						indentCount++;
-					}
-				}
-
-				// indent the line
-				if (indentCount > 0) {
-					lineDiv.classList.add("cardDetailsIndent");
-					lineDiv.style.setProperty("--indent-amount", indentCount + "em");
-				}
-
-				effectDiv.appendChild(lineDiv);
-			});
-
-			cardDetailsEffectList.appendChild(effectDiv);
+		// all other effects come from the card object.
+		for (const ability of card.values.abilities) {
+			let divClass = undefined;
+			if (!card.baseValues.abilities.includes(ability)) {
+				divClass = "valueAdded";
+			}
+			insertEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), divClass);
+		}
+		for (const ability of card.baseValues.abilities) {
+			if (!card.values.abilities.includes(ability)) {
+				insertEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), "valueGone");
+			}
 		}
 	}
 
 	cardDetails.style.setProperty("--side-distance", ".5em");
+}
+
+function insertEffect(type, content, className) {
+	let effectDiv = document.createElement("div");
+	effectDiv.classList.add("cardDetailsEffect");
+	if (className) {
+		effectDiv.classList.add(className);
+	}
+
+	if (type != "rule") { // 'rule' effects get no title
+		let effectTitle = document.createElement("span");
+		effectTitle.textContent = locale[type + "CardDetailEffect"];
+		effectDiv.appendChild(effectTitle);
+		effectDiv.appendChild(document.createElement("br"));
+	}
+
+	let indentCount = 0;
+	let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
+	content.split("\n").forEach(line => {
+		let lineDiv = document.createElement("div");
+		lineDiv.textContent = line;
+
+		// recalculate indentation if necessary
+		if (indentChars.includes(line[0])) {
+			// recalculate indentation amount
+			indentCount = 0;
+			while (indentChars.includes(line[indentCount])) {
+				indentCount++;
+			}
+		}
+
+		// indent the line
+		if (indentCount > 0) {
+			lineDiv.classList.add("cardDetailsIndent");
+			lineDiv.style.setProperty("--indent-amount", indentCount + "em");
+		}
+
+		effectDiv.appendChild(lineDiv);
+	});
+
+	cardDetailsEffectList.appendChild(effectDiv);
 }
 
 function insertCardValue(card, value, target) {

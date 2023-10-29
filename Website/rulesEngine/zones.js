@@ -1,6 +1,6 @@
 // This module exports zone-related classes which define single zones as per the Cross Universe rules.
 
-import {TriggerAbility} from "./abilities.js";
+import * as abilities from "./abilities.js";
 
 export class Zone {
 	constructor(player, type) {
@@ -28,7 +28,6 @@ export class Zone {
 			index = -1;
 		}
 		card.zone = this;
-		card.lastMoveTimingIndex = card.owner.game.nextTimingIndex - 1;
 
 		if (clearValues) {
 			// remove this card from relevant actions
@@ -41,10 +40,13 @@ export class Zone {
 			}
 			card.attackCount = 0; // reset AFTER removing card from the attack since removing it increases the attackCount
 			card.canAttackAgain = false;
-			// All of the card's trigger abilities aren't met anymore.
 			for (const ability of card.values.abilities) {
-				if (ability instanceof TriggerAbility) {
+				// All of the card's trigger abilities aren't met anymore.
+				if (ability instanceof abilities.TriggerAbility) {
 					ability.triggerMetOnStack = -1;
+				} else if (ability instanceof abilities.StaticAbility) {
+					// static abilities need to reset their zone enter timer
+					ability.zoneEnterTimingIndex = card.owner.game.nextTimingIndex - 1;
 				}
 			}
 			// Effects that applied to the card before stop applying.
@@ -187,11 +189,18 @@ export class FieldZone extends Zone {
 			// If the card came from outside the field, it stops being tracked as itself.
 			if (!(card.zone instanceof FieldZone)) {
 				card.invalidateSnapshots();
+
+				// static abilities need to reset their zone enter timer
+				for (const ability of card.values.abilities) {
+					if (ability instanceof abilities.StaticAbility) {
+						ability.zoneEnterTimingIndex = card.owner.game.nextTimingIndex - 1;
+					}
+				}
 			}
 		}
 		this.cards[index] = card;
 		card.zone = this;
-		card.lastMoveTimingIndex = card.owner.game.nextTimingIndex - 1;
+
 		card.index = index;
 		card.hiddenFor = [];
 		return index;

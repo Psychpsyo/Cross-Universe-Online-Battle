@@ -49,6 +49,7 @@ export async function registerCustomCard(cardData, player) {
 	return cardId;
 }
 
+// Returns a cdf file that is 'good enough' for manual games, where the values don't change and the effects do not need to work.
 export async function getManualCdf(cardId) {
 	let cardData = await getCardInfo(cardId);
 	let cdf = `id:CU${cardId}
@@ -60,6 +61,12 @@ attack:${cardData.attack ?? 0}
 defense:${cardData.defense ?? 0}`;
 	if (cardData.deckLimit) {
 		cdf += "\ndeckLimit: " + (cardData.deckLimit == 50? Infinity : cardData.deckLimit);
+	}
+	for (const ability of cardData.effects) {
+		if (ability.type !== "rule") {
+			// Yes, an effect can be completely empty.
+			cdf += "\no: " + ability.type;
+		}
 	}
 	return cdf;
 }

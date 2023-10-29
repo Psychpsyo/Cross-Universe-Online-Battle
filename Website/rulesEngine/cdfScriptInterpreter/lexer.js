@@ -32,6 +32,8 @@ let keywordTokenTypes = {
 	baseLevel: "cardProperty",
 	types: "cardProperty",
 	baseTypes: "cardProperty",
+	abilities: "cardProperty",
+	baseAbilities: "cardProperty",
 	attack: "cardProperty",
 	baseAttack: "cardProperty",
 	defense: "cardProperty",

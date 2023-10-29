@@ -24,7 +24,6 @@ export class BaseCard {
 		this.zone = null;
 		this.placedTo = null;
 		this.index = -1;
-		this.lastMoveTimingIndex = 0;
 
 		this.counters = {};
 		this.equippedTo = null;
@@ -231,7 +230,7 @@ export class Card extends BaseCard {
 				data.types ?? [],
 				data.attack ?? null,
 				data.defense ?? null,
-				data.abilities.map(ability => makeAbility(ability, player.game)),
+				data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
 				baseCardTypes.includes("unit")? 1 : null
 			),
 			data.deckLimit,
@@ -301,7 +300,6 @@ export class SnapshotCard extends BaseCard {
 		this.zone = card.zone;
 		this.placedTo = card.placedTo;
 		this.index = card.index;
-		this.lastMoveTimingIndex = card.lastMoveTimingIndex;
 
 		for (const [counter, amount] of Object.entries(card.counters)) {
 			this.counters[counter] = amount;
@@ -331,6 +329,7 @@ export class SnapshotCard extends BaseCard {
 
 		this._actualCard.hiddenFor = [...this.hiddenFor];
 
+		// also ends up restoring snapshotted abilities
 		this._actualCard.initialValues = this.initialValues;
 		this._actualCard.values = this.values;
 		this._actualCard.baseValues = this.baseValues;
@@ -545,28 +544,8 @@ function parseCdfValues(cdf) {
 			}
 		}
 	}
-	return data;
-}
-
-function makeAbility(ability, game) {
-	switch (ability.type) {
-		case "cast": {
-			return new abilities.CastAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
-		}
-		case "deploy": {
-			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
-		}
-		case "optional": {
-			return new abilities.OptionalAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.condition);
-		}
-		case "fast": {
-			return new abilities.FastAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.condition);
-		}
-		case "trigger": {
-			return new abilities.TriggerAbility(ability.id, game, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.during, ability.after, ability.condition);
-		}
-		case "static": {
-			return new abilities.StaticAbility(ability.id, game, ability.modifier, ability.applyTo, ability.condition);
-		}
+	for (const ability of data.abilities) {
+		interpreter.registerAbility(ability);
 	}
+	return data;
 }
