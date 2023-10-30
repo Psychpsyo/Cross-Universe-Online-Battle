@@ -164,7 +164,8 @@ export class BaseCard {
 				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
 				}
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer);
+				let currentZone = this.zone; // Can't discard a spell for its own cost
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone;
 			}
 		}
 
@@ -190,7 +191,8 @@ export class BaseCard {
 				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
 				}
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer);
+				let currentZone = this.zone; // Can't discard an item for its own cost
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone;
 			}
 		}
 
