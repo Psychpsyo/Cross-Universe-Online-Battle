@@ -5,6 +5,7 @@
 		<title>Cross Universe Online Battle</title>
 		<meta name="description" content="Play Cross Universe online against others!">
 		<meta name="keywords" content="Cross Universe, Cross Universe Online Battle, Card Game, Crunis, クロス・ユニバース, クロユニ, card game, カードゲーム">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<link rel="icon" type="image/png" href="images/favicon.png">
 
@@ -32,7 +33,9 @@
 		<div id="roomCodeEntry">
 			<div id="levitatingCards"></div>
 			<div id="centerDiv">
-				<img id="mainLogo" src="./images/logo.png" alt="">
+				<div id="mainLogoHolder">
+					<img id="mainLogo" src="./images/logo.png" alt="">
+				</div>
 				<main id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
 					<div id="roomCodeInputFieldHolder">
 						<h1 id="roomCodeInputTitle"></h1><br>
@@ -60,7 +63,7 @@
 					<a id="deckMakerButton" class="bigButton" href="./deckMaker"></a>
 				</nav>
 			</div>
-			<footer id="unofficialNotice"></footer>
+			<footer id="unofficialFooter"><span id="unofficialNotice"></span></footer>
 		</div>
 
 		<!--IN-GAME-->
