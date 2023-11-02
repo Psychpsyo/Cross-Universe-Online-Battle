@@ -86,7 +86,7 @@ export class CastAbility extends Ability {
 
 export class DeployAbility extends Ability {
 	constructor(ability, game) {
-		super(id, game, ability.exec, ability.cost, ability.condition, ability.cancellable);
+		super(ability.id, game, ability.exec, ability.cost, ability.condition, ability.cancellable);
 	}
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during item deployment
