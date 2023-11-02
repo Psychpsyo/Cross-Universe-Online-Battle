@@ -320,17 +320,8 @@ export class EstablishAttackDeclaration extends Action {
 		// handle remaining attack rights
 		this.attackers = this.attackers.map(attacker => new SnapshotCard(attacker));
 		this.attackTarget = new SnapshotCard(this.attackTarget);
-		for (let attacker of this.attackers) {
-			attacker.current().canAttackAgain = false;
-		}
 
 		return events.createAttackDeclarationEstablishedEvent(this.player, this.attackTarget, this.attackers);
-	}
-
-	undo() {
-		for (let attacker of this.attackers) {
-			attacker.current().canAttackAgain = attacker.canAttackAgain;
-		}
 	}
 }
 
@@ -451,7 +442,7 @@ export class ApplyCardStatChange extends Action {
 
 	async* run() {
 		// remove invalid modifications
-		ast.setImplicitCard(this.card);
+		ast.setImplicitCard(this.modifier.card);
 		for (let i = this.modifier.modifications.length - 1; i >= 0; i--) {
 			if (this.modifier.modifications[i].isUnitSpecific() && !this.card.values.cardTypes.includes("unit")) {
 				this.modifier.modifications.splice(i, 1);
@@ -460,7 +451,7 @@ export class ApplyCardStatChange extends Action {
 			for (const unaffection of this.card.unaffectedBy) {
 				if (unaffection.value === this.modifier.modifications[i].value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
 					this.modifier.modifications.splice(i, 1);
-					continue;
+					break;
 				}
 			}
 		}
@@ -501,12 +492,13 @@ export class ApplyCardStatChange extends Action {
 	isImpossible(timing) {
 		// cannot apply stat-changes to cards that are not on the field
 		if (!(this.card.zone instanceof zones.FieldZone)) {
-			return;
+			return true;
 		}
-		// certain stat-changes can only be applied to units
+		// check un-appliable stat-changes
 		let validModifications = 0;
-		ast.setImplicitCard(this.card);
+		ast.setImplicitCard(this.modifier.card);
 		for (const modification of this.modifier.modifications) {
+			// certain stat-changes can only be applied to units
 			if (modification.isUnitSpecific() && !this.card.values.cardTypes.includes("unit")) {
 				continue;
 			}

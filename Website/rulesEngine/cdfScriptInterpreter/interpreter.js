@@ -30,22 +30,22 @@ export function makeAbility(abilityId, game) {
 	let ability = registeredAbilities[abilityId];
 	switch (ability.type) {
 		case "cast": {
-			return new abilities.CastAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
+			return new abilities.CastAbility(ability, game);
 		}
 		case "deploy": {
-			return new abilities.DeployAbility(ability.id, game, ability.exec, ability.cost, ability.condition, ability.after);
+			return new abilities.DeployAbility(ability, game);
 		}
 		case "optional": {
-			return new abilities.OptionalAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.condition);
+			return new abilities.OptionalAbility(ability, game);
 		}
 		case "fast": {
-			return new abilities.FastAbility(ability.id, game, ability.exec, ability.cost, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.condition);
+			return new abilities.FastAbility(ability, game);
 		}
 		case "trigger": {
-			return new abilities.TriggerAbility(ability.id, game, ability.exec, ability.cost, ability.mandatory, ability.turnLimit, ability.globalTurnLimit, ability.gameLimit, ability.during, ability.after, ability.condition);
+			return new abilities.TriggerAbility(ability, game);
 		}
 		case "static": {
-			return new abilities.StaticAbility(ability.id, game, ability.modifier, ability.applyTo, ability.condition);
+			return new abilities.StaticAbility(ability, game);
 		}
 	}
 }

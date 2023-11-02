@@ -314,7 +314,7 @@ export class BattlePhase extends StackPhase {
 
 			// find eligible attackers
 			let eligibleAttackers = this.turn.player.partnerZone.cards.concat(this.turn.player.unitZone.cards.filter(card => card !== null));
-			eligibleAttackers = eligibleAttackers.filter(card => card.attackCount < card.values.attackRights || card.canAttackAgain);
+			eligibleAttackers = eligibleAttackers.filter(card => card.canAttack());
 			if (eligibleAttackers.length > 0) {
 				options.push(requests.doAttackDeclaration.create(this.turn.player, eligibleAttackers));
 			}

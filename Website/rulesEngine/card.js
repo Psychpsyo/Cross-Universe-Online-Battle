@@ -61,6 +61,7 @@ export class BaseCard {
 	// Whenever a card's values change, this function re-evaluates the modifier stack to figure out what the new value should be.
 	// In doing so, it also takes care of spells & items losing their unit-specific modifications
 	recalculateModifiedValues() {
+		this.unaffectedBy = [];
 		// values being unaffected by cards
 		for (const modifier of this.modifierStack) {
 			modifier.modify(this, false, true);
@@ -202,6 +203,11 @@ export class BaseCard {
 		return costOptionTree.valid;
 	}
 
+	// Does not check if the card can be declared to attack, only if it is allowed to be/stay in an attack declaration.
+	canAttack() {
+		return this.values.cardTypes.includes("unit") && (this.attackCount < this.values.attackRights || this.canAttackAgain);
+	}
+
 	static sort(a, b) {
 		if (a.cardId < b.cardId) {
 			return -1;
@@ -233,7 +239,9 @@ export class Card extends BaseCard {
 				data.attack ?? null,
 				data.defense ?? null,
 				data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
-				baseCardTypes.includes("unit")? 1 : null
+				[],
+				baseCardTypes.includes("unit")? 1 : null,
+				true
 			),
 			data.deckLimit,
 			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game),
@@ -387,6 +395,13 @@ function parseCdfValues(cdf) {
 		if (inAbility && parts[0] != "o") {
 			let ability = data.abilities[data.abilities.length - 1];
 			switch (parts[0]) {
+				case "cancellable": {
+					if (!["yes", "no"].includes(parts[1])) {
+						throw new Error("CDF Parser Error: 'cancellable' must be either 'yes' or 'no'.");
+					}
+					ability.cancellable = parts[1] === "yes";
+					break;
+				}
 				case "turnLimit": {
 					ability.turnLimit = parseInt(parts[1]);
 					break;
@@ -430,7 +445,7 @@ function parseCdfValues(cdf) {
 					if (!["yes", "no"].includes(parts[1])) {
 						throw new Error("CDF Parser Error: 'mandatory' must be either 'yes' or 'no'.");
 					}
-					ability.mandatory = parts[1] == "yes";
+					ability.mandatory = parts[1] === "yes";
 					break;
 				}
 				case "cost": {
@@ -499,7 +514,7 @@ function parseCdfValues(cdf) {
 				break;
 			}
 			case "deckLimit": {
-				data.deckLimit = parts[1] == "any"? Infinity : parseInt(parts[1]);
+				data.deckLimit = parts[1] === "any"? Infinity : parseInt(parts[1]);
 				break;
 			}
 			case "equipableTo": {
@@ -518,15 +533,16 @@ function parseCdfValues(cdf) {
 				if (!["cast", "deploy", "optional", "fast", "trigger", "static"].includes(parts[1])) {
 					throw new Error("CDF Parser Error: " + parts[1] + " is an invalid ability type.");
 				}
-				if (parts[1] == "cast" && !["standardSpell", "continuousSpell", "enchantSpell"].includes(data.cardType)) {
+				if (parts[1] === "cast" && !["standardSpell", "continuousSpell", "enchantSpell"].includes(data.cardType)) {
 					throw new Error("CDF Parser Error: Only spells can have cast abilities.");
 				}
-				if (parts[1] == "deploy" && !["standardItem", "continuousItem", "equipableItem"].includes(data.cardType)) {
+				if (parts[1] === "deploy" && !["standardItem", "continuousItem", "equipableItem"].includes(data.cardType)) {
 					throw new Error("CDF Parser Error: Only items can have deploy abilities.");
 				}
 				data.abilities.push({
 					id: data.id + ":" + data.abilities.length,
 					type: parts[1],
+					cancellable: true,
 					turnLimit: Infinity,
 					globalTurnLimit: Infinity,
 					gameLimit: Infinity,

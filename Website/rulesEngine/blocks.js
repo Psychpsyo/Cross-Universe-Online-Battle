@@ -112,12 +112,12 @@ export class StandardSummon extends Block {
 	}
 
 	async* runCost() {
+		this.card = new SnapshotCard(this.card);
 		let paid = await (yield* super.runCost());
 		if (!paid) {
-			this.card.zone.add(this.card, this.card.index);
+			this.card.zone.add(this.card.current(), this.card.index);
 			return false;
 		}
-		this.card = new SnapshotCard(this.card);
 		this.stack.phase.turn.hasStandardSummoned = true;
 		return true;
 	}
@@ -260,22 +260,21 @@ export class DeployItem extends Block {
 	}
 
 	async* runCost() {
-		let sourceZone = this.card.zone;
+		this.card = new SnapshotCard(this.card);
 		if (!(await (yield* super.runCost()))) {
-			this.card.zone.add(this.card, this.card.index);
+			this.card.zone.add(this.card.current(), this.card.index);
 			return false;
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if ((this.deployAbility && this.deployAbility.exec && !this.deployAbility.exec.hasAllTargets(this.card, this.player, this.deployAbility, this.player)) ||
-			sourceZone !== this.card.zone
+		if (!this.card.current() ||
+			(this.deployAbility && this.deployAbility.exec && !this.deployAbility.exec.hasAllTargets(this.card.current(), this.player, this.deployAbility, this.player))
 		) {
 			yield* this.undoCost();
-			this.card.zone.add(this.card, this.card.index);
+			this.card.zone.add(this.card.current(), this.card.index);
 			return false;
 		}
 
-		this.card = new SnapshotCard(this.card);
 		return true;
 	}
 }
@@ -320,22 +319,23 @@ export class CastSpell extends Block {
 	}
 
 	async* runCost() {
-		let sourceZone = this.card.zone;
+		this.card = new SnapshotCard(this.card);
 		if (!(await (yield* super.runCost()))) {
-			this.card.zone.add(this.card, this.card.index);
+			this.card.restore();
+			this.card.zone.add(this.card.current(), this.card.index);
 			return false;
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if ((this.castAbility && this.castAbility.exec && !this.castAbility.exec.hasAllTargets(this.card, this.player, this.castAbility, this.player)) ||
-			sourceZone !== this.card.zone
+		if (!this.card.current() ||
+			(this.castAbility && this.castAbility.exec && !this.castAbility.exec.hasAllTargets(this.card.current(), this.player, this.castAbility, this.player))
 		) {
 			yield* this.undoCost();
-			this.card.zone.add(this.card, this.card.index);
+			this.card.restore();
+			this.card.zone.add(this.card.current(), this.card.index);
 			return false;
 		}
 
-		this.card = new SnapshotCard(this.card);
 		return true;
 	}
 }

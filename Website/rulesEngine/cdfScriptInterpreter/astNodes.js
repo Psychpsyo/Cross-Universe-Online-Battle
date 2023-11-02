@@ -409,6 +409,9 @@ export class FunctionNode extends AstNode {
 			case "SELECT": {
 				let choiceAmount = (yield* this.parameters[0].eval(card, player, ability)).get(player);
 				let eligibleCards = (yield* this.parameters[1].eval(card, player, ability)).get(player);
+				if (eligibleCards.length === 0) {
+					return new ScriptValue("card", []);
+				}
 				for (let card of eligibleCards) {
 					if (card.currentOwner() === player || !(["deck", "hand"].includes(card.zone.type))) {
 						card.showTo(player);
@@ -843,6 +846,7 @@ export class CardPropertyNode extends AstNode {
 			"equipments": "card",
 			"attackRights": "number",
 			"attacksMade": "number",
+			"doLifeDamage": "bool",
 			"self": "card",
 			"zone": "zone"
 		}[this.property];
@@ -921,6 +925,9 @@ export class CardPropertyNode extends AstNode {
 			}
 			case "attacksMade": {
 				return card.attackCount;
+			}
+			case "doLifeDamage": {
+				return card.values.doLifeDamage;
 			}
 			case "self": {
 				return card;

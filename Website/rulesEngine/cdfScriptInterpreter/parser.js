@@ -547,98 +547,116 @@ function parseCardMatcher() {
 function parseModifier() {
 	let valueModifications = [];
 	while (tokens[pos] && tokens[pos].type != "rightBrace") {
-		let valueIdentifiers = [];
-		do {
-			pos++;
-			if (tokens[pos].type != "cardProperty") {
-				throw new ScriptParserError("Expected a 'cardProperty' token at the start of a modifier assignment. Got '" + tokens[pos].type + "' instead.");
+		switch (tokens[pos+1].type) {
+			case "cancel": {
+				pos += 2;
+				break;
 			}
-			valueIdentifiers.push(tokens[pos].value);
-			pos++;
-		} while (tokens[pos].type == "separator");
-
-		let toBaseValues = [];
-		for (let i = 0; i < valueIdentifiers.length; i++) {
-			if (valueIdentifiers[i].startsWith("base")) {
-				valueIdentifiers[i] = valueIdentifiers[i][4].toLowerCase() + valueIdentifiers[i].substr(5);
-				toBaseValues.push(true);
-			} else {
-				toBaseValues.push(false);
+			case "cardProperty": {
+				valueModifications = valueModifications.concat(parseValueModifications());
+				break;
 			}
-			if (valueIdentifiers[i] == "name") {
-				valueIdentifiers[i] = "names";
-			}
-		}
-
-		if (!["immunityAssignment", "equals", "plusAssignment", "minusAssignment", "divideAssignment", "swapAssignment"].includes(tokens[pos].type)) {
-			throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' token as operator in modifier syntax.");
-		}
-		let assignmentType = tokens[pos].type;
-		pos++;
-
-		let rightHandSide;
-		if (assignmentType != "swapAssignment") {
-			rightHandSide = parseExpression();
-		} else {
-			if (tokens[pos].type != "cardProperty") {
-				throw new ScriptParserError("Swap modifier (><) can only swap card properties with other card properties. (Got '" + tokens[pos].type + "' token instead.)");
-			}
-			rightHandSide = tokens[pos].value;
-			pos++;
-		}
-
-		// maybe parse if condition
-		let condition = null;
-		if (tokens[pos].type == "if") {
-			pos++;
-			condition = parseExpression();
-		}
-
-		for (const [i, valueIdentifier] of valueIdentifiers.entries()) {
-			switch (assignmentType) {
-				case "immunityAssignment": {
-					valueModifications.push(new cardValues.ValueUnaffectedModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
-					break;
-				}
-				case "equals": {
-					valueModifications.push(new cardValues.ValueSetModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
-					break;
-				}
-				case "plusAssignment": {
-					if (["level", "attack", "defense"].includes(valueIdentifier)) {
-						valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
-					} else {
-						valueModifications.push(new cardValues.ValueAppendModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
-					}
-					break;
-				}
-				case "minusAssignment": {
-					if (!["level", "attack", "defense"].includes(valueIdentifier)) {
-						throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.");
-					}
-					valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(rightHandSide), toBaseValues[i], condition));
-					break;
-				}
-				case "divideAssignment": {
-					if (!["level", "attack", "defense"].includes(valueIdentifier)) {
-						throw new ScriptParserError("Modifier cannot divide non-number card property '" + valueIdentifier + "'.");
-					}
-					valueModifications.push(new cardValues.NumericDivideModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
-					break;
-				}
-				case "swapAssignment": {
-					if (rightHandSide.startsWith("base") != toBaseValues[i]) {
-						throw new ScriptParserError("Swap modifier (><) cannot swap base value with non-base value.");
-					}
-					if (toBaseValues[i]) {
-						rightHandSide = rightHandSide[4].toLowerCase() + rightHandSide.substr(5);
-					}
-					valueModifications.push(new cardValues.ValueSwapModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
-					break;
-				}
+			default: {
+				throw new ScriptParserError("Unexpected '" + tokens[pos].type + "' token at start of modifier syntax instead.");
 			}
 		}
 	}
 	pos++;
 	return new ast.ModifierNode(valueModifications);
+}
+
+function parseValueModifications() {
+	let valueIdentifiers = [];
+	do {
+		pos++;
+		if (tokens[pos].type != "cardProperty") {
+			throw new ScriptParserError("Expected only 'cardProperty' tokens at the start of a modifier assignment. Got '" + tokens[pos].type + "' instead.");
+		}
+		valueIdentifiers.push(tokens[pos].value);
+		pos++;
+	} while (tokens[pos].type == "separator");
+
+	let toBaseValues = [];
+	for (let i = 0; i < valueIdentifiers.length; i++) {
+		if (valueIdentifiers[i].startsWith("base")) {
+			valueIdentifiers[i] = valueIdentifiers[i][4].toLowerCase() + valueIdentifiers[i].substr(5);
+			toBaseValues.push(true);
+		} else {
+			toBaseValues.push(false);
+		}
+		if (valueIdentifiers[i] == "name") {
+			valueIdentifiers[i] = "names";
+		}
+	}
+
+	if (!["immunityAssignment", "equals", "plusAssignment", "minusAssignment", "divideAssignment", "swapAssignment"].includes(tokens[pos].type)) {
+		throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' token as operator in modifier syntax.");
+	}
+	let assignmentType = tokens[pos].type;
+	pos++;
+
+	let rightHandSide;
+	if (assignmentType != "swapAssignment") {
+		rightHandSide = parseExpression();
+	} else {
+		if (tokens[pos].type != "cardProperty") {
+			throw new ScriptParserError("Swap modifier (><) can only swap card properties with other card properties. (Got '" + tokens[pos].type + "' token instead.)");
+		}
+		rightHandSide = tokens[pos].value;
+		pos++;
+	}
+
+	// maybe parse if condition
+	let condition = null;
+	if (tokens[pos].type == "if") {
+		pos++;
+		condition = parseExpression();
+	}
+
+	let valueModifications = [];
+	for (const [i, valueIdentifier] of valueIdentifiers.entries()) {
+		switch (assignmentType) {
+			case "immunityAssignment": {
+				valueModifications.push(new cardValues.ValueUnaffectedModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				break;
+			}
+			case "equals": {
+				valueModifications.push(new cardValues.ValueSetModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				break;
+			}
+			case "plusAssignment": {
+				if (["level", "attack", "defense"].includes(valueIdentifier)) {
+					valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				} else {
+					valueModifications.push(new cardValues.ValueAppendModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				}
+				break;
+			}
+			case "minusAssignment": {
+				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
+					throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.");
+				}
+				valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(rightHandSide), toBaseValues[i], condition));
+				break;
+			}
+			case "divideAssignment": {
+				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
+					throw new ScriptParserError("Modifier cannot divide non-number card property '" + valueIdentifier + "'.");
+				}
+				valueModifications.push(new cardValues.NumericDivideModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				break;
+			}
+			case "swapAssignment": {
+				if (rightHandSide.startsWith("base") != toBaseValues[i]) {
+					throw new ScriptParserError("Swap modifier (><) cannot swap base value with non-base value.");
+				}
+				if (toBaseValues[i]) {
+					rightHandSide = rightHandSide[4].toLowerCase() + rightHandSide.substr(5);
+				}
+				valueModifications.push(new cardValues.ValueSwapModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				break;
+			}
+		}
+	}
+	return valueModifications;
 }

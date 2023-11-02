@@ -178,8 +178,12 @@ export function* fightTimingGenerator(attackDeclaration) {
 	}
 	// RULES: Compare the attacker’s Attack to the target’s Defense.
 	let totalAttack = 0;
+	let doLifeDamage = true;
 	for (const unit of attackDeclaration.attackers) {
 		totalAttack += unit.values.attack;
+		if (!unit.values.doLifeDamage) {
+			doLifeDamage = false;
+		}
 	}
 
 	// RULES: If the Attack is greater the attacker destroys the target.
@@ -188,7 +192,10 @@ export function* fightTimingGenerator(attackDeclaration) {
 		let discard = new actions.Discard(attackDeclaration.target.owner, attackDeclaration.target);
 		let actionList = [new actions.Destroy(discard), discard];
 		if (attackDeclaration.target.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(attackDeclaration.target.currentOwner(), totalAttack - attackDeclaration.target.values.defense));
+			actionList.push(new actions.DealDamage(
+				attackDeclaration.target.currentOwner(),
+				doLifeDamage? totalAttack - attackDeclaration.target.values.defense : 0
+			));
 		}
 		yield actionList;
 	}
@@ -215,7 +222,10 @@ export function* fightTimingGenerator(attackDeclaration) {
 		let discard = new actions.Discard(counterattackTarget.owner, counterattackTarget);
 		let actionList = [new actions.Destroy(discard), discard];
 		if (counterattackTarget.zone.type == "partner") {
-			actionList.push(new actions.DealDamage(counterattackTarget.currentOwner(), attackDeclaration.target.values.attack - counterattackTarget.values.defense));
+			actionList.push(new actions.DealDamage(
+				counterattackTarget.currentOwner(),
+				attackDeclaration.target.values.doLifeDamage? attackDeclaration.target.values.attack - counterattackTarget.values.defense : 0
+			));
 		}
 		yield actionList;
 	}

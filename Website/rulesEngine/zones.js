@@ -45,7 +45,7 @@ export class Zone {
 				if (ability instanceof abilities.TriggerAbility) {
 					ability.triggerMetOnStack = -1;
 				} else if (ability instanceof abilities.StaticAbility) {
-					// static abilities need to reset their zone enter timer
+					// static abilities need to update their zone enter timer
 					ability.zoneEnterTimingIndex = card.owner.game.nextTimingIndex - 1;
 				}
 			}
@@ -190,7 +190,7 @@ export class FieldZone extends Zone {
 			if (!(card.zone instanceof FieldZone)) {
 				card.invalidateSnapshots();
 
-				// static abilities need to reset their zone enter timer
+				// static abilities need to update their zone enter timer
 				for (const ability of card.values.abilities) {
 					if (ability instanceof abilities.StaticAbility) {
 						ability.zoneEnterTimingIndex = card.owner.game.nextTimingIndex - 1;

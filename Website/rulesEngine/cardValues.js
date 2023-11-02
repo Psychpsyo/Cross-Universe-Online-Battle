@@ -4,7 +4,7 @@ import * as abilities from "./abilities.js";
 import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 
 export class CardValues {
-	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights) {
+	constructor(cardTypes, names, level, types, attack, defense, abilities, cancelledAbilities, attackRights, doLifeDamage) {
 		this.cardTypes = cardTypes;
 		this.names = names;
 		this.level = level;
@@ -12,7 +12,9 @@ export class CardValues {
 		this.attack = attack;
 		this.defense = defense;
 		this.abilities = abilities;
+		this.cancelledAbilities = cancelledAbilities;
 		this.attackRights = attackRights;
+		this.doLifeDamage = doLifeDamage;
 	}
 
 	// Clones these values WITHOUT cloning contained abilities by design.
@@ -27,7 +29,9 @@ export class CardValues {
 			this.attack,
 			this.defense,
 			[...this.abilities],
-			this.attackRights
+			[...this.cancelledAbilities],
+			this.attackRights,
+			this.doLifeDamage
 		);
 	}
 
@@ -268,4 +272,8 @@ export class ValueSwapModification extends ValueModification {
 		}
 		return values;
 	}
+}
+
+export class EffectCancelModification extends ValueModification {
+
 }

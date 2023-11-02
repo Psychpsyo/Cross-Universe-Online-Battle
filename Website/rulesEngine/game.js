@@ -297,6 +297,7 @@ export class AttackDeclaration {
 			this.attackers.splice(attackerIndex, 1);
 			card.isAttacking = false;
 			card.attackCount++;
+			card.canAttackAgain = false;
 		}
 	}
 
@@ -305,6 +306,7 @@ export class AttackDeclaration {
 		for (let attacker of this.attackers) {
 			attacker.isAttacking = false;
 			attacker.attackCount++;
+			card.canAttackAgain = false;
 		}
 		if (this.target) {
 			this.target.isAttackTarget = false;
@@ -332,8 +334,8 @@ export class AttackDeclaration {
 	removeInvalidAttackers() {
 		let removed = [];
 		for (let i = this.attackers.length - 1; i >= 0; i--) {
-			if (!this.attackers[i].values.cardTypes.includes("unit")) {
-				removed.push(this.attackers[i]);
+			if (!this.attackers[i].canAttack()) {
+				removed.push({unit: this.attackers[i], canAttackAgain: this.attackers[i].canAttackAgain});
 				this.removeAttacker(this.attackers[i]);
 			}
 		}
@@ -341,7 +343,7 @@ export class AttackDeclaration {
 			let partner = this.attackers.find(unit => unit.zone.type == "partner");
 			for (let i = this.attackers.length - 1; i >= 0; i--) {
 				if (!partner || !partner.sharesTypeWith(this.attackers[i])) {
-					removed.push(this.attackers[i]);
+					removed.push({unit: this.attackers[i], canAttackAgain: this.attackers[i].canAttackAgain});
 					this.removeAttacker(this.attackers[i]);
 				}
 			}
@@ -350,10 +352,11 @@ export class AttackDeclaration {
 	}
 
 	undoRemoveInvalidAttackers() {
-		for (const unit of invalidAttackerRemoveUndoStack.pop()) {
-			this.attackers.push(unit);
-			unit.isAttacking = true;
-			unit.attackCount--;
+		for (const removed of invalidAttackerRemoveUndoStack.pop()) {
+			this.attackers.push(removed.unit);
+			removed.unit.isAttacking = true;
+			removed.unit.attackCount--;
+			removed.unit.canAttackAgain = removed.canAttackAgain;
 		}
 	}
 }

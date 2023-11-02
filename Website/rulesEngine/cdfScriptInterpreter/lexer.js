@@ -3,6 +3,7 @@ let keywordTokenTypes = {
 	where: "where",
 	if: "if",
 	unaffectedBy: "immunityAssignment",
+	cancel: "cancel",
 
 	thisCard: "thisCard",
 	attackTarget: "attackTarget",
@@ -46,6 +47,7 @@ let keywordTokenTypes = {
 	equipments: "cardProperty",
 	attackRights: "cardProperty",
 	attacksMade: "cardProperty",
+	doLifeDamage: "cardProperty",
 	self: "cardProperty",
 	zone: "cardProperty",
 
