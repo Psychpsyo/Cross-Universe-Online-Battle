@@ -306,7 +306,7 @@ export class AttackDeclaration {
 		for (let attacker of this.attackers) {
 			attacker.isAttacking = false;
 			attacker.attackCount++;
-			card.canAttackAgain = false;
+			attacker.canAttackAgain = false;
 		}
 		if (this.target) {
 			this.target.isAttackTarget = false;

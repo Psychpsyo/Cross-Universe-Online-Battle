@@ -453,6 +453,8 @@ export class AutomaticController extends InteractionController {
 						default: {
 							if (request.reason.startsWith("cardEffect:")) {
 								message = locale.game.automatic.opponentActions.effectSelectingCards.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+							} else if (request.reason.startsWith("equipTarget:")) {
+								message = locale.game.automatic.opponentActions.selectingEquipTarget.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 							} else if (request.reason.startsWith("cardEffectMove:")) {
 								message = locale.game.automatic.opponentActions.effectMoveSelectingCards.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 							}
@@ -520,6 +522,8 @@ export class AutomaticController extends InteractionController {
 					default: {
 						if (request.reason.startsWith("cardEffect:")) {
 							title = locale.game.cardChoice.cardEffect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+						} else if (request.reason.startsWith("equipTarget:")) {
+							title = locale.game.cardChoice.equipTarget.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 						} else if (request.reason.startsWith("cardEffectMove:")) {
 							title = locale.game.cardChoice.cardEffectMove.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 						}

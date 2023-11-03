@@ -110,6 +110,7 @@
 			"handDiscard": null,
 			"attackTarget": null,
 			"cardEffect": null,
+			"equipTarget": null,
 			"cardEffectMove": null
 		},
 
@@ -228,6 +229,7 @@
 				"effectMoveSelectingCards": null,
 				"selectingHandDiscard": null,
 				"selectingAttackTarget": null,
+				"selectingEquipTarget": null,
 				"selectingPlayer": null,
 				"effectSelectingPlayer": null,
 				"selectingStartingPlayer": null,
