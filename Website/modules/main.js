@@ -187,3 +187,11 @@ document.documentElement.style.setProperty("--p1-card-back", "url('" + localStor
 if (localStorage.getItem("mainMenuCards") == "true") {
 	startEffect(levitatingCards);
 }
+
+
+
+window.startAiGame = function() {
+	import("/modules/aiInitState.js").then(initModule => {
+		new initModule.AiInitState();
+	});
+}

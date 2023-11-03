@@ -19,7 +19,9 @@ export class AutomaticController extends InteractionController {
 		super();
 
 		autoUI.init();
-		game.rng = new DistRandom();
+		if (socket) {
+			game.rng = new DistRandom();
+		}
 
 		this.opponentMoveEventTarget = new EventTarget();
 		this.opponentMoves = [];
@@ -71,7 +73,7 @@ export class AutomaticController extends InteractionController {
 
 					let autoResponse = getAutoResponse(localRequests);
 					if (autoResponse) {
-						socket.send("[inputRequestResponse]" + JSON.stringify(autoResponse));
+						socket?.send("[inputRequestResponse]" + JSON.stringify(autoResponse));
 						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
 					} else {
 						playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
@@ -729,7 +731,7 @@ export class AutomaticController extends InteractionController {
 			}
 		}
 		this.madeMoveTarget.dispatchEvent(new CustomEvent("move"));
-		socket.send("[inputRequestResponse]" + JSON.stringify(response));
+		socket?.send("[inputRequestResponse]" + JSON.stringify(response));
 		return response;
 	}
 
@@ -739,7 +741,7 @@ export class AutomaticController extends InteractionController {
 
 	cancelRetire(player) {
 		if (player == localPlayer) {
-			socket.send("[cancelRetire]");
+			socket?.send("[cancelRetire]");
 		}
 		for (let card of this.playerInfos[player.index].retiring) {
 			gameUI.clearDragSource(card.zone, card.index, player);

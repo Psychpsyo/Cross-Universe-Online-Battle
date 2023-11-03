@@ -133,7 +133,7 @@ export class BoardState extends GameState {
 		if (partnerPosInDeck == -1) {
 			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == players[localPlayer.index].deck.suggestedPartner});
 		}
-		socket.send("[choosePartner]" + partnerPosInDeck);
+		socket?.send("[choosePartner]" + partnerPosInDeck);
 		this.setPartner(localPlayer, partnerPosInDeck);
 	}
 
