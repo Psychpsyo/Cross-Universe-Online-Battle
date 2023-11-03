@@ -23,7 +23,7 @@ export class AiInitState extends GameState {
 		localPlayer = game.players[1];
 
 		// load decks and partners
-		players[0].deck = deckUtils.toDeckx(waterDeck);
+		players[0].deck = deckUtils.toDeckx(angelDeck);
 		players[1].deck = deckUtils.toDeckx(waterDeck);
 
 		let deckSetupPromises = [];

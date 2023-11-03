@@ -2,6 +2,7 @@ import {AI} from "/rulesEngine/aiSystems/ai.js";
 import {getAutoResponse} from "/modules/autopass.js";
 import {getCardInfo} from "/modules/cardLoader.js";
 import {locale} from "/modules/locale.js";
+import {putChatMessage} from "/modules/generalUI.js";
 
 const unitZoneSlots = ["Leftmost slot", "Left of center", "In the middle", "Right of center", "Rightmost slot"];
 const spellItemZoneSlots = ["Leftmost slot", "Left of partner", "Right of partner", "Rightmost slot"];
@@ -21,6 +22,12 @@ class Choice {
 }
 
 export class ChatGPT extends AI {
+	constructor(player) {
+		super(player);
+		this.doDialogue = true;
+		this.opponent = this.player.next();
+	}
+
 	async selectMove(optionList) {
 		// Do auto-passing
 		let autoResponse = getAutoResponse(optionList);
@@ -57,17 +64,42 @@ export class ChatGPT extends AI {
 					break;
 				}
 				case "chooseCards": {
-					mainQuestion = "You must choose some cards, how would you like to do it?";
 					giveRecap = false;
-					choices.push(new Choice("Give up", {type: option.type, value: null}));
-					// TODO: figure this out.
+					if (option.validAmounts.length === 1 && option.validAmounts[0] === 1) {
+						switch (option.reason) {
+							case "selectAttackTarget": {
+								mainQuestion = "Select the target for your attack.";
+								break;
+							}
+							case "handTooFull": {
+								mainQuestion = "Your hand is too full, which card do you want to discard?";
+								break;
+							}
+							default: {
+								if (option.reason.startsWith("cardEffect:")) {
+									mainQuestion = "Select a card for the effect of '" + (await getCardInfo(option.reason.split(":")[1])).name + "'";
+								} else if (option.reason.startsWith("equipTarget:")) {
+									mainQuestion = "Select a unit to equip with '" + (await getCardInfo(option.reason.split(":")[1])).name + "'";
+								} else if (option.reason.startsWith("cardEffectMove:")) {
+									mainQuestion = "Select a card to move with the effect of '" + (await getCardInfo(option.reason.split(":")[1])).name + "'";
+								} else {
+									mainQuestion = "Select a card for that.";
+								}
+							}
+						}
+						for (let i = 0; i < option.from.length; i++) {
+							choices.push(new Choice("'" + (await getCardInfo(option.from[i].cardId)).name + "' (Lv" + option.from[i].values.level + ")", {type: option.type, value: [i]}));
+						}
+					} else {
+						return null; // TODO: figure out how multi-card choices work
+					}
 					break;
 				}
 				case "choosePlayer": {
 					mainQuestion = "Select a player for that.";
 					giveRecap = false;
 					choices.push(new Choice("Yourself", {type: option.type, value: this.player.index}));
-					choices.push(new Choice("Your opponent", {type: option.type, value: this.player.next().index}));
+					choices.push(new Choice("Your opponent", {type: option.type, value: this.opponent.index}));
 					break;
 				}
 				case "chooseType": {
@@ -126,7 +158,8 @@ export class ChatGPT extends AI {
 					break;
 				}
 				case "pass": {
-					choices.push(new Choice("Pass priority", {type: option.type}));
+					let optionLabel = game.currentStack().blocks.length === 0? "Do nothing" : "Don't respond";
+					choices.push(new Choice(optionLabel, {type: option.type}));
 					break;
 				}
 			}
@@ -140,25 +173,45 @@ export class ChatGPT extends AI {
 			console.log("The AI only had one choice to pick from so it is being made automatically.");
 			return choices[0].response;
 		}
-		// construct AI prompt
 
+		// construct AI prompt
 		let moveExplanation = "";
 		if (giveRecap) {
-			moveExplanation += "You are playing a card game and must make a move.\n";
+			// basic game state
+			moveExplanation += "It is " + (this.player === game.currentTurn().player? "your" : "your opponent's") + " turn in a card game and you can make a move.\n";
 			moveExplanation += "You have " + this.player.mana + " mana and " + this.player.life + " life.\n";
-			moveExplanation += "There is " + this.player.deckZone.cards.length + " cards in your deck.\n";
+			moveExplanation += "Your opponent has " + this.opponent.mana + " mana and " + this.opponent.life + " life.\n";
+			moveExplanation += "There is " + this.player.deckZone.cards.length + " cards in your deck and " + this.opponent.deckZone.cards.length + " in your opponent's.\n";
+
+			// hand cards
+			moveExplanation += this.player.handZone.cards.length > 0? "These are the cards in your hand:\n" : "You have no cards in hand.";
+			for (let card of this.player.handZone.cards) {
+				moveExplanation += "- " + (await getCardInfo(card.cardId)).name + "', level " + card.values.level + " " + locale[card.values.cardTypes[0] + "CardDetailType"] + "\n";
+				moveExplanation += (card.values.types.length > 0? "Types: " + card.values.types.map(type => locale.types[type]).join(", ") : "(typeless)") + "\n";
+				moveExplanation += (await getCardInfo(card.cardId)).effectsPlain + "\n\n";
+			}
 		}
 		moveExplanation += mainQuestion + "\n";
 		for (let i = 0; i < choices.length; i++) {
 			moveExplanation += (i + 1) + ". " + choices[i].label + "\n";
 		}
-		moveExplanation += "Please respond with only a number between 1 and " + choices.length + " and nothing else.";
-		return choices[parseInt(this.askChatGPT(moveExplanation)) - 1].response;
+		moveExplanation += "Please respond with only a number between 1 and " + choices.length + " and nothing else. (not even punctuation)"
+		if (this.doDialogue) {
+			moveExplanation += "\nYou may then follow it up with something related to say to your opponent, encased in quotes in the style of someone in an anime."
+		}
+		let gptResponse = this.askChatGPT(moveExplanation);
+		if (gptResponse.comment) {
+			putChatMessage(players[this.player.index].name + locale["chat"]["colon"] + gptResponse.comment);
+		}
+		return choices[gptResponse.choice - 1].response;
 	}
 
 	askChatGPT(question) {
-		let response = prompt(question);
-		console.log(question);
+		let responseText = prompt(question).split("\"");
+		let response = {choice: parseInt(responseText[0])};
+		if (responseText.length > 1) {
+			response.comment = responseText[1];
+		}
 		return response;
 	}
 }
