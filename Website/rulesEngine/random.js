@@ -7,10 +7,10 @@ export class CURandom {
 	}
 
 	async nextInts(ranges) {
-		return ranges.map(range => this.nextInt(range));
+		return await Promise.all(ranges.map(range => this.nextInt(range)));
 	}
 
 	async nextPlayer(game) {
-		return await this.nextInt(game.players.length);
+		return this.nextInt(game.players.length);
 	}
 }

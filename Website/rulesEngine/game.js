@@ -186,7 +186,7 @@ export class Game {
 					if (actionList[0].player.aiSystem === null) {
 						playerInput = yield actionList;
 					} else {
-						playerInput = actionList[0].player.aiSystem.selectMove(actionList);
+						playerInput = await actionList[0].player.aiSystem.selectMove(actionList);
 					}
 					this.replay.inputLog.push(playerInput);
 					this.replayPosition++;
