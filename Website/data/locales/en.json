@@ -110,6 +110,7 @@
 			"handDiscard": "Discard your hand down to 8:",
 			"attackTarget": "Select the attack target:",
 			"cardEffect": "Select card(s) for the effect of '{#CARDNAME}':",
+			"equipTarget": "Select what unit to equip '{#CARDNAME}' to:",
 			"cardEffectMove": "Select which card(s) to move for the effect of '{#CARDNAME}':"
 		},
 
@@ -227,6 +228,7 @@
 				"effectSelectingCards": "Your opponent is selecting card(s) for the effect of '{#CARDNAME}'.",
 				"effectMoveSelectingCards": "Your opponent is selecting which card(s) should be moved for the effect of '{#CARDNAME}'.",
 				"selectingHandDiscard": "Your opponent is selecting card(s) from hand to discard down to 8.",
+				"selectingEquipTarget": "Your opponent is selecting what unit to equip '{#CARDNAME}' to.",
 				"selectingAttackTarget": "Your opponent is selecting the attack target.",
 				"selectingPlayer": "Your opponent is selecting a player.",
 				"effectSelectingPlayer": "Your opponent is selecting a player for the effect of '{#CARDNAME}'.",

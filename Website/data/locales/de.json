@@ -110,6 +110,7 @@
 			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:",
 			"attackTarget": "Wähle, wen du angreifst:",
 			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':",
+			"equipTarget": "Wähle, welche Einheit du mit '{#CARDNAME}' ausrüsten möchtest:",
 			"cardEffectMove": "Wähle welche Karte(n) für den Effekt von '{#CARDNAME}' verschoben werden sollen:"
 		},
 
@@ -227,6 +228,7 @@
 				"effectSelectingCards": "Dein Gegner wählt Karte(n) für den Effekt von '{#CARDNAME}'.",
 				"effectMoveSelectingCards": "Dein Gegner wählt aus, welche Karte(n) durch den Effekt von '{#CARDNAME}' verschoben werden sollen.",
 				"selectingHandDiscard": "Dein Gegner wählt Handkarte(n), weil er mehr als 8 hat.",
+				"selectingEquipTarget": "Dein Gegner wählt aus, welche Einheit er mit '{#CARDNAME}' ausrüsten möchte.",
 				"selectingAttackTarget": "Dein Gegner wählt eine Einheit zum Angriff aus.",
 				"selectingPlayer": "Dein Gegner wählt einen Spieler.",
 				"effectSelectingPlayer": "Dein Gegner wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
