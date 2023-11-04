@@ -715,6 +715,11 @@ export class AutomaticController extends InteractionController {
 				}
 				// TODO: Let player choose one here.
 				response.value = 0;
+				for (let i = 0; i < request.eligibleSlots.length; i++) {
+					if (Math.abs(request.eligibleSlots[i] - 2) < Math.abs(request.eligibleSlots[response.value] - 2)) {
+						response.value = i;
+					}
+				}
 				break;
 			}
 			case "chooseAbilityOrder": {
