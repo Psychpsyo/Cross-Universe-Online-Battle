@@ -243,9 +243,7 @@ export class FunctionNode extends AstNode {
 
 		if (type === "tempActions") { // actions need to be executed
 			let actions = [];
-			let orderedPlayers = [...player.game.players];
-			orderedPlayers.unshift(orderedPlayers.splice(orderedPlayers.indexOf(player.game.currentTurn().player), 1)[0]);
-			for (const iterPlayer of orderedPlayers) {
+			for (const iterPlayer of players) {
 				actions = actions.concat(valueMap.get(iterPlayer));
 			}
 			let timing = yield actions;

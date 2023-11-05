@@ -5,4 +5,4 @@ level: 1
 types: Fire
 
 o: cast
-DISCARD(DECKTOP?(2)) & DISCARD(opponent.DECKTOP?(2))
+both.DISCARD(DECKTOP?(2))
