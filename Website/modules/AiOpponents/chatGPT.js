@@ -4,14 +4,31 @@ import {getCardInfo} from "/modules/cardLoader.js";
 import {locale} from "/modules/locale.js";
 import {putChatMessage} from "/modules/generalUI.js";
 
-const unitZoneSlots = ["Leftmost slot", "Left of center", "In the middle", "Right of center", "Rightmost slot"];
-const spellItemZoneSlots = ["Leftmost slot", "Left of partner", "Right of partner", "Rightmost slot"];
-
 function cardinalToOrdinal(num) {
 	if ([11, 12, 13].includes(num % 100)) {
 		return num + "th";
 	}
 	return num + ["th", "st", "nd", "rd", "th"][Math.min(num % 10, 4)];
+}
+
+// generates a short text representation of a card like 'Haniwa Soldier', Lv1 unit (100 attack / 100 defense)
+async function generateShortCardText(card) {
+	let cardText = "'" + (await getCardInfo(card.cardId)).name + "', Lv" + card.values.level + " " + locale[card.values.cardTypes[0] + "CardDetailType"];
+	if (card.values.cardTypes.includes("unit")) {
+		cardText += " (" + card.values.attack + " attack/" + card.values.defense + " defense)";
+	}
+	return cardText;
+}
+
+// generates a complete text representation of a card
+async function generateFullCardText(card) {
+	let cardText = await generateShortCardText(card);
+	cardText += "\n" + (card.values.types.length > 0? "Types: " + card.values.types.map(type => locale.types[type]).join(", ") : "(typeless)") + "\n";
+	let cardInfo = await getCardInfo(card.cardId);
+	if (cardInfo.effects.length > 0) {
+		cardText += "Abilities:\n" + cardInfo.effectsPlain;
+	}
+	return cardText;
 }
 
 class Choice {
@@ -28,6 +45,11 @@ export class ChatGPT extends AI {
 		this.opponent = this.player.next();
 		this.apiKey = apiKey;
 		this.gptModel = "gpt-3.5-turbo-instruct";
+
+		this.socket = new WebSocket("ws://dorf.quest:8766");
+		this.socket.addEventListener("open", (() => {
+			this.socket.send(JSON.stringify({"n_ctx": 4096}));
+		}).bind(this));
 	}
 
 	async selectMove(optionList) {
@@ -55,7 +77,7 @@ export class ChatGPT extends AI {
 				}
 				case "castSpell": {
 					for (const spell of option.eligibleSpells) {
-						choices.push(new Choice("Cast '" + (await getCardInfo(spell.cardId)).name + "' (Lv" + spell.values.level + ")", {type: option.type, value: spell.index}));
+						choices.push(new Choice("Cast " + await generateShortCardText(spell), {type: option.type, value: spell.index}));
 					}
 					break;
 				}
@@ -123,7 +145,7 @@ export class ChatGPT extends AI {
 				}
 				case "deployItem": {
 					for (const item of option.eligibleItems) {
-						choices.push(new Choice("Deploy '" + (await getCardInfo(item.cardId)).name + "' (Lv" + item.values.level + ")", {type: option.type, value: item.index}));
+						choices.push(new Choice("Deploy " + await generateShortCardText(item), {type: option.type, value: item.index}));
 					}
 					break;
 				}
@@ -136,7 +158,12 @@ export class ChatGPT extends AI {
 					break;
 				}
 				case "doRetire": {
-					choices.push(new Choice("Retire some units (discarding them to regain their levels in mana)", {type: option.type}));
+					for (const unit of option.eligibleUnits) {
+						if (unit.zone.type !== "partner") {
+							choices.push(new Choice("Retire units from the field (discarding them to regain their levels in mana)", {type: option.type}));
+							break;
+						}
+					}
 					break;
 				}
 				case "doStandardDraw": {
@@ -145,7 +172,7 @@ export class ChatGPT extends AI {
 				}
 				case "doStandardSummon": {
 					for (const unit of option.eligibleUnits) {
-						choices.push(new Choice("Summon '" + (await getCardInfo(unit.cardId)).name + "' (Lv" + unit.values.level + ")", {type: option.type, value: unit.index}));
+						choices.push(new Choice("Summon " + await generateShortCardText(unit), {type: option.type, value: unit.index}));
 					}
 					break;
 				}
@@ -168,37 +195,41 @@ export class ChatGPT extends AI {
 				}
 			}
 		}
-		if (choices.length === 0) {
-			// TODO: Remove this once impossible.
-			alert("The AI bricked and has 0 choices!");
-			return null;
-		}
 		if (choices.length === 1) {
 			console.log("The AI only had one choice to pick from so it is being made automatically.");
 			return choices[0].response;
 		}
 
 		// construct AI prompt
-		let moveExplanation = "";
+		let moveExplanation = "Q:\n";
 		if (giveRecap) {
 			// basic game state
-			moveExplanation += "It is " + (this.player === game.currentTurn().player? "your" : "your opponent's") + " turn in a card game:\n";
+			moveExplanation += "It is " + (this.player === game.currentTurn().player? "your" : "your opponent's") + " turn in a card game.\n";
 			moveExplanation += "You have " + this.player.mana + " mana and " + this.player.life + " life.\n";
 			moveExplanation += "Your opponent has " + this.opponent.mana + " mana and " + this.opponent.life + " life.\n";
 			moveExplanation += "There is " + this.player.deckZone.cards.length + " cards in your deck and " + this.opponent.deckZone.cards.length + " in their's.\n";
 
 			// hand cards
-			moveExplanation += this.player.handZone.cards.length > 0? "These are the cards in your hand:\n" : "You have no cards in hand.";
-			for (let card of this.player.handZone.cards) {
-				let cardInfo = await getCardInfo(card.cardId);
-				moveExplanation += "- " + cardInfo.name + "', level " + card.values.level + " " + locale[card.values.cardTypes[0] + "CardDetailType"] + "\n";
-				moveExplanation += (card.values.types.length > 0? "Types: " + card.values.types.map(type => locale.types[type]).join(", ") : "(typeless)") + "\n";
-				if (cardInfo.effects.length > 0) {
-					moveExplanation += "Abilities:\n" + cardInfo.effectsPlain + "\n\n";
+			moveExplanation += this.player.handZone.cards.length > 0? "\n\nThese are the cards in your hand:\n" : "You have no cards in hand.";
+			for (const card of this.player.handZone.cards) {
+				moveExplanation += "- " + await generateFullCardText(card) + "\n";
+			}
+			// your field
+			moveExplanation += "\n\nOn your field there are these cards:\n- Your partner, " + await generateFullCardText(this.player.partnerZone.cards[0]) + "\n";
+			for (const card of this.player.unitZone.cards.concat(this.player.spellItemZone.cards)) {
+				if (card) {
+					moveExplanation += "- " + await generateFullCardText(card) + "\n";
+				}
+			}
+			// opponent field
+			moveExplanation += "\n\nOn the opponent's field there are these cards:\n- Their partner, " + await generateFullCardText(this.player.next().partnerZone.cards[0]) + "\n";
+			for (const card of this.player.next().unitZone.cards.concat(this.player.next().spellItemZone.cards)) {
+				if (card) {
+					moveExplanation += "- " + await generateFullCardText(card) + "\n";
 				}
 			}
 		}
-		moveExplanation += mainQuestion + "\n";
+		moveExplanation += "\n\n" + mainQuestion + "\n";
 		for (let i = 0; i < choices.length; i++) {
 			moveExplanation += (i + 1) + ". " + choices[i].label + "\n";
 		}
@@ -211,24 +242,24 @@ export class ChatGPT extends AI {
 		// do additional, more specific query if needed
 		if (gptChoice.response.type === "doAttackDeclaration") {
 			let option = optionList.find(opt => opt.type === "doAttackDeclaration");
-			moveExplanation = "Which of your units should attack?\n";
+			moveExplanation = "Q:\nWhich of your units should attack?\n";
 			for (let i = 0; i < option.eligibleUnits.length; i++) {
 				const unit = option.eligibleUnits[i];
 				moveExplanation += (i + 1) + ". Level " + unit.values.level + " '" + (await getCardInfo(unit.cardId)).name + "' (" + unit.values.attack + " attack, " + unit.values.defense + " defense)\n";
 			}
 			moveExplanation += this.getFinalPromt(option.eligibleUnits.length);
 			gptResponse = await this.askChatGPT(moveExplanation);
-			gptChoice.response.response.value = [gptResponse.choice];
+			gptChoice.response.response.value = [gptResponse.choice - 1];
 		} else if (gptChoice.response.type === "doRetire") {
 			let option = optionList.find(opt => opt.type === "doRetire");
-			moveExplanation = "Which of your units should retire?\n";
+			moveExplanation = "Q:\nWhich of your units should retire?\n";
 			for (let i = 0; i < option.eligibleUnits.length; i++) {
 				const unit = option.eligibleUnits[i];
 				moveExplanation += (i + 1) + ". Level " + unit.values.level + " '" + (await getCardInfo(unit.cardId)).name + "' (" + unit.values.attack + " attack, " + unit.values.defense + " defense)\n";
 			}
 			moveExplanation += this.getFinalPromt(option.eligibleUnits.length);
 			gptResponse = await this.askChatGPT(moveExplanation);
-			gptChoice.response.value = [gptResponse.choice];
+			gptChoice.response.value = [gptResponse.choice - 1];
 		}
 
 		if (gptResponse.comment) {
@@ -239,19 +270,25 @@ export class ChatGPT extends AI {
 	}
 
 	async askChatGPT(question) {
-		let responseText = prompt(question).split("\"");
-		let response = {choice: parseInt(responseText[0])};
-		if (responseText.length > 1) {
-			response.comment = responseText[1];
-		}
+		console.log("Asking the AI:\n" + question);
+		this.socket.send(JSON.stringify({
+			"prompt": question,
+			"max_tokens": 4096,
+			"stop": ["Q:"]
+		}));
+		let responseText = await new Promise(resolve => {
+			this.socket.addEventListener("message", e => {
+				resolve(JSON.parse(e.data).choices[0].text);
+			});
+		});
+		console.log("The AI said:\n" + responseText);
+		const numbers = responseText.match(/\[\d+\]/);
+		let response = {choice: parseInt(numbers[numbers.length - 1].substring(1))};
+		// TODO: fill response.comment
 		return response;
 	}
 
 	getFinalPromt(choiceCount) {
-		let retVal = "Carefully read the effects on your cards, then make your choice by responding with only a number from 1 to " + choiceCount + " and nothing else. (not even punctuation)";
-		if (this.doDialogue) {
-			retVal += "\nYou may then follow it up with something related to say to your opponent, encased in quotes in the style of someone in an anime.";
-		}
-		return retVal;
+		return "A:\n(I will now lay out my thoughts and then I will make my choice by writing the option's number is square brackets like so: [x])";
 	}
 }
