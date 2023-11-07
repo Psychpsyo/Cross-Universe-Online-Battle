@@ -549,7 +549,7 @@ function parseModifier() {
 	while (tokens[pos] && tokens[pos].type != "rightBrace") {
 		switch (tokens[pos+1].type) {
 			case "cancel": {
-				pos += 2;
+				valueModifications.push(parseAbilityCancelModification());
 				break;
 			}
 			case "cardProperty": {
@@ -563,6 +563,20 @@ function parseModifier() {
 	}
 	pos++;
 	return new ast.ModifierNode(valueModifications);
+}
+
+function parseAbilityCancelModification() {
+	pos += 2;
+	let rightHandSide = parseExpression();
+
+	// maybe parse 'if' condition
+	let condition = null;
+	if (tokens[pos].type == "if") {
+		pos++;
+		condition = parseExpression();
+	}
+
+	return new cardValues.AbilityCancelModification("abilities", rightHandSide, false, condition);
 }
 
 function parseValueModifications() {
@@ -606,7 +620,7 @@ function parseValueModifications() {
 		pos++;
 	}
 
-	// maybe parse if condition
+	// maybe parse 'if' condition
 	let condition = null;
 	if (tokens[pos].type == "if") {
 		pos++;

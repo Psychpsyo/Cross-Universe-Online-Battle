@@ -46,6 +46,45 @@ for (let i = 0; i < 2; i++) {
 	});
 }
 
+export function createAbilityFragment(abilityText) {
+	const fragment = new DocumentFragment();
+
+	let indentCount = 0; // how many characters to un-indent
+	let marginCount = 0; // how much of a margin to put
+	// margin and indent count are different so that whitespace can be cut out while still being margined
+	let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
+	abilityText.split("\n").forEach(line => {
+		const lineDiv = document.createElement("div");
+
+		// recalculate indentation if necessary
+		if (indentChars.includes(line[0])) {
+			// recalculate indentation amount
+			indentCount = 0;
+			marginCount = 0;
+			while (line[0] === "　") {
+				marginCount++;
+				line = line.substring(1);
+			}
+			while (indentChars.includes(line[indentCount])) {
+				indentCount++;
+				marginCount++;
+			}
+		}
+
+		// indent the line
+		if (marginCount > 0) {
+			lineDiv.classList.add("cardDetailsIndent");
+			lineDiv.style.setProperty("--indent-amount", indentCount + "em");
+			lineDiv.style.setProperty("--margin-amount", marginCount + "em");
+		}
+
+		lineDiv.textContent = line;
+		fragment.appendChild(lineDiv);
+	});
+
+	return fragment;
+}
+
 // chat box
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 export function putChatMessage(message, type, cards) {
@@ -181,26 +220,24 @@ export async function updateCardPreview(card) {
 
 		// all other effects come from the card object.
 		for (const ability of card.values.abilities) {
-			let divClass = undefined;
+			let divClasses = [];
 			if (!card.baseValues.abilities.includes(ability)) {
-				divClass = "valueAdded";
+				divClasses.push("valueAdded");
 			}
-			insertEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), divClass);
-		}
-		for (const ability of card.baseValues.abilities) {
-			if (!card.values.abilities.includes(ability)) {
-				insertEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), "valueGone");
+			if (ability.isCancelled) {
+				divClasses.push("valueGone");
 			}
+			insertEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), divClasses);
 		}
 	}
 
 	cardDetails.style.setProperty("--side-distance", ".5em");
 }
 
-function insertEffect(type, content, className) {
+function insertEffect(type, content, classNames = []) {
 	let effectDiv = document.createElement("div");
 	effectDiv.classList.add("cardDetailsEffect");
-	if (className) {
+	for (const className of classNames) {
 		effectDiv.classList.add(className);
 	}
 
@@ -211,29 +248,7 @@ function insertEffect(type, content, className) {
 		effectDiv.appendChild(document.createElement("br"));
 	}
 
-	let indentCount = 0;
-	let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
-	content.split("\n").forEach(line => {
-		let lineDiv = document.createElement("div");
-		lineDiv.textContent = line;
-
-		// recalculate indentation if necessary
-		if (indentChars.includes(line[0])) {
-			// recalculate indentation amount
-			indentCount = 0;
-			while (indentChars.includes(line[indentCount])) {
-				indentCount++;
-			}
-		}
-
-		// indent the line
-		if (indentCount > 0) {
-			lineDiv.classList.add("cardDetailsIndent");
-			lineDiv.style.setProperty("--indent-amount", indentCount + "em");
-		}
-
-		effectDiv.appendChild(lineDiv);
-	});
+	effectDiv.appendChild(createAbilityFragment(content));
 
 	cardDetailsEffectList.appendChild(effectDiv);
 }

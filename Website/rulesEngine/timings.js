@@ -4,6 +4,7 @@ import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
 import * as actions from "./actions.js";
 import {chooseAbilityOrder} from "./inputRequests.js";
+import {SnapshotCard} from "./card.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
@@ -314,8 +315,7 @@ function* phaseStaticAbilities(game) {
 function* recalculateCardValues(game) {
 	for (let player of game.players) {
 		for (let card of player.getActiveCards()) {
-			let cardBaseValues = card.baseValues;
-			let cardValues = card.values;
+			let oldCard = new SnapshotCard(card);
 			let wasUnit = card.values.cardTypes.includes("unit");
 			card.recalculateModifiedValues();
 			// once done, unit specific modifications may need to be removed.
@@ -329,11 +329,13 @@ function* recalculateCardValues(game) {
 			}
 
 			let valueChangeEvents = [];
-			for (let property of cardBaseValues.compareTo(card.baseValues)) {
-				valueChangeEvents.push(createCardValueChangedEvent(card, property, true))
+			for (let property of oldCard.baseValues.compareTo(card.baseValues)) {
+				valueChangeEvents.push(createCardValueChangedEvent(card, property, true));
 			}
-			for (let property of cardValues.compareTo(card.values)) {
-				valueChangeEvents.push(createCardValueChangedEvent(card, property, false))
+			for (let property of oldCard.values.compareTo(card.values)) {
+				if (valueChangeEvents.find(event => event.valueName === property) === undefined) {
+					valueChangeEvents.push(createCardValueChangedEvent(card, property, false));
+				}
 			}
 			if (valueChangeEvents.length > 0) {
 				yield valueChangeEvents;

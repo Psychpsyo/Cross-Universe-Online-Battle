@@ -307,16 +307,16 @@ export async function promptTypeSelection(message, types) {
 	});
 }
 
-export async function promptOrderSelection(title, labels, confirmLabel) {
+export async function promptOrderSelection(title, labelFragments, confirmLabel) {
 	itemOrderPopupText.textContent = title;
 	itemOrderConfirm.textContent = confirmLabel;
 	itemOrderConfirm.disabled = true;
 
-	for (const label of labels) {
+	for (const label of labelFragments) {
 		let orderItem = document.createElement("div");
 		orderItem.classList.add("bigButton");
-		orderItem.classList.add("itemOrderAbility");
-		orderItem.textContent = label;
+		orderItem.classList.add("itemOrderDiv");
+		orderItem.appendChild(label);
 		orderItem.addEventListener("click", function() {
 			// either add or remove the index from this element.
 			if (this.dataset.index) {

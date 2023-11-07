@@ -444,15 +444,8 @@ export class ApplyCardStatChange extends Action {
 		// remove invalid modifications
 		ast.setImplicitCard(this.modifier.card);
 		for (let i = this.modifier.modifications.length - 1; i >= 0; i--) {
-			if (this.modifier.modifications[i].isUnitSpecific() && !this.card.values.cardTypes.includes("unit")) {
+			if (!this.modifier.modifications[i].canApplyTo(this.card, this.modifier.card, this.modifier.player, this.modifier.ability)) {
 				this.modifier.modifications.splice(i, 1);
-				continue;
-			}
-			for (const unaffection of this.card.unaffectedBy) {
-				if (unaffection.value === this.modifier.modifications[i].value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
-					this.modifier.modifications.splice(i, 1);
-					break;
-				}
 			}
 		}
 		ast.clearImplicitCard();
@@ -498,14 +491,8 @@ export class ApplyCardStatChange extends Action {
 		let validModifications = 0;
 		ast.setImplicitCard(this.modifier.card);
 		for (const modification of this.modifier.modifications) {
-			// certain stat-changes can only be applied to units
-			if (modification.isUnitSpecific() && !this.card.values.cardTypes.includes("unit")) {
+			if (!modification.canApplyTo(this.card, this.modifier.card, this.modifier.player, this.modifier.ability)) {
 				continue;
-			}
-			for (const unaffection of this.card.unaffectedBy) {
-				if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
-					continue;
-				}
 			}
 			validModifications++;
 		}
