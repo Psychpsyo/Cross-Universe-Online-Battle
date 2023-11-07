@@ -4,7 +4,7 @@ import * as abilities from "./abilities.js";
 import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 
 export class CardValues {
-	constructor(cardTypes, names, level, types, attack, defense, abilities, cancelledAbilities, attackRights, doLifeDamage) {
+	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, doLifeDamage) {
 		this.cardTypes = cardTypes;
 		this.names = names;
 		this.level = level;
@@ -12,7 +12,6 @@ export class CardValues {
 		this.attack = attack;
 		this.defense = defense;
 		this.abilities = abilities;
-		this.cancelledAbilities = cancelledAbilities;
 		this.attackRights = attackRights;
 		this.doLifeDamage = doLifeDamage;
 	}
@@ -29,7 +28,6 @@ export class CardValues {
 			this.attack,
 			this.defense,
 			[...this.abilities],
-			[...this.cancelledAbilities],
 			this.attackRights,
 			this.doLifeDamage
 		);
@@ -49,7 +47,9 @@ export class CardValues {
 				differences.push(property);
 			} else {
 				for (let i = 0; i < this[property].length; i++) {
-					if (this[property][i] != other[property][i]) {
+					if (
+						(property !== "abilities" && this[property][i] !== other[property][i]) ||
+						(property === "abilities" && (this[property][i].isCancelled !== other[property][i].isCancelled || this[property][i].id !== other[property][i].id))) {
 						differences.push(property);
 						break;
 					}
@@ -72,23 +72,27 @@ export class CardModifier {
 		let values = toBaseValues? card.baseValues : card.values;
 		for (let modification of this.modifications) {
 			let worksOnCard = true;
-			// only static abilities are influenced by unaffections when already on a card
+			// only static abilities are influenced by unaffections/cancelling when already on a card
 			if (this.ability instanceof abilities.StaticAbility) {
-				ast.setImplicitCard(this.card);
-				for (const unaffection of card.unaffectedBy) {
-					if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
-						worksOnCard = false;
-						break;
+				if (this.ability.isCancelled) {
+					worksOnCard = false;
+				} else { // only check card unaffections if the ability isn't cancelled anyways
+					ast.setImplicitCard(this.card);
+					for (const unaffection of card.unaffectedBy) {
+						if (unaffection.value === modification.value && unaffection.by.evalFull(unaffection.sourceCard, this.player, unaffection.sourceAbility)[0].get(this.player)) {
+							worksOnCard = false;
+							break;
+						}
 					}
+					ast.clearImplicitCard();
 				}
-				ast.clearImplicitCard();
 			}
 			ast.setImplicitCard(card);
 			if (worksOnCard &&
-				modification instanceof ValueUnaffectedModification === toUnaffections &&
+				(modification instanceof ValueUnaffectedModification || modification instanceof AbilityCancelModification) === toUnaffections &&
 				(modification.condition === null || modification.condition.evalFull(this.card, this.player, this.ability)[0].get(this.player))
 			) {
-				if (toUnaffections) {
+				if (modification instanceof ValueUnaffectedModification) {
 					card.unaffectedBy.push({
 						value: modification.value,
 						by: modification.unaffectedBy,
@@ -116,8 +120,10 @@ export class CardModifier {
 	}
 
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
-	bake() {
+	bake(forCard) {
+		ast.setImplicitCard(forCard);
 		let bakedModifications = this.modifications.map(modification => modification.bake(this.card, this.player, this.ability)).filter(modification => modification !== null);
+		ast.clearImplicitCard();
 		return new CardModifier(bakedModifications, this.card, this.player, this.ability);
 	}
 }
@@ -138,6 +144,20 @@ export class ValueModification {
 
 	isUnitSpecific() {
 		return ["attack", "defense", "attackRights"].includes(this.value);
+	}
+
+	canApplyTo(target, card, player, ability) {
+		// certain stat-changes can only be applied to units
+		if (this.isUnitSpecific() && !target.values.cardTypes.includes("unit")) {
+			return false;
+		}
+		// cards that are unaffected can't have modifications applied
+		for (const unaffection of target.unaffectedBy) {
+			if (unaffection.value === this.value && unaffection.by.evalFull(unaffection.sourceCard, player, unaffection.sourceAbility)[0].get(player)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 
@@ -161,8 +181,8 @@ export class ValueSetModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let newValue = this.newValue.evalFull(card, player, ability)[0].get(player);
 		if (toBaseValues === this.toBase) {
+			let newValue = this.newValue.evalFull(card, player, ability)[0].get(player);
 			if (["level", "attack", "defense"].includes(this.value)) {
 				values[this.value] = newValue[0];
 			} else {
@@ -188,9 +208,13 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let newValues = this.newValues.evalFull(card, player, ability)[0].get(player);
 		if (toBaseValues === this.toBase) {
+			let newValues = this.newValues.evalFull(card, player, ability)[0].get(player);
 			for (let newValue of newValues) {
+				// abilities are always put onto cards in an un-cancelled state
+				if (this.value === "abilities") {
+					newValue.isCancelled = false;
+				}
 				if (!values[this.value].includes(newValue)) {
 					values[this.value].push(newValue);
 				}
@@ -219,8 +243,8 @@ export class NumericChangeModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let amount = this.amount.evalFull(card, player, ability)[0].get(player)[0];
 		if (toBaseValues === this.toBase) {
+			let amount = this.amount.evalFull(card, player, ability)[0].get(player)[0];
 			values[this.value] = Math.max(0, values[this.value] + amount);
 		}
 		return values;
@@ -242,8 +266,8 @@ export class NumericDivideModification extends ValueModification {
 	}
 
 	modify(values, card, player, ability, toBaseValues) {
-		let byAmount = this.byAmount.evalFull(card, player, ability)[0].get(player)[0];
 		if (toBaseValues === this.toBase) {
+			let byAmount = this.byAmount.evalFull(card, player, ability)[0].get(player)[0];
 			values[this.value] = Math.ceil(values[this.value] / byAmount);
 		}
 		return values;
@@ -274,6 +298,36 @@ export class ValueSwapModification extends ValueModification {
 	}
 }
 
-export class EffectCancelModification extends ValueModification {
+export class AbilityCancelModification extends ValueModification {
+	constructor(value, abilities, toBase, condition) {
+		super(value, toBase, condition);
+		this.abilities = abilities;
+	}
 
+	modify(values, card, player, ability, toBaseValues) {
+		for (const toCancel of this.abilities.evalFull(card, player, ability)[0].get(player)) {
+			toCancel.isCancelled = true;
+		}
+		return values;
+	}
+
+	bake(card, player, ability) {
+		let abilities = this.abilities.evalFull(card, player, ability)[0].get(player);
+		return new AbilityCancelModification(this.value, new ast.ValueArrayNode(abilities), this.toBase, this.condition);
+	}
+
+	canApplyTo(target, card, player, ability) {
+		if (!super.canApplyTo(target, card, player, ability)) {
+			return false;
+		}
+
+		let validAbilities = 0;
+		for (const iterAbility of this.abilities.evalFull(card, player, ability)[0].get(player)) {
+			if (iterAbility.cancellable && !iterAbility.isCancelled) {
+				validAbilities++;
+			}
+		}
+
+		return validAbilities > 0;
+	}
 }

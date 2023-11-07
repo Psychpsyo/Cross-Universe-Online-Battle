@@ -307,16 +307,16 @@ export async function promptTypeSelection(message, types) {
 	});
 }
 
-export async function promptOrderSelection(title, labels, confirmLabel) {
+export async function promptOrderSelection(title, labelFragments, confirmLabel) {
 	itemOrderPopupText.textContent = title;
 	itemOrderConfirm.textContent = confirmLabel;
 	itemOrderConfirm.disabled = true;
 
-	for (const label of labels) {
+	for (const label of labelFragments) {
 		let orderItem = document.createElement("div");
 		orderItem.classList.add("bigButton");
-		orderItem.classList.add("itemOrderAbility");
-		orderItem.textContent = label;
+		orderItem.classList.add("itemOrderDiv");
+		orderItem.appendChild(label);
 		orderItem.addEventListener("click", function() {
 			// either add or remove the index from this element.
 			if (this.dataset.index) {
@@ -368,9 +368,11 @@ export async function showCoolAttackAnim(defender, attackers) {
 
 	const imgs = document.querySelectorAll(".coolAttackImgHolder > img");
 	imgs[0].src = cardLoader.getCardImage(defender);
-	imgs[0].style.setProperty("--left", -(gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
-	if (gameUI.cardAlignmentInfo[players[1].profilePicture]?.flip) {
+	if (gameUI.cardAlignmentInfo[defender.cardId]?.flip) {
+		imgs[0].style.setProperty("--left", -100 + (gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 		imgs[0].style.transform = "scaleX(-1)";
+	} else {
+		imgs[0].style.setProperty("--left", -(gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 	}
 
 	for (let i = 0; i < attackers.length; i++) {

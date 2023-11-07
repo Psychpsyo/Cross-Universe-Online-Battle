@@ -148,7 +148,7 @@ dialog #cardDetails {
 
 .cardDetailsIndent {
 	text-indent: calc(0px - var(--indent-amount));
-	margin-left: var(--indent-amount);
+	margin-left: var(--margin-amount);
 }
 
 #cardDetailsImage {

@@ -7,13 +7,18 @@ export class BaseAbility {
 		this.id = id;
 		this.condition = null;
 		this.cancellable = true;
+		this.isCancelled = false;
 		if (condition) {
 			this.condition = interpreter.buildAST("condition", id, condition, game);
 		}
 	}
 
-	canActivate(card, player, evaluatingPlayer = player) {
+	isConditionMet(card, player, evaluatingPlayer = player) {
 		return this.condition === null || this.condition.evalFull(card, player, this, evaluatingPlayer)[0].get(player);
+	}
+
+	canActivate(card, player, evaluatingPlayer = player) {
+		return !this.isCancelled && this.isConditionMet(card, player, evaluatingPlayer);
 	}
 
 	snapshot() {
@@ -73,7 +78,7 @@ export class CastAbility extends Ability {
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during spell casting
 	canActivate(card, player, evaluatingPlayer = player) {
-		return (this.condition === null || this.condition.evalFull(card, player, this, evaluatingPlayer)[0].get(player)) &&
+		return (this.isConditionMet(card, player, evaluatingPlayer)) &&
 			(this.after === null || this.triggerMetOnStack === player.game.currentStack().index - 1);
 	}
 
@@ -91,7 +96,7 @@ export class DeployAbility extends Ability {
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during item deployment
 	canActivate(card, player, evaluatingPlayer = player) {
-		return (this.condition === null || this.condition.evalFull(card, player, this, evaluatingPlayer)[0].get(player));
+		return this.isConditionMet(card, player, evaluatingPlayer);
 	}
 }
 
@@ -204,7 +209,7 @@ export class StaticAbility extends BaseAbility {
 	}
 
 	getTargetCards(card, player, evaluatingPlayer = player) {
-		if (this.canActivate(card, player, evaluatingPlayer = player)) {
+		if (this.isConditionMet(card, player, evaluatingPlayer = player)) {
 			return this.applyTo.evalFull(card, player, this, evaluatingPlayer)[0].get(player);
 		}
 		return [];

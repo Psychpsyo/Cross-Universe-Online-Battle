@@ -61,8 +61,12 @@ export class BaseCard {
 	// Whenever a card's values change, this function re-evaluates the modifier stack to figure out what the new value should be.
 	// In doing so, it also takes care of spells & items losing their unit-specific modifications
 	recalculateModifiedValues() {
-		this.unaffectedBy = [];
+		// un-cancel all abilities
+		for (const ability of this.initialValues.abilities) {
+			ability.isCancelled = false;
+		}
 		// values being unaffected by cards
+		this.unaffectedBy = [];
 		for (const modifier of this.modifierStack) {
 			modifier.modify(this, false, true);
 		}
@@ -239,7 +243,6 @@ export class Card extends BaseCard {
 				data.attack ?? null,
 				data.defense ?? null,
 				data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
-				[],
 				baseCardTypes.includes("unit")? 1 : null,
 				true
 			),

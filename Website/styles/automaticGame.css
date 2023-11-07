@@ -223,15 +223,14 @@
 	gap: .5em;
 	margin: .5em 0;
 }
-.itemOrderAbility {
+.itemOrderDiv {
 	text-align: left;
 	white-space: pre-wrap;
 	border-radius: .5em;
 	padding: .25em;
-	text-indent: -2em;
-	padding-left: 2.25em;
+	padding-right: 1.75em;
 }
-.itemOrderAbility[data-index]::after {
+.itemOrderDiv[data-index]::after {
 	content: attr(data-index);
 	position: absolute;
 	top: 50%;
@@ -243,7 +242,6 @@
 	border-radius: 50%;
 	text-align: center;
 	line-height: 100%;
-	text-indent: 0;
 }
 
 /* Cool Attack Visual */

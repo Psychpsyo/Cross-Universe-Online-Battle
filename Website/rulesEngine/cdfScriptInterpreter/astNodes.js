@@ -243,9 +243,7 @@ export class FunctionNode extends AstNode {
 
 		if (type === "tempActions") { // actions need to be executed
 			let actions = [];
-			let orderedPlayers = [...player.game.players];
-			orderedPlayers.unshift(orderedPlayers.splice(orderedPlayers.indexOf(player.game.currentTurn().player), 1)[0]);
-			for (const iterPlayer of orderedPlayers) {
+			for (const iterPlayer of players) {
 				actions = actions.concat(valueMap.get(iterPlayer));
 			}
 			let timing = yield actions;
@@ -260,9 +258,17 @@ export class FunctionNode extends AstNode {
 	* runFunction(card, player, ability) {
 		switch (this.functionName) {
 			case "APPLY": {
-				let modifier = (yield* this.parameters[1].eval(card, player, ability)).get(player).bake();
 				let until = (yield* this.parameters[2].eval(card, player, ability)).get(player);
-				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(card, player, ability)).get(player).map(card => new actions.ApplyCardStatChange(player, card.current(), modifier, until)));
+				let applyActions = [];
+				for (const target of (yield* this.parameters[0].eval(card, player, ability)).get(player)) {
+					applyActions.push(new actions.ApplyCardStatChange(
+						player,
+						target.current(),
+						(yield* this.parameters[1].eval(card, player, ability)).get(player).bake(target.current()),
+						until
+					));
+				}
+				return new ScriptValue("tempActions", applyActions);
 			}
 			case "CANCELATTACK": {
 				return new ScriptValue("tempActions", [new actions.CancelAttack(player)]);
