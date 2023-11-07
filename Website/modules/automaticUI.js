@@ -368,9 +368,11 @@ export async function showCoolAttackAnim(defender, attackers) {
 
 	const imgs = document.querySelectorAll(".coolAttackImgHolder > img");
 	imgs[0].src = cardLoader.getCardImage(defender);
-	imgs[0].style.setProperty("--left", -(gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
-	if (gameUI.cardAlignmentInfo[players[1].profilePicture]?.flip) {
+	if (gameUI.cardAlignmentInfo[defender.cardId]?.flip) {
+		imgs[0].style.setProperty("--left", -100 + (gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 		imgs[0].style.transform = "scaleX(-1)";
+	} else {
+		imgs[0].style.setProperty("--left", -(gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 	}
 
 	for (let i = 0; i < attackers.length; i++) {
