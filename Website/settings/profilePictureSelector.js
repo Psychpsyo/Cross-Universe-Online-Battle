@@ -3,7 +3,7 @@ import {locale} from "/modules/locale.js";
 
 const categoryLinks = {
 	"cardGameRecommendation": "https://crossuniverse.jp/原作小説/",
-	"cardGameDystopia": "https://novelup.plus/story/406826942"
+	"cardGameDystopia": "https://kakuyomu.jp/works/16817330652761030151"
 }
 
 const profilePictureInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());

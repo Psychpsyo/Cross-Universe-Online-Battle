@@ -8,7 +8,7 @@ let cdfCache = {};
 let scriptedCardList = null;
 let nextCustomCardIDs = [1, 2];
 let customCardURLs = [];
-let neosAvailability = null;
+let resoniteAvailability = null;
 
 const cardLanguages = ["en", "ja"];
 
@@ -179,9 +179,9 @@ export async function isCardScripted(cardId) {
 	return (await scriptedCardList).includes(cardId);
 }
 
-export async function isInNeos(cardId) {
-	if (!neosAvailability) {
-		neosAvailability = (async() => {
+export async function isInResonite(cardId) {
+	if (!resoniteAvailability) {
+		resoniteAvailability = (async() => {
 			let response = await fetch("https://raw.githubusercontent.com/Psychpsyo/cu-data/master/cards.txt");
 			let availableCards = [];
 			for (let line of (await response.text()).split("\n")) {
@@ -197,5 +197,5 @@ export async function isInNeos(cardId) {
 			return availableCards;
 		})();
 	}
-	return (await neosAvailability).includes(cardId);
+	return (await resoniteAvailability).includes(cardId);
 }

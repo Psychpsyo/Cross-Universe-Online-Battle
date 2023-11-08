@@ -204,8 +204,8 @@ function searchCards(query) {
 					display = await cardLoader.isCardScripted(card.cardID);
 					break;
 				}
-				case "neos": {
-					display = await cardLoader.isInNeos(card.cardID);
+				case "resonite": {
+					display = await cardLoader.isInResonite(card.cardID);
 					break;
 				}
 				case "unimplemented": {
