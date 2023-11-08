@@ -57,6 +57,16 @@ h1, h2, h3, h4 {
 .compact .cardButton:hover img {
 	transform: translateY(-10%);
 }
+.compact li:not(:nth-last-child(-n+3)) > .cardButton::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 110%;
+	background: linear-gradient(transparent 80%, black);
+}
+
 .cardList > * {
 	width: 95%;
 	max-height: 95%;

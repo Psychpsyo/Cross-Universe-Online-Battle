@@ -28,7 +28,7 @@
 	aspect-ratio: 813 / 1185;
 }
 
-.levitateCard:before, .levitateCard:after {
+.levitateCard::before, .levitateCard::after {
 	content: "";
 	position: absolute;
 	top: 0;
@@ -43,11 +43,11 @@
 	backface-visibility: hidden;
 }
 
-.levitateCard:before {
+.levitateCard::before {
 	background-image: var(--p1-card-back), url("/images/cardBack.jpg");
 	background-position: center;
 }
 
-.levitateCard:after {
+.levitateCard::after {
 	background-image: url("/images/cardBackFrameP1.png");
 }
