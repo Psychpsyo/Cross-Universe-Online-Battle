@@ -11,7 +11,7 @@ const waterDeck = {"Cards":["CUU00237","CUU00237","CUU00139","CUU00139","CUU0010
 const angelDeck = {"Cards":["CUU00166","CUU00166","CUU00166","CUU00165","CUU00165","CUU00165","CUU00164","CUU00164","CUU00164","CUU00099","CUU00099","CUU00099","CUS00149","CUS00149","CUS00149","CUS00147","CUS00147","CUS00147","CUS00146","CUS00146","CUS00146","CUS00033","CUS00033","CUS00033","CUI00082","CUI00082","CUI00046","CUI00046","CUI00046"],"Name":"Automatic Machine Deck!","Description":"","Partner":"CUU00163"};
 
 export class AiInitState extends GameState {
-	constructor(apiKey) {
+	constructor(wsUrl) {
 		super();
 		gameState = this;
 		loadingIndicator.classList.add("active");
@@ -19,12 +19,15 @@ export class AiInitState extends GameState {
 		deckSelector.classList.add("deckListDisable");
 
 		game = new Game();
-		new ChatGPT(game.players[0], apiKey);
+		new ChatGPT(game.players[0], wsUrl);
 		localPlayer = game.players[1];
 
 		// load decks and partners
 		players[0].deck = deckUtils.toDeckx(angelDeck);
 		players[1].deck = deckUtils.toDeckx(waterDeck);
+
+		players[0].profilePicture = "I00096";
+		players[0].name = "ChatGPT";
 
 		let deckSetupPromises = [];
 		for (let i = 0; i < 2; i++) {

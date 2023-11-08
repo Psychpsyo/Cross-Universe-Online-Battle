@@ -39,17 +39,12 @@ class Choice {
 }
 
 export class ChatGPT extends AI {
-	constructor(player, apiKey) {
+	constructor(player, wsUrl) {
 		super(player);
 		this.doDialogue = true;
 		this.opponent = this.player.next();
-		this.apiKey = apiKey;
-		this.gptModel = "gpt-3.5-turbo-instruct";
 
-		this.socket = new WebSocket("ws://dorf.quest:8766");
-		this.socket.addEventListener("open", (() => {
-			this.socket.send(JSON.stringify({"n_ctx": 4096}));
-		}).bind(this));
+		this.socket = new WebSocket(wsUrl);
 	}
 
 	async selectMove(optionList) {
@@ -201,7 +196,7 @@ export class ChatGPT extends AI {
 		}
 
 		// construct AI prompt
-		let moveExplanation = "Q:\n";
+		let moveExplanation = "";
 		if (giveRecap) {
 			// basic game state
 			moveExplanation += "It is " + (this.player === game.currentTurn().player? "your" : "your opponent's") + " turn in a card game.\n";
@@ -236,30 +231,30 @@ export class ChatGPT extends AI {
 		moveExplanation += this.getFinalPromt(choices.length);
 
 		// ask chatGPT
-		let gptResponse = await this.askChatGPT(moveExplanation);
-		let gptChoice = choices[gptResponse.choice - 1];
+		let gptResponse = await this.askChatGPT(moveExplanation, choices.length);
+		let gptChoice = choices[gptResponse.choice];
 
 		// do additional, more specific query if needed
 		if (gptChoice.response.type === "doAttackDeclaration") {
 			let option = optionList.find(opt => opt.type === "doAttackDeclaration");
-			moveExplanation = "Q:\nWhich of your units should attack?\n";
+			moveExplanation = "Which of your units should attack?\n";
 			for (let i = 0; i < option.eligibleUnits.length; i++) {
 				const unit = option.eligibleUnits[i];
 				moveExplanation += (i + 1) + ". Level " + unit.values.level + " '" + (await getCardInfo(unit.cardId)).name + "' (" + unit.values.attack + " attack, " + unit.values.defense + " defense)\n";
 			}
 			moveExplanation += this.getFinalPromt(option.eligibleUnits.length);
-			gptResponse = await this.askChatGPT(moveExplanation);
-			gptChoice.response.response.value = [gptResponse.choice - 1];
+			gptResponse = await this.askChatGPT(moveExplanation, option.eligibleUnits.length);
+			gptChoice.response.value = [gptResponse.choice];
 		} else if (gptChoice.response.type === "doRetire") {
 			let option = optionList.find(opt => opt.type === "doRetire");
-			moveExplanation = "Q:\nWhich of your units should retire?\n";
+			moveExplanation = "Which of your units should retire?\n";
 			for (let i = 0; i < option.eligibleUnits.length; i++) {
 				const unit = option.eligibleUnits[i];
 				moveExplanation += (i + 1) + ". Level " + unit.values.level + " '" + (await getCardInfo(unit.cardId)).name + "' (" + unit.values.attack + " attack, " + unit.values.defense + " defense)\n";
 			}
 			moveExplanation += this.getFinalPromt(option.eligibleUnits.length);
-			gptResponse = await this.askChatGPT(moveExplanation);
-			gptChoice.response.value = [gptResponse.choice - 1];
+			gptResponse = await this.askChatGPT(moveExplanation, option.eligibleUnits.length);
+			gptChoice.response.value = [gptResponse.choice];
 		}
 
 		if (gptResponse.comment) {
@@ -269,26 +264,27 @@ export class ChatGPT extends AI {
 		return gptChoice.response;
 	}
 
-	async askChatGPT(question) {
+	async askChatGPT(question, optionCount) {
 		console.log("Asking the AI:\n" + question);
-		this.socket.send(JSON.stringify({
-			"prompt": question,
-			"max_tokens": 4096,
-			"stop": ["Q:"]
-		}));
+		this.socket.send(question);
 		let responseText = await new Promise(resolve => {
 			this.socket.addEventListener("message", e => {
-				resolve(JSON.parse(e.data).choices[0].text);
+				resolve(e.data);
 			});
 		});
 		console.log("The AI said:\n" + responseText);
-		const numbers = responseText.match(/\[\d+\]/);
-		let response = {choice: parseInt(numbers[numbers.length - 1].substring(1))};
+		const numbers = responseText.match(/\[\d+\]/) ?? ["[1]"];
+		let response = {choice: parseInt(numbers[numbers.length - 1].substring(1)) - 1};
+		if (response.choice < 0 || response.choice >= optionCount) {
+			response.choice = 0;
+		}
+		console.log("Detected response number #" + response.choice);
 		// TODO: fill response.comment
 		return response;
 	}
 
 	getFinalPromt(choiceCount) {
-		return "A:\n(I will now lay out my thoughts and then I will make my choice by writing the option's number is square brackets like so: [x])";
+		let retVal = "Carefully read the effects on your cards, then lay out your reasoning and at the end make your choice by responding with only a number from 1 to " + choiceCount + " in square brackets, like so: [x]";
+		return retVal;
 	}
 }

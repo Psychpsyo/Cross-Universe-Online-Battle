@@ -190,8 +190,8 @@ if (localStorage.getItem("mainMenuCards") == "true") {
 
 
 
-window.startAiGame = function(apiKey) {
+window.startAiGame = function(wsUrl) {
 	import("/modules/aiInitState.js").then(initModule => {
-		new initModule.AiInitState(apiKey);
+		new initModule.AiInitState(wsUrl);
 	});
 }
