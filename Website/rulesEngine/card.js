@@ -143,16 +143,16 @@ export class BaseCard {
 		return timingGenerators.combinedTimingGenerator(generators);
 	}
 
-	async canSummon(player) {
+	async canSummon(checkPlacement, player) {
 		if (!this.values.cardTypes.includes("unit")) {
 			return false;
 		}
 		let timingRunner = new timingGenerators.TimingRunner(() => this.getSummoningCost(player), player.game);
 		timingRunner.isCost = true;
-		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, () => true);
+		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, () => !checkPlacement || player.unitZone.cards.includes(null));
 		return costOptionTree.valid;
 	}
-	async canCast(player, evaluatingPlayer = player) {
+	async canCast(checkPlacement, player, evaluatingPlayer = player) {
 		if (!this.values.cardTypes.includes("spell")) {
 			return false;
 		}
@@ -163,14 +163,14 @@ export class BaseCard {
 			return false;
 		}
 		// find cast ability
-		let endOfTreeCheck = () => true;
+		let endOfTreeCheck = () => !checkPlacement || player.spellItemZone.cards.includes(null);
 		for (const ability of this.values.abilities) {
 			if (ability instanceof abilities.CastAbility) {
 				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
 				}
 				let currentZone = this.zone; // Can't discard a spell for its own cost
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone;
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone && (!checkPlacement || player.spellItemZone.cards.includes(null));
 			}
 		}
 
@@ -179,7 +179,8 @@ export class BaseCard {
 		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, endOfTreeCheck);
 		return costOptionTree.valid;
 	}
-	async canDeploy(player, evaluatingPlayer = player) {
+	// If checkPlacement is false, only teh deployment conditions that the rules care about will be evaluated, not if the card can actually sucessfully be placed on the field
+	async canDeploy(checkPlacement, player, evaluatingPlayer = player) {
 		if (!this.values.cardTypes.includes("item")) {
 			return false;
 		}
@@ -190,14 +191,14 @@ export class BaseCard {
 			return false;
 		}
 		// find deploy ability
-		let endOfTreeCheck = () => true;
+		let endOfTreeCheck = () => !checkPlacement || player.spellItemZone.cards.includes(null);
 		for (const ability of this.values.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
 				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
 				}
 				let currentZone = this.zone; // Can't discard an item for its own cost
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone;
+				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone && (!checkPlacement || player.spellItemZone.cards.includes(null));
 			}
 		}
 

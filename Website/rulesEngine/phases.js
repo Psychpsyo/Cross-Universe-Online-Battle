@@ -91,7 +91,7 @@ export class StackPhase extends Phase {
 		let player = stack.getNextPlayer();
 		let castable = [];
 		for (const card of player.handZone.cards) {
-			if (await card.canCast(player)) {
+			if (await card.canCast(true, player)) {
 				castable.push(card);
 			}
 		}
@@ -281,7 +281,7 @@ export class MainPhase extends StackPhase {
 	async getSummonableUnits() {
 		let summonable = [];
 		for (const card of this.turn.player.handZone.cards) {
-			if (await card.canSummon(this.turn.player)) {
+			if (await card.canSummon(true, this.turn.player)) {
 				summonable.push(card);
 			}
 		}
@@ -291,7 +291,7 @@ export class MainPhase extends StackPhase {
 	async getDeployableItems() {
 		let deployable = [];
 		for (const card of this.turn.player.handZone.cards) {
-			if (await card.canDeploy(this.turn.player)) {
+			if (await card.canDeploy(true, this.turn.player)) {
 				deployable.push(card);
 			}
 		}

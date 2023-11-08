@@ -370,7 +370,11 @@ export const chooseZoneSlot = {
 		return request.eligibleSlots[response];
 	},
 	generateValidResponses: function(request) {
-		return request.eligibleSlots;
+		let options = [];
+		for (let i = 0; i < request.eligibleSlots.length; i++) {
+			options.push(i);
+		}
+		return options;
 	}
 }
 
