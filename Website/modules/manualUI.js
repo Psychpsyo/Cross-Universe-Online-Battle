@@ -152,8 +152,12 @@ export function init() {
 
 export function receiveMessage(command, message) {
 	switch (command) {
-		case "dice": { // opponent rolled a dice with /dice in chat
+		case "dice": { // opponent clicked the button on 'Fate's Dice' to roll a dice.
 			putChatMessage(locale.cardActions.I00040.opponentRoll.replace("{#RESULT}", message), "notice");
+			return true;
+		}
+		case "laplaceScan": { // opponent used the button on 'Absolute God of the Perfect World' to look at your entire deck
+			putChatMessage(locale.cardActions.U002XX.activation, "notice");
 			return true;
 		}
 		case "counterAdd": {

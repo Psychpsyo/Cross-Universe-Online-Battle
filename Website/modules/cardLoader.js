@@ -62,10 +62,12 @@ defense:${cardData.defense ?? 0}`;
 	if (cardData.deckLimit) {
 		cdf += "\ndeckLimit: " + (cardData.deckLimit == 50? Infinity : cardData.deckLimit);
 	}
-	for (const ability of cardData.effects) {
-		if (ability.type !== "rule") {
-			// Yes, an effect can be completely empty.
-			cdf += "\no: " + ability.type;
+	if (cardId[0] !== "C") {
+		for (const ability of cardData.effects) {
+			if (ability.type !== "rule") {
+				// Yes, an effect can be completely empty.
+				cdf += "\no: " + ability.type;
+			}
 		}
 	}
 	return cdf;

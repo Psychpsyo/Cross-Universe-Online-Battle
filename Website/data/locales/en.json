@@ -95,6 +95,7 @@
 
 		"cardSelector": {
 			"tokens": "Tokens:",
+			"deck0": "Opponent's Deck:",
 			"deck1": "Your Deck:",
 			"discard0": "Opponent's Discard Pile:",
 			"discard1": "Your Discard Pile:",
@@ -754,6 +755,10 @@
 			"roll": "Roll",
 			"yourRoll": "You rolled Fate's Dice. It showed a {#RESULT}.",
 			"opponentRoll": "Your opponent rolled Fate's Dice. It showed a {#RESULT}."
+		},
+		"U002XX": {
+			"scan": "Laplace Scan",
+			"activation": "Your opponent is inspecting your deck with 'Absolute God of the Perfect World'."
 		}
 	},
 

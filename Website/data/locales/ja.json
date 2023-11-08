@@ -95,6 +95,7 @@
 
 		"cardSelector": {
 			"tokens": "トークン：",
+			"deck0": "相手のデッキ：",
 			"deck1": "自分のデッキ：",
 			"discard0": "相手の捨て山：",
 			"discard1": "自分の捨て山：",
@@ -754,6 +755,10 @@
 			"roll": "振る",
 			"yourRoll": "自分の「運命のサイコロ」：{#RESULT}",
 			"opponentRoll": "相手の「運命のサイコロ」：{#RESULT}"
+		},
+		"U002XX": {
+			"scan": "ラプラス・スキャン",
+			"activation": null
 		}
 	},
 

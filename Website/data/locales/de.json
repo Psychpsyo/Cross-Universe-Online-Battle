@@ -95,6 +95,7 @@
 
 		"cardSelector": {
 			"tokens": "Tokens:",
+			"deck0": "Deck deines Gegners:",
 			"deck1": "Dein Deck:",
 			"discard0": "Ablagestapel deines Gegners:",
 			"discard1": "Dein Ablagestapel:",
@@ -754,6 +755,10 @@
 			"roll": "Würfeln",
 			"yourRoll": "Du hast Fate's Dice geworfen. Es war eine {#RESULT}.",
 			"opponentRoll": "Dein Gegner hat Fate's Dice geworfen. Es war eine {#RESULT}."
+		},
+		"U002XX": {
+			"scan": "Laplace Scan",
+			"activation": "Dein Gegner sieht sich mit 'Absolute God of the Perfect World' dein Deck an."
 		}
 	},
 

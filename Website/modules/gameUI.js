@@ -483,7 +483,7 @@ class FieldCardSlot extends UiCardSlot {
 		if (card) {
 			this.fieldSlot.src = getCardImage(card);
 			// add card action buttons
-			if (!gameState.automatic && !card.hiddenFor.includes(localPlayer)) {
+			if (!gameState.automatic && !card.hiddenFor.includes(localPlayer) && this.zone.player === localPlayer) {
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
 						this.addCardButton(locale.cardActions[card.cardId][key], "cardSpecific", value);
