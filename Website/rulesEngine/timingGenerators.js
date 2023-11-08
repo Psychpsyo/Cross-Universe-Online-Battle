@@ -144,6 +144,9 @@ export function* abilityTimingGenerator(ability, card, player) {
 	let timing;
 	let actionList;
 	do {
+		if (ability.isCancelled) {
+			return;
+		}
 		actionList = timingGenerator.next(timing);
 		if (!actionList.done) {
 			if (actionList.value.length == 0) {

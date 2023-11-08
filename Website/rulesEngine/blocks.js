@@ -218,13 +218,6 @@ export class AbilityActivation extends Block {
 		this.ability.successfulActivation();
 		return true;
 	}
-
-	async* run() {
-		if (this.ability.isCancelled) {
-			return;
-		}
-		return yield* super.run();
-	}
 }
 
 export class DeployItem extends Block {
