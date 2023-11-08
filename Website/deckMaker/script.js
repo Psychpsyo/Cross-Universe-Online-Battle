@@ -538,7 +538,7 @@ function sortCardsInDeck() {
 	});
 
 	sortedOptions.forEach(cardElement => {
-		document.getElementById("deckCreatorCardList").appendChild(cardElement);
+		deckCreatorCardList.appendChild(cardElement);
 	});
 }
 
@@ -549,7 +549,7 @@ async function recalculateDeckStats() {
 	let tokenCount = 0;
 
 	let levelDist = [];
-	for (let i = 0; i < 13; i++) {
+	for (let i = 0; i <= 12; i++) {
 		levelDist[i] = {total: 0, units: 0, spells: 0, items: 0};
 	}
 
@@ -582,40 +582,51 @@ async function recalculateDeckStats() {
 		}
 	}
 
-	document.getElementById("deckMakerDetailsCardTotalValue").textContent = deckList.length;
+	deckMakerDetailsCardTotalValue.textContent = deckList.length;
 	if (deckList.length > 0) {
-		document.getElementById("deckMakerDetailsUnitCountValue").textContent = unitCount + " (" + (unitCount / deckList.length * 100).toFixed(2) + "%)";
-		document.getElementById("deckMakerDetailsSpellCountValue").textContent = spellCount + " (" + (spellCount / deckList.length * 100).toFixed(2) + "%)";
-		document.getElementById("deckMakerDetailsItemCountValue").textContent = itemCount + " (" + (itemCount / deckList.length * 100).toFixed(2) + "%)";
+		deckMakerDetailsUnitCountValue.textContent = unitCount + " (" + (unitCount / deckList.length * 100).toFixed(2) + "%)";
+		deckMakerDetailsSpellCountValue.textContent = spellCount + " (" + (spellCount / deckList.length * 100).toFixed(2) + "%)";
+		deckMakerDetailsItemCountValue.textContent = itemCount + " (" + (itemCount / deckList.length * 100).toFixed(2) + "%)";
 	} else {
 		//set preset values to avoid divide by 0 above
-		document.getElementById("deckMakerDetailsUnitCountValue").textContent = "0 (0.00%)";
-		document.getElementById("deckMakerDetailsSpellCountValue").textContent = "0 (0.00%)";
-		document.getElementById("deckMakerDetailsItemCountValue").textContent = "0 (0.00%)";
+		deckMakerDetailsUnitCountValue.textContent = "0 (0.00%)";
+		deckMakerDetailsSpellCountValue.textContent = "0 (0.00%)";
+		deckMakerDetailsItemCountValue.textContent = "0 (0.00%)";
 	}
 
 	//set level distribution
-	let highestLevel = 0;
-	for (let i = 0; i < 13; i++) {
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(0).style.display = levelDist[i].items == 0? "none" : "block";
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(0).style.height = (levelDist[i].items / levelDist[i].total * 100).toFixed(3) + "%";
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(0).title = levelDist[i].items;
+	let levelCardMax = 0;
+	for (let i = 0; i <= 12; i++) {
+		deckMakerLevelDistribution.children.item(i).children.item(0).style.display = levelDist[i].items == 0? "none" : "block";
+		deckMakerLevelDistribution.children.item(i).children.item(0).style.height = (levelDist[i].items / levelDist[i].total * 100).toFixed(3) + "%";
+		deckMakerLevelDistribution.children.item(i).children.item(0).title = levelDist[i].items;
 
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(1).style.display = levelDist[i].spells == 0? "none" : "block";
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(1).style.height = (levelDist[i].spells / levelDist[i].total * 100).toFixed(3) + "%";
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(1).title = levelDist[i].spells;
+		deckMakerLevelDistribution.children.item(i).children.item(1).style.display = levelDist[i].spells == 0? "none" : "block";
+		deckMakerLevelDistribution.children.item(i).children.item(1).style.height = (levelDist[i].spells / levelDist[i].total * 100).toFixed(3) + "%";
+		deckMakerLevelDistribution.children.item(i).children.item(1).title = levelDist[i].spells;
 
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(2).style.display = levelDist[i].units == 0? "none" : "block";
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(2).style.height = (levelDist[i].units / levelDist[i].total * 100).toFixed(3) + "%";
-		document.getElementById("deckMakerLevelDistribution").children.item(i).children.item(2).title = levelDist[i].units;
-		highestLevel = Math.max(highestLevel, levelDist[i].total);
+		deckMakerLevelDistribution.children.item(i).children.item(2).style.display = levelDist[i].units == 0? "none" : "block";
+		deckMakerLevelDistribution.children.item(i).children.item(2).style.height = (levelDist[i].units / levelDist[i].total * 100).toFixed(3) + "%";
+		deckMakerLevelDistribution.children.item(i).children.item(2).title = levelDist[i].units;
+		levelCardMax = Math.max(levelCardMax, levelDist[i].total);
 	}
 
-	for (let i = 0; i < 13; i++) {
-		document.getElementById("deckMakerLevelDistribution").children.item(i).style.height = (levelDist[i].total / highestLevel * 100).toFixed(3) + "%";
+	for (let i = 0; i <= 12; i++) {
+		deckMakerLevelDistribution.children.item(i).style.height = (levelDist[i].total / levelCardMax * 100).toFixed(3) + "%";
+		deckMakerLevelDistribution.children.item(i).hidden = false;
+		deckMakerLevelDistributionLabels.children.item(i).hidden = false;
 	}
 
-	document.getElementById("dotDeckExportBtn").disabled = document.getElementById("deckMakerDetailsPartnerSelect").value == "";
+	// hide levels 11/12 if not used
+	for (let i = 12; i > 10; i--) {
+		if (levelDist[i].total > 0) {
+			break;
+		}
+		deckMakerLevelDistribution.children.item(i).hidden = true;
+		deckMakerLevelDistributionLabels.children.item(i).hidden = true;
+	}
+
+	dotDeckExportBtn.disabled = document.getElementById("deckMakerDetailsPartnerSelect").value == "";
 
 	//enable/disable warnings
 	document.getElementById("unitWarning").style.display = unitCount == 0? "block" : "none";
