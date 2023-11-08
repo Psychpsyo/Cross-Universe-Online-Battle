@@ -540,6 +540,12 @@
 		"continuousItems": "永続アイテム",
 		"equipableItems": "装備アイテム",
 
+		"quickSearch": {
+			"title": null,
+			"prompt": null,
+			"noResults": null
+		},
+
 		"searchMenu": {
 			"title": "カードサーチ",
 			"search": "サーチ",

@@ -12,8 +12,9 @@
 
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="deckMaker/style.css">
+		<link rel="stylesheet" href="styles/loadingIndicator.css">
 	</head>
-	<body>
+	<body class="noResults">
 		<div id="mainHeaderHolder">
 			<header>
 				<button id="deckMakerDeckButton" class="bigButton deckMakerTopButton"></button>
@@ -21,8 +22,12 @@
 				<button id="deckMakerSearchButton" class="bigButton deckMakerTopButton"></button>
 			</header>
 		</div>
-		<section id="deckMakerPanels" aria-label="Search Results">
-			<section id="deckMakerUnits" aria-label="Unit/Token Column">
+		<section id="quickSearchHolder" aria-labelledBy="quickSearch">
+			<input id="quickSearch" type="text" autocomplete="off" autofocus aria-label="">
+			<span id="noResultsMessage" hidden></span>
+		</section>
+		<section id="deckMakerPanels" aria-label="">
+			<section id="deckMakerUnits" aria-label="">
 				<section id="unitList" aria-labelledBy="unitHeader">
 					<h2 id="unitHeader" class="deckMakerHeader"></h2>
 					<ul id="unitGrid" class="deckMakerGrid cardList"></ul>
@@ -32,7 +37,7 @@
 					<ul id="tokenGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 			</section>
-			<section id="deckMakerSpells" aria-label="Spell Column">
+			<section id="deckMakerSpells" aria-label="">
 				<section id="standardSpellList" aria-labelledBy="standardSpellHeader">
 					<h2 id="standardSpellHeader" class="deckMakerHeader"></h2>
 					<ul id="standardSpellGrid" class="deckMakerGrid cardList"></ul>
@@ -46,7 +51,7 @@
 					<ul id="enchantSpellGrid" class="deckMakerGrid cardList"></ul>
 				</section>
 			</section>
-			<section id="deckMakerItems" aria-label="Item Column">
+			<section id="deckMakerItems" aria-label="">
 				<section id="standardItemList" aria-labelledBy="standardItemHeader">
 					<h2 id="standardItemHeader" class="deckMakerHeader"></h2>
 					<ul id="standardItemGrid" class="deckMakerGrid cardList"></ul>
@@ -328,6 +333,9 @@
 				<div id="regenerateStartingHand"></div>
 			</section>
 		</dialog>
+
+		<!--loading indicator-->
+		<object id="loadingIndicator" type="image/svg+xml" data="./images/icons/loading.svg" width="150px" height="150px"></object>
 
 		<!--scripts-->
 		<script src="scripts/polyfills.js"></script>

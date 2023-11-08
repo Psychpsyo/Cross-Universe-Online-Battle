@@ -12,6 +12,10 @@ deckCreatorTitle.textContent = locale.deckMaker.title;
 deckMakerDeckButton.textContent = locale.deckMaker.deck;
 deckMakerSearchButton.textContent = locale.deckMaker.search;
 
+quickSearch.setAttribute("aria-label", locale.deckMaker.quickSearch.title);
+quickSearch.placeholder = locale.deckMaker.quickSearch.prompt;
+noResultsMessage.textContent = locale.deckMaker.quickSearch.noResults;
+
 deckMakerPanels.setAttribute("aria-label", locale.deckMaker.searchResults);
 deckMakerUnits.setAttribute("aria-label", locale.deckMaker.unitTokenColumn);
 deckMakerSpells.setAttribute("aria-label", locale.deckMaker.spellColumn);
@@ -139,6 +143,15 @@ if (localStorage.getItem("compactMode") === "true") {
 	document.documentElement.classList.add("compact");
 }
 
+quickSearch.addEventListener("keyup", function(e) {
+	if (e.key === "Enter") {
+		searchCards({
+			name: this.value,
+			language: (locale.warnings.includes("noCards")? "en" : locale.code)
+		});
+	}
+});
+
 // make dialogs work
 Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 	elem.addEventListener("click", function(e) {
@@ -184,18 +197,26 @@ function createCardButton(card, lazyLoading) {
 function searchCards(query) {
 	//clear current card lists:
 	Array.from(document.getElementsByClassName("deckMakerGrid")).forEach(list => {
-		while(list.firstChild) {
-			list.firstChild.remove();
-		}
+		list.innerHTML = "";
 	});
 	closeAllDeckMakerOverlays();
+	loadingIndicator.classList.add("active");
+	noResultsMessage.hidden = true;
 
 	fetch(
 		localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl"),
 		{method: "POST", body: JSON.stringify(query)}
 	).then(response => response.text())
 	.then(async (response) => {
-		for (let card of JSON.parse(response)) {
+		loadingIndicator.classList.remove("active");
+		const cards = JSON.parse(response);
+		if (cards.length === 0) {
+			document.body.classList.add("noResults");
+			noResultsMessage.hidden = false;
+			return;
+		}
+		document.body.classList.remove("noResults");
+		for (const card of cards) {
 			cardLoader.cardInfoCache[card.cardID] = card;
 
 			let display = true;

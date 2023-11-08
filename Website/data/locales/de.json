@@ -540,6 +540,12 @@
 		"continuousItems": "Permanente Items",
 		"equipableItems": "Ausrüstbare Items",
 
+		"quickSearch": {
+			"title": "Schnellsuche",
+			"prompt": "Suche nach einem Kartennamen... (oder drücke Enter um alle Karten zu zeigen)",
+			"noResults": "Konnte keine Karten finden."
+		},
+
 		"searchMenu": {
 			"title": "Kartensuche",
 			"search": "Suchen",

@@ -540,6 +540,12 @@
 		"continuousItems": "Continuous Items",
 		"equipableItems": "Equipable Items",
 
+		"quickSearch": {
+			"title": "Quick Search",
+			"prompt": "Search for a card name... (or press Enter to show all cards)",
+			"noResults": "Couldn't find any cards."
+		},
+
 		"searchMenu": {
 			"title": "Card Search",
 			"search": "Search",
