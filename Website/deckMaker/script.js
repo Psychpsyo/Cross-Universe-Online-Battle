@@ -6,11 +6,25 @@ import * as cardLoader from "/modules/cardLoader.js";
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
 let contestWinnerTags = await fetch("data/contestWinnerTags.json").then(async response => await response.json());
 
+function markFirstLetter(string, letter) {
+	const parts = string.split(new RegExp(letter + "(.*)"));
+	const fragment = new DocumentFragment();
+	fragment.appendChild(document.createTextNode(parts[0]));
+	if (parts.length > 1) {
+		const underlined = document.createElement("span");
+		underlined.textContent = letter;
+		underlined.style.setProperty("text-decoration", "underline");
+		fragment.appendChild(underlined);
+		fragment.appendChild(document.createTextNode(parts[1]));
+	}
+	return fragment;
+}
+
 // translate page
 // main section
 deckCreatorTitle.textContent = locale.deckMaker.title;
-deckMakerDeckButton.textContent = locale.deckMaker.deck;
-deckMakerSearchButton.textContent = locale.deckMaker.search;
+deckMakerDeckButton.appendChild(markFirstLetter(locale.deckMaker.deck, "D"));
+deckMakerSearchButton.appendChild(markFirstLetter(locale.deckMaker.search, "S"));
 
 quickSearch.setAttribute("aria-label", locale.deckMaker.quickSearch.title);
 quickSearch.placeholder = locale.deckMaker.quickSearch.prompt;
