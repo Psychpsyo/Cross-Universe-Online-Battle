@@ -154,7 +154,7 @@ window.deckList = [];
 recalculateDeckStats();
 
 if (localStorage.getItem("compactMode") === "true") {
-	document.documentElement.classList.add("compact");
+	deckMakerPanels.classList.add("compact");
 }
 
 quickSearch.addEventListener("keyup", function(e) {
