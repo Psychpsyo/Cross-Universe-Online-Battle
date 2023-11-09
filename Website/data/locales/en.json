@@ -762,7 +762,7 @@
 			"yourRoll": "You rolled Fate's Dice. It showed a {#RESULT}.",
 			"opponentRoll": "Your opponent rolled Fate's Dice. It showed a {#RESULT}."
 		},
-		"U002XX": {
+		"U00286": {
 			"scan": "Laplace Scan",
 			"activation": "Your opponent is inspecting your deck with 'Absolute God of the Perfect World'."
 		}

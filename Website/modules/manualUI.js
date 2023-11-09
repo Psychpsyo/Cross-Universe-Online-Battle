@@ -157,7 +157,7 @@ export function receiveMessage(command, message) {
 			return true;
 		}
 		case "laplaceScan": { // opponent used the button on 'Absolute God of the Perfect World' to look at your entire deck
-			putChatMessage(locale.cardActions.U002XX.activation, "notice");
+			putChatMessage(locale.cardActions.U00286.activation, "notice");
 			return true;
 		}
 		case "counterAdd": {

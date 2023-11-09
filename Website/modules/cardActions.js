@@ -13,7 +13,7 @@ export let cardActions = {
 			socket.send("[dice]" + result);
 		}
 	},
-	"U002XX": {
+	"U00286": {
 		"scan": function() {
 			socket.send("[laplaceScan]");
 			openCardSelect(localPlayer.next().deckZone);

@@ -762,7 +762,7 @@
 			"yourRoll": "自分の「運命のサイコロ」：{#RESULT}",
 			"opponentRoll": "相手の「運命のサイコロ」：{#RESULT}"
 		},
-		"U002XX": {
+		"U00286": {
 			"scan": "ラプラス・スキャン",
 			"activation": null
 		}
