@@ -35,11 +35,7 @@ const settings = {
 		},
 		{
 			id: "profilePicture",
-			type: "button",
-			action: function() {
-				profilePictureDialog.showModal();
-				document.documentElement.classList.add("dialogOpen");
-			}
+			type: "profilePicture"
 		},
 		{
 			id: "cardBack",
@@ -242,6 +238,10 @@ for (const [id, options] of Object.entries(settings)) {
 				newButton(setting, block);
 				break;
 			}
+			case "profilePicture": {
+				newProfilePictureButton(setting, block);
+				break;
+			}
 			case "centerButton": {
 				let button = document.createElement("button");
 				button.id = setting.id + "Button";
@@ -328,6 +328,13 @@ async function setLanguage(language) {
 						document.getElementById(setting.id + "Label").textContent = locale.settings[id][setting.id] ?? "";
 					}
 					document.getElementById(setting.id + "Button").textContent = locale.settings[id][setting.id + "Button"] ?? "";
+					break;
+				}
+				case "profilePicture": {
+					if (document.getElementById(setting.id + "Label")) {
+						document.getElementById(setting.id + "Label").textContent = locale.settings[id][setting.id] ?? "";
+					}
+					document.getElementById(setting.id + "Button").style.setProperty("--change-label", "'" + locale.settings[id][setting.id + "Button"] + "'");
 					break;
 				}
 				case "centerButton": {
@@ -433,9 +440,31 @@ function newButton(setting, block) {
 	let holder = document.createElement("div");
 	let button = document.createElement("button");
 	button.id = setting.id + "Button";
+	button.classList.add("settingsInput");
 	if (setting.action) {
 		button.addEventListener("click", setting.action);
 	}
+	let label = document.createElement("label");
+	label.id = setting.id + "Label";
+	label.htmlFor = button.id;
+	holder.appendChild(label);
+	holder.appendChild(button);
+	block.appendChild(holder);
+}
+
+function newProfilePictureButton(setting, block) {
+	let holder = document.createElement("div");
+	let button = document.createElement("button");
+	button.id = setting.id + "Button";
+	button.classList.add("settingsInput");
+	button.classList.add("profilePictureBtn");
+	button.addEventListener("click", () => {
+		profilePictureDialog.showModal();
+		document.documentElement.classList.add("dialogOpen");
+	});
+	let img = document.createElement("img");
+	img.id = "profilePictureImage";
+	button.appendChild(img);
 	let label = document.createElement("label");
 	label.id = setting.id + "Label";
 	label.htmlFor = button.id;

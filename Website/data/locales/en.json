@@ -307,7 +307,7 @@
 			"username": "Your Username:",
 			"usernamePlaceholder": "No username set.",
 			"profilePicture": "Profile Picture:",
-			"profilePictureButton": "Change Profile Picture...",
+			"profilePictureButton": "Change",
 			"profilePictureMenu": {
 				"header": "Choose a Profile Picture",
 				"categoriesTab": "Categorized",

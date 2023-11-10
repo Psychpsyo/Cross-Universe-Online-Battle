@@ -43,6 +43,8 @@ export function refetchCardData() {
 			addProfilePictureList("tokens", cardLists.T, profilePicturesAll);
 			addProfilePictureList("spells", cardLists.S, profilePicturesAll);
 			addProfilePictureList("items", cardLists.I, profilePicturesAll);
+
+			setProfilePicture(localStorage.getItem("profilePicture"));
 		}
 	});
 }
@@ -51,24 +53,27 @@ function cardNameReload(cardApiData) {
 	cardApiData.forEach(card => {
 		cardNames[card.cardID] = card.name;
 	});
-	for (const button of Array.from(document.querySelectorAll(".profilePicture"))) {
+	for (const button of Array.from(document.querySelectorAll("#profilePictureDialog .profilePictureBtn"))) {
 		button.setAttribute("aria-label", cardNames[button.dataset.cardID]);
 	}
 }
 
-function recalculateActiveButtons() {
-	for (const button of Array.from(document.querySelectorAll(".profilePicture"))) {
-		if (button.dataset.cardID == localStorage.getItem("profilePicture")) {
+function setProfilePicture(newPicture) {
+	for (const button of Array.from(document.querySelectorAll(".profilePictureBtn"))) {
+		if (button.dataset.cardID == newPicture) {
 			button.classList.add("selectedProfilePic");
 		} else {
 			button.classList.remove("selectedProfilePic");
 		}
 	}
+
+	profilePictureImage.src = getCardImageFromID(newPicture);
+	profilePictureImage.style.setProperty("--left", -(profilePictureInfo[newPicture]?.left ?? 50) + "%");
 }
 
 function buttonSetProfilePicture() {
 	localStorage.setItem("profilePicture", this.dataset.cardID);
-	recalculateActiveButtons();
+	setProfilePicture(this.dataset.cardID);
 }
 
 function addProfilePictureList(name, cardIdList, targetDiv) {
@@ -76,14 +81,11 @@ function addProfilePictureList(name, cardIdList, targetDiv) {
 	list.classList.add("profilePictureList");
 	for (const cardId of cardIdList) {
 		let button = document.createElement("button");
-		button.classList.add("profilePicture");
+		button.classList.add("profilePictureBtn");
 		button.dataset.cardID = cardId;
 		button.addEventListener("click", buttonSetProfilePicture);
 		if (cardNames[cardId]) {
 			button.setAttribute("aria-label", cardNames[cardId]);
-		}
-		if (cardId == localStorage.getItem("profilePicture")) {
-			button.classList.add("selectedProfilePic");
 		}
 
 		let img = document.createElement("img");

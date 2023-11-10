@@ -44,13 +44,11 @@ hr {
 	position: relative;
 	padding: .1em .4em;
 	text-align: left;
+	display: flow-root; /* Establishes new block formatting context so that float elements fit */
 }
 
-input[type="text"], select, .settingsBlock > div > button {
-	position: absolute;
-	right: .4em;
-	top: 50%;
-	transform: translateY(-50%);
+input[type="text"], select, .settingsInput {
+	float: right;
 }
 
 .keybind {
@@ -89,7 +87,7 @@ input[type="text"], select, .settingsBlock > div > button {
 	gap: .5em;
 }
 
-.profilePicture {
+.profilePictureBtn {
 	background-color: transparent;
 	padding: 0;
 	width: min(8vw, 8em);
@@ -98,17 +96,20 @@ input[type="text"], select, .settingsBlock > div > button {
 	border: 3px solid white;
 	position: relative;
 	overflow: hidden;
+	cursor: pointer;
 }
-.profilePicture > img {
+.profilePictureBtn > img {
 	width: 180%;
 	height: calc(180% * (1185/813));
 	position: absolute;
 	top: calc(-22.5% * (1185/813 * 1.8 - 1)); /* This recreates background-position-y: 22.5% */
 	left: calc(var(--left) * .8);
+}
+#profilePictureDialog .profilePictureBtn > img {
 	filter: brightness(.7);
 	transition: filter, .25s;
 }
-.profilePicture:hover img, .selectedProfilePic img {
+#profilePictureDialog .profilePictureBtn:hover > img, .selectedProfilePic img {
 	filter: brightness(1);
 }
 .selectedProfilePic {
@@ -126,4 +127,28 @@ input[type="text"], select, .settingsBlock > div > button {
 }
 #profilePictureSwitcher > :last-child {
 	border-right: 0;
+}
+
+#profilePictureButton {
+	color: inherit;
+	font-size: .75em;
+}
+#profilePictureButton::after {
+	content: var(--change-label);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #eee;
+	filter: opacity(0);
+	transition: filter, .15s;
+}
+#profilePictureButton:hover::after {
+	filter: opacity(1);
+}
+#profilePictureButton > img {
+	transition: filter, .15s;
+}
+#profilePictureButton:hover > img {
+	filter: brightness(.25);
 }
