@@ -409,10 +409,12 @@ img[src$="cardBackFrameP1.png"] {
 	user-select: none;
 	z-index: 90;
 }
-
 #yourDragCard {
 	pointer-events: none;
 	z-index: 95;
+}
+.dragCard[src="images/cardHidden.png"] {
+	pointer-events: none;
 }
 
 .dragSource {

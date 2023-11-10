@@ -824,6 +824,7 @@ class UiPlayer {
 		this.cursorElem.classList.add("dragCard");
 		this.cursorElem.src = "images/opponentCursor.png";
 		this.cursorElem.hidden = true;
+		this.cursorElem.style.setProperty("pointer-events", "none");
 		draggedCardImages.appendChild(this.cursorElem);
 		draggedCardImages.appendChild(this.dragCardElem);
 		if (player == localPlayer) {
