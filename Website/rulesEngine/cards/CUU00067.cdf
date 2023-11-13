@@ -11,5 +11,5 @@ turnLimit: 1
 mandatory: no
 after: declared.owner = opponent
 condition: thisCard.zone = field
-MOVE(SELECT(1, [from you.discard where types = Wind]), you.deck)
-CANCELATTACK()
+MOVE(SELECT(1, [from you.discard where types = Wind]), you.deck);
+CANCELATTACK();

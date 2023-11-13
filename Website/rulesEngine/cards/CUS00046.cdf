@@ -5,5 +5,5 @@ level: 10
 types: Dark
 
 o: cast
-$destructions = DESTROY([from opponent.field where cardType = unit])
-opponent.DAMAGE(SUM($destructions.destroyed.level) * 50)
+$destructions = DESTROY([from opponent.field where cardType = unit]);
+opponent.DAMAGE(SUM($destructions.destroyed.level) * 50);

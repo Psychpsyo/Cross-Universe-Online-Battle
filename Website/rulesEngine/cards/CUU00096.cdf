@@ -10,14 +10,14 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.hand where types = Electric]))
+DISCARD(SELECT(1, [from you.hand where types = Electric]));
 exec:
-APPLY([from opponent.field where cardType = unit], {defense -= 200}, endOfTurn)
+APPLY([from opponent.field where cardType = unit], {defense -= 200}, endOfTurn);
 
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.hand]))
+DISCARD(SELECT(1, [from you.hand]));
 exec:
-DESTROY([from field where cardType = unit & defense = 0])
+DESTROY([from field where cardType = unit & defense = 0]);

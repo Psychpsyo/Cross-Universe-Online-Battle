@@ -10,6 +10,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSEMANA(1)
+LOSEMANA(1);
 exec:
-MOVE(SELECT(1, [from deck where name = CUI00097]), you.hand)
+MOVE(SELECT(1, [from deck where name = CUI00097]), you.hand);

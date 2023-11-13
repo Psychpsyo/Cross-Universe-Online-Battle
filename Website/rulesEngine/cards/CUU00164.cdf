@@ -9,4 +9,4 @@ defense: 100
 o: trigger
 mandatory: no
 after: COUNT([from summoned where self = thisCard & zone = hand]) > 0
-MOVE(SELECT(1, [from you.deck where name = CUU00165]), you.hand)
+MOVE(SELECT(1, [from you.deck where name = CUU00165]), you.hand);

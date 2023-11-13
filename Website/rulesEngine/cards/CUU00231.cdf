@@ -10,6 +10,6 @@ o: optional
 turnLimit: 3
 condition: thisCard.zone = field
 cost:
-EXILE(SELECT(1, [from you.discard where cardType = unit]))
+EXILE(SELECT(1, [from you.discard where cardType = unit]));
 exec:
-APPLY(thisCard, {attack += 100}, endOfTurn)
+APPLY(thisCard, {attack += 100}, endOfTurn);

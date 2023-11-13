@@ -9,5 +9,5 @@ defense: 200
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-$type = SELECTTYPE(allTypes)
-APPLY(thisCard, {types += $type}, endOfOpponentNextTurn)
+$type = SELECTTYPE(allTypes);
+APPLY(thisCard, {types += $type}, endOfOpponentNextTurn);

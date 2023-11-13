@@ -9,4 +9,4 @@ defense: 200
 o: trigger
 mandatory: no
 after: COUNT([from discarded where self = thisCard & zone = [hand, field]]) > 0
-DISCARD(SELECT(1, [from you.deck where level < 7 & types = Warrior]))
+DISCARD(SELECT(1, [from you.deck where level < 7 & types = Warrior]));

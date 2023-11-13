@@ -10,6 +10,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSELIFE(200)
+LOSELIFE(200);
 exec:
-APPLY([from you.field where cardType = unit & types = Water & COUNT(types) = 1], {attack += 200}, endOfTurn)
+APPLY([from you.field where cardType = unit & types = Water & COUNT(types) = 1], {attack += 200}, endOfTurn);

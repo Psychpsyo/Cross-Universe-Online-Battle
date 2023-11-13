@@ -10,12 +10,12 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.hand]))
+DISCARD(SELECT(1, [from you.hand]));
 exec:
-DESTROY(SELECT(1, [from field where defense = 0]))
+DESTROY(SELECT(1, [from field where defense = 0]));
 
 o: trigger
 mandatory: yes
 during: currentPhase = endPhase
 condition: thisCard.zone = field
-both.DAMAGE(50)
+both.DAMAGE(50);

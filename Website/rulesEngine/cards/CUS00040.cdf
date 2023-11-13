@@ -6,5 +6,5 @@ types:
 
 o: cast
 condition: currentPhase = opponent.drawPhase
-opponent.GAINMANA(2)
-DRAW(2)
+opponent.GAINMANA(2);
+DRAW(2);

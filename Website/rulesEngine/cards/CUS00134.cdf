@@ -7,7 +7,7 @@ types: Electric
 o: cast
 after: declared.owner = opponent
 cost:
-LOSELIFE(100)
+LOSELIFE(100);
 exec:
-CANCELATTACK()
-APPLY(attackers, {attack = 0}, endOfTurn)
+CANCELATTACK();
+APPLY(attackers, {attack = 0}, endOfTurn);

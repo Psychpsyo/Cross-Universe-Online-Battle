@@ -6,6 +6,6 @@ types:
 
 o: cast
 cost:
-$unit = SELECT(1, [from opponent.field where cardType = unit])
+$unit = SELECT(1, [from opponent.field where cardType = unit]);
 exec:
-APPLY($unit, {defense = 0}, forever)
+APPLY($unit, {defense = 0}, forever);

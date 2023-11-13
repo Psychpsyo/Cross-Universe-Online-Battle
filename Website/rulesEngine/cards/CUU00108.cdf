@@ -10,13 +10,13 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSEMANA(1)
+LOSEMANA(1);
 exec:
-EXILE(SELECT(1, [from you.hand]))
-MOVE(SELECT(1, [from deck where types = Gravity & cardType = spell]), you.hand)
+EXILE(SELECT(1, [from you.hand]));
+MOVE(SELECT(1, [from deck where types = Gravity & cardType = spell]), you.hand);
 
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-$exiles = EXILE(SELECT([1, 2, 3], [from you.discard where types = Gravity]))
-APPLY(thisCard, {attack += COUNT($exiles.exiled) * 100}, endOfTurn)
+$exiles = EXILE(SELECT([1, 2, 3], [from you.discard where types = Gravity]));
+APPLY(thisCard, {attack += COUNT($exiles.exiled) * 100}, endOfTurn);

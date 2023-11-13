@@ -6,6 +6,6 @@ types: Light
 
 o: cast
 cost:
-$player = SELECTPLAYER()
+$player = SELECTPLAYER();
 exec:
-$player.GAINLIFE(200)
+$player.GAINLIFE(200);

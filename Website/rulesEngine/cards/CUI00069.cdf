@@ -7,6 +7,6 @@ types: Landmine
 o: trigger
 during: attackers.owner = opponent
 condition: thisCard.zone = field
-EXILE(thisCard)
-CANCELATTACK()
-opponent.DRAW(1)
+EXILE(thisCard);
+CANCELATTACK();
+opponent.DRAW(1);

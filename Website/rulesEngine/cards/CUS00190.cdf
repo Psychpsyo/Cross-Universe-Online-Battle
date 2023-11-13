@@ -7,6 +7,6 @@ types: Illusion
 o: cast
 condition: [from you.partnerZone].types = Illusion & [from you.partnerZone].cardType = unit
 cost:
-DISCARD(SELECT(1, [from you.hand where types = Illusion]))
+DISCARD(SELECT(1, [from you.hand where types = Illusion]));
 exec:
-APPLY(SELECT(1, [from opponent.field where cardType = unit & level < 4]), {cancel abilities}, endOfTurn)
+APPLY(SELECT(1, [from opponent.field where cardType = unit & level < 4]), {cancel abilities}, endOfTurn);

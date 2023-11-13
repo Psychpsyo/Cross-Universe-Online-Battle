@@ -6,6 +6,6 @@ types: Medicine
 
 o: deploy
 cost:
-$player = SELECTPLAYER()
+$player = SELECTPLAYER();
 exec:
-$player.GAINLIFE(300)
+$player.GAINLIFE(300);

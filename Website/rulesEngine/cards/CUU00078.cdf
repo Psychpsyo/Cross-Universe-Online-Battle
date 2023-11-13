@@ -11,6 +11,6 @@ mandatory: no
 after: declared.owner = opponent
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.hand where types = thisCard.types]))
+DISCARD(SELECT(1, [from you.hand where types = thisCard.types]));
 exec:
-CANCELATTACK()
+CANCELATTACK();

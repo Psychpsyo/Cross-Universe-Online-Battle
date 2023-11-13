@@ -6,6 +6,6 @@ types: Illusion, Rock
 
 o: deploy
 cost:
-LOSELIFE(100)
+LOSELIFE(100);
 exec:
-MOVE([from you.deck where name = CUS00127], you.hand)
+MOVE([from you.deck where name = CUS00127], you.hand);

@@ -9,4 +9,4 @@ defense: 200
 o: trigger
 mandatory: no
 after: summoned = thisCard
-MOVE(SELECT(1, [from you.discard where types = Rock]), baseOwner.hand)
+MOVE(SELECT(1, [from you.discard where types = Rock]), baseOwner.hand);

@@ -6,4 +6,4 @@ types:
 
 o: cast
 after: discarded.cardType = unit
-MOVE(SELECT(1, [from exile]), baseOwner.discard)
+MOVE(SELECT(1, [from exile]), baseOwner.discard);

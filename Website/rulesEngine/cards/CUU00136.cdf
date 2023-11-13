@@ -9,6 +9,6 @@ defense: 500
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-$exiles = EXILE(SELECT([1, 2, 3], [from you.discard where cardType = unit]))
-APPLY(thisCard, {attack += COUNT($exiles.exiled) * 100}, endOfTurn)
-DAMAGE(100)
+$exiles = EXILE(SELECT([1, 2, 3], [from you.discard where cardType = unit]));
+APPLY(thisCard, {attack += COUNT($exiles.exiled) * 100}, endOfTurn);
+DAMAGE(100);

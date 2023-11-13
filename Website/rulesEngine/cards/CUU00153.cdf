@@ -10,10 +10,10 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSELIFE(200)
+LOSELIFE(200);
 exec:
-$destroys = DESTROY(SELECT(1, [from field where level < thisCard.level & cardType = [spell, item]]))
-APPLY(thisCard, {level += $destroys.destroyed.level}, forever)
+$destroys = DESTROY(SELECT(1, [from field where level < thisCard.level & cardType = [spell, item]]));
+APPLY(thisCard, {level += $destroys.destroyed.level}, forever);
 
 o: static
 applyTo: thisCard

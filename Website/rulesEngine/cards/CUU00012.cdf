@@ -9,11 +9,11 @@ defense: 700
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field
-$discards = DISCARD(SELECT(any, [from you.hand where types = Earth]))
-APPLY(thisCard, {defense += COUNT($discards.discarded) * 100}, endOfNextTurn)
+$discards = DISCARD(SELECT(any, [from you.hand where types = Earth]));
+APPLY(thisCard, {defense += COUNT($discards.discarded) * 100}, endOfNextTurn);
 
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-DISCARD(SELECT(1, [from you.hand where types = Earth]))
-DESTROY(SELECT(1, [from field where cardType = [spell, item]]))
+DISCARD(SELECT(1, [from you.hand where types = Earth]));
+DESTROY(SELECT(1, [from field where cardType = [spell, item]]));

@@ -11,6 +11,6 @@ mandatory: no
 after: COUNT([from destroyed where zone = you.field & self != thisCard & types = Beast & cardType = unit]) > 0
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.hand]))
+DISCARD(SELECT(1, [from you.hand]));
 exec:
-MOVE(SELECT(1, [from you.deck where name = CUU00275]), you.field)
+MOVE(SELECT(1, [from you.deck where name = CUU00275]), you.field);

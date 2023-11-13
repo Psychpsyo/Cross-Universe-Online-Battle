@@ -5,5 +5,5 @@ level: 0
 types:
 
 o: cast
-SUMMON(SELECT(1, [from you.hand where cardType = unit]), opponent.unitZone, yes)
-DRAW(1)
+SUMMON(SELECT(1, [from you.hand where cardType = unit]), opponent.unitZone, yes);
+DRAW(1);

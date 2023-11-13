@@ -10,6 +10,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.hand where cardType = spell]))
+DISCARD(SELECT(1, [from you.hand where cardType = spell]));
 exec:
-APPLY(thisCard, {attack += COUNT([from field where self != thisCard & types = Plant]) * 100}, endOfTurn)
+APPLY(thisCard, {attack += COUNT([from field where self != thisCard & types = Plant]) * 100}, endOfTurn);

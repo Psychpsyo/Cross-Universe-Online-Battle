@@ -5,5 +5,5 @@ level: 0
 types: Curse
 
 o: deploy
-SUMMON(SELECT(1, [from you.discard where cardType = unit]), opponent.unitZone, no)
-DRAW(1)
+SUMMON(SELECT(1, [from you.discard where cardType = unit]), opponent.unitZone, no);
+DRAW(1);

@@ -9,5 +9,5 @@ defense: 200
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-$exile = EXILE(SELECT(1, [from you.hand where cardType = spell]))
-APPLY(thisCard, {attack, defense += $exile.exiled.level * 50}, endOfOpponentNextTurn)
+$exile = EXILE(SELECT(1, [from you.hand where cardType = spell]));
+APPLY(thisCard, {attack, defense += $exile.exiled.level * 50}, endOfOpponentNextTurn);

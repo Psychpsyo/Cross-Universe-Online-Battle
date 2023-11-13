@@ -6,7 +6,7 @@ types:
 
 o: cast
 cost:
-$unit = SELECT(1, [from field where cardType = unit & level < [from you.partnerZone].level])
+$unit = SELECT(1, [from field where cardType = unit & level < [from you.partnerZone].level]);
 exec:
-DISCARD(SELECT(1, [from you.hand]))
-APPLY([from $unit where cardType = unit], {cancel abilities}, endOfTurn)
+DISCARD(SELECT(1, [from you.hand]));
+APPLY([from $unit where cardType = unit], {cancel abilities}, endOfTurn);

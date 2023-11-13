@@ -13,4 +13,4 @@ o: trigger
 mandatory: yes
 during: currentPhase = endPhase
 condition: thisCard.zone = field & thisCard.equippedUnit.types != Samurai
-DESTROY(thisCard)
+DESTROY(thisCard);

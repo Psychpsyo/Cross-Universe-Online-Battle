@@ -10,12 +10,12 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.hand where types = Ice]))
+DISCARD(SELECT(1, [from you.hand where types = Ice]));
 exec:
-APPLY([from you.field where types = Ice & cardType = token], {level += 1}, forever)
+APPLY([from you.field where types = Ice & cardType = token], {level += 1}, forever);
 
 o: trigger
 mandatory: no
 during: currentPhase = you.endPhase
 condition: thisCard.zone = field & COUNT([from unitZone where types = Ice & cardType = unit]) > 3
-MOVE(SELECT(1, [from you.deck where level > 4 & types = Ice]), you.hand)
+MOVE(SELECT(1, [from you.deck where level > 4 & types = Ice]), you.hand);

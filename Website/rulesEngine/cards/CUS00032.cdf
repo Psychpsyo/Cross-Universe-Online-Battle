@@ -5,4 +5,4 @@ level: 1
 types: Wind
 
 o: cast
-MOVE(SELECT(1, [from you.deck where level = 1 & types = Wind]), you.hand)
+MOVE(SELECT(1, [from you.deck where level = 1 & types = Wind]), you.hand);

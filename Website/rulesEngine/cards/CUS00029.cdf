@@ -6,6 +6,6 @@ types: Wind
 
 o: cast
 cost:
-$card = SELECT(1, [from field where cardType = item | (types = Machine & cardType = unit)])
+$card = SELECT(1, [from field where cardType = item | (types = Machine & cardType = unit)]);
 exec:
-DESTROY($card)
+DESTROY($card);

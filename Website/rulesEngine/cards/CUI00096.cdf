@@ -15,8 +15,8 @@ mandatory: no
 during: currentPhase = opponent.endPhase
 condition: thisCard.zone = field
 cost:
-DISCARD(thisCard)
+DISCARD(thisCard);
 exec:
-$spell = SELECT(1, [from you.deck where types = Psychic & cardType = spell])
-SHUFFLE($spell)
-MOVE($spell, you.deckTop)
+$spell = SELECT(1, [from you.deck where types = Psychic & cardType = spell]);
+SHUFFLE($spell);
+MOVE($spell, you.deckTop);

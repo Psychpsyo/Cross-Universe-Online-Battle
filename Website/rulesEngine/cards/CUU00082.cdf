@@ -10,6 +10,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-$player = SELECTPLAYER()
+$player = SELECTPLAYER();
 exec:
-DISCARD($player.DECKTOP(1))
+DISCARD($player.DECKTOP(1));

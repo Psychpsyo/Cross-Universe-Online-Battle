@@ -5,4 +5,4 @@ level: 1
 types: Earth
 
 o: cast
-MOVE(SELECT(2, [from you.discard where types = Rock]), baseOwner.hand)
+MOVE(SELECT(2, [from you.discard where types = Rock]), baseOwner.hand);

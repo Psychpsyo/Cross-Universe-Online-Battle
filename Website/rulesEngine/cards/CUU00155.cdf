@@ -10,6 +10,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSELIFE(100)
+LOSELIFE(100);
 exec:
-APPLY(SELECT(1, [from field where cardType = [spell, item]]), {cancel abilities}, endOfOpponentNextTurn)
+APPLY(SELECT(1, [from field where cardType = [spell, item]]), {cancel abilities}, endOfOpponentNextTurn);

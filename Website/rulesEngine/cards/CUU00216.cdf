@@ -9,9 +9,9 @@ defense: 0
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-GAINLIFE(50)
+GAINLIFE(50);
 
 o: trigger
 mandatory: no
 after: destroyed = thisCard
-MOVE(SELECT(1, [from deck where types = Light & cardType = continuousItem]), you.hand)
+MOVE(SELECT(1, [from deck where types = Light & cardType = continuousItem]), you.hand);

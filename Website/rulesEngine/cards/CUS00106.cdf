@@ -5,5 +5,5 @@ level: 1
 types:
 
 o: cast
-DISCARD(SELECT(2, [from you.hand where cardType = item]))
-DRAW(2)
+DISCARD(SELECT(2, [from you.hand where cardType = item]));
+DRAW(2);

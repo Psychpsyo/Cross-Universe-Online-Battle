@@ -139,7 +139,9 @@ export function tokenize(code, game) {
 	let tokens = [];
 	while (pos < code.length) {
 		switch (code[pos]) {
-			case " ": {
+			case " ":
+			case "\t":
+			case "\n": {
 				pos++;
 				break;
 			}
@@ -178,7 +180,7 @@ export function tokenize(code, game) {
 				pos++;
 				break;
 			}
-			case "\n": {
+			case ";": {
 				tokens.push({type: "newLine"});
 				pos++;
 				break;

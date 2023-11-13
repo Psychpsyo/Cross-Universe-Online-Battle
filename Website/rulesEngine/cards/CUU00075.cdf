@@ -9,4 +9,4 @@ defense: 100
 o: trigger
 mandatory: no
 after: destroyed = thisCard
-MOVE(SELECT(1, [from you.deck where types = Fish]), you.hand)
+MOVE(SELECT(1, [from you.deck where types = Fish]), you.hand);

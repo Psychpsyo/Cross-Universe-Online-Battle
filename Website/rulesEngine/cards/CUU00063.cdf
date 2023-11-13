@@ -10,4 +10,4 @@ o: trigger
 mandatory: yes
 during: currentPhase = endPhase
 condition: thisCard.zone = field
-DAMAGE(100)
+DAMAGE(100);

@@ -7,6 +7,6 @@ types: Gravity
 o: cast
 condition: attackers.owner = opponent
 cost:
-$unit = SELECT(1, [from you.field where cardType = unit & self != attackTarget])
+$unit = SELECT(1, [from you.field where cardType = unit & self != attackTarget]);
 exec:
-SETATTACKTARGET($unit)
+SETATTACKTARGET($unit);

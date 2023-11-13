@@ -10,4 +10,4 @@ deckLimit: any
 o: trigger
 mandatory: yes
 after: discarded = thisCard
-GAINLIFE(50)
+GAINLIFE(50);

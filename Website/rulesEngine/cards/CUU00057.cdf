@@ -10,14 +10,14 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.field]))
+DISCARD(SELECT(1, [from you.field]));
 exec:
-opponent.DAMAGE(100)
+opponent.DAMAGE(100);
 
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-DISCARD(SELECT(1, [from you.field]))
+DISCARD(SELECT(1, [from you.field]));
 exec:
-DESTROY(SELECT(1, [from field where cardType = [spell, item]]))
+DESTROY(SELECT(1, [from field where cardType = [spell, item]]));

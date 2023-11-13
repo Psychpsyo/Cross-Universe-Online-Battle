@@ -8,13 +8,13 @@ o: trigger
 mandatory: yes
 after: COUNT([from summoned, cast, deployed]) > 0
 condition: thisCard.zone = field
-both.SHUFFLE()
-PUTCOUNTERS(thisCard, Chaos, 1)
+both.SHUFFLE();
+PUTCOUNTERS(thisCard, Chaos, 1);
 
 o: trigger
 mandatory: yes
 during: currentPhase = endPhase
 condition: GETCOUNTERS(thisCard, Chaos) > 5
-REMOVECOUNTERS(thisCard, Chaos, GETCOUNTERS(thisCard, Chaos))
-$cards = both.MOVE([from own.hand], own.deck)
-both.DRAW(COUNT($cards.moved))
+REMOVECOUNTERS(thisCard, Chaos, GETCOUNTERS(thisCard, Chaos));
+$cards = both.MOVE([from own.hand], own.deck);
+both.DRAW(COUNT($cards.moved));

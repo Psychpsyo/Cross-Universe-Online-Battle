@@ -6,6 +6,6 @@ types:
 
 o: cast
 cost:
-$cards = SELECT(2, [from you.discard where cardType = item | (cardType = unit & types = Machine)])
+$cards = SELECT(2, [from you.discard where cardType = item | (cardType = unit & types = Machine)]);
 exec:
-MOVE([from discard where self = $cards], you.hand)
+MOVE([from discard where self = $cards], you.hand);

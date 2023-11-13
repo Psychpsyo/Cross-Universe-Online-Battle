@@ -8,4 +8,4 @@ o: trigger
 mandatory: yes
 after: COUNT([from destroyed where zone = field & cardType = unit]) > 0
 condition: thisCard.zone = field
-APPLY(SELECT(1, [from unitZone where cardType = unit]), {attack, defense -= 100}, endOfTurn)
+APPLY(SELECT(1, [from unitZone where cardType = unit]), {attack, defense -= 100}, endOfTurn);

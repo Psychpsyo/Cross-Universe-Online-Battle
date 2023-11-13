@@ -6,5 +6,5 @@ types:
 
 o: cast
 condition: COUNT(attackers) = 1 & attackers.owner = you
-DESTROY(attackers)
-APPLY(attackTarget, {defense = 0}, endOfTurn)
+DESTROY(attackers);
+APPLY(attackTarget, {defense = 0}, endOfTurn);

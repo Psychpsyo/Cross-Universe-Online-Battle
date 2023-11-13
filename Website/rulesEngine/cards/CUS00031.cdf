@@ -6,7 +6,7 @@ types:
 
 o: cast
 cost:
-LOSELIFE(50)
+LOSELIFE(50);
 exec:
-$unit = MOVE(SELECT(1, [from you.deck where cardType = unit]), you.hand)
-DAMAGE($unit.moved.level * 50)
+$unit = MOVE(SELECT(1, [from you.deck where cardType = unit]), you.hand);
+DAMAGE($unit.moved.level * 50);

@@ -10,7 +10,7 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSELIFE(200)
+LOSELIFE(200);
 exec:
-$unit = SELECT(1, [from exile where cardType = unit])
-APPLY(thisCard, {attack += $unit.attack}, endOfTurn)
+$unit = SELECT(1, [from exile where cardType = unit]);
+APPLY(thisCard, {attack += $unit.attack}, endOfTurn);

@@ -5,4 +5,4 @@ level: 2
 types:
 
 o: cast
-EXILE(SELECT(3, [from discard]))
+EXILE(SELECT(3, [from discard]));

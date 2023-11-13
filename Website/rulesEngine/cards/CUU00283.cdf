@@ -20,7 +20,7 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field & COUNT([from you.field where types = Book & cardType = item]) > 0
 cost:
-DISCARD(SELECT(1, [from you.hand]))
+DISCARD(SELECT(1, [from you.hand]));
 exec:
-EXILE(SELECT(1, [from opponent.field where level < 5 & cardType = [spell, item]]))
-opponent.DAMAGE(100)
+EXILE(SELECT(1, [from opponent.field where level < 5 & cardType = [spell, item]]));
+opponent.DAMAGE(100);

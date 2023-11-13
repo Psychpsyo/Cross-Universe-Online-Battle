@@ -6,6 +6,6 @@ types: Medicine
 
 o: deploy
 cost:
-$unit = SELECT(1, [from field where level < 6 & cardType = unit])
+$unit = SELECT(1, [from field where level < 6 & cardType = unit]);
 exec:
-APPLY($unit, {cancel abilities}, endOfTurn)
+APPLY($unit, {cancel abilities}, endOfTurn);

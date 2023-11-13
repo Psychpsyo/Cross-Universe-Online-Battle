@@ -7,5 +7,5 @@ types: Electric, Landmine
 o: cast
 condition: COUNT([from unitZone]) > 2
 after: declared.owner = opponent
-DISCARD(SELECT(1, [from you.hand]))
-DESTROY([from field where cardType = unit])
+DISCARD(SELECT(1, [from you.hand]));
+DESTROY([from field where cardType = unit]);

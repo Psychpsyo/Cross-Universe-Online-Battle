@@ -14,4 +14,4 @@ modifier: {attack += COUNT([from discard where name = CUU00061]) * 50}
 o: trigger
 after: destroyed = thisCard
 mandatory: no
-MOVE(SELECT(1, [from you.deck where name = CUU00061]), you.hand)
+MOVE(SELECT(1, [from you.deck where name = CUU00061]), you.hand);

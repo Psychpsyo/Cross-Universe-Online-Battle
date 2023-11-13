@@ -10,4 +10,4 @@ o: trigger
 mandatory: no
 after: declared.owner = opponent
 condition: thisCard.zone = field
-SETATTACKTARGET(thisCard)
+SETATTACKTARGET(thisCard);

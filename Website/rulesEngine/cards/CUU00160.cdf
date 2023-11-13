@@ -9,11 +9,11 @@ defense: 0
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-SUMMON(SELECT(1, [from you.hand where types = [Beast, Bird] & name != [from you.field where cardType = unit].name]), you.unitZone, yes)
+SUMMON(SELECT(1, [from you.hand where types = [Beast, Bird] & name != [from you.field where cardType = unit].name]), you.unitZone, yes);
 
 o: trigger
 mandatory: no
 turnLimit: 1
 after: chosenTarget.owner = you
 condition: thisCard.zone = field
-SETATTACKTARGET(SELECT(1, [from you.unitZone where types = [Beast, Bird] & self != thisCard]))
+SETATTACKTARGET(SELECT(1, [from you.unitZone where types = [Beast, Bird] & self != thisCard]));

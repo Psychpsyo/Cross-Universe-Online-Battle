@@ -6,6 +6,6 @@ types:
 
 o: cast
 cost:
-$unit = SELECT(1, [from field where cardType = unit])
+$unit = SELECT(1, [from field where cardType = unit]);
 exec:
-APPLY($unit, {defense += 100}, endOfTurn)
+APPLY($unit, {defense += 100}, endOfTurn);

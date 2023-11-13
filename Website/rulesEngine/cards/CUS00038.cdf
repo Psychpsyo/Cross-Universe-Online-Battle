@@ -5,4 +5,4 @@ level: 1
 types:
 
 o: cast
-DESTROY([from field where cardType = spell])
+DESTROY([from field where cardType = spell]);

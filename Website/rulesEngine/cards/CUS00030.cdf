@@ -6,4 +6,4 @@ types:
 
 o: cast
 condition: attackers.owner = opponent
-CANCELATTACK()
+CANCELATTACK();

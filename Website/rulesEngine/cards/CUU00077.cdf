@@ -9,4 +9,4 @@ defense: 500
 o: trigger
 mandatory: yes
 after: destroyed = thisCard
-DISCARD(DECKTOP?(2))
+DISCARD(DECKTOP?(2));

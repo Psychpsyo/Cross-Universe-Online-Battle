@@ -10,6 +10,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSELIFE(200)
+LOSELIFE(200);
 exec:
-APPLY(thisCard, {attackRights = 2}, endOfTurn)
+APPLY(thisCard, {attackRights = 2}, endOfTurn);

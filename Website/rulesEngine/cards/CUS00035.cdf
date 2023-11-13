@@ -5,4 +5,4 @@ level: 0
 types: Psychic
 
 o: cast
-MOVE(SELECT(1, [from you.deck where cardType = equipableItem]), you.hand)
+MOVE(SELECT(1, [from you.deck where cardType = equipableItem]), you.hand);

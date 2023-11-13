@@ -10,6 +10,6 @@ turnLimit: 1
 mandatory: no
 after: declared.owner = opponent
 condition: thisCard.zone = field
-EXILE(SELECT(2, [from you.discard]))
-CANCELATTACK()
-DAMAGE(100)
+EXILE(SELECT(2, [from you.discard]));
+CANCELATTACK();
+DAMAGE(100);

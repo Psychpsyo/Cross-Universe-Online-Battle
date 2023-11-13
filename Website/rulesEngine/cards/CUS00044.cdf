@@ -5,9 +5,9 @@ level: 5
 types:
 
 o: cast
-DRAW(2)
+DRAW(2);
 
 o: trigger
 mandatory: yes
 after: COUNT([from discarded where self = thisCard & zone = [hand, deck]]) > 0
-DRAW(1)
+DRAW(1);

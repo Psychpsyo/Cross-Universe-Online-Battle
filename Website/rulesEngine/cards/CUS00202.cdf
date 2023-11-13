@@ -6,6 +6,6 @@ types:
 
 o: cast
 cost:
-LOSELIFE(100)
+LOSELIFE(100);
 exec:
-MOVE(SELECT(1, [from field where baseOwner = you]), you.hand)
+MOVE(SELECT(1, [from field where baseOwner = you]), you.hand);

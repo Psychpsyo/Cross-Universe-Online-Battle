@@ -9,4 +9,4 @@ defense: 100
 o: trigger
 mandatory: no
 after: retired = thisCard
-DRAW(2)
+DRAW(2);

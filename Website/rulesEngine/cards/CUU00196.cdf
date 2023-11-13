@@ -11,6 +11,6 @@ globalTurnLimit: 1
 mandatory: no
 after: discarded = thisCard
 cost:
-DISCARD(SELECT(1, [from you.hand]))
+DISCARD(SELECT(1, [from you.hand]));
 exec:
-SUMMON(SELECT(1, [from you.deck where name = CUU00196]), you.unitZone, yes)
+SUMMON(SELECT(1, [from you.deck where name = CUU00196]), you.unitZone, yes);

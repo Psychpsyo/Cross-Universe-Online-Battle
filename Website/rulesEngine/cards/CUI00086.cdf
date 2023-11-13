@@ -8,6 +8,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-LOSELIFE(100)
+LOSELIFE(100);
 exec:
-MOVE(SELECT(1, [from you.discard where types = Angel]), you.deckTop)
+MOVE(SELECT(1, [from you.discard where types = Angel]), you.deckTop);

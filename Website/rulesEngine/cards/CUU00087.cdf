@@ -10,13 +10,13 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-$card = SELECT(1, [from field where types = Curse])
+$card = SELECT(1, [from field where types = Curse]);
 exec:
-MOVE(thisCard, baseOwner.deck)
-DESTROY($card)
+MOVE(thisCard, baseOwner.deck);
+DESTROY($card);
 
 o: trigger
 mandatory: yes
 during: currentPhase = you.endPhase
 condition: thisCard.zone = field
-APPLY(SELECT(1, [from field]), {types += Curse}, forever)
+APPLY(SELECT(1, [from field]), {types += Curse}, forever);

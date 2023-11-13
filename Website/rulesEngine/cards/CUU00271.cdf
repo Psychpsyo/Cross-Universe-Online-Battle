@@ -10,9 +10,9 @@ o: trigger
 mandatory: yes
 after: targeted = thisCard
 condition: thisCard.zone = field
-DRAW(1)
+DRAW(1);
 
 o: trigger
 mandatory: yes
 after: destroyed = thisCard
-LOSELIFE(300)
+LOSELIFE(300);

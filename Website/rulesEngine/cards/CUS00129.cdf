@@ -6,5 +6,5 @@ types:
 deckLimit: 1
 
 o: cast
-$destruction = DESTROY(SELECT(1, [from you.field where cardType = unit]))
-opponent.DAMAGE($destruction.destroyed.baseLevel * 50)
+$destruction = DESTROY(SELECT(1, [from you.field where cardType = unit]));
+opponent.DAMAGE($destruction.destroyed.baseLevel * 50);

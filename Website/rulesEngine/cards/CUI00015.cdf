@@ -12,6 +12,6 @@ modifier: {attack += 200}
 o: optional
 condition: thisCard.zone = field & thisCard.equippedUnit.types = Earth
 cost:
-DISCARD(thisCard)
+DISCARD(thisCard);
 exec:
-DESTROY(SELECT(1, [from opponent.field where cardType = [spell, item]]))
+DESTROY(SELECT(1, [from opponent.field where cardType = [spell, item]]));

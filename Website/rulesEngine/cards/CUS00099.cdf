@@ -6,6 +6,6 @@ types:
 
 o: cast
 cost:
-DISCARD(SELECT(4, [from you.hand]))
+DISCARD(SELECT(4, [from you.hand]));
 exec:
-DESTROY([from field])
+DESTROY([from field]);

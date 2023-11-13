@@ -9,5 +9,5 @@ defense: 500
 o: optional
 turnLimit: 2
 condition: thisCard.zone = field
-DESTROY(SELECT(1, [from you.field where self != thisCard]))
-APPLY(thisCard, {attack += 300}, endOfTurn)
+DESTROY(SELECT(1, [from you.field where self != thisCard]));
+APPLY(thisCard, {attack += 300}, endOfTurn);

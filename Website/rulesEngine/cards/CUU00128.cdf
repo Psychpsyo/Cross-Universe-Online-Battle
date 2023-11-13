@@ -9,5 +9,5 @@ defense: 0
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-DISCARD(SELECT(1, [from you.hand]))
-APPLY(SELECT(1, [from field where cardType = unit]), {attack += 100}, endOfTurn)
+DISCARD(SELECT(1, [from you.hand]));
+APPLY(SELECT(1, [from field where cardType = unit]), {attack += 100}, endOfTurn);

@@ -12,4 +12,4 @@ modifier: {attack += 100}
 o: trigger
 mandatory: yes
 after: destroyed = thisCard
-DRAW(1)
+DRAW(1);

@@ -10,4 +10,4 @@ o: trigger
 mandatory: yes
 after: COUNT([from summoned where level < 2 & owner = you]) > 0
 condition: thisCard.zone = field
-GAINLIFE(50)
+GAINLIFE(50);

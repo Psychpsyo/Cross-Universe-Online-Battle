@@ -12,4 +12,4 @@ modifier: {defense += 100}
 o: trigger
 mandatory: yes
 after: [from discarded where zone = deck + field] = thisCard
-MOVE(thisCard, owner.deck)
+MOVE(thisCard, owner.deck);

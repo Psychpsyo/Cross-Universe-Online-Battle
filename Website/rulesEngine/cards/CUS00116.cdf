@@ -8,6 +8,6 @@ deckLimit: 1
 o: cast
 condition: COUNT([from discard]) > 14
 cost:
-LOSELIFE(you.life / 2)
+LOSELIFE(you.life / 2);
 exec:
-DESTROY([from field])
+DESTROY([from field]);

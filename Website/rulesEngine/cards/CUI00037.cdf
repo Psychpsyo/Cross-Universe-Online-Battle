@@ -6,6 +6,6 @@ types: Book
 turnLimit: 1
 
 o: deploy
-$unit = SELECT(1, [from you.deck where level < 5 & cardType = unit])
-SHUFFLE($unit)
-MOVE($unit, you.deckTop)
+$unit = SELECT(1, [from you.deck where level < 5 & cardType = unit]);
+SHUFFLE($unit);
+MOVE($unit, you.deckTop);

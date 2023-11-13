@@ -12,5 +12,5 @@ modifier: {attack += 100, attack += 100 if types = Samurai}
 o: optional
 turnLimit: 2
 condition: thisCard.zone = field
-EXILE(SELECT(1, [from you.discard where cardType = spell]))
-APPLY(thisCard.equippedUnit, {attack += 100}, endOfTurn)
+EXILE(SELECT(1, [from you.discard where cardType = spell]));
+APPLY(thisCard.equippedUnit, {attack += 100}, endOfTurn);

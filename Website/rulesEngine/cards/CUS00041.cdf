@@ -5,4 +5,4 @@ level: 3
 types: Wind, Water, Electric
 
 o: cast
-DESTROY([from field where cardType = item | (types = Machine & cardType = unit)])
+DESTROY([from field where cardType = item | (types = Machine & cardType = unit)]);

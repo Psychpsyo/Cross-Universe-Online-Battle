@@ -5,5 +5,5 @@ level: 6
 types:
 
 o: cast
-$destructions = DESTROY([from you.field])
-opponent.DAMAGE(COUNT($destructions.destroyed) * 100)
+$destructions = DESTROY([from you.field]);
+opponent.DAMAGE(COUNT($destructions.destroyed) * 100);

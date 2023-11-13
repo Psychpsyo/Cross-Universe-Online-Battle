@@ -9,7 +9,7 @@ o: trigger
 mandatory: yes
 during: currentPhase = endPhase
 condition: thisCard.zone = field
-PUTCOUNTERS([from unitZone where types != Curse & cardType = unit], Weakness, 1)
+PUTCOUNTERS([from unitZone where types != Curse & cardType = unit], Weakness, 1);
 
 o: static
 applyTo: [from field where cardType = unit]

@@ -10,4 +10,4 @@ o: trigger
 gameLimit: 1
 mandatory: no
 after: COUNT([from destroyed where self = thisCard & zone = field]) > 0
-MOVE(thisCard, you.field)
+MOVE(thisCard, you.field);

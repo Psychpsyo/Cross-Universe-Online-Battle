@@ -6,6 +6,6 @@ types:
 
 o: cast
 cost:
-LOSELIFE(800)
+LOSELIFE(800);
 exec:
-SUMMON(SELECT(1, [from you.hand where level < 8 & types != Light]), you.unitZone, no)
+SUMMON(SELECT(1, [from you.hand where level < 8 & types != Light]), you.unitZone, no);

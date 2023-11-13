@@ -6,5 +6,5 @@ types:
 
 o: cast
 condition: attackers.owner = opponent
-DISCARD(SELECT(1, [from you.hand]))
-CANCELATTACK()
+DISCARD(SELECT(1, [from you.hand]));
+CANCELATTACK();

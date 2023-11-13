@@ -5,4 +5,4 @@ level: 0
 types:
 
 o: cast
-MOVE(SELECT(1, [from you.field where cardType = unit & cardType != token]), baseOwner.hand)
+MOVE(SELECT(1, [from you.field where cardType = unit & cardType != token]), baseOwner.hand);

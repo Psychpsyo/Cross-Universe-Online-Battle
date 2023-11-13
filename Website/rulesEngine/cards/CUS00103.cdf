@@ -5,6 +5,6 @@ level: 0
 types: Earth
 
 o: cast
-$card = SELECT(1, [from you.deck where types = Rock])
-SHUFFLE($card)
-MOVE($card, you.deckTop)
+$card = SELECT(1, [from you.deck where types = Rock]);
+SHUFFLE($card);
+MOVE($card, you.deckTop);
