@@ -42,23 +42,9 @@ var themes = {
 		"borderColor": "#eee",
 		"buttonHoverColor": "#fff3"
 	},
-	"light": {
-		"backgroundColor": "white",
-		"background": null,
-		"backgroundY": "center",
-		"fieldDropShadow": false,
-		"shadowColor": "#0002",
-		"dialogBackground": "white",
-		"textShadow": "none",
-		"textColor": "#000",
-		"disabledTextColor": "#0008",
-		"disabledBackgroundColor": "#ccc",
-		"borderColor": "#888",
-		"buttonHoverColor": "#00f3"
-	},
 	"worldTree": {
 		"backgroundColor": "black",
-		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/ホームページ背景2.jpg",
+		"background": "https://crossuniverse.net/images/background.jpg",
 		"backgroundY": "top",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
@@ -72,7 +58,7 @@ var themes = {
 	},
 	"deepSea": {
 		"backgroundColor": "black",
-		"background": "https://crossuniverse.jp/wp-content/uploads/2018/08/6501dd551fcd4880fce262e4993896a8.png",
+		"background": "https://crossuniverse.net/images/backgroundDark.jpg",
 		"backgroundY": "10%",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
@@ -83,6 +69,20 @@ var themes = {
 		"disabledBackgroundColor": "#222",
 		"borderColor": "#eee",
 		"buttonHoverColor": "#fff3"
+	},
+	"light": {
+		"backgroundColor": "white",
+		"background": null,
+		"backgroundY": "center",
+		"fieldDropShadow": false,
+		"shadowColor": "#0002",
+		"dialogBackground": "white",
+		"textShadow": "none",
+		"textColor": "#000",
+		"disabledTextColor": "#0008",
+		"disabledBackgroundColor": "#ccc",
+		"borderColor": "#888",
+		"buttonHoverColor": "#00f3"
 	}
 }
 function applyTheme(theme) {
@@ -100,7 +100,7 @@ function applyTheme(theme) {
 	document.documentElement.style.setProperty("--theme-border-color", themes[theme].borderColor);
 	document.documentElement.style.setProperty("--theme-button-hover-color", themes[theme].buttonHoverColor);
 }
-applyTheme(localStorage.getItem("theme") ?? "default");
+applyTheme(localStorage.getItem("theme") ?? "worldTree");
 
 // accessibility
 var fonts = {
