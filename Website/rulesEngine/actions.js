@@ -270,10 +270,9 @@ export class Move extends Action {
 		}
 		let card = this.card;
 		this.card = new SnapshotCard(this.card);
-		let cardMovedEvent = events.createCardMovedEvent(this.player, this.card.zone, this.card.index, this.zone, this.insertedIndex, this.card);
 		this.zone.add(this.card.current(), this.insertedIndex);
 		this.card.globalId = card.globalId;
-		return cardMovedEvent;
+		return events.createCardMovedEvent(this.player, this.card.zone, this.card.index, this.zone, this.insertedIndex, this.card);
 	}
 
 	undo() {
@@ -285,10 +284,73 @@ export class Move extends Action {
 	}
 
 	isImpossible(timing) {
-		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length) {
+		if (this.card.isRemovedToken ||
+			this.card.zone?.type == "partner" ||
+			(this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length)
+		) {
 			return true;
 		}
-		if (this.card.zone?.type == "partner") {
+		return false;
+	}
+}
+
+export class Swap extends Action {
+	constructor(player, cardA, cardB, transferEquipments) {
+		super(player);
+		this.cardA = cardA;
+		this.cardB = cardB;
+		this.transferEquipments = transferEquipments;
+	}
+
+	async* run() {
+		let cardA = this.cardA;
+		let cardB = this.cardB;
+		this.cardA = new SnapshotCard(this.cardA);
+		this.cardB = new SnapshotCard(this.cardB);
+
+		this.cardA.zone.remove(cardA);
+		this.cardB.zone.remove(cardB);
+		this.cardA.zone.add(cardB, this.cardA.index);
+		this.cardB.zone.add(cardA, this.cardB.index);
+
+		this.cardA.globalId = cardA.globalId;
+		this.cardB.globalId = cardB.globalId;
+
+		if (this.transferEquipments) {
+			if (cardA.zone instanceof zones.FieldZone) {
+				for (const equipment of this.cardB.equipments) {
+					cardA.equipments.push(equipment.current());
+					equipment.current().equippedTo = cardA;
+				}
+			}
+			if (cardB.zone instanceof zones.FieldZone) {
+				for (const equipment of this.cardA.equipments) {
+					cardB.equipments.push(equipment.current());
+					equipment.current().equippedTo = cardB;
+				}
+			}
+		}
+
+		return events.createCardsSwappedEvent(this.player, this.cardA, this.cardB, this.transferEquipments);
+	}
+
+	undo() {
+		let event = events.createUndoCardsSwappedEvent(this.cardA, this.cardB);
+
+		this.cardA.current().zone.remove(this.cardA.current());
+		this.cardB.current().zone.remove(this.cardB.current());
+		this.cardA.restore();
+		this.cardB.restone();
+
+		return event;
+	}
+
+	isImpossible(timing) {
+		if ((this.cardA.isToken && !(this.cardB.zone instanceof FieldZone)) ||
+			(this.cardB.isToken && !(this.cardA.zone instanceof FieldZone)) ||
+			this.cardA.isRemovedToken ||
+			this.cardB.isRemovedToken
+		) {
 			return true;
 		}
 		return false;
@@ -584,6 +646,7 @@ export class GiveAttack extends Action {
 	}
 
 	isImpossible(timing) {
+		if (this.card.isRemovedToken) return true;
 		return !this.card.values.cardTypes.includes("unit");
 	}
 }
@@ -665,6 +728,10 @@ export class View extends Action {
 		}
 		return events.createCardViewedEvent(this.player, this.card);
 	}
+
+	isImpossible(timing) {
+		return this.card.isRemovedToken;
+	}
 }
 
 export class Reveal extends Action {
@@ -686,6 +753,7 @@ export class Reveal extends Action {
 	}
 
 	isImpossible(timing) {
+		if (this.card.isRemovedToken) return true;
 		return this.card.hiddenFor.length == 0;
 	}
 }
@@ -715,9 +783,11 @@ export class ChangeCounters extends Action {
 	}
 
 	isImpossible(timing) {
+		if (this.card.isRemovedToken) return true;
 		return (this.card.counters[this.type] ?? 0) == 0 && this.amount < 0;
 	}
 	isFullyPossible(timing) {
+		if (this.card.isRemovedToken) return false;
 		return (this.card.counters[this.type] ?? 0) + this.amount >= 0;
 	}
 }

@@ -37,7 +37,7 @@ export class Player {
 		for (const cdf of cdfList) {
 			let card = new Card(this, cdf);
 			card.hiddenFor = [...this.game.players];
-			if (card.initialValues.cardTypes.includes("token")) {
+			if (card.isToken) {
 				throw new deckErrors.DeckTokenError(card.cardId);
 			}
 			cardList.push(card);

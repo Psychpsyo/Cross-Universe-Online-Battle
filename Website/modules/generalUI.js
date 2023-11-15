@@ -183,8 +183,9 @@ export async function updateCardPreview(card) {
 	insertCardValueList(card, "names", cardDetailsName, "/", async (name) => (await cardLoader.getCardInfo(name)).name);
 
 	let cardTypes = [...card.values.cardTypes];
-	if (cardTypes.includes("token")) {
+	if (card.isToken) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);
+		cardTypes.push("token");
 	}
 	if (cardTypes.includes("spell")) {
 		cardTypes.splice(cardTypes.indexOf("spell"), 1);

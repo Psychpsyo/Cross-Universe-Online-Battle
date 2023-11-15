@@ -21,11 +21,12 @@ export class Zone {
 			card.placedTo.placed[card.index] = null;
 			card.placedTo = null;
 		}
-		if (!card.values.cardTypes.includes("token")) {
+		if (!card.isToken) {
 			this.cards.splice(index, 0, card);
 			this.reindex();
 		} else {
 			index = -1;
+			card.isRemovedToken = true;
 		}
 		card.zone = this;
 

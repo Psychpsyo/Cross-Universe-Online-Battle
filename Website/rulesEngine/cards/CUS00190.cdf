@@ -5,7 +5,7 @@ level: 0
 types: Illusion
 
 o: cast
-condition: [from you.partnerZone].types = Illusion & [from you.partnerZone].cardType = unit
+condition: you.partner.types = Illusion & you.partner.cardType = unit
 cost:
 DISCARD(SELECT(1, [from you.hand where types = Illusion]));
 exec:

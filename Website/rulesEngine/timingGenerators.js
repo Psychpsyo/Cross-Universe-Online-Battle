@@ -136,7 +136,21 @@ export function* combinedTimingGenerator(generators) {
 }
 
 export function* abilityCostTimingGenerator(ability, card, player) {
-	return yield* ability.runCost(card, player);
+	let timingGenerator = ability.runCost(card, player);
+	let timing;
+	let actionList;
+	do {
+		if (ability.isCancelled) {
+			return;
+		}
+		actionList = timingGenerator.next(timing);
+		if (!actionList.done) {
+			if (actionList.value.length == 0) {
+				return;
+			}
+			timing = yield actionList.value;
+		}
+	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));
 }
 
 export function* abilityTimingGenerator(ability, card, player) {

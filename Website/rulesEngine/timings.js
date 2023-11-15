@@ -1,10 +1,11 @@
 
 import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
+import {chooseAbilityOrder} from "./inputRequests.js";
+import {SnapshotCard} from "./card.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
 import * as actions from "./actions.js";
-import {chooseAbilityOrder} from "./inputRequests.js";
-import {SnapshotCard} from "./card.js";
+import * as zones from "./zones.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
@@ -182,16 +183,6 @@ export class Timing {
 	}
 
 	getFollowupTiming() {
-		// decks need to be shuffled after cards are added to them.
-		let unshuffledDecks = [];
-		for (const action of this.actions) {
-			if (action instanceof actions.Move && action.zone.type === "deck" && action.targetIndex === null) {
-				if (unshuffledDecks.indexOf(action.zone) === -1) {
-					unshuffledDecks.push(action.zone);
-				}
-			}
-		}
-
 		// cards need to be revealed if added from deck to hand
 		let unrevealedCards = [];
 		for (const action of this.actions) {
@@ -202,11 +193,30 @@ export class Timing {
 			}
 		}
 
+		// decks need to be shuffled after cards are added to them.
+		let unshuffledDecks = [];
+		for (const action of this.actions) {
+			if (action instanceof actions.Move && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
+				if (unshuffledDecks.indexOf(action.zone) === -1) {
+					unshuffledDecks.push(action.zone);
+				}
+			}
+			if (action instanceof actions.Swap && action.cardA?.zone instanceof zones.DeckZone || action.cardB?.zone instanceof zones.DeckZone) {
+				if (action.cardA.zone instanceof zones.DeckZone) {
+					unshuffledDecks.push(action.cardA.zone);
+				}
+				if (action.cardB.zone instanceof zones.DeckZone) {
+					unshuffledDecks.push(action.cardB.zone);
+				}
+			}
+		}
+
 		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.currentOwner().next(), card.current())));
 		if (allActions.length > 0) {
 			return new Timing(this.game, allActions, this.block);
 		}
 
+		// Equipments might need to be destroyed
 		let invalidEquipments = [];
 		for (const equipment of this.game.players.map(player => player.spellItemZone.cards).flat()) {
 			if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&

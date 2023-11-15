@@ -26,6 +26,7 @@ let keywordTokenTypes = {
 
 	life: "playerLife",
 	mana: "playerMana",
+	partner: "playerPartner",
 
 	name: "cardProperty",
 	baseName: "cardProperty",
@@ -50,6 +51,7 @@ let keywordTokenTypes = {
 	doLifeDamage: "cardProperty",
 	self: "cardProperty",
 	zone: "cardProperty",
+	isToken: "cardProperty",
 
 	field: "zone",
 	deck: "zone",
@@ -72,7 +74,6 @@ let keywordTokenTypes = {
 	endPhase: "phaseType",
 
 	unit: "cardType",
-	token: "cardType",
 	spell: "cardType",
 	standardSpell: "cardType",
 	continuousSpell: "cardType",
@@ -110,6 +111,7 @@ let keywordTokenTypes = {
 	SHUFFLE: "function",
 	SUM: "function",
 	SUMMON: "function",
+	SWAP: "function",
 	TOKENS: "function",
 	VIEW: "function",
 

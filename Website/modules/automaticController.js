@@ -351,7 +351,7 @@ export class AutomaticController extends InteractionController {
 				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => event.card.current()? new SnapshotCard(event.card.current()) : event.card));
 				for (const event of events) {
 					gameUI.removeCard(event.fromZone, event.fromIndex);
-					if (!event.card.values.cardTypes.includes("token") || event.toZone instanceof zones.FieldZone) {
+					if (!event.card.isToken || event.toZone instanceof zones.FieldZone) {
 						gameUI.insertCard(event.toZone, event.toIndex);
 					}
 				}
@@ -365,6 +365,14 @@ export class AutomaticController extends InteractionController {
 							gameUI.insertCard(card.toZone, card.toIndex);
 						}
 					}
+				}
+				return;
+			}
+			case "cardsSwapped":
+			case "undoCardsSwapped": {
+				for (const event of events) {
+					gameUI.updateCard(event.cardA.zone, event.cardA.index);
+					gameUI.updateCard(event.cardB.zone, event.cardB.index);
 				}
 				return;
 			}

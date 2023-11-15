@@ -134,14 +134,6 @@ export function createManaChangedEvent(player) {
 	}
 }
 
-export function createUndoCardsMovedEvent(movedCards) {
-	return {
-		"nature": "event",
-		"type": "undoCardsMoved",
-		"movedCards": movedCards
-	}
-}
-
 export function createCardsDrawnEvent(player, cards) {
 	return {
 		"nature": "event",
@@ -212,6 +204,34 @@ export function createCardMovedEvent(player, fromZone, fromIndex, toZone, toInde
 		"toZone": toZone,
 		"toIndex": toIndex,
 		"card": card
+	}
+}
+
+export function createUndoCardsMovedEvent(movedCards) {
+	return {
+		"nature": "event",
+		"type": "undoCardsMoved",
+		"movedCards": movedCards
+	}
+}
+
+export function createCardsSwappedEvent(player, cardA, cardB, equipmentsTransferred) {
+	return {
+		"nature": "event",
+		"type": "cardsSwapped",
+		"player": player,
+		"cardA": cardA,
+		"cardB": cardB,
+		"equipmentsTransferred": equipmentsTransferred
+	}
+}
+
+export function createUndoCardsSwappedEvent(cardA, cardB) {
+	return {
+		"nature": "event",
+		"type": "undoCardsMoved",
+		"cardA": cardA,
+		"cardB": cardB
 	}
 }
 

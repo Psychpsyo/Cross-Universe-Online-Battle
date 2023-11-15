@@ -201,6 +201,7 @@ function parseExpression() {
 		}
 	}
 	if (expression.length > 1) {
+		console.log(expression);
 		throw new ScriptParserError("Failed to fully consolidate expression.");
 	}
 	return expression[0];
@@ -382,6 +383,15 @@ function parsePlayerDotAccess(player) {
 		case "playerMana": {
 			let node = new ast.ManaNode(player);
 			pos++;
+			return node;
+		}
+		case "playerPartner": {
+			let node = new ast.PartnerNode(player);
+			pos++;
+			if (tokens[pos] && tokens[pos].type === "dotOperator") {
+				pos++;
+				return parseCardDotAccess(node);
+			}
 			return node;
 		}
 	}

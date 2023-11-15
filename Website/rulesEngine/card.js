@@ -8,9 +8,11 @@ import * as actions from "./actions.js";
 import * as timingGenerators from "./timingGenerators.js";
 
 export class BaseCard {
-	constructor(player, cardId, initialValues, deckLimit, equipableTo, turnLimit, condition) {
+	constructor(player, cardId, isToken, initialValues, deckLimit, equipableTo, turnLimit, condition) {
 		this.owner = player;
 		this.cardId = cardId;
+		this.isToken = isToken;
+		this.isRemovedToken = false;
 		this.deckLimit = deckLimit;
 		this.equipableTo = equipableTo;
 		this.turnLimit = turnLimit;
@@ -210,6 +212,7 @@ export class BaseCard {
 
 	// Does not check if the card can be declared to attack, only if it is allowed to be/stay in an attack declaration.
 	canAttack() {
+		if (this.isRemovedToken) return false;
 		return this.values.cardTypes.includes("unit") && (this.attackCount < this.values.attackRights || this.canAttackAgain);
 	}
 
@@ -229,13 +232,14 @@ export class Card extends BaseCard {
 		let data = parseCdfValues(cdf);
 		let baseCardTypes = [data.cardType];
 		if (data.cardType == "token") {
-			baseCardTypes.push("unit");
+			baseCardTypes = ["unit"];
 		} else if (["standardSpell", "continuousSpell", "enchantSpell"].includes(data.cardType)) {
 			baseCardTypes.push("spell");
 		} else if (["standardItem", "continuousItem", "equipableItem"].includes(data.cardType)) {
 			baseCardTypes.push("item");
 		}
 		super(player, data.id,
+			data.cardType === "token",
 			new CardValues(
 				baseCardTypes,
 				[data.name ?? data.id],
@@ -284,7 +288,9 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 export class SnapshotCard extends BaseCard {
 	constructor(card, equippedToSnapshot, equipmentSnapshot) {
-		super(card.owner, card.cardId, card.initialValues.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
+		super(card.owner, card.cardId, card.isToken, card.initialValues.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
+		this.isRemovedToken = card.isRemovedToken;
+
 		this.values = card.values.clone();
 		this.baseValues = card.baseValues.clone();
 		this.modifierStack = [...card.modifierStack];
@@ -330,6 +336,8 @@ export class SnapshotCard extends BaseCard {
 	}
 
 	restore() {
+		this._actualCard.isRemovedToken = this.isRemovedToken;
+
 		// tokens might need to be restored back to non-existance
 		if (this.zone === null && this.placedTo === null) {
 			this._actualCard.zone.remove(this._actualCard);
