@@ -7,16 +7,16 @@ import {SnapshotCard} from "./card.js";
 
 // Base class for all blocks
 class Block {
-	constructor(stack, player, timingRunner, costTimingRunner = null) {
+	constructor(type, stack, player, timingRunner, costTimingRunner = null) {
+		this.type = type;
 		this.player = player;
 		this.stack = stack;
 		this.timingRunner = timingRunner;
-		this.timingRunner.block = this;
 		this.costTimingRunner = costTimingRunner;
 		if (this.costTimingRunner) {
-			this.costTimingRunner.block = this;
 			this.costTimingRunner.isCost = true;
 		}
+		this.followupTimings = [];
 		this.isCancelled = false;
 	}
 
@@ -71,7 +71,7 @@ class Block {
 
 export class StandardDraw extends Block {
 	constructor(stack, player) {
-		super(stack, player, new timingGenerators.TimingRunner(() =>
+		super("standardDrawBlock", stack, player, new timingGenerators.TimingRunner(() =>
 			timingGenerators.arrayTimingGenerator([
 				[new actions.Draw(player, 1)]
 			]),
@@ -91,7 +91,7 @@ export class StandardDraw extends Block {
 export class StandardSummon extends Block {
 	constructor(stack, player, card) {
 		let placeAction = new actions.Place(player, card, player.unitZone);
-		super(stack, player,
+		super("standardSummonBlock", stack, player,
 			new timingGenerators.TimingRunner(() =>
 				timingGenerators.arrayTimingGenerator([
 					[new actions.Summon(player, placeAction)]
@@ -125,7 +125,7 @@ export class StandardSummon extends Block {
 
 export class Retire extends Block {
 	constructor(stack, player, units) {
-		super(stack, player, new timingGenerators.TimingRunner(() => timingGenerators.retireTimingGenerator(player, units), player.game));
+		super("retireBlock", stack, player, new timingGenerators.TimingRunner(() => timingGenerators.retireTimingGenerator(player, units), player.game));
 		this.units = units;
 		for (let unit of units) {
 			unit.inRetire = this;
@@ -145,7 +145,7 @@ export class Retire extends Block {
 export class AttackDeclaration extends Block {
 	constructor(stack, player, attackers) {
 		let establishAction = new actions.EstablishAttackDeclaration(player, attackers);
-		super(stack, player, new timingGenerators.TimingRunner(() =>
+		super("attackDeclarationBlock", stack, player, new timingGenerators.TimingRunner(() =>
 			timingGenerators.arrayTimingGenerator([
 				[establishAction]
 			]),
@@ -166,7 +166,7 @@ export class AttackDeclaration extends Block {
 
 export class Fight extends Block {
 	constructor(stack, player) {
-		super(stack, player, new timingGenerators.TimingRunner(() => {
+		super("fightBlock", stack, player, new timingGenerators.TimingRunner(() => {
 			return timingGenerators.fightTimingGenerator(stack.phase.turn.game.currentAttackDeclaration);
 		}, player.game));
 		this.attackDeclaration = stack.phase.turn.game.currentAttackDeclaration;
@@ -189,7 +189,7 @@ export class Fight extends Block {
 
 export class AbilityActivation extends Block {
 	constructor(stack, player, card, ability) {
-		super(stack, player,
+		super("abilityActivationBlock", stack, player,
 			new timingGenerators.TimingRunner(() =>
 				timingGenerators.abilityTimingGenerator(ability, card, player),
 				player.game
@@ -251,7 +251,7 @@ export class DeployItem extends Block {
 				break;
 			}
 		}
-		super(stack, player,
+		super("deployBlock", stack, player,
 			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(execTimingGenerators), player.game),
 			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(costTimingGenerators), player.game)
 		);
@@ -310,7 +310,7 @@ export class CastSpell extends Block {
 				break;
 			}
 		}
-		super(stack, player,
+		super("castBlock", stack, player,
 			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(execTimingGenerators), player.game),
 			new timingGenerators.TimingRunner(() => timingGenerators.combinedTimingGenerator(costTimingGenerators), player.game)
 		);

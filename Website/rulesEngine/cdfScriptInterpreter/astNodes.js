@@ -1,9 +1,10 @@
 // This module exports the definition for all nodes required for the CDF Script abstract syntax tree
 
 import * as actions from "../actions.js";
+import * as blocks from "../blocks.js";
+import * as events from "../events.js";
 import * as requests from "../inputRequests.js";
 import * as zones from "../zones.js";
-import * as events from "../events.js";
 import {Card, BaseCard, SnapshotCard} from "../card.js";
 import {CardModifier} from "../cardValues.js";
 import {ScriptValue} from "./structs.js";
@@ -1356,6 +1357,15 @@ export class DeckPositionNode extends AstNode {
 	}
 }
 
+export class BlockNode extends AstNode {
+	constructor(blockType) {
+		super();
+		this.blockType = blockType;
+	}
+	* eval(card, player, ability) {
+		return new ScriptValue("block", [this.blockType]);
+	}
+}
 export class PhaseNode extends AstNode {
 	constructor(playerNode, phaseIndicator) {
 		super();
@@ -1381,6 +1391,12 @@ export class TurnNode extends AstNode {
 			return new ScriptValue("turn", ["yourTurn"]);
 		}
 		return new ScriptValue("turn", ["opponentTurn"]);
+	}
+}
+export class CurrentBlockNode extends AstNode {
+	* eval(card, player, ability) {
+		let type = player.game.currentBlock()?.type;
+		return new ScriptValue("block", type? [type] : []);
 	}
 }
 export class CurrentPhaseNode extends AstNode {

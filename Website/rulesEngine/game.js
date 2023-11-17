@@ -270,6 +270,9 @@ export class Game {
 		let currentPhase = this.currentPhase();
 		return !(currentPhase instanceof phases.StackPhase)? null : currentPhase.currentStack();
 	}
+	currentBlock() {
+		return this.currentStack()?.currentBlock();
+	}
 
 	getFieldCards(player) {
 		return player.partnerZone.cards.concat(player.unitZone.cards.concat(player.spellItemZone.cards)).filter(card => card != null);

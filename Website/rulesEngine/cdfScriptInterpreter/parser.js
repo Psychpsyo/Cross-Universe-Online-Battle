@@ -261,6 +261,11 @@ function parseValue() {
 			pos++;
 			return node;
 		}
+		case "blockType": {
+			let node = new ast.BlockNode(tokens[pos].value);
+			pos++;
+			return node;
+		}
 		case "zone": {
 			return parseZone();
 		}
@@ -321,6 +326,10 @@ function parseValue() {
 		}
 		case "actionAccessor": {
 			return parseActionAccessor(new ast.ImplicitActionsNode());
+		}
+		case "currentBlock": {
+			pos++;
+			return new ast.CurrentBlockNode();
 		}
 		case "currentPhase": {
 			pos++;

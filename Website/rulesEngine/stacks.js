@@ -1,14 +1,15 @@
-
-import * as requests from "./inputRequests.js";
-import * as blocks from "./blocks.js";
-import {createBlockCreatedEvent, createBlockCreationAbortedEvent, createStackStartedEvent, createBlockStartedEvent} from "./events.js"
 import * as abilities from "./abilities.js";
+import * as blocks from "./blocks.js";
+import * as requests from "./inputRequests.js";
+import {createBlockCreatedEvent, createBlockCreationAbortedEvent, createStackStartedEvent, createBlockStartedEvent} from "./events.js";
+import {runInterjectedTimings} from "./timings.js";
 
 export class Stack {
 	constructor(phase, index) {
 		this.phase = phase;
 		this.index = index;
 		this.blocks = [];
+		this.executingBlock = null;
 		this.passed = false;
 		this.processed = false;
 	}
@@ -90,6 +91,9 @@ export class Stack {
 		}
 	}
 
+	currentBlock() {
+		return this.executingBlock;
+	}
 	getTimings() {
 		let costTimings = this.blocks.map(block => block.getCostTimings()).flat();
 		let executionTimings = this.blocks.toReversed().map(block => block.getExecutionTimings()).flat();
@@ -103,8 +107,13 @@ export class Stack {
 
 	async* executeBlocks() {
 		for (let i = this.blocks.length - 1; i >= 0; i--) {
+			this.executingBlock = this.blocks[i];
 			yield [createBlockStartedEvent(this.blocks[i])];
 			yield* this.blocks[i].run();
+			this.executingBlock = null;
+			for (const timing of await (yield* runInterjectedTimings(this.phase.turn.game, false))) {
+				this.blocks[i].followupTimings.push(timing);
+			}
 		}
 		this.processed = true;
 	}

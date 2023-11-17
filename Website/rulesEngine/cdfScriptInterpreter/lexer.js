@@ -11,6 +11,7 @@ let keywordTokenTypes = {
 
 	currentPhase: "currentPhase",
 	currentTurn: "currentTurn",
+	currentBlock: "currentBlock",
 	turn: "turn",
 
 	any: "anyAmount",
@@ -72,6 +73,15 @@ let keywordTokenTypes = {
 	battlePhase: "phaseType",
 	mainPhase2: "phaseType",
 	endPhase: "phaseType",
+
+	abilityActivationBlock: "blockType",
+	attackDeclarationBlock: "blockType",
+	castBlock: "blockType",
+	deployBlock: "blockType",
+	fightBlock: "blockType",
+	retireBlock: "blockType",
+	standardDrawBlock: "blockType",
+	standardSummonBlock: "blockType",
 
 	unit: "cardType",
 	spell: "cardType",

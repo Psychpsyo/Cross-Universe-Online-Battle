@@ -1,6 +1,6 @@
 // This file contains timing generator functions and related utility functions
 
-import {Timing} from "./timings.js";
+import {Timing, runInterjectedTimings} from "./timings.js";
 import {createCardsAttackedEvent} from "./events.js";
 import {FieldZone} from "./zones.js";
 import * as actions from "./actions.js";
@@ -10,12 +10,15 @@ export class TimingRunner {
 	constructor(generatorFunction, game) {
 		this.generatorFunction = generatorFunction;
 		this.game = game;
-		this.block = null;
 		this.isCost = false;
 		this.timings = [];
 	}
 
 	async* run(isPrediction = false) {
+		for (const timing of await (yield* runInterjectedTimings(this.game, isPrediction, this.actions))) {
+			this.timings.push(timing);
+		}
+
 		let generator = this.generatorFunction();
 		let timing = yield* this.getNextTiming(generator, null);
 		while(timing) {
@@ -49,7 +52,7 @@ export class TimingRunner {
 		if (generatorOutput.done) {
 			return null;
 		}
-		return new Timing(this.game, generatorOutput.value, this.block);
+		return new Timing(this.game, generatorOutput.value);
 	}
 
 	* undo() {

@@ -9,11 +9,10 @@ import * as zones from "./zones.js";
 
 // Represents a single instance in time where multiple actions take place at once.
 export class Timing {
-	constructor(game, actionList, block) {
+	constructor(game, actionList) {
 		this.game = game;
 		this.index = 0;
 		this.actions = actionList;
-		this.block = block; // block may be null
 		for (const action of this.actions) {
 			action.timing = this;
 		}
@@ -111,25 +110,17 @@ export class Timing {
 		}
 		this.successful = true;
 
-		// TODO: None of thes following things have proper undo support yet.
+		// TODO: The following things have proper undo support yet.
 		// This *should* only matter when units turn into spells/items so for now it does not matter(?)
 		yield* recalculateCardValues(this.game);
 		this.game.currentAttackDeclaration?.removeInvalidAttackers();
 
-		// static abilities and win/lose condition checks
-		let staticsChanged = true;
-		while (staticsChanged) {
-			staticsChanged = yield* phaseStaticAbilities(this.game);
-			yield* recalculateCardValues(this.game);
-			this.game.currentAttackDeclaration?.removeInvalidAttackers();
-			if (!isPrediction) {
-				yield* checkGameOver(this.game);
-			}
-		}
-
-		// check trigger ability conditions
 		if (!isPrediction) {
-			if (!isPrediction && this.game.currentPhase() instanceof phases.StackPhase) {
+			// check win/lose conditions
+			yield* checkGameOver(this.game);
+
+			// check trigger ability conditions
+			if (this.game.currentPhase() instanceof phases.StackPhase) {
 				for (let player of game.players) {
 					for (let card of player.getAllCards()) {
 						for (let ability of card.values.abilities) {
@@ -143,27 +134,15 @@ export class Timing {
 			}
 		}
 
-		await (yield* this.runFollowupTimings(isPrediction));
-	}
-
-	async* runFollowupTimings(isPrediction) {
-		let timings = [];
-		let interjected = this.getFollowupTiming();
-		while (interjected) {
-			timings.push(interjected);
-			await (yield* interjected.run(isPrediction));
-			interjected = interjected.getFollowupTiming();
+		for (const timing of await (yield* runInterjectedTimings(this.game, isPrediction, this.actions))) {
+			this.followupTimings.push(timing);
 		}
-		this.followupTimings = timings;
 	}
 
 	* undo() {
 		// check if this timing actually ran
 		if (!this.successful) {
 			return;
-		}
-		for (let i = this.followupTimings.length - 1; i >= 0; i--) {
-			yield* this.followupTimings[i].undo();
 		}
 		let events = [];
 		for (let action of this.actions) {
@@ -181,56 +160,79 @@ export class Timing {
 	valueOf() {
 		return this.index;
 	}
+}
 
-	getFollowupTiming() {
-		// cards need to be revealed if added from deck to hand
-		let unrevealedCards = [];
-		for (const action of this.actions) {
-			if (action instanceof actions.Move && action.zone.type === "hand" && action.card.zone.type === "deck") {
-				if (unrevealedCards.indexOf(action.card) === -1) {
-					unrevealedCards.push(action.card);
-				}
+// This is run after every regular timing and right after blocks start and end.
+// It takes care of
+export async function* runInterjectedTimings(game, isPrediction, lastActions = []) {
+	let timings = [];
+	let interjected = null;
+	// do while since static ability phasing must be attempted at least once.
+	do {
+		interjected = getInterjectedTiming(game, lastActions);
+		if (interjected) {
+			timings.push(interjected);
+			await (yield* interjected.run(isPrediction));
+		}
+		let staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
+		while (staticAbilityPhasingTiming) {
+			timings.push(staticAbilityPhasingTiming);
+			await (yield* staticAbilityPhasingTiming.run(isPrediction));
+			staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
+		}
+	} while (interjected);
+	return timings;
+}
+
+// lastActions are the actions that happened in the preceeding timing
+function getInterjectedTiming(game, lastActions = []) {
+	// cards need to be revealed if added from deck to hand
+	let unrevealedCards = [];
+	for (const action of lastActions) {
+		if (action instanceof actions.Move && action.zone.type === "hand" && action.card.zone.type === "deck") {
+			if (unrevealedCards.indexOf(action.card) === -1) {
+				unrevealedCards.push(action.card);
 			}
 		}
-
-		// decks need to be shuffled after cards are added to them.
-		let unshuffledDecks = [];
-		for (const action of this.actions) {
-			if (action instanceof actions.Move && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
-				if (unshuffledDecks.indexOf(action.zone) === -1) {
-					unshuffledDecks.push(action.zone);
-				}
-			}
-			if (action instanceof actions.Swap && action.cardA?.zone instanceof zones.DeckZone || action.cardB?.zone instanceof zones.DeckZone) {
-				if (action.cardA.zone instanceof zones.DeckZone) {
-					unshuffledDecks.push(action.cardA.zone);
-				}
-				if (action.cardB.zone instanceof zones.DeckZone) {
-					unshuffledDecks.push(action.cardB.zone);
-				}
-			}
-		}
-
-		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.currentOwner().next(), card.current())));
-		if (allActions.length > 0) {
-			return new Timing(this.game, allActions, this.block);
-		}
-
-		// Equipments might need to be destroyed
-		let invalidEquipments = [];
-		for (const equipment of this.game.players.map(player => player.spellItemZone.cards).flat()) {
-			if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
-				(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.currentOwner(), null)[0].get(equipment.currentOwner()).includes(equipment.equippedTo))
-			) {
-				invalidEquipments.push(equipment);
-			}
-		}
-		if (invalidEquipments.length > 0) {
-			let discards = invalidEquipments.map(equipment => new actions.Discard(equipment.owner, equipment));
-			return new Timing(this.game, discards.concat(discards.map(discard => new actions.Destroy(discard))), this.block);
-		}
-		return null;
 	}
+
+	// decks need to be shuffled after cards are added to them.
+	let unshuffledDecks = [];
+	for (const action of lastActions) {
+		if (action instanceof actions.Move && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
+			if (unshuffledDecks.indexOf(action.zone) === -1) {
+				unshuffledDecks.push(action.zone);
+			}
+		}
+		if (action instanceof actions.Swap && action.cardA?.zone instanceof zones.DeckZone || action.cardB?.zone instanceof zones.DeckZone) {
+			if (action.cardA.zone instanceof zones.DeckZone) {
+				unshuffledDecks.push(action.cardA.zone);
+			}
+			if (action.cardB.zone instanceof zones.DeckZone) {
+				unshuffledDecks.push(action.cardB.zone);
+			}
+		}
+	}
+
+	let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.currentOwner().next(), card.current())));
+	if (allActions.length > 0) {
+		return new Timing(game, allActions);
+	}
+
+	// Equipments might need to be destroyed
+	let invalidEquipments = [];
+	for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
+		if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
+			(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.currentOwner(), null)[0].get(equipment.currentOwner()).includes(equipment.equippedTo))
+		) {
+			invalidEquipments.push(equipment);
+		}
+	}
+	if (invalidEquipments.length > 0) {
+		let discards = invalidEquipments.map(equipment => new actions.Discard(equipment.owner, equipment));
+		return new Timing(game, discards.concat(discards.map(discard => new actions.Destroy(discard))));
+	}
+	return null;
 }
 
 function* checkGameOver(game) {
@@ -253,8 +255,8 @@ function* checkGameOver(game) {
 }
 
 // iterates over all static abilities and activates/deactivates those that need it.
-function* phaseStaticAbilities(game) {
-	let abilitiesChanged = false;
+function* getStaticAbilityPhasingTiming(game) {
+	let modificationActions = []; // the list of Apply/UnapplyStaticAbility actions that this will return as a timing.
 	let activeCards = game.players.map(player => player.getAllCards()).flat();
 	let newApplications = new Map();
 	for (let currentCard of activeCards) {
@@ -271,13 +273,14 @@ function* phaseStaticAbilities(game) {
 								source: currentCard
 							});
 							newApplications.set(otherCard, modifiers);
-							abilitiesChanged = true;
 						}
 					} else {
-						let modifierIndex = otherCard.modifierStack.findIndex(modifier => modifier.ability === ability);
-						if (modifierIndex != -1) {
-							otherCard.modifierStack.splice(modifierIndex, 1);
-							abilitiesChanged = true;
+						if (otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
+							modificationActions.push(new actions.UnapplyStaticAbility(
+								currentCard.currentOwner(), // have these be owned by the player that owns the card with the ability.
+								otherCard,
+								ability
+							));
 						}
 					}
 				}
@@ -314,12 +317,19 @@ function* phaseStaticAbilities(game) {
 				}
 				for (let index of orderedAbilities) {
 					let application = fieldEnterBuckets[fieldIndex][timing][index];
-					card.modifierStack.push(application.ability.getModifier(application.source, application.source.currentOwner()));
+					modificationActions.push(new actions.ApplyStaticAbility(
+						application.source.currentOwner(), // have these be owned by the player that owns the card with the ability.
+						card,
+						application.ability.getModifier(application.source, application.source.currentOwner())
+					));
 				}
 			}
 		}
 	}
-	return abilitiesChanged;
+	if (modificationActions.length === 0) {
+		return null;
+	}
+	return new Timing(game, modificationActions);
 }
 
 function* recalculateCardValues(game) {

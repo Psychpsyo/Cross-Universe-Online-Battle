@@ -156,13 +156,13 @@ export class ManaSupplyPhase extends Phase {
 			}
 		}
 		if (reduceManaActions.length > 0) {
-			this.timings.push(new Timing(this.turn.game, reduceManaActions, null));
+			this.timings.push(new Timing(this.turn.game, reduceManaActions));
 			await (yield* this.runTiming());
 		}
 
 		// RULES: Next, the active player gains 5 mana.
 		let turnPlayer = this.turn.player;
-		this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5)], null));
+		this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5)]));
 		await (yield* this.runTiming());
 
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
@@ -175,13 +175,13 @@ export class ManaSupplyPhase extends Phase {
 				yield [];
 			}
 		} else {
-			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, -partnerLevel)], null));
+			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, -partnerLevel)]));
 			await (yield* this.runTiming());
 		}
 
 		// RULES: If they still have more than 5 mana, it will again be reduced to 5.
 		if (turnPlayer.mana > 5) {
-			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5 - turnPlayer.mana)], null));
+			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5 - turnPlayer.mana)]));
 			await (yield* this.runTiming());
 		}
 
@@ -191,7 +191,7 @@ export class ManaSupplyPhase extends Phase {
 			if (player.handZone.cards.length > 8) {
 				let choiceRequest = requests.chooseCards.create(player, player.handZone.cards, [player.handZone.cards.length - 8], "handTooFull");
 				let chosenCards = requests.chooseCards.validate((yield [choiceRequest]).value, choiceRequest);
-				this.timings.push(new Timing(this.turn.game, chosenCards.map(card => new actions.Discard(player, card)), null));
+				this.timings.push(new Timing(this.turn.game, chosenCards.map(card => new actions.Discard(player, card))));
 				await (yield* this.runTiming());
 			}
 		}

@@ -517,7 +517,7 @@ export class ApplyCardStatChange extends Action {
 		if (this.until == "forever") {
 			return;
 		}
-		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.player, this.card.current(), this.modifier)], null);
+		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.player, this.card.current(), this.modifier)]);
 		switch (this.until) {
 			case "endOfTurn": {
 				this.card.owner.game.currentTurn().endOfTurnTimings.push(removalTiming);
@@ -789,5 +789,40 @@ export class ChangeCounters extends Action {
 	isFullyPossible(timing) {
 		if (this.card.isRemovedToken) return false;
 		return (this.card.counters[this.type] ?? 0) + this.amount >= 0;
+	}
+}
+
+export class ApplyStaticAbility extends Action {
+	constructor(player, card, modifier) {
+		super(player);
+		this.card = card;
+		this.modifier = modifier;
+	}
+
+	async* run() {
+		this.card = new SnapshotCard(this.card);
+		this.card.current().modifierStack.push(this.modifier);
+	}
+
+	undo() {
+		this.card.restore();
+	}
+}
+
+export class UnapplyStaticAbility extends Action {
+	constructor(player, card, ability) {
+		super(player);
+		this.card = card;
+		this.ability = ability;
+	}
+
+	async* run() {
+		this.card = new SnapshotCard(this.card);
+		let modifierIndex = this.card.current().modifierStack.findIndex(modifier => modifier.ability === this.ability);
+		this.card.current().modifierStack.splice(modifierIndex, 1);
+	}
+
+	undo() {
+		this.card.restore();
 	}
 }
