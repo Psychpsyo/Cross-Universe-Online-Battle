@@ -2,8 +2,9 @@ import * as ast from "./cdfScriptInterpreter/astNodes.js";
 import * as events from "./events.js";
 import * as requests from "./inputRequests.js";
 import * as zones from "./zones.js";
-import {Timing} from "./timings.js";
+import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 import {SnapshotCard} from "./card.js";
+import {Timing} from "./timings.js";
 
 // helper functions
 function getAvailableZoneSlots(zone) {
@@ -659,7 +660,7 @@ export class SelectEquipableUnit extends Action {
 	}
 
 	async* run() {
-		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0].get(this.player), [1], "equipTarget:" + this.spellItem.cardId);
+		let selectionRequest = new requests.chooseCards.create(this.player, this.spellItem.equipableTo.evalFull(new ScriptContext(this.spellItem, this.player))[0].get(this.player), [1], "equipTarget:" + this.spellItem.cardId);
 		let response = yield [selectionRequest];
 		if (response.type != "chooseCards") {
 			throw new Error("Incorrect response type supplied when selecting unit to equip to. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
@@ -668,7 +669,7 @@ export class SelectEquipableUnit extends Action {
 	}
 
 	isImpossible(timing) {
-		return this.spellItem.equipableTo.evalFull(this.spellItem, this.player, null)[0].get(this.player).length == 0;
+		return this.spellItem.equipableTo.evalFull(new ScriptContext(this.spellItem, this.player))[0].get(this.player).length == 0;
 	}
 }
 
@@ -694,7 +695,7 @@ export class EquipCard extends Action {
 	}
 
 	isImpossible(timing) {
-		return !this.equipment.equipableTo.evalFull(this.spellItem, this.player, null)[0].get(this.player).includes(this.target);
+		return !this.equipment.equipableTo.evalFull(new ScriptContext(this.spellItem, this.player))[0].get(this.player).includes(this.target);
 	}
 }
 

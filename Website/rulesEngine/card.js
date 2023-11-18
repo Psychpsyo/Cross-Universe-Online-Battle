@@ -1,6 +1,7 @@
 // This module exports the Card class which represents a specific card in a Game.
 
 import {CardValues} from "./cardValues.js";
+import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 import * as abilities from "./abilities.js";
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
 import * as blocks from "./blocks.js";
@@ -159,8 +160,8 @@ export class BaseCard {
 			return false;
 		}
 		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
-			(this.condition !== null && !this.condition.evalFull(this, player, null)[0].get(player)) ||
-			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(this, player, null)[0].get(player).length == 0)
+			(this.condition !== null && !this.condition.evalFull(new ScriptContext(this, player))[0].get(player)) ||
+			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(new ScriptContext(this, player))[0].get(player).length == 0)
 		) {
 			return false;
 		}
@@ -172,7 +173,7 @@ export class BaseCard {
 					return false;
 				}
 				let currentZone = this.zone; // Can't discard a spell for its own cost
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone && (!checkPlacement || player.spellItemZone.cards.includes(null));
+				endOfTreeCheck = () => ability.exec.hasAllTargets(new ScriptContext(this, player, ability, evaluatingPlayer)) && this.zone === currentZone && (!checkPlacement || player.spellItemZone.cards.includes(null));
 			}
 		}
 
@@ -187,8 +188,8 @@ export class BaseCard {
 			return false;
 		}
 		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
-			(this.condition !== null && !this.condition.evalFull(this, player, null)[0].get(player)) ||
-			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(this, player, null)[0].get(player).length == 0)
+			(this.condition !== null && !this.condition.evalFull(new ScriptContext(this, player))[0].get(player)) ||
+			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(new ScriptContext(this, player))[0].get(player).length == 0)
 		) {
 			return false;
 		}
@@ -200,7 +201,7 @@ export class BaseCard {
 					return false;
 				}
 				let currentZone = this.zone; // Can't discard an item for its own cost
-				endOfTreeCheck = () => ability.exec.hasAllTargets(this, player, ability, evaluatingPlayer) && this.zone === currentZone && (!checkPlacement || player.spellItemZone.cards.includes(null));
+				endOfTreeCheck = () => ability.exec.hasAllTargets(new ScriptContext(this, player, ability, evaluatingPlayer)) && this.zone === currentZone && (!checkPlacement || player.spellItemZone.cards.includes(null));
 			}
 		}
 

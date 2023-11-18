@@ -7,7 +7,7 @@ import * as requests from "../inputRequests.js";
 import * as zones from "../zones.js";
 import {Card, BaseCard, SnapshotCard} from "../card.js";
 import {CardModifier} from "../cardValues.js";
-import {ScriptValue} from "./structs.js";
+import {ScriptValue, ScriptContext} from "./structs.js";
 
 let implicitCard = [null];
 let implicitActions = [null];
@@ -74,14 +74,14 @@ function nChooseK(n, k) {
 }
 
 class AstNode {
-	* eval(card, player, ability) {}
+	* eval(ctx) {}
 	// evalFull() does the same as eval without being a generator function itself.
 	// This means that it will return an array of all possible return values for every combination of choices
 	// that the player could make.
 	// If run with an evaluatingPlayer, information that is hidden from that player is ignored.
 	// This means that card matchers, for example, will always return hidden cards, no matter if they actually match.
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		let generator = this.eval(card, player, ability);
+	evalFull(ctx) {
+		let generator = this.eval(ctx);
 		let next;
 		do {
 			next = generator.next();
@@ -89,9 +89,9 @@ class AstNode {
 		return [next.value];
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
-	hasAllTargets(card, player, ability, evaluatingPlayer) {
+	hasAllTargets(ctx) {
 		for (let childNode of this.getChildNodes()) {
-			if (childNode && !childNode.hasAllTargets(card, player, ability, evaluatingPlayer)) {
+			if (childNode && !childNode.hasAllTargets(ctx)) {
 				return false;
 			}
 		}
@@ -108,22 +108,22 @@ export class ScriptRootNode extends AstNode {
 		super();
 		this.steps = steps;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		for (let step of this.steps) {
-			yield* step.eval(card, player, ability);
+			yield* step.eval(ctx);
 		}
 	}
 	// whether or not all actions in this tree have enough targets to specify the target availability rule.
-	hasAllTargets(card, player, ability, evaluatingPlayer) {
-		return this.hasAllTargetsFromStep(0, card, player, ability, evaluatingPlayer);
+	hasAllTargets(ctx) {
+		return this.hasAllTargetsFromStep(0, ctx);
 	}
 	getChildNodes() {
 		return this.steps;
 	}
 
-	hasAllTargetsFromStep(i, card, player, ability, evaluatingPlayer) {
+	hasAllTargetsFromStep(i, ctx) {
 		for (; i < this.steps.length; i++) {
-			if (!this.steps[i].hasAllTargets(card, player, ability, evaluatingPlayer)) {
+			if (!this.steps[i].hasAllTargets(ctx)) {
 				return false;
 			}
 			// If this step is a variable assignment, we need to enumerate all possible values
@@ -131,16 +131,16 @@ export class ScriptRootNode extends AstNode {
 			// check target availability for the rest of the script with those choices made.
 			// If just one of those branches has all targets, the ability is said to have all targets.
 			if (this.steps[i].assignTo) {
-				let oldVarValue = ability.scriptVariables[this.steps[i].assignTo];
+				let oldVarValue = ctx.ability.scriptVariables[this.steps[i].assignTo];
 				let foundValidBranch = false;
-				for (const possibility of this.steps[i].evalFull(card, player, ability)) {
-					ability.scriptVariables[this.steps[i].assignTo] = possibility;
-					if (this.hasAllTargetsFromStep(i + 1, card, player, ability, evaluatingPlayer)) {
+				for (const possibility of this.steps[i].evalFull(ctx)) {
+					ctx.ability.scriptVariables[this.steps[i].assignTo] = possibility;
+					if (this.hasAllTargetsFromStep(i + 1, ctx)) {
 						foundValidBranch = true;
 						break;
 					}
 				}
-				ability.scriptVariables[this.steps[i].assignTo] = oldVarValue;
+				ctx.ability.scriptVariables[this.steps[i].assignTo] = oldVarValue;
 				return foundValidBranch;
 			}
 		}
@@ -154,15 +154,15 @@ export class LineNode extends AstNode {
 		this.expression = expression;
 		this.assignTo = variable;
 	}
-	* eval(card, player, ability) {
-		let returnValue = yield* this.expression.eval(card, player, ability);
+	* eval(ctx) {
+		let returnValue = yield* this.expression.eval(ctx);
 		if (this.assignTo) {
-			ability.scriptVariables[this.assignTo] = returnValue;
+			ctx.ability.scriptVariables[this.assignTo] = returnValue;
 		}
 		return returnValue;
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		return this.expression.evalFull(card, player, ability, evaluatingPlayer);
+	evalFull(ctx) {
+		return this.expression.evalFull(ctx);
 	}
 	getChildNodes() {
 		return [this.expression];
@@ -174,11 +174,9 @@ export class TriggerRootNode extends AstNode {
 		super();
 		this.expression = expression;
 	}
-	* eval(card, player, ability) {
-		setImplicitActions(player.game.currentPhase().lastActionList);
-
-		let returnValue = yield* this.expression.eval(card, player, ability);
-
+	* eval(ctx) {
+		setImplicitActions(ctx.game.currentPhase().lastActionList);
+		let returnValue = yield* this.expression.eval(ctx);
 		clearImplicitActions();
 		return returnValue;
 	}
@@ -221,23 +219,23 @@ export class FunctionNode extends AstNode {
 		this.player = player;
 		this.asManyAsPossible = asManyAsPossible;
 	}
-	* eval(card, player, ability) {
-		let players = (yield* this.player.eval(card, player, ability)).get(player);
+	* eval(ctx) {
+		let players = (yield* this.player.eval(ctx)).get(ctx.player);
 		if (players.length == 1) {
-			let value = yield* this.runFunction(card, players[0], ability);
+			let value = yield* this.runFunction(new ScriptContext(ctx.card, players[0], ctx.ability));
 			if (value.type === "tempActions") { // actions need to be executed
-				let timing = yield value.get(player);
+				let timing = yield value.get(ctx.player);
 				return new ScriptValue("action", timing.actions);
 			} else {
 				return value;
 			}
 		}
 		// otherwise this is a both.FUNCTION() and must create a split value, while executing for the turn player first
-		players.unshift(players.splice(players.indexOf(player.game.currentTurn().player), 1)[0]);
+		players.unshift(players.splice(players.indexOf(ctx.game.currentTurn().player), 1)[0]);
 		let valueMap = new Map();
 		let type;
 		for (const player of players) {
-			let value = yield* this.runFunction(card, player, ability);
+			let value = yield* this.runFunction(new ScriptContext(ctx.card, player, ctx.ability, ctx.evaluatingPlayer));
 			type = value.type;
 			valueMap.set(player, value.get(player));
 		}
@@ -256,41 +254,41 @@ export class FunctionNode extends AstNode {
 		}
 		return new ScriptValue(type, valueMap);
 	}
-	* runFunction(card, player, ability) {
+	* runFunction(ctx) {
 		switch (this.functionName) {
 			case "APPLY": {
-				let until = (yield* this.parameters[2].eval(card, player, ability)).get(player);
+				let until = (yield* this.parameters[2].eval(ctx)).get(ctx.player);
 				let applyActions = [];
-				for (const target of (yield* this.parameters[0].eval(card, player, ability)).get(player)) {
+				for (const target of (yield* this.parameters[0].eval(ctx)).get(ctx.player)) {
 					applyActions.push(new actions.ApplyCardStatChange(
-						player,
+						ctx.player,
 						target.current(),
-						(yield* this.parameters[1].eval(card, player, ability)).get(player).bake(target.current()),
+						(yield* this.parameters[1].eval(ctx)).get(ctx.player).bake(target.current()),
 						until
 					));
 				}
 				return new ScriptValue("tempActions", applyActions);
 			}
 			case "CANCELATTACK": {
-				return new ScriptValue("tempActions", [new actions.CancelAttack(player)]);
+				return new ScriptValue("tempActions", [new actions.CancelAttack(ctx.player)]);
 			}
 			case "COUNT": {
-				let list = (yield* this.parameters[0].eval(card, player, ability)).get(player);
+				let list = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
 				return new ScriptValue("number", [list.length]);
 			}
 			case "DAMAGE": {
-				return new ScriptValue("tempActions", [new actions.DealDamage(player, (yield* this.parameters[0].eval(card, player, ability)).get(player)[0])]);
+				return new ScriptValue("tempActions", [new actions.DealDamage(ctx.player, (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0])]);
 			}
 			case "DECKTOP": {
-				return new ScriptValue("card", player.deckZone.cards.slice(Math.max(0, player.deckZone.cards.length - (yield* this.parameters[0].eval(card, player, ability)).get(player)[0]), player.deckZone.cards.length));
+				return new ScriptValue("card", ctx.player.deckZone.cards.slice(Math.max(0, ctx.player.deckZone.cards.length - (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0]), ctx.player.deckZone.cards.length));
 			}
 			case "DESTROY": {
-				let cards = (yield* this.parameters[0].eval(card, player, ability)).get(player).filter(card => card.current());
-				let discards = cards.map(card => new actions.Discard(player, card.current()));
+				let cards = (yield* this.parameters[0].eval(ctx)).get(ctx.player).filter(card => card.current());
+				let discards = cards.map(card => new actions.Discard(ctx.player, card.current()));
 				return new ScriptValue("tempActions", discards.concat(discards.map(discard => new actions.Destroy(discard))));
 			}
 			case "DIFFERENT": {
-				let list = (yield* this.parameters[0].eval(card, player, ability)).get(player);
+				let list = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
 				for (let i = 0; i < list.length; i++) {
 					for (let j = 0; j < list.length; j++) {
 						if (i == j) {
@@ -306,27 +304,27 @@ export class FunctionNode extends AstNode {
 				return new ScriptValue("bool", true);
 			}
 			case "DISCARD": {
-				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(card, player, ability)).get(player).filter(card => card.current()).map(card => new actions.Discard(player, card.current())));
+				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(ctx.player, card.current())));
 			}
 			case "DRAW": {
-				let amount = (yield* this.parameters[0].eval(card, player, ability)).get(player)[0];
+				let amount = (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0];
 				if (this.asManyAsPossible) {
-					amount = Math.min(amount, player.deckZone.cards.length);
+					amount = Math.min(amount, ctx.player.deckZone.cards.length);
 				}
-				return new ScriptValue("tempActions", [new actions.Draw(player, amount)]);
+				return new ScriptValue("tempActions", [new actions.Draw(ctx.player, amount)]);
 			}
 			case "EXILE": {
-				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(card, player, ability)).get(player).filter(card => card.current()).map(card => new actions.Exile(player, card.current())));
+				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current())));
 			}
 			case "GAINLIFE": {
-				return new ScriptValue("tempActions", [new actions.ChangeLife(player, (yield* this.parameters[0].eval(card, player, ability)).get(player)[0])]);
+				return new ScriptValue("tempActions", [new actions.ChangeLife(ctx.player, (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0])]);
 			}
 			case "GAINMANA": {
-				return new ScriptValue("tempActions", [new actions.ChangeMana(player, (yield* this.parameters[0].eval(card, player, ability)).get(player)[0])]);
+				return new ScriptValue("tempActions", [new actions.ChangeMana(ctx.player, (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0])]);
 			}
 			case "GETCOUNTERS": {
-				let cards = (yield* this.parameters[0].eval(card, player, ability)).get(player);
-				let type = (yield* this.parameters[1].eval(card, player, ability)).get(player)[0];
+				let cards = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
+				let type = (yield* this.parameters[1].eval(ctx)).get(ctx.player)[0];
 
 				let total = 0;
 				for (let card of cards) {
@@ -338,17 +336,17 @@ export class FunctionNode extends AstNode {
 				return new ScriptValue("number", [total]);
 			}
 			case "GIVEATTACK": {
-				let target = (yield* this.parameters[0].eval(card, player, ability)).get(player)[0];
-				return new ScriptValue("tempActions", target.current()? [new actions.GiveAttack(player, target.current())] : []);
+				let target = (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0];
+				return new ScriptValue("tempActions", target.current()? [new actions.GiveAttack(ctx.player, target.current())] : []);
 			}
 			case "LOSELIFE": {
-				return new ScriptValue("tempActions", [new actions.ChangeLife(player, -(yield* this.parameters[0].eval(card, player, ability)).get(player)[0])]);
+				return new ScriptValue("tempActions", [new actions.ChangeLife(ctx.player, -(yield* this.parameters[0].eval(ctx)).get(ctx.player)[0])]);
 			}
 			case "LOSEMANA": {
-				return new ScriptValue("tempActions", [new actions.ChangeMana(player, -(yield* this.parameters[0].eval(card, player, ability)).get(player)[0])]);
+				return new ScriptValue("tempActions", [new actions.ChangeMana(ctx.player, -(yield* this.parameters[0].eval(ctx)).get(ctx.player)[0])]);
 			}
 			case "MOVE": {
-				let cards = (yield* this.parameters[0].eval(card, player, ability)).get(player);
+				let cards = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
 				let moveActions = [];
 				let zoneMoveCards = new Map();
 				for (const card of cards) {
@@ -356,13 +354,13 @@ export class FunctionNode extends AstNode {
 						continue;
 					}
 					setImplicitCard(card);
-					let zoneValue = yield* this.parameters[1].eval(card, player, ability);
-					let zone = zoneValue.type === "deckPosition"? zoneValue.get(player).deck : getZoneForCard(zoneValue.get(player), card);
+					let zoneValue = yield* this.parameters[1].eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer));
+					let zone = zoneValue.type === "deckPosition"? zoneValue.get(ctx.player).deck : getZoneForCard(zoneValue.get(ctx.player), card);
 					let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 					if (zoneValue.type === "deckPosition") {
-						index = zoneValue.get(player).isTop? -1 : 0;
+						index = zoneValue.get(ctx.player).isTop? -1 : 0;
 					}
-					moveActions.push(new actions.Move(player, card.current(), zone, index));
+					moveActions.push(new actions.Move(ctx.player, card.current(), zone, index));
 					zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.current()));
 					clearImplicitCard();
 				}
@@ -370,7 +368,7 @@ export class FunctionNode extends AstNode {
 				for (const [zone, cards] of zoneMoveCards.entries()) {
 					let freeSlots = zone.getFreeSpaceCount();
 					if (freeSlots < cards.length) {
-						let selectionRequest = new requests.chooseCards.create(player, cards, [freeSlots], "cardEffectMove:" + ability.id);
+						let selectionRequest = new requests.chooseCards.create(ctx.player, cards, [freeSlots], "cardEffectMove:" + ctx.ability.id);
 						let response = yield [selectionRequest];
 						if (response.type != "chooseCards") {
 							throw new Error("Incorrect response type supplied during card move selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
@@ -387,8 +385,8 @@ export class FunctionNode extends AstNode {
 				return new ScriptValue("tempActions", moveActions);
 			}
 			case "ORDER": {
-				let toOrder = (yield* this.parameters[0].eval(card, player, ability)).get(player);
-				let orderRequest = new requests.orderCards.create(player, toOrder, "cardEffect:" + ability.id);
+				let toOrder = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
+				let orderRequest = new requests.orderCards.create(ctx.player, toOrder, "cardEffect:" + ctx.ability.id);
 				let response = yield [orderRequest];
 				if (response.type != "orderCards") {
 					throw new Error("Incorrect response type supplied during card ordering. (expected \"orderCards\", got \"" + response.type + "\" instead)");
@@ -396,79 +394,79 @@ export class FunctionNode extends AstNode {
 				return new ScriptValue("card", requests.orderCards.validate(response.value, orderRequest).map(card => new SnapshotCard(card.current())));
 			}
 			case "PUTCOUNTERS": {
-				let cards = (yield* this.parameters[0].eval(card, player, ability)).get(player);
-				let type = (yield* this.parameters[1].eval(card, player, ability)).get(player)[0];
-				let amount = (yield* this.parameters[2].eval(card, player, ability)).get(player)[0];
+				let cards = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
+				let type = (yield* this.parameters[1].eval(ctx)).get(ctx.player)[0];
+				let amount = (yield* this.parameters[2].eval(ctx)).get(ctx.player)[0];
 
-				return new ScriptValue("tempActions", cards.map(card => new actions.ChangeCounters(player, card, type, amount)));
+				return new ScriptValue("tempActions", cards.map(card => new actions.ChangeCounters(ctx.player, ctx.card, type, amount)));
 			}
 			case "REMOVECOUNTERS": {
-				let cards = (yield* this.parameters[0].eval(card, player, ability)).get(player);
-				let type = (yield* this.parameters[1].eval(card, player, ability)).get(player)[0];
-				let amount = (yield* this.parameters[2].eval(card, player, ability)).get(player)[0];
+				let cards = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
+				let type = (yield* this.parameters[1].eval(ctx)).get(ctx.player)[0];
+				let amount = (yield* this.parameters[2].eval(ctx)).get(ctx.player)[0];
 
-				return new ScriptValue("tempActions", cards.map(card => new actions.ChangeCounters(player, card, type, -amount)));
+				return new ScriptValue("tempActions", cards.map(card => new actions.ChangeCounters(ctx.player, card, type, -amount)));
 			}
 			case "REVEAL": {
-				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(card, player, ability)).get(player).filter(card => card.current()).map(card => new actions.Reveal(player, card.current())));
+				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Reveal(ctx.player, card.current())));
 			}
 			case "SELECT": {
-				let choiceAmount = (yield* this.parameters[0].eval(card, player, ability)).get(player);
-				let eligibleCards = (yield* this.parameters[1].eval(card, player, ability)).get(player);
+				let choiceAmount = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
+				let eligibleCards = (yield* this.parameters[1].eval(ctx)).get(ctx.player);
 				if (eligibleCards.length === 0) {
 					return new ScriptValue("card", []);
 				}
 				for (let card of eligibleCards) {
-					if (card.currentOwner() === player || !(["deck", "hand"].includes(card.zone.type))) {
-						card.showTo(player);
+					if (card.currentOwner() === ctx.player || !(["deck", "hand"].includes(card.zone.type))) {
+						card.showTo(ctx.player);
 					} else {
 						// selecting from revealed hands is still random.
-						card.hideFrom(player);
+						card.hideFrom(ctx.player);
 					}
 				}
-				let selectionRequest = new requests.chooseCards.create(player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ability.id);
+				let selectionRequest = new requests.chooseCards.create(ctx.player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ctx.ability.id);
 				let response = yield [selectionRequest];
 				if (response.type != "chooseCards") {
 					throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 				}
 				for (let card of eligibleCards) {
-					if (card.zone.type === "deck" || (card.zone.type === "hand" && card.currentOwner() !== player)) {
-						card.hideFrom(player);
+					if (card.zone.type === "deck" || (card.zone.type === "hand" && card.currentOwner() !== ctx.player)) {
+						card.hideFrom(ctx.player);
 					}
 				}
 				let cards = requests.chooseCards.validate(response.value, selectionRequest);
-				yield [events.createCardsSelectedEvent(player, cards.map(card => new SnapshotCard(card.current())))];
+				yield [events.createCardsSelectedEvent(ctx.player, cards.map(card => new SnapshotCard(card.current())))];
 				return new ScriptValue("card", cards);
 			}
 			case "SELECTPLAYER": {
-				let selectionRequest = new requests.choosePlayer.create(player, "cardEffect:" + ability.id);
+				let selectionRequest = new requests.choosePlayer.create(ctx.player, "cardEffect:" + ctx.ability.id);
 				let response = yield [selectionRequest];
 				if (response.type != "choosePlayer") {
 					throw new Error("Incorrect response type supplied during player selection. (expected \"choosePlayer\", got \"" + response.type + "\" instead)");
 				}
 				let chosenPlayer = requests.choosePlayer.validate(response.value, selectionRequest);
-				yield [events.createPlayerSelectedEvent(player, chosenPlayer)];
+				yield [events.createPlayerSelectedEvent(ctx.player, chosenPlayer)];
 				return new ScriptValue("player", [chosenPlayer]);
 			}
 			case "SELECTTYPE": {
-				let selectionRequest = new requests.chooseType.create(player, ability.id, (yield* this.parameters[0].eval(card, player, ability)).get(player));
+				let selectionRequest = new requests.chooseType.create(ctx.player, ctx.ability.id, (yield* this.parameters[0].eval(ctx)).get(ctx.player));
 				let response = yield [selectionRequest];
 				if (response.type != "chooseType") {
 					throw new Error("Incorrect response type supplied during type selection. (expected \"chooseType\", got \"" + response.type + "\" instead)");
 				}
 				let type = requests.chooseType.validate(response.value, selectionRequest);
-				yield [events.createTypeSelectedEvent(player, type)];
+				yield [events.createTypeSelectedEvent(ctx.player, type)];
 				return new ScriptValue("type", [type]);
 			}
 			case "SETATTACKTARGET": {
-				let newTarget = (yield* this.parameters[0].eval(card, player, ability)).get(player)[0];
-				return new ScriptValue("tempActions", newTarget.current()? [new actions.SetAttackTarget(player, newTarget.current())] : []);
+				let newTarget = (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0];
+				return new ScriptValue("tempActions", newTarget.current()? [new actions.SetAttackTarget(ctx.player, newTarget.current())] : []);
 			}
 			case "SHUFFLE": {
-				return new ScriptValue("tempActions", [new actions.Shuffle(player)]);
+				return new ScriptValue("tempActions", [new actions.Shuffle(ctx.player)]);
 			}
 			case "SUM": {
-				let list = (yield* this.parameters[0].eval(card, player, ability)).get(player);
+				let list = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
 				let sum = 0;
 				for (let num of list) {
 					sum += num;
@@ -477,9 +475,9 @@ export class FunctionNode extends AstNode {
 			}
 			case "SUMMON": {
 				// TODO: Make player choose which cards to summon if only a limited amount can be summoned
-				let cards = (yield* this.parameters[0].eval(card, player, ability)).get(player);
-				let zone = (yield* this.parameters[1].eval(card, player, ability)).get(player)[0];
-				let payCost = (yield* this.parameters[2].eval(card, player, ability)).get(player);
+				let cards = (yield* this.parameters[0].eval(ctx)).get(ctx.player);
+				let zone = (yield* this.parameters[1].eval(ctx)).get(ctx.player)[0];
+				let payCost = (yield* this.parameters[2].eval(ctx)).get(ctx.player);
 
 				let costs = [];
 				let placeActions = [];
@@ -496,13 +494,13 @@ export class FunctionNode extends AstNode {
 					if (availableZoneSlots.length == 0) {
 						break;
 					}
-					let placeCost = new actions.Place(player, cards[i].current(), zone);
+					let placeCost = new actions.Place(ctx.player, cards[i].current(), zone);
 					placeCost.costIndex = i;
 					costs.push(placeCost);
 					placeActions.push(placeCost);
 
 					if (payCost) {
-						let costActions = cards[i].getSummoningCost(player);
+						let costActions = cards[i].getSummoningCost(ctx.player);
 						// TODO: Figure out if this needs to account for multi-action costs and how to handle those.
 						for (const actionList of costActions) {
 							for (const action of actionList) {
@@ -516,32 +514,32 @@ export class FunctionNode extends AstNode {
 				let summons = [];
 				for (let i = 0; i < timing.costCompletions.length; i++) {
 					if (timing.costCompletions[i]) {
-						summons.push(new actions.Summon(player, placeActions[i]));
+						summons.push(new actions.Summon(ctx.player, placeActions[i]));
 					}
 				}
 				return new ScriptValue("tempActions", summons);
 			}
 			case "SWAP": {
-				let cardA = (yield* this.parameters[0].eval(card, player, ability)).get(player)[0];
-				let cardB = (yield* this.parameters[1].eval(card, player, ability)).get(player)[0];
+				let cardA = (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0];
+				let cardB = (yield* this.parameters[1].eval(ctx)).get(ctx.player)[0];
 				let transferEquipments = false;
 				if (this.parameters.length > 2) {
-					transferEquipments = (yield* this.parameters[2].eval(card, player, ability)).get(player);
+					transferEquipments = (yield* this.parameters[2].eval(ctx)).get(ctx.player);
 				}
-				return new ScriptValue("tempActions", [new actions.Swap(player, cardA, cardB, transferEquipments)]);
+				return new ScriptValue("tempActions", [new actions.Swap(ctx.player, cardA, cardB, transferEquipments)]);
 			}
 			case "TOKENS": {
-				let amount = (yield* this.parameters[0].eval(card, player, ability)).get(player)[0];
-				let name = (yield* this.parameters[2].eval(card, player, ability)).get(player)[0];
-				let level = (yield* this.parameters[3].eval(card, player, ability)).get(player)[0];
-				let types = (yield* this.parameters[4].eval(card, player, ability)).get(player);
-				let attack = (yield* this.parameters[5].eval(card, player, ability)).get(player)[0];
-				let defense = (yield* this.parameters[6].eval(card, player, ability)).get(player)[0];
+				let amount = (yield* this.parameters[0].eval(ctx)).get(ctx.player)[0];
+				let name = (yield* this.parameters[2].eval(ctx)).get(ctx.player)[0];
+				let level = (yield* this.parameters[3].eval(ctx)).get(ctx.player)[0];
+				let types = (yield* this.parameters[4].eval(ctx)).get(ctx.player);
+				let attack = (yield* this.parameters[5].eval(ctx)).get(ctx.player)[0];
+				let defense = (yield* this.parameters[6].eval(ctx)).get(ctx.player)[0];
 				let cards = [];
 				for (let i = 0; i < amount; i++) {
 					// TODO: Give player control over the specific token variant that gets selected
-					let cardIds = (yield* this.parameters[1].eval(card, player, ability)).get(player);
-					cards.push(new Card(player, `id: CU${cardIds[i % cardIds.length]}
+					let cardIds = (yield* this.parameters[1].eval(ctx)).get(ctx.player);
+					cards.push(new Card(ctx.player, `id: CU${cardIds[i % cardIds.length]}
 cardType: token
 name: CU${name}
 level: ${level}
@@ -552,21 +550,21 @@ defense: ${defense}`));
 				return new ScriptValue("card", cards);
 			}
 			case "VIEW": {
-				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(card, player, ability)).get(player).filter(card => card.current()).map(card => new actions.View(player, card.current())));
+				return new ScriptValue("tempActions", (yield* this.parameters[0].eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.View(ctx.player, card.current())));
 			}
 		}
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		let players = this.player.evalFull(card, player, ability)[0].get(player);
+	evalFull(ctx) {
+		let players = this.player.evalFull(ctx)[0].get(ctx.player);
 		if (players.length == 1) {
-			let result = this.runFunctionFull(card, players[0], ability);
-			return result ?? super.evalFull(card, players[0], ability, evaluatingPlayer);
+			let result = this.runFunctionFull(new ScriptContext(ctx.card, players[0], ctx.ability, ctx.evaluatingPlayer));
+			return result ?? super.evalFull(new ScriptContext(ctx.card, players[0], ctx.ability, ctx.evaluatingPlayer));
 		}
 		// otherwise this is a both.FUNCTION() and must create split values, while executing for the turn player first
-		players.unshift(players.splice(players.indexOf(player.game.currentTurn().player), 1)[0]);
+		players.unshift(players.splice(players.indexOf(ctx.game.currentTurn().player), 1)[0]);
 		let values = [];
 		for (const player of players) {
-			values.push(this.runFunctionFull(card, player, ability));
+			values.push(this.runFunctionFull(new ScriptContext(ctx.card, player, ctx.ability, ctx.evaluatingPlayer)));
 		}
 		return cartesianProduct(values).map(list => {
 			let valueMap = new Map();
@@ -576,22 +574,22 @@ defense: ${defense}`));
 			return new ScriptValue(list[0].type, valueMap);
 		});
 	}
-	runFunctionFull(card, player, ability, evaluatingPlayer = null) {
+	runFunctionFull(ctx) {
 		// TODO: Probably best to implement these on a case-by-case basis when cards actually need them
 		switch (this.functionName) {
 			case "DESTROY": {
-				let cardLists = this.parameters[0].evalFull(card, player, ability).map(option => option.get(player).filter(card => card.current()));
-				let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(player, card.current())));
+				let cardLists = this.parameters[0].evalFull(ctx).map(option => option.get(ctx.player).filter(card => card.current()));
+				let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(ctx.player, card.current())));
 				return discardLists.map(discards => new ScriptValue("action", discards.concat(discards.map(discard => new actions.Destroy(discard)))));
 			}
 			case "DISCARD": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => new ScriptValue("action", option.get(player).filter(card => card.current()).map(card => new actions.Discard(player, card.current()))));
+				return this.parameters[0].evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(ctx.player, card.current()))));
 			}
 			case "EXILE": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => new ScriptValue("action", option.get(player).filter(card => card.current()).map(card => new actions.Exile(player, card.current()))));
+				return this.parameters[0].evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current()))));
 			}
 			case "MOVE": {
-				let cardPossibilities = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(possibilities => possibilities.get(player));
+				let cardPossibilities = this.parameters[0].evalFull(ctx).map(possibilities => possibilities.get(ctx.player));
 				let moveActions = [];
 				for (let cards of cardPossibilities) {
 					moveActions.push([]);
@@ -601,20 +599,20 @@ defense: ${defense}`));
 						}
 						setImplicitCard(card);
 						// TODO: this might need to handle multiple zone possibilities
-						let zoneValue = this.parameters[1].evalFull(card, player, ability)[0];
-						let zone = zoneValue.type === "deckPosition"? zoneValue.get(player).deck : getZoneForCard(zoneValue.get(player), card);
+						let zoneValue = this.parameters[1].evalFull(ctx)[0];
+						let zone = zoneValue.type === "deckPosition"? zoneValue.get(ctx.player).deck : getZoneForCard(zoneValue.get(ctx.player), card);
 						let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 						if (zoneValue.type === "deckPosition") {
-							index = zoneValue.get(player).isTop? -1 : 0;
+							index = zoneValue.get(ctx.player).isTop? -1 : 0;
 						}
-						moveActions[moveActions.length - 1].push(new actions.Move(player, card.current(), zone, index));
+						moveActions[moveActions.length - 1].push(new actions.Move(ctx.player, card.current(), zone, index));
 						clearImplicitCard();
 					}
 				}
 				return moveActions.map(actions => new ScriptValue("action", actions));
 			}
 			case "ORDER": {
-				let toOrder = this.parameters[0].evalFull(card, player, ability).map(toOrder => toOrder.get(player));
+				let toOrder = this.parameters[0].evalFull(ctx).map(toOrder => toOrder.get(ctx.player));
 				let options = [];
 				for (const cards of toOrder) {
 					options = options.concat(new ScriptValue("number", nChooseK(cards.length, cards.length).map(i => toOrder[i])));
@@ -622,11 +620,11 @@ defense: ${defense}`));
 				return options;
 			}
 			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => new ScriptValue("action", option.get(player).filter(card => card.current()).map(card => new actions.Reveal(player, card.current()))));
+				return this.parameters[0].evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Reveal(ctx.player, card.current()))));
 			}
 			case "SELECT": {
-				let choiceAmounts = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer)[0].get(player);
-				let eligibleCards = this.parameters[1].evalFull(card, player, ability, evaluatingPlayer)[0].get(player);
+				let choiceAmounts = this.parameters[0].evalFull(ctx)[0].get(ctx.player);
+				let eligibleCards = this.parameters[1].evalFull(ctx)[0].get(ctx.player);
 				if (eligibleCards.length == 0) {
 					return [new ScriptValue("card", [])];
 				}
@@ -644,27 +642,27 @@ defense: ${defense}`));
 				return combinations;
 			}
 			case "SELECTTYPE": {
-				let types = this.parameters[0].evalFull(card, player, ability).map(value => value.get(player)).flat();
+				let types = this.parameters[0].evalFull(ctx).map(value => value.get(ctx.player)).flat();
 				types = [...new Set(types)];
 				return types.map(type => new ScriptValue("type", [type]));
 			}
 			case "VIEW": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).map(option => new ScriptValue("action", option.get(player).filter(card => card.current()).map(card => new actions.View(player, card.current()))));
+				return this.parameters[0].evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.View(ctx.player, card.current()))));
 			}
 		}
 	}
-	hasAllTargets(card, player, ability, evaluatingPlayer) {
-		let players = this.player.evalFull(card, player, ability, evaluatingPlayer)[0].get(player);
+	hasAllTargets(ctx) {
+		let players = this.player.evalFull(ctx)[0].get(ctx.player);
 		for (const player of players) {
-			if (!this.runHasAllTargets(card, player, ability, evaluatingPlayer)) {
+			if (!this.runHasAllTargets(new ScriptContext(ctx.card, player, ctx.ability, ctx.evaluatingPlayer))) {
 				return false;
 			}
 		}
 		return true;
 	}
-	runHasAllTargets(card, player, ability, evaluatingPlayer) {
+	runHasAllTargets(ctx) {
 		// check if all child nodes have their targets
-		if (!super.hasAllTargets(card, player, ability, evaluatingPlayer)) {
+		if (!super.hasAllTargets(ctx)) {
 			return false;
 		}
 		switch (this.functionName) {
@@ -686,72 +684,72 @@ defense: ${defense}`));
 				return true;
 			}
 			case "APPLY": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "DECKTOP": {
 				if (this.asManyAsPossible) {
-					return player.deckZone.cards.length > 0;
+					return ctx.player.deckZone.cards.length > 0;
 				}
-				for (let amount of this.parameters[0].evalFull(card, player, ability, evaluatingPlayer)) {
-					if (player.deckZone.cards.length >= amount.get(player)[0]) {
+				for (let amount of this.parameters[0].evalFull(ctx)) {
+					if (ctx.player.deckZone.cards.length >= amount.get(ctx.player)[0]) {
 						return true;
 					}
 				}
 				return false;
 			}
 			case "DESTROY": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "DISCARD": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "EXILE": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "GIVEATTACK": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "MOVE": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "PUTCOUNTERS": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "REMOVECOUNTERS": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "REVEAL": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "SELECT": {
-				let availableOptions = this.parameters[1].evalFull(card, player, ability, evaluatingPlayer).map(option => option.get(player));
+				let availableOptions = this.parameters[1].evalFull(ctx).map(option => option.get(ctx.player));
 				if (this.parameters[0] instanceof AnyAmountNode && availableOptions.find(list => list.length > 0) !== undefined) {
 					return true;
 				}
-				let amountsRequired = this.parameters[0].evalFull(card, player, ability, evaluatingPlayer);
+				let amountsRequired = this.parameters[0].evalFull(ctx);
 				for (let i = 0; i < availableOptions.length; i++) {
-					if (Math.min(...amountsRequired[i].get(player)) <= availableOptions[i].length) {
+					if (Math.min(...amountsRequired[i].get(ctx.player)) <= availableOptions[i].length) {
 						return true;
 					}
 				}
 				return false;
 			}
 			case "SETATTACKTARGET": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "SHUFFLE": {
-				let excludableCardAmounts = this.parameters[0]?.evalFull(card, player, ability, evaluatingPlayer)?.map(cardList => cardList.get(player).length) ?? [0];
-				return player.deckZone.cards.length > Math.min(...excludableCardAmounts);
+				let excludableCardAmounts = this.parameters[0]?.evalFull(ctx)?.map(cardList => cardList.get(ctx.player).length) ?? [0];
+				return ctx.player.deckZone.cards.length > Math.min(...excludableCardAmounts);
 			}
 			case "SUMMON": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "SWAP": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined &&
-					   this.parameters[1].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined &&
+					   this.parameters[1].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 			case "VIEW": {
-				return this.parameters[0].evalFull(card, player, ability, evaluatingPlayer).find(list => list.get(player).length > 0) !== undefined;
+				return this.parameters[0].evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 			}
 		}
 	}
@@ -766,11 +764,11 @@ export class CardMatchNode extends AstNode {
 		this.cardListNodes = cardListNodes;
 		this.conditions = conditions;
 	}
-	* eval(card, player, ability) {
-		return new ScriptValue("card", yield* this.getMatchingCards(card, player, ability));
+	* eval(ctx) {
+		return new ScriptValue("card", yield* this.getMatchingCards(ctx));
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		let generator = this.getMatchingCards(card, player, ability, evaluatingPlayer);
+	evalFull(ctx) {
+		let generator = this.getMatchingCards(ctx);
 		let next;
 		do {
 			next = generator.next();
@@ -781,11 +779,11 @@ export class CardMatchNode extends AstNode {
 		return this.cardListNodes.concat(this.conditions);
 	}
 
-	* getMatchingCards(card, player, ability, evaluatingPlayer = null) {
+	* getMatchingCards(ctx) {
 		let cards = [];
 		let matchingCards = [];
 		for (let cardList of this.cardListNodes) {
-			cardList = (yield* cardList.eval(card, player, ability)).get(player);
+			cardList = (yield* cardList.eval(ctx)).get(ctx.player);
 			if (cardList.length > 0 && (cardList[0] instanceof zones.Zone)) {
 				cards.push(...(cardList.map(zone => zone.cards).flat()));
 			} else {
@@ -797,12 +795,12 @@ export class CardMatchNode extends AstNode {
 				continue;
 			}
 			// If the evaluating player can't see the cards, they should all be treated as valid / matching.
-			if (checkCard.hiddenFor.includes(evaluatingPlayer) && checkCard.zone !== evaluatingPlayer.deckZone) {
+			if (checkCard.hiddenFor.includes(ctx.evaluatingPlayer) && checkCard.zone !== ctx.evaluatingPlayer.deckZone) {
 				matchingCards.push(checkCard);
 				continue;
 			}
 			setImplicitCard(checkCard);
-			if ((!this.conditions || (yield* this.conditions.eval(card, player, ability)).get(player))) {
+			if ((!this.conditions || (yield* this.conditions.eval(ctx)).get(ctx.player))) {
 				matchingCards.push(checkCard);
 				clearImplicitCard();
 				continue;
@@ -813,33 +811,33 @@ export class CardMatchNode extends AstNode {
 	}
 }
 export class ThisCardNode extends AstNode {
-	* eval(card, player, ability) {
-		return new ScriptValue("card", [card]);
+	* eval(ctx) {
+		return new ScriptValue("card", [ctx.card]);
 	}
 }
 export class AttackTargetNode extends AstNode {
-	* eval(card, player, ability) {
-		if (player.game.currentAttackDeclaration?.target) {
-			return new ScriptValue("card", [player.game.currentAttackDeclaration.target]);
+	* eval(ctx) {
+		if (ctx.game.currentAttackDeclaration?.target) {
+			return new ScriptValue("card", [ctx.game.currentAttackDeclaration.target]);
 		}
 		return new ScriptValue("card", []);
 	}
 }
 export class AttackersNode extends AstNode {
-	* eval(card, player, ability) {
-		if (player.game.currentAttackDeclaration) {
-			return new ScriptValue("card", player.game.currentAttackDeclaration.attackers);
+	* eval(ctx) {
+		if (ctx.game.currentAttackDeclaration) {
+			return new ScriptValue("card", ctx.game.currentAttackDeclaration.attackers);
 		}
 		return new ScriptValue("card", []);
 	}
 }
 export class ImplicitCardNode extends AstNode {
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		return new ScriptValue("card", [implicitCard[implicitCard.length - 1]]);
 	}
 }
 export class ImplicitActionsNode extends AstNode {
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		return new ScriptValue("action", implicitActions[implicitActions.length - 1]);
 	}
 }
@@ -877,8 +875,8 @@ export class CardPropertyNode extends AstNode {
 		}[this.property];
 	}
 
-	* eval(card, player, ability) {
-		let cards = (yield* this.cards.eval(card, player, ability)).get(player);
+	* eval(ctx) {
+		let cards = (yield* this.cards.eval(ctx)).get(ctx.player);
 		if (this.property === "isToken") {
 			let isToken = false;
 			for (const c of cards) {
@@ -892,8 +890,8 @@ export class CardPropertyNode extends AstNode {
 		return new ScriptValue(this.returnType, cards.map(card => this.accessProperty(card)).flat());
 	}
 
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		return this.cards.evalFull(card, player, ability, evaluatingPlayer).map(possibility => new ScriptValue(this.returnType, possibility.get(player).map(card => this.accessProperty(card)).flat()));
+	evalFull(ctx) {
+		return this.cards.evalFull(ctx).map(possibility => new ScriptValue(this.returnType, possibility.get(ctx.player).map(card => this.accessProperty(card)).flat()));
 	}
 
 	getChildNodes() {
@@ -980,12 +978,12 @@ export class VariableNode extends AstNode {
 		super();
 		this.name = name;
 	}
-	* eval(card, player, ability) {
-		let variable = ability.scriptVariables[this.name];
+	* eval(ctx) {
+		let variable = ctx.ability.scriptVariables[this.name];
 		if (variable === undefined) {
 			throw new Error("Tried to access unitialized variable '" + this.name + "'.");
 		}
-		return new ScriptValue(variable.type, variable.get(player));
+		return new ScriptValue(variable.type, variable.get(ctx.player));
 	}
 }
 
@@ -995,20 +993,20 @@ export class ValueArrayNode extends AstNode {
 		this.values = values;
 		this.type = type;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		return new ScriptValue(this.type, this.values);
 	}
 }
 
 export class AnyAmountNode extends AstNode {
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		return new ScriptValue("number", "any");
 	}
 }
 
 export class AllTypesNode extends AstNode {
-	* eval(card, player, ability) {
-		return new ScriptValue("type", player.game.config.allTypes);
+	* eval(ctx) {
+		return new ScriptValue("type", ctx.game.config.allTypes);
 	}
 }
 
@@ -1020,14 +1018,14 @@ export class MathNode extends AstNode {
 		this.rightSide = rightSide;
 		this.resultType = resultType;
 	}
-	* eval(card, player, ability) {
-		let left = (yield* this.leftSide.eval(card, player, ability)).get(player);
-		let right = (yield* this.rightSide.eval(card, player, ability)).get(player);
+	* eval(ctx) {
+		let left = (yield* this.leftSide.eval(ctx)).get(ctx.player);
+		let right = (yield* this.rightSide.eval(ctx)).get(ctx.player);
 		return new ScriptValue(this.resultType, this.doOperation(left, right));
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		let left = this.leftSide.evalFull(card, player, ability, evaluatingPlayer).map(value => value.get(player));
-		let right = this.rightSide.evalFull(card, player, ability, evaluatingPlayer).map(value => value.get(player));
+	evalFull(ctx) {
+		let left = this.leftSide.evalFull(ctx).map(value => value.get(ctx.player));
+		let right = this.rightSide.evalFull(ctx).map(value => value.get(ctx.player));
 		let results = [];
 		for (const leftValue of left) {
 			for (const rightValue of right) {
@@ -1206,11 +1204,11 @@ export class UnaryMinusNode extends AstNode {
 		super();
 		this.operand = operand;
 	}
-	* eval(card, player, ability) {
-		return (yield* this.operand.eval(card, player, ability)).map(value => -value.get(player));
+	* eval(ctx) {
+		return (yield* this.operand.eval(ctx)).map(value => -value.get(ctx.player));
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		return this.operand.evalFull(card, player, ability, evaluatingPlayer).map(values => new ScriptValue("number", values.get(player).map(value => -value)));
+	evalFull(ctx) {
+		return this.operand.evalFull(ctx).map(values => new ScriptValue("number", values.get(ctx.player).map(value => -value)));
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -1221,11 +1219,11 @@ export class UnaryNotNode extends AstNode {
 		super();
 		this.operand = operand;
 	}
-	* eval(card, player, ability) {
-		return new ScriptValue("bool", !(yield* this.operand.eval(card, player, ability)).get(player));
+	* eval(ctx) {
+		return new ScriptValue("bool", !(yield* this.operand.eval(ctx)).get(ctx.player));
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		return this.operand.evalFull(card, player, ability, evaluatingPlayer).map(value => new ScriptValue("bool", !value.get(player)));
+	evalFull(ctx) {
+		return this.operand.evalFull(ctx).map(value => new ScriptValue("bool", !value.get(ctx.player)));
 	}
 	getChildNodes() {
 		return [this.operand];
@@ -1237,7 +1235,7 @@ export class BoolNode extends AstNode {
 		super();
 		this.value = value == "yes";
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		return new ScriptValue("bool", this.value);
 	}
 }
@@ -1247,9 +1245,9 @@ export class PlayerNode extends AstNode {
 		super();
 		this.playerKeyword = playerKeyword;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		// a card that is not in a zone belongs to its owner as it is in the process of being summoned/cast/deployed
-		let you = card.currentOwner();
+		let you = ctx.card.currentOwner();
 		switch(this.playerKeyword) {
 			case "you":
 				return new ScriptValue("player", [you]);
@@ -1258,7 +1256,7 @@ export class PlayerNode extends AstNode {
 			case "both":
 				return new ScriptValue("player", [...you.game.players]);
 			case "own":
-				return new ScriptValue("player", [player]);
+				return new ScriptValue("player", [ctx.player]);
 		}
 	}
 }
@@ -1267,8 +1265,8 @@ export class LifeNode extends AstNode {
 		super();
 		this.playerNode = playerNode;
 	}
-	* eval(card, player, ability) {
-		return new ScriptValue("number", (yield* this.playerNode.eval(card, player, ability)).get(player).map(player => player.life));
+	* eval(ctx) {
+		return new ScriptValue("number", (yield* this.playerNode.eval(ctx)).get(ctx.player).map(player => player.life));
 	}
 }
 export class ManaNode extends AstNode {
@@ -1276,8 +1274,8 @@ export class ManaNode extends AstNode {
 		super();
 		this.playerNode = playerNode;
 	}
-	* eval(card, player, ability) {
-		return new ScriptValue("number", (yield* this.playerNode.eval(card, player, ability)).get(player).map(player => player.mana));
+	* eval(ctx) {
+		return new ScriptValue("number", (yield* this.playerNode.eval(ctx)).get(ctx.player).map(player => player.mana));
 	}
 }
 export class PartnerNode extends AstNode {
@@ -1285,8 +1283,8 @@ export class PartnerNode extends AstNode {
 		super();
 		this.playerNode = playerNode;
 	}
-	* eval(card, player, ability) {
-		return new ScriptValue("card", (yield* this.playerNode.eval(card, player, ability)).get(player).map(player => player.partnerZone.cards[0]));
+	* eval(ctx) {
+		return new ScriptValue("card", (yield* this.playerNode.eval(ctx)).get(ctx.player).map(player => player.partnerZone.cards[0]));
 	}
 }
 
@@ -1296,18 +1294,19 @@ export class ZoneNode extends AstNode {
 		this.zoneIdentifier = zoneIdentifier;
 		this.playerNode = playerNode;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
+		let player = ctx.player;
 		if (this.playerNode) {
-			player = (yield* this.playerNode.eval(card, player, ability)).get(player)[0];
+			player = (yield* this.playerNode.eval(ctx)).get(ctx.player)[0];
 		}
 		return new ScriptValue("zone", this.getZone(player));
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
+	evalFull(ctx) {
 		let players;
 		if (this.playerNode) {
-			players = this.playerNode.evalFull(card, player, ability, evaluatingPlayer).map(p => p.get(player));
+			players = this.playerNode.evalFull(ctx).map(p => p.get(ctx.player));
 		} else {
-			players = [player];
+			players = [ctx.player];
 		}
 		return players.map(player => new ScriptValue("zone", this.getZone(player)));
 	}
@@ -1346,11 +1345,11 @@ export class DeckPositionNode extends AstNode {
 		this.playerNode = playerNode;
 		this.top = position === "deckTop";
 	}
-	* eval(card, player, ability) {
-		return new ScriptValue("deckPosition", {deck: (yield* this.playerNode.eval(card, player, ability)).get(player)[0].deckZone, isTop: this.top});
+	* eval(ctx) {
+		return new ScriptValue("deckPosition", {deck: (yield* this.playerNode.eval(ctx)).get(ctx.player)[0].deckZone, isTop: this.top});
 	}
-	evalFull(card, player, ability, evaluatingPlayer = null) {
-		return this.playerNode.evalFull(card, player, ability, evaluatingPlayer).map(p => new ScriptValue("deckPosition", {deck: p.get(player)[0].deckZone, isTop: this.top}));
+	evalFull(ctx) {
+		return this.playerNode.evalFull(ctx).map(p => new ScriptValue("deckPosition", {deck: p.get(ctx.player)[0].deckZone, isTop: this.top}));
 	}
 	getChildNodes() {
 		return [this.playerNode];
@@ -1362,7 +1361,7 @@ export class BlockNode extends AstNode {
 		super();
 		this.blockType = blockType;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		return new ScriptValue("block", [this.blockType]);
 	}
 }
@@ -1372,10 +1371,10 @@ export class PhaseNode extends AstNode {
 		this.playerNode = playerNode;
 		this.phaseIndicator = phaseIndicator;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		let phaseAfterPrefix = this.phaseIndicator[0].toUpperCase() + this.phaseIndicator.slice(1);
 		if (this.playerNode) {
-			let prefix = player == (yield* this.playerNode.eval(card, player, ability)).get(player)[0]? "your" : "opponent";
+			let prefix = ctx.player === (yield* this.playerNode.eval(ctx)).get(ctx.player)[0]? "your" : "opponent";
 			return new ScriptValue("phase", [prefix + phaseAfterPrefix]);
 		}
 		return new ScriptValue("phase", ["your" + phaseAfterPrefix, "opponent" + phaseAfterPrefix]);
@@ -1386,23 +1385,23 @@ export class TurnNode extends AstNode {
 		super();
 		this.playerNode = playerNode;
 	}
-	* eval(card, player, ability) {
-		if (player == (yield* this.playerNode.eval(card, player, ability)).get(player)[0]) {
+	* eval(ctx) {
+		if (ctx.player === (yield* this.playerNode.eval(ctx)).get(ctx.player)[0]) {
 			return new ScriptValue("turn", ["yourTurn"]);
 		}
 		return new ScriptValue("turn", ["opponentTurn"]);
 	}
 }
 export class CurrentBlockNode extends AstNode {
-	* eval(card, player, ability) {
-		let type = player.game.currentBlock()?.type;
+	* eval(ctx) {
+		let type = ctx.game.currentBlock()?.type;
 		return new ScriptValue("block", type? [type] : []);
 	}
 }
 export class CurrentPhaseNode extends AstNode {
-	* eval(card, player, ability) {
-		let phaseTypes = [...player.game.currentPhase().types];
-		let prefix = player === game.currentTurn().player? "your" : "opponent";
+	* eval(ctx) {
+		let phaseTypes = [...ctx.game.currentPhase().types];
+		let prefix = ctx.player === game.currentTurn().player? "your" : "opponent";
 		for (let i = phaseTypes.length -1; i >= 0; i--) {
 			phaseTypes.push(prefix + phaseTypes[i][0].toUpperCase() + phaseTypes[i].slice(1));
 		}
@@ -1410,8 +1409,8 @@ export class CurrentPhaseNode extends AstNode {
 	}
 }
 export class CurrentTurnNode extends AstNode {
-	* eval(card, player, ability) {
-		return new ScriptValue("turn", [player == player.game.currentTurn().player? "yourTurn" : "opponentTurn"]);
+	* eval(ctx) {
+		return new ScriptValue("turn", [ctx.player == ctx.game.currentTurn().player? "yourTurn" : "opponentTurn"]);
 	}
 }
 
@@ -1427,13 +1426,13 @@ export class ActionAccessorNode extends AstNode {
 		this.actionsNode = actionsNode;
 		this.accessor = accessor;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		let values = [];
 		let actionList = [];
 		if (this.actionsNode instanceof CurrentTurnNode) {
 			actionList = game.currentTurn().getActions();
 		} else {
-			actionList = (yield* this.actionsNode.eval(card, player, ability)).get(player);
+			actionList = (yield* this.actionsNode.eval(ctx)).get(ctx.player);
 		}
 		for (let action of actionList) {
 			switch (this.accessor) {
@@ -1527,8 +1526,8 @@ export class ModifierNode extends AstNode {
 		super();
 		this.modifications = modifications;
 	}
-	* eval(card, player, ability) {
-		return new ScriptValue("modifier", new CardModifier(this.modifications, card, player, ability));
+	* eval(ctx) {
+		return new ScriptValue("modifier", new CardModifier(this.modifications, ctx));
 	}
 }
 
@@ -1537,7 +1536,7 @@ export class UntilIndicatorNode extends AstNode {
 		super();
 		this.type = type;
 	}
-	* eval(card, player, ability) {
+	* eval(ctx) {
 		return new ScriptValue("untilIndicator", this.type);
 	}
 }

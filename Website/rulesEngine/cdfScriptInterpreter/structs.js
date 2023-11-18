@@ -22,3 +22,15 @@ export class ScriptValue {
 		return a === b;
 	}
 }
+
+// This is an execution context for cdfScript
+// Ability may be null but card and player are guaranteed to always exist
+export class ScriptContext {
+	constructor(card, player, ability = null, evaluatingPlayer = null) {
+		this.game = player.game; // just for convenience
+		this.card = card; // The card that the portion of script currently resides on
+		this.player = player; // The player executing the script
+		this.evaluatingPlayer = evaluatingPlayer; // The player evaluating the script (cards may be hidden from the script like this)
+		this.ability = ability; // The ability that the script belongs to
+	}
+}

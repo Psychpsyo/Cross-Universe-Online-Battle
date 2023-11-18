@@ -3,6 +3,7 @@ import * as game from "./game.js";
 import * as actions from "./actions.js";
 import * as abilities from "./abilities.js";
 import * as timingGenerators from "./timingGenerators.js";
+import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 import {SnapshotCard} from "./card.js";
 
 // Base class for all blocks
@@ -210,7 +211,7 @@ export class AbilityActivation extends Block {
 		}
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
-		if (this.ability.exec && !this.ability.exec.hasAllTargets(this.card, this.player, this.ability, this.player)) {
+		if (this.ability.exec && !this.ability.exec.hasAllTargets(new ScriptContext(this.card, this.player, this.ability))) {
 			yield* this.undoCost();
 			return false;
 		}
@@ -268,7 +269,7 @@ export class DeployItem extends Block {
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
 		if (!this.card.current() ||
-			(this.deployAbility && this.deployAbility.exec && !this.deployAbility.exec.hasAllTargets(this.card.current(), this.player, this.deployAbility, this.player))
+			(this.deployAbility && this.deployAbility.exec && !this.deployAbility.exec.hasAllTargets(new ScriptContext(this.card.current(), this.player, this.deployAbility)))
 		) {
 			yield* this.undoCost();
 			this.card.zone.add(this.card.current(), this.card.index);
@@ -328,7 +329,7 @@ export class CastSpell extends Block {
 
 		// Needs to be checked after paying the cost in case paying the cost made some targets invalid.
 		if (!this.card.current() ||
-			(this.castAbility && this.castAbility.exec && !this.castAbility.exec.hasAllTargets(this.card.current(), this.player, this.castAbility, this.player))
+			(this.castAbility && this.castAbility.exec && !this.castAbility.exec.hasAllTargets(new ScriptContext(this.card.current(), this.player, this.castAbility)))
 		) {
 			yield* this.undoCost();
 			this.card.restore();

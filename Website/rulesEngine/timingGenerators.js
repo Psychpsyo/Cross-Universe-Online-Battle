@@ -15,7 +15,7 @@ export class TimingRunner {
 	}
 
 	async* run(isPrediction = false) {
-		for (const timing of await (yield* runInterjectedTimings(this.game, isPrediction, this.actions))) {
+		for (const timing of await (yield* runInterjectedTimings(this.game, isPrediction))) {
 			this.timings.push(timing);
 		}
 

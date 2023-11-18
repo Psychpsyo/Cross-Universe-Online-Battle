@@ -1,12 +1,13 @@
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
 import * as blocks from "./blocks.js";
 import * as timingGenerators from "./timingGenerators.js";
+import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 
 export class BaseAbility {
 	constructor(id, game, condition, cancellable) {
 		this.id = id;
 		this.condition = null;
-		this.cancellable = true;
+		this.cancellable = cancellable;
 		this.isCancelled = false;
 		if (condition) {
 			this.condition = interpreter.buildAST("condition", id, condition, game);
@@ -14,7 +15,7 @@ export class BaseAbility {
 	}
 
 	isConditionMet(card, player, evaluatingPlayer = player) {
-		return this.condition === null || this.condition.evalFull(card, player, this, evaluatingPlayer)[0].get(player);
+		return this.condition === null || this.condition.evalFull(new ScriptContext(card, player, this, evaluatingPlayer))[0].get(player);
 	}
 
 	canActivate(card, player, evaluatingPlayer = player) {
@@ -43,22 +44,22 @@ export class Ability extends BaseAbility {
 			return false;
 		}
 		if (this.cost === null) {
-			return this.exec.hasAllTargets(card, player, this, evaluatingPlayer);
+			return this.exec.hasAllTargets(new ScriptContext(card, player, this, evaluatingPlayer));
 		}
 		let timingRunner = new timingGenerators.TimingRunner(() => timingGenerators.abilityCostTimingGenerator(this, card, player), player.game);
 		timingRunner.isCost = true;
-		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, () => this.exec.hasAllTargets(card, player, this, evaluatingPlayer));
+		let costOptionTree = await timingGenerators.generateOptionTree(timingRunner, () => this.exec.hasAllTargets(new ScriptContext(card, player, this, evaluatingPlayer)));
 		return costOptionTree.valid;
 	}
 
 	* runCost(card, player) {
 		if (this.cost) {
-			yield* this.cost.eval(card, player, this);
+			yield* this.cost.eval(new ScriptContext(card, player, this));
 		}
 	}
 
 	* run(card, player) {
-		yield* this.exec.eval(card, player, this);
+		yield* this.exec.eval(new ScriptContext(card, player, this));
 	}
 
 	successfulActivation() {}
@@ -83,7 +84,7 @@ export class CastAbility extends Ability {
 	}
 
 	checkTrigger(card, player) {
-		if (this.after == null || this.after.evalFull(card, player, this)[0].get(player)) {
+		if (this.after == null || this.after.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
 			this.triggerMetOnStack = player.game.currentStack().index;
 		}
 	}
@@ -174,7 +175,7 @@ export class TriggerAbility extends Ability {
 		if (this.after === null) {
 			return;
 		}
-		if (this.after.evalFull(card, player, this)[0].get(player)) {
+		if (this.after.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
 			this.triggerMetOnStack = player.game.currentStack().index;
 		}
 	}
@@ -183,7 +184,7 @@ export class TriggerAbility extends Ability {
 		if (!this.during) {
 			return;
 		}
-		if (!this.during.evalFull(card, player, this)[0].get(player)) {
+		if (!this.during.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
 			this.triggerMetOnStack = -1;
 			this.usedDuring = false;
 		} else if (!this.usedDuring) {
@@ -210,12 +211,12 @@ export class StaticAbility extends BaseAbility {
 
 	getTargetCards(card, player, evaluatingPlayer = player) {
 		if (this.isConditionMet(card, player, evaluatingPlayer = player)) {
-			return this.applyTo.evalFull(card, player, this, evaluatingPlayer)[0].get(player);
+			return this.applyTo.evalFull(new ScriptContext(card, player, this, evaluatingPlayer))[0].get(player);
 		}
 		return [];
 	}
 
 	getModifier(card, player) {
-		return this.modifier.evalFull(card, player, this)[0].get(player);
+		return this.modifier.evalFull(new ScriptContext(card, player, this))[0].get(player);
 	}
 }

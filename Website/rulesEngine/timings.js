@@ -1,6 +1,7 @@
 
 import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
 import {chooseAbilityOrder} from "./inputRequests.js";
+import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 import {SnapshotCard} from "./card.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
@@ -97,18 +98,33 @@ export class Timing {
 			return;
 		}
 
-		this.game.currentPhase().lastActionList = this.actions;
+		// run actions and collect events
 		let events = [];
-		for (let action of this.actions) {
+		for (const action of this.actions) {
 			let event = await (yield* action.run());
 			if (event) {
 				events.push(event);
 			}
 		}
+
+		// sometimes actions prompt certain other actions to be performed at the same time
+		let followupActions = this.actions;
+		do {
+			followupActions = this.getFollowupActions(game, followupActions);
+			for (const action of followupActions) {
+				let event = await (yield* action.run());
+				if (event) {
+					events.push(event);
+				}
+			}
+		} while (followupActions.length > 0);
+
 		if (events.length > 0) {
 			yield events;
 		}
+
 		this.successful = true;
+		this.game.currentPhase().lastActionList = this.actions;
 
 		// TODO: The following things have proper undo support yet.
 		// This *should* only matter when units turn into spells/items so for now it does not matter(?)
@@ -157,6 +173,56 @@ export class Timing {
 		}
 	}
 
+	getFollowupActions(game, lastActions = []) {
+		// cards need to be revealed if added from deck to hand
+		let unrevealedCards = [];
+		for (const action of lastActions) {
+			if (action instanceof actions.Move && action.zone.type === "hand" && action.card.zone.type === "deck") {
+				if (unrevealedCards.indexOf(action.card) === -1) {
+					unrevealedCards.push(action.card);
+				}
+			}
+		}
+
+		// decks need to be shuffled after cards are added to them.
+		let unshuffledDecks = [];
+		for (const action of lastActions) {
+			if (action instanceof actions.Move && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
+				if (unshuffledDecks.indexOf(action.zone) === -1) {
+					unshuffledDecks.push(action.zone);
+				}
+			}
+			if (action instanceof actions.Swap && action.cardA?.zone instanceof zones.DeckZone || action.cardB?.zone instanceof zones.DeckZone) {
+				if (action.cardA.zone instanceof zones.DeckZone) {
+					unshuffledDecks.push(action.cardA.zone);
+				}
+				if (action.cardB.zone instanceof zones.DeckZone) {
+					unshuffledDecks.push(action.cardB.zone);
+				}
+			}
+		}
+
+		let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.currentOwner().next(), card.current())));
+		if (allActions.length > 0) {
+			return allActions;
+		}
+
+		// Equipments might need to be destroyed
+		let invalidEquipments = [];
+		for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
+			if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
+				(equipment.equippedTo === null || !equipment.equipableTo.evalFull(new ScriptContext(equipment, equipment.currentOwner()))[0].get(equipment.currentOwner()).includes(equipment.equippedTo))
+			) {
+				invalidEquipments.push(equipment);
+			}
+		}
+		if (invalidEquipments.length > 0) {
+			let discards = invalidEquipments.map(equipment => new actions.Discard(equipment.owner, equipment));
+			return discards.concat(discards.map(discard => new actions.Destroy(discard)));
+		}
+		return [];
+	}
+
 	valueOf() {
 		return this.index;
 	}
@@ -164,75 +230,15 @@ export class Timing {
 
 // This is run after every regular timing and right after blocks start and end.
 // It takes care of
-export async function* runInterjectedTimings(game, isPrediction, lastActions = []) {
+export async function* runInterjectedTimings(game, isPrediction) {
 	let timings = [];
-	let interjected = null;
-	// do while since static ability phasing must be attempted at least once.
-	do {
-		interjected = getInterjectedTiming(game, lastActions);
-		if (interjected) {
-			timings.push(interjected);
-			await (yield* interjected.run(isPrediction));
-		}
-		let staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
-		while (staticAbilityPhasingTiming) {
-			timings.push(staticAbilityPhasingTiming);
-			await (yield* staticAbilityPhasingTiming.run(isPrediction));
-			staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
-		}
-	} while (interjected);
+	let staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
+	while (staticAbilityPhasingTiming) {
+		timings.push(staticAbilityPhasingTiming);
+		await (yield* staticAbilityPhasingTiming.run(isPrediction));
+		staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
+	}
 	return timings;
-}
-
-// lastActions are the actions that happened in the preceeding timing
-function getInterjectedTiming(game, lastActions = []) {
-	// cards need to be revealed if added from deck to hand
-	let unrevealedCards = [];
-	for (const action of lastActions) {
-		if (action instanceof actions.Move && action.zone.type === "hand" && action.card.zone.type === "deck") {
-			if (unrevealedCards.indexOf(action.card) === -1) {
-				unrevealedCards.push(action.card);
-			}
-		}
-	}
-
-	// decks need to be shuffled after cards are added to them.
-	let unshuffledDecks = [];
-	for (const action of lastActions) {
-		if (action instanceof actions.Move && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
-			if (unshuffledDecks.indexOf(action.zone) === -1) {
-				unshuffledDecks.push(action.zone);
-			}
-		}
-		if (action instanceof actions.Swap && action.cardA?.zone instanceof zones.DeckZone || action.cardB?.zone instanceof zones.DeckZone) {
-			if (action.cardA.zone instanceof zones.DeckZone) {
-				unshuffledDecks.push(action.cardA.zone);
-			}
-			if (action.cardB.zone instanceof zones.DeckZone) {
-				unshuffledDecks.push(action.cardB.zone);
-			}
-		}
-	}
-
-	let allActions = unshuffledDecks.map(deck => new actions.Shuffle(deck.player)).concat(unrevealedCards.map(card => new actions.View(card.currentOwner().next(), card.current())));
-	if (allActions.length > 0) {
-		return new Timing(game, allActions);
-	}
-
-	// Equipments might need to be destroyed
-	let invalidEquipments = [];
-	for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
-		if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
-			(equipment.equippedTo === null || !equipment.equipableTo.evalFull(equipment, equipment.currentOwner(), null)[0].get(equipment.currentOwner()).includes(equipment.equippedTo))
-		) {
-			invalidEquipments.push(equipment);
-		}
-	}
-	if (invalidEquipments.length > 0) {
-		let discards = invalidEquipments.map(equipment => new actions.Discard(equipment.owner, equipment));
-		return new Timing(game, discards.concat(discards.map(discard => new actions.Destroy(discard))));
-	}
-	return null;
 }
 
 function* checkGameOver(game) {
@@ -265,7 +271,7 @@ function* getStaticAbilityPhasingTiming(game) {
 				let eligibleCards = ability.getTargetCards(currentCard, currentCard.currentOwner());
 				for (let otherCard of activeCards) {
 					if (eligibleCards.includes(otherCard)) {
-						if (!otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
+						if (!otherCard.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
 							// abilities are just dumped in a list here to be sorted later.
 							let modifiers = newApplications.get(otherCard) ?? [];
 							modifiers.push({
@@ -275,7 +281,7 @@ function* getStaticAbilityPhasingTiming(game) {
 							newApplications.set(otherCard, modifiers);
 						}
 					} else {
-						if (otherCard.modifierStack.find(modifier => modifier.ability === ability)) {
+						if (otherCard.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
 							modificationActions.push(new actions.UnapplyStaticAbility(
 								currentCard.currentOwner(), // have these be owned by the player that owns the card with the ability.
 								otherCard,
