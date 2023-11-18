@@ -50,6 +50,7 @@ let keywordTokenTypes = {
 	attackRights: "cardProperty",
 	attacksMade: "cardProperty",
 	doLifeDamage: "cardProperty",
+	fightingAgainst: "cardProperty",
 	self: "cardProperty",
 	zone: "cardProperty",
 	isToken: "cardProperty",

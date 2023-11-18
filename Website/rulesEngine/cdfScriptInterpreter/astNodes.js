@@ -869,6 +869,7 @@ export class CardPropertyNode extends AstNode {
 			"attackRights": "number",
 			"attacksMade": "number",
 			"doLifeDamage": "bool",
+			"fightingAgainst": "card",
 			"self": "card",
 			"zone": "zone",
 			"isToken": "bool"
@@ -949,7 +950,7 @@ export class CardPropertyNode extends AstNode {
 				return card.owner;
 			}
 			case "equippedUnit": {
-				return card.equippedTo? [card.equippedTo] : [];
+				return card.equippedTo? card.equippedTo : [];
 			}
 			case "equipments": {
 				return card.equipments;
@@ -962,6 +963,18 @@ export class CardPropertyNode extends AstNode {
 			}
 			case "doLifeDamage": {
 				return card.values.doLifeDamage;
+			}
+			case "fightingAgainst": {
+				let currentBlock = card.owner.game.currentBlock();
+				if (currentBlock instanceof blocks.Fight) {
+					if (card.isAttackTarget) {
+						return currentBlock.attackDeclaration.attackers;
+					}
+					if (card.isAttacking) {
+						return currentBlock.attackDeclaration.target? currentBlock.attackDeclaration.target : [];
+					}
+				}
+				return [];
 			}
 			case "self": {
 				return card;

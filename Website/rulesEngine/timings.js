@@ -128,7 +128,11 @@ export class Timing {
 
 		// TODO: The following things have proper undo support yet.
 		// This *should* only matter when units turn into spells/items so for now it does not matter(?)
-		yield* recalculateCardValues(this.game);
+		// (That's because in those cases, modifiers on the card are destroyed and wouldn't properly get restored)
+		let valueChangeEvents = recalculateCardValues(this.game);
+		if (valueChangeEvents.length > 0) {
+			yield valueChangeEvents;
+		}
 		this.game.currentAttackDeclaration?.removeInvalidAttackers();
 
 		if (!isPrediction) {
@@ -167,7 +171,10 @@ export class Timing {
 				events.push(event);
 			}
 		}
-		yield* recalculateCardValues(this.game);
+		let valueChangeEvents = recalculateCardValues(this.game);
+		if (valueChangeEvents.length > 0) {
+			yield valueChangeEvents;
+		}
 		if (events.length > 0) {
 			yield events;
 		}
@@ -298,7 +305,11 @@ function* getStaticAbilityPhasingTiming(game) {
 		let fieldEnterBuckets = [{}, {}];
 		for (let i = value.length - 1; i >= 0; i--) {
 			if (value[i].source === card) {
-				card.modifierStack.push(value[i].ability.getModifier(value[i].source, value[i].source.currentOwner()));
+				modificationActions.push(new actions.ApplyStaticAbility(
+					value[i].source.currentOwner(), // have these be owned by the player that owns the card with the ability.
+					card,
+					value[i].ability.getModifier(value[i].source, value[i].source.currentOwner())
+				));
 				value.splice(i, 1);
 			} else {
 				let fieldIndex = value[i].source.currentOwner().index;
@@ -338,7 +349,8 @@ function* getStaticAbilityPhasingTiming(game) {
 	return new Timing(game, modificationActions);
 }
 
-function* recalculateCardValues(game) {
+function recalculateCardValues(game) {
+	let valueChangeEvents = [];
 	for (let player of game.players) {
 		for (let card of player.getActiveCards()) {
 			let oldCard = new SnapshotCard(card);
@@ -354,7 +366,6 @@ function* recalculateCardValues(game) {
 				}
 			}
 
-			let valueChangeEvents = [];
 			for (let property of oldCard.baseValues.compareTo(card.baseValues)) {
 				valueChangeEvents.push(createCardValueChangedEvent(card, property, true));
 			}
@@ -363,9 +374,7 @@ function* recalculateCardValues(game) {
 					valueChangeEvents.push(createCardValueChangedEvent(card, property, false));
 				}
 			}
-			if (valueChangeEvents.length > 0) {
-				yield valueChangeEvents;
-			}
 		}
 	}
+	return valueChangeEvents;
 }

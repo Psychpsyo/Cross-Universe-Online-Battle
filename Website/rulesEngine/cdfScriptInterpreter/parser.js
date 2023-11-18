@@ -201,7 +201,6 @@ function parseExpression() {
 		}
 	}
 	if (expression.length > 1) {
-		console.log(expression);
 		throw new ScriptParserError("Failed to fully consolidate expression.");
 	}
 	return expression[0];
@@ -425,7 +424,8 @@ function parseCardProperty(cardsNode) {
 				return parsePlayerDotAccess(node);
 			}
 			case "equipments":
-			case "equippedUnit": {
+			case "equippedUnit":
+			case "fightingAgainst": {
 				return parseCardDotAccess(node);
 			}
 			default: {

@@ -271,7 +271,7 @@ export class Game {
 		return !(currentPhase instanceof phases.StackPhase)? null : currentPhase.currentStack();
 	}
 	currentBlock() {
-		return this.currentStack()?.currentBlock();
+		return this.currentStack()?.currentBlock() ?? null;
 	}
 
 	getFieldCards(player) {
