@@ -5,7 +5,7 @@ import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 
 export class CardValues {
-	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, doLifeDamage) {
+	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, attackCosts = [], doLifeDamage = true) {
 		this.cardTypes = cardTypes;
 		this.names = names;
 		this.level = level;
@@ -14,6 +14,7 @@ export class CardValues {
 		this.defense = defense;
 		this.abilities = abilities;
 		this.attackRights = attackRights;
+		this.attackCosts = attackCosts;
 		this.doLifeDamage = doLifeDamage;
 	}
 
@@ -30,6 +31,7 @@ export class CardValues {
 			this.defense,
 			[...this.abilities],
 			this.attackRights,
+			this.attackCost,
 			this.doLifeDamage
 		);
 	}
@@ -69,22 +71,21 @@ export class CardModifier {
 
 	modify(card, toBaseValues, toUnaffections) {
 		let values = toBaseValues? card.baseValues : card.values;
+		if (this.ctx.ability instanceof abilities.StaticAbility && this.ctx.ability.isCancelled) {
+			return values;
+		}
 		for (let modification of this.modifications) {
 			let worksOnCard = true;
 			// only static abilities are influenced by unaffections/cancelling when already on a card
 			if (this.ctx.ability instanceof abilities.StaticAbility) {
-				if (this.ctx.ability.isCancelled) {
-					worksOnCard = false;
-				} else { // only check card unaffections if the ability isn't cancelled anyways
-					ast.setImplicitCard(this.ctx.card);
-					for (const unaffection of card.unaffectedBy) {
-						if (unaffection.value === modification.value && unaffection.by.evalFull(new ScriptContext(unaffection.sourceCard, this.ctx.player, unaffection.sourceAbility))[0].get(this.ctx.player)) {
-							worksOnCard = false;
-							break;
-						}
+				ast.setImplicitCard(this.ctx.card);
+				for (const unaffection of card.unaffectedBy) {
+					if (unaffection.value === modification.value && unaffection.by.evalFull(new ScriptContext(unaffection.sourceCard, this.ctx.player, unaffection.sourceAbility))[0].get(this.ctx.player)) {
+						worksOnCard = false;
+						break;
 					}
-					ast.clearImplicitCard();
 				}
+				ast.clearImplicitCard();
 			}
 			ast.setImplicitCard(card);
 			if (worksOnCard &&

@@ -5,16 +5,18 @@ import * as abilities from "../abilities.js";
 let registeredAbilities = {};
 
 let alreadyParsed = {
-	exec: {},
-	cost: {},
-	condition: {},
-	trigger: {},
-	during: {},
 	applyTarget: {},
-	modifier: {},
-	applyTarger: {},
+	cardCondition: {},
+	condition: {},
+	cost: {},
+	during: {},
 	equipableTo: {},
-	cardCondition: {}
+	exec: {},
+	gameLimit: {},
+	globalTurnLimit: {},
+	modifier: {},
+	trigger: {},
+	turnLimit: {}
 };
 
 // ability is the information from the .cdf file, parsed into a js object.

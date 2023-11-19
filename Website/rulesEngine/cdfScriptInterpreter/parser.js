@@ -22,10 +22,13 @@ export function parseScript(tokenList, newEffectId, type) {
 
 	switch (type) {
 		case "applyTarget":
-		case "equipableTo":
 		case "cardCondition":
+		case "condition":
 		case "during":
-		case "condition": {
+		case "equipableTo":
+		case "gameLimit":
+		case "globalTurnLimit":
+		case "turnLimit": {
 			return parseExpression();
 		}
 		case "trigger": {

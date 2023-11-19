@@ -159,9 +159,10 @@ export class BaseCard {
 		if (!this.values.cardTypes.includes("spell")) {
 			return false;
 		}
-		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
-			(this.condition !== null && !this.condition.evalFull(new ScriptContext(this, player))[0].get(player)) ||
-			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(new ScriptContext(this, player))[0].get(player).length == 0)
+		let cardCtx = new ScriptContext(this, player, null, evaluatingPlayer);
+		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit.evalFull(cardCtx)[0].getJsNum(player)) ||
+			(this.condition !== null && !this.condition.evalFull(cardCtx)[0].get(player)) ||
+			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(cardCtx)[0].get(player).length == 0)
 		) {
 			return false;
 		}
@@ -187,9 +188,10 @@ export class BaseCard {
 		if (!this.values.cardTypes.includes("item")) {
 			return false;
 		}
-		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit) ||
-			(this.condition !== null && !this.condition.evalFull(new ScriptContext(this, player))[0].get(player)) ||
-			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(new ScriptContext(this, player))[0].get(player).length == 0)
+		let cardCtx = new ScriptContext(this, player, null, evaluatingPlayer);
+		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit.evalFull(cardCtx)[0].getJsNum(player)) ||
+			(this.condition !== null && !this.condition.evalFull(cardCtx)[0].get(player)) ||
+			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(cardCtx)[0].get(player).length == 0)
 		) {
 			return false;
 		}
@@ -249,12 +251,11 @@ export class Card extends BaseCard {
 				data.attack ?? null,
 				data.defense ?? null,
 				data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
-				baseCardTypes.includes("unit")? 1 : null,
-				true
+				baseCardTypes.includes("unit")? 1 : null
 			),
 			data.deckLimit,
 			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game),
-			data.turnLimit,
+			interpreter.buildAST("turnLimit", data.id, data.turnLimit, player.game),
 			data.condition? interpreter.buildAST("cardCondition", data.id, data.condition, player.game) : null
 		);
 		this.globalId = ++player.game.lastGlobalCardId;
@@ -394,7 +395,7 @@ function parseCdfValues(cdf) {
 		abilities: [],
 		deckLimit: 3,
 		equipableTo: "[from field where cardType = unit]",
-		turnLimit: Infinity,
+		turnLimit: "any",
 		condition: null
 	};
 	let lines = cdf.replaceAll("\r", "").split("\n");
@@ -416,15 +417,15 @@ function parseCdfValues(cdf) {
 					break;
 				}
 				case "turnLimit": {
-					ability.turnLimit = parseInt(parts[1]);
+					ability.turnLimit = parts[1];
 					break;
 				}
 				case "globalTurnLimit": {
-					ability.globalTurnLimit = parseInt(parts[1]);
+					ability.globalTurnLimit = parts[1];
 					break;
 				}
 				case "gameLimit": {
-					ability.gameLimit = parseInt(parts[1]);
+					ability.gameLimit = parts[1];
 					break;
 				}
 				case "condition": {
@@ -535,7 +536,7 @@ function parseCdfValues(cdf) {
 				break;
 			}
 			case "turnLimit": {
-				data.turnLimit = parseInt(parts[1]);
+				data.turnLimit = parts[1];
 				break;
 			}
 			case "condition": {
@@ -556,9 +557,9 @@ function parseCdfValues(cdf) {
 					id: data.id + ":" + data.abilities.length,
 					type: parts[1],
 					cancellable: true,
-					turnLimit: Infinity,
-					globalTurnLimit: Infinity,
-					gameLimit: Infinity,
+					turnLimit: "any",
+					globalTurnLimit: "any",
+					gameLimit: "any",
 					during: null,
 					after: null,
 					condition: null,

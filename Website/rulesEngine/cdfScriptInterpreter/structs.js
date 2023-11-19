@@ -5,8 +5,18 @@ export class ScriptValue {
 		this.value = value;
 	}
 
+	// Returns the given player's version of this value.
 	get(player) {
 		return this.isSplit? this.value.get(player) : this.value;
+	}
+
+	// Returns this value as a single number.
+	// The 'any' value is represented by infinity, non-number values by NaN.
+	getJsNum(player) {
+		let val = this.get(player);
+		if (val === "any") return Infinity;
+		if (typeof val[0] === "number") return val[0];
+		return NaN;
 	}
 
 	// TODO: make comparison nodes use this and write functions for other operators
