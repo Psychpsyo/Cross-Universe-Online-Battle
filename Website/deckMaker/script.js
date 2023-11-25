@@ -159,9 +159,25 @@ if (localStorage.getItem("compactMode") === "true") {
 
 quickSearch.addEventListener("keyup", function(e) {
 	if (e.key === "Enter") {
-		searchCards({
-			name: this.value,
-			language: (locale.warnings.includes("noCards")? "en" : locale.code)
+		if (this.value === "") {
+			searchCards({language: (locale.warnings.includes("noCards")? "en" : locale.code)});
+			return;
+		}
+		Array.from(document.getElementsByClassName("deckMakerGrid")).forEach(list => {
+			list.innerHTML = "";
+		});
+		loadingIndicator.classList.add("active");
+		noResultsMessage.hidden = true;
+
+		let url = localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl");
+		url += url.endsWith("/")? "stringSearch" : "/stringSearch";
+		fetch(
+			url,
+			{method: "POST", body: JSON.stringify({input: this.value})}
+		).then(response => response.text())
+		.then(async (response) => {
+			loadingIndicator.classList.remove("active");
+			showSearchResults(JSON.parse(response));
 		});
 	}
 });
@@ -223,38 +239,41 @@ function searchCards(query) {
 	).then(response => response.text())
 	.then(async (response) => {
 		loadingIndicator.classList.remove("active");
-		const cards = JSON.parse(response);
-		if (cards.length === 0) {
-			document.body.classList.add("noResults");
-			noResultsMessage.hidden = false;
-			return;
-		}
-		document.body.classList.remove("noResults");
-		for (const card of cards) {
-			cardLoader.cardInfoCache[card.cardID] = card;
-
-			let display = true;
-			switch (cardSearchSupportInput.value) {
-				case "automatic":{
-					display = await cardLoader.isCardScripted(card.cardID);
-					break;
-				}
-				case "resonite": {
-					display = await cardLoader.isInResonite(card.cardID);
-					break;
-				}
-				case "unimplemented": {
-					display = !(await cardLoader.isCardScripted(card.cardID));
-					break;
-				}
-			}
-			if (display) {
-				let listItem = document.createElement("li");
-				listItem.appendChild(createCardButton(card, true));
-				document.getElementById(card.cardType + "Grid").appendChild(listItem);
-			}
-		}
+		showSearchResults(JSON.parse(response));
 	});
+}
+
+async function showSearchResults(cards) {
+	if (cards.length === 0) {
+		document.body.classList.add("noResults");
+		noResultsMessage.hidden = false;
+		return;
+	}
+	document.body.classList.remove("noResults");
+	for (const card of cards) {
+		cardLoader.cardInfoCache[card.cardID] = card;
+
+		let display = true;
+		switch (cardSearchSupportInput.value) {
+			case "automatic":{
+				display = await cardLoader.isCardScripted(card.cardID);
+				break;
+			}
+			case "resonite": {
+				display = await cardLoader.isInResonite(card.cardID);
+				break;
+			}
+			case "unimplemented": {
+				display = !(await cardLoader.isCardScripted(card.cardID));
+				break;
+			}
+		}
+		if (display) {
+			let listItem = document.createElement("li");
+			listItem.appendChild(createCardButton(card, true));
+			document.getElementById(card.cardType + "Grid").appendChild(listItem);
+		}
+	}
 }
 
 async function fillCardResultGrid(cardList, grid) {

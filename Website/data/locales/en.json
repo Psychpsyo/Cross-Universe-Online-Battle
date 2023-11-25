@@ -524,8 +524,8 @@
 
 	"deckMaker": {
 		"title": "Deck Creator",
-		"deck": "Deck",
-		"search": "Search",
+		"deck": "Deck...",
+		"search": "Search...",
 
 		"searchResults": "Search Results",
 		"unitTokenColumn": "Unit/Token Column",
@@ -542,7 +542,7 @@
 
 		"quickSearch": {
 			"title": "Quick Search",
-			"prompt": "Search for a card name... (or press Enter to show all cards)",
+			"prompt": "Search by card name or effect... (or press Enter to show all cards)",
 			"noResults": "Couldn't find any cards."
 		},
 

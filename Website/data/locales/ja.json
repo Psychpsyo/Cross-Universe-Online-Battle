@@ -524,8 +524,8 @@
 
 	"deckMaker": {
 		"title": null,
-		"deck": "デッキ",
-		"search": "サーチ",
+		"deck": "デッキ…",
+		"search": "サーチ…",
 
 		"searchResults": null,
 		"unitTokenColumn": null,

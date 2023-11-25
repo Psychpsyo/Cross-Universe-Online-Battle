@@ -524,8 +524,8 @@
 
 	"deckMaker": {
 		"title": "Deck Editor",
-		"deck": "Deck",
-		"search": "Suche",
+		"deck": "Deck...",
+		"search": "Suche...",
 
 		"searchResults": "Suchergebnisse",
 		"unitTokenColumn": "Einheiten-/Tokenspalte",
@@ -542,7 +542,7 @@
 
 		"quickSearch": {
 			"title": "Schnellsuche",
-			"prompt": "Suche nach einem Kartennamen... (oder drücke Enter um alle Karten zu zeigen)",
+			"prompt": "Suche nach Kartennamen oder Effekten... (oder drücke Enter um alle Karten zu zeigen)",
 			"noResults": "Konnte keine Karten finden."
 		},
 
