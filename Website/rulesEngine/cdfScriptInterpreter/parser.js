@@ -1,9 +1,18 @@
 import * as ast from "./astNodes.js";
 import * as cardValues from "../cardValues.js";
 
-let pos;
-let tokens;
+let pos; // the current position in the token stream
+let tokens; // the token stream emitted by the lexer
 let effectId; // The effect that is currently being parsed.
+let cardId; // the card the effect is on
+
+// contains a list of objects holding variable definition types, indexed by their card IDs, like so:
+// {
+// 	"CUU00161": {
+// 		"$units": "card"
+// 	}
+// }
+let foundVariables = {};
 
 class ScriptParserError extends Error {
 	constructor(message) {
@@ -17,6 +26,7 @@ export function parseScript(tokenList, newEffectId, type) {
 		return null;
 	}
 	effectId = newEffectId;
+	cardId = effectId.substring(0, effectId.indexOf(":"));
 	tokens = tokenList;
 	pos = 0;
 
@@ -57,7 +67,19 @@ function parseLine() {
 		variableName = tokens[pos].value;
 		pos += 2;
 	}
-	return new ast.LineNode(parseExpression(), variableName);
+	let expr = parseExpression();
+	// check variable type
+	if (variableName) {
+		if (!foundVariables[cardId]) {
+			foundVariables[cardId] = {};
+		}
+		if (!foundVariables[cardId][variableName]) {
+			foundVariables[cardId][variableName] = expr.returnType;
+		} else if (foundVariables[cardId][variableName] !== expr.returnType) {
+			new ScriptParserError("Invalid assignment of type " + expr.returnType + " to variable " + variableName + " of type " + foundVariables[cardId][variableName] + ".")
+		}
+	}
+	return new ast.LineNode(expr, variableName);
 }
 
 function parseFunction() {
@@ -125,6 +147,7 @@ function parseExpression() {
 		pos++;
 	}
 	let expression = [];
+	let needsReturnType = [];
 	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator", "if"].includes(tokens[pos].type)) {
 		expression.push(parseValue());
 		if (tokens[pos]) {
@@ -174,9 +197,10 @@ function parseExpression() {
 					break;
 				}
 				default: {
-					pos--;
+					continue;
 				}
 			}
+			needsReturnType.push(expression[expression.length - 1]);
 			pos++;
 		}
 	}
@@ -205,6 +229,14 @@ function parseExpression() {
 	}
 	if (expression.length > 1) {
 		throw new ScriptParserError("Failed to fully consolidate expression.");
+	}
+	while (needsReturnType.length > 0) {
+		for (let i = needsReturnType.length - 1; i >= 0; i--) {
+			if (needsReturnType[i].leftSide.returnType) {
+				needsReturnType[i].returnType = needsReturnType[i].leftSide.returnType;
+				needsReturnType.splice(i, 1);
+			}
+		}
 	}
 	return expression[0];
 }
@@ -451,7 +483,10 @@ function parseActionAccessor(actionsNode) {
 }
 
 function parseVariable() {
-	let node = new ast.VariableNode(tokens[pos].value);
+	if (!foundVariables[cardId][tokens[pos].value]) {
+		throw new ScriptParserError("Reference to unassigned variable " + tokens[pos].value + ".");
+	}
+	let node = new ast.VariableNode(tokens[pos].value, foundVariables[cardId][tokens[pos].value]);
 	pos++;
 	return node;
 }
@@ -471,7 +506,7 @@ function parseNumber() {
 	if (negative) {
 		value *= -1;
 	}
-	let node = new ast.ValueArrayNode([value]);
+	let node = new ast.ValueArrayNode([value], "number");
 	pos++;
 	return node;
 }
@@ -483,7 +518,7 @@ function parseBool() {
 }
 
 function parseValueArray() {
-	let node = new ast.ValueArrayNode([tokens[pos].value]);
+	let node = new ast.ValueArrayNode([tokens[pos].value], tokens[pos].type);
 	pos++;
 	return node;
 }
@@ -502,7 +537,7 @@ function parseList(type) {
 		throw new ScriptParserError("Expected a 'rightBracket' at the end of a list. Got '" + tokens[pos].type + "' instead.");
 	}
 	pos++;
-	return new ast.ValueArrayNode(elements);
+	return new ast.ValueArrayNode(elements, type);
 }
 
 function parseZone() {

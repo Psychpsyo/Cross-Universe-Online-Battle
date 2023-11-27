@@ -5,7 +5,7 @@ level: 0
 types:
 
 o: cast
-SUMMON(SELECT(1, [from you.hand, you.discard where name = [CUU00211, CUU00277]]), you.unitZone, yes);
+SUMMON(SELECT(1, [from you.hand, you.discard where name = [CUU00211, CUU00277]]), you.unitZone);
 
 o: trigger
 mandatory: no

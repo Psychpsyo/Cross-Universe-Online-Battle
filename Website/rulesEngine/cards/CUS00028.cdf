@@ -8,4 +8,4 @@ o: cast
 cost:
 $unit = SELECT(1, [from discard where cardType = unit]);
 exec:
-SUMMON($unit, you.unitZone, yes);
+SUMMON($unit, you.unitZone);

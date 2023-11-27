@@ -31,11 +31,12 @@ export class BaseAbility {
 export class Ability extends BaseAbility {
 	constructor(ability, game) {
 		super(ability, game);
-		this.exec = interpreter.buildAST("exec", ability.id, ability.exec, game);
+		// cost MUST be parsed first to not miss variable declarations that might be mentioned in exec
 		this.cost =  null;
 		if (ability.cost) {
 			this.cost = interpreter.buildAST("cost", ability.id, ability.cost, game);
 		}
+		this.exec = interpreter.buildAST("exec", ability.id, ability.exec, game);
 		this.scriptVariables = {};
 	}
 

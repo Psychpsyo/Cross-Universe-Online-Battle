@@ -9,4 +9,4 @@ defense: 100
 o: trigger
 mandatory: no
 after: destroyed = thisCard
-SUMMON(SELECT(1, [from you.deck where name = CUU00049]), you.unitZone, yes);
+SUMMON(SELECT(1, [from you.deck where name = CUU00049]), you.unitZone);

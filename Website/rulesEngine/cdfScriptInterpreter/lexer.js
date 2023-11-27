@@ -140,6 +140,14 @@ let keywordTokenTypes = {
 	summoned: "actionAccessor",
 	targeted: "actionAccessor",
 
+	dueTo: "accessorProperty",
+	by: "accessorProperty",
+
+	fight: "dueToReason",
+	effect: "dueToReason",
+	equippedUnitDestroyed: "dueToReason",
+	invalidEquipment: "dueToReason",
+
 	forever: "untilIndicator",
 	endOfTurn: "untilIndicator",
 	endOfNextTurn: "untilIndicator",
@@ -200,6 +208,11 @@ export function tokenize(code, game) {
 			}
 			case ".": {
 				tokens.push({type: "dotOperator"});
+				pos++;
+				break;
+			}
+			case ":": {
+				tokens.push({type: "colon"});
 				pos++;
 				break;
 			}

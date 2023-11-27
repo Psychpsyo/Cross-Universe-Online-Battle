@@ -44,3 +44,10 @@ export class ScriptContext {
 		this.ability = ability; // The ability that the script belongs to
 	}
 }
+
+export class DeckPosition {
+	constructor(deck, isTop) {
+		this.deck = deck;
+		this.isTop = isTop;
+	}
+}

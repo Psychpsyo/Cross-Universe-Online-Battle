@@ -5,7 +5,7 @@ import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 
 export class CardValues {
-	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, attackCosts = [], doLifeDamage = true) {
+	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, doLifeDamage = true) {
 		this.cardTypes = cardTypes;
 		this.names = names;
 		this.level = level;
@@ -14,7 +14,6 @@ export class CardValues {
 		this.defense = defense;
 		this.abilities = abilities;
 		this.attackRights = attackRights;
-		this.attackCosts = attackCosts;
 		this.doLifeDamage = doLifeDamage;
 	}
 
@@ -31,7 +30,6 @@ export class CardValues {
 			this.defense,
 			[...this.abilities],
 			this.attackRights,
-			this.attackCost,
 			this.doLifeDamage
 		);
 	}

@@ -9,4 +9,4 @@ defense: 200
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-SUMMON(TOKENS(1, CUT00002, CUT00002, 1, Ice, 0, 0), you.unitZone, yes);
+SUMMON(TOKENS(1, CUT00002, CUT00002, 1, Ice, 0, 0), you.unitZone);

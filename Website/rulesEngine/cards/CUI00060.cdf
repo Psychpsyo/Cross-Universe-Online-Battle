@@ -13,4 +13,4 @@ cost:
 LOSELIFE(200);
 exec:
 DISCARD(thisCard);
-SUMMON(SELECT(1, [from you.discard where cardType = unit]), you.unitZone, yes);
+SUMMON(SELECT(1, [from you.discard where cardType = unit]), you.unitZone);
