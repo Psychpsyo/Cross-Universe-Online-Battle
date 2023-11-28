@@ -20,4 +20,4 @@ condition: thisCard.zone = field & currentTurn.summoned != thisCard
 cost:
 EXILE(SELECT(1, [from you.discard where types = Electric]));
 exec:
-APPLY(thisCard, {level += 1}, forever);
+APPLY(thisCard, {level += 1});

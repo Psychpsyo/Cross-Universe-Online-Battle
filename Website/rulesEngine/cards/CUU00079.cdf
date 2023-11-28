@@ -12,5 +12,5 @@ condition: thisCard.zone = field
 cost:
 $card = SELECT(1, [from unitZone, spellItemZone where types != Curse]);
 exec:
-APPLY($card, {level -= 1}, forever);
-APPLY($card, {types += Curse}, forever);
+APPLY($card, {level -= 1});
+APPLY($card, {types += Curse});

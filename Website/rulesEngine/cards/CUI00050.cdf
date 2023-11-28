@@ -8,4 +8,4 @@ o: deploy
 cost:
 $unit = SELECT(1, [from unitZone where cardType = unit]);
 exec:
-APPLY([from $unit where cardType = unit], {attack, defense -= 300, level += 2}, forever);
+APPLY([from $unit where cardType = unit], {attack, defense -= 300, level += 2});

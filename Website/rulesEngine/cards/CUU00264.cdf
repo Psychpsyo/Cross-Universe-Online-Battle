@@ -9,4 +9,4 @@ defense: 100
 o: trigger
 mandatory: no
 after: declared = thisCard
-APPLY(thisCard, {attack += 100}, forever);
+APPLY(thisCard, {attack += 100});

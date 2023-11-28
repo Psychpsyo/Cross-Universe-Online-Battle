@@ -13,7 +13,7 @@ cost:
 LOSELIFE(200);
 exec:
 $destroys = DESTROY(SELECT(1, [from field where level < thisCard.level & cardType = [spell, item]]));
-APPLY(thisCard, {level += $destroys.destroyed.level}, forever);
+APPLY(thisCard, {level += $destroys.destroyed.level});
 
 o: static
 applyTo: thisCard

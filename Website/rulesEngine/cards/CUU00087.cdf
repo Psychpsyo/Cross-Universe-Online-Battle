@@ -19,4 +19,4 @@ o: trigger
 mandatory: yes
 during: currentPhase = you.endPhase
 condition: thisCard.zone = field
-APPLY(SELECT(1, [from field]), {types += Curse}, forever);
+APPLY(SELECT(1, [from field]), {types += Curse});

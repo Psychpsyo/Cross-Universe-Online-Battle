@@ -14,4 +14,4 @@ condition: thisCard.zone = field & thisCard.equippedUnit.owner = you & thisCard.
 cost:
 DISCARD(thisCard);
 exec:
-APPLY(SELECT(1, [from unitZone where types = Dragon]), {attack, defense = 0}, forever);
+APPLY(SELECT(1, [from unitZone where types = Dragon]), {attack, defense = 0});

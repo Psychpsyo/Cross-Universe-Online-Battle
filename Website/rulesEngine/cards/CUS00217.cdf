@@ -6,4 +6,4 @@ types: Curse
 
 o: cast
 condition: COUNT([from field where types = Curse]) > 0
-APPLY(SELECT(1, [from field]), {types += Curse}, forever);
+APPLY(SELECT(1, [from field]), {types += Curse});

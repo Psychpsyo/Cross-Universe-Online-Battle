@@ -268,15 +268,18 @@ export function initFunctions() {
 
 	// Exiles the passed-in cards
 	EXILE: new ScriptFunction(
-		["card"],
-		[null],
+		["card", "untilIndicator"],
+		[null, new ast.UntilIndicatorNode("forever")],
 		"action",
 		function*(astNode, ctx) {
-			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current())));
+			let until = (yield* this.getParameter(astNode, "untilIndicator").eval(ctx)).get(ctx.player);
+			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current(), until)));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current()))));
+			// TODO: make this re-evaluate the until indicator with an implicit card
+			let until = this.getParameter(astNode, "untilIndicator").evalFull(ctx)[0].get(ctx.player);
+			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current(), until))));
 		}
 	),
 

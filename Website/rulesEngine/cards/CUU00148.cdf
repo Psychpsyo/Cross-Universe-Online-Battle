@@ -12,6 +12,6 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand]));
 exec:
-APPLY([from unitZone where types != Curse], {level -= 1}, forever);
-APPLY([from unitZone where types != Curse], {attack, defense -= 100}, forever);
-APPLY([from unitZone where types != Curse], {types += Curse}, forever);
+APPLY([from unitZone where types != Curse], {level -= 1});
+APPLY([from unitZone where types != Curse], {attack, defense -= 100});
+APPLY([from unitZone where types != Curse], {types += Curse});

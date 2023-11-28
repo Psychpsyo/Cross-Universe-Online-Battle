@@ -22,6 +22,25 @@ function* queryZoneSlot(player, zone) {
 	let zoneSlotResponse = yield [zoneSlotRequest];
 	return requests.chooseZoneSlot.validate(zoneSlotResponse.value, zoneSlotRequest);
 }
+// gets the list that an 'undo' timing needs to be put into for actions that can be applied until a certain point
+function getUntilTimingList(ctxPlayer, until) {
+	switch (until) {
+		case "endOfTurn": {
+			return ctxPlayer.game.currentTurn().endOfTurnTimings;
+		}
+		case "endOfNextTurn": {
+			return ctxPlayer.game.endOfUpcomingTurnTimings[0];
+		}
+		case "endOfYourNextTurn": {
+			let currentlyYourTurn = ctxPlayer.game.currentTurn().player == ctxPlayer;
+			return ctxPlayer.game.endOfUpcomingTurnTimings[currentlyYourTurn? 1 : 0];
+		}
+		case "endOfOpponentNextTurn": {
+			let currentlyOpponentTurn = ctxPlayer.game.currentTurn().player != ctxPlayer;
+			return ctxPlayer.game.endOfUpcomingTurnTimings[currentlyOpponentTurn? 1 : 0];
+		}
+	}
+}
 
 // Base class for any action in the game.
 export class Action {
@@ -260,6 +279,7 @@ export class Move extends Action {
 	}
 
 	async* run() {
+		this.card = this.card.current();
 		if (this.targetIndex === null) {
 			if (this.zone instanceof zones.DeckZone) {
 				this.insertedIndex = this.zone.cards.length;
@@ -285,12 +305,10 @@ export class Move extends Action {
 	}
 
 	isImpossible(timing) {
-		if (this.card.isRemovedToken ||
-			this.card.zone?.type == "partner" ||
-			(this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length)
-		) {
-			return true;
-		}
+		if (!this.card.current()) return true;
+		if (this.card.current().isRemovedToken) return true;
+		if (this.card.current().zone?.type == "partner") return true;
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length) return true;
 		return false;
 	}
 }
@@ -465,9 +483,10 @@ export class Destroy extends Action {
 }
 
 export class Exile extends Action {
-	constructor(player, card) {
+	constructor(player, card, until) {
 		super(player);
 		this.card = card;
+		this.until = until;
 	}
 
 	async* run() {
@@ -476,6 +495,10 @@ export class Exile extends Action {
 		let event = events.createCardExiledEvent(this.card.zone, this.card.index, this.card.owner.exileZone, this.card);
 		this.card.owner.exileZone.add(this.card.current(), this.card.owner.exileZone.cards.length);
 		this.card.globalId = card.globalId;
+		if (this.until !== "forever") {
+			let returnTiming = new Timing(this.player.game, [new Move(this.player, this.card, this.card.zone, null)]);
+			getUntilTimingList(this.player, this.until).push(returnTiming);
+		}
 		return event;
 	}
 
@@ -515,29 +538,9 @@ export class ApplyCardStatChange extends Action {
 
 		this.card = new SnapshotCard(this.card);
 		this.card.current().modifierStack.push(this.modifier);
-		if (this.until == "forever") {
-			return;
-		}
-		let removalTiming = new Timing(this.card.owner.game, [new RemoveCardStatChange(this.player, this.card.current(), this.modifier)]);
-		switch (this.until) {
-			case "endOfTurn": {
-				this.card.owner.game.currentTurn().endOfTurnTimings.push(removalTiming);
-				break;
-			}
-			case "endOfNextTurn": {
-				this.card.owner.game.endOfUpcomingTurnTimings[0].push(removalTiming);
-				break;
-			}
-			case "endOfYourNextTurn": {
-				let currentlyYourTurn = this.card.owner.game.currentTurn().player == this.modifier.card.currentOwner();
-				this.card.owner.game.endOfUpcomingTurnTimings[currentlyYourTurn? 1 : 0].push(removalTiming);
-				break;
-			}
-			case "endOfOpponentNextTurn": {
-				let currentlyOpponentTurn = this.card.owner.game.currentTurn().player != this.modifier.card.currentOwner();
-				this.card.owner.game.endOfUpcomingTurnTimings[currentlyOpponentTurn? 1 : 0].push(removalTiming);
-				break;
-			}
+		if (this.until !== "forever") {
+			let removalTiming = new Timing(this.player.game, [new RemoveCardStatChange(this.player, this.card.current(), this.modifier)]);
+			getUntilTimingList(this.player, this.until).push(removalTiming);
 		}
 	}
 

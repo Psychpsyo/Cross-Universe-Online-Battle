@@ -12,7 +12,7 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand where types = Ice]));
 exec:
-APPLY([from you.field where types = Ice & isToken], {level += 1}, forever);
+APPLY([from you.field where types = Ice & isToken], {level += 1});
 
 o: trigger
 mandatory: no
