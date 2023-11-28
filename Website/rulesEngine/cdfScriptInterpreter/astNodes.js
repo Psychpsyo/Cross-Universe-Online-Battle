@@ -232,9 +232,11 @@ export class FunctionNode extends AstNode {
 	hasAllTargets(ctx) {
 		let players = this.player.evalFull(ctx)[0].get(ctx.player);
 		for (const player of players) {
-			if (!this.function.hasAllTargets(this, new ScriptContext(ctx.card, player, ctx.ability, ctx.evaluatingPlayer))) {
-				return false;
-			}
+			let context = new ScriptContext(ctx.card, player, ctx.ability, ctx.evaluatingPlayer);
+			// checks if all child nodes have their targets
+			if (!super.hasAllTargets(context)) return false;
+			// then checks function-specific requirements
+			if (!this.function.hasAllTargets(this, context)) return false;
 		}
 		return true;
 	}

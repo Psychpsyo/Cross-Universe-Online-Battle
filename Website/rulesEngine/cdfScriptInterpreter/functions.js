@@ -379,7 +379,7 @@ export function initFunctions() {
 				if (card.current() === null) {
 					continue;
 				}
-				setImplicitCard(card);
+				ast.setImplicitCard(card);
 				let zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
 				let zone = zoneValue instanceof DeckPosition? zoneValue.deck : getZoneForCard(zoneValue, card);
 				let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
@@ -388,7 +388,7 @@ export function initFunctions() {
 				}
 				moveActions.push(new actions.Move(ctx.player, card.current(), zone, index));
 				zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.current()));
-				clearImplicitCard();
+				ast.clearImplicitCard();
 			}
 
 			for (const [zone, cards] of zoneMoveCards.entries()) {
@@ -420,7 +420,7 @@ export function initFunctions() {
 					if (card.current() === null) {
 						continue;
 					}
-					setImplicitCard(card);
+					ast.setImplicitCard(card);
 					// TODO: this might need to handle multiple zone possibilities
 					let zoneValue = this.getParameter(astNode, "zone").evalFull(ctx)[0].get(ctx.player);
 					let zone = zoneValue instanceof DeckPosition? zoneValue.deck : getZoneForCard(zoneValue, card);
@@ -429,7 +429,7 @@ export function initFunctions() {
 						index = zoneValue.isTop? -1 : 0;
 					}
 					moveActions[moveActions.length - 1].push(new actions.Move(ctx.player, card.current(), zone, index));
-					clearImplicitCard();
+					ast.clearImplicitCard();
 				}
 			}
 			return moveActions.map(actions => new ScriptValue("action", actions));
@@ -542,15 +542,12 @@ export function initFunctions() {
 			return new ScriptValue("card", cards);
 		},
 		function(astNode, ctx) {
-			let availableOptions = this.getParameter(astNode, "card").evalFull(ctx).map(option => option.get(ctx.player));
 			let amountsRequired = this.getParameter(astNode, "number").evalFull(ctx);
-			if (amountsRequired === "any" && availableOptions.find(list => list.length > 0) !== undefined) {
-				return true;
-			}
+			let availableOptions = this.getParameter(astNode, "card").evalFull(ctx).map(option => option.get(ctx.player));
 			for (let i = 0; i < availableOptions.length; i++) {
-				if (Math.min(...amountsRequired[i].get(ctx.player)) <= availableOptions[i].length) {
-					return true;
-				}
+				let required = amountsRequired[i].get(ctx.player);
+				if (required === "any" && availableOptions[i].length > 0) return true;
+				if (Math.min(...required) <= availableOptions[i].length) return true;
 			}
 			return false;
 		},
