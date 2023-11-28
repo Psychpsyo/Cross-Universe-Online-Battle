@@ -109,7 +109,6 @@ export class InitState extends GameState {
 					break;
 				}
 			}
-			gameUI.init();
 
 			// make chat functional
 			document.getElementById("chatInput").addEventListener("keyup", function(e) {
@@ -131,6 +130,7 @@ export class InitState extends GameState {
 			stopEffect();
 			roomCodeEntry.remove();
 			gameDiv.hidden = false;
+			gameUI.init();
 		}
 	}
 

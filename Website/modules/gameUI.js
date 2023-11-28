@@ -15,8 +15,10 @@ let lastFrame = 0;
 let cardSelectorSlots = [];
 let cardSelectorMainSlot = null;
 let cardSelectorSorted = false;
-
 let cardChoiceSelected = [];
+
+
+// localization
 for (const elem of Array.from(document.querySelectorAll(".lifeTitle"))) {
 	elem.textContent = locale.game.playerInfo.life;
 }
@@ -83,6 +85,13 @@ export function fieldSlotIndexFromZone(zone, index) {
 	}
 	return -1;
 }
+
+// performant field rect tracking
+let fieldRect;
+function recalculateFieldRect() {
+	fieldRect = document.getElementById("field").getBoundingClientRect();
+}
+window.addEventListener("resize", recalculateFieldRect);
 
 // hides your cursor from the opponent
 function hideCursor() {
@@ -161,7 +170,6 @@ export function init() {
 			currentPointer = e.pointerId;
 			hideCursor();
 		}
-		let fieldRect = document.getElementById("field").getBoundingClientRect();
 		uiPlayers[1].targetX = (e.clientX - fieldRect.left - fieldRect.width / 2) / fieldRect.height;
 		uiPlayers[1].targetY = (e.clientY - fieldRect.top) / fieldRect.height;
 		uiPlayers[1].posX = uiPlayers[1].targetX;
@@ -235,6 +243,7 @@ export function init() {
 		document.documentElement.classList.add("leftField");
 	}
 
+	recalculateFieldRect();
 	lastFrame = performance.now();
 	animate();
 }
@@ -893,7 +902,6 @@ function animate(currentTime) {
 	let delta = currentTime - lastFrame;
 	lastFrame = currentTime;
 
-	let fieldRect = document.getElementById("field").getBoundingClientRect();
 	for (let uiPlayer of uiPlayers) {
 		// cursors
 		uiPlayer.posX += (uiPlayer.targetX - uiPlayer.posX) / 5;
