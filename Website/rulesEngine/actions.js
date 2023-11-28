@@ -195,8 +195,12 @@ export class Place extends Action {
 }
 
 export class Summon extends Action {
-	constructor(player, placeAction) {
-		super(player);
+	constructor(player, placeAction, reason, source) {
+		let properties = {dueTo: reason};
+		if (source) { // standard summons have no source
+			properties.by = source;
+		}
+		super(player, properties);
 		this.placeAction = placeAction;
 	}
 
@@ -529,13 +533,13 @@ export class ApplyCardStatChange extends Action {
 
 	async* run() {
 		// remove invalid modifications
-		ast.setImplicitCard(this.modifier.card);
+		ast.setImplicitCards([this.modifier.card]);
 		for (let i = this.modifier.modifications.length - 1; i >= 0; i--) {
 			if (!this.modifier.modifications[i].canApplyTo(this.card, this.modifier.ctx)) {
 				this.modifier.modifications.splice(i, 1);
 			}
 		}
-		ast.clearImplicitCard();
+		ast.clearImplicitCards();
 
 		this.card = new SnapshotCard(this.card);
 		this.card.current().modifierStack.push(this.modifier);
@@ -556,15 +560,30 @@ export class ApplyCardStatChange extends Action {
 		}
 		// check un-appliable stat-changes
 		let validModifications = 0;
-		ast.setImplicitCard(this.modifier.card);
+		ast.setImplicitCards([this.modifier.card]);
 		for (const modification of this.modifier.modifications) {
 			if (!modification.canApplyTo(this.card, this.modifier.ctx)) {
 				continue;
 			}
 			validModifications++;
 		}
-		ast.clearImplicitCard();
+		ast.clearImplicitCards();
 		return validModifications === 0;
+	}
+	isFullyPossible(timing) {
+		// cannot apply stat-changes to cards that are not on the field
+		if (!(this.card.zone instanceof zones.FieldZone)) {
+			return false;
+		}
+		// check not fully-appliable stat-changes
+		ast.setImplicitCards([this.modifier.card]);
+		for (const modification of this.modifier.modifications) {
+			if (!modification.canFullyApplyTo(this.card, this.modifier.ctx)) {
+				return false;
+			}
+		}
+		ast.clearImplicitCards();
+		return true;
 	}
 }
 

@@ -16,28 +16,35 @@ function equalityCompare(a, b) {
 	return a === b;
 }
 // Used by the MOVE() function, primarily to figure out which field zone a given card needs to move to.
-function getZoneForCard(zoneList, card) {
+function getZoneForCard(zoneList, card, ctx) {
+	let rightType = [];
 	for (let zone of zoneList) {
 		if (zone instanceof zones.FieldZone) {
 			switch (zone.type) {
 				case "unit":
 				case "partner": {
 					if (card.values.cardTypes.includes("unit")) {
-						return zone;
+						rightType.push(zone);
 					}
 					break;
 				}
 				case "spellItem": {
 					if (card.values.cardTypes.includes("spell") || card.values.cardTypes.includes("item")) {
-						return zone;
+						rightType.push(zone);
 					}
 					break;
 				}
 			}
 		} else {
+			rightType.push(zone);
+		}
+	}
+	for (let zone of rightType) {
+		if (zone.player === ctx.player) {
 			return zone;
 		}
 	}
+	return rightType[0] ?? zoneList[0];
 }
 // returns all possible ways to choose k elements from a list of n elements.
 function nChooseK(n, k) {
@@ -387,16 +394,16 @@ export function initFunctions() {
 				if (card.current() === null) {
 					continue;
 				}
-				ast.setImplicitCard(card);
+				ast.setImplicitCards([card]);
 				let zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
-				let zone = zoneValue instanceof DeckPosition? zoneValue.deck : getZoneForCard(zoneValue, card);
+				let zone = zoneValue instanceof DeckPosition? zoneValue.deck : getZoneForCard(zoneValue, card, ctx);
 				let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 				if (zoneValue instanceof DeckPosition) {
 					index = zoneValue.isTop? -1 : 0;
 				}
 				moveActions.push(new actions.Move(ctx.player, card.current(), zone, index));
 				zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.current()));
-				ast.clearImplicitCard();
+				ast.clearImplicitCards();
 			}
 
 			for (const [zone, cards] of zoneMoveCards.entries()) {
@@ -428,16 +435,16 @@ export function initFunctions() {
 					if (card.current() === null) {
 						continue;
 					}
-					ast.setImplicitCard(card);
+					ast.setImplicitCards([card]);
 					// TODO: this might need to handle multiple zone possibilities
 					let zoneValue = this.getParameter(astNode, "zone").evalFull(ctx)[0].get(ctx.player);
-					let zone = zoneValue instanceof DeckPosition? zoneValue.deck : getZoneForCard(zoneValue, card);
+					let zone = zoneValue instanceof DeckPosition? zoneValue.deck : getZoneForCard(zoneValue, card, ctx);
 					let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 					if (zoneValue instanceof DeckPosition) {
 						index = zoneValue.isTop? -1 : 0;
 					}
 					moveActions[moveActions.length - 1].push(new actions.Move(ctx.player, card.current(), zone, index));
-					ast.clearImplicitCard();
+					ast.clearImplicitCards();
 				}
 			}
 			return moveActions.map(actions => new ScriptValue("action", actions));
@@ -715,7 +722,12 @@ export function initFunctions() {
 			let summons = [];
 			for (let i = 0; i < timing.costCompletions.length; i++) {
 				if (timing.costCompletions[i]) {
-					summons.push(new actions.Summon(ctx.player, placeActions[i]));
+					summons.push(new actions.Summon(
+						ctx.player,
+						placeActions[i],
+						new ScriptValue("dueToReason", "effect"),
+						new ScriptValue("by", ctx.card)
+					));
 				}
 			}
 			return new ScriptValue("tempActions", summons);

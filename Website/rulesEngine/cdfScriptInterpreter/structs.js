@@ -28,8 +28,17 @@ export class ScriptValue {
 		}
 		let a = this.get(player);
 		let b = other.get(player);
-		if (a instanceof BaseCard && b instanceof BaseCard) {
-			return a.globalId === b.globalId;
+		if (a instanceof Array) {
+			for (const elemA of a) {
+				for (const elemB of b) {
+					if (elemA instanceof BaseCard && elemB instanceof BaseCard) {
+						if (elemA.globalId === elemB.globalId) return true;
+					} else {
+						if (elemA === elemB) return true;
+					}
+				}
+			}
+			return false;
 		}
 		return a === b;
 	}

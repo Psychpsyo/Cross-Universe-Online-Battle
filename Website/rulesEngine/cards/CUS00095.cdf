@@ -6,4 +6,4 @@ types:
 
 o: cast
 $card = SELECT(1, [from exile]);
-MOVE(SELECT(1, [from you.deck where name = $card.name]), you.hand);
+MOVE(SELECT(1, [from you.deck where name = $card.name]), hand);

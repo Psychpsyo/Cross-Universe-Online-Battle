@@ -3,7 +3,7 @@ import * as game from "./game.js";
 import * as actions from "./actions.js";
 import * as abilities from "./abilities.js";
 import * as timingGenerators from "./timingGenerators.js";
-import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
+import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
 import {SnapshotCard} from "./card.js";
 
 // Base class for all blocks
@@ -95,7 +95,7 @@ export class StandardSummon extends Block {
 		super("standardSummonBlock", stack, player,
 			new timingGenerators.TimingRunner(() =>
 				timingGenerators.arrayTimingGenerator([
-					[new actions.Summon(player, placeAction)]
+					[new actions.Summon(player, placeAction, new ScriptValue("dueToReason", "standardSummon"))]
 				]),
 				player.game
 			),

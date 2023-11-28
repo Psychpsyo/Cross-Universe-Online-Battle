@@ -5,4 +5,4 @@ level: 0
 types:
 
 o: deploy
-MOVE(SELECT(1, [from you.deck where types = Structure]), you.hand);
+MOVE(SELECT(1, [from you.deck where types = Structure]), hand);

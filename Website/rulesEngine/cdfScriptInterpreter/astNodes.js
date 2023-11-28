@@ -8,7 +8,7 @@ import {CardModifier} from "../cardValues.js";
 import {ScriptValue, ScriptContext, DeckPosition} from "./structs.js";
 import {functions, initFunctions} from "./functions.js";
 
-let implicitCard = [null];
+let implicitCards = [null];
 let implicitActions = [null];
 
 // helper functions
@@ -18,11 +18,11 @@ function equalityCompare(a, b) {
 	}
 	return a === b;
 }
-export function setImplicitCard(card) {
-	implicitCard.push(card);
+export function setImplicitCards(cards) {
+	implicitCards.push(cards);
 }
-export function clearImplicitCard() {
-	implicitCard.pop();
+export function clearImplicitCards() {
+	implicitCards.pop();
 }
 export function setImplicitActions(actions) {
 	implicitActions.push(actions);
@@ -286,13 +286,13 @@ export class CardMatchNode extends AstNode {
 				matchingCards.push(checkCard);
 				continue;
 			}
-			setImplicitCard(checkCard);
+			setImplicitCards([checkCard]);
 			if ((!this.conditions || (yield* this.conditions.eval(ctx)).get(ctx.player))) {
 				matchingCards.push(checkCard);
-				clearImplicitCard();
+				clearImplicitCards();
 				continue;
 			}
-			clearImplicitCard();
+			clearImplicitCards();
 		}
 		return matchingCards;
 	}
@@ -327,12 +327,12 @@ export class AttackersNode extends AstNode {
 		return new ScriptValue("card", []);
 	}
 }
-export class ImplicitCardNode extends AstNode {
+export class ImplicitCardsNode extends AstNode {
 	constructor() {
 		super("card");
 	}
 	* eval(ctx) {
-		return new ScriptValue("card", [implicitCard[implicitCard.length - 1]]);
+		return new ScriptValue("card", implicitCards[implicitCards.length - 1]);
 	}
 }
 export class ImplicitActionsNode extends AstNode {
@@ -974,7 +974,9 @@ export class ActionAccessorNode extends AstNode {
 			actionList = (yield* this.actionsNode.eval(ctx)).get(ctx.player);
 		}
 		for (let action of actionList) {
+			let actionCards = this.getActionValues(action);
 			let hasProperties = true;
+			setImplicitCards(actionCards);
 			for (const property of Object.keys(this.actionProperties)) {
 				if (!(property in action.properties) ||
 					!action.properties[property].equals(yield* this.actionProperties[property].eval(ctx), ctx.player)
@@ -983,91 +985,97 @@ export class ActionAccessorNode extends AstNode {
 					break;
 				}
 			}
+			clearImplicitCards();
 			if (!hasProperties) continue;
 
-			switch (this.accessor) {
-				case "cast": {
-					if (action instanceof actions.Cast) {
-						pushCardUnique(values, action.placeAction.card);
-					}
-					break;
-				}
-				case "chosenTarget": {
-					if (action instanceof actions.EstablishAttackDeclaration) {
-						pushCardUnique(values, action.attackTarget);
-					}
-					break;
-				}
-				case "declared": {
-					if (action instanceof actions.EstablishAttackDeclaration) {
-						for (let attacker of action.attackers) {
-							pushCardUnique(values, attacker);
-						}
-					}
-					break;
-				}
-				case "deployed": {
-					if (action instanceof actions.Deploy) {
-						pushCardUnique(values, action.placeAction.card);
-					}
-					break;
-				}
-				case "destroyed": {
-					if (action instanceof actions.Destroy) {
-						pushCardUnique(values, action.discard.card);
-					}
-					break;
-				}
-				case "discarded": {
-					if (action instanceof actions.Discard) {
-						pushCardUnique(values, action.card);
-					}
-					break;
-				}
-				case "exiled": {
-					if (action instanceof actions.Exile) {
-						pushCardUnique(values, action.card);
-					}
-					break;
-				}
-				// TODO: This might need to be split up into separate selectors for cards getting added / returned to zones.
-				//       (once / if there ever is a card that can replace one type of move with another)
-				//       Though the exact behavior here would probably need to be clarified by a new ruling.
-				case "moved": {
-					if (action instanceof actions.Move) {
-						pushCardUnique(values, action.card);
-					}
-					break;
-				}
-				case "retired": {
-					if (action instanceof actions.Discard && action.isRetire) {
-						pushCardUnique(values, action.card);
-					}
-					break;
-				}
-				case "viewed": {
-					if (action instanceof actions.View) {
-						pushCardUnique(values, action.card);
-					}
-					break;
-				}
-				case "summoned": {
-					if (action instanceof actions.Summon) {
-						pushCardUnique(values, action.placeAction.card);
-					}
-					break;
-				}
-				case "targeted": {
-					if (action instanceof actions.EstablishAttackDeclaration) {
-						pushCardUnique(values, action.attackTarget);
-					} else if (action instanceof actions.SetAttackTarget) {
-						pushCardUnique(values, action.newTarget);
-					}
-					break;
-				}
+			for (const card of actionCards) {
+				pushCardUnique(values, card);
 			}
 		}
 		return new ScriptValue("card", values);
+	}
+
+	getActionValues(action) {
+		switch (this.accessor) {
+			case "cast": {
+				if (action instanceof actions.Cast) {
+					return [action.placeAction.card];
+				}
+				break;
+			}
+			case "chosenTarget": {
+				if (action instanceof actions.EstablishAttackDeclaration) {
+					return [action.attackTarget];
+				}
+				break;
+			}
+			case "declared": {
+				if (action instanceof actions.EstablishAttackDeclaration) {
+					return action.attackers;
+				}
+				break;
+			}
+			case "deployed": {
+				if (action instanceof actions.Deploy) {
+					return [action.placeAction.card];
+				}
+				break;
+			}
+			case "destroyed": {
+				if (action instanceof actions.Destroy) {
+					return [action.discard.card];
+				}
+				break;
+			}
+			case "discarded": {
+				if (action instanceof actions.Discard) {
+					return [action.card];
+				}
+				break;
+			}
+			case "exiled": {
+				if (action instanceof actions.Exile) {
+					return [action.card];
+				}
+				break;
+			}
+			// TODO: This might need to be split up into separate selectors for cards getting added / returned to zones.
+			//       (once / if there ever is a card that can replace one type of move with another)
+			//       Though the exact behavior here would probably need to be clarified by a new ruling.
+			case "moved": {
+				if (action instanceof actions.Move) {
+					return [action.card];
+				}
+				break;
+			}
+			case "retired": {
+				if (action instanceof actions.Discard && action.isRetire) {
+					return [action.card];
+				}
+				break;
+			}
+			case "viewed": {
+				if (action instanceof actions.View) {
+					return [action.card];
+				}
+				break;
+			}
+			case "summoned": {
+				if (action instanceof actions.Summon) {
+					return [action.placeAction.card];
+				}
+				break;
+			}
+			case "targeted": {
+				if (action instanceof actions.EstablishAttackDeclaration) {
+					return [action.attackTarget];
+				} else if (action instanceof actions.SetAttackTarget) {
+					return [action.newTarget];
+				}
+				break;
+			}
+		}
+		return [];
 	}
 }
 

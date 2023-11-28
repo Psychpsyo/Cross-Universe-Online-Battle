@@ -100,7 +100,7 @@ export class Stack {
 		return costTimings.concat(executionTimings);
 	}
 	getActions() {
-		let costActions = this.blocks.map(block => block.getCostActions());
+		let costActions = this.blocks.map(block => block.getCostActions()).flat();
 		let executionActions = this.blocks.toReversed().map(block => block.getExecutionActions()).flat();
 		return costActions.concat(executionActions);
 	}

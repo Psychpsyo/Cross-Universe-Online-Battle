@@ -143,9 +143,10 @@ let keywordTokenTypes = {
 	dueTo: "accessorProperty",
 	by: "accessorProperty",
 
-	fight: "dueToReason",
 	effect: "dueToReason",
+	fight: "dueToReason",
 	invalidEquipment: "dueToReason",
+	standardSummon: "dueToReason",
 
 	forever: "untilIndicator",
 	endOfTurn: "untilIndicator",

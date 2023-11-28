@@ -13,7 +13,7 @@ cost:
 LOSEMANA(1);
 exec:
 EXILE(SELECT(1, [from you.hand]));
-MOVE(SELECT(1, [from deck where types = Gravity & cardType = spell]), you.hand);
+MOVE(SELECT(1, [from deck where types = Gravity & cardType = spell]), hand);
 
 o: optional
 turnLimit: 1

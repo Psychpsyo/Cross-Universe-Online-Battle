@@ -18,4 +18,4 @@ o: trigger
 mandatory: no
 during: currentPhase = you.endPhase
 condition: thisCard.zone = field & COUNT([from unitZone where types = Ice & cardType = unit]) > 3
-MOVE(SELECT(1, [from you.deck where level > 4 & types = Ice]), you.hand);
+MOVE(SELECT(1, [from you.deck where level > 4 & types = Ice]), hand);

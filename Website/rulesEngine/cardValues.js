@@ -76,16 +76,16 @@ export class CardModifier {
 			let worksOnCard = true;
 			// only static abilities are influenced by unaffections/cancelling when already on a card
 			if (this.ctx.ability instanceof abilities.StaticAbility) {
-				ast.setImplicitCard(this.ctx.card);
+				ast.setImplicitCards([this.ctx.card]);
 				for (const unaffection of card.unaffectedBy) {
 					if (unaffection.value === modification.value && unaffection.by.evalFull(new ScriptContext(unaffection.sourceCard, this.ctx.player, unaffection.sourceAbility))[0].get(this.ctx.player)) {
 						worksOnCard = false;
 						break;
 					}
 				}
-				ast.clearImplicitCard();
+				ast.clearImplicitCards();
 			}
-			ast.setImplicitCard(card);
+			ast.setImplicitCards([card]);
 			if (worksOnCard &&
 				(modification instanceof ValueUnaffectedModification || modification instanceof AbilityCancelModification) === toUnaffections &&
 				(modification.condition === null || modification.condition.evalFull(this.ctx)[0].get(this.ctx.player))
@@ -101,7 +101,7 @@ export class CardModifier {
 					values = modification.modify(values, this.ctx, toBaseValues);
 				}
 			}
-			ast.clearImplicitCard();
+			ast.clearImplicitCards();
 		}
 		return values;
 	}
@@ -119,9 +119,9 @@ export class CardModifier {
 
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
 	bake(forCard) {
-		ast.setImplicitCard(forCard);
+		ast.setImplicitCards([forCard]);
 		let bakedModifications = this.modifications.map(modification => modification.bake(this.ctx)).filter(modification => modification !== null);
-		ast.clearImplicitCard();
+		ast.clearImplicitCards();
 		return new CardModifier(bakedModifications, this.ctx);
 	}
 }
@@ -156,6 +156,9 @@ export class ValueModification {
 			}
 		}
 		return true;
+	}
+	canFullyApplyTo(target, ctx) {
+		return this.canApplyTo(target, ctx);
 	}
 }
 
@@ -255,6 +258,11 @@ export class NumericChangeModification extends ValueModification {
 		}
 		return new NumericChangeModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
 	}
+	canFullyApplyTo(target, ctx) {
+		if (!this.canApplyTo(target, ctx)) return false;
+		if (target.values[this.value] + this.amount.evalFull(ctx)[0].get(ctx.player)[0] < 0) return false;
+		return true;
+	}
 }
 
 export class NumericDivideModification extends ValueModification {
@@ -315,9 +323,7 @@ export class AbilityCancelModification extends ValueModification {
 	}
 
 	canApplyTo(target, ctx) {
-		if (!super.canApplyTo(target, ctx)) {
-			return false;
-		}
+		if (!super.canApplyTo(target, ctx)) return false;
 
 		let validAbilities = 0;
 		for (const iterAbility of this.abilities.evalFull(ctx)[0].get(ctx.player)) {
@@ -325,7 +331,16 @@ export class AbilityCancelModification extends ValueModification {
 				validAbilities++;
 			}
 		}
-
 		return validAbilities > 0;
+	}
+	canFullyApplyTo(target, ctx) {
+		if (!this.canApplyTo(target, ctx)) return false;
+
+		for (const iterAbility of this.abilities.evalFull(ctx)[0].get(ctx.player)) {
+			if (!iterAbility.cancellable || iterAbility.isCancelled) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

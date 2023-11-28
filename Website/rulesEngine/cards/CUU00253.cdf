@@ -12,4 +12,4 @@ condition: thisCard.zone = field
 cost:
 LOSEMANA(1);
 exec:
-MOVE(SELECT(1, [from you.deck where name = CUI00097]), you.hand);
+MOVE(SELECT(1, [from you.deck where name = CUI00097]), hand);

@@ -141,11 +141,6 @@ function parseFunctionToken(player) {
 }
 
 function parseExpression() {
-	let insideParens = false;
-	if (tokens[pos].type == "leftParen") {
-		insideParens = true;
-		pos++;
-	}
 	let expression = [];
 	let needsReturnType = [];
 	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator", "if"].includes(tokens[pos].type)) {
@@ -209,17 +204,9 @@ function parseExpression() {
 		return null;
 	}
 
-	if (insideParens) {
-		if (tokens[pos].type == "rightParen") {
-			pos++;
-		} else {
-			throw new ScriptParserError("Found unwanted '" + tokens[pos].type + "' token instead of ')' at the end of parenthesized expression.");
-		}
-	}
-
 	for (let type of [ast.DotMathNode, ast.DashMathNode, ast.ComparisonNode, ast.LogicNode]) {
 		for (let i = 0; i < expression.length; i++) {
-			if (expression[i] instanceof type) {
+			if (expression[i] instanceof type && expression[i].leftSide === null && expression[i].rightSide === null) {
 				expression[i].leftSide = expression[i-1];
 				expression[i].rightSide = expression[i+1];
 				i--;
@@ -283,7 +270,7 @@ function parseValue() {
 				}
 				return cardMatcher;
 			}
-			return parseList(tokens[pos+1].type);
+			return parseList();
 		}
 		case "function": {
 			return parseFunction();
@@ -312,7 +299,14 @@ function parseValue() {
 			return parseBool();
 		}
 		case "leftParen": {
-			return parseExpression();
+			pos++;
+			const node = parseExpression();
+			if (tokens[pos].type == "rightParen") {
+				pos++;
+			} else {
+				throw new ScriptParserError("Found unwanted '" + tokens[pos].type + "' token instead of ')' at the end of parenthesized expression value.");
+			}
+			return node;
 		}
 		case "variable": {
 			let variable = parseVariable();
@@ -361,7 +355,7 @@ function parseValue() {
 			return cards;
 		}
 		case "cardProperty": {
-			return parseCardProperty(new ast.ImplicitCardNode());
+			return parseCardProperty(new ast.ImplicitCardsNode());
 		}
 		case "actionAccessor": {
 			return parseActionAccessor(new ast.ImplicitActionsNode());
@@ -492,6 +486,7 @@ function parseActionAccessor(actionsNode) {
 			}
 			pos++;
 			properties[property] = parseExpression();
+			if (tokens[pos].type === "separator") pos++;
 		}
 		pos++;
 	}
@@ -544,17 +539,18 @@ function parseValueArray() {
 	return node;
 }
 
-function parseList(type) {
+function parseList() {
 	let elements = [];
 	pos++;
-	while (tokens[pos].type == type) {
+	let type = tokens[pos].type;
+	while (tokens[pos].type === type) {
 		elements.push(tokens[pos].value);
 		pos++;
-		if (tokens[pos].type == "separator") {
+		if (tokens[pos].type === "separator") {
 			pos++;
 		}
 	}
-	if (tokens[pos].type != "rightBracket") {
+	if (tokens[pos].type !== "rightBracket") {
 		throw new ScriptParserError("Expected a 'rightBracket' at the end of a list. Got '" + tokens[pos].type + "' instead.");
 	}
 	pos++;

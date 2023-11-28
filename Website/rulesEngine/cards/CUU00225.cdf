@@ -12,4 +12,4 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand where cardType = unit]));
 exec:
-MOVE(SELECT(1, [from you.deck, you.discard where name = CUI00083]), you.hand);
+MOVE(SELECT(1, [from you.deck, you.discard where name = CUI00083]), hand);
