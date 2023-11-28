@@ -1,7 +1,7 @@
 
 import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
 import {chooseAbilityOrder} from "./inputRequests.js";
-import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
+import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
 import {SnapshotCard} from "./card.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
@@ -225,7 +225,11 @@ export class Timing {
 		}
 		if (invalidEquipments.length > 0) {
 			let discards = invalidEquipments.map(equipment => new actions.Discard(equipment.owner, equipment));
-			return discards.concat(discards.map(discard => new actions.Destroy(discard)));
+			return discards.concat(discards.map(discard => new actions.Destroy(
+				discard,
+				new ScriptValue("dueToReason", ["invalidEquipment"]),
+				new ScriptValue("card", [])
+			)));
 		}
 		return [];
 	}

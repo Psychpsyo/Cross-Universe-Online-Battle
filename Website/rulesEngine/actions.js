@@ -44,10 +44,11 @@ function getUntilTimingList(ctxPlayer, until) {
 
 // Base class for any action in the game.
 export class Action {
-	constructor(player) {
+	constructor(player, properties = {}) {
 		this.player = player;
 		this.timing = null; // Is set by the Timing itself
 		this.costIndex = -1; // If this is positive, it indicates that this action is to be treated as a cost, together with other actions of the same costIndex
+		this.properties = properties;
 	}
 
 	// Returns the event that represents this action.
@@ -464,8 +465,8 @@ export class Discard extends Action {
 }
 
 export class Destroy extends Action {
-	constructor(discard) {
-		super(discard.player);
+	constructor(discard, reason, source) {
+		super(discard.player, {dueTo: reason, by: source});
 		this.discard = discard;
 	}
 

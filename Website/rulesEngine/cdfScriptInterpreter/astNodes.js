@@ -531,8 +531,8 @@ export class AllTypesNode extends AstNode {
 
 // Math and comparison operators with left and right operands
 export class MathNode extends AstNode {
-	constructor(leftSide, rightSide) {
-		super(null); // return type is set later by the parser once it has consolidated the expression tree
+	constructor(leftSide, rightSide, returnType = null) {
+		super(returnType); // return type is set later by the parser once it has consolidated the expression tree
 		this.leftSide = leftSide;
 		this.rightSide = rightSide;
 	}
@@ -946,7 +946,7 @@ function pushCardUnique(array, card) {
 	}
 }
 export class ActionAccessorNode extends AstNode {
-	constructor(actionsNode, accessor) {
+	constructor(actionsNode, accessor, actionProperties) {
 		super({
 			"cast": "card",
 			"chosenTarget": "card",
@@ -963,6 +963,7 @@ export class ActionAccessorNode extends AstNode {
 		}[accessor]);
 		this.actionsNode = actionsNode;
 		this.accessor = accessor;
+		this.actionProperties = actionProperties;
 	}
 	* eval(ctx) {
 		let values = [];
@@ -973,6 +974,17 @@ export class ActionAccessorNode extends AstNode {
 			actionList = (yield* this.actionsNode.eval(ctx)).get(ctx.player);
 		}
 		for (let action of actionList) {
+			let hasProperties = true;
+			for (const property of Object.keys(this.actionProperties)) {
+				if (!(property in action.properties) ||
+					!action.properties[property].equals(yield* this.actionProperties[property].eval(ctx), ctx.player)
+				) {
+					hasProperties = false;
+					break;
+				}
+			}
+			if (!hasProperties) continue;
+
 			switch (this.accessor) {
 				case "cast": {
 					if (action instanceof actions.Cast) {

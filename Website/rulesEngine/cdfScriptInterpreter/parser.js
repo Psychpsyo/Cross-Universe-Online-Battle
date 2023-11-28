@@ -232,6 +232,10 @@ function parseExpression() {
 	}
 	while (needsReturnType.length > 0) {
 		for (let i = needsReturnType.length - 1; i >= 0; i--) {
+			if (needsReturnType[i].returnType !== null) {
+				needsReturnType.splice(i, 1);
+				continue;
+			}
 			if (needsReturnType[i].leftSide.returnType) {
 				needsReturnType[i].returnType = needsReturnType[i].leftSide.returnType;
 				needsReturnType.splice(i, 1);
@@ -287,6 +291,7 @@ function parseValue() {
 		case "cardType":
 		case "cardId":
 		case "counter":
+		case "dueToReason":
 		case "type": {
 			return parseValueArray();
 		}
@@ -473,8 +478,24 @@ function parseCardProperty(cardsNode) {
 }
 
 function parseActionAccessor(actionsNode) {
-	let node = new ast.ActionAccessorNode(actionsNode, tokens[pos].value);
+	let actionType = tokens[pos].value;
 	pos++;
+	// accessor properties like 'dueTo' or 'by'
+	let properties = {};
+	if (tokens[pos].type === "leftParen") {
+		pos++;
+		while (tokens[pos].type === "accessorProperty") {
+			let property = tokens[pos].value;
+			pos++;
+			if (tokens[pos].type !== "colon") {
+				throw new ScriptParserError("Accessor property must be followed by colon. Got " + tokens[pos].value + " instead.");
+			}
+			pos++;
+			properties[property] = parseExpression();
+		}
+		pos++;
+	}
+	let node = new ast.ActionAccessorNode(actionsNode, actionType, properties);
 	if (tokens[pos].type == "dotOperator") {
 		pos++;
 		return parseCardDotAccess(node);

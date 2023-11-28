@@ -3,6 +3,8 @@
 import {Timing, runInterjectedTimings} from "./timings.js";
 import {createCardsAttackedEvent} from "./events.js";
 import {FieldZone} from "./zones.js";
+import {ScriptValue} from "./cdfScriptInterpreter/structs.js";
+import {SnapshotCard} from "./card.js";
 import * as actions from "./actions.js";
 import * as requests from "./inputRequests.js";
 
@@ -210,7 +212,11 @@ export function* fightTimingGenerator(attackDeclaration) {
 	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
 	if (totalAttack > attackDeclaration.target.values.defense) {
 		let discard = new actions.Discard(attackDeclaration.target.owner, attackDeclaration.target);
-		let actionList = [new actions.Destroy(discard), discard];
+		let actionList = [new actions.Destroy(
+			discard,
+			new ScriptValue("dueToReason", ["fight"]),
+			new ScriptValue("card", attackDeclaration.attackers.map(unit => new SnapshotCard(unit)))
+		), discard];
 		if (attackDeclaration.target.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(
 				attackDeclaration.target.currentOwner(),
@@ -240,7 +246,11 @@ export function* fightTimingGenerator(attackDeclaration) {
 	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
 	if (attackDeclaration.target.values.attack > counterattackTarget.values.defense) {
 		let discard = new actions.Discard(counterattackTarget.owner, counterattackTarget);
-		let actionList = [new actions.Destroy(discard), discard];
+		let actionList = [new actions.Destroy(
+			discard,
+			new ScriptValue("dueToReason", ["fight"]),
+			new ScriptValue("card", [new SnapshotCard(attackDeclaration.target)])
+		), discard];
 		if (counterattackTarget.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(
 				counterattackTarget.currentOwner(),

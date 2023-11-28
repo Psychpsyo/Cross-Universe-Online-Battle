@@ -201,13 +201,21 @@ export function initFunctions() {
 		function*(astNode, ctx) {
 			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current());
 			let discards = cards.map(card => new actions.Discard(ctx.player, card.current()));
-			return new ScriptValue("tempActions", discards.concat(discards.map(discard => new actions.Destroy(discard))));
+			return new ScriptValue("tempActions", discards.concat(discards.map(discard => new actions.Destroy(
+				discard,
+				new ScriptValue("dueToReason", ["effect"]),
+				new ScriptValue("card", [new SnapshotCard(ctx.card)])
+			))));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
 			let cardLists = this.getParameter(astNode, "card").evalFull(ctx).map(option => option.get(ctx.player).filter(card => card.current()));
 			let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(ctx.player, card.current())));
-			return discardLists.map(discards => new ScriptValue("action", discards.concat(discards.map(discard => new actions.Destroy(discard)))));
+			return discardLists.map(discards => new ScriptValue("action", discards.concat(discards.map(discard => new actions.Destroy(
+				discard,
+				new ScriptValue("dueToReason", ["effect"]),
+				new ScriptValue("card", [new SnapshotCard(ctx.card)])
+			)))));
 		}
 	),
 

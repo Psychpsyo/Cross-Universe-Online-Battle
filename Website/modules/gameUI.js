@@ -346,7 +346,7 @@ function dropCard(player, zone, index) {
 
 export function addCardButton(zone, index, label, type, onClick, visible = false) {
 	for (let slot of cardSlots) {
-		if (slot.zone === zone && (slot.index == index || slot.index == -1)) {
+		if (slot.zone === zone && (slot.index == index || slot.index == -1 || slot instanceof PileCardSlot)) {
 			let button = slot.addCardButton(label, type, onClick, visible);
 			if (button) {
 				return button;
@@ -357,7 +357,7 @@ export function addCardButton(zone, index, label, type, onClick, visible = false
 }
 export function clearCardButtons(zone, index, type) {
 	for (let slot of cardSlots) {
-		if (slot.zone === zone && (slot.index == index || slot.index == -1)) {
+		if (slot.zone === zone && (slot.index == index || slot.index == -1 || slot instanceof PileCardSlot)) {
 			slot.clearCardButtons(type);
 		}
 	}

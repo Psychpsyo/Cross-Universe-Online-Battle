@@ -145,7 +145,6 @@ let keywordTokenTypes = {
 
 	fight: "dueToReason",
 	effect: "dueToReason",
-	equippedUnitDestroyed: "dueToReason",
 	invalidEquipment: "dueToReason",
 
 	forever: "untilIndicator",

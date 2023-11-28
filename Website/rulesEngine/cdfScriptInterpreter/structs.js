@@ -1,3 +1,5 @@
+import {BaseCard} from "../card.js";
+
 export class ScriptValue {
 	constructor(type, value) {
 		this.type = type;
