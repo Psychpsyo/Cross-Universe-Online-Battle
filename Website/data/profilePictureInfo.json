@@ -219,6 +219,8 @@
 	"U00282": {"flip": true, "left": 53},
 	"U00283": {"left": 25},
 	"U00284": {"flip": true, "left": 52},
+	"U00285": {"flip": true, "left": 48},
+	"U00286": {"flip": true, "left": 35},
 
 	"T00001": {"flip": true, "left": 45},
 	"T00002": {"flip": true, "left": 46},
@@ -351,6 +353,7 @@
 	"I00108": {"neverFlip": true},
 	"I00109": {"flip": true, "left": 60},
 	"I00110": {"left": 57},
+	"I00111": {"neverFlip": true, "left": 52},
 
 	"S00001": {"neverFlip": true},
 	"S00002": {"neverFlip": true},
@@ -573,5 +576,6 @@
 	"S00230": {"flip": true, "left": 35},
 	"S00231": {"neverFlip": true, "left": 45},
 	"S00232": {"left": 25},
-	"S00233": {"left": 25}
+	"S00233": {"left": 25},
+	"S00234": {"neverFlip": true}
 }
