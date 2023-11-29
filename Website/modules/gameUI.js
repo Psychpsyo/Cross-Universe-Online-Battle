@@ -859,13 +859,15 @@ class UiPlayer {
 	}
 }
 
-class UiValue {
+const uiValues = [];
+export class UiValue {
 	constructor(initial, speed, displayElem) {
 		this.value = initial;
 		this.targetValue = initial;
 		this.counter = 0;
 		this.speed = speed;
 		this.displayElem = displayElem;
+		uiValues.push(this);
 	}
 
 	async set(value, instant) {
@@ -896,13 +898,21 @@ class UiValue {
 			}
 		}
 	}
+
+	remove() {
+		uiValues.splice(uiValues.indexOf(this), 1);
+	}
 }
 
 function animate(currentTime) {
-	let delta = currentTime - lastFrame;
+	const delta = currentTime - lastFrame;
 	lastFrame = currentTime;
 
-	for (let uiPlayer of uiPlayers) {
+	for (const value of uiValues) {
+		value.animate(delta);
+	}
+
+	for (const uiPlayer of uiPlayers) {
 		// cursors
 		uiPlayer.posX += (uiPlayer.targetX - uiPlayer.posX) / 5;
 		uiPlayer.posY += (uiPlayer.targetY - uiPlayer.posY) / 5;
@@ -912,16 +922,15 @@ function animate(currentTime) {
 		uiPlayer.cursorElem.style.left = uiPlayer.dragCardElem.style.left;
 		uiPlayer.cursorElem.style.top = uiPlayer.dragCardElem.style.top;
 
-		let velX = uiPlayer.posX - uiPlayer.lastX;
-		let velY = uiPlayer.lastY - uiPlayer.posY;
+		const velX = uiPlayer.posX - uiPlayer.lastX;
+		const velY = uiPlayer.lastY - uiPlayer.posY;
 
-		let flipped = uiPlayer.player.index % 2 == 0;
+		const flipped = uiPlayer.player.index % 2 == 0;
 		uiPlayer.dragCardElem.style.transform = "translate(-50%,-50%) perspective(300px) rotateY(" + (velX > 0? Math.min(Math.PI / 3, velX * 100) : Math.max(Math.PI / -3, velX * 100)) + "rad) rotateX(" + (velY > 0? Math.min(Math.PI / 3, velY * 100) : Math.max(Math.PI / -3, velY * 100)) + "rad)" + (flipped? " rotateZ(180deg)" : "");
 
 		uiPlayer.lastX = uiPlayer.posX;
 		uiPlayer.lastY = uiPlayer.posY;
 
-		uiPlayer.life.animate(delta);
 		if (uiPlayer.life.value == 0) {
 			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "grayscale(100%)";
 			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "opacity(50%)";
@@ -930,7 +939,6 @@ function animate(currentTime) {
 			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "";
 			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "";
 		}
-		uiPlayer.mana.animate(delta);
 	}
 
 	requestAnimationFrame(animate);

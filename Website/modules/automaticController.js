@@ -238,6 +238,7 @@ export class AutomaticController extends InteractionController {
 			case "partnerRevealed": {
 				for (const event of events) {
 					gameUI.updateCard(event.player.partnerZone, 0);
+					autoUI.addCardAttackDefenseOverlay(event.player.partnerZone.cards[0]);
 				}
 				return this.gameSleep();
 			}
@@ -316,10 +317,16 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "cardValueChanged": {
+				const changeAnimPromises = [];
+				const cards = [];
 				for (const event of events) {
 					generalUI.updateCardPreview(event.card);
+					if (!event.isBaseValue && ["attack", "defense"].includes(event.valueName) && !cards.includes(event.card)) {
+						changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.card, false));
+						cards.push(event.card);
+					}
 				}
-				return;
+				return await Promise.all(changeAnimPromises);
 			}
 			case "cardPlaced": {
 				for (const event of events) {
@@ -342,6 +349,8 @@ export class AutomaticController extends InteractionController {
 					if (event.fromZone) {
 						gameUI.removeCard(event.fromZone, event.fromIndex);
 					}
+					autoUI.removeCardAttackDefenseOverlay(event.card);
+					autoUI.addCardAttackDefenseOverlay(event.card.current());
 				}
 				return this.gameSleep();
 			}
@@ -351,6 +360,7 @@ export class AutomaticController extends InteractionController {
 				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => event.card.current()? new SnapshotCard(event.card.current()) : event.card));
 				for (const event of events) {
 					gameUI.removeCard(event.fromZone, event.fromIndex);
+					autoUI.removeCardAttackDefenseOverlay(event.card);
 					if (!event.card.isToken || event.toZone instanceof zones.FieldZone) {
 						gameUI.insertCard(event.toZone, event.toIndex);
 					}
@@ -373,6 +383,10 @@ export class AutomaticController extends InteractionController {
 				for (const event of events) {
 					gameUI.updateCard(event.cardA.zone, event.cardA.index);
 					gameUI.updateCard(event.cardB.zone, event.cardB.index);
+					await Promise.all([
+						autoUI.updateCardAttackDefenseOverlay(event.cardA, true),
+						autoUI.updateCardAttackDefenseOverlay(event.cardB, true)
+					]);
 				}
 				return;
 			}

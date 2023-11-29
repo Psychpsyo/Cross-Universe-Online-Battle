@@ -40,11 +40,12 @@
 	z-index: 100;
 }
 
-.activating .card {
+#field .activating .card {
 	animation-duration: calc(.5s * var(--game-speed));
 	animation-iteration-count: 2;
 	animation-direction: alternate;
 	animation-timing-function: ease-in-out;
+	z-index: 100;
 }
 #p0Grid .activating .card {
 	animation-name: opponentActivation;
@@ -338,4 +339,23 @@
 		transform: translateY(calc(var(--anim-start) * -50vh));
 		opacity: 0;
 	}
+}
+
+
+/* Card Overlay Values for Attack & Defense */
+.cardValueOverlay {
+	position: absolute;
+	z-index: 1;
+	left: 50%;
+	font-size: .75em;
+	white-space: nowrap;
+	z-index: 25;
+}
+#p0Grid .cardValueOverlay {
+	top: 0;
+	transform: translate(-50%, -25%);
+}
+#p1Grid .cardValueOverlay {
+	bottom: 0;
+	transform: translate(-50%, 25%);
 }

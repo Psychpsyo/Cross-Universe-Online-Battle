@@ -209,13 +209,13 @@ export async function updateCardPreview(card) {
 	}
 
 	// effects
-	cardDetailsEffectList.innerHTML = "";
+	let effectDivs = [];
 	if (!card.cardId.startsWith("C")) {
 		// insert rule sections from the API since the card object does not specify how many there are.
 		let effects = (await cardLoader.getCardInfo(card.cardId)).effects;
 		for (const effect of effects) {
 			if (effect.type === "rule") {
-				insertEffect(effect.type, effect.text);
+				effectDivs.push(createDomEffect(effect.type, effect.text));
 			}
 		}
 
@@ -228,14 +228,19 @@ export async function updateCardPreview(card) {
 			if (ability.isCancelled) {
 				divClasses.push("valueGone");
 			}
-			insertEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), divClasses);
+			effectDivs.push(createDomEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), divClasses));
 		}
+	}
+	// all at once to prevent getting too many effects when this function is called multiple times at once.
+	cardDetailsEffectList.innerHTML = "";
+	for (const div of effectDivs) {
+		cardDetailsEffectList.appendChild(div);
 	}
 
 	cardDetails.style.setProperty("--side-distance", ".5em");
 }
 
-function insertEffect(type, content, classNames = []) {
+function createDomEffect(type, content, classNames = []) {
 	let effectDiv = document.createElement("div");
 	effectDiv.classList.add("cardDetailsEffect");
 	for (const className of classNames) {
@@ -251,7 +256,7 @@ function insertEffect(type, content, classNames = []) {
 
 	effectDiv.appendChild(createAbilityFragment(content));
 
-	cardDetailsEffectList.appendChild(effectDiv);
+	return effectDiv;
 }
 
 function insertCardValue(card, value, target) {

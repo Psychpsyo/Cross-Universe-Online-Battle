@@ -400,3 +400,51 @@ export async function showCoolAttackAnim(defender, attackers) {
 
 	coolAttackVisual.classList.remove("visible");
 }
+
+// card attack/defense overlays
+const attackUiValues = new Map();
+const defenseUiValues = new Map();
+export function addCardAttackDefenseOverlay(card) {
+	if (!(card.zone instanceof FieldZone)) return;
+	if (!card.values.cardTypes.includes("unit")) return;
+
+	const slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
+
+	const overlay = document.createElement("div");
+	overlay.classList.add("overlayText", "cardValueOverlay");
+	const attackSpan = document.createElement("span");
+	attackSpan.textContent = card.values.attack;
+	const defenseSpan = document.createElement("span");
+	defenseSpan.textContent = card.values.defense;
+	overlay.appendChild(attackSpan);
+	overlay.appendChild(document.createTextNode(" / "));
+	overlay.appendChild(defenseSpan);
+
+	attackUiValues.set(slot, new gameUI.UiValue(card.values.attack, 5, attackSpan));
+	defenseUiValues.set(slot, new gameUI.UiValue(card.values.defense, 5, defenseSpan));
+
+	slot.appendChild(overlay);
+}
+export function removeCardAttackDefenseOverlay(card) {
+	if (!(card.zone instanceof FieldZone)) {
+		return;
+	}
+	const slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
+
+	slot.querySelector(".cardValueOverlay").remove();
+
+	attackUiValues.get(slot).remove();
+	defenseUiValues.get(slot).remove();
+	attackUiValues.delete(slot);
+	defenseUiValues.delete(slot);
+}
+export async function updateCardAttackDefenseOverlay(card, instant) {
+	if (!(card.zone instanceof FieldZone)) {
+		return;
+	}
+	const slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
+	return Promise.all([
+		attackUiValues.get(slot).set(card.values.attack, instant),
+		defenseUiValues.get(slot).set(card.values.defense, instant)
+	]);
+}
