@@ -12,7 +12,7 @@ condition: thisCard.zone = field
 cost:
 $card = SELECT(1, [from field where types = Curse]);
 exec:
-MOVE(thisCard, baseOwner.deck);
+RETURN(thisCard, baseOwner.deck);
 DESTROY($card);
 
 o: trigger

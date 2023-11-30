@@ -19,4 +19,4 @@ modifier: {defense += COUNT([from you.hand]) * 100}
 o: trigger
 mandatory: no
 after: destroyed(dueTo: fight) = thisCard
-MOVE([from discard where self = thisCard], owner.hand);
+RETURN([from discard where self = thisCard], baseOwner.hand);

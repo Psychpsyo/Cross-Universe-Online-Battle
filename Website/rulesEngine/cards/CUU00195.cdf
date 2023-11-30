@@ -20,4 +20,4 @@ o: trigger
 mandatory: no
 after: COUNT([from destroyed where self = thisCard & zone = field]) > 0 & COUNT([from you.discard where name = CUS00176]) > 0
 EXILE(DECKTOP?(10));
-MOVE([from discard where self = thisCard], field);
+RETURN([from discard where self = thisCard], field);

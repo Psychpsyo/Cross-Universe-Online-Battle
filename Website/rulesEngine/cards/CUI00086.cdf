@@ -10,4 +10,4 @@ condition: thisCard.zone = field
 cost:
 LOSELIFE(100);
 exec:
-MOVE(SELECT(1, [from you.discard where types = Angel]), you.deckTop);
+RETURN(SELECT(1, [from you.discard where types = Angel]), baseOwner.deckTop);

@@ -201,7 +201,7 @@ export class FieldZone extends Zone {
 		}
 		this.cards[index] = card;
 		card.zone = this;
-
+		card.lastFieldSidePlayer = this.player;
 		card.index = index;
 		card.hiddenFor = [];
 		return index;

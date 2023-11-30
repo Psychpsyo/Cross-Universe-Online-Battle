@@ -6,6 +6,6 @@ types:
 
 o: cast
 $cards = both.SELECT(3, [from own.discard]);
-both.MOVE(ORDER($cards), own.deckBottom);
+both.RETURN(ORDER($cards), own.deckBottom);
 both.DISCARD(DECKTOP(3));
 EXILE(thisCard);

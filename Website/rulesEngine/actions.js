@@ -313,8 +313,60 @@ export class Move extends Action {
 		if (!this.card.current()) return true;
 		if (this.card.current().isRemovedToken) return true;
 		if (this.card.current().zone?.type == "partner") return true;
-		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length) return true;
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length === 0) return true;
 		return false;
+	}
+	isFullyPossible(timing) {
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length) return false;
+		return this.isPossible(timing);
+	}
+}
+
+export class Return extends Action {
+	constructor(player, card, zone, targetIndex) {
+		super(player);
+		this.card = card;
+		this.zone = zone;
+		this.targetIndex = targetIndex;
+		this.insertedIndex = null;
+	}
+
+	async* run() {
+		this.card = this.card.current();
+		if (this.targetIndex === null) {
+			if (this.zone instanceof zones.DeckZone) {
+				this.insertedIndex = this.zone.cards.length;
+			} else {
+				this.insertedIndex = yield* queryZoneSlot(this.player, this.zone);
+			}
+		} else if (this.targetIndex === -1) {
+			this.insertedIndex = this.zone.cards.length;
+		}
+		let card = this.card;
+		this.card = new SnapshotCard(this.card);
+		this.zone.add(this.card.current(), this.insertedIndex);
+		this.card.globalId = card.globalId;
+		return events.createCardMovedEvent(this.player, this.card.zone, this.card.index, this.zone, this.insertedIndex, this.card);
+	}
+
+	undo() {
+		let event = events.createUndoCardsMovedEvent([
+			{fromZone: this.card.current().zone, fromIndex: this.card.current().index, toZone: this.card.zone, toIndex: this.card.index}
+		]);
+		this.card.restore();
+		return event;
+	}
+
+	isImpossible(timing) {
+		if (!this.card.current()) return true;
+		if (this.card.current().isRemovedToken) return true;
+		if (this.card.current().zone?.type == "partner") return true;
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length === 0) return true;
+		return false;
+	}
+	isFullyPossible(timing) {
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Return).length) return false;
+		return this.isPossible(timing);
 	}
 }
 

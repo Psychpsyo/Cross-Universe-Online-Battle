@@ -7,5 +7,5 @@ types: Water
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-MOVE(SELECT(1, [from you.exile where types = Water & cardType = unit]), you.deckBottom);
+RETURN(SELECT(1, [from you.exile where types = Water & cardType = unit]), you.deckBottom);
 GAINLIFE(100);

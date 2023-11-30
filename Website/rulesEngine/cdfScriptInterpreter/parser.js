@@ -295,6 +295,11 @@ function parseValue() {
 		case "zone": {
 			return parseZone();
 		}
+		case "deckPosition": {
+			let node = new ast.DeckPositionNode(new ast.PlayerNode("both"), tokens[pos].value);
+			pos++;
+			return node;
+		}
 		case "bool": {
 			return parseBool();
 		}
@@ -316,6 +321,7 @@ function parseValue() {
 					case "phaseType":
 					case "turn":
 					case "function":
+					case "deckPosition":
 					case "zone": {
 						return parsePlayerDotAccess(variable);
 					}
@@ -395,40 +401,40 @@ function parseValue() {
 	}
 }
 
-function parsePlayerDotAccess(player) {
+function parsePlayerDotAccess(playerNode) {
 	switch (tokens[pos].type) {
 		case "function": {
-			return parseFunctionToken(player);
+			return parseFunctionToken(playerNode);
 		}
 		case "deckPosition": {
-			let node = new ast.DeckPositionNode(player, tokens[pos].value);
+			let node = new ast.DeckPositionNode(playerNode, tokens[pos].value);
 			pos++;
 			return node;
 		}
 		case "zone": {
-			return parseZoneToken(player);
+			return parseZoneToken(playerNode);
 		}
 		case "turn": {
 			pos++;
-			return new ast.TurnNode(player);
+			return new ast.TurnNode(playerNode);
 		}
 		case "phaseType": {
-			let node = new ast.PhaseNode(player, tokens[pos].value);
+			let node = new ast.PhaseNode(playerNode, tokens[pos].value);
 			pos++;
 			return node;
 		}
 		case "playerLife": {
-			let node = new ast.LifeNode(player);
+			let node = new ast.LifeNode(playerNode);
 			pos++;
 			return node;
 		}
 		case "playerMana": {
-			let node = new ast.ManaNode(player);
+			let node = new ast.ManaNode(playerNode);
 			pos++;
 			return node;
 		}
 		case "playerPartner": {
-			let node = new ast.PartnerNode(player);
+			let node = new ast.PartnerNode(playerNode);
 			pos++;
 			if (tokens[pos] && tokens[pos].type === "dotOperator") {
 				pos++;

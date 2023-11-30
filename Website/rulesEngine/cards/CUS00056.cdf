@@ -6,4 +6,4 @@ types: Wind, Landmine
 
 o: cast
 after: declared.owner = opponent
-MOVE(attackers + attackTarget, owner.hand);
+RETURN(attackers + attackTarget, baseOwner.hand);

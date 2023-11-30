@@ -28,6 +28,7 @@ export class BaseCard {
 		this.zone = null;
 		this.placedTo = null;
 		this.index = -1;
+		this.lastFieldSidePlayer = null;
 
 		this.counters = {};
 		this.equippedTo = null;
@@ -322,6 +323,7 @@ export class SnapshotCard extends BaseCard {
 		this.zone = card.zone;
 		this.placedTo = card.placedTo;
 		this.index = card.index;
+		this.lastFieldSidePlayer = card.lastFieldSidePlayer;
 
 		for (const [counter, amount] of Object.entries(card.counters)) {
 			this.counters[counter] = amount;
@@ -350,6 +352,7 @@ export class SnapshotCard extends BaseCard {
 		if (this._actualCard.globalId != this.globalId) {
 			this._actualCard.undoInvalidateSnapshots();
 		}
+		this._actualCard.lastFieldSidePlayer = this.lastFieldSidePlayer;
 
 		this._actualCard.hiddenFor = [...this.hiddenFor];
 

@@ -57,8 +57,8 @@ export class ScriptContext {
 }
 
 export class DeckPosition {
-	constructor(deck, isTop) {
-		this.deck = deck;
+	constructor(decks, isTop) {
+		this.decks = decks;
 		this.isTop = isTop;
 	}
 }

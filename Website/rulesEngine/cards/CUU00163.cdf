@@ -10,7 +10,7 @@ o: trigger
 mandatory: yes
 during: currentPhase = endPhase & COUNT([from currentTurn.destroyed where owner = you & level > 0 & types = Machine & types = Angel & cardType = unit]) > 0
 condition: thisCard.zone = field
-$move = MOVE?(
+$returns = RETURN?(
 	[from discard where
 		owner = you &
 		level > 0 &
@@ -21,4 +21,4 @@ $move = MOVE?(
 	],
 	you.unitZone
 );
-LOSELIFE(SUM($move.moved.level) * 100);
+LOSELIFE(SUM($returns.returned.level) * 100);

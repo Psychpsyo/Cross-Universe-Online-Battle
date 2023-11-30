@@ -16,5 +16,5 @@ mandatory: yes
 during: currentPhase = endPhase
 condition: GETCOUNTERS(thisCard, Chaos) > 5
 REMOVECOUNTERS(thisCard, Chaos, GETCOUNTERS(thisCard, Chaos));
-$cards = both.MOVE([from own.hand], own.deck);
-both.DRAW(COUNT($cards.moved));
+$cards = both.RETURN([from own.hand], deck);
+both.DRAW(COUNT($cards.returned));

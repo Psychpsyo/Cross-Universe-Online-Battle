@@ -862,10 +862,10 @@ export class DeckPositionNode extends AstNode {
 		this.top = position === "deckTop";
 	}
 	* eval(ctx) {
-		return new ScriptValue("zone", new DeckPosition((yield* this.playerNode.eval(ctx)).get(ctx.player)[0].deckZone, this.top));
+		return new ScriptValue("zone", new DeckPosition((yield* this.playerNode.eval(ctx)).get(ctx.player).map(player => player.deckZone), this.top));
 	}
 	evalFull(ctx) {
-		return this.playerNode.evalFull(ctx).map(p => new ScriptValue("zone", new DeckPosition(p.get(ctx.player)[0].deckZone, this.top)));
+		return this.playerNode.evalFull(ctx).map(p => new ScriptValue("zone", new DeckPosition(p.get(ctx.player).map(player => player.deckZone), this.top)));
 	}
 	getChildNodes() {
 		return [this.playerNode];
@@ -957,9 +957,10 @@ export class ActionAccessorNode extends AstNode {
 			"exiled": "card",
 			"moved": "card",
 			"retired": "card",
-			"viewed": "card",
+			"returned": "card",
 			"summoned": "card",
-			"targeted": "card"
+			"targeted": "card",
+			"viewed": "card"
 		}[accessor]);
 		this.actionsNode = actionsNode;
 		this.accessor = accessor;
@@ -1039,9 +1040,6 @@ export class ActionAccessorNode extends AstNode {
 				}
 				break;
 			}
-			// TODO: This might need to be split up into separate selectors for cards getting added / returned to zones.
-			//       (once / if there ever is a card that can replace one type of move with another)
-			//       Though the exact behavior here would probably need to be clarified by a new ruling.
 			case "moved": {
 				if (action instanceof actions.Move) {
 					return [action.card];
@@ -1050,6 +1048,12 @@ export class ActionAccessorNode extends AstNode {
 			}
 			case "retired": {
 				if (action instanceof actions.Discard && action.isRetire) {
+					return [action.card];
+				}
+				break;
+			}
+			case "returned": {
+				if (action instanceof actions.Return) {
 					return [action.card];
 				}
 				break;
