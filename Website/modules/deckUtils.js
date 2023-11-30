@@ -31,9 +31,9 @@ export function toDeckx(cuDeck) {
 
 	//set name
 	jsonDeck["name"] = {};
-	jsonDeck["name"][locale.code] = cuDeck["Name"] === undefined? "Cross Universe VCI Generator デッキ" : cuDeck["Name"];
+	jsonDeck["name"][locale.code] = cuDeck["Name"] ?? locale.deckxDefaultName;
 	jsonDeck["description"] = {};
-	jsonDeck["description"][locale.code] = cuDeck["Description"] === undefined? "" : cuDeck["Description"];
+	jsonDeck["description"][locale.code] = cuDeck["Description"] ?? "";
 
 	//set partner
 	jsonDeck["cards"] = [];

@@ -730,27 +730,23 @@ document.getElementById("deckMakerImportInput").addEventListener("change", funct
 		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it
 		let loadedDeck = this.fileName.endsWith(".deck")? toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result);
 
-		//quick fix for loading card description
-		if (this.fileName.endsWith(".deck")) {
-			document.getElementById("deckMakerDetailsDescriptionInput").value = JSON.parse(e.target.result).Description
-		} else {
-			document.getElementById("deckMakerDetailsDescriptionInput").value = "";
-		}
+		//set deck name and description
+		document.getElementById("deckMakerDetailsNameInput").value = loadedDeck.name[localStorage.getItem("language")] ?? loadedDeck.name.en ?? loadedDeck.name.ja ?? "";
+		document.getElementById("deckMakerDetailsDescriptionInput").value = loadedDeck.description[localStorage.getItem("language")] ?? loadedDeck.description.en ?? loadedDeck.description.ja ?? "";
 
 		//load cards
 		for (const card of loadedDeck.cards.reverse()) {
+			let promises = [];
 			for (let i = 0; i < card.amount; i++) {
-				await addCardToDeck(card.id);
+				promises.push(addCardToDeck(card.id));
 			}
+			await Promise.all(promises);
 
 			if (loadedDeck.suggestedPartner == card.id) {
 				document.getElementById("deckMakerDetailsPartnerSelect").value = loadedDeck.suggestedPartner;
 				recalculateDeckStats();
 			}
 		}
-
-		//set deck name
-		document.getElementById("deckMakerDetailsNameInput").value = loadedDeck.name[localStorage.getItem("language")] ?? loadedDeck.name.en ?? loadedDeck.name.ja ?? "";
 	};
 
 	reader.fileName = this.files[0]["name"];

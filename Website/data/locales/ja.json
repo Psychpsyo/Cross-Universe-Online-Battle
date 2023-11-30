@@ -768,6 +768,8 @@
 		}
 	},
 
+	"deckxDefaultName": "Cross Universe VCI Generator デッキ",
+
 	"optional": {
 		"typeSortNames": {
 			"Angel": "てんし",
