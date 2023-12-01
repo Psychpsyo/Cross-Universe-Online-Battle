@@ -1,5 +1,6 @@
 import {locale} from "/modules/locale.js";
 import {startEffect} from "/modules/levitationEffect.js";
+import * as uiUtils from "/modules/uiUtils.js";
 
 // global variables
 window.game = null;
@@ -132,15 +133,8 @@ copyInviteLink.addEventListener("click", function() {
 		inviteURL += "&m=" + encodeURIComponent(gameModeSelect.value);
 	}
 	navigator.clipboard.writeText(inviteURL);
-	copyInviteLink.textContent = locale.mainMenu.inviteLinkCopied;
 });
-copyInviteLink.addEventListener("mouseleave", function() {
-	setTimeout(function() {
-		if (typeof copyInviteLink !== "undefined") {
-			copyInviteLink.textContent = locale.mainMenu.copyInviteLink;
-		}
-	}, 500);
-});
+uiUtils.makeCopyButton(copyInviteLink, locale.mainMenu.copyInviteLink);
 
 // handle hotkeys
 document.addEventListener("keydown", async function(e) {
@@ -167,11 +161,12 @@ roomCodeEntry.addEventListener("dragover", function(e) {
 	e.preventDefault();
 });
 roomCodeEntry.addEventListener("drop", function(e) {
-	e.preventDefault();
 	let file = e.dataTransfer.items[0].getAsFile();
 	if (!file || !file.name.endsWith(".replay")) {
 		return;
 	}
+
+	e.preventDefault();
 
 	let reader = new FileReader();
 	reader.onload = function(e) {

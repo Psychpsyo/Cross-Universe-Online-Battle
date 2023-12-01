@@ -1,6 +1,7 @@
 import {locale} from "/modules/locale.js";
-import {toDeckx} from "/modules/deckUtils.js";
 import * as cardLoader from "/modules/cardLoader.js";
+import * as deckUtils from "/modules/deckUtils.js";
+import * as uiUtils from "/modules/uiUtils.js";
 
 //load illustrator & contest winner tags
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
@@ -70,10 +71,12 @@ tokenWarning.textContent = locale.deckMaker.deckMenu.warnings.noTokens;
 partnerWarning.textContent = locale.deckMaker.deckMenu.warnings.noPartner;
 unsupportedWarning.textContent = locale.deckMaker.deckMenu.warnings.unsupported;
 
-// starting hand
+// deck options panel
 deckOptionsTitle.textContent = locale.deckMaker.deckMenu.options;
 dotDeckExportBtn.textContent = locale.deckMaker.deckMenu.exportDeck;
-deckMakerImportBtn.textContent = locale.deckMaker.deckMenu.importDeck;
+fileImportBtn.textContent = locale.deckMaker.deckMenu.importDeckFromFile;
+deckCodeImportBtn.textContent = locale.deckMaker.deckMenu.importDeckFromCode;
+deckCodeCopyBtn.textContent = locale.deckMaker.deckMenu.copyDeckCode;
 startingHandGenBtn.textContent = locale.deckMaker.deckMenu.drawStartingHand;
 
 //search panel
@@ -659,7 +662,8 @@ async function recalculateDeckStats() {
 		deckMakerLevelDistributionLabels.children.item(i).hidden = true;
 	}
 
-	dotDeckExportBtn.disabled = document.getElementById("deckMakerDetailsPartnerSelect").value == "";
+	dotDeckExportBtn.disabled = deckMakerDetailsPartnerSelect.value === "";
+	deckCodeCopyBtn.disabled = deckList.length === 0;
 
 	//enable/disable warnings
 	document.getElementById("unitWarning").style.display = unitCount == 0? "block" : "none";
@@ -710,76 +714,109 @@ document.getElementById("deckMakerDetailsPartnerSelect").addEventListener("chang
 	recalculateDeckStats();
 });
 
-//deck import
-document.getElementById("deckMakerImportBtn").addEventListener("click", function() {
-	document.getElementById("deckMakerImportInput").click();
+// deck import
+document.getElementById("fileImportInput").addEventListener("change", function() {
+	loadDeckFile(this.files[0]);
+});
+document.getElementById("fileImportBtn").addEventListener("click", function() {
+	document.getElementById("fileImportInput").click();
+});
+document.getElementById("deckCodeImportBtn").addEventListener("click", function() {
+	const deckCode = prompt(locale.deckMaker.deckMenu.deckCodeImportPrompt).trim();
+	if (deckCode) {
+		loadDeck(deckUtils.decodeDeckCode(deckCode));
+	}
 });
 
-document.getElementById("deckMakerImportInput").addEventListener("change", function() {
-	//remove all cards from current deck
+function loadDeckFile(file) {
+	const reader = new FileReader();
+	reader.onload = function(e) {
+		loadDeck(this.fileName.endsWith(".deck")? deckUtils.toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
+	};
+
+	reader.fileName = file["name"];
+	reader.readAsText(file);
+}
+
+async function loadDeck(deck) {
+	if (deckList.length > 0 && !confirm(locale.deckMaker.unsavedChangesWarning)) return;
+
+	// remove all cards from current deck
 	while (deckList.length > 0) {
 		removeCardFromDeck(deckList[0]);
 	}
-	//clear recent cards
+	// clear recent cards
 	while (document.getElementById("recentCardsList").firstChild) {
 		document.getElementById("recentCardsList").firstChild.remove();
 	}
+	// open deck panel
+	closeAllDeckMakerOverlays();
+	deckCreationPanel.showModal();
 
-	let reader = new FileReader();
-	reader.onload = async function(e) {
-		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it
-		let loadedDeck = this.fileName.endsWith(".deck")? toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result);
+	// set deck name and description
+	document.getElementById("deckMakerDetailsNameInput").value = deck.name?.[localStorage.getItem("language")] ?? deck.name?.en ?? deck.name?.ja ?? "";
+	document.getElementById("deckMakerDetailsDescriptionInput").value = deck.description?.[localStorage.getItem("language")] ?? deck.description?.en ?? deck.description?.ja ?? "";
 
-		//set deck name and description
-		document.getElementById("deckMakerDetailsNameInput").value = loadedDeck.name[localStorage.getItem("language")] ?? loadedDeck.name.en ?? loadedDeck.name.ja ?? "";
-		document.getElementById("deckMakerDetailsDescriptionInput").value = loadedDeck.description[localStorage.getItem("language")] ?? loadedDeck.description.en ?? loadedDeck.description.ja ?? "";
-
-		//load cards
-		for (const card of loadedDeck.cards.reverse()) {
-			let promises = [];
-			for (let i = 0; i < card.amount; i++) {
-				promises.push(addCardToDeck(card.id));
-			}
-			await Promise.all(promises);
-
-			if (loadedDeck.suggestedPartner == card.id) {
-				document.getElementById("deckMakerDetailsPartnerSelect").value = loadedDeck.suggestedPartner;
-				recalculateDeckStats();
-			}
+	// load cards
+	for (const card of deck.cards.reverse()) {
+		const promises = [];
+		for (let i = 0; i < card.amount; i++) {
+			promises.push(addCardToDeck(card.id));
 		}
-	};
+		await Promise.all(promises);
 
-	reader.fileName = this.files[0]["name"];
-	reader.readAsText(this.files[0]);
-});
+		if (deck.suggestedPartner === card.id) {
+			document.getElementById("deckMakerDetailsPartnerSelect").value = deck.suggestedPartner;
+			recalculateDeckStats();
+		}
+	}
+}
 
 //deck export
 document.getElementById("dotDeckExportBtn").addEventListener("click", function() {
-	let deckObject = {Cards: []};
-	deckObject.Name = document.getElementById("deckMakerDetailsNameInput").value;
-	deckObject.Description = document.getElementById("deckMakerDetailsDescriptionInput").value;
-	if (deckObject.Name == "") {
-		deckObject.Name = document.getElementById("deckMakerDetailsNameInput").placeholder;
-	}
-	deckObject.Partner = "CU" + document.getElementById("deckMakerDetailsPartnerSelect").value;
-
-	deckList.sort().reverse();
-	//temporarily remove partner
-	deckList.splice(deckList.indexOf(document.getElementById("deckMakerDetailsPartnerSelect").value), 1);
-	deckList.forEach(cardID => {
-		deckObject.Cards.push("CU" + cardID);
-	});
-	//re-add partner
-	deckList.push(document.getElementById("deckMakerDetailsPartnerSelect").value);
+	let deck = deckUtils.basicDeckFromCardList(
+		deckList,
+		deckMakerDetailsPartnerSelect.value,
+		deckMakerDetailsNameInput.value === ""? deckMakerDetailsNameInput.value : deckMakerDetailsNameInput.placeholder,
+		deckMakerDetailsDescriptionInput.value
+	);
 
 	//generate the actual download
 	let downloadElement = document.createElement("a");
-	downloadElement.href = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(deckObject));
-	downloadElement.download = deckObject.Name + ".deck";
+	downloadElement.href = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(deck));
+	downloadElement.download = deck.Name + ".deck";
 	downloadElement.click();
 });
+
+deckCodeCopyBtn.addEventListener("click", function() {
+	const deck = deckUtils.deckFromCardList(deckList, deckMakerDetailsPartnerSelect.value === ""? null : deckMakerDetailsPartnerSelect.value);
+	navigator.clipboard.writeText(deckUtils.encodeDeckCode(deck));
+});
+uiUtils.makeCopyButton(deckCodeCopyBtn, locale.deckMaker.deckMenu.copyDeckCode);
 
 // recent card hiding
 recentCardsHeaderBtn.addEventListener("click", function() {
 	recentCardsList.classList.toggle("shown");
 })
+
+// drag & dropping a deck
+window.addEventListener("dragover", function(e) {
+	e.preventDefault();
+});
+window.addEventListener("drop", function(e) {
+	let file = e.dataTransfer.items[0].getAsFile();
+	if (!file || !(file.name.endsWith(".deck") || file.name.endsWith(".deckx"))) {
+		return;
+	}
+	e.preventDefault();
+	loadDeckFile(file);
+});
+
+// prevent user from accidently leaving the site
+window.unloadWarning = new AbortController();
+window.addEventListener("beforeunload", function(e) {
+	if (deckList.length > 0) {
+		e.preventDefault();
+		e.returnValue = "";
+	}
+}, {"signal": unloadWarning.signal});

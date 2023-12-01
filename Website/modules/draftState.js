@@ -163,7 +163,7 @@ export class DraftState extends GameState {
 			// load decks
 			let deckSetupPromises = [];
 			for (let i = 0; i < 2; i++) {
-				players[i].deck = deckFromCardList(Array.from(document.getElementById("draftDeckList" + i).childNodes).map(img => img.dataset.cardId), locale.draft.deckName, locale.draft.deckDescription);
+				players[i].deck = deckFromCardList(Array.from(document.getElementById("draftDeckList" + i).childNodes).map(img => img.dataset.cardId), null, locale.draft.deckName, locale.draft.deckDescription);
 				deckSetupPromises.push(cardLoader.deckToCdfList(players[i].deck, false, game.players[i]).then(deck => {
 					game.players[i].setDeck(deck);
 					gameUI.updateCard(game.players[i].deckZone, -1);

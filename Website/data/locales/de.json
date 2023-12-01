@@ -1,6 +1,11 @@
 {
 	"warnings": ["noRules", "noCards"],
 	"code": "de",
+
+	"general": {
+		"buttonCopied": "Kopiert!"
+	},
+
 	"mainMenu": {
 		"roomCodeInputTitle": "Mit Raum-Code verbinden",
 		"enterRoomcode": "Raum-Code:",
@@ -8,7 +13,6 @@
 		"connectToRoom": "Verbinden",
 		"waitingForOpponent": "Warte auf Gegner...",
 		"copyInviteLink": "Einladungslink kopieren",
-		"inviteLinkCopied": "Kopiert!",
 		"cancelWaiting": "Abbrechen",
 		"rulesButton": "Spielregeln",
 		"rulesLink": "https://crossuniverse.net/rules",
@@ -540,6 +544,8 @@
 		"continuousItems": "Permanente Items",
 		"equipableItems": "Ausrüstbare Items",
 
+		"unsavedChangesWarning": "Dein momentaniges Deck könnte ungespeicherte Änderungen haben.\nBist du dir sicher, dass du diese verwerfen möchtest?",
+
 		"quickSearch": {
 			"title": "Schnellsuche",
 			"prompt": "Suche nach Kartennamen oder Effekten... (oder drücke Enter um alle Karten zu zeigen)",
@@ -626,7 +632,10 @@
 			"levelDistribution": "Level-Verteilung:",
 			"options": "Optionen",
 			"exportDeck": "Exportieren (.deck)",
-			"importDeck": "Deck Importieren",
+			"importDeckFromFile": "Aus Datei importieren",
+			"copyDeckCode": "Deck-Code kopieren",
+			"importDeckFromCode": "Deck-Code importieren",
+			"deckCodeImportPrompt": "Füge deinen Deck-Code hier ein.\n(Er sollte in etwa so aussehen: a4z8bb3n558a77sa1gi2h8pg8a2v4i58a )",
 			"drawStartingHand": "Starthand ziehen"
 		},
 

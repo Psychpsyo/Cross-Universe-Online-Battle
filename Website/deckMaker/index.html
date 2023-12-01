@@ -258,6 +258,19 @@
 								</div>
 							</section>
 							<hr>
+							<section aria-labelledBy="deckOptionsTitle">
+								<h4 id="deckOptionsTitle"></h4><br>
+								<div id="deckMakerOptionButtons">
+									<!-- autocomplete must be off for some of these so that they always starts disabled. -->
+									<button id="dotDeckExportBtn" disabled autocomplete="off"></button>
+									<input id="fileImportInput" type="file" accept=".deck,.deckx">
+									<button id="fileImportBtn"></button><br>
+									<button id="deckCodeCopyBtn" disabled autocomplete="off"></button>
+									<button id="deckCodeImportBtn"></button><br>
+									<button id="startingHandGenBtn" disabled autocomplete="off"></button>
+								</div>
+							</section>
+							<hr>
 							<section aria-labelledBy="deckWarningsTitle">
 								<h4 id="deckWarningsTitle"></h4><br>
 								<div id="deckWarnings">
@@ -267,17 +280,6 @@
 									<div id="tokenWarning" class="warning"></div>
 									<div id="partnerWarning" class="lightWarning"></div>
 									<div id="unsupportedWarning" class="lightWarning"></div>
-								</div>
-								<hr>
-							</section>
-							<section aria-labelledBy="deckOptionsTitle">
-								<h4 id="deckOptionsTitle"></h4><br>
-								<div id="deckMakerOptionButtons">
-									<!-- autocomplete must be off for some of these so that they always starts disabled. -->
-									<button id="dotDeckExportBtn" disabled autocomplete="off"></button>
-									<input id="deckMakerImportInput" type="file" accept=".deck,.deckx">
-									<button id="deckMakerImportBtn"></button>
-									<button id="startingHandGenBtn" disabled autocomplete="off"></button>
 								</div>
 							</section>
 						</div>

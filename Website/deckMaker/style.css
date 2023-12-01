@@ -264,7 +264,6 @@ h1, h2, h3, h4 {
 
 #deckCreatorDetailsPanel {
 	min-width: 20em;
-	white-space: nowrap;
 	text-align: left;
 }
 
@@ -319,9 +318,8 @@ h1, h2, h3, h4 {
 }
 
 #deckMakerOptionButtons {
-	display: flex;
 	margin: .3em .5em;
-	justify-content: space-evenly;
+	text-align: center;
 }
 
 /* recent cards area */
@@ -380,7 +378,7 @@ h1, h2, h3, h4 {
 }
 
 /* This is an <input type="file"> element that needs to be hidden to have it accessible only via a button */
-#deckMakerImportInput {
+#fileImportInput {
 	display: none;
 }
 

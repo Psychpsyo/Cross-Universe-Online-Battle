@@ -1,6 +1,11 @@
 {
 	"warnings": ["incomplete"],
 	"code": "ja",
+
+	"general": {
+		"buttonCopied": null
+	},
+
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Battle ID",
 		"enterRoomcode": "対戦ID：",
@@ -8,7 +13,6 @@
 		"connectToRoom": "接続",
 		"waitingForOpponent": "承認待ち",
 		"copyInviteLink": null,
-		"inviteLinkCopied": null,
 		"cancelWaiting": "キャンセル",
 		"rulesButton": "ゲームのルール",
 		"rulesLink": "https://crossuniverse.jp/%e2%97%86%e2%97%86%e2%97%86%e3%82%af%e3%83%ad%e3%82%b9%e3%83%a6%e3%83%8b%e3%83%90%e3%83%bc%e3%82%b9%e3%81%a8%e3%81%af%e2%97%86%e2%97%86%e2%97%86/",
@@ -540,6 +544,8 @@
 		"continuousItems": "永続アイテム",
 		"equipableItems": "装備アイテム",
 
+		"unsavedChangesWarning": null,
+
 		"quickSearch": {
 			"title": null,
 			"prompt": null,
@@ -626,7 +632,10 @@
 			"levelDistribution": null,
 			"options": null,
 			"exportDeck": null,
-			"importDeck": null,
+			"importDeckFromFile": null,
+			"copyDeckCode": null,
+			"importDeckFromCode": null,
+			"deckCodeImportPrompt": null,
 			"drawStartingHand": null
 		},
 

@@ -1,6 +1,11 @@
 {
 	"warnings": [],
 	"code": "en",
+
+	"general": {
+		"buttonCopied": "Copied!"
+	},
+
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Room Code",
 		"enterRoomcode": "Room Code:",
@@ -8,7 +13,6 @@
 		"connectToRoom": "Connect",
 		"waitingForOpponent": "Waiting for Opponent...",
 		"copyInviteLink": "Copy Invite Link",
-		"inviteLinkCopied": "Copied!",
 		"cancelWaiting": "Cancel",
 		"rulesButton": "Game Rules",
 		"rulesLink": "https://crossuniverse.net/rules",
@@ -540,6 +544,8 @@
 		"continuousItems": "Continuous Items",
 		"equipableItems": "Equipable Items",
 
+		"unsavedChangesWarning": "Your current deck might have unsaved changes.\nAre you sure you want to discard them?",
+
 		"quickSearch": {
 			"title": "Quick Search",
 			"prompt": "Search by card name or effect... (or press Enter to show all cards)",
@@ -626,7 +632,10 @@
 			"levelDistribution": "Level Distribution:",
 			"options": "Options",
 			"exportDeck": "Export (.deck)",
-			"importDeck": "Import Deck",
+			"importDeckFromFile": "Import from File",
+			"copyDeckCode": "Copy Deck Code",
+			"importDeckFromCode": "Import Deck Code",
+			"deckCodeImportPrompt": "Paste your deck code.\n(It should look similar to this: a4z8bb3n558a77sa1gi2h8pg8a2v4i58a )",
 			"drawStartingHand": "Draw Starting Hand"
 		},
 
