@@ -777,7 +777,7 @@ document.getElementById("dotDeckExportBtn").addEventListener("click", function()
 	let deck = deckUtils.basicDeckFromCardList(
 		deckList,
 		deckMakerDetailsPartnerSelect.value,
-		deckMakerDetailsNameInput.value === ""? deckMakerDetailsNameInput.value : deckMakerDetailsNameInput.placeholder,
+		deckMakerDetailsNameInput.value === ""? deckMakerDetailsNameInput.placeholder : deckMakerDetailsNameInput.value,
 		deckMakerDetailsDescriptionInput.value
 	);
 

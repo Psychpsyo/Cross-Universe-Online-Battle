@@ -29,13 +29,13 @@ export function deckFromCardList(cards, partner = null, name = null, description
 // Creates a .deck json from a .deckx json, based on the user's current locale
 export function basicDeckFromCardList(cards, partner = null, name = null, description = null) {
 	let deck = {};
-	deck.Name = name ?? "";
-	deck.Description = description ?? "";
 	deck.Cards = [];
+	deck.Description = description ?? "";
+	deck.Name = name ?? "";
 
 	//add the cards
 	for (const card of cards.toSorted().reverse()) {
-		if (card === partner && typeof deck.Partner !== "undefined") {
+		if (card === partner && typeof deck.Partner === "undefined") {
 			deck.Partner = "CU" + card;
 		} else {
 			deck.Cards.push("CU" + card);
