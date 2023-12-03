@@ -362,7 +362,7 @@ export class EndPhase extends StackPhase {
 
 function getOptionPriority(option) {
 	if (["doFight", "doStandardDraw"].includes(option.type)) {
-		return 1;
+		return 2;
 	}
 	if (option.type == "activateTriggerAbility") {
 		let hasMandatory = false;
@@ -378,7 +378,7 @@ function getOptionPriority(option) {
 			}
 		}
 		if (hasMandatory) {
-			return 2;
+			return 1;
 		}
 	}
 	return 0;
