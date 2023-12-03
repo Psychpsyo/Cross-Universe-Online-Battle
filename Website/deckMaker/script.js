@@ -163,7 +163,7 @@ if (localStorage.getItem("compactMode") === "true") {
 quickSearch.addEventListener("keyup", function(e) {
 	if (e.key === "Enter") {
 		if (this.value === "") {
-			searchCards({language: (locale.warnings.includes("noCards")? "en" : locale.code)});
+			searchCards({});
 			return;
 		}
 		Array.from(document.getElementsByClassName("deckMakerGrid")).forEach(list => {
@@ -176,7 +176,7 @@ quickSearch.addEventListener("keyup", function(e) {
 		url += url.endsWith("/")? "stringSearch" : "/stringSearch";
 		fetch(
 			url,
-			{method: "POST", body: JSON.stringify({input: this.value})}
+			{method: "POST", body: JSON.stringify({input: this.value, language: locale.warnings.includes("noCards")? "en" : locale.code})}
 		).then(response => response.text())
 		.then(async (response) => {
 			loadingIndicator.classList.remove("active");
@@ -235,6 +235,8 @@ function searchCards(query) {
 	closeAllDeckMakerOverlays();
 	loadingIndicator.classList.add("active");
 	noResultsMessage.hidden = true;
+
+	query.language = locale.warnings.includes("noCards")? "en" : locale.code;
 
 	fetch(
 		localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl"),
