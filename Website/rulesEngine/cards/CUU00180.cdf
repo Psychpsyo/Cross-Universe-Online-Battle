@@ -13,4 +13,4 @@ cost:
 $cardChoice = SELECT(1, [from you.hand where types = Dark]);
 DISCARD($cardChoice);
 exec:
-SUMMON(SELECT(1, [from you.discard where level > $cardChoice.level]), you.unitZone);
+SUMMON(SELECT(1, [from you.discard where level > $cardChoice.level]));

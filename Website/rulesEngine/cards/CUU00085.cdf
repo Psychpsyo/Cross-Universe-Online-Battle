@@ -12,5 +12,5 @@ condition: thisCard.zone = field
 cost:
 LOSEMANA(1);
 exec:
-SUMMON(TOKENS(1, CUT00001, CUT00001, 0, [Illusion, Light, Bug], 0, 0), you.unitZone);
+SUMMON(TOKENS(1, CUT00001, CUT00001, 0, [Illusion, Light, Bug], 0, 0), you.field);
 LOSELIFE(100);

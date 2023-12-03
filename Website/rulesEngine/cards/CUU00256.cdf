@@ -12,7 +12,7 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand where types = Ice]));
 exec:
-SUMMON(SELECT(1, [from you.deck where name = CUU00121]), you.unitZone);
+SUMMON(SELECT(1, [from you.deck where name = CUU00121]));
 
 o: trigger
 during: attackers = thisCard

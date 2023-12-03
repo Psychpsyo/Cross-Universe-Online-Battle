@@ -1,5 +1,5 @@
 import * as ast from "./astNodes.js";
-import * as cardValues from "../cardValues.js";
+import * as valueModifiers from "../valueModifiers.js";
 
 let pos; // the current position in the token stream
 let tokens; // the token stream emitted by the lexer
@@ -656,7 +656,7 @@ function parseAbilityCancelModification() {
 		condition = parseExpression();
 	}
 
-	return new cardValues.AbilityCancelModification("abilities", rightHandSide, false, condition);
+	return new valueModifiers.AbilityCancelModification("abilities", rightHandSide, false, condition);
 }
 
 function parseValueModifications() {
@@ -711,18 +711,18 @@ function parseValueModifications() {
 	for (const [i, valueIdentifier] of valueIdentifiers.entries()) {
 		switch (assignmentType) {
 			case "immunityAssignment": {
-				valueModifications.push(new cardValues.ValueUnaffectedModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				valueModifications.push(new valueModifiers.ValueUnaffectedModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				break;
 			}
 			case "equals": {
-				valueModifications.push(new cardValues.ValueSetModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				valueModifications.push(new valueModifiers.ValueSetModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				break;
 			}
 			case "plusAssignment": {
 				if (["level", "attack", "defense"].includes(valueIdentifier)) {
-					valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+					valueModifications.push(new valueModifiers.NumericChangeModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				} else {
-					valueModifications.push(new cardValues.ValueAppendModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+					valueModifications.push(new valueModifiers.ValueAppendModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				}
 				break;
 			}
@@ -730,14 +730,14 @@ function parseValueModifications() {
 				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
 					throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.");
 				}
-				valueModifications.push(new cardValues.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(rightHandSide), toBaseValues[i], condition));
+				valueModifications.push(new valueModifiers.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(rightHandSide), toBaseValues[i], condition));
 				break;
 			}
 			case "divideAssignment": {
 				if (!["level", "attack", "defense"].includes(valueIdentifier)) {
 					throw new ScriptParserError("Modifier cannot divide non-number card property '" + valueIdentifier + "'.");
 				}
-				valueModifications.push(new cardValues.NumericDivideModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				valueModifications.push(new valueModifiers.NumericDivideModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				break;
 			}
 			case "swapAssignment": {
@@ -747,7 +747,7 @@ function parseValueModifications() {
 				if (toBaseValues[i]) {
 					rightHandSide = rightHandSide[4].toLowerCase() + rightHandSide.substr(5);
 				}
-				valueModifications.push(new cardValues.ValueSwapModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
+				valueModifications.push(new valueModifiers.ValueSwapModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				break;
 			}
 		}

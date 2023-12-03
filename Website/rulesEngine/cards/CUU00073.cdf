@@ -9,4 +9,4 @@ defense: 200
 o: trigger
 mandatory: no
 after: summoned = thisCard
-SUMMON(SELECT(1, [from you.deck where name = CUU00074]), you.unitZone);
+SUMMON(SELECT(1, [from you.deck where name = CUU00074]));

@@ -14,7 +14,7 @@ modifier: {attack += COUNT([from field where name = CUU00107]) * 100}
 o: trigger
 mandatory: yes
 after: destroyed = thisCard
-SUMMON(SELECT(1, [from you.deck where name = CUU00107]), you.unitZone);
+SUMMON(SELECT(1, [from you.deck where name = CUU00107]));
 
 o: static
 applyTo: [from field where GETCOUNTERS(self, Weakness) > 0]

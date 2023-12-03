@@ -12,7 +12,7 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand where types = thisCard.types]));
 exec:
-SUMMON(SELECT(1, [from you.deck where name = CUU00232]), you.unitZone);
+SUMMON(SELECT(1, [from you.deck where name = CUU00232]));
 
 o: optional
 turnLimit: 1

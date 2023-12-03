@@ -5,7 +5,7 @@ import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 
 export class CardValues {
-	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, doLifeDamage = true) {
+	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, canAttack, canCounterattack) {
 		this.cardTypes = cardTypes;
 		this.names = names;
 		this.level = level;
@@ -14,7 +14,8 @@ export class CardValues {
 		this.defense = defense;
 		this.abilities = abilities;
 		this.attackRights = attackRights;
-		this.doLifeDamage = doLifeDamage;
+		this.canAttack = canAttack;
+		this.canCounterattack = canCounterattack;
 	}
 
 	// Clones these values WITHOUT cloning contained abilities by design.
@@ -30,7 +31,8 @@ export class CardValues {
 			this.defense,
 			[...this.abilities],
 			this.attackRights,
-			this.doLifeDamage
+			this.canAttack,
+			this.canCounterattack
 		);
 	}
 
@@ -61,7 +63,7 @@ export class CardValues {
 	}
 }
 
-export class CardModifier {
+export class Modifier {
 	constructor(modifications, ctx) {
 		this.modifications = modifications;
 		this.ctx = ctx;
@@ -122,7 +124,7 @@ export class CardModifier {
 		ast.setImplicitCards([forCard]);
 		let bakedModifications = this.modifications.map(modification => modification.bake(this.ctx)).filter(modification => modification !== null);
 		ast.clearImplicitCards();
-		return new CardModifier(bakedModifications, this.ctx);
+		return new Modifier(bakedModifications, this.ctx);
 	}
 }
 
@@ -141,7 +143,7 @@ export class ValueModification {
 	}
 
 	isUnitSpecific() {
-		return ["attack", "defense", "attackRights"].includes(this.value);
+		return ["attack", "defense", "attackRights", "canAttack", "canCounterattack"].includes(this.value);
 	}
 
 	canApplyTo(target, ctx) {

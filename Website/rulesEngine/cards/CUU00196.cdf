@@ -13,4 +13,4 @@ after: discarded = thisCard
 cost:
 DISCARD(SELECT(1, [from you.hand]));
 exec:
-SUMMON(SELECT(1, [from you.deck where name = CUU00196]), you.unitZone);
+SUMMON(SELECT(1, [from you.deck where name = CUU00196]));

@@ -1,6 +1,6 @@
 // This module exports the Card class which represents a specific card in a Game.
 
-import {CardValues} from "./cardValues.js";
+import {CardValues} from "./valueModifiers.js";
 import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 import * as abilities from "./abilities.js";
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
@@ -89,11 +89,13 @@ export class BaseCard {
 		for (const modifier of this.modifierStack) {
 			this.values = modifier.modify(this, false, false);
 		}
-		// non-units only have base attack/defense
+		// non-units only have base values for attack/defense-related things
 		if (!this.values.cardTypes.includes("unit")) {
 			this.values.attack = null;
 			this.values.defense = null;
 			this.values.attackRights = null;
+			this.values.canAttack = null;
+			this.values.canCounterAttack = null;
 		}
 	}
 
@@ -217,7 +219,9 @@ export class BaseCard {
 	// Does not check if the card can be declared to attack, only if it is allowed to be/stay in an attack declaration.
 	canAttack() {
 		if (this.isRemovedToken) return false;
-		return this.values.cardTypes.includes("unit") && (this.attackCount < this.values.attackRights || this.canAttackAgain);
+		if (!this.values.cardTypes.includes("unit")) return false;
+		if (!this.values.canAttack) return false;
+		return this.attackCount < this.values.attackRights || this.canAttackAgain;
 	}
 
 	static sort(a, b) {
@@ -252,7 +256,8 @@ export class Card extends BaseCard {
 				data.attack ?? null,
 				data.defense ?? null,
 				data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
-				baseCardTypes.includes("unit")? 1 : null
+				baseCardTypes.includes("unit")? 1 : null,
+				baseCardTypes.includes("unit")? true : null
 			),
 			data.deckLimit,
 			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game),

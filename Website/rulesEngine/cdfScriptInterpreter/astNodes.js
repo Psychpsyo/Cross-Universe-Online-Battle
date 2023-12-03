@@ -4,7 +4,7 @@ import * as actions from "../actions.js";
 import * as blocks from "../blocks.js";
 import * as zones from "../zones.js";
 import {BaseCard} from "../card.js";
-import {CardModifier} from "../cardValues.js";
+import {Modifier} from "../valueModifiers.js";
 import {ScriptValue, ScriptContext, DeckPosition} from "./structs.js";
 import {functions, initFunctions} from "./functions.js";
 
@@ -367,7 +367,8 @@ export class CardPropertyNode extends AstNode {
 			"equipments": "card",
 			"attackRights": "number",
 			"attacksMade": "number",
-			"doLifeDamage": "bool",
+			"canAttack": "bool",
+			"canCounterattack": "bool",
 			"fightingAgainst": "card",
 			"self": "card",
 			"zone": "zone",
@@ -379,17 +380,16 @@ export class CardPropertyNode extends AstNode {
 
 	* eval(ctx) {
 		let cards = (yield* this.cards.eval(ctx)).get(ctx.player);
-		if (this.property === "isToken") {
-			let isToken = false;
-			for (const c of cards) {
-				if (c.isToken) {
-					isToken = true;
+		let retVal = cards.map(card => this.accessProperty(card)).flat();
+		if (this.returnType === "bool") {
+			for (const value of retVal) {
+				if (value === true) {
+					retVal = true;
 					break;
 				}
 			}
-			return new ScriptValue("bool", isToken);
 		}
-		return new ScriptValue(this.returnType, cards.map(card => this.accessProperty(card)).flat());
+		return new ScriptValue(this.returnType, retVal);
 	}
 
 	evalFull(ctx) {
@@ -462,8 +462,11 @@ export class CardPropertyNode extends AstNode {
 			case "attacksMade": {
 				return card.attackCount;
 			}
-			case "doLifeDamage": {
-				return card.values.doLifeDamage;
+			case "canAttack": {
+				return card.values.canAttack;
+			}
+			case "canCounterattack": {
+				return card.values.canCounterattack;
 			}
 			case "fightingAgainst": {
 				let currentBlock = card.owner.game.currentBlock();
@@ -482,6 +485,9 @@ export class CardPropertyNode extends AstNode {
 			}
 			case "zone": {
 				return card.zone;
+			}
+			case "isToken": {
+				return card.isToken;
 			}
 		}
 	}
@@ -1089,7 +1095,7 @@ export class ModifierNode extends AstNode {
 		this.modifications = modifications;
 	}
 	* eval(ctx) {
-		return new ScriptValue("modifier", new CardModifier(this.modifications, ctx));
+		return new ScriptValue("modifier", new Modifier(this.modifications, ctx));
 	}
 }
 

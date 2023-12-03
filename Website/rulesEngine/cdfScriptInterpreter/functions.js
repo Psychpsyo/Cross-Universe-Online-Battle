@@ -757,12 +757,12 @@ export function initFunctions() {
 	// Summons the given cards
 	SUMMON: new ScriptFunction(
 		["card", "zone", "bool"],
-		[null, null, new ast.BoolNode("yes")],
+		[null, new ast.ZoneNode("unitZone", new ast.PlayerNode("you")), new ast.BoolNode("yes")],
 		"action",
 		function*(astNode, ctx) {
 			// TODO: Make player choose which cards to summon if only a limited amount can be summoned
 			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
-			let zone = (yield* this.getParameter(astNode, "zone").eval(ctx)).get(ctx.player)[0];
+			let zone = (yield* this.getParameter(astNode, "zone").eval(ctx)).get(ctx.player).find(zone => zone.type === "unit");
 			let payCost = (yield* this.getParameter(astNode, "bool").eval(ctx)).get(ctx.player);
 
 			let costs = [];
