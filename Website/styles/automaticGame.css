@@ -350,6 +350,8 @@
 	font-size: .75em;
 	white-space: nowrap;
 	z-index: 25;
+
+	pointer-events: none;
 }
 #p0Grid .cardValueOverlay {
 	top: 0;

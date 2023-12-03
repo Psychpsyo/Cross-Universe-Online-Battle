@@ -321,7 +321,7 @@ export class AutomaticController extends InteractionController {
 				const cards = [];
 				for (const event of events) {
 					generalUI.updateCardPreview(event.card);
-					if (!event.isBaseValue && ["attack", "defense"].includes(event.valueName) && !cards.includes(event.card)) {
+					if (["attack", "defense"].includes(event.valueName) && !cards.includes(event.card)) {
 						changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.card, false));
 						cards.push(event.card);
 					}
