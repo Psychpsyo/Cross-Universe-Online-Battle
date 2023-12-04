@@ -1,12 +1,11 @@
-import {locale} from "/modules/locale.js";
+import * as generalUI from "/modules/generalUI.js";
+import {DistRandom} from "/modules/distributedRandom.js";
 import {GameState} from "/modules/gameState.js";
 import {DraftState} from "/modules/draftState.js";
 import {DeckState} from "/modules/deckState.js";
 import {Game} from "/rulesEngine/game.js";
 import {stopEffect} from "/modules/levitationEffect.js";
 import {socket, connectTo} from "/modules/netcode.js";
-import {putChatMessage} from "/modules/generalUI.js";
-import * as gameUI from "/modules/gameUI.js";
 
 export class InitState extends GameState {
 	constructor(roomcode, gameMode, websocketUrl) {
@@ -35,6 +34,7 @@ export class InitState extends GameState {
 				socket.send("[language]" + localStorage.getItem("language"));
 
 				game = new Game();
+				game.rng = new DistRandom();
 				localPlayer = game.players[1];
 				socket.send("[ready]");
 				this.checkReadyConditions();
@@ -77,60 +77,45 @@ export class InitState extends GameState {
 	}
 
 	checkReadyConditions() {
-		if (this.opponentReady && youAre !== null) {
-			// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
-			document.getElementById("gameDiv").addEventListener("dragover", function(e) {
-				e.preventDefault();
-			});
-			document.getElementById("gameDiv").addEventListener("drop", function(e) {
-				e.preventDefault();
-			});
+		if (!this.opponentReady || youAre === null) return;
 
-			// prevent user from accidently leaving the site
-			window.unloadWarning = new AbortController();
-			window.addEventListener("beforeunload", function(e) {
-				if (lifeDisplay0.textContent > 0 && lifeDisplay1.textContent > 0) {
-					e.preventDefault();
-					e.returnValue = "";
-				}
-			}, {"signal": unloadWarning.signal});
+		// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
+		document.getElementById("gameDiv").addEventListener("dragover", function(e) {
+			e.preventDefault();
+		});
+		document.getElementById("gameDiv").addEventListener("drop", function(e) {
+			e.preventDefault();
+		});
 
-			switch (this.gameMode) {
-				case "normal": {
-					new DeckState(false);
-					break;
-				}
-				case "draft": {
-					new DraftState();
-					break;
-				}
-				case "normalAutomatic": {
-					new DeckState(true);
-					break;
-				}
+		// prevent user from accidently leaving the site
+		window.unloadWarning = new AbortController();
+		window.addEventListener("beforeunload", function(e) {
+			if (lifeDisplay0.textContent > 0 && lifeDisplay1.textContent > 0) {
+				e.preventDefault();
+				e.returnValue = "";
 			}
+		}, {"signal": unloadWarning.signal});
 
-			// make chat functional
-			document.getElementById("chatInput").addEventListener("keyup", function(e) {
-				if (e.code == "Enter" && this.value != "") {
-					socket.send("[chat]" + this.value);
-					putChatMessage(players[1].name + locale["chat"]["colon"] + this.value);
-					this.value = "";
-				}
-				if (e.code == "Escape") {
-					this.blur();
-				}
-			});
+		// switch to game view
+		stopEffect();
+		roomCodeEntry.remove();
+		generalUI.init();
+		gameDiv.hidden = false;
 
-			document.getElementById("chatInput").addEventListener("keydown", function(e) {
-				e.stopPropagation();
-			});
-
-			// main screen is no longer needed
-			stopEffect();
-			roomCodeEntry.remove();
-			gameDiv.hidden = false;
-			gameUI.init();
+		// Start game
+		switch (this.gameMode) {
+			case "normal": {
+				new DeckState(false);
+				break;
+			}
+			case "draft": {
+				new DraftState();
+				break;
+			}
+			case "normalAutomatic": {
+				new DeckState(true);
+				break;
+			}
 		}
 	}
 

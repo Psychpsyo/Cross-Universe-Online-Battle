@@ -16,35 +16,8 @@ const abilityTypes = new Map([
 
 let currentPreviewedCard = null;
 
-chatHeader.textContent = locale.chat.title;
-chatInput.placeholder = locale.chat.enterMessage;
-
-cardDetailsAttack.textContent = locale.cardDetailsAttack;
-cardDetailsDefense.textContent = locale.cardDetailsDefense;
-cardDetailsLevel.textContent = locale.cardDetailsLevel;
-cardDetailsLevelTypeSeparator.textContent = locale.cardDetailsLevelTypeSeparator;
-cardDetailsTypes.textContent = locale.cardDetailsTypes;
-
-infoPanelVS.textContent = locale.game.playerInfo.vs;
-for (let i = 0; i < 2; i++) {
-	document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
-	document.getElementById("playerDeckButtonImage" + i).alt = locale.game.playerInfo.viewDeck;
-	document.getElementById("playerDeckButton" + i).addEventListener("click", function() {
-		let deck = players[i].deck;
-		if (deck.name) {
-			deckViewTitle.classList.remove("greyedOut");
-			deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
-		} else {
-			deckViewTitle.textContent = "";
-		}
-		if (deckViewTitle.textContent == "") {
-			deckViewTitle.textContent = locale.game.deckSelect.unnamedDeck;
-			deckViewTitle.classList.add("greyedOut");
-		}
-		loadDeckPreview(deck);
-		openDeckView();
-	});
-}
+// used for profile pictures here but also used for things like the cool attack visuals by automatic games
+export const cardAlignmentInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
 
 export function createAbilityFragment(abilityText) {
 	const fragment = new DocumentFragment();
@@ -84,6 +57,7 @@ export function createAbilityFragment(abilityText) {
 
 	return fragment;
 }
+
 
 // chat box
 let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
@@ -131,26 +105,8 @@ export function putChatMessage(message, type, cards) {
 		messageDiv.classList.add(type);
 	}
 	chatBox.appendChild(messageDiv);
-	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight
+	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight;
 }
-
-// card preview
-document.addEventListener("click", function() {
-	if (localStorage.getItem("autoClosePreview") === "true") {
-		closeCardPreview();
-	}
-});
-
-cardDetails.addEventListener("click", function(e) {
-	// make the click not pass through to the document to close the preview.
-	e.stopPropagation();
-});
-cardDetailsSwitch.addEventListener("click", function(e) {
-	cardDetailsImage.style.display = window.getComputedStyle(cardDetailsImage).display == "none"? "revert" : "none";
-	e.stopPropagation();
-});
-cardDetailsClose.addEventListener("click", closeCardPreview);
-cardDetails.show();
 
 export function closeCardPreview() {
 	cardDetails.style.setProperty("--side-distance", "-50vh");
@@ -367,9 +323,92 @@ export function closeDeckView() {
 	deckSelector.close();
 }
 
-// selecting deck from the deck list
-deckSelector.addEventListener("click", function(e) {
-	if (e.target == document.getElementById("deckSelector")) {
-		closeDeckView();
+// init function
+export function init() {
+	chatHeader.textContent = locale.chat.title;
+	chatInput.placeholder = locale.chat.enterMessage;
+
+	cardDetailsAttack.textContent = locale.cardDetailsAttack;
+	cardDetailsDefense.textContent = locale.cardDetailsDefense;
+	cardDetailsLevel.textContent = locale.cardDetailsLevel;
+	cardDetailsLevelTypeSeparator.textContent = locale.cardDetailsLevelTypeSeparator;
+	cardDetailsTypes.textContent = locale.cardDetailsTypes;
+
+	infoPanelVS.textContent = locale.game.playerInfo.vs;
+	for (let i = 0; i < 2; i++) {
+		document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
+		document.getElementById("playerDeckButtonImage" + i).alt = locale.game.playerInfo.viewDeck;
+		document.getElementById("playerDeckButton" + i).addEventListener("click", function() {
+			let deck = players[i].deck;
+			if (deck.name) {
+				deckViewTitle.classList.remove("greyedOut");
+				deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
+			} else {
+				deckViewTitle.textContent = "";
+			}
+			if (deckViewTitle.textContent == "") {
+				deckViewTitle.textContent = locale.game.deckSelect.unnamedDeck;
+				deckViewTitle.classList.add("greyedOut");
+			}
+			loadDeckPreview(deck);
+			openDeckView();
+		});
 	}
-});
+
+	// profile pictures
+	for (let i = 0; i < 2; i++) {
+		document.getElementById("username" + i).textContent = players[i].name;
+		document.getElementById("profilePicture" + i).style.backgroundImage = "url('" + cardLoader.getCardImageFromID(players[i].profilePicture) + "')";
+		if (cardAlignmentInfo[players[i].profilePicture]?.left) {
+			document.getElementById("profilePicture" + i).style.backgroundPositionX = cardAlignmentInfo[players[i].profilePicture].left + "%";
+		}
+	}
+	if (!cardAlignmentInfo[players[0].profilePicture]?.flip && !cardAlignmentInfo[players[0].profilePicture]?.neverFlip) {
+		profilePicture0.style.transform = "scaleX(-1)";
+	}
+	if (cardAlignmentInfo[players[1].profilePicture]?.flip) {
+		profilePicture1.style.transform = "scaleX(-1)";
+	}
+
+	// chat
+	document.getElementById("chatInput").addEventListener("keyup", function(e) {
+		if (e.code == "Enter" && this.value != "") {
+			socket.send("[chat]" + this.value);
+			putChatMessage(players[1].name + locale["chat"]["colon"] + this.value);
+			this.value = "";
+		}
+		if (e.code == "Escape") {
+			this.blur();
+		}
+	});
+	document.getElementById("chatInput").addEventListener("keydown", function(e) {
+		e.stopPropagation();
+	});
+
+
+	// card preview
+	document.addEventListener("click", function() {
+		if (localStorage.getItem("autoClosePreview") === "true") {
+			closeCardPreview();
+		}
+	});
+
+	cardDetails.addEventListener("click", function(e) {
+		// make the click not pass through to the document to close the preview.
+		e.stopPropagation();
+	});
+	cardDetailsSwitch.addEventListener("click", function(e) {
+		cardDetailsImage.style.display = window.getComputedStyle(cardDetailsImage).display == "none"? "revert" : "none";
+		e.stopPropagation();
+	});
+	cardDetailsClose.addEventListener("click", closeCardPreview);
+	cardDetails.show();
+
+
+	// selecting deck from the deck selector list
+	deckSelector.addEventListener("click", function(e) {
+		if (e.target == document.getElementById("deckSelector")) {
+			closeDeckView();
+		}
+	});
+}

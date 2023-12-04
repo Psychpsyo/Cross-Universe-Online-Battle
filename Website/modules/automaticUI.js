@@ -1,7 +1,7 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
 import {locale} from "/modules/locale.js";
-import {previewCard, closeCardPreview} from "/modules/generalUI.js";
+import {previewCard, closeCardPreview, cardAlignmentInfo} from "/modules/generalUI.js";
 import {FieldZone} from "/rulesEngine/zones.js";
 import {SnapshotCard} from "/rulesEngine/card.js";
 import * as gameUI from "/modules/gameUI.js";
@@ -368,17 +368,17 @@ export async function showCoolAttackAnim(defender, attackers) {
 
 	const imgs = document.querySelectorAll(".coolAttackImgHolder > img");
 	imgs[0].src = cardLoader.getCardImage(defender);
-	if (gameUI.cardAlignmentInfo[defender.cardId]?.flip) {
-		imgs[0].style.setProperty("--left", -100 + (gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
+	if (cardAlignmentInfo[defender.cardId]?.flip) {
+		imgs[0].style.setProperty("--left", -100 + (cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 		imgs[0].style.transform = "scaleX(-1)";
 	} else {
-		imgs[0].style.setProperty("--left", -(gameUI.cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
+		imgs[0].style.setProperty("--left", -(cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 	}
 
 	for (let i = 0; i < attackers.length; i++) {
 		imgs[i+1].src = cardLoader.getCardImage(attackers[i]);
-		imgs[i+1].style.setProperty("--left", -(gameUI.cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
-		if (!gameUI.cardAlignmentInfo[attackers[i].cardId]?.flip && !gameUI.cardAlignmentInfo[attackers[i].cardId]?.neverFlip) {
+		imgs[i+1].style.setProperty("--left", -(cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
+		if (!cardAlignmentInfo[attackers[i].cardId]?.flip && !cardAlignmentInfo[attackers[i].cardId]?.neverFlip) {
 			imgs[i+1].style.transform = "scaleX(-1)";
 		} else {
 			imgs[i+1].style.transform = "";

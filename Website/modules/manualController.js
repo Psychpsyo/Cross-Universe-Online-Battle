@@ -61,13 +61,10 @@ export class ManualController extends InteractionController {
 	}
 
 	async startGame() {
-		if (youAre === 0) {
-			this.deckShuffle(localPlayer.deckZone);
-			let startingPlayer = Math.random() > .5;
-			putChatMessage(startingPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
-			socket.send("[selectPlayer]" + startingPlayer);
-			addPartnerRevealButton();
-		}
+		this.deckShuffle(localPlayer.deckZone);
+		let startingPlayer = await game.randomPlayer();
+		putChatMessage(startingPlayer === localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
+		addPartnerRevealButton();
 	}
 
 	receiveMessage(command, message) {
@@ -140,12 +137,6 @@ export class ManualController extends InteractionController {
 					game.players[0].handZone.cards[i].hideFrom(localPlayer);
 					gameUI.updateCard(game.players[0].handZone, i);
 				}
-				return true;
-			}
-			case "selectPlayer": { // opponent chose the starting player (at random)
-				this.deckShuffle(localPlayer.deckZone);
-				putChatMessage(message == "true"? locale.game.notices.opponentStarts : locale.game.notices.youStart, "notice");
-				addPartnerRevealButton();
 				return true;
 			}
 			default: {

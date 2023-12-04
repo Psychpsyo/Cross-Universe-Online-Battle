@@ -32,6 +32,8 @@ export class BoardState extends GameState {
 		mainGameArea.hidden = false;
 
 		this.controller = automatic? new AutomaticController() : new ManualController();
+
+		this.givePartnerChoice();
 	}
 
 	receiveMessage(command, message) {

@@ -146,6 +146,7 @@ export class DeckState extends GameState {
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.chooseYourDeck;
 
 		mainGameArea.hidden = false;
+		gameUI.init();
 	}
 
 	receiveMessage(command, message) {
@@ -239,7 +240,6 @@ export class DeckState extends GameState {
 			}
 			if (this.opponentReady) {
 				new BoardState(this.automatic);
-				gameState.givePartnerChoice();
 			}
 		}
 	}

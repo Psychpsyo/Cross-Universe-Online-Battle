@@ -32,6 +32,14 @@ function receiveMessage(e) {
 			putChatMessage(players[0].name + locale["chat"]["colon"] + message);
 			break;
 		}
+		case "distRandValue": {
+			game.rng.importCyphertext(message);
+			return true;
+		}
+		case "distRandKey": {
+			game.rng.importCypherKey(message);
+			return true;
+		}
 		case "quit": { // opponent quit the game (or crashed)
 			socket.close();
 			unloadWarning.abort();

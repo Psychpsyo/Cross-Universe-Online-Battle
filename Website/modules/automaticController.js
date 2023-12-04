@@ -3,7 +3,6 @@
 import {locale} from "/modules/locale.js";
 import {InteractionController} from "/modules/interactionController.js";
 import {socket} from "/modules/netcode.js";
-import {DistRandom} from "/modules/distributedRandom.js";
 import {getAutoResponse} from "/modules/autopass.js";
 import {SnapshotCard} from "/rulesEngine/card.js";
 import * as gameUI from "/modules/gameUI.js";
@@ -19,7 +18,6 @@ export class AutomaticController extends InteractionController {
 		super();
 
 		autoUI.init();
-		game.rng = new DistRandom();
 
 		this.opponentMoveEventTarget = new EventTarget();
 		this.opponentMoves = [];
@@ -115,14 +113,6 @@ export class AutomaticController extends InteractionController {
 				}
 				this.opponentMoves.push(move);
 				this.opponentMoveEventTarget.dispatchEvent(new CustomEvent("input"));
-				return true;
-			}
-			case "distRandValue": {
-				game.rng.importCyphertext(message);
-				return true;
-			}
-			case "distRandKey": {
-				game.rng.importCypherKey(message);
 				return true;
 			}
 			case "cancelRetire": {
