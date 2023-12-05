@@ -5,7 +5,7 @@ import {DraftState} from "/modules/draftState.js";
 import {DeckState} from "/modules/deckState.js";
 import {Game} from "/rulesEngine/game.js";
 import {stopEffect} from "/modules/levitationEffect.js";
-import {socket, connectTo} from "/modules/netcode.js";
+import {socket, connectTo, youAre} from "/modules/netcode.js";
 
 export class InitState extends GameState {
 	constructor(roomcode, gameMode, websocketUrl) {
@@ -39,12 +39,6 @@ export class InitState extends GameState {
 				socket.send("[ready]");
 				this.checkReadyConditions();
 
-				return true;
-			}
-			case "youAre": { // Indicates if this client is player 0 or 1.
-				// TODO: This message is currently just sent by the server for simplicity but who is player 0 or 1 should really be negotiated by the clients in this initial handshake.
-				youAre = parseInt(message);
-				this.checkReadyConditions();
 				return true;
 			}
 			case "username": {

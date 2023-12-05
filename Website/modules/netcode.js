@@ -2,6 +2,7 @@ import {putChatMessage} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
 
 export let socket = null;
+export let youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and player selection, as far as the board is concerned, the local player is always player 1.)
 
 export function zoneToLocal(name) {
 	if (name == "undefined") {
@@ -45,6 +46,11 @@ function receiveMessage(e) {
 			unloadWarning.abort();
 			location.reload();
 			break;
+		}
+		case "youAre": { // Indicates if this client is player 0 or 1.
+			// TODO: This message is currently just sent by the server for simplicity but who is player 0 or 1 should really be negotiated by the clients in this initial handshake.
+			youAre = parseInt(message);
+			return true;
 		}
 		default: {
 			if (!gameState?.receiveMessage(command, message)) {

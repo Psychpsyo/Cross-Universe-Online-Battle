@@ -3,7 +3,7 @@
 // a commit-then-reveal protocol.
 
 import {CURandom} from "/rulesEngine/random.js";
-import {socket} from "/modules/netcode.js";
+import {socket, youAre} from "/modules/netcode.js";
 
 export class DistRandom extends CURandom {
 	constructor() {
