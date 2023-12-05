@@ -4,6 +4,58 @@ let cardsSoFar = 0;
 let effectElement = null;
 let effectInterval = null;
 
+const christmasCards = [
+	"I00024",
+	"I00039",
+	"I00067",
+	"I00077",
+	"I00113",
+	"S00047",
+	"S00052",
+	"S00096",
+	"S00141",
+	"S00162",
+	"S00169",
+	"S00215",
+	"S00216",
+	"T00002",
+	"T00024",
+	"U00001",
+	"U00020",
+	"U00055",
+	"U00089",
+	"U00092",
+	"U00098",
+	"U00103",
+	"U00109",
+	"U00121",
+	"U00133",
+	"U00134",
+	"U00155",
+	"U00176",
+	"U00183",
+	"U00185",
+	"U00192",
+	"U00226",
+	"U00229",
+	"U00233",
+	"U00245",
+	"U00256"
+];
+const cardBaseUrl = (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl"));
+function getRandomCardLink() {
+	const date = new Date();
+	const day = date.getDate();
+	const month = date.getMonth();
+	if (month === 11 && (day === 24 || day === 25 || day === 26)) {
+		return cardBaseUrl + locale.code + "/" + christmasCards[Math.floor(Math.random(christmasCards.length))] + ".jpg";
+	}
+	if (month === 3 && day === 1) {
+		return cardBaseUrl + locale.code + "/S00099.jpg";
+	}
+	return cardBaseUrl + "random?lang=" + locale.code + "&num=" + cardsSoFar;
+}
+
 function spawnCard(parentElement) {
 	let card = document.createElement("div");
 	card.classList.add("levitateCard");
@@ -19,7 +71,7 @@ function spawnCard(parentElement) {
 		position += 70;
 	}
 	card.style.left = position + "%";
-	card.style.backgroundImage = "url('" + (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")) + "random?lang=" + locale.code + "&num=" + cardsSoFar + "')"
+	card.style.backgroundImage = "url('" + getRandomCardLink() + "')";
 	cardsSoFar++;
 
 	parentElement.appendChild(card);
