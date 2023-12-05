@@ -21,6 +21,12 @@
 	aspect-ratio: 8130 / 1185;
 	background-color: #0004;
 	user-select: none;
+	filter: brightness(1);
+	transition: filter .5s;
+}
+
+.draftFinished #draftCardSelection {
+	filter: brightness(.5);
 }
 
 @keyframes cardEntry {

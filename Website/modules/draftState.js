@@ -24,6 +24,7 @@ export class DraftState extends GameState {
 		this.takenCards = 0;
 		this.packsOpened = 0;
 		this.currentPlayer = null;
+		this.firstPlayer = null;
 
 		this.pressedReady = false;
 		this.opponentReady = false;
@@ -52,15 +53,19 @@ export class DraftState extends GameState {
 
 		game.randomPlayer().then(player => {
 			this.setPlayer(player);
+			this.firstPlayer = player;
 			this.rerollCards();
-		})
+		});
 
 		draftGameSetupMenu.hidden = false;
 	}
 	receiveMessage(command, message) {
 		switch (command) {
 			case "picked": {
-				this.addToDeck(draftCardSelection.childNodes.item(message), 0);
+				let cardElem = draftCardSelection.childNodes.item(message);
+				if (this.isForPlayer(cardElem, localPlayer.next())) {
+					this.addToDeck(cardElem, 0);
+				}
 				return true;
 			}
 			case "ready": {
@@ -94,7 +99,7 @@ export class DraftState extends GameState {
 		const randomValues = await game.randomInts(randomRanges);
 		for (let i = 0; i < 10; i++) {
 			let cardPool = this.format.cardPools[this.format.packContents[i].pool];
-			this.currentBooster.push(cardPool[randomValues[i]]);
+			this.currentBooster.push({card: cardPool[randomValues[i]], forPlayer: this.format.packContents[i].player});
 		}
 
 		this.openNewPack();
@@ -116,7 +121,9 @@ export class DraftState extends GameState {
 	slideCardIn() {
 		let card = document.createElement("img");
 		card.draggable = false;
-		card.dataset.cardId = this.currentBooster.pop();
+		const boosterElement = this.currentBooster.pop();
+		card.dataset.cardId = boosterElement.card;
+		card.dataset.forPlayer = boosterElement.forPlayer;
 		card.src = cardLoader.getCardImageFromID(card.dataset.cardId);
 		card.addEventListener("click", async function(e) {
 			if (e.shiftKey || e.ctrlKey || e.altKey) {
@@ -129,6 +136,8 @@ export class DraftState extends GameState {
 			if (gameState.currentPlayer !== localPlayer) return;
 			// does the card still exist?
 			if (this.src.endsWith("cardHidden.png")) return;
+			// is this card for you?
+			if (!gameState.isForPlayer(this, localPlayer)) return;
 
 			// sync this to the opponent first, since this element may get destroyed by draftAddToDeck if that triggers a reroll.
 			socket.send("[picked]" + Array.from(this.parentElement.childNodes).indexOf(this));
@@ -137,14 +146,25 @@ export class DraftState extends GameState {
 		draftCardSelection.appendChild(card);
 	}
 
+	// whether or not
+	isForPlayer(cardElem, player) {
+		switch (cardElem.dataset.forPlayer) {
+			case "1":
+				return player === this.firstPlayer;
+			case "2":
+				return player === this.firstPlayer.next();
+		}
+		return true;
+	}
+
 	// adds a card to deck and switches which player is taking a card
-	async addToDeck(card, deck) {
+	async addToDeck(cardElem, deck) {
 		let deckCard = document.createElement("img");
-		deckCard.dataset.cardId = card.dataset.cardId;
-		deckCard.src = card.src;
+		deckCard.dataset.cardId = cardElem.dataset.cardId;
+		deckCard.src = cardElem.src;
 		document.getElementById("draftDeckList" + deck).appendChild(deckCard);
 		document.getElementById("draftDeckCount" + deck).textContent = document.getElementById("draftDeckList" + deck).childElementCount + "/" + this.format.deckSize;
-		card.src = "images/cardHidden.png";
+		cardElem.src = "images/cardHidden.png";
 
 		deckCard.addEventListener("click", async function(e) {
 			e.stopPropagation();
@@ -172,6 +192,7 @@ export class DraftState extends GameState {
 			loadingIndicator.classList.remove("active");
 
 			// show start button
+			draftGameSetupMenu.classList.add("draftFinished");
 			draftMainInfo.textContent = locale.draft.finished;
 			draftStartButton.hidden = false;
 			return;
