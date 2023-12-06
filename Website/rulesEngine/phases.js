@@ -65,7 +65,7 @@ export class StackPhase extends Phase {
 			// reset on what stacks trigger abilities were met since we're going back to stack 1.
 			for (let player of this.turn.game.players) {
 				for (let card of player.getActiveCards()) {
-					for (let ability of card.values.abilities) {
+					for (let ability of card.values.current.abilities) {
 						if ((ability instanceof abilities.TriggerAbility ||
 							ability instanceof abilities.CastAbility) &&
 							ability.after
@@ -102,7 +102,7 @@ export class StackPhase extends Phase {
 		let eligibleAbilities = [];
 		let player = stack.getNextPlayer();
 		for (let card of player.getActiveCards()) {
-			let cardAbilities = card.values.abilities;
+			let cardAbilities = card.values.current.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.FastAbility && await cardAbilities[i].canActivate(card, player)) {
 					eligibleAbilities.push({card: card, index: i});
@@ -116,7 +116,7 @@ export class StackPhase extends Phase {
 		let eligibleAbilities = [];
 		let player = stack.getNextPlayer();
 		for (let card of player.getActiveCards()) {
-			let cardAbilities = card.values.abilities;
+			let cardAbilities = card.values.current.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.TriggerAbility && await cardAbilities[i].canActivate(card, player)) {
 					eligibleAbilities.push({card: card, index: i});
@@ -162,21 +162,23 @@ export class ManaSupplyPhase extends Phase {
 
 		// RULES: Next, the active player gains 5 mana.
 		let turnPlayer = this.turn.player;
-		this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, 5)]));
+		this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, turnPlayer.values.current.manaGainAmount)]));
 		await (yield* this.runTiming());
 
 		// RULES: Then they pay their partner's level in mana. If they can't pay, they loose the game.
-		let partnerLevel = turnPlayer.partnerZone.cards[0].values.level;
-		if (turnPlayer.mana < partnerLevel) {
-			let winner = turnPlayer.next();
-			winner.victoryConditions.push("partnerCostTooHigh");
-			yield [createPlayerWonEvent(winner)];
-			while (true) {
-				yield [];
+		if (turnPlayer.values.current.needsToPayForPartner) {
+			let partnerLevel = turnPlayer.partnerZone.cards[0].values.current.level;
+			if (turnPlayer.mana < partnerLevel) {
+				let winner = turnPlayer.next();
+				winner.victoryConditions.push("partnerCostTooHigh");
+				yield [createPlayerWonEvent(winner)];
+				while (true) {
+					yield [];
+				}
+			} else {
+				this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, -partnerLevel)]));
+				await (yield* this.runTiming());
 			}
-		} else {
-			this.timings.push(new Timing(this.turn.game, [new actions.ChangeMana(turnPlayer, -partnerLevel)]));
-			await (yield* this.runTiming());
 		}
 
 		// RULES: If they still have more than 5 mana, it will again be reduced to 5.
@@ -268,7 +270,7 @@ export class MainPhase extends StackPhase {
 	async getActivatableOptionalAbilities() {
 		let eligibleAbilities = [];
 		for (let card of this.turn.player.getActiveCards()) {
-			let cardAbilities = card.values.abilities;
+			let cardAbilities = card.values.current.abilities;
 			for (let i = 0; i < cardAbilities.length; i++) {
 				if (cardAbilities[i] instanceof abilities.OptionalAbility && await cardAbilities[i].canActivate(card, this.turn.player)) {
 					eligibleAbilities.push({card: card, index: i});
@@ -345,7 +347,7 @@ export class EndPhase extends StackPhase {
 	triggerAbilitiesMet() {
 		for (let player of this.turn.game.players) {
 			for (let card of player.getActiveCards()) {
-				for (let ability of card.values.abilities) {
+				for (let ability of card.values.current.abilities) {
 					if (ability instanceof abilities.TriggerAbility && ability.after && ability.triggerMetOnStack !== -1) {
 						return true;
 					}
@@ -367,7 +369,7 @@ function getOptionPriority(option) {
 	if (option.type == "activateTriggerAbility") {
 		let hasMandatory = false;
 		for (let i = option.eligibleAbilities.length -1; i >= 0; i--) {
-			let ability = option.eligibleAbilities[i].card.values.abilities[option.eligibleAbilities[i].index];
+			let ability = option.eligibleAbilities[i].card.values.current.abilities[option.eligibleAbilities[i].index];
 			if (ability.mandatory) {
 				if (!hasMandatory) {
 					option.eligibleAbilities.splice(i + 1);

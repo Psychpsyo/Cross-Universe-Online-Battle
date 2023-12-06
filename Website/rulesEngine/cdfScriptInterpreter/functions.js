@@ -23,13 +23,13 @@ function getZoneForCard(zoneList, card, ctx, forReturn) {
 			switch (zone.type) {
 				case "unit":
 				case "partner": {
-					if (card.values.cardTypes.includes("unit")) {
+					if (card.values.current.cardTypes.includes("unit")) {
 						rightType.push(zone);
 					}
 					break;
 				}
 				case "spellItem": {
-					if (card.values.cardTypes.includes("spell") || card.values.cardTypes.includes("item")) {
+					if (card.values.current.cardTypes.includes("spell") || card.values.current.cardTypes.includes("item")) {
 						rightType.push(zone);
 					}
 					break;
@@ -127,25 +127,31 @@ export let functions = null;
 export function initFunctions() {
 	functions =
 {
-	// Applies a value modifier to a card (TODO: extend for players and game processes)
+	// Applies a value modifier to a card or player (TODO: extend for fights)
 	APPLY: new ScriptFunction(
-		["card", "modifier", "untilIndicator"],
-		[null, null, new ast.UntilIndicatorNode("forever")],
+		["card", "player", "modifier", "untilIndicator"],
+		[null, null, null, new ast.UntilIndicatorNode("forever")],
 		"action",
 		function*(astNode, ctx) {
 			let until = (yield* this.getParameter(astNode, "untilIndicator").eval(ctx)).get(ctx.player);
 			let applyActions = [];
-			for (const target of (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player)) {
-				applyActions.push(new actions.ApplyCardStatChange(
+			let objects = (yield* this.getParameter(astNode, "card")?.eval(ctx))?.get(ctx.player)?.map(card => card.current()) ??
+						  (yield* this.getParameter(astNode, "player").eval(ctx)).get(ctx.player);
+			for (const target of objects) {
+				applyActions.push(new actions.ApplyStatChange(
 					ctx.player,
-					target.current(),
-					(yield* this.getParameter(astNode, "modifier").eval(ctx)).get(ctx.player).bake(target.current()),
+					target,
+					(yield* this.getParameter(astNode, "modifier").eval(ctx)).get(ctx.player).bake(target),
 					until
 				));
 			}
 			return new ScriptValue("tempActions", applyActions);
 		},
-		hasCardTarget,
+		function(astNode, ctx) { // for checking if any cards are available for the first card parameter
+			if (this.getParameter(astNode, "card").evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined) return true;
+			if (this.getParameter(astNode, "player").evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined) return true;
+			return ;
+		},
 		undefined // TODO: Write evalFull
 	),
 
@@ -402,7 +408,7 @@ export function initFunctions() {
 				if (card.current() === null) {
 					continue;
 				}
-				ast.setImplicitCards([card]);
+				ast.setImplicit([card], "card");
 				let zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
 				let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, false);
 				let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
@@ -411,7 +417,7 @@ export function initFunctions() {
 				}
 				moveActions.push(new actions.Move(ctx.player, card.current(), zone, index));
 				zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.current()));
-				ast.clearImplicitCards();
+				ast.clearImplicit("card");
 			}
 
 			for (const [zone, cards] of zoneMoveCards.entries()) {
@@ -443,7 +449,7 @@ export function initFunctions() {
 					if (card.current() === null) {
 						continue;
 					}
-					ast.setImplicitCards([card]);
+					ast.setImplicit([card], "card");
 					// TODO: this might need to handle multiple zone possibilities
 					let zoneValue = this.getParameter(astNode, "zone").evalFull(ctx)[0].get(ctx.player);
 					let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, false);
@@ -452,7 +458,7 @@ export function initFunctions() {
 						index = zoneValue.isTop? -1 : 0;
 					}
 					moveActions[moveActions.length - 1].push(new actions.Move(ctx.player, card.current(), zone, index));
-					ast.clearImplicitCards();
+					ast.clearImplicit("card");
 				}
 			}
 			return moveActions.map(actions => new ScriptValue("action", actions));
@@ -530,7 +536,7 @@ export function initFunctions() {
 				if (card.current() === null) {
 					continue;
 				}
-				ast.setImplicitCards([card]);
+				ast.setImplicit([card], "card");
 				let zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
 				let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, true);
 				let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
@@ -539,7 +545,7 @@ export function initFunctions() {
 				}
 				returnActions.push(new actions.Return(ctx.player, card.current(), zone, index));
 				zoneReturnCards.set(zone, (zoneReturnCards.get(zone) ?? []).concat(card.current()));
-				ast.clearImplicitCards();
+				ast.clearImplicit("card");
 			}
 
 			for (const [zone, cards] of zoneReturnCards.entries()) {
@@ -571,7 +577,7 @@ export function initFunctions() {
 					if (card.current() === null) {
 						continue;
 					}
-					ast.setImplicitCards([card]);
+					ast.setImplicit([card], "card");
 					// TODO: this might need to handle multiple zone possibilities
 					let zoneValue = this.getParameter(astNode, "zone").evalFull(ctx)[0].get(ctx.player);
 					let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, true);
@@ -580,7 +586,7 @@ export function initFunctions() {
 						index = zoneValue.isTop? -1 : 0;
 					}
 					returnActions[returnActions.length - 1].push(new actions.Return(ctx.player, card.current(), zone, index));
-					ast.clearImplicitCards();
+					ast.clearImplicit("card");
 				}
 			}
 			return returnActions.map(actions => new ScriptValue("action", actions));

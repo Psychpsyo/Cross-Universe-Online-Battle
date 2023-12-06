@@ -2,6 +2,8 @@ import * as ast from "./cdfScriptInterpreter/astNodes.js";
 import * as events from "./events.js";
 import * as requests from "./inputRequests.js";
 import * as zones from "./zones.js";
+import {BaseCard} from "./card.js";
+import {Player} from "./player.js";
 import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 import {SnapshotCard} from "./card.js";
 import {Timing} from "./timings.js";
@@ -40,6 +42,13 @@ function getUntilTimingList(ctxPlayer, until) {
 			return ctxPlayer.game.endOfUpcomingTurnTimings[currentlyOpponentTurn? 1 : 0];
 		}
 	}
+}
+// gets the current version of a game object, no matter if it is a card or player
+function getObjectCurrent(object) {
+	if (object instanceof BaseCard) {
+		return object.current();
+	}
+	return object;
 }
 
 // Base class for any action in the game.
@@ -575,88 +584,98 @@ export class Exile extends Action {
 	}
 }
 
-export class ApplyCardStatChange extends Action {
-	constructor(player, card, modifier, until) {
+export class ApplyStatChange extends Action {
+	constructor(player, toObject, modifier, until) {
 		super(player);
-		this.card = card;
+		this.toObject = toObject;
 		this.modifier = modifier;
 		this.until = until;
 	}
 
 	async* run() {
 		// remove invalid modifications
-		ast.setImplicitCards([this.modifier.card]);
+		ast.setImplicit([this.modifier.card], "card");
 		for (let i = this.modifier.modifications.length - 1; i >= 0; i--) {
-			if (!this.modifier.modifications[i].canApplyTo(this.card, this.modifier.ctx)) {
+			if (!this.modifier.modifications[i].canApplyTo(this.toObject, this.modifier.ctx)) {
 				this.modifier.modifications.splice(i, 1);
 			}
 		}
-		ast.clearImplicitCards();
+		ast.clearImplicit("card");
 
-		this.card = new SnapshotCard(this.card);
-		this.card.current().modifierStack.push(this.modifier);
+		if (this.toObject instanceof BaseCard) {
+			this.toObject = new SnapshotCard(this.toObject);
+		}
+		getObjectCurrent(this.toObject).values.modifierStack.push(this.modifier);
 		if (this.until !== "forever") {
-			let removalTiming = new Timing(this.player.game, [new RemoveCardStatChange(this.player, this.card.current(), this.modifier)]);
+			let removalTiming = new Timing(this.player.game, [new RemoveStatChange(this.player, getObjectCurrent(this.toObject), this.modifier)]);
 			getUntilTimingList(this.player, this.until).push(removalTiming);
 		}
 	}
 
 	undo() {
-		this.card.current().modifierStack.pop();
+		this.card.current().values.modifierStack.pop();
 	}
 
 	isImpossible(timing) {
+		// players are always around and anything that wants to apply to them can
+		if (this.toObject instanceof Player) return false;
+
 		// cannot apply stat-changes to cards that are not on the field
-		if (!(this.card.zone instanceof zones.FieldZone)) {
+		if (!(this.toObject.zone instanceof zones.FieldZone)) {
 			return true;
 		}
 		// check un-appliable stat-changes
 		let validModifications = 0;
-		ast.setImplicitCards([this.modifier.card]);
+		ast.setImplicit([this.modifier.card], "card");
 		for (const modification of this.modifier.modifications) {
-			if (!modification.canApplyTo(this.card, this.modifier.ctx)) {
+			if (!modification.canApplyTo(this.toObject, this.modifier.ctx)) {
 				continue;
 			}
 			validModifications++;
 		}
-		ast.clearImplicitCards();
+		ast.clearImplicit("card");
 		return validModifications === 0;
 	}
 	isFullyPossible(timing) {
+		// players are always around and anything that wants to apply to them can
+		if (this.toObject instanceof Player) return true;
+
 		// cannot apply stat-changes to cards that are not on the field
-		if (!(this.card.zone instanceof zones.FieldZone)) {
+		if (!(this.toObject.zone instanceof zones.FieldZone)) {
 			return false;
 		}
 		// check not fully-appliable stat-changes
-		ast.setImplicitCards([this.modifier.card]);
+		ast.setImplicit([this.modifier.card], "card");
 		for (const modification of this.modifier.modifications) {
-			if (!modification.canFullyApplyTo(this.card, this.modifier.ctx)) {
+			if (!modification.canFullyApplyTo(this.toObject, this.modifier.ctx)) {
 				return false;
 			}
 		}
-		ast.clearImplicitCards();
+		ast.clearImplicit("card");
 		return true;
 	}
 }
 
-export class RemoveCardStatChange extends Action {
-	constructor(player, card, modifier) {
+export class RemoveStatChange extends Action {
+	constructor(player, object, modifier) {
 		super(player);
-		this.card = card;
+		this.object = object;
 		this.modifier = modifier;
 		this.index = -1;
 	}
 
 	async* run() {
-		this.card = new SnapshotCard(this.card);
-		this.index = this.card.current().modifierStack.indexOf(this.modifier);
+		if (this.object instanceof BaseCard) {
+			this.object = new SnapshotCard(this.object);
+		}
+		this.index = getObjectCurrent(this.object).values.modifierStack.indexOf(this.modifier);
 		if (this.index != -1) {
-			this.card.current().modifierStack.splice(this.index, 1);
+			getObjectCurrent(this.object).values.modifierStack.splice(this.index, 1);
 		}
 	}
 
 	undo() {
-		this.card.current().modifierStack.splice(this.index, 0, this.modifier);
+		getObjectCurrent(this.object).values.modifierStack.splice(this.index, 0, this.modifier);
 	}
 }
 
@@ -701,7 +720,7 @@ export class SetAttackTarget extends Action {
 	}
 
 	isImpossible(timing) {
-		return !(this.newTarget.values.cardTypes.includes("unit") && this.newTarget.zone instanceof zones.FieldZone);
+		return !(this.newTarget.values.current.cardTypes.includes("unit") && this.newTarget.zone instanceof zones.FieldZone);
 	}
 }
 
@@ -723,7 +742,7 @@ export class GiveAttack extends Action {
 
 	isImpossible(timing) {
 		if (this.card.isRemovedToken) return true;
-		return !this.card.values.cardTypes.includes("unit");
+		return !this.card.values.current.cardTypes.includes("unit");
 	}
 }
 
@@ -869,36 +888,43 @@ export class ChangeCounters extends Action {
 }
 
 export class ApplyStaticAbility extends Action {
-	constructor(player, card, modifier) {
+	constructor(player, toObject, modifier) {
 		super(player);
-		this.card = card;
+		this.toObject = toObject;
 		this.modifier = modifier;
 	}
 
 	async* run() {
-		this.card = new SnapshotCard(this.card);
-		this.card.current().modifierStack.push(this.modifier);
+		if (this.toObject instanceof BaseCard) {
+			this.toObject = new SnapshotCard(this.toObject);
+		}
+		getObjectCurrent(this.toObject).values.modifierStack.push(this.modifier);
 	}
 
 	undo() {
-		this.card.restore();
+		getObjectCurrent(this.toObject).values.modifierStack.pop();
 	}
 }
 
 export class UnapplyStaticAbility extends Action {
-	constructor(player, card, ability) {
+	constructor(player, object, ability) {
 		super(player);
-		this.card = card;
+		this.object = object;
 		this.ability = ability;
+
+		this._modifierIndex = -1;
+		this._removed = null;
 	}
 
 	async* run() {
-		this.card = new SnapshotCard(this.card);
-		let modifierIndex = this.card.current().modifierStack.findIndex(modifier => modifier.ability === this.ability);
-		this.card.current().modifierStack.splice(modifierIndex, 1);
+		if (this.object instanceof BaseCard) {
+			this.object = new SnapshotCard(this.object);
+		}
+		this._modifierIndex = getObjectCurrent(this.object).values.modifierStack.findIndex(modifier => modifier.ability === this.ability);
+		this._removed = getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 1);
 	}
 
 	undo() {
-		this.card.restore();
+		getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 0, this._removed);
 	}
 }

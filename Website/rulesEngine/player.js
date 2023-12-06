@@ -1,6 +1,7 @@
 // This module exports the Player class which holds all data relevant to one player in a game.
 
 import {Card} from "./card.js";
+import {ObjectValues, PlayerValues} from "./objectValues.js";
 import * as zones from "./zones.js";
 import * as deckErrors from "./deckErrors.js";
 
@@ -20,6 +21,9 @@ export class Player {
 		this.partnerZone = new zones.FieldZone(this, "partner", 1);
 		this.discardPile = new zones.PileZone(this, "discard");
 		this.exileZone = new zones.PileZone(this, "exile");
+
+		this.values = new ObjectValues(new PlayerValues());
+		this.cdfScriptType = "player";
 
 		this.aiSystem = null;
 	}
@@ -57,7 +61,7 @@ export class Player {
 		}
 		if (this.game.config.enforceRank) {
 			for (const card of cardList) {
-				if (card.initialValues.level > this.rank) {
+				if (card.values.initial.level > this.rank) {
 					throw new deckErrors.InsufficientRankError(card.cardId);
 				}
 			}

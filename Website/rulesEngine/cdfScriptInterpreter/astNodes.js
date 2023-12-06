@@ -8,8 +8,11 @@ import {Modifier} from "../valueModifiers.js";
 import {ScriptValue, ScriptContext, DeckPosition} from "./structs.js";
 import {functions, initFunctions} from "./functions.js";
 
-let implicitCards = [null];
-let implicitActions = [null];
+let implicit = {
+	card: [null],
+	action: [null],
+	player: [null]
+}
 
 // helper functions
 function equalityCompare(a, b) {
@@ -18,17 +21,11 @@ function equalityCompare(a, b) {
 	}
 	return a === b;
 }
-export function setImplicitCards(cards) {
-	implicitCards.push(cards);
+export function setImplicit(objects, type) {
+	implicit[type].push(objects);
 }
-export function clearImplicitCards() {
-	implicitCards.pop();
-}
-export function setImplicitActions(actions) {
-	implicitActions.push(actions);
-}
-export function clearImplicitActions() {
-	implicitActions.pop();
+export function clearImplicit(type) {
+	implicit[type].pop();
 }
 // generates every possible combination [A1, A2, A3 ... Ax] so that An is from
 // the n-th array that was passed in and x is the amount of input arrays.
@@ -155,9 +152,9 @@ export class TriggerRootNode extends AstNode {
 		this.expression = expression;
 	}
 	* eval(ctx) {
-		setImplicitActions(ctx.game.currentPhase().lastActionList);
+		setImplicit(ctx.game.currentPhase().lastActionList, "action");
 		let returnValue = yield* this.expression.eval(ctx);
-		clearImplicitActions();
+		clearImplicit("action");
 		return returnValue;
 	}
 	getChildNodes() {
@@ -286,13 +283,13 @@ export class CardMatchNode extends AstNode {
 				matchingCards.push(checkCard);
 				continue;
 			}
-			setImplicitCards([checkCard]);
+			setImplicit([checkCard], "card");
 			if ((!this.conditions || (yield* this.conditions.eval(ctx)).get(ctx.player))) {
 				matchingCards.push(checkCard);
-				clearImplicitCards();
+				clearImplicit("card");
 				continue;
 			}
-			clearImplicitCards();
+			clearImplicit("card");
 		}
 		return matchingCards;
 	}
@@ -327,20 +324,13 @@ export class AttackersNode extends AstNode {
 		return new ScriptValue("card", []);
 	}
 }
-export class ImplicitCardsNode extends AstNode {
-	constructor() {
-		super("card");
+
+export class ImplicitValuesNode extends AstNode {
+	constructor(returnType) {
+		super(returnType);
 	}
 	* eval(ctx) {
-		return new ScriptValue("card", implicitCards[implicitCards.length - 1]);
-	}
-}
-export class ImplicitActionsNode extends AstNode {
-	constructor() {
-		super("action");
-	}
-	* eval(ctx) {
-		return new ScriptValue("action", implicitActions[implicitActions.length - 1]);
+		return new ScriptValue(this.returnType, implicit[this.returnType][implicit[this.returnType].length - 1]);
 	}
 }
 
@@ -403,46 +393,46 @@ export class CardPropertyNode extends AstNode {
 	accessProperty(card) {
 		switch(this.property) {
 			case "name": {
-				return card.values.names;
+				return card.values.current.names;
 			}
 			case "baseName": {
-				return card.baseValues.names;
+				return card.values.base.names;
 			}
 			case "level": {
-				return card.values.level;
+				return card.values.current.level;
 			}
 			case "baseLevel": {
-				return card.baseValues.level;
+				return card.values.base.level;
 			}
 			case "types": {
-				return card.values.types;
+				return card.values.current.types;
 			}
 			case "baseTypes": {
-				return card.baseValues.types;
+				return card.values.base.types;
 			}
 			case "abilities": {
-				return card.values.abilities;
+				return card.values.current.abilities;
 			}
 			case "baseAbilities": {
-				return card.values.abilities;
+				return card.values.base.abilities;
 			}
 			case "attack": {
-				return card.values.attack;
+				return card.values.current.attack;
 			}
 			case "baseAttack": {
-				return card.baseValues.attack;
+				return card.values.base.attack;
 			}
 			case "defense": {
-				return card.values.defense;
+				return card.values.current.defense;
 			}
 			case "baseDefense": {
-				return card.baseValues.defense;
+				return card.values.base.defense;
 			}
 			case "cardType": {
-				return card.values.cardTypes;
+				return card.values.current.cardTypes;
 			}
 			case "baseCardType": {
-				return card.baseValues.cardTypes;
+				return card.values.base.cardTypes;
 			}
 			case "owner": {
 				return card.currentOwner();
@@ -457,16 +447,16 @@ export class CardPropertyNode extends AstNode {
 				return card.equipments;
 			}
 			case "attackRights": {
-				return card.values.attackRights;
+				return card.values.current.attackRights;
 			}
 			case "attacksMade": {
 				return card.attackCount;
 			}
 			case "canAttack": {
-				return card.values.canAttack;
+				return card.values.current.canAttack;
 			}
 			case "canCounterattack": {
-				return card.values.canCounterattack;
+				return card.values.current.canCounterattack;
 			}
 			case "fightingAgainst": {
 				let currentBlock = card.owner.game.currentBlock();
@@ -488,6 +478,66 @@ export class CardPropertyNode extends AstNode {
 			}
 			case "isToken": {
 				return card.isToken;
+			}
+		}
+	}
+}
+
+export class PlayerPropertyNode extends AstNode {
+	constructor(players, property) {
+		super({
+			"life": "number",
+			"mana": "number",
+			"partner": "number",
+			"manaGainAmount": "number",
+			"standardDrawAmount": "number",
+			"needsToPayForPartner": "bool"
+		}[property]);
+		this.players = players;
+		this.property = property;
+	}
+
+	* eval(ctx) {
+		let players = (yield* this.players.eval(ctx)).get(ctx.player);
+		let retVal = players.map(player => this.accessProperty(player)).flat();
+		if (this.returnType === "bool") {
+			for (const value of retVal) {
+				if (value === true) {
+					retVal = true;
+					break;
+				}
+			}
+		}
+		return new ScriptValue(this.returnType, retVal);
+	}
+
+	evalFull(ctx) {
+		return this.cards.evalFull(ctx).map(possibility => new ScriptValue(this.returnType, possibility.get(ctx.player).map(card => this.accessProperty(card)).flat()));
+	}
+
+	getChildNodes() {
+		return [this.cards];
+	}
+
+	accessProperty(player) {
+		switch(this.property) {
+			case "life": {
+				return player.life;
+			}
+			case "mana": {
+				return player.mana;
+			}
+			case "partner": {
+				return player.partnerZone.cards[0];
+			}
+			case "manaGainAmount": {
+				return player.values.current.manaGainAmount;
+			}
+			case "standardDrawAmount": {
+				return player.values.current.standardDrawAmount;
+			}
+			case "needsToPayForPartner": {
+				return player.values.current.needsToPayForPartner;
 			}
 		}
 	}
@@ -782,33 +832,6 @@ export class PlayerNode extends AstNode {
 		}
 	}
 }
-export class LifeNode extends AstNode {
-	constructor(playerNode) {
-		super("number");
-		this.playerNode = playerNode;
-	}
-	* eval(ctx) {
-		return new ScriptValue("number", (yield* this.playerNode.eval(ctx)).get(ctx.player).map(player => player.life));
-	}
-}
-export class ManaNode extends AstNode {
-	constructor(playerNode) {
-		super("number");
-		this.playerNode = playerNode;
-	}
-	* eval(ctx) {
-		return new ScriptValue("number", (yield* this.playerNode.eval(ctx)).get(ctx.player).map(player => player.mana));
-	}
-}
-export class PartnerNode extends AstNode {
-	constructor(playerNode) {
-		super("card");
-		this.playerNode = playerNode;
-	}
-	* eval(ctx) {
-		return new ScriptValue("card", (yield* this.playerNode.eval(ctx)).get(ctx.player).map(player => player.partnerZone.cards[0]));
-	}
-}
 
 export class ZoneNode extends AstNode {
 	constructor(zoneIdentifier, playerNode) {
@@ -983,7 +1006,7 @@ export class ActionAccessorNode extends AstNode {
 		for (let action of actionList) {
 			let actionCards = this.getActionValues(action);
 			let hasProperties = true;
-			setImplicitCards(actionCards);
+			setImplicit(actionCards, "card");
 			for (const property of Object.keys(this.actionProperties)) {
 				if (!(property in action.properties) ||
 					!action.properties[property].equals(yield* this.actionProperties[property].eval(ctx), ctx.player)
@@ -992,7 +1015,7 @@ export class ActionAccessorNode extends AstNode {
 					break;
 				}
 			}
-			clearImplicitCards();
+			clearImplicit("card");
 			if (!hasProperties) continue;
 
 			for (const card of actionCards) {

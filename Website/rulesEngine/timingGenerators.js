@@ -176,6 +176,10 @@ export function* abilityTimingGenerator(ability, card, player) {
 	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));
 }
 
+export function* standardDrawTimingGenerator(player) {
+	yield [new actions.Draw(player, player.values.current.standardDrawAmount)];
+}
+
 export function* equipTimingGenerator(equipChoiceAction, player) {
 	yield [new actions.EquipCard(player, equipChoiceAction.spellItem.current(), equipChoiceAction.chosenUnit.current())];
 }
@@ -186,7 +190,7 @@ export function* retireTimingGenerator(player, units) {
 	let gainedMana = 0;
 	for (const action of discardTiming.actions) {
 		if (action instanceof actions.Discard) {
-			gainedMana += action.card.values.level;
+			gainedMana += action.card.values.current.level;
 		}
 	}
 	if (gainedMana > 0) {
@@ -201,12 +205,12 @@ export function* fightTimingGenerator(attackDeclaration) {
 	// RULES: Compare the attacker’s Attack to the target’s Defense.
 	let totalAttack = 0;
 	for (const unit of attackDeclaration.attackers) {
-		totalAttack += unit.values.attack;
+		totalAttack += unit.values.current.attack;
 	}
 
 	// RULES: If the Attack is greater the attacker destroys the target.
 	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
-	if (totalAttack > attackDeclaration.target.values.defense) {
+	if (totalAttack > attackDeclaration.target.values.current.defense) {
 		let discard = new actions.Discard(attackDeclaration.target.owner, attackDeclaration.target);
 		let actionList = [new actions.Destroy(
 			discard,
@@ -216,14 +220,14 @@ export function* fightTimingGenerator(attackDeclaration) {
 		if (attackDeclaration.target.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(
 				attackDeclaration.target.currentOwner(),
-				totalAttack - attackDeclaration.target.values.defense
+				totalAttack - attackDeclaration.target.values.current.defense
 			));
 		}
 		yield actionList;
 	}
 
 	// RULES: If the unit wasn't destoyed, a 'counterattack' occurs.
-	if (attackDeclaration.target === null || !attackDeclaration.target.values.canCounterattack) {
+	if (attackDeclaration.target === null || !attackDeclaration.target.values.current.canCounterattack) {
 		return;
 	}
 
@@ -240,7 +244,7 @@ export function* fightTimingGenerator(attackDeclaration) {
 	}
 
 	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
-	if (attackDeclaration.target.values.attack > counterattackTarget.values.defense) {
+	if (attackDeclaration.target.values.current.attack > counterattackTarget.values.current.defense) {
 		let discard = new actions.Discard(counterattackTarget.owner, counterattackTarget);
 		let actionList = [new actions.Destroy(
 			discard,
@@ -250,7 +254,7 @@ export function* fightTimingGenerator(attackDeclaration) {
 		if (counterattackTarget.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(
 				counterattackTarget.currentOwner(),
-				attackDeclaration.target.values.attack - counterattackTarget.values.defense
+				attackDeclaration.target.values.current.attack - counterattackTarget.values.current.defense
 			));
 		}
 		yield actionList;

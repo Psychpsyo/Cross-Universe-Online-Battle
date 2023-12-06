@@ -73,9 +73,7 @@ class Block {
 export class StandardDraw extends Block {
 	constructor(stack, player) {
 		super("standardDrawBlock", stack, player, new timingGenerators.TimingRunner(() =>
-			timingGenerators.arrayTimingGenerator([
-				[new actions.Draw(player, 1)]
-			]),
+			timingGenerators.standardDrawTimingGenerator(player),
 			player.game
 		));
 	}
@@ -231,16 +229,16 @@ export class DeployItem extends Block {
 		let execTimingGenerators = [
 			timingGenerators.arrayTimingGenerator([[new actions.Deploy(player, placeAction)]])
 		];
-		if (card.values.cardTypes.includes("equipableItem")) {
+		if (card.values.current.cardTypes.includes("equipableItem")) {
 			let selectEquipableAction = new actions.SelectEquipableUnit(player, card);
 			costTimingGenerators.unshift(timingGenerators.arrayTimingGenerator([[selectEquipableAction]]));
 			execTimingGenerators.unshift(timingGenerators.equipTimingGenerator(selectEquipableAction, player));
 		}
 		let deployAbility = null;
-		for (let ability of card.values.abilities) {
+		for (let ability of card.values.current.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
 				deployAbility = ability;
-				if (card.values.cardTypes.includes("standardItem")) {
+				if (card.values.current.cardTypes.includes("standardItem")) {
 					// standard items first activate and are only treated as briefly on the field after
 					execTimingGenerators.unshift(timingGenerators.abilityTimingGenerator(ability, card, player));
 					// and are then discarded.
@@ -290,16 +288,16 @@ export class CastSpell extends Block {
 		let execTimingGenerators = [
 			timingGenerators.arrayTimingGenerator([[new actions.Cast(player, placeAction)]])
 		];
-		if (card.values.cardTypes.includes("enchantSpell")) {
+		if (card.values.current.cardTypes.includes("enchantSpell")) {
 			let selectEquipableAction = new actions.SelectEquipableUnit(player, card);
 			costTimingGenerators.unshift(timingGenerators.arrayTimingGenerator([[selectEquipableAction]]));
 			execTimingGenerators.unshift(timingGenerators.equipTimingGenerator(selectEquipableAction, player));
 		}
 		let castAbility = null;
-		for (let ability of card.values.abilities) {
+		for (let ability of card.values.current.abilities) {
 			if (ability instanceof abilities.CastAbility) {
 				castAbility = ability;
-				if (card.values.cardTypes.includes("standardSpell")) {
+				if (card.values.current.cardTypes.includes("standardSpell")) {
 					// standard spells first activate and are only treated as briefly on the field after
 					execTimingGenerators.unshift(timingGenerators.abilityTimingGenerator(ability, card, player));
 					// and are then discarded.

@@ -140,7 +140,7 @@ function isImportant(request) {
 			}
 			case "castSpell": {
 				for (let card of request.eligibleSpells) {
-					for (let ability of card.values.abilities) {
+					for (let ability of card.values.current.abilities) {
 						if (ability instanceof abilities.CastAbility) {
 							if (ability.condition && hasPhaseEqualityCondition(ability.condition)) {
 								return true;
@@ -157,7 +157,7 @@ function isImportant(request) {
 }
 
 function isSpellItemTriggered(card) {
-	for (let ability of card.values.abilities) {
+	for (let ability of card.values.current.abilities) {
 		if (ability instanceof abilities.CastAbility || ability instanceof abilities.DeployAbility) {
 			if (ability.after || (ability.condition && hasTimeSensitiveCondition(ability.condition))) {
 				return true;

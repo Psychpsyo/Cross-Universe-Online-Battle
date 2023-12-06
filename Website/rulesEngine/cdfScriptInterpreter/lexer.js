@@ -25,9 +25,12 @@ let keywordTokenTypes = {
 	both: "player",
 	own: "player",
 
-	life: "playerLife",
-	mana: "playerMana",
-	partner: "playerPartner",
+	life: "playerProperty",
+	mana: "playerProperty",
+	partner: "playerProperty",
+	manaGainAmount: "playerProperty",
+	standardDrawAmount: "playerProperty",
+	needsToPayForPartner: "playerProperty",
 
 	name: "cardProperty",
 	baseName: "cardProperty",

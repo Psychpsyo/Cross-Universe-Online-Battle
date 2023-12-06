@@ -1,65 +1,56 @@
 // This file holds definitions for the CardValues class and modifiers for the card's modifier stacks.
 import * as ast from "./cdfScriptInterpreter/astNodes.js";
 import * as abilities from "./abilities.js";
+import {BaseCard} from "./card.js";
 import {makeAbility} from "./cdfScriptInterpreter/interpreter.js";
 import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 
-export class CardValues {
-	constructor(cardTypes, names, level, types, attack, defense, abilities, attackRights, canAttack, canCounterattack) {
-		this.cardTypes = cardTypes;
-		this.names = names;
-		this.level = level;
-		this.types = types;
-		this.attack = attack;
-		this.defense = defense;
-		this.abilities = abilities;
-		this.attackRights = attackRights;
-		this.canAttack = canAttack;
-		this.canCounterattack = canCounterattack;
+export function recalculateModifiedValuesFor(object) {
+	// for cards, all abilities need to be un-cancelled as a baseline
+	if (object instanceof BaseCard) {
+		for (const ability of object.values.initial.abilities) {
+			ability.isCancelled = false;
+		}
 	}
 
-	// Clones these values WITHOUT cloning contained abilities by design.
-	// This is because usually initial, base and final values are cloned together
-	// and shouldn't all get different copies of an ability.
-	clone() {
-		return new CardValues(
-			[...this.cardTypes],
-			[...this.names],
-			this.level,
-			[...this.types],
-			this.attack,
-			this.defense,
-			[...this.abilities],
-			this.attackRights,
-			this.canAttack,
-			this.canCounterattack
-		);
+	// handle values being unaffected by cards
+	object.values.unaffectedBy = [];
+	for (const modifier of object.values.modifierStack) {
+		modifier.modify(object, false, true);
 	}
 
-	// returns a list of all properties that are different between this and other
-	compareTo(other) {
-		let differences = [];
-		for (let property of ["level", "attack", "defense", "attackRights"]) {
-			if (this[property] != other[property]) {
-				differences.push(property);
-			}
-		}
+	// handle base value changes
+	object.values.base = object.values.initial.clone();
+	for (const modifier of object.values.modifierStack) {
+		object.values.base = modifier.modify(object, true, false);
+	}
 
-		for (let property of ["cardTypes", "names", "types", "abilities"]) {
-			if (this[property].length != other[property].length) {
-				differences.push(property);
-			} else {
-				for (let i = 0; i < this[property].length; i++) {
-					if (
-						(property !== "abilities" && this[property][i] !== other[property][i]) ||
-						(property === "abilities" && (this[property][i].isCancelled !== other[property][i].isCancelled || this[property][i].id !== other[property][i].id))) {
-						differences.push(property);
-						break;
-					}
-				}
-			}
+	// non-unit cards need to loose unit-specific base values
+	if (object instanceof BaseCard) {
+		if (!object.values.base.cardTypes.includes("unit")) {
+			object.values.base.attack = null;
+			object.values.base.defense = null;
+			object.values.base.attackRights = null;
+			object.values.base.canAttack = null;
+			object.values.base.canCounterAttack = null;
 		}
-		return differences;
+	}
+
+	// handle main value changes
+	object.values.current = object.values.base.clone();
+	for (const modifier of object.values.modifierStack) {
+		object.values.current = modifier.modify(object, false, false);
+	}
+
+	// non-unit cards also need to loose unit-specific regular values
+	if (object instanceof BaseCard) {
+		if (!object.values.current.cardTypes.includes("unit")) {
+			object.values.current.attack = null;
+			object.values.current.defense = null;
+			object.values.current.attackRights = null;
+			object.values.current.canAttack = null;
+			object.values.current.canCounterAttack = null;
+		}
 	}
 }
 
@@ -69,31 +60,32 @@ export class Modifier {
 		this.ctx = ctx;
 	}
 
-	modify(card, toBaseValues, toUnaffections) {
-		let values = toBaseValues? card.baseValues : card.values;
+	modify(object, toBaseValues, toUnaffections) {
+		let values = toBaseValues? object.values.base : object.values.current;
 		if (this.ctx.ability instanceof abilities.StaticAbility && this.ctx.ability.isCancelled) {
 			return values;
 		}
 		for (let modification of this.modifications) {
-			let worksOnCard = true;
+			let worksOnObject = true;
 			// only static abilities are influenced by unaffections/cancelling when already on a card
 			if (this.ctx.ability instanceof abilities.StaticAbility) {
-				ast.setImplicitCards([this.ctx.card]);
-				for (const unaffection of card.unaffectedBy) {
+				ast.setImplicit([this.ctx.card], "card");
+				for (const unaffection of object.values.unaffectedBy) {
 					if (unaffection.value === modification.value && unaffection.by.evalFull(new ScriptContext(unaffection.sourceCard, this.ctx.player, unaffection.sourceAbility))[0].get(this.ctx.player)) {
-						worksOnCard = false;
+						worksOnObject = false;
 						break;
 					}
 				}
-				ast.clearImplicitCards();
+				ast.clearImplicit("card");
 			}
-			ast.setImplicitCards([card]);
-			if (worksOnCard &&
+			// set implicit card / player
+			ast.setImplicit([object], object.cdfScriptType);
+			if (worksOnObject &&
 				(modification instanceof ValueUnaffectedModification || modification instanceof AbilityCancelModification) === toUnaffections &&
 				(modification.condition === null || modification.condition.evalFull(this.ctx)[0].get(this.ctx.player))
 			) {
 				if (modification instanceof ValueUnaffectedModification) {
-					card.unaffectedBy.push({
+					object.values.unaffectedBy.push({
 						value: modification.value,
 						by: modification.unaffectedBy,
 						sourceCard: this.ctx.card,
@@ -103,7 +95,8 @@ export class Modifier {
 					values = modification.modify(values, this.ctx, toBaseValues);
 				}
 			}
-			ast.clearImplicitCards();
+			// clear implicit card / player
+			ast.clearImplicit(object.cdfScriptType);
 		}
 		return values;
 	}
@@ -120,10 +113,10 @@ export class Modifier {
 	}
 
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
-	bake(forCard) {
-		ast.setImplicitCards([forCard]);
+	bake(forObject) {
+		ast.setImplicit([forObject], forObject.cdfScriptType);
 		let bakedModifications = this.modifications.map(modification => modification.bake(this.ctx)).filter(modification => modification !== null);
-		ast.clearImplicitCards();
+		ast.clearImplicit(forObject.cdfScriptType);
 		return new Modifier(bakedModifications, this.ctx);
 	}
 }
@@ -147,12 +140,14 @@ export class ValueModification {
 	}
 
 	canApplyTo(target, ctx) {
+		// this function is only really concerned with applying non-unit values to units.
+		if (!target instanceof BaseCard) return true;
 		// certain stat-changes can only be applied to units
-		if (this.isUnitSpecific() && !target.values.cardTypes.includes("unit")) {
+		if (this.isUnitSpecific() && !target.values.current.cardTypes.includes("unit")) {
 			return false;
 		}
 		// cards that are unaffected can't have modifications applied
-		for (const unaffection of target.unaffectedBy) {
+		for (const unaffection of target.values.unaffectedBy) {
 			if (unaffection.value === this.value && unaffection.by.evalFull(new ScriptContext(unaffection.sourceCard, ctx.player, unaffection.sourceAbility))[0].get(ctx.player)) {
 				return false;
 			}
@@ -262,7 +257,7 @@ export class NumericChangeModification extends ValueModification {
 	}
 	canFullyApplyTo(target, ctx) {
 		if (!this.canApplyTo(target, ctx)) return false;
-		if (target.values[this.value] + this.amount.evalFull(ctx)[0].get(ctx.player)[0] < 0) return false;
+		if (target.values.current[this.value] + this.amount.evalFull(ctx)[0].get(ctx.player)[0] < 0) return false;
 		return true;
 	}
 }

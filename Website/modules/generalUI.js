@@ -138,7 +138,7 @@ export async function updateCardPreview(card) {
 	// general info
 	insertCardValueList(card, "names", cardDetailsName, "/", async (name) => (await cardLoader.getCardInfo(name)).name);
 
-	let cardTypes = [...card.values.cardTypes];
+	let cardTypes = [...card.values.current.cardTypes];
 	if (card.isToken) {
 		cardTypes.splice(cardTypes.indexOf("unit"), 1);
 		cardTypes.push("token");
@@ -156,7 +156,7 @@ export async function updateCardPreview(card) {
 	insertCardValueList(card, "types", cardDetailsTypesValues, locale.typeSeparator, async (type) => locale.types[type], locale.typeless);
 
 	// attack & defense
-	if (card.values.cardTypes.includes("unit")) {
+	if (card.values.current.cardTypes.includes("unit")) {
 		cardDetailsAttackDefense.style.display = "flex";
 		insertCardValue(card, "attack", cardDetailsAttackValues);
 		insertCardValue(card, "defense", cardDetailsDefenseValues);
@@ -176,9 +176,9 @@ export async function updateCardPreview(card) {
 		}
 
 		// all other effects come from the card object.
-		for (const ability of card.values.abilities) {
+		for (const ability of card.values.current.abilities) {
 			let divClasses = [];
-			if (!card.baseValues.abilities.includes(ability)) {
+			if (!card.values.base.abilities.includes(ability)) {
 				divClasses.push("valueAdded");
 			}
 			if (ability.isCancelled) {
@@ -217,10 +217,10 @@ function createDomEffect(type, content, classNames = []) {
 
 function insertCardValue(card, value, target) {
 	target.innerHTML = "";
-	insertCardValueText(card.baseValues[value] == -1? "?" : card.baseValues[value], target, card.baseValues[value] == card.values[value]? null : "valueGone");
-	if (card.baseValues[value] != card.values[value]) {
+	insertCardValueText(card.values.base[value] == -1? "?" : card.values.base[value], target, card.values.base[value] == card.values.current[value]? null : "valueGone");
+	if (card.values.base[value] != card.values.current[value]) {
 		target.appendChild(document.createTextNode(" "));
-		insertCardValueText(card.values[value] == -1? "?" : card.values[value], target, "valueAdded");
+		insertCardValueText(card.values.current[value] == -1? "?" : card.values.current[value], target, "valueAdded");
 	}
 }
 
@@ -236,7 +236,7 @@ function insertCardValueText(string, target, className) {
 function insertCardValueList(card, valueName, target, separator, localizer, noneText = "---") {
 	target.innerHTML = "";
 	let valueAdded = false;
-	for (let value of card.baseValues[valueName]) {
+	for (let value of card.values.base[valueName]) {
 		if (valueAdded) {
 			target.appendChild(document.createTextNode(separator));
 		}
@@ -244,18 +244,18 @@ function insertCardValueList(card, valueName, target, separator, localizer, none
 		localizer(value).then(localizedValue => {
 			valueSpan.textContent = localizedValue;
 		});
-		if (!card.values[valueName].includes(value)) {
+		if (!card.values.current[valueName].includes(value)) {
 			valueSpan.classList.add("valueGone");
 		}
 		target.appendChild(valueSpan);
 		valueAdded = true;
 	}
-	if (card.baseValues[valueName].length == 0) {
-		insertCardValueText(noneText, target, card.values[valueName].length == 0? null : "valueGone");
+	if (card.values.base[valueName].length == 0) {
+		insertCardValueText(noneText, target, card.values.current[valueName].length == 0? null : "valueGone");
 		target.appendChild(document.createTextNode(" "));
 	}
-	for (let value of card.values[valueName]) {
-		if (card.baseValues[valueName].includes(value)) {
+	for (let value of card.values.current[valueName]) {
+		if (card.values.base[valueName].includes(value)) {
 			continue;
 		}
 		if (valueAdded) {
@@ -269,7 +269,7 @@ function insertCardValueList(card, valueName, target, separator, localizer, none
 		target.appendChild(valueSpan);
 		valueAdded = true;
 	}
-	if (card.baseValues[valueName].length != 0 && card.values[valueName].length == 0) {
+	if (card.values.base[valueName].length != 0 && card.values.current[valueName].length == 0) {
 		target.appendChild(document.createTextNode(separator));
 		insertCardValueText(noneText, target, "valueAdded");
 	}

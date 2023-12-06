@@ -122,7 +122,7 @@ export class BoardState extends GameState {
 		for (let card of localPlayer.deckZone.cards) {
 			card.showTo(localPlayer);
 		}
-		ui.presentCardChoice(localPlayer.deckZone.cards, locale.game.partnerSelect.popupTitle, card => card.values.cardTypes.includes("unit") && card.values.level < 6).then(cards => {
+		ui.presentCardChoice(localPlayer.deckZone.cards, locale.game.partnerSelect.popupTitle, card => card.values.current.cardTypes.includes("unit") && card.values.current.level < 6).then(cards => {
 			for (let card of localPlayer.deckZone.cards) {
 				card.hideFrom(localPlayer);
 			}

@@ -41,7 +41,7 @@ export class Zone {
 			}
 			card.attackCount = 0; // reset AFTER removing card from the attack since removing it increases the attackCount
 			card.canAttackAgain = false;
-			for (const ability of card.values.abilities) {
+			for (const ability of card.values.current.abilities) {
 				// All of the card's trigger abilities aren't met anymore.
 				if (ability instanceof abilities.TriggerAbility) {
 					ability.triggerMetOnStack = -1;
@@ -51,7 +51,7 @@ export class Zone {
 				}
 			}
 			// Effects that applied to the card before stop applying.
-			card.modifierStack = [];
+			card.values.modifierStack = [];
 			// equipments get unequipped
 			if (card.equippedTo) {
 				card.equippedTo.equipments.splice(card.equippedTo.equipments.indexOf(card), 1);
@@ -192,7 +192,7 @@ export class FieldZone extends Zone {
 				card.invalidateSnapshots();
 
 				// static abilities need to update their zone enter timer
-				for (const ability of card.values.abilities) {
+				for (const ability of card.values.current.abilities) {
 					if (ability instanceof abilities.StaticAbility) {
 						ability.zoneEnterTimingIndex = card.owner.game.nextTimingIndex - 1;
 					}

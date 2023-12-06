@@ -734,7 +734,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "chooseAbilityOrder": {
 				response.value = await autoUI.promptOrderSelection(
-					locale.game.automatic.orderSelect.abilityPrompt.replaceAll("{#CARDNAME}", (await Promise.all(request.applyTo.values.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					locale.game.automatic.orderSelect.abilityPrompt.replaceAll("{#CARDNAME}", (await Promise.all(request.applyTo.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
 					(await Promise.allSettled(request.abilities.map(ability => cardLoader.getAbilityText(ability.id)))).map(promise => generalUI.createAbilityFragment(promise.value)),
 					locale.game.automatic.orderSelect.confirm
 				);
@@ -743,7 +743,7 @@ export class AutomaticController extends InteractionController {
 			case "orderCards": {
 				response.value = await autoUI.promptOrderSelection(
 					locale.game.automatic.orderSelect.cardPrompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name),
-					(await Promise.allSettled(request.cards.map(card => cardLoader.getCardInfo(card.values.names[0])))).map(promise => document.createTextNode(promise.value.name)),
+					(await Promise.allSettled(request.cards.map(card => cardLoader.getCardInfo(card.values.current.names[0])))).map(promise => document.createTextNode(promise.value.name)),
 					locale.game.automatic.orderSelect.confirm
 				);
 				break;

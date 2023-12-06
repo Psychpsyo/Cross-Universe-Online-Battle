@@ -235,7 +235,7 @@ export class StaticAbility extends BaseAbility {
 		this.zoneEnterTimingIndex = 0;
 	}
 
-	getTargetCards(card, player, evaluatingPlayer = player) {
+	getTargets(card, player, evaluatingPlayer = player) {
 		if (this.isConditionMet(card, player, evaluatingPlayer = player)) {
 			return this.applyTo.evalFull(new ScriptContext(card, player, this, evaluatingPlayer))[0].get(player);
 		}

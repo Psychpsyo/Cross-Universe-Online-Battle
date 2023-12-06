@@ -18,7 +18,7 @@ export class Stack {
 		// check non-after based trigger ability triggers (these go during phases or "[when units are] going to attack")
 		for (let player of this.phase.turn.game.players) {
 			for (let card of player.getActiveCards()) {
-				for (let ability of card.values.abilities) {
+				for (let ability of card.values.current.abilities) {
 					if (ability instanceof abilities.TriggerAbility) {
 						ability.checkDuring(card, player);
 					}
@@ -73,7 +73,7 @@ export class Stack {
 				case "activateOptionalAbility":
 				case "activateFastAbility":
 				case "activateTriggerAbility": {
-					let ability = responseValue.card.values.abilities[responseValue.index];
+					let ability = responseValue.card.values.current.abilities[responseValue.index];
 					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), responseValue.card, ability);
 					break;
 				}

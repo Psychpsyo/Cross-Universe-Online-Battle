@@ -118,7 +118,7 @@ export class Game {
 
 		// RULES: Both players choose one unit from their decks as their partner. Don’t reveal it to your opponent yet.
 		for (const player of this.players) {
-			if (!player.partnerZone.cards[0].values.cardTypes.includes("unit")) {
+			if (!player.partnerZone.cards[0].values.current.cardTypes.includes("unit")) {
 				throw new Error("All partner cards must be units!");
 			}
 		}

@@ -1,6 +1,6 @@
 // This module exports the Card class which represents a specific card in a Game.
 
-import {CardValues} from "./valueModifiers.js";
+import {CardValues, ObjectValues} from "./objectValues.js";
 import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
 import * as abilities from "./abilities.js";
 import * as interpreter from "./cdfScriptInterpreter/interpreter.js";
@@ -19,11 +19,8 @@ export class BaseCard {
 		this.turnLimit = turnLimit;
 		this.condition = condition;
 
-		this.initialValues = initialValues;
-		this.baseValues = initialValues;
-		this.values = initialValues;
-		this.modifierStack = [];
-		this.unaffectedBy = [];
+		this.values = new ObjectValues(initialValues);
+		this.cdfScriptType = "card";
 
 		this.zone = null;
 		this.placedTo = null;
@@ -49,8 +46,8 @@ export class BaseCard {
 	}
 
 	sharesTypeWith(card) {
-		let ownTypes = this.values.types;
-		for (let type of card.values.types) {
+		let ownTypes = this.values.current.types;
+		for (let type of card.values.current.types) {
 			if (ownTypes.includes(type)) {
 				return true;
 			}
@@ -60,43 +57,6 @@ export class BaseCard {
 
 	currentOwner() {
 		return this.zone?.player ?? this.placedTo?.player ?? this.owner;
-	}
-
-	// Whenever a card's values change, this function re-evaluates the modifier stack to figure out what the new value should be.
-	// In doing so, it also takes care of spells & items losing their unit-specific modifications
-	recalculateModifiedValues() {
-		// un-cancel all abilities
-		for (const ability of this.initialValues.abilities) {
-			ability.isCancelled = false;
-		}
-		// values being unaffected by cards
-		this.unaffectedBy = [];
-		for (const modifier of this.modifierStack) {
-			modifier.modify(this, false, true);
-		}
-		// handle base value changes
-		this.baseValues = this.initialValues.clone();
-		for (const modifier of this.modifierStack) {
-			this.baseValues = modifier.modify(this, true, false);
-		}
-		if (!this.baseValues.cardTypes.includes("unit")) {
-			this.baseValues.attack = null;
-			this.baseValues.defense = null;
-			this.baseValues.attackRights = null;
-		}
-		// handle main value changes
-		this.values = this.baseValues.clone();
-		for (const modifier of this.modifierStack) {
-			this.values = modifier.modify(this, false, false);
-		}
-		// non-units only have base values for attack/defense-related things
-		if (!this.values.cardTypes.includes("unit")) {
-			this.values.attack = null;
-			this.values.defense = null;
-			this.values.attackRights = null;
-			this.values.canAttack = null;
-			this.values.canCounterAttack = null;
-		}
 	}
 
 	hideFrom(player) {
@@ -113,16 +73,16 @@ export class BaseCard {
 
 	getSummoningCost(player) {
 		return timingGenerators.arrayTimingGenerator([
-			[new actions.ChangeMana(player, -this.values.level)]
+			[new actions.ChangeMana(player, -this.values.current.level)]
 		]);
 	}
 	getCastingCost(player) {
 		let generators = [
 			timingGenerators.arrayTimingGenerator([
-				[new actions.ChangeMana(player, -this.values.level)]
+				[new actions.ChangeMana(player, -this.values.current.level)]
 			])
 		];
-		for (let ability of this.values.abilities) {
+		for (let ability of this.values.current.abilities) {
 			if (ability instanceof abilities.CastAbility) {
 				if (ability.cost) {
 					generators.push(timingGenerators.abilityCostTimingGenerator(ability, this, player));
@@ -135,10 +95,10 @@ export class BaseCard {
 	getDeploymentCost(player) {
 		let generators = [
 			timingGenerators.arrayTimingGenerator([
-				[new actions.ChangeMana(player, -this.values.level)]
+				[new actions.ChangeMana(player, -this.values.current.level)]
 			])
 		];
-		for (let ability of this.values.abilities) {
+		for (let ability of this.values.current.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
 				if (ability.cost) {
 					generators.push(timingGenerators.abilityCostTimingGenerator(ability, this, player));
@@ -150,7 +110,7 @@ export class BaseCard {
 	}
 
 	async canSummon(checkPlacement, player) {
-		if (!this.values.cardTypes.includes("unit")) {
+		if (!this.values.current.cardTypes.includes("unit")) {
 			return false;
 		}
 		let timingRunner = new timingGenerators.TimingRunner(() => this.getSummoningCost(player), player.game);
@@ -159,19 +119,19 @@ export class BaseCard {
 		return costOptionTree.valid;
 	}
 	async canCast(checkPlacement, player, evaluatingPlayer = player) {
-		if (!this.values.cardTypes.includes("spell")) {
+		if (!this.values.current.cardTypes.includes("spell")) {
 			return false;
 		}
 		let cardCtx = new ScriptContext(this, player, null, evaluatingPlayer);
 		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.CastSpell && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit.evalFull(cardCtx)[0].getJsNum(player)) ||
 			(this.condition !== null && !this.condition.evalFull(cardCtx)[0].get(player)) ||
-			(this.values.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(cardCtx)[0].get(player).length == 0)
+			(this.values.current.cardTypes.includes("enchantSpell") && this.equipableTo.evalFull(cardCtx)[0].get(player).length == 0)
 		) {
 			return false;
 		}
 		// find cast ability
 		let endOfTreeCheck = () => !checkPlacement || player.spellItemZone.cards.includes(null);
-		for (const ability of this.values.abilities) {
+		for (const ability of this.values.current.abilities) {
 			if (ability instanceof abilities.CastAbility) {
 				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
@@ -188,19 +148,19 @@ export class BaseCard {
 	}
 	// If checkPlacement is false, only teh deployment conditions that the rules care about will be evaluated, not if the card can actually sucessfully be placed on the field
 	async canDeploy(checkPlacement, player, evaluatingPlayer = player) {
-		if (!this.values.cardTypes.includes("item")) {
+		if (!this.values.current.cardTypes.includes("item")) {
 			return false;
 		}
 		let cardCtx = new ScriptContext(this, player, null, evaluatingPlayer);
 		if ((player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.DeployItem && block.card.cardId === this.cardId && block.player === player).length >= this.turnLimit.evalFull(cardCtx)[0].getJsNum(player)) ||
 			(this.condition !== null && !this.condition.evalFull(cardCtx)[0].get(player)) ||
-			(this.values.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(cardCtx)[0].get(player).length == 0)
+			(this.values.current.cardTypes.includes("equipableItem") && this.equipableTo.evalFull(cardCtx)[0].get(player).length == 0)
 		) {
 			return false;
 		}
 		// find deploy ability
 		let endOfTreeCheck = () => !checkPlacement || player.spellItemZone.cards.includes(null);
-		for (const ability of this.values.abilities) {
+		for (const ability of this.values.current.abilities) {
 			if (ability instanceof abilities.DeployAbility) {
 				if (!ability.canActivate(this, player, evaluatingPlayer)) {
 					return false;
@@ -219,9 +179,9 @@ export class BaseCard {
 	// Does not check if the card can be declared to attack, only if it is allowed to be/stay in an attack declaration.
 	canAttack() {
 		if (this.isRemovedToken) return false;
-		if (!this.values.cardTypes.includes("unit")) return false;
-		if (!this.values.canAttack) return false;
-		return this.attackCount < this.values.attackRights || this.canAttackAgain;
+		if (!this.values.current.cardTypes.includes("unit")) return false;
+		if (!this.values.current.canAttack) return false;
+		return this.attackCount < this.values.current.attackRights || this.canAttackAgain;
 	}
 
 	static sort(a, b) {
@@ -285,7 +245,7 @@ export class Card extends BaseCard {
 	endOfTurnReset() {
 		this.attackCount = 0;
 		this.canAttackAgain = false;
-		for (let ability of this.values.abilities) {
+		for (let ability of this.values.current.abilities) {
 			if (ability instanceof abilities.OptionalAbility || ability instanceof abilities.FastAbility || ability instanceof abilities.TriggerAbility) {
 				ability.turnActivationCount = 0;
 			}
@@ -296,23 +256,23 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 export class SnapshotCard extends BaseCard {
 	constructor(card, equippedToSnapshot, equipmentSnapshot) {
-		super(card.owner, card.cardId, card.isToken, card.initialValues.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
+		super(card.owner, card.cardId, card.isToken, card.values.initial.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
 		this.isRemovedToken = card.isRemovedToken;
 
-		this.values = card.values.clone();
-		this.baseValues = card.baseValues.clone();
-		this.modifierStack = [...card.modifierStack];
+		this.values.current = card.values.current.clone();
+		this.values.base = card.values.base.clone();
+		this.values.modifierStack = [...card.values.modifierStack];
 
-		let abilities = this.initialValues.abilities;
-		for (let ability of this.baseValues.abilities.concat(this.values.abilities)) {
+		let abilities = this.values.initial.abilities;
+		for (let ability of this.values.base.abilities.concat(this.values.current.abilities)) {
 			if (!abilities.includes(ability)) {
 				abilities.push(ability);
 			}
 		}
 		let abilitySnapshots = abilities.map(ability => ability.snapshot());
-		this.initialValues.abilities = this.initialValues.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
-		this.baseValues.abilities = this.baseValues.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
-		this.values.abilities = this.values.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+		this.values.initial.abilities = this.values.initial.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+		this.values.base.abilities = this.values.base.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+		this.values.current.abilities = this.values.current.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
 
 		if (equippedToSnapshot) {
 			this.equippedTo = equippedToSnapshot;
@@ -362,10 +322,7 @@ export class SnapshotCard extends BaseCard {
 		this._actualCard.hiddenFor = [...this.hiddenFor];
 
 		// also ends up restoring snapshotted abilities
-		this._actualCard.initialValues = this.initialValues;
 		this._actualCard.values = this.values;
-		this._actualCard.baseValues = this.baseValues;
-		this._actualCard.modifierStack = this.modifierStack;
 
 		this._actualCard.equippedTo = this.equippedTo?._actualCard ?? null;
 		if (this.equippedTo && !this._actualCard.equippedTo.equipments.includes(this._actualCard)) {

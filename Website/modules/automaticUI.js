@@ -406,22 +406,22 @@ const attackUiValues = new Map();
 const defenseUiValues = new Map();
 export function addCardAttackDefenseOverlay(card) {
 	if (!(card.zone instanceof FieldZone)) return;
-	if (!card.values.cardTypes.includes("unit")) return;
+	if (!card.values.current.cardTypes.includes("unit")) return;
 
 	const slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
 
 	const overlay = document.createElement("div");
 	overlay.classList.add("overlayText", "cardValueOverlay");
 	const attackSpan = document.createElement("span");
-	attackSpan.textContent = card.values.attack;
+	attackSpan.textContent = card.values.current.attack;
 	const defenseSpan = document.createElement("span");
-	defenseSpan.textContent = card.values.defense;
+	defenseSpan.textContent = card.values.current.defense;
 	overlay.appendChild(attackSpan);
 	overlay.appendChild(document.createTextNode(" / "));
 	overlay.appendChild(defenseSpan);
 
-	attackUiValues.set(slot, new gameUI.UiValue(card.values.attack, 5, attackSpan));
-	defenseUiValues.set(slot, new gameUI.UiValue(card.values.defense, 5, defenseSpan));
+	attackUiValues.set(slot, new gameUI.UiValue(card.values.current.attack, 5, attackSpan));
+	defenseUiValues.set(slot, new gameUI.UiValue(card.values.current.defense, 5, defenseSpan));
 
 	slot.appendChild(overlay);
 }
@@ -444,7 +444,7 @@ export async function updateCardAttackDefenseOverlay(card, instant) {
 	}
 	const slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
 	return Promise.all([
-		attackUiValues.get(slot).set(card.values.attack, instant),
-		defenseUiValues.get(slot).set(card.values.defense, instant)
+		attackUiValues.get(slot).set(card.values.current.attack, instant),
+		defenseUiValues.get(slot).set(card.values.current.defense, instant)
 	]);
 }

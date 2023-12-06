@@ -1,8 +1,10 @@
 
 import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
 import {chooseAbilityOrder} from "./inputRequests.js";
+import {Player} from "./player.js";
 import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
-import {SnapshotCard} from "./card.js";
+import {SnapshotCard, BaseCard} from "./card.js";
+import {recalculateModifiedValuesFor} from "./valueModifiers.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
 import * as actions from "./actions.js";
@@ -143,7 +145,7 @@ export class Timing {
 			if (this.game.currentPhase() instanceof phases.StackPhase) {
 				for (let player of game.players) {
 					for (let card of player.getAllCards()) {
-						for (let ability of card.values.abilities) {
+						for (let ability of card.values.current.abilities) {
 							if (ability instanceof abilities.TriggerAbility ||
 								ability instanceof abilities.CastAbility) {
 								ability.checkTrigger(card, player);
@@ -217,7 +219,7 @@ export class Timing {
 		// Equipments might need to be destroyed
 		let invalidEquipments = [];
 		for (const equipment of game.players.map(player => player.spellItemZone.cards).flat()) {
-			if (equipment && (equipment.values.cardTypes.includes("equipableItem") || equipment.values.cardTypes.includes("enchantSpell")) &&
+			if (equipment && (equipment.values.current.cardTypes.includes("equipableItem") || equipment.values.current.cardTypes.includes("enchantSpell")) &&
 				(equipment.equippedTo === null || !equipment.equipableTo.evalFull(new ScriptContext(equipment, equipment.currentOwner()))[0].get(equipment.currentOwner()).includes(equipment.equippedTo))
 			) {
 				invalidEquipments.push(equipment);
@@ -275,27 +277,28 @@ function* checkGameOver(game) {
 function* getStaticAbilityPhasingTiming(game) {
 	let modificationActions = []; // the list of Apply/UnapplyStaticAbility actions that this will return as a timing.
 	let activeCards = game.players.map(player => player.getAllCards()).flat();
+	let possibleTargets = activeCards.concat(game.players);
 	let newApplications = new Map();
 	for (let currentCard of activeCards) {
-		for (let ability of currentCard.values.abilities) {
+		for (let ability of currentCard.values.current.abilities) {
 			if (ability instanceof abilities.StaticAbility) {
-				let eligibleCards = ability.getTargetCards(currentCard, currentCard.currentOwner());
-				for (let otherCard of activeCards) {
-					if (eligibleCards.includes(otherCard)) {
-						if (!otherCard.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
+				let eligibleTargets = ability.getTargets(currentCard, currentCard.currentOwner());
+				for (let target of possibleTargets) {
+					if (eligibleTargets.includes(target)) {
+						if (!target.values.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
 							// abilities are just dumped in a list here to be sorted later.
-							let modifiers = newApplications.get(otherCard) ?? [];
+							let modifiers = newApplications.get(target) ?? [];
 							modifiers.push({
 								ability: ability,
 								source: currentCard
 							});
-							newApplications.set(otherCard, modifiers);
+							newApplications.set(target, modifiers);
 						}
 					} else {
-						if (otherCard.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
+						if (target.values.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
 							modificationActions.push(new actions.UnapplyStaticAbility(
 								currentCard.currentOwner(), // have these be owned by the player that owns the card with the ability.
-								otherCard,
+								target,
 								ability
 							));
 						}
@@ -305,48 +308,95 @@ function* getStaticAbilityPhasingTiming(game) {
 		}
 	}
 
-	for (const [card, value] of newApplications) {
-		let fieldEnterBuckets = [{}, {}];
-		for (let i = value.length - 1; i >= 0; i--) {
-			if (value[i].source === card) {
+	for (const [target, applications] of newApplications) {
+		let fieldEnterBuckets = {};
+		for (let i = applications.length - 1; i >= 0; i--) {
+			// a card's own abilities go first.
+			if (target instanceof BaseCard && applications[i].source === target) {
 				modificationActions.push(new actions.ApplyStaticAbility(
-					value[i].source.currentOwner(), // have these be owned by the player that owns the card with the ability.
-					card,
-					value[i].ability.getModifier(value[i].source, value[i].source.currentOwner())
+					applications[i].source.currentOwner(), // have these be owned by the player that owns the card with the ability.
+					target,
+					applications[i].ability.getModifier(applications[i].source, applications[i].source.currentOwner())
 				));
-				value.splice(i, 1);
+				applications.splice(i, 1);
 			} else {
-				let fieldIndex = value[i].source.currentOwner().index;
-				let lastMoved = value[i].ability.zoneEnterTimingIndex;
-				if (fieldEnterBuckets[fieldIndex][lastMoved] === undefined) {
-					fieldEnterBuckets[fieldIndex][lastMoved] = [];
+				// otherwise the applications get ordered by when they entered the field
+				const lastMoved = applications[i].ability.zoneEnterTimingIndex;
+				if (fieldEnterBuckets[lastMoved] === undefined) {
+					fieldEnterBuckets[lastMoved] = [];
 				}
-				fieldEnterBuckets[fieldIndex][lastMoved].push(value[i]);
+				fieldEnterBuckets[lastMoved].push(applications[i]);
 			}
 		}
 
-		for (const fieldIndex of [card.currentOwner().index, card.currentOwner().next().index]) {
-			for (const timing of Object.keys(fieldEnterBuckets[fieldIndex]).sort()) {
+		// sort abilities by when they were put on the field, then by application category bucket. (whose field they are on)
+		for (const timing of Object.keys(fieldEnterBuckets).sort()) {
+			let applyBuckets = [];
+			switch (true) {
+				case target instanceof BaseCard: { // applying to cards
+					applyBuckets.push({player: target.currentOwner(), applications: []}); // abilities on same side of field
+					applyBuckets.push({player: target.currentOwner().next(), applications: []}); // abilities on other side of field
+					for (const application of fieldEnterBuckets[timing]) {
+						if (application.source.currentOwner() === target.currentOwner()) {
+							applyBuckets[0].applications.push(application);
+						} else {
+							applyBuckets[1].applications.push(application);
+						}
+					}
+					break;
+				}
+				case target instanceof Player: { // applying to players
+					applyBuckets.push({player: target, applications: []}); // abilities on same side of field
+					applyBuckets.push({player: target.next(), applications: []}); // abilities on other side of field
+					for (const application of fieldEnterBuckets[timing]) {
+						if (application.source.currentOwner() === target) {
+							applyBuckets[0].applications.push(application);
+						} else {
+							applyBuckets[1].applications.push(application);
+						}
+					}
+					break;
+				}
+				default: { // applying to everything else (game processes like fights)
+					applyBuckets.push({player: game.currentTurn().player, applications: []}); // abilities owned by the turn player
+					applyBuckets.push({player: game.currentTurn().player.next(), applications: []}); // abilities owned by the non-turn player
+					for (const application of fieldEnterBuckets[timing]) {
+						if (application.source.currentOwner() === buckets[0].player) {
+							applyBuckets[0].applications.push(application);
+						} else {
+							applyBuckets[1].applications.push(application);
+						}
+					}
+				}
+			}
+
+			// ordering abilities in the buckets
+			for (const bucket of applyBuckets) {
+				if (bucket.applications.length === 0) continue;
+
 				let orderedAbilities = [0];
-				if (fieldEnterBuckets[fieldIndex][timing].length !== 1) {
-					let request = chooseAbilityOrder.create(game.players[fieldIndex], card, fieldEnterBuckets[fieldIndex][timing].map(elem => elem.ability));
-					let response = yield [request];
+				// is sorting necessary for this bucket?
+				if (bucket.applications.length !== 1) {
+					const request = chooseAbilityOrder.create(bucket.player, target, bucket.applications.map(elem => elem.ability));
+					const response = yield [request];
 					if (response.type != "chooseAbilityOrder") {
 						throw new Error("Wrong response type supplied during ability ordering (expected 'chooseAbilityOrder', got '" + response.type + "')");
 					}
 					orderedAbilities = chooseAbilityOrder.validate(response.value, request);
 				}
-				for (let index of orderedAbilities) {
-					let application = fieldEnterBuckets[fieldIndex][timing][index];
+				// actually apply the abilities
+				for (const index of orderedAbilities) {
+					const application = bucket.applications[index];
 					modificationActions.push(new actions.ApplyStaticAbility(
 						application.source.currentOwner(), // have these be owned by the player that owns the card with the ability.
-						card,
+						target,
 						application.ability.getModifier(application.source, application.source.currentOwner())
 					));
 				}
 			}
 		}
 	}
+
 	if (modificationActions.length === 0) {
 		return null;
 	}
@@ -356,24 +406,25 @@ function* getStaticAbilityPhasingTiming(game) {
 function recalculateCardValues(game) {
 	let valueChangeEvents = [];
 	for (let player of game.players) {
+		recalculateModifiedValuesFor(player);
 		for (let card of player.getActiveCards()) {
 			let oldCard = new SnapshotCard(card);
-			let wasUnit = card.values.cardTypes.includes("unit");
-			card.recalculateModifiedValues();
+			let wasUnit = card.values.current.cardTypes.includes("unit");
+			recalculateModifiedValuesFor(card);
 			// once done, unit specific modifications may need to be removed.
-			if (wasUnit && !card.values.cardTypes.includes("unit")) {
+			if (wasUnit && !card.values.current.cardTypes.includes("unit")) {
 				card.canAttackAgain = false;
-				for (let i = card.modifierStack.length - 1; i >= 0; i--) {
-					if (card.modifierStack[i].removeUnitSpecificModifications()) {
-						card.modifierStack.splice(i, 1);
+				for (let i = card.values.modifierStack.length - 1; i >= 0; i--) {
+					if (card.values.modifierStack[i].removeUnitSpecificModifications()) {
+						card.values.modifierStack.splice(i, 1);
 					}
 				}
 			}
 
-			for (let property of oldCard.baseValues.compareTo(card.baseValues)) {
+			for (let property of oldCard.values.base.compareTo(card.values.base)) {
 				valueChangeEvents.push(createCardValueChangedEvent(card, property, true));
 			}
-			for (let property of oldCard.values.compareTo(card.values)) {
+			for (let property of oldCard.values.current.compareTo(card.values.current)) {
 				if (valueChangeEvents.find(event => event.valueName === property) === undefined) {
 					valueChangeEvents.push(createCardValueChangedEvent(card, property, false));
 				}
