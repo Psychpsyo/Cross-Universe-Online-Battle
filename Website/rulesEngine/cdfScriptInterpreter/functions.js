@@ -3,7 +3,7 @@ import * as ast from "./astNodes.js";
 import * as events from "../events.js";
 import * as requests from "../inputRequests.js";
 import * as zones from "../zones.js";
-import {Card, BaseCard, SnapshotCard} from "../card.js";
+import {Card, BaseCard} from "../card.js";
 import {ScriptValue, ScriptContext, DeckPosition} from "./structs.js";
 
 // general helper functions
@@ -228,7 +228,7 @@ export function initFunctions() {
 			return new ScriptValue("tempActions", discards.concat(discards.map(discard => new actions.Destroy(
 				discard,
 				new ScriptValue("dueToReason", ["effect"]),
-				new ScriptValue("card", [new SnapshotCard(ctx.card)])
+				new ScriptValue("card", [ctx.card.snapshot()])
 			))));
 		},
 		hasCardTarget,
@@ -238,7 +238,7 @@ export function initFunctions() {
 			return discardLists.map(discards => new ScriptValue("action", discards.concat(discards.map(discard => new actions.Destroy(
 				discard,
 				new ScriptValue("dueToReason", ["effect"]),
-				new ScriptValue("card", [new SnapshotCard(ctx.card)])
+				new ScriptValue("card", [ctx.card.snapshot()])
 			)))));
 		}
 	),
@@ -408,9 +408,6 @@ export function initFunctions() {
 			let moveActions = [];
 			let zoneMoveCards = new Map();
 			for (const card of cards) {
-				if (card.current() === null) {
-					continue;
-				}
 				ast.setImplicit([card], "card");
 				let zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
 				let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, false);
@@ -418,8 +415,8 @@ export function initFunctions() {
 				if (zoneValue instanceof DeckPosition) {
 					index = zoneValue.isTop? -1 : 0;
 				}
-				moveActions.push(new actions.Move(ctx.player, card.current(), zone, index));
-				zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card.current()));
+				moveActions.push(new actions.Move(ctx.player, card, zone, index));
+				zoneMoveCards.set(zone, (zoneMoveCards.get(zone) ?? []).concat(card));
 				ast.clearImplicit("card");
 			}
 
@@ -449,9 +446,6 @@ export function initFunctions() {
 			for (let cards of cardPossibilities) {
 				moveActions.push([]);
 				for (const card of cards) {
-					if (card.current() === null) {
-						continue;
-					}
 					ast.setImplicit([card], "card");
 					// TODO: this might need to handle multiple zone possibilities
 					let zoneValue = this.getParameter(astNode, "zone").evalFull(ctx)[0].get(ctx.player);
@@ -460,7 +454,7 @@ export function initFunctions() {
 					if (zoneValue instanceof DeckPosition) {
 						index = zoneValue.isTop? -1 : 0;
 					}
-					moveActions[moveActions.length - 1].push(new actions.Move(ctx.player, card.current(), zone, index));
+					moveActions[moveActions.length - 1].push(new actions.Move(ctx.player, card, zone, index));
 					ast.clearImplicit("card");
 				}
 			}
@@ -480,7 +474,7 @@ export function initFunctions() {
 			if (response.type != "orderCards") {
 				throw new Error("Incorrect response type supplied during card ordering. (expected \"orderCards\", got \"" + response.type + "\" instead)");
 			}
-			return new ScriptValue("card", requests.orderCards.validate(response.value, orderRequest).map(card => new SnapshotCard(card.current())));
+			return new ScriptValue("card", requests.orderCards.validate(response.value, orderRequest).map(card => card.current().snapshot()));
 		},
 		alwaysHasTarget, // technically you can't order nothing but that should never matter in practice
 		function(astNode, ctx) {
@@ -546,7 +540,7 @@ export function initFunctions() {
 				if (zoneValue instanceof DeckPosition) {
 					index = zoneValue.isTop? -1 : 0;
 				}
-				returnActions.push(new actions.Return(ctx.player, card.current(), zone, index));
+				returnActions.push(new actions.Return(ctx.player, card, zone, index));
 				zoneReturnCards.set(zone, (zoneReturnCards.get(zone) ?? []).concat(card.current()));
 				ast.clearImplicit("card");
 			}
@@ -588,7 +582,7 @@ export function initFunctions() {
 					if (zoneValue instanceof DeckPosition) {
 						index = zoneValue.isTop? -1 : 0;
 					}
-					returnActions[returnActions.length - 1].push(new actions.Return(ctx.player, card.current(), zone, index));
+					returnActions[returnActions.length - 1].push(new actions.Return(ctx.player, card, zone, index));
 					ast.clearImplicit("card");
 				}
 			}
@@ -602,11 +596,11 @@ export function initFunctions() {
 		[null],
 		"action",
 		function*(astNode, ctx) {
-			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Reveal(ctx.player, card.current())));
+			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).map(card => new actions.Reveal(ctx.player, card)));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Reveal(ctx.player, card.current()))));
+			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).map(card => new actions.Reveal(ctx.player, card))));
 		}
 	),
 
@@ -643,7 +637,7 @@ export function initFunctions() {
 				}
 			}
 			let cards = requests.chooseCards.validate(response.value, selectionRequest);
-			yield [events.createCardsSelectedEvent(ctx.player, cards.map(card => new SnapshotCard(card.current())))];
+			yield [events.createCardsSelectedEvent(ctx.player, cards.map(card => card.current().snapshot()))];
 			return new ScriptValue("card", cards);
 		},
 		function(astNode, ctx) {
@@ -773,7 +767,7 @@ export function initFunctions() {
 		"action",
 		function*(astNode, ctx) {
 			let newTarget = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player)[0];
-			return new ScriptValue("tempActions", newTarget.current()? [new actions.SetAttackTarget(ctx.player, newTarget.current())] : []);
+			return new ScriptValue("tempActions", [new actions.SetAttackTarget(ctx.player, newTarget)]);
 		},
 		hasCardTarget,
 		undefined // TODO: Write evalFull

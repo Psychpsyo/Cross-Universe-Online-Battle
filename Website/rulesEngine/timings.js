@@ -3,7 +3,7 @@ import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, 
 import {chooseAbilityOrder} from "./inputRequests.js";
 import {Player} from "./player.js";
 import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
-import {SnapshotCard, BaseCard} from "./card.js";
+import {BaseCard} from "./card.js";
 import {recalculateModifiedValuesFor} from "./valueModifiers.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
@@ -418,7 +418,7 @@ function recalculateObjectValues(game) {
 
 		// recalculate the values for the player's cards
 		for (let card of player.getActiveCards()) {
-			let oldCard = new SnapshotCard(card);
+			let oldCard = card.snapshot();
 			let wasUnit = card.values.current.cardTypes.includes("unit");
 			recalculateModifiedValuesFor(card);
 			// once done, unit specific modifications may need to be removed.

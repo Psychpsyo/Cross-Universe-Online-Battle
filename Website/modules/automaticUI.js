@@ -3,7 +3,6 @@
 import {locale} from "/modules/locale.js";
 import {previewCard, closeCardPreview, cardAlignmentInfo} from "/modules/generalUI.js";
 import {FieldZone} from "/rulesEngine/zones.js";
-import {SnapshotCard} from "/rulesEngine/card.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 import * as blocks from "/rulesEngine/blocks.js";
@@ -148,17 +147,17 @@ export function newBlock(block) {
 		// The snapshot needs to be taken because the card might be shuffled into a deck before the block executes, making it so that clicking on
 		// it would try to bring up a hidden card.
 		case blocks.StandardSummon: {
-			card = new SnapshotCard(block.card.current());
+			card = block.card.current().snapshot();
 			label = locale.game.automatic.blocks.summon;
 			break;
 		}
 		case blocks.CastSpell: {
-			card = new SnapshotCard(block.card.current());
+			card = block.card.current().snapshot();
 			label = locale.game.automatic.blocks.cast;
 			break;
 		}
 		case blocks.DeployItem: {
-			card = new SnapshotCard(block.card.current());
+			card = block.card.current().snapshot();
 			label = locale.game.automatic.blocks.deploy;
 			break;
 		}

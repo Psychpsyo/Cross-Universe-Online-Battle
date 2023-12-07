@@ -4,7 +4,6 @@ import * as actions from "./actions.js";
 import * as abilities from "./abilities.js";
 import * as timingGenerators from "./timingGenerators.js";
 import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
-import {SnapshotCard} from "./card.js";
 
 // Base class for all blocks
 class Block {
@@ -111,7 +110,7 @@ export class StandardSummon extends Block {
 	}
 
 	async* runCost() {
-		this.card = new SnapshotCard(this.card);
+		this.card = this.card.snapshot();
 		let paid = await (yield* super.runCost());
 		if (!paid) {
 			this.card.zone.add(this.card.current(), this.card.index);
@@ -159,7 +158,7 @@ export class AttackDeclaration extends Block {
 
 		this.attackTarget = this.establishAction.attackTarget; // already a snapshot
 		this.player.game.currentAttackDeclaration = new game.AttackDeclaration(this.player.game, this.attackers, this.attackTarget.current());
-		this.attackers = this.attackers.map(attacker => new SnapshotCard(attacker));
+		this.attackers = this.attackers.map(attacker => attacker.snapshot());
 	}
 }
 
@@ -203,7 +202,7 @@ export class AbilityActivation extends Block {
 	}
 
 	async* runCost() {
-		this.card = new SnapshotCard(this.card);
+		this.card = this.card.snapshot();
 		if (!(await (yield* super.runCost()))) {
 			return false;
 		}
@@ -259,7 +258,7 @@ export class DeployItem extends Block {
 	}
 
 	async* runCost() {
-		this.card = new SnapshotCard(this.card);
+		this.card = this.card.snapshot();
 		if (!(await (yield* super.runCost()))) {
 			this.card.zone.add(this.card.current(), this.card.index);
 			return false;
@@ -318,7 +317,7 @@ export class CastSpell extends Block {
 	}
 
 	async* runCost() {
-		this.card = new SnapshotCard(this.card);
+		this.card = this.card.snapshot();
 		if (!(await (yield* super.runCost()))) {
 			this.card.restore();
 			this.card.zone.add(this.card.current(), this.card.index);

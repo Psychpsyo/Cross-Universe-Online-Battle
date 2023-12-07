@@ -4,7 +4,7 @@ import {locale} from "/modules/locale.js";
 import {InteractionController} from "/modules/interactionController.js";
 import {socket} from "/modules/netcode.js";
 import {getAutoResponse} from "/modules/autopass.js";
-import {SnapshotCard, BaseCard} from "/rulesEngine/card.js";
+import {BaseCard} from "/rulesEngine/card.js";
 import {Player} from "/rulesEngine/player.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
@@ -214,7 +214,7 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
-				for (const [playerIndex, cards] of Object.entries(Object.groupBy(events.map(event => event.cards).flat().map(card => card.current()? new SnapshotCard(card.current()) : card), card => card.owner.index))) {
+				for (const [playerIndex, cards] of Object.entries(Object.groupBy(events.map(event => event.cards).flat(), card => card.owner.index))) {
 					generalUI.putChatMessage(locale.game.notices[playerIndex == localPlayer.index? "youDrew" : "opponentDrew"], "notice", cards);
 				}
 				await Promise.all(events.map(async event => {
@@ -328,8 +328,8 @@ export class AutomaticController extends InteractionController {
 			case "cardPlaced": {
 				for (const event of events) {
 					gameUI.insertCard(event.toZone, event.toIndex);
-					if (event.fromZone) {
-						gameUI.removeCard(event.fromZone, event.fromIndex);
+					if (event.card.zone) {
+						gameUI.removeCard(event.card.zone, event.card.index);
 					}
 				}
 				return this.gameSleep();
@@ -338,13 +338,13 @@ export class AutomaticController extends InteractionController {
 			case "cardDeployed":
 			case "cardSummoned": {
 				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
-					generalUI.putChatMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", eventList.map(event => event.card.current()? new SnapshotCard(event.card.current()) : event.card));
+					generalUI.putChatMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", eventList.map(event => event.card));
 				}
 				for (const event of events) {
 					gameUI.insertCard(event.toZone, event.toIndex);
 					gameUI.clearDragSource(event.toZone, event.toIndex, event.player);
-					if (event.fromZone) {
-						gameUI.removeCard(event.fromZone, event.fromIndex);
+					if (event.card.zone) {
+						gameUI.removeCard(event.card.zone, event.card.index);
 					}
 					autoUI.removeCardAttackDefenseOverlay(event.card);
 					autoUI.addCardAttackDefenseOverlay(event.card.current());
@@ -353,10 +353,11 @@ export class AutomaticController extends InteractionController {
 			}
 			case "cardDiscarded":
 			case "cardExiled":
+			case "cardReturned":
 			case "cardMoved": {
-				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => event.card.current()? new SnapshotCard(event.card.current()) : event.card));
+				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => event.card));
 				for (const event of events) {
-					gameUI.removeCard(event.fromZone, event.fromIndex);
+					gameUI.removeCard(event.card.zone, event.card.index);
 					autoUI.removeCardAttackDefenseOverlay(event.card);
 					if (!event.card.isToken || event.toZone instanceof zones.FieldZone) {
 						gameUI.insertCard(event.toZone, event.toIndex);

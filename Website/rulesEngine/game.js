@@ -6,7 +6,6 @@ import {CURandom} from "./random.js";
 import {createDeckShuffledEvent, createStartingPlayerSelectedEvent, createCardsDrawnEvent, createPartnerRevealedEvent, createTurnStartedEvent} from "./events.js";
 import * as phases from "./phases.js";
 import * as requests from "./inputRequests.js";
-import {SnapshotCard} from "./card.js";
 
 export const baseTypes = [
 	"Angel",
@@ -148,7 +147,7 @@ export class Game {
 			let drawnCards = [];
 			for (let i = 0; i < this.config.startingHandSize && player.deckZone.cards.length > 0; i++) {
 				let card = player.deckZone.cards[player.deckZone.cards.length - 1];
-				drawnCards.push(new SnapshotCard(card));
+				drawnCards.push(card.snapshot());
 				player.handZone.add(card, player.handZone.cards.length);
 				drawnCards[drawnCards.length - 1].globalId = card.globalId;
 			}

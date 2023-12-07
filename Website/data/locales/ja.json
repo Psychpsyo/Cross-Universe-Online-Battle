@@ -56,6 +56,7 @@
 			"discarded": null,
 			"exiled": null,
 			"moved": null,
+			"returned": null,
 			"viewed": null
 		},
 
@@ -228,8 +229,8 @@
 
 			"deckSideSelect": {
 				"prompt": null,
-				"top": "上",
-				"bottom": "下"
+				"top": "デッキの上",
+				"bottom": "デッキの下"
 			},
 
 			"orderSelect": {

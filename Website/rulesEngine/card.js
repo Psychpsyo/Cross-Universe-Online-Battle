@@ -40,6 +40,10 @@ export class BaseCard {
 		this.globalId = 0;
 	}
 
+	// makes a snapshot of this card.
+	snapshot(equippedToSnapshot, equipmentSnapshot) {
+		return new SnapshotCard(this, equippedToSnapshot, equipmentSnapshot);
+	}
 	// always returns the current, non-snapshot version of a card or null if that doesn't exist.
 	current() {
 		return this.owner.game.currentCards.get(this.globalId) ?? null;
@@ -265,13 +269,13 @@ export class SnapshotCard extends BaseCard {
 		if (equippedToSnapshot) {
 			this.equippedTo = equippedToSnapshot;
 		} else if (card.equippedTo) {
-			this.equippedTo = new SnapshotCard(card.equippedTo, undefined, this);
+			this.equippedTo = card.equippedTo.snapshot(undefined, this);
 		}
 		this.equipments = card.equipments.map((equipment => {
 			if (equipmentSnapshot === equipment) {
 				return equipmentSnapshot;
 			}
-			return new SnapshotCard(equipment, this);
+			returnequipment.snapshot(this);
 		}).bind(this));
 		this.zone = card.zone;
 		this.placedTo = card.placedTo;
@@ -290,6 +294,11 @@ export class SnapshotCard extends BaseCard {
 		this.hiddenFor = [...card.hiddenFor];
 		this.globalId = card.globalId;
 		this._actualCard = card; // will not be cleared by card moving and is only for restoring a card on undo
+	}
+
+	// makes a snapshot of this card.
+	snapshot(equippedToSnapshot, equipmentSnapshot) {
+		return this;
 	}
 
 	restore() {

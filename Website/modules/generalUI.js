@@ -89,7 +89,10 @@ export function putChatMessage(message, type, cards) {
 	if (cards) {
 		let cardHolder = document.createElement("div");
 		cardHolder.classList.add("chatCardHolder");
-		for (const card of cards) {
+		for (let card of cards) {
+			if (card.hiddenFor.includes(localPlayer) && card.current()) {
+				card = card.current().snapshot();
+			}
 			let cardImg = document.createElement("img");
 			cardImg.src = cardLoader.getCardImage(card);
 			cardImg.addEventListener("click", function () {
