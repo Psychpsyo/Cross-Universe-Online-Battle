@@ -259,13 +259,27 @@ export async function attack(units) {
 }
 
 export async function activate(card) {
-	if (!(card.zone instanceof FieldZone)) {
-		return;
+	switch (card.zone.type) {
+		case "unit":
+		case "spellItem":
+		case "partner": {
+			let slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
+			slot.classList.add("activating");
+			await gameState.controller.gameSleep(1);
+			slot.classList.remove("activating");
+		}
+		case "discard":
+		case "exile": {
+			let img = document.getElementById(card.zone.type + card.zone.player.index);
+			let slot = img.parentElement;
+			let previousSrc = img.src;
+			img.src = cardLoader.getCardImage(card);
+			slot.classList.add("activating");
+			await gameState.controller.gameSleep(1);
+			slot.classList.remove("activating");
+			img.src = previousSrc;
+		}
 	}
-	let slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
-	slot.classList.add("activating");
-	await gameState.controller.gameSleep(1);
-	slot.classList.remove("activating");
 }
 
 export async function revealHandCard(card) {

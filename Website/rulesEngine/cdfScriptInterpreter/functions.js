@@ -42,7 +42,7 @@ function getZoneForCard(zoneList, card, ctx, forReturn) {
 	for (let zone of rightType) {
 		// RULES: When a card is being returned to the field (or put back) it is returned to the player's field it was most recently on.
 		// ルール：また、フィールドに戻す場合は直前に存在していたプレイヤー側のフィールドに置くことになります。
-		if (forReturn && zone instanceof FieldZone) {
+		if (forReturn && zone instanceof zones.FieldZone) {
 			if (zone.player === (card.lastFieldSidePlayer ?? ctx.player)) {
 				return zone;
 			}
@@ -135,8 +135,12 @@ export function initFunctions() {
 		function*(astNode, ctx) {
 			let until = (yield* this.getParameter(astNode, "untilIndicator").eval(ctx)).get(ctx.player);
 			let applyActions = [];
-			let objects = (yield* this.getParameter(astNode, "card")?.eval(ctx))?.get(ctx.player)?.map(card => card.current()) ??
-						  (yield* this.getParameter(astNode, "player").eval(ctx)).get(ctx.player);
+			let objects = (yield* (this.getParameter(astNode, "card") ?? this.getParameter(astNode, "player")).eval(ctx));
+			if (objects.type === "card") {
+				objects = objects.get(ctx.player).map(card => card.current);
+			} else {
+				objects = objects.get(ctx.player);
+			}
 			for (const target of objects) {
 				applyActions.push(new actions.ApplyStatChange(
 					ctx.player,
@@ -148,9 +152,8 @@ export function initFunctions() {
 			return new ScriptValue("tempActions", applyActions);
 		},
 		function(astNode, ctx) { // for checking if any cards are available for the first card parameter
-			if (this.getParameter(astNode, "card").evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined) return true;
-			if (this.getParameter(astNode, "player").evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined) return true;
-			return ;
+			let target = this.getParameter(astNode, "card") ?? this.getParameter(astNode, "player");
+			return target.evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 		},
 		undefined // TODO: Write evalFull
 	),
@@ -607,23 +610,26 @@ export function initFunctions() {
 		}
 	),
 
-	// Makes the executing player choose X cards from the given ones
+	// Makes the executing player choose X cards from the given ones, either selecting at random or not.
 	SELECT: new ScriptFunction(
-		["number", "card"],
-		[null, null],
+		["number", "card", "bool"],
+		[null, null, new ast.BoolNode("no")],
 		"card",
 		function*(astNode, ctx) {
 			let choiceAmount = (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player);
 			let eligibleCards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
+			let atRandom = (yield* this.getParameter(astNode, "bool").eval(ctx)).get(ctx.player);
 			if (eligibleCards.length === 0) {
 				return new ScriptValue("card", []);
 			}
+
+			let wasHidden = [];
 			for (let card of eligibleCards) {
-				if (card.currentOwner() === ctx.player || !(["deck", "hand"].includes(card.zone.type))) {
-					card.showTo(ctx.player);
-				} else {
-					// selecting from revealed hands is still random.
+				wasHidden.push(card.hiddenFor.includes(ctx.player));
+				if (atRandom) {
 					card.hideFrom(ctx.player);
+				} else {
+					card.showTo(ctx.player);
 				}
 			}
 			let selectionRequest = new requests.chooseCards.create(ctx.player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ctx.ability.id);
@@ -631,9 +637,9 @@ export function initFunctions() {
 			if (response.type != "chooseCards") {
 				throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 			}
-			for (let card of eligibleCards) {
-				if (card.zone.type === "deck" || (card.zone.type === "hand" && card.currentOwner() !== ctx.player)) {
-					card.hideFrom(ctx.player);
+			for (let i = 0; i < eligibleCards.length; i++) {
+				if (wasHidden[i]) {
+					eligibleCards[i].hideFrom(ctx.player);
 				}
 			}
 			let cards = requests.chooseCards.validate(response.value, selectionRequest);
@@ -643,12 +649,35 @@ export function initFunctions() {
 		function(astNode, ctx) {
 			let amountsRequired = this.getParameter(astNode, "number").evalFull(ctx);
 			let availableOptions = this.getParameter(astNode, "card").evalFull(ctx).map(option => option.get(ctx.player));
+			let atRandom = this.getParameter(astNode, "bool").evalFull(ctx)[0].get(ctx.player);
+
+			let foundTarget = false;
 			for (let i = 0; i < availableOptions.length; i++) {
+				let wasHidden = [];
+				for (let card of availableOptions[i]) {
+					wasHidden.push(card.hiddenFor.includes(ctx.player));
+					if (atRandom) {
+						card.hideFrom(ctx.player);
+					} else {
+						card.showTo(ctx.player);
+					}
+				}
+
 				let required = amountsRequired[i].get(ctx.player);
-				if (required === "any" && availableOptions[i].length > 0) return true;
-				if (Math.min(...required) <= availableOptions[i].length) return true;
+				if (required === "any" && availableOptions[i].length > 0) foundTarget = true;
+				if (Math.min(...required) <= availableOptions[i].length) foundTarget = true;
+
+				for (let j = 0; j < availableOptions[i].length; j++) {
+					if (wasHidden[j]) {
+						availableOptions[i][j].hideFrom(ctx.player);
+					}
+				}
+
+				if (foundTarget) {
+					break;
+				}
 			}
-			return false;
+			return foundTarget;
 		},
 		function(astNode, ctx) {
 			let choiceAmounts = this.getParameter(astNode, "number").evalFull(ctx)[0].get(ctx.player);
@@ -668,6 +697,28 @@ export function initFunctions() {
 				combinations = combinations.concat(nChooseK(eligibleCards.length, amount).map(list => new ScriptValue("card", list.map(i => eligibleCards[i]))));
 			}
 			return combinations;
+		}
+	),
+
+	// Makes the executing player choose a type
+	SELECTDECKSIDE: new ScriptFunction(
+		["player"],
+		[null],
+		"zone",
+		function*(astNode, ctx) {
+			let selectionRequest = new requests.chooseDeckSide.create(ctx.player, ctx.ability.id, (yield* this.getParameter(astNode, "player").eval(ctx)).get(ctx.player)[0]);
+			let response = yield [selectionRequest];
+			if (response.type != "chooseDeckSide") {
+				throw new Error("Incorrect response type supplied during type selection. (expected \"chooseDeckSide\", got \"" + response.type + "\" instead)");
+			}
+			let deckSide = requests.chooseDeckSide.validate(response.value, selectionRequest);
+			yield [events.createDeckSideSelectedEvent(ctx.player, deckSide.isTop? "top" : "bottom")];
+			return new ScriptValue("zone", deckSide);
+		},
+		alwaysHasTarget,
+		function(astNode, ctx) {
+			let player = this.getParameter(astNode, "player").evalFull(ctx).get(ctx.player)[0];
+			return [new ScriptValue("zone", new DeckPosition(player.deckZone, true)), new ScriptValue("zone", new DeckPosition(player.deckZone, false))];
 		}
 	),
 

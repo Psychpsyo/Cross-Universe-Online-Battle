@@ -38,6 +38,10 @@
 			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
 			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt.",
 			"opponentChoseType": "Dein Gegner hat Typ {#TYPE} gewählt.",
+			"opponentChoseDeckSide": {
+				"top": "Dein Gegner hat die Deckoberseite gewählt.",
+				"bottom": "Dein Gegner hat die Deckunterseite gewählt."
+			},
 
 			"youDrew": "Du hast gezogen:",
 			"opponentDrew": "Dein Gegner hat gezogen:",
@@ -222,6 +226,12 @@
 				"select": "Auswählen"
 			},
 
+			"deckSideSelect": {
+				"prompt": "Wähle die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}':",
+				"top": "Oberseite",
+				"bottom": "Unterseite"
+			},
+
 			"orderSelect": {
 				"confirm": "Bestätigen",
 				"abilityPrompt": "Wähle, in welcher Reihenfolge diese Statischen Fähigkeiten auf '{#CARDNAME}' angewandt werden sollen:",
@@ -238,7 +248,8 @@
 				"selectingPlayer": "Dein Gegner wählt einen Spieler.",
 				"effectSelectingPlayer": "Dein Gegner wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
 				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt.",
-				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'."
+				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
+				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'."
 			},
 
 			"gameOver": {

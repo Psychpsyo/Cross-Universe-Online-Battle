@@ -31,6 +31,7 @@ let keywordTokenTypes = {
 	manaGainAmount: "playerProperty",
 	standardDrawAmount: "playerProperty",
 	needsToPayForPartner: "playerProperty",
+	canEnterBattlePhase: "playerProperty",
 
 	name: "cardProperty",
 	baseName: "cardProperty",
@@ -121,6 +122,7 @@ let keywordTokenTypes = {
 	RETURN: "function",
 	REVEAL: "function",
 	SELECT: "function",
+	SELECTDECKSIDE: "function",
 	SELECTPLAYER: "function",
 	SELECTTYPE: "function",
 	SETATTACKTARGET: "function",

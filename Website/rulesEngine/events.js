@@ -351,6 +351,15 @@ export function createTypeSelectedEvent(player, chosenType) {
 	}
 }
 
+export function createDeckSideSelectedEvent(player, chosenSide) {
+	return {
+		"nature": "event",
+		"type": "deckSideSelected",
+		"player": player,
+		"chosenSide": chosenSide
+	}
+}
+
 export function createCountersChangedEvent(card, type) {
 	return {
 		"nature": "event",

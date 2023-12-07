@@ -423,6 +423,12 @@ export class AutomaticController extends InteractionController {
 				}
 				break;
 			}
+			case "deckSideSelected": {
+				if (events[0].player !== localPlayer) {
+					generalUI.putChatMessage(locale.game.notices.opponentChoseDeckSide[events[0].chosenSide], "notice");
+				}
+				break;
+			}
 		}
 	}
 
@@ -485,6 +491,10 @@ export class AutomaticController extends InteractionController {
 				}
 				case "chooseType": {
 					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingType.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
+					break;
+				}
+				case "chooseDeckSide": {
+					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingDeckSide.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
 					break;
 				}
 			}
@@ -554,6 +564,10 @@ export class AutomaticController extends InteractionController {
 			}
 			case "chooseType": {
 				response.value = await autoUI.promptTypeSelection(locale.game.automatic.typeSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name), request.from);
+				break;
+			}
+			case "chooseDeckSide": {
+				response.value = (await gameUI.askQuestion(locale.game.automatic.deckSideSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name), locale.game.automatic.deckSideSelect.top, locale.game.automatic.deckSideSelect.bottom))? "top" : "bottom";
 				break;
 			}
 			case "pass": {

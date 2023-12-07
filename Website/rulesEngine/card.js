@@ -217,6 +217,7 @@ export class Card extends BaseCard {
 				data.defense ?? null,
 				data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
 				baseCardTypes.includes("unit")? 1 : null,
+				baseCardTypes.includes("unit")? true : null,
 				baseCardTypes.includes("unit")? true : null
 			),
 			data.deckLimit,

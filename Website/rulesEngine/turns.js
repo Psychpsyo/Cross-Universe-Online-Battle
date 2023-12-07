@@ -23,7 +23,7 @@ export class Turn {
 
 		yield* this.runPhase(new MainPhase(this));
 
-		if (this.index > 0) {
+		if (this.index > 0 && this.player.values.current.canEnterBattlePhase) {
 			let battlePhase = yield [enterBattlePhase.create(this.player)];
 			battlePhase.value = enterBattlePhase.validate(battlePhase.value);
 			if (battlePhase.value) {

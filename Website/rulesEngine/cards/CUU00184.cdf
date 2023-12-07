@@ -8,7 +8,6 @@ defense: 100
 
 o: trigger
 mandatory: yes
-condition: thisCard.zone = field
 after: COUNT([from summoned(dueTo: effect) where self = thisCard & zone = hand]) > 0
 APPLY(thisCard, {attack += 100}, endOfTurn);
 

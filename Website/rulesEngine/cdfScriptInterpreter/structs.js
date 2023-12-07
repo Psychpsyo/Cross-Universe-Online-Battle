@@ -3,13 +3,13 @@ import {BaseCard} from "../card.js";
 export class ScriptValue {
 	constructor(type, value) {
 		this.type = type;
-		this.isSplit = value instanceof Map;
-		this.value = value;
+		this._isSplit = value instanceof Map;
+		this._value = value;
 	}
 
 	// Returns the given player's version of this value.
 	get(player) {
-		return this.isSplit? this.value.get(player) : this.value;
+		return this._isSplit? this._value.get(player) : this._value;
 	}
 
 	// Returns this value as a single number.

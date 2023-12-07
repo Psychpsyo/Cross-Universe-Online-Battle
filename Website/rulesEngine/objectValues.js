@@ -1,4 +1,5 @@
 
+// not a superclass for Card/PlayerValues but a container.
 export class ObjectValues {
 	constructor(initial) {
 		this.initial = initial;
@@ -71,23 +72,26 @@ export class CardValues {
 }
 
 export class PlayerValues {
-	constructor(manaGainAmount = 5, standardDrawAmount = 1, needsToPayForPartner = true) {
+	constructor(manaGainAmount = 5, standardDrawAmount = 1, needsToPayForPartner = true, canEnterBattlePhase = true) {
 		this.manaGainAmount = manaGainAmount;
 		this.standardDrawAmount = standardDrawAmount;
 		this.needsToPayForPartner = needsToPayForPartner;
+		this.canEnterBattlePhase = canEnterBattlePhase;
 	}
 
 	clone() {
 		return new PlayerValues(
 			this.manaGainAmount,
-			this.standardDrawAmount
+			this.standardDrawAmount,
+			this.needsToPayForPartner,
+			this.canEnterBattlePhase
 		);
 	}
 
 	// returns a list of all properties that are different between this and other
 	compareTo(other) {
 		let differences = [];
-		for (let property of ["manaGainAmount", "standardDrawAmount"]) {
+		for (let property of ["manaGainAmount", "standardDrawAmount", "needsToPayForPartner", "canEnterBattlePhase"]) {
 			if (this[property] != other[property]) {
 				differences.push(property);
 			}

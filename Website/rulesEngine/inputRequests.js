@@ -1,4 +1,5 @@
 // This file input request definitions for passing out of the engine
+import {DeckPosition} from "./cdfScriptInterpreter/structs.js";
 
 // returns all possible ways to choose k elements from a list of n elements.
 function nChooseK(n, k) {
@@ -108,6 +109,27 @@ export const chooseType = {
 			options.push(i);
 		}
 		return options;
+	}
+}
+
+export const chooseDeckSide = {
+	create: function(player, effect, deckOwner) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "chooseDeckSide",
+			"effect": effect,
+			"deckOwner": deckOwner
+		}
+	},
+	validate: function(response, request) {
+		if (response != "top" && response != "bottom") {
+			throw new Error("Chose an invalid deck side: " + response + " (must be either 'top' or 'bottom')");
+		}
+		return new DeckPosition([request.player.deckZone], response === "top");
+	},
+	generateValidResponses: function(request) {
+		return [new DeckPosition([request.player.deckZone], true), new DeckPosition([request.player.deckZone], false)];
 	}
 }
 

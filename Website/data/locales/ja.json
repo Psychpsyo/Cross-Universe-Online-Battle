@@ -38,6 +38,10 @@
 			"opponentChoseYou": null,
 			"opponentChoseSelf": null,
 			"opponentChoseType": null,
+			"opponentChoseDeckSide": {
+				"top": null,
+				"bottom": null
+			},
 
 			"youDrew": null,
 			"opponentDrew": null,
@@ -222,6 +226,12 @@
 				"select": null
 			},
 
+			"deckSideSelect": {
+				"prompt": null,
+				"top": "上",
+				"bottom": "下"
+			},
+
 			"orderSelect": {
 				"confirm": null,
 				"abilityPrompt": null,
@@ -238,7 +248,8 @@
 				"selectingPlayer": null,
 				"effectSelectingPlayer": null,
 				"selectingStartingPlayer": null,
-				"selectingType": null
+				"selectingType": null,
+				"selectingDeckSide": null
 			},
 
 			"gameOver": {

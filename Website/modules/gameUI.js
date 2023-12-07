@@ -2,7 +2,7 @@ import {cardActions} from "/modules/cardActions.js";
 import {socket, zoneToLocal} from "/modules/netcode.js";
 import {previewCard, closeCardPreview} from "/modules/generalUI.js";
 import {locale} from "/modules/locale.js";
-import {getCardImage, getCardImageFromID} from "/modules/cardLoader.js";
+import {getCardImage} from "/modules/cardLoader.js";
 import {Card} from "/rulesEngine/card.js";
 import * as fieldOverlay from "/modules/fieldOverlay.js";
 
