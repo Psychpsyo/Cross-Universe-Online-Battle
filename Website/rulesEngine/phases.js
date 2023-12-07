@@ -70,7 +70,7 @@ export class StackPhase extends Phase {
 							ability instanceof abilities.CastAbility) &&
 							ability.after
 						) {
-							ability.triggerMetOnStack = -1;
+							ability.triggerMetOnStacks = [];
 						}
 					}
 				}
@@ -348,7 +348,7 @@ export class EndPhase extends StackPhase {
 		for (let player of this.turn.game.players) {
 			for (let card of player.getActiveCards()) {
 				for (let ability of card.values.current.abilities) {
-					if (ability instanceof abilities.TriggerAbility && ability.after && ability.triggerMetOnStack !== -1) {
+					if (ability instanceof abilities.TriggerAbility && ability.after && ability.triggerMetOnStacks.length > 0) {
 						return true;
 					}
 				}

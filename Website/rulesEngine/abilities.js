@@ -75,18 +75,18 @@ export class CastAbility extends Ability {
 		if (ability.after) {
 			this.after = interpreter.buildAST("trigger", ability.id, ability.after, game);
 		}
-		this.triggerMetOnStack = -1;
+		this.triggerMetOnStacks = [];
 	}
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during spell casting
 	canActivate(card, player, evaluatingPlayer = player) {
 		return (this.isConditionMet(card, player, evaluatingPlayer)) &&
-			(this.after === null || this.triggerMetOnStack === player.game.currentStack().index - 1);
+			(this.after === null || this.triggerMetOnStacks.includes(player.game.currentStack().index - 1));
 	}
 
 	checkTrigger(card, player) {
 		if (this.after == null || this.after.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
-			this.triggerMetOnStack = player.game.currentStack().index;
+			this.triggerMetOnStacks.push(player.game.currentStack().index);
 		}
 	}
 }
@@ -176,12 +176,12 @@ export class TriggerAbility extends Ability {
 		if (ability.after) {
 			this.after = interpreter.buildAST("trigger", ability.id, ability.after, game);
 		}
-		this.triggerMetOnStack = -1;
+		this.triggerMetOnStacks = [];
 		this.turnActivationCount = 0;
 	}
 
 	async canActivate(card, player, evaluatingPlayer = player) {
-		if (this.triggerMetOnStack !== player.game.currentStack().index - 1) return false;
+		if (!this.triggerMetOnStacks.includes(player.game.currentStack().index - 1)) return false;
 
 		let ctx = new ScriptContext(card, player, this, evaluatingPlayer);
 		if (this.turnActivationCount >= this.turnLimit.evalFull(ctx)[0].getJsNum(player)) return false;
@@ -202,7 +202,7 @@ export class TriggerAbility extends Ability {
 			return;
 		}
 		if (this.after.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
-			this.triggerMetOnStack = player.game.currentStack().index;
+			this.triggerMetOnStacks.push(player.game.currentStack().index);
 		}
 	}
 
@@ -211,16 +211,16 @@ export class TriggerAbility extends Ability {
 			return;
 		}
 		if (!this.during.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
-			this.triggerMetOnStack = -1;
+			this.triggerMetOnStacks = [];
 			this.usedDuring = false;
 		} else if (!this.usedDuring) {
-			this.triggerMetOnStack = player.game.currentStack().index - 1;
+			this.triggerMetOnStacks.push(player.game.currentStack().index - 1);
 		}
 	}
 
 	successfulActivation() {
 		this.turnActivationCount++;
-		this.triggerMetOnStack = -1;
+		this.triggerMetOnStacks = [];
 		if (this.during) {
 			this.usedDuring = true;
 		}

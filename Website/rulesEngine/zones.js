@@ -44,7 +44,7 @@ export class Zone {
 			for (const ability of card.values.current.abilities) {
 				// All of the card's trigger abilities aren't met anymore.
 				if (ability instanceof abilities.TriggerAbility) {
-					ability.triggerMetOnStack = -1;
+					ability.triggerMetOnStacks = [];
 				} else if (ability instanceof abilities.StaticAbility) {
 					// static abilities need to update their zone enter timer
 					ability.zoneEnterTimingIndex = card.owner.game.nextTimingIndex - 1;
