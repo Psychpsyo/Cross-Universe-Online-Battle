@@ -275,7 +275,7 @@ export class SnapshotCard extends BaseCard {
 			if (equipmentSnapshot === equipment) {
 				return equipmentSnapshot;
 			}
-			returnequipment.snapshot(this);
+			return equipment.snapshot(this);
 		}).bind(this));
 		this.zone = card.zone;
 		this.placedTo = card.placedTo;

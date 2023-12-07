@@ -314,7 +314,7 @@ export class AutomaticController extends InteractionController {
 					if (event.object instanceof BaseCard) {
 						generalUI.updateCardPreview(event.object);
 						if (["attack", "defense"].includes(event.valueName) && !objects.includes(event.object)) {
-							changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.card, false));
+							changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.object, false));
 							objects.push(event.object);
 						}
 					} else if (event.object instanceof Player) {

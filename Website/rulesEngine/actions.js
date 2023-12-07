@@ -213,13 +213,16 @@ export class Summon extends Action {
 		}
 		super(player, properties);
 		this.placeAction = placeAction;
+		this.card = placeAction.card.current();
 	}
 
 	async* run() {
-		let card = this.placeAction.card.current();
-		let summonEvent = events.createCardSummonedEvent(this.player, this.placeAction.card, this.placeAction.zone, this.placeAction.targetIndex);
+		const card = this.card.current();
+		this.card = this.card.snapshot();
+		let summonEvent = events.createCardSummonedEvent(this.player, this.card, this.placeAction.zone, this.placeAction.targetIndex);
 		this.placeAction.zone.add(card, this.placeAction.targetIndex);
 		this.placeAction.card.globalId = card.globalId;
+		this.card.globalId = card.globalId;
 		return summonEvent;
 	}
 
@@ -238,14 +241,17 @@ export class Deploy extends Action {
 	constructor(player, placeAction) {
 		super(player);
 		this.placeAction = placeAction;
+		this.card = placeAction.card.current();
 	}
 
 	async* run() {
-		let card = this.placeAction.card.current();
-		let deployEvent = events.createCardDeployedEvent(this.player, this.placeAction.card, this.placeAction.zone, this.placeAction.targetIndex);
+		const card = this.card.current();
+		this.card = this.card.snapshot();
+		let deployEvent = events.createCardDeployedEvent(this.player, this.card, this.placeAction.zone, this.placeAction.targetIndex);
 		if (this.placeAction.card.current()) {
 			this.placeAction.zone.add(card, this.placeAction.targetIndex);
 			this.placeAction.card.globalId = card.globalId;
+			this.card.globalId = card.globalId;
 		}
 		return deployEvent;
 	}
@@ -265,14 +271,17 @@ export class Cast extends Action {
 	constructor(player, placeAction) {
 		super(player);
 		this.placeAction = placeAction;
+		this.card = placeAction.card.current();
 	}
 
 	async* run() {
-		let card = this.placeAction.card.current();
-		let castEvent = events.createCardCastEvent(this.player, this.placeAction.card, this.placeAction.zone, this.placeAction.targetIndex);
+		const card = this.card.current();
+		this.card = this.card.snapshot();
+		let castEvent = events.createCardCastEvent(this.player, this.card, this.placeAction.zone, this.placeAction.targetIndex);
 		if (this.placeAction.card.current()) {
 			this.placeAction.zone.add(card, this.placeAction.targetIndex);
 			this.placeAction.card.globalId = card.globalId;
+			this.card.globalId = card.globalId;
 		}
 		return castEvent;
 	}
@@ -797,6 +806,8 @@ export class EquipCard extends Action {
 	}
 
 	isImpossible(timing) {
+		if (this.equipment.current() === null) return true;
+		if (this.target.current() === null) return true;
 		return !this.equipment.equipableTo.evalFull(new ScriptContext(this.spellItem, this.player))[0].get(this.player).includes(this.target);
 	}
 }

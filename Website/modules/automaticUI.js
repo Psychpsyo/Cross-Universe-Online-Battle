@@ -428,6 +428,7 @@ export async function showCoolAttackAnim(defender, attackers) {
 const attackUiValues = new Map();
 const defenseUiValues = new Map();
 export function addCardAttackDefenseOverlay(card) {
+	if (!card) return;
 	if (!(card.zone instanceof FieldZone)) return;
 	if (!card.values.current.cardTypes.includes("unit")) return;
 
@@ -454,8 +455,10 @@ export function removeCardAttackDefenseOverlay(card) {
 	}
 	const slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
 
-	slot.querySelector(".cardValueOverlay").remove();
+	const overlay = slot.querySelector(".cardValueOverlay");
+	if (!overlay) return;
 
+	overlay.remove();
 	attackUiValues.get(slot).remove();
 	defenseUiValues.get(slot).remove();
 	attackUiValues.delete(slot);

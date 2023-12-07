@@ -180,7 +180,7 @@ export function* standardDrawTimingGenerator(player) {
 }
 
 export function* equipTimingGenerator(equipChoiceAction, player) {
-	yield [new actions.EquipCard(player, equipChoiceAction.spellItem.current(), equipChoiceAction.chosenUnit.current())];
+	yield [new actions.EquipCard(player, equipChoiceAction.spellItem, equipChoiceAction.chosenUnit)];
 }
 
 export function* retireTimingGenerator(player, units) {
