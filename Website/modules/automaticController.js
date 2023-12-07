@@ -4,7 +4,8 @@ import {locale} from "/modules/locale.js";
 import {InteractionController} from "/modules/interactionController.js";
 import {socket} from "/modules/netcode.js";
 import {getAutoResponse} from "/modules/autopass.js";
-import {SnapshotCard} from "/rulesEngine/card.js";
+import {SnapshotCard, BaseCard} from "/rulesEngine/card.js";
+import {Player} from "/rulesEngine/player.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as autoUI from "/modules/automaticUI.js";
 import * as generalUI from "/modules/generalUI.js";
@@ -306,14 +307,20 @@ export class AutomaticController extends InteractionController {
 				}
 				return this.gameSleep();
 			}
-			case "cardValueChanged": {
+			case "valueChanged": {
 				const changeAnimPromises = [];
-				const cards = [];
+				const objects = [];
 				for (const event of events) {
-					generalUI.updateCardPreview(event.card);
-					if (["attack", "defense"].includes(event.valueName) && !cards.includes(event.card)) {
-						changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.card, false));
-						cards.push(event.card);
+					if (event.object instanceof BaseCard) {
+						generalUI.updateCardPreview(event.object);
+						if (["attack", "defense"].includes(event.valueName) && !objects.includes(event.object)) {
+							changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.card, false));
+							objects.push(event.object);
+						}
+					} else if (event.object instanceof Player) {
+						if (event.valueName === "canEnterBattlePhase") {
+							autoUI.updateBattlePhaseIndicator();
+						}
 					}
 				}
 				return await Promise.all(changeAnimPromises);

@@ -74,8 +74,7 @@ export function startTurn(speed) {
 	currentActivePhaseElem?.classList.remove("current");
 	currentActivePhaseElem = null;
 
-	let currentTurn = game.currentTurn();
-	if (currentTurn.player == localPlayer) {
+	if (game.currentTurn().player == localPlayer) {
 		opponentTurnDisplayLabel.classList.add("hidden");
 		window.setTimeout(() => {
 			yourTurnDisplayLabel.classList.remove("hidden");
@@ -87,9 +86,17 @@ export function startTurn(speed) {
 		}, speed * 1.5);
 	}
 
-	if (currentTurn.index == 1) {
+	updateBattlePhaseIndicator();
+}
+
+export function updateBattlePhaseIndicator() {
+	const currentTurn = game.currentTurn();
+	if (currentTurn.index > 0 && currentTurn.player.values.current.canEnterBattlePhase) {
 		battlePhaseIndicator.classList.remove("invalid");
 		secondMainPhaseIndicator.classList.remove("invalid");
+	} else {
+		battlePhaseIndicator.classList.add("invalid");
+		secondMainPhaseIndicator.classList.add("invalid");
 	}
 }
 
@@ -267,6 +274,7 @@ export async function activate(card) {
 			slot.classList.add("activating");
 			await gameState.controller.gameSleep(1);
 			slot.classList.remove("activating");
+			break;
 		}
 		case "discard":
 		case "exile": {
@@ -278,6 +286,7 @@ export async function activate(card) {
 			await gameState.controller.gameSleep(1);
 			slot.classList.remove("activating");
 			img.src = previousSrc;
+			break;
 		}
 	}
 }
@@ -391,10 +400,11 @@ export async function showCoolAttackAnim(defender, attackers) {
 
 	for (let i = 0; i < attackers.length; i++) {
 		imgs[i+1].src = cardLoader.getCardImage(attackers[i]);
-		imgs[i+1].style.setProperty("--left", -(cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
 		if (!cardAlignmentInfo[attackers[i].cardId]?.flip && !cardAlignmentInfo[attackers[i].cardId]?.neverFlip) {
+			imgs[i+1].style.setProperty("--left", -100 + (cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
 			imgs[i+1].style.transform = "scaleX(-1)";
 		} else {
+			imgs[i+1].style.setProperty("--left", -(cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
 			imgs[i+1].style.transform = "";
 		}
 	}

@@ -9,6 +9,29 @@ export class ObjectValues {
 		this.modifierStack = [];
 		this.unaffectedBy = [];
 	}
+
+	clone() {
+		let newValues = new ObjectValues(this.initial.clone());
+		newValues.base = this.base.clone();
+		newValues.current = this.current.clone();
+		newValues.modifierStack = [...this.modifierStack];
+		newValues.unaffectedBy = [...this.unaffectedBy];
+
+		// cloning abilities if this is for a card
+		if (this.initial instanceof CardValues) {
+			let abilities = this.initial.abilities;
+			for (let ability of this.base.abilities.concat(this.current.abilities)) {
+				if (!abilities.includes(ability)) {
+					abilities.push(ability);
+				}
+			}
+			let abilitySnapshots = abilities.map(ability => ability.snapshot());
+			newValues.initial.abilities = newValues.initial.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+			newValues.base.abilities = newValues.base.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+			newValues.current.abilities = newValues.current.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
+		}
+		return newValues;
+	}
 }
 
 export class CardValues {
@@ -26,9 +49,7 @@ export class CardValues {
 	}
 
 	// Clones these values WITHOUT cloning contained abilities by design.
-	// This is because initial, base and final values are cloned together
-	// by snapshotting and shouldn't get different values and because
-	// creating new values from base values also uses cloning
+	// This is because initial, base and current values are cloned together in ObjectValues.
 	clone() {
 		return new CardValues(
 			[...this.cardTypes],

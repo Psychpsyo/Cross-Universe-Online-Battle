@@ -9,7 +9,7 @@ import * as actions from "./actions.js";
 import * as timingGenerators from "./timingGenerators.js";
 
 export class BaseCard {
-	constructor(player, cardId, isToken, initialValues, deckLimit, equipableTo, turnLimit, condition) {
+	constructor(player, cardId, isToken, values, deckLimit, equipableTo, turnLimit, condition) {
 		this.owner = player;
 		this.cardId = cardId;
 		this.isToken = isToken;
@@ -19,7 +19,7 @@ export class BaseCard {
 		this.turnLimit = turnLimit;
 		this.condition = condition;
 
-		this.values = new ObjectValues(initialValues);
+		this.values = values;
 		this.cdfScriptType = "card";
 
 		this.zone = null;
@@ -208,17 +208,19 @@ export class Card extends BaseCard {
 		}
 		super(player, data.id,
 			data.cardType === "token",
-			new CardValues(
-				baseCardTypes,
-				[data.name ?? data.id],
-				data.level ?? 0,
-				data.types ?? [],
-				data.attack ?? null,
-				data.defense ?? null,
-				data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
-				baseCardTypes.includes("unit")? 1 : null,
-				baseCardTypes.includes("unit")? true : null,
-				baseCardTypes.includes("unit")? true : null
+			new ObjectValues(
+				new CardValues(
+					baseCardTypes,
+					[data.name ?? data.id],
+					data.level ?? 0,
+					data.types ?? [],
+					data.attack ?? null,
+					data.defense ?? null,
+					data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
+					baseCardTypes.includes("unit")? 1 : null,
+					baseCardTypes.includes("unit")? true : null,
+					baseCardTypes.includes("unit")? true : null
+				)
 			),
 			data.deckLimit,
 			interpreter.buildAST("equipableTo", data.id, data.equipableTo, player.game),
@@ -257,23 +259,8 @@ export class Card extends BaseCard {
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
 export class SnapshotCard extends BaseCard {
 	constructor(card, equippedToSnapshot, equipmentSnapshot) {
-		super(card.owner, card.cardId, card.isToken, card.values.initial.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
+		super(card.owner, card.cardId, card.isToken, card.values.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
 		this.isRemovedToken = card.isRemovedToken;
-
-		this.values.current = card.values.current.clone();
-		this.values.base = card.values.base.clone();
-		this.values.modifierStack = [...card.values.modifierStack];
-
-		let abilities = this.values.initial.abilities;
-		for (let ability of this.values.base.abilities.concat(this.values.current.abilities)) {
-			if (!abilities.includes(ability)) {
-				abilities.push(ability);
-			}
-		}
-		let abilitySnapshots = abilities.map(ability => ability.snapshot());
-		this.values.initial.abilities = this.values.initial.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
-		this.values.base.abilities = this.values.base.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
-		this.values.current.abilities = this.values.current.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
 
 		if (equippedToSnapshot) {
 			this.equippedTo = equippedToSnapshot;

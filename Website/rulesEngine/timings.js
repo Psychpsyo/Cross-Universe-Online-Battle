@@ -1,5 +1,5 @@
 
-import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createCardValueChangedEvent} from "./events.js";
+import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createValueChangedEvent} from "./events.js";
 import {chooseAbilityOrder} from "./inputRequests.js";
 import {Player} from "./player.js";
 import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
@@ -131,7 +131,7 @@ export class Timing {
 		// TODO: The following things have proper undo support yet.
 		// This *should* only matter when units turn into spells/items so for now it does not matter(?)
 		// (That's because in those cases, modifiers on the card are destroyed and wouldn't properly get restored)
-		let valueChangeEvents = recalculateCardValues(this.game);
+		let valueChangeEvents = recalculateObjectValues(this.game);
 		if (valueChangeEvents.length > 0) {
 			yield valueChangeEvents;
 		}
@@ -173,7 +173,7 @@ export class Timing {
 				events.push(event);
 			}
 		}
-		let valueChangeEvents = recalculateCardValues(this.game);
+		let valueChangeEvents = recalculateObjectValues(this.game);
 		if (valueChangeEvents.length > 0) {
 			yield valueChangeEvents;
 		}
@@ -403,10 +403,20 @@ function* getStaticAbilityPhasingTiming(game) {
 	return new Timing(game, modificationActions);
 }
 
-function recalculateCardValues(game) {
+function recalculateObjectValues(game) {
 	let valueChangeEvents = [];
 	for (let player of game.players) {
+		// recalculate the player's own values
+		const oldPlayerValues = player.values.clone();
 		recalculateModifiedValuesFor(player);
+		for (let property of oldPlayerValues.base.compareTo(player.values.base)) {
+			valueChangeEvents.push(createValueChangedEvent(player, property, true));
+		}
+		for (let property of oldPlayerValues.current.compareTo(player.values.current)) {
+			valueChangeEvents.push(createValueChangedEvent(player, property, false));
+		}
+
+		// recalculate the values for the player's cards
 		for (let card of player.getActiveCards()) {
 			let oldCard = new SnapshotCard(card);
 			let wasUnit = card.values.current.cardTypes.includes("unit");
@@ -422,11 +432,11 @@ function recalculateCardValues(game) {
 			}
 
 			for (let property of oldCard.values.base.compareTo(card.values.base)) {
-				valueChangeEvents.push(createCardValueChangedEvent(card, property, true));
+				valueChangeEvents.push(createValueChangedEvent(card, property, true));
 			}
 			for (let property of oldCard.values.current.compareTo(card.values.current)) {
 				if (valueChangeEvents.find(event => event.valueName === property) === undefined) {
-					valueChangeEvents.push(createCardValueChangedEvent(card, property, false));
+					valueChangeEvents.push(createValueChangedEvent(card, property, false));
 				}
 			}
 		}
