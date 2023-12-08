@@ -35,6 +35,7 @@ export class BaseCard {
 		this.isAttacking = false;
 		this.isAttackTarget = false;
 		this.inRetire = null;
+		this.inAttackDeclarationBlock = null;
 
 		this.hiddenFor = [];
 		this.globalId = 0;
@@ -290,6 +291,7 @@ export class SnapshotCard extends BaseCard {
 		this.isAttacking = card.isAttacking;
 		this.isAttackTarget = card.isAttackTarget;
 		this.inRetire = card.inRetire;
+		this.inAttackDeclarationBlock = card.inAttackDeclarationBlock;
 
 		this.hiddenFor = [...card.hiddenFor];
 		this.globalId = card.globalId;
@@ -346,8 +348,12 @@ export class SnapshotCard extends BaseCard {
 			}
 		}
 		this._actualCard.inRetire = this.inRetire;
-		if (this.inRetire) {
+		if (this.inRetire && !this.inRetire.units.includes(this._actualCard)) {
 			this.inRetire.units.push(this._actualCard);
+		}
+		this._actualCard.inAttackDeclarationBlock = this.inAttackDeclarationBlock;
+		if (this.inAttackDeclarationBlock && !this.inAttackDeclarationBlock.attackers.includes(this._actualCard)) {
+			this.inAttackDeclarationBlock.attackers.push(this._actualCard);
 		}
 	}
 }

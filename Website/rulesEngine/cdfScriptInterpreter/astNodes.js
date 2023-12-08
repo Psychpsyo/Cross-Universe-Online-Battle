@@ -1029,7 +1029,7 @@ export class ActionAccessorNode extends AstNode {
 		switch (this.accessor) {
 			case "cast": {
 				if (action instanceof actions.Cast) {
-					return [action.placeAction.card];
+					return [action.card];
 				}
 				break;
 			}
@@ -1047,7 +1047,7 @@ export class ActionAccessorNode extends AstNode {
 			}
 			case "deployed": {
 				if (action instanceof actions.Deploy) {
-					return [action.placeAction.card];
+					return [action.card];
 				}
 				break;
 			}
@@ -1095,7 +1095,7 @@ export class ActionAccessorNode extends AstNode {
 			}
 			case "summoned": {
 				if (action instanceof actions.Summon) {
-					return [action.placeAction.card];
+					return [action.card];
 				}
 				break;
 			}

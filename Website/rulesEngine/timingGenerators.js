@@ -179,8 +179,25 @@ export function* standardDrawTimingGenerator(player) {
 	yield [new actions.Draw(player, player.values.current.standardDrawAmount)];
 }
 
-export function* equipTimingGenerator(equipChoiceAction, player) {
-	yield [new actions.EquipCard(player, equipChoiceAction.spellItem, equipChoiceAction.chosenUnit)];
+export function* equipTimingGenerator(equipChoiceAction, player, abilityGenerator = null) {
+	const timing = yield [new actions.EquipCard(player, equipChoiceAction.spellItem, equipChoiceAction.chosenUnit)];
+	if (!timing.successful) return;
+
+	if (abilityGenerator !== null) {
+		yield* abilityGenerator;
+	}
+}
+
+export function* spellItemDiscardGenerator(player, spellItem) {
+	// don't discard things that aren't on the field
+	if (!(spellItem.zone instanceof FieldZone)) return;
+	// don't discard continuous spells/items
+	if (spellItem.values.current.cardTypes.includes("continuousSpell")) return;
+	if (spellItem.values.current.cardTypes.includes("continuousItem")) return;
+	// don't discard spells/items that equipped successfully
+	if (spellItem.equippedTo !== null) return;
+
+	yield [new actions.Discard(player, spellItem)];
 }
 
 export function* retireTimingGenerator(player, units) {
@@ -257,11 +274,5 @@ export function* fightTimingGenerator(attackDeclaration) {
 			));
 		}
 		yield actionList;
-	}
-}
-
-export function* spellItemDiscardGenerator(player, spellItem) {
-	if (spellItem.zone instanceof FieldZone) {
-		yield [new actions.Discard(player, spellItem)];
 	}
 }

@@ -36,6 +36,10 @@ export class Zone {
 				card.inRetire.units.splice(card.inRetire.units.indexOf(card), 1);
 				card.inRetire = null;
 			}
+			if (card.inAttackDeclarationBlock) {
+				card.inAttackDeclarationBlock.attackers.splice(card.inAttackDeclarationBlock.attackers.indexOf(card), 1);
+				card.inAttackDeclarationBlock = null;
+			}
 			if (card.isAttacking || card.isAttackTarget) {
 				this.player.game.currentAttackDeclaration?.removeCard(card);
 			}

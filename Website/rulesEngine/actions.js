@@ -212,88 +212,88 @@ export class Summon extends Action {
 			properties.by = source;
 		}
 		super(player, properties);
-		this.placeAction = placeAction;
+		this._placeAction = placeAction;
 		this.card = placeAction.card.current();
 	}
 
 	async* run() {
 		const card = this.card.current();
 		this.card = this.card.snapshot();
-		let summonEvent = events.createCardSummonedEvent(this.player, this.card, this.placeAction.zone, this.placeAction.targetIndex);
-		this.placeAction.zone.add(card, this.placeAction.targetIndex);
-		this.placeAction.card.globalId = card.globalId;
+		let summonEvent = events.createCardSummonedEvent(this.player, this.card, this._placeAction.zone, this._placeAction.targetIndex);
+		this._placeAction.zone.add(card, this._placeAction.targetIndex);
+		this._placeAction.card.globalId = card.globalId;
 		this.card.globalId = card.globalId;
 		return summonEvent;
 	}
 
 	undo() {
-		this.zone.remove(this.placeAction.card.current(), this.placeAction.targetIndex);
+		this.zone.remove(this.card.current(), this._placeAction.targetIndex);
 	}
 
 	isImpossible(timing) {
-		if (this.placeAction.card.current() === null) return true;
-		let slotCard = this.placeAction.zone.get(this.placeAction.targetIndex);
-		return slotCard != null && slotCard != this.placeAction.card.current();
+		if (this.card.current() === null) return true;
+		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
+		return slotCard != null && slotCard != this.card.current();
 	}
 }
 
 export class Deploy extends Action {
 	constructor(player, placeAction) {
 		super(player);
-		this.placeAction = placeAction;
+		this._placeAction = placeAction;
 		this.card = placeAction.card.current();
 	}
 
 	async* run() {
 		const card = this.card.current();
 		this.card = this.card.snapshot();
-		let deployEvent = events.createCardDeployedEvent(this.player, this.card, this.placeAction.zone, this.placeAction.targetIndex);
-		if (this.placeAction.card.current()) {
-			this.placeAction.zone.add(card, this.placeAction.targetIndex);
-			this.placeAction.card.globalId = card.globalId;
+		let deployEvent = events.createCardDeployedEvent(this.player, this.card, this._placeAction.zone, this._placeAction.targetIndex);
+		if (this._placeAction.card.current()) {
+			this._placeAction.zone.add(card, this._placeAction.targetIndex);
+			this._placeAction.card.globalId = card.globalId;
 			this.card.globalId = card.globalId;
 		}
 		return deployEvent;
 	}
 
 	undo() {
-		this.zone.remove(this.placeAction.card.current(), this.placeAction.targetIndex);
+		this.zone.remove(this.card.current(), this._placeAction.targetIndex);
 	}
 
 	isImpossible(timing) {
-		if (this.placeAction.card.current() === null) return true;
-		let slotCard = this.placeAction.zone.get(this.placeAction.targetIndex);
-		return slotCard != null && slotCard != this.placeAction.card.current();
+		if (this.card.current() === null) return true;
+		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
+		return slotCard != null && slotCard != this.card.current();
 	}
 }
 
 export class Cast extends Action {
 	constructor(player, placeAction) {
 		super(player);
-		this.placeAction = placeAction;
+		this._placeAction = placeAction;
 		this.card = placeAction.card.current();
 	}
 
 	async* run() {
 		const card = this.card.current();
 		this.card = this.card.snapshot();
-		let castEvent = events.createCardCastEvent(this.player, this.card, this.placeAction.zone, this.placeAction.targetIndex);
-		if (this.placeAction.card.current()) {
-			this.placeAction.zone.add(card, this.placeAction.targetIndex);
-			this.placeAction.card.globalId = card.globalId;
+		let castEvent = events.createCardCastEvent(this.player, this.card, this._placeAction.zone, this._placeAction.targetIndex);
+		if (this._placeAction.card.current()) {
+			this._placeAction.zone.add(card, this._placeAction.targetIndex);
+			this._placeAction.card.globalId = card.globalId;
 			this.card.globalId = card.globalId;
 		}
 		return castEvent;
 	}
 
 	undo() {
-		this.zone.remove(this.placeAction.card.current(), this.placeAction.targetIndex);
+		this.zone.remove(this.card.current(), this._placeAction.targetIndex);
 	}
 
 	isImpossible(timing) {
-		if (this.placeAction.card.current() === null) return true;
-		let slotCard = this.placeAction.zone.get(this.placeAction.targetIndex);
-		return slotCard != null && slotCard != this.placeAction.card.current();
+		if (this.card.current() === null) return true;
+		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
+		return slotCard != null && slotCard != this.card.current();
 	}
 }
 
