@@ -808,7 +808,11 @@ export class EquipCard extends Action {
 	isImpossible(timing) {
 		if (this.equipment.current() === null) return true;
 		if (this.target.current() === null) return true;
-		return !this.equipment.equipableTo.evalFull(new ScriptContext(this.spellItem, this.player))[0].get(this.player).includes(this.target);
+
+		ast.setImplicit([this.target], "card");
+		let equipTargetStillValid = this.equipment.equipableTo.evalFull(new ScriptContext(this.equipment, this.player))[0].get(this.player).includes(this.target);
+		ast.clearImplicit("card");
+		return !equipTargetStillValid;
 	}
 }
 

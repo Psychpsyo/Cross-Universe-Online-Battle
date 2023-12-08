@@ -22,7 +22,8 @@
 		"gamemodes": {
 			"normal": "ノーマル",
 			"draft": "ドラフト",
-			"normalAutomatic": null
+			"normalAutomatic": null,
+			"draftAutomatic": null
 		},
 
 		"settingsButton": null,

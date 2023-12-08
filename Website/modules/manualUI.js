@@ -111,7 +111,7 @@ export function init() {
 		gameUI.openCardSelect(localPlayer.deckZone);
 	});
 
-	game.players.forEach(player => {
+	for (const player of game.players) {
 		// dropping to deck
 		document.getElementById("deckTopBtn" + player.index).addEventListener("click", function() {
 			gameState.controller.deckToTop(localPlayer, player.deckZone);
@@ -145,6 +145,22 @@ export function init() {
 				document.getElementById("deckHoverBtns" + player.index).style.display = "none";
 			}
 		});
+
+		// presented cards
+		document.getElementById("presentedCards" + player.index).addEventListener("pointerup", function(e) {
+			if (e.pointerId != gameUI.currentPointer) {
+				return;
+			}
+			e.stopPropagation();
+			let presentedZone = gameState.controller.playerInfos[player.index].presentedZone;
+			gameUI.dropCard(localPlayer, presentedZone, presentedZone.cards.length);
+		});
+	}
+
+	// card selector
+	cardSelectorReturnToDeck.addEventListener("click", function(e) {
+		gameState.controller.returnAllToDeck(gameUI.cardSelectorMainSlot.zone);
+		gameUI.closeCardSelect();
 	});
 
 	document.documentElement.classList.add("manualGame");

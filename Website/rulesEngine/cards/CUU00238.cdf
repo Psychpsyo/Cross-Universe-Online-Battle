@@ -1,7 +1,7 @@
 id: CUU00238
 cardType: unit
 name: CUU00238
-level: 2
+level: 4
 types: Light, Angel, Mage
 attack: 0
 defense: 400

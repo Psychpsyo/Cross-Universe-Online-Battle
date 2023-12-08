@@ -103,11 +103,15 @@ export class InitState extends GameState {
 				break;
 			}
 			case "draft": {
-				new DraftState();
+				new DraftState(false);
 				break;
 			}
 			case "normalAutomatic": {
 				new DeckState(true);
+				break;
+			}
+			case "draftAutomatic": {
+				new DraftState(true);
 				break;
 			}
 		}

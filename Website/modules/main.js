@@ -69,7 +69,7 @@ let queryString = new URLSearchParams(window.location.search);
 if (queryString.get("id")) {
 	roomCodeInputField.placeholder = queryString.get("id");
 	let gameMode = queryString.get("m");
-	if (!["normal", "draft", "normalAutomatic"].includes(gameMode)) {
+	if (!["normal", "draft", "normalAutomatic", "draftAutomatic"].includes(gameMode)) {
 		gameMode = "normal";
 	}
 	gameModeSelect.value = gameMode;
@@ -88,6 +88,7 @@ gameModeSelectorLabel.textContent = locale.mainMenu.gamemode;
 gameModeNormalOption.textContent = locale.mainMenu.gamemodes.normal;
 gameModeDraftOption.textContent = locale.mainMenu.gamemodes.draft;
 gameModeNormalAutomaticOption.textContent = locale.mainMenu.gamemodes.normalAutomatic;
+gameModeDraftAutomaticOption.textContent = locale.mainMenu.gamemodes.draftAutomatic;
 
 connectBtn.textContent = locale.mainMenu.connectToRoom;
 waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;

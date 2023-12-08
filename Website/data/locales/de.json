@@ -22,7 +22,8 @@
 		"gamemodes": {
 			"normal": "Normal",
 			"draft": "Draft",
-			"normalAutomatic": "Automatisch (WIP)"
+			"normalAutomatic": "Automatisch (WIP)",
+			"draftAutomatic": "Auto-Draft (WIP)"
 		},
 
 		"settingsButton": "Einstellungen",

@@ -8,12 +8,12 @@ import * as fieldOverlay from "/modules/fieldOverlay.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
-let currentPointer = null;
+export let currentPointer = null;
 let cursorHidden = true; // whether or not the cursor is hidden for the opponent
 let lastFrame = 0;
 
 let cardSelectorSlots = [];
-let cardSelectorMainSlot = null;
+export let cardSelectorMainSlot = null;
 let cardSelectorSorted = false;
 let cardChoiceSelected = [];
 
@@ -103,7 +103,7 @@ function hideCursor() {
 }
 
 export function init() {
-	game.players.forEach(player => {
+	for (const player of game.players) {
 		uiPlayers.push(new UiPlayer(player));
 
 		new DeckCardSlot(player.deckZone);
@@ -124,17 +124,7 @@ export function init() {
 			e.stopPropagation();
 			dropCard(localPlayer, player.handZone, player.handZone.cards.length);
 		});
-
-		// presented cards (only used during manual play)
-		document.getElementById("presentedCards" + player.index).addEventListener("pointerup", function(e) {
-			if (e.pointerId != currentPointer) {
-				return;
-			}
-			e.stopPropagation();
-			let presentedZone = gameState.controller.playerInfos[player.index].presentedZone;
-			dropCard(localPlayer, presentedZone, presentedZone.cards.length);
-		});
-	});
+	}
 
 	// dropping cards off in nowhere
 	document.addEventListener("pointerup", function(e) {
@@ -201,10 +191,6 @@ export function init() {
 	});
 	cardSelector.addEventListener("cancel", function(e) {
 		e.preventDefault();
-		closeCardSelect();
-	});
-	cardSelectorReturnToDeck.addEventListener("click", function() {
-		gameState.controller.returnAllToDeck(cardSelectorMainSlot.zone);
 		closeCardSelect();
 	});
 
@@ -320,14 +306,14 @@ export function clearDragSource(zone, index, player) {
 	});
 }
 
-function grabCard(player, zone, index) {
+export function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
 		socket?.send("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
 		return true;
 	}
 	return false;
 }
-function dropCard(player, zone, index) {
+export function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
 			socket?.send("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));

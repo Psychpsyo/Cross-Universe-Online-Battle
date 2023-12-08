@@ -8,18 +8,15 @@ import {previewCard} from "/modules/generalUI.js";
 import * as gameUI from "/modules/gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 
-let basicFormat = await fetch("data/draftFormats/beginnerFormat.json");
-basicFormat = await basicFormat.json();
-basicFormat.packCount = Math.ceil(basicFormat.deckSize * 2 / basicFormat.cardPicks);
-
 export class DraftState extends GameState {
-	constructor() {
+	constructor(automatic) {
 		super();
 		gameState = this;
 
+		this.automatic = automatic;
 		game.config.validateCardAmounts = false;
 
-		this.format = basicFormat;
+		this.format = null;
 		this.currentBooster = [];
 		this.takenCards = 0;
 		this.packsOpened = 0;
@@ -32,32 +29,38 @@ export class DraftState extends GameState {
 		draftStartButton.textContent = locale.draft.startGame;
 		draftDeckOwner0.textContent = players[0].name;
 		draftDeckOwner1.textContent = players[1].name;
-		draftDeckCount0.textContent = "0/" + this.format.deckSize;
-		draftDeckCount1.textContent = "0/" + this.format.deckSize;
-
-		document.querySelectorAll(".draftDeckList").forEach(deckList => {
-			deckList.style.aspectRatio = "8130 / " + (Math.ceil(this.format.deckSize / 10) * 1185);
-		});
-
-		draftStartButton.addEventListener("click", function() {
-			socket.send("[ready]");
-			gameState.pressedReady = true;
-			draftStartButton.textContent = locale.draft.waitingForOpponent;
-			draftStartButton.setAttribute("disabled", "");
-			gameState.checkReadyConditions();
-		});
 
 		// deck loading elements won't be needed
 		deckDropzone.remove();
 		deckSelector.classList.add("deckListDisable");
 
-		game.randomPlayer().then(player => {
+		fetch("data/draftFormats/" + (this.automatic? "autoFormat" : "beginnerFormat") + ".json").then(async function(format) {
+			format = await format.json();
+			format.packCount = Math.ceil(format.deckSize * 2 / format.cardPicks);
+			this.format = format;
+
+			draftDeckCount0.textContent = "0/" + format.deckSize;
+			draftDeckCount1.textContent = "0/" + format.deckSize;
+
+			document.querySelectorAll(".draftDeckList").forEach(deckList => {
+				deckList.style.aspectRatio = "8130 / " + (Math.ceil(this.format.deckSize / 10) * 1185);
+			});
+
+			draftStartButton.addEventListener("click", function() {
+				socket.send("[ready]");
+				gameState.pressedReady = true;
+				draftStartButton.textContent = locale.draft.waitingForOpponent;
+				draftStartButton.setAttribute("disabled", "");
+				gameState.checkReadyConditions();
+			});
+
+			const player = await game.randomPlayer();
 			this.setPlayer(player);
 			this.firstPlayer = player;
 			this.rerollCards();
-		});
 
-		draftGameSetupMenu.hidden = false;
+			draftGameSetupMenu.hidden = false;
+		}.bind(this));
 	}
 	receiveMessage(command, message) {
 		switch (command) {
@@ -79,7 +82,7 @@ export class DraftState extends GameState {
 
 	checkReadyConditions() {
 		if (this.pressedReady && this.opponentReady) {
-			new BoardState(false);
+			new BoardState(this.automatic);
 			gameUI.init();
 		}
 	}
@@ -96,6 +99,7 @@ export class DraftState extends GameState {
 			let cardPool = this.format.cardPools[this.format.packContents[i].pool];
 			randomRanges.push(cardPool.length);
 		}
+
 		const randomValues = await game.randomInts(randomRanges);
 		for (let i = 0; i < 10; i++) {
 			let cardPool = this.format.cardPools[this.format.packContents[i].pool];
@@ -176,12 +180,13 @@ export class DraftState extends GameState {
 			// disable card picking
 			this.currentPlayer = null;
 			draftMainInfo.textContent = locale.draft.settingUpDecks;
+			draftGameSetupMenu.classList.add("draftFinished");
 
 			// load decks
 			let deckSetupPromises = [];
 			for (let i = 0; i < 2; i++) {
 				players[i].deck = deckFromCardList(Array.from(document.getElementById("draftDeckList" + i).childNodes).map(img => img.dataset.cardId), null, locale.draft.deckName, locale.draft.deckDescription);
-				deckSetupPromises.push(cardLoader.deckToCdfList(players[i].deck, false, game.players[i]).then(deck => {
+				deckSetupPromises.push(cardLoader.deckToCdfList(players[i].deck, this.automatic, game.players[i]).then(deck => {
 					game.players[i].setDeck(deck);
 					gameUI.updateCard(game.players[i].deckZone, -1);
 					document.getElementById("playerDeckButton" + i).disabled = false;
@@ -192,7 +197,6 @@ export class DraftState extends GameState {
 			loadingIndicator.classList.remove("active");
 
 			// show start button
-			draftGameSetupMenu.classList.add("draftFinished");
 			draftMainInfo.textContent = locale.draft.finished;
 			draftStartButton.hidden = false;
 			return;
