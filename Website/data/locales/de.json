@@ -120,13 +120,13 @@
 			"handDiscard": "Werfe Handkarten ab, bis du nur noch 8 hast:",
 			"attackTarget": "Wähle, wen du angreifst:",
 			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':",
-			"equipTarget": "Wähle, welche Einheit du mit '{#CARDNAME}' ausrüsten möchtest:",
+			"equipTarget": "Wähle, welche Unit du mit '{#CARDNAME}' ausrüsten möchtest:",
 			"cardEffectMove": "Wähle welche Karte(n) für den Effekt von '{#CARDNAME}' verschoben werden sollen:"
 		},
 
 		"fieldLabels": {
 			"verticalText": false,
-			"unitZone": "Einheiten\nZone",
+			"unitZone": "Unit\nZone",
 			"spellItemZone": "Zauber\n&\nItem\nZone",
 			"partnerZone": "Partner\nZone",
 			"exileZone": "Exil",
@@ -244,8 +244,8 @@
 				"effectSelectingCards": "Dein Gegner wählt Karte(n) für den Effekt von '{#CARDNAME}'.",
 				"effectMoveSelectingCards": "Dein Gegner wählt aus, welche Karte(n) durch den Effekt von '{#CARDNAME}' verschoben werden sollen.",
 				"selectingHandDiscard": "Dein Gegner wählt Handkarte(n), weil er mehr als 8 hat.",
-				"selectingEquipTarget": "Dein Gegner wählt aus, welche Einheit er mit '{#CARDNAME}' ausrüsten möchte.",
-				"selectingAttackTarget": "Dein Gegner wählt eine Einheit zum Angriff aus.",
+				"selectingEquipTarget": "Dein Gegner wählt aus, welche Unit er mit '{#CARDNAME}' ausrüsten möchte.",
+				"selectingAttackTarget": "Dein Gegner wählt eine Unit zum Angriff aus.",
 				"selectingPlayer": "Dein Gegner wählt einen Spieler.",
 				"effectSelectingPlayer": "Dein Gegner wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
 				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt.",
@@ -330,7 +330,7 @@
 				"allCardsTab": "Alle Karten",
 				"close": "Schließen",
 				"categories": {
-					"units": "Einheiten",
+					"units": "Units",
 					"spells": "Zauber",
 					"items": "Items",
 					"tokens": "Tokens",
@@ -544,10 +544,10 @@
 		"search": "Suche...",
 
 		"searchResults": "Suchergebnisse",
-		"unitTokenColumn": "Einheiten-/Tokenspalte",
+		"unitTokenColumn": "Units-/Tokenspalte",
 		"spellColumn": "Zauberspalte",
 		"itemColumn": "Itemspalte",
-		"units": "Einheiten",
+		"units": "Units",
 		"tokens": "Tokens",
 		"standardSpells": "Standard-Zauber",
 		"continuousSpells": "Permanente Zauber",
@@ -627,7 +627,7 @@
 			"partner": "Partnerkarte:",
 
 			"cardTotal": "Gesamt:",
-			"unitTotal": "Einheiten:",
+			"unitTotal": "Units:",
 			"spellTotal": "Zauber:",
 			"itemTotal": "Items:",
 
@@ -635,7 +635,7 @@
 				"title": "Warnungen:",
 				"cardMinimum": "Ein Deck muss mindestens 30 Karten haben.",
 				"cardMaximum": "Ein Deck darf maximal 50 Karten haben.",
-				"needsUnit": "Ein Deck braucht mindestens eine Einheit.",
+				"needsUnit": "Ein Deck braucht mindestens eine Unit.",
 				"noTokens": "Ein Deck darf keine Tokens enthalten.",
 				"noPartner": "Um nach .deck zu exportieren musst du einen Partner wählen.",
 				"unsupported": "Manche Karten in diesem Deck gibt es im automatischen Spielmodus nicht."
@@ -663,7 +663,7 @@
 	"cardDetailsEffects": "Effekte: ",
 	"cardDetailsLevel": "Lv",
 	"cardDetailsLevelTypeSeparator": " ",
-	"unitCardDetailType": "Einheit",
+	"unitCardDetailType": "Unit",
 	"tokenCardDetailType": "Token",
 	"standardSpellCardDetailType": "Standard-Zauber",
 	"continuousSpellCardDetailType": "Permanenter Zauber",
