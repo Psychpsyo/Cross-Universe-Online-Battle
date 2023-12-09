@@ -2,6 +2,7 @@
 import {locale} from "/modules/locale.js";
 import {deckToCardIdList} from "/modules/deckUtils.js";
 import {Card} from "/rulesEngine/card.js";
+import {socket} from "./netcode.js";
 import * as cardLoader from "/modules/cardLoader.js";
 import * as abilities from "/rulesEngine/abilities.js";
 
