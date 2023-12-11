@@ -1,10 +1,10 @@
-import {cardActions} from "/modules/cardActions.js";
-import {socket, zoneToLocal} from "/modules/netcode.js";
-import {previewCard, closeCardPreview} from "/modules/generalUI.js";
+import {cardActions} from "./cardActions.js";
+import {socket, zoneToLocal} from "./netcode.js";
+import {previewCard, closeCardPreview} from "./generalUI.js";
 import {locale} from "/modules/locale.js";
 import {getCardImage} from "/modules/cardLoader.js";
 import {Card} from "/rulesEngine/card.js";
-import * as fieldOverlay from "/modules/fieldOverlay.js";
+import * as fieldOverlay from "./fieldOverlay.js";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -206,11 +206,6 @@ export function init() {
 		// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
 		window.setTimeout(closeCardPreview, 0);
 	});
-
-	//position the menu on the right if that option is enabled
-	if (localStorage.getItem("fieldLeftToggle") == "true") {
-		document.documentElement.classList.add("leftField");
-	}
 
 	recalculateFieldRect();
 	lastFrame = performance.now();
@@ -903,7 +898,6 @@ function animate(currentTime) {
 		if (uiPlayer.life.value == 0) {
 			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "grayscale(100%)";
 			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "opacity(50%)";
-			playerDeckButton0.disabled = false;
 		} else {
 			document.getElementById("profilePicture" + uiPlayer.player.index).style.filter = "";
 			document.getElementById("playerInfoHolder" + uiPlayer.player.index).style.filter = "";

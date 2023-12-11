@@ -1,11 +1,11 @@
 // This module exports the DeckState class which is the state at the beginning of a (non-draft) match where players select their decks.
-import {GameState} from "/modules/gameState.js";
-import {BoardState} from "/modules/boardState.js";
+import {GameState} from "./gameState.js";
+import {BoardState} from "./boardState.js";
 import {locale} from "/modules/locale.js";
-import {socket} from "/modules/netcode.js";
+import {socket} from "./netcode.js";
 import {toDeckx, countDeckCards} from "/modules/deckUtils.js";
-import {loadDeckPreview, openDeckView, closeDeckView} from "/modules/generalUI.js";
-import * as gameUI from "/modules/gameUI.js";
+import {loadDeckPreview, openDeckView, closeDeckView} from "./generalUI.js";
+import * as gameUI from "./gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 import * as deckErrors from "/rulesEngine/deckErrors.js";
 

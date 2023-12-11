@@ -204,3 +204,8 @@ if (localStorage.getItem("hotkeys")) {
 } else {
 	localStorage.setItem("hotkeys", JSON.stringify(hotkeyDefaults));
 }
+
+//position the menu on the right if that option is enabled
+if (localStorage.getItem("fieldLeftToggle") == "true") {
+	document.documentElement.classList.add("leftField");
+}

@@ -1,14 +1,14 @@
 // This module exports the controller for the automatic simulator which verifies the cross universe game rules
 
 import {locale} from "/modules/locale.js";
-import {InteractionController} from "/modules/interactionController.js";
-import {socket} from "/modules/netcode.js";
-import {getAutoResponse} from "/modules/autopass.js";
+import {InteractionController} from "./interactionController.js";
+import {socket} from "./netcode.js";
+import {getAutoResponse} from "./autopass.js";
 import {BaseCard} from "/rulesEngine/card.js";
 import {Player} from "/rulesEngine/player.js";
-import * as gameUI from "/modules/gameUI.js";
-import * as autoUI from "/modules/automaticUI.js";
-import * as generalUI from "/modules/generalUI.js";
+import * as gameUI from "./gameUI.js";
+import * as autoUI from "./automaticUI.js";
+import * as generalUI from "./generalUI.js";
 import * as actions from "/rulesEngine/actions.js";
 import * as blocks from "/rulesEngine/blocks.js";
 import * as cardLoader from "/modules/cardLoader.js";
@@ -280,10 +280,12 @@ export class AutomaticController extends InteractionController {
 			}
 			case "playerWon": {
 				await autoUI.playerWon(events[0].player);
+				window.top.postMessage({type: "playerWon", players: [events[0].player]});
 				return;
 			}
 			case "gameDrawn": {
 				await autoUI.gameDrawn();
+				window.top.postMessage({type: "gameDrawn"});
 				return;
 			}
 			case "damageDealt": {

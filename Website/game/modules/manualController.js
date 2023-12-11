@@ -1,13 +1,13 @@
 // This module exports the manual controller, used for manually operated Cross Universe games.
 
-import {InteractionController} from "/modules/interactionController.js";
+import {InteractionController} from "./interactionController.js";
 import {locale} from "/modules/locale.js";
 import {Zone} from "/rulesEngine/zones.js";
 import {Card} from "/rulesEngine/card.js";
-import {socket, zoneToLocal} from "/modules/netcode.js";
-import {putChatMessage} from "/modules/generalUI.js";
-import * as gameUI from "/modules/gameUI.js";
-import * as manualUI from "/modules/manualUI.js";
+import {socket, zoneToLocal} from "./netcode.js";
+import {putChatMessage} from "./generalUI.js";
+import * as gameUI from "./gameUI.js";
+import * as manualUI from "./manualUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 
 class tokenZone {
@@ -343,15 +343,19 @@ export class ManualController extends InteractionController {
 		}
 	}
 
-	setLife(player, value) {
+	async setLife(player, value) {
 		value = Math.max(value, 0);
 		if (value == player.life) {
 			return;
 		}
 		player.life = value;
-		gameUI.uiPlayers[player.index].life.set(value, false);
 		if (player === localPlayer) {
 			socket.send("[life]" + localPlayer.life);
+		}
+		await gameUI.uiPlayers[player.index].life.set(value, false);
+		if (value === 0) {
+			playerDeckButton0.disabled = false;
+			window.top.postMessage({type: "playerWon", players: [player.next().index]});
 		}
 	}
 	setMana(player, value) {

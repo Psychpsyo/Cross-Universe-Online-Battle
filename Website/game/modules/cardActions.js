@@ -1,9 +1,9 @@
 // This module exports a list of functions that need to be accessible as buttons on specific cards.
 
 import {locale} from "/modules/locale.js";
-import {openCardSelect} from "/modules/gameUI.js";
-import {putChatMessage} from "/modules/generalUI.js";
-import {socket} from "/modules/netcode.js";
+import {openCardSelect} from "./gameUI.js";
+import {putChatMessage} from "./generalUI.js";
+import {socket} from "./netcode.js";
 
 export let cardActions = {
 	"I00040": {

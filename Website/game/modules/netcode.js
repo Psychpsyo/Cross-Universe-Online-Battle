@@ -1,4 +1,4 @@
-import {putChatMessage} from "/modules/generalUI.js";
+import {putChatMessage} from "./generalUI.js";
 import {locale} from "/modules/locale.js";
 
 export let socket = null;
@@ -15,7 +15,7 @@ export function zoneToLocal(name) {
 
 export function connectTo(targetRoomcode, websocketUrl) {
 	socket = new WebSocket(websocketUrl);
-	socket.addEventListener("open", function (event) {
+	socket.addEventListener("open", () => {
 		socket.send("[roomcode]" + targetRoomcode);
 	});
 
@@ -43,8 +43,7 @@ function receiveMessage(e) {
 		}
 		case "quit": { // opponent quit the game (or crashed)
 			socket.close();
-			unloadWarning.abort();
-			location.reload();
+			window.top.postMessage({type: "connectionLost"});
 			break;
 		}
 		case "youAre": { // Indicates if this client is player 0 or 1.

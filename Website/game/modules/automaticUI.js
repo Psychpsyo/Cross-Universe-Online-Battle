@@ -1,9 +1,9 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
 import {locale} from "/modules/locale.js";
-import {previewCard, closeCardPreview, cardAlignmentInfo} from "/modules/generalUI.js";
+import {previewCard, closeCardPreview, cardAlignmentInfo} from "./generalUI.js";
 import {FieldZone} from "/rulesEngine/zones.js";
-import * as gameUI from "/modules/gameUI.js";
+import * as gameUI from "./gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 import * as blocks from "/rulesEngine/blocks.js";
 
@@ -198,17 +198,20 @@ export function clearRetire() {
 }
 
 export function playerWon(player) {
-	closeCardPreview();
 	let displayText = player == localPlayer? locale.game.automatic.gameOver.youWon : locale.game.automatic.gameOver.youLost;
 	displayText += "\n\n";
 	displayText += locale.game.automatic.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.victoryConditions[0]];
-	mainGameBlackoutContent.textContent = displayText;
-	mainGameBlackout.classList.remove("hidden");
+	finishGame(displayText);
 }
 export function gameDrawn() {
+	finishGame(locale.game.automatic.gameOver.draw + "\n\n" + locale.game.automatic.gameOver.bothWon);
+}
+
+function finishGame(message) {
 	closeCardPreview();
-	mainGameBlackoutContent.textContent = locale.game.automatic.gameOver.draw + "\n\n" + locale.game.automatic.gameOver.bothWon;
+	mainGameBlackoutContent.textContent = message;
 	mainGameBlackout.classList.remove("hidden");
+	playerDeckButton0.disabled = false;
 }
 
 export function setAttackTarget(target) {

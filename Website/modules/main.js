@@ -1,29 +1,6 @@
 import {locale} from "/modules/locale.js";
-import {startEffect} from "/modules/levitationEffect.js";
+import {startEffect, stopEffect} from "/modules/levitationEffect.js";
 import * as uiUtils from "/modules/uiUtils.js";
-
-// global variables
-window.game = null;
-window.localPlayer = null;
-window.gameState = null;
-
-window.players = [
-	{
-		name: locale.chat.opponent,
-		profilePicture: "S00093",
-		deck: null,
-		language: null
-	},
-	{
-		name: localStorage.getItem("username"),
-		profilePicture: localStorage.getItem("profilePicture"),
-		deck: null,
-		language: localStorage.getItem("language")
-	}
-];
-if (players[1].name == "") {
-	players[1].name = locale.chat.you;
-}
 
 // randomizing the default room code
 function randomizeRoomcode() {
@@ -31,10 +8,56 @@ function randomizeRoomcode() {
 	roomCodeInputField.placeholder = roomcode;
 	roomCodeInputField.value = roomcode;
 }
-
 function getRoomcode() {
 	return roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value;
 }
+
+let websocketUrl = localStorage.getItem("websocketUrl") === ""? "wss://battle.crossuniverse.net:443/ws/" : localStorage.getItem("websocketUrl");
+let unloadWarning = new AbortController();
+
+// receiving messages from the iframe
+window.addEventListener("message", e => {
+	if (e.source !== gameFrame.contentWindow) return;
+
+	switch (e.data.type) {
+		case "ready": {
+			gameFrame.contentWindow.postMessage({
+				type: "connect",
+				roomCode: getRoomcode(),
+				gameMode: gameModeSelect.value,
+				websocketUrl: websocketUrl
+			});
+			break;
+		}
+		case "gameStarted": {
+			stopEffect();
+			roomCodeEntry.hidden = true;
+			gameFrame.style.visibility = "visible";
+			waitingForOpponentHolder.hidden = true;
+			roomCodeInputFieldHolder.hidden = false;
+			loadingIndicator.classList.remove("active");
+
+			// prevent user from accidently leaving the site
+			window.addEventListener("beforeunload", e => {
+				e.preventDefault();
+				e.returnValue = "";
+			}, {"signal": unloadWarning.signal});
+			break;
+		}
+		case "playerWon":
+		case "gameDrawn": {
+			unloadWarning.abort();
+			break;
+		}
+		case "connectionLost": {
+			unloadWarning.abort();
+			gameFrame.style.visibility = "hidden";
+			roomCodeEntry.hidden = false;
+			gameFrame.src = "";
+			break;
+		}
+	}
+});
 
 // connecting
 function connect(websocketUrl) {
@@ -49,23 +72,12 @@ function connect(websocketUrl) {
 		}
 	}, 100);
 
-	websocketUrl ??= localStorage.getItem("websocketUrl") === ""? "wss://battle.crossuniverse.net:443/ws/" : localStorage.getItem("websocketUrl");
-
-	// This is not imported up-front on pageload since it imports a bunch of other stuff itself
-	// and is not needed right away.
-	import("/modules/initState.js").then(initModule => {
-		try {
-			new initModule.InitState(getRoomcode(), gameModeSelect.value, websocketUrl);
-		} catch {
-			roomCodeInputFieldHolder.hidden = false;
-			waitingForOpponentHolder.hidden = true;
-			alert("Failed to connect to '" + websocketUrl + "'.");
-		}
-	});
+	gameFrame.src = location.origin + "/game";
+	loadingIndicator.classList.add("active");
 }
 
 // check if a room code is given in the query string
-let queryString = new URLSearchParams(window.location.search);
+const queryString = new URLSearchParams(window.location.search);
 if (queryString.get("id")) {
 	roomCodeInputField.placeholder = queryString.get("id");
 	let gameMode = queryString.get("m");
@@ -73,7 +85,8 @@ if (queryString.get("id")) {
 		gameMode = "normal";
 	}
 	gameModeSelect.value = gameMode;
-	connect(queryString.get("s"));
+	websocketUrl ??= queryString.get("s");
+	connect();
 } else {
 	randomizeRoomcode();
 }
@@ -121,10 +134,14 @@ roomCodeInputField.addEventListener("keyup", function(e) {
 // clicking the connect button to connect
 connectBtn.addEventListener("click", () => connect());
 
+
 // canceling a connection
 cancelWaitingBtn.addEventListener("click", function() {
-	gameState.cancel();
-	gameState = null;
+	gameFrame.removeAttribute("src");
+	waitingForOpponentHolder.hidden = true;
+	roomCodeInputFieldHolder.hidden = false;
+	roomCodeInputField.focus();
+	loadingIndicator.classList.remove("active");
 });
 // generating an invite link
 copyInviteLink.addEventListener("click", function() {
@@ -136,25 +153,6 @@ copyInviteLink.addEventListener("click", function() {
 });
 uiUtils.makeCopyButton(copyInviteLink, locale.mainMenu.copyInviteLink);
 
-// handle hotkeys
-document.addEventListener("keydown", async function(e) {
-	for (const [name, hotkey] of Object.entries(hotkeys)) {
-		if (hotkey.keyCode === e.code && hotkey.ctrl === e.ctrlKey && hotkey.shift === e.shiftKey && hotkey.alt === e.altKey) {
-			switch(name) {
-				case "chat": {
-					if (!gameDiv.hidden) {
-						document.getElementById("chatInput").focus();
-						e.preventDefault();
-					}
-					break;
-				}
-				default: {
-					gameState?.hotkeyPressed(name);
-				}
-			}
-		}
-	}
-});
 
 // drag&drop loading for replays
 roomCodeEntry.addEventListener("dragover", function(e) {

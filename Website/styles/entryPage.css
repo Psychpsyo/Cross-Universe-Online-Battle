@@ -103,3 +103,10 @@ h1 {
 	perspective: 1500px;
 	overflow: hidden;
 }
+
+#gameFrame {
+	border: none;
+	width: 100vw;
+	height: 100vh;
+	visibility: hidden;
+}

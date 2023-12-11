@@ -1,11 +1,11 @@
-import {GameState} from "/modules/gameState.js";
-import {BoardState} from "/modules/boardState.js";
+import {GameState} from "./gameState.js";
+import {BoardState} from "./boardState.js";
 import {Card} from "/rulesEngine/card.js";
 import {locale} from "/modules/locale.js";
-import {socket} from "/modules/netcode.js";
+import {socket} from "./netcode.js";
 import {deckFromCardList} from "/modules/deckUtils.js";
-import {previewCard} from "/modules/generalUI.js";
-import * as gameUI from "/modules/gameUI.js";
+import {previewCard} from "./generalUI.js";
+import * as gameUI from "./gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 
 export class DraftState extends GameState {

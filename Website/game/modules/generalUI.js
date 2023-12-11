@@ -13,7 +13,7 @@ const abilityTypes = new Map([
 	[abilities.OptionalAbility, "optional"],
 	[abilities.StaticAbility, "static"],
 	[abilities.TriggerAbility, "trigger"]
-])
+]);
 
 let currentPreviewedCard = null;
 

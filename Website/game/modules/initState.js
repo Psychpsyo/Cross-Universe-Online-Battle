@@ -1,11 +1,10 @@
-import * as generalUI from "/modules/generalUI.js";
-import {DistRandom} from "/modules/distributedRandom.js";
-import {GameState} from "/modules/gameState.js";
-import {DraftState} from "/modules/draftState.js";
-import {DeckState} from "/modules/deckState.js";
+import * as generalUI from "./generalUI.js";
+import {DistRandom} from "./distributedRandom.js";
+import {GameState} from "./gameState.js";
+import {DraftState} from "./draftState.js";
+import {DeckState} from "./deckState.js";
 import {Game} from "/rulesEngine/game.js";
-import {stopEffect} from "/modules/levitationEffect.js";
-import {socket, connectTo, youAre} from "/modules/netcode.js";
+import {socket, connectTo, youAre} from "./netcode.js";
 
 export class InitState extends GameState {
 	constructor(roomcode, gameMode, websocketUrl) {
@@ -15,7 +14,7 @@ export class InitState extends GameState {
 		this.gameMode = gameMode;
 		this.opponentReady = false;
 
-		connectTo(roomcode + gameMode, websocketUrl );
+		connectTo(roomcode + gameMode, websocketUrl);
 	}
 
 	receiveMessage(command, message) {
@@ -81,20 +80,10 @@ export class InitState extends GameState {
 			e.preventDefault();
 		});
 
-		// prevent user from accidently leaving the site
-		window.unloadWarning = new AbortController();
-		window.addEventListener("beforeunload", function(e) {
-			if (lifeDisplay0.textContent > 0 && lifeDisplay1.textContent > 0) {
-				e.preventDefault();
-				e.returnValue = "";
-			}
-		}, {"signal": unloadWarning.signal});
-
 		// switch to game view
-		stopEffect();
-		roomCodeEntry.remove();
 		generalUI.init();
 		gameDiv.hidden = false;
+		window.top.postMessage({type: "gameStarted"});
 
 		// Start game
 		switch (this.gameMode) {
@@ -115,13 +104,5 @@ export class InitState extends GameState {
 				break;
 			}
 		}
-	}
-
-	cancel() {
-		socket.close();
-		waitingForOpponentHolder.hidden = true;
-		roomCodeInputFieldHolder.hidden = false;
-		roomCodeInputField.focus();
-		gameState = null;
 	}
 }
