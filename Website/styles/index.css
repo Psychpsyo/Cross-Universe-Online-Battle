@@ -9,6 +9,7 @@
 
 html {
 	--custom-font: "游ゴシック";
+	word-break: auto-phrase;
 }
 
 body {
