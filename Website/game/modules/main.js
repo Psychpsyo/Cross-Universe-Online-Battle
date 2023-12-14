@@ -1,6 +1,8 @@
 import {InitState} from "./initState.js";
 import {locale} from "/modules/locale.js";
 
+document.documentElement.lang = locale.code;
+
 // global variables
 window.game = null;
 window.localPlayer = null;
