@@ -395,7 +395,7 @@ export async function showCoolAttackAnim(defender, attackers) {
 	imgs[0].src = cardLoader.getCardImage(defender);
 	if (cardAlignmentInfo[defender.cardId]?.flip) {
 		imgs[0].style.setProperty("--left", -100 + (cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
-		imgs[0].style.transform = "scaleX(-1)";
+		imgs[0].style.transform = "skew(5deg) scaleX(-1)";
 	} else {
 		imgs[0].style.setProperty("--left", -(cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 	}
@@ -404,7 +404,7 @@ export async function showCoolAttackAnim(defender, attackers) {
 		imgs[i+1].src = cardLoader.getCardImage(attackers[i]);
 		if (!cardAlignmentInfo[attackers[i].cardId]?.flip && !cardAlignmentInfo[attackers[i].cardId]?.neverFlip) {
 			imgs[i+1].style.setProperty("--left", -100 + (cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
-			imgs[i+1].style.transform = "scaleX(-1)";
+			imgs[i+1].style.transform = "skew(5deg) scaleX(-1)";
 		} else {
 			imgs[i+1].style.setProperty("--left", -(cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
 			imgs[i+1].style.transform = "";
