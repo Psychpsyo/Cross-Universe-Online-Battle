@@ -14,7 +14,7 @@ both.DISCARD(DECKTOP?(2));
 
 o: trigger
 mandatory: no
-condition: [from discarded where self = thisCard & zone = [deck, field]]
+condition: discarded(from: [deck, field]) = thisCard
 cost:
 LOSELIFE(100);
 exec:

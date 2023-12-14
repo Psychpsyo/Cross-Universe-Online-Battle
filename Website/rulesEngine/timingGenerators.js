@@ -201,7 +201,11 @@ export function* spellItemDiscardGenerator(player, spellItem) {
 }
 
 export function* retireTimingGenerator(player, units) {
-	let discardTiming = yield units.map(unit => new actions.Discard(player, unit, true));
+	let discardTiming = yield units.map(unit => new actions.Discard(
+		player,
+		unit,
+		new ScriptValue("dueToReason", ["retire"])
+	));
 
 	let gainedMana = 0;
 	for (const action of discardTiming.actions) {
@@ -227,12 +231,13 @@ export function* fightTimingGenerator(attackDeclaration) {
 	// RULES: If the Attack is greater the attacker destroys the target.
 	yield [createCardsAttackedEvent(attackDeclaration.attackers, attackDeclaration.target)];
 	if (totalAttack > attackDeclaration.target.values.current.defense) {
-		let discard = new actions.Discard(attackDeclaration.target.owner, attackDeclaration.target);
-		let actionList = [new actions.Destroy(
-			discard,
+		let discard = new actions.Discard(
+			attackDeclaration.target.owner,
+			attackDeclaration.target,
 			new ScriptValue("dueToReason", ["fight"]),
 			new ScriptValue("card", attackDeclaration.attackers.map(unit => unit.snapshot()))
-		), discard];
+		);
+		let actionList = [new actions.Destroy(discard), discard];
 		if (attackDeclaration.target.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(
 				attackDeclaration.target.currentOwner(),
@@ -261,12 +266,13 @@ export function* fightTimingGenerator(attackDeclaration) {
 
 	yield [createCardsAttackedEvent([attackDeclaration.target], counterattackTarget)];
 	if (attackDeclaration.target.values.current.attack > counterattackTarget.values.current.defense) {
-		let discard = new actions.Discard(counterattackTarget.owner, counterattackTarget);
-		let actionList = [new actions.Destroy(
-			discard,
+		let discard = new actions.Discard(
+			counterattackTarget.owner,
+			counterattackTarget,
 			new ScriptValue("dueToReason", ["fight"]),
 			new ScriptValue("card", [attackDeclaration.target.snapshot()])
-		), discard];
+		);
+		let actionList = [new actions.Destroy(discard), discard];
 		if (counterattackTarget.zone.type == "partner") {
 			actionList.push(new actions.DealDamage(
 				counterattackTarget.currentOwner(),

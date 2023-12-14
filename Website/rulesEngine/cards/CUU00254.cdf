@@ -9,5 +9,5 @@ defense: 50
 o: trigger
 gameLimit: 1
 mandatory: no
-after: COUNT([from destroyed where self = thisCard & zone = field]) > 0
+after: destroyed(from: field) = thisCard
 RETURN([from discard where self = thisCard], field);

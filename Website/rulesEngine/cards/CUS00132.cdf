@@ -10,7 +10,7 @@ DRAW(1);
 
 o: trigger
 mandatory: yes
-after: COUNT([from discarded where self = thisCard & zone = [hand, deck]]) > 0
+after: discarded(from: [hand, deck]) = thisCard
 condition: you.partner.types = Fire
 DAMAGE(100);
 both.DRAW(1);

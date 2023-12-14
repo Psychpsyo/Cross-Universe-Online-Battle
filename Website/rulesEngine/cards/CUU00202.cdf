@@ -8,6 +8,6 @@ defense: 400
 
 o: trigger
 mandatory: no
-after: COUNT([from summoned(dueTo: effect, by: self != thisCard) where self = thisCard & zone = discard]) > 0
+after: summoned(from: discard, dueTo: effect, by: self != thisCard) = thisCard
 DESTROY(SELECT(1, [from field where cardType = [spell, item]]));
 opponent.DAMAGE(100);

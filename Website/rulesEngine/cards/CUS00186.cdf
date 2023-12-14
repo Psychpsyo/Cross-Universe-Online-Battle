@@ -10,7 +10,7 @@ GAINLIFE(200);
 
 o: trigger
 mandatory: no
-after: COUNT([from discarded where self = thisCard & zone = deck]) > 0
+after: discarded(from: deck) = thisCard
 cost:
 EXILE([from discard where self = thisCard]);
 exec:

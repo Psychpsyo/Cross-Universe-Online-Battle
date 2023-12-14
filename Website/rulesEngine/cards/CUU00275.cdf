@@ -8,7 +8,7 @@ defense: 100
 
 o: trigger
 mandatory: no
-after: COUNT([from destroyed where zone = you.field & self != thisCard & types = Beast & cardType = unit]) > 0
+after: COUNT([from destroyed(from: you.field) where self != thisCard & types = Beast & cardType = unit]) > 0
 condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand]));

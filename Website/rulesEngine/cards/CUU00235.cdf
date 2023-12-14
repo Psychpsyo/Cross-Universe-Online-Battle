@@ -9,7 +9,7 @@ defense: 500
 o: trigger
 mandatory: no
 condition: thisCard.zone = field
-after: COUNT([from summoned where self = thisCard & zone = discard]) > 0
+after: summoned(from: discard) = thisCard
 APPLY(thisCard, {attack += opponent.life})
 
 o: trigger

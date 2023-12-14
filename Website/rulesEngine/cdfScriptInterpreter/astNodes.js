@@ -1076,7 +1076,7 @@ export class ActionAccessorNode extends AstNode {
 				break;
 			}
 			case "retired": {
-				if (action instanceof actions.Discard && action.isRetire) {
+				if (action instanceof actions.Discard && action.properties.dueTo.get().includes("retire")) {
 					return [action.card];
 				}
 				break;

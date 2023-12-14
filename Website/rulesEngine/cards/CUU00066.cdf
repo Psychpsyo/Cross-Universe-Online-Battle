@@ -8,5 +8,5 @@ defense: 100
 
 o: trigger
 mandatory: no
-after: COUNT([from discarded where self = thisCard & zone = hand]) > 0
+after: discarded(from: hand) = thisCard
 SUMMON([from discard where self = thisCard]);

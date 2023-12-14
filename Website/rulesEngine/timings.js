@@ -226,12 +226,13 @@ export class Timing {
 			}
 		}
 		if (invalidEquipments.length > 0) {
-			let discards = invalidEquipments.map(equipment => new actions.Discard(equipment.owner, equipment));
-			return discards.concat(discards.map(discard => new actions.Destroy(
-				discard,
+			let discards = invalidEquipments.map(equipment => new actions.Discard(
+				equipment.owner,
+				equipment,
 				new ScriptValue("dueToReason", ["invalidEquipment"]),
 				new ScriptValue("card", [])
-			)));
+			));
+			return discards.concat(discards.map(discard => new actions.Destroy(discard)));
 		}
 		return [];
 	}

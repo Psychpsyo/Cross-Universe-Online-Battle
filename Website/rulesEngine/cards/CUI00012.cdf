@@ -11,5 +11,5 @@ modifier: {defense += 100}
 
 o: trigger
 mandatory: yes
-after: [from discarded where zone = deck + field] = thisCard
+after: discarded(from: [deck, field]) = thisCard
 RETURN(thisCard, baseOwner.deck);

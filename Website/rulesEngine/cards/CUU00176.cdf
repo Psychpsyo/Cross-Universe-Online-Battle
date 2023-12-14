@@ -15,6 +15,6 @@ opponent.DAMAGE(200)
 
 o: trigger
 mandatory: no
-after: COUNT([from destroyed where self = thisCard & zone = field]) > 0 & COUNT([from you.discard where name = CUS00176]) > 0
+after: destroyed(from: field) = thisCard & COUNT([from you.discard where name = CUS00176]) > 0
 DESTROY(SELECT(2, [from you.field where types = thisCard.types]));
 RETURN([from discard where self = thisCard], field);

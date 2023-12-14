@@ -155,6 +155,7 @@ let keywordTokenTypes = {
 	fight: "dueToReason",
 	invalidEquipment: "dueToReason",
 	standardSummon: "dueToReason",
+	retire: "dueToReason",
 
 	forever: "untilIndicator",
 	endOfTurn: "untilIndicator",

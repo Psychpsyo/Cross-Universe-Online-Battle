@@ -4,8 +4,7 @@ import * as requests from "./inputRequests.js";
 import * as zones from "./zones.js";
 import {BaseCard} from "./card.js";
 import {Player} from "./player.js";
-import {ScriptContext} from "./cdfScriptInterpreter/structs.js";
-import {SnapshotCard} from "./card.js";
+import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
 import {Timing} from "./timings.js";
 
 // helper functions
@@ -207,7 +206,7 @@ export class Place extends Action {
 
 export class Summon extends Action {
 	constructor(player, placeAction, reason, source) {
-		let properties = {dueTo: reason};
+		let properties = {dueTo: reason, from: new ScriptValue("zone", [placeAction.card.zone])};
 		if (source) { // standard summons have no source
 			properties.by = source;
 		}
@@ -238,8 +237,12 @@ export class Summon extends Action {
 }
 
 export class Deploy extends Action {
-	constructor(player, placeAction) {
-		super(player);
+	constructor(player, placeAction, reason, source) {
+		let properties = {dueTo: reason, from: new ScriptValue("zone", [placeAction.card.zone])};
+		if (source) { // only exists if deployed by card effect
+			properties.by = source;
+		}
+		super(player, properties);
 		this._placeAction = placeAction;
 		this.card = placeAction.card.current();
 	}
@@ -268,8 +271,12 @@ export class Deploy extends Action {
 }
 
 export class Cast extends Action {
-	constructor(player, placeAction) {
-		super(player);
+	constructor(player, placeAction, reason, source) {
+		let properties = {dueTo: reason, from: new ScriptValue("zone", [placeAction.card.zone])};
+		if (source) { // only exists if cast by card effect
+			properties.by = source;
+		}
+		super(player, properties);
 		this._placeAction = placeAction;
 		this.card = placeAction.card.current();
 	}
@@ -513,10 +520,13 @@ export class DealDamage extends Action {
 }
 
 export class Discard extends Action {
-	constructor(player, card, isRetire = false) {
-		super(player);
+	constructor(player, card, reason, source) {
+		let properties = {dueTo: reason, from: new ScriptValue("zone", [card.zone])};
+		if (source) { // source only exists if discarded by card effect
+			properties.by = source;
+		}
+		super(player, properties);
 		this.card = card;
-		this.isRetire = isRetire;
 	}
 
 	async* run() {
@@ -545,8 +555,8 @@ export class Discard extends Action {
 }
 
 export class Destroy extends Action {
-	constructor(discard, reason, source) {
-		super(discard.player, {dueTo: reason, by: source});
+	constructor(discard) {
+		super(discard.player, discard.properties);
 		this.discard = discard;
 	}
 

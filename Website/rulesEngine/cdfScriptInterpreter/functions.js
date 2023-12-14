@@ -137,7 +137,7 @@ export function initFunctions() {
 			let applyActions = [];
 			let objects = (yield* (this.getParameter(astNode, "card") ?? this.getParameter(astNode, "player")).eval(ctx));
 			if (objects.type === "card") {
-				objects = objects.get(ctx.player).map(card => card.current);
+				objects = objects.get(ctx.player).map(card => card.current());
 			} else {
 				objects = objects.get(ctx.player);
 			}
@@ -224,22 +224,24 @@ export function initFunctions() {
 		"action",
 		function*(astNode, ctx) {
 			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current());
-			let discards = cards.map(card => new actions.Discard(ctx.player, card.current()));
-			return new ScriptValue("tempActions", discards.concat(discards.map(discard => new actions.Destroy(
-				discard,
+			let discards = cards.map(card => new actions.Discard(
+				ctx.player,
+				card.current(),
 				new ScriptValue("dueToReason", ["effect"]),
 				new ScriptValue("card", [ctx.card.snapshot()])
-			))));
+			));
+			return new ScriptValue("tempActions", discards.concat(discards.map(discard => new actions.Destroy(discard))));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
 			let cardLists = this.getParameter(astNode, "card").evalFull(ctx).map(option => option.get(ctx.player).filter(card => card.current()));
-			let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(ctx.player, card.current())));
-			return discardLists.map(discards => new ScriptValue("action", discards.concat(discards.map(discard => new actions.Destroy(
-				discard,
+			let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(
+				ctx.player,
+				card.current(),
 				new ScriptValue("dueToReason", ["effect"]),
 				new ScriptValue("card", [ctx.card.snapshot()])
-			)))));
+			)));
+			return discardLists.map(discards => new ScriptValue("action", discards.concat(discards.map(discard => new actions.Destroy(discard)))));
 		}
 	),
 
@@ -274,11 +276,21 @@ export function initFunctions() {
 		[null],
 		"action",
 		function*(astNode, ctx) {
-			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(ctx.player, card.current())));
+			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(
+				ctx.player,
+				card.current(),
+				new ScriptValue("dueToReason", ["effect"]),
+				new ScriptValue("card", [ctx.card.snapshot()])
+			)));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(ctx.player, card.current()))));
+			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(
+				ctx.player,
+				card.current(),
+				new ScriptValue("dueToReason", ["effect"]),
+				new ScriptValue("card", [ctx.card.snapshot()])
+			))));
 		}
 	),
 

@@ -482,7 +482,7 @@ function parseActionAccessor(actionsNode) {
 	let properties = {};
 	if (tokens[pos].type === "leftParen") {
 		pos++;
-		while (tokens[pos].type === "accessorProperty") {
+		while (["accessorProperty", "from"].includes(tokens[pos].type)) {
 			let property = tokens[pos].value;
 			pos++;
 			if (tokens[pos].type !== "colon") {

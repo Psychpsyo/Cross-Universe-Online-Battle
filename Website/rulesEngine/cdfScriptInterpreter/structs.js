@@ -9,7 +9,11 @@ export class ScriptValue {
 
 	// Returns the given player's version of this value.
 	get(player) {
-		return this._isSplit? this._value.get(player) : this._value;
+		if (this._isSplit) {
+			if (!player) throw new Error("Cannot read a split variable without providing a player!");
+			return this._value.get(player);
+		}
+		return this._value;
 	}
 
 	// Returns this value as a single number.

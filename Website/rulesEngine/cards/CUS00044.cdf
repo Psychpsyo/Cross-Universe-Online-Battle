@@ -9,5 +9,5 @@ DRAW(2);
 
 o: trigger
 mandatory: yes
-after: COUNT([from discarded where self = thisCard & zone = [hand, deck]]) > 0
+after: discarded(from: [hand, deck]) = thisCard
 DRAW(1);

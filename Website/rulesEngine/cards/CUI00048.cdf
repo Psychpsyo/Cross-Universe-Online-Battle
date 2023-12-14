@@ -18,6 +18,6 @@ DAMAGE(200);
 
 o: trigger
 mandatory: yes
-after: COUNT([from discarded where self = thisCard & zone = field]) > 0
+after: discarded(from: field) = thisCard
 RETURN([from you.discard where name != CUI00048], you.deck);
 EXILE(thisCard);

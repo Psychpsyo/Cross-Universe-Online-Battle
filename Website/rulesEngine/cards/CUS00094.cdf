@@ -9,5 +9,5 @@ both.DRAW(1);
 
 o: trigger
 mandatory: yes
-after: COUNT([from discarded where self = thisCard & zone = hand]) > 0
+after: discarded(from: hand) = thisCard
 both.DRAW(1);
