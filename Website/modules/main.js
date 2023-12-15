@@ -91,8 +91,10 @@ if (queryString.get("id")) {
 	randomizeRoomcode();
 }
 
-// this is to make Chromium browsers work when the page reloads while the iframe is up.
-window.scrollTo(0, 0);
+// this is an awful fix to make Chromium browsers work when the page reloads while the game iframe is up.
+setTimeout(function() {
+	window.scrollTo(0, 0);
+}, 1000);
 
 // translate main menu
 roomCodeInputTitle.textContent = locale.mainMenu.roomCodeInputTitle;
