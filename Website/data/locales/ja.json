@@ -3,7 +3,8 @@
 	"code": "ja",
 
 	"general": {
-		"buttonCopied": null
+		"buttonCopied": null,
+		"buttonBack": null
 	},
 
 	"mainMenu": {
@@ -541,8 +542,8 @@
 
 	"deckMaker": {
 		"title": null,
-		"deck": "デッキ…",
-		"search": "サーチ…",
+		"deckButton": null,
+		"searchButton": null,
 
 		"searchResults": null,
 		"unitTokenColumn": null,

@@ -21,7 +21,6 @@ h2 {
 	margin: 0;
 	padding: .2em;
 	text-align: center;
-	box-sizing: border-box;
 }
 
 hr {
@@ -70,7 +69,6 @@ input[type="text"], select, .settingsInput {
 	overflow-y: scroll;
 }
 .profilePictureLists > h2 {
-	box-sizing: border-box;
 	padding-bottom: 0;
 }
 .profilePictureLists > h2 > a {

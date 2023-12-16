@@ -31,7 +31,7 @@ window.addEventListener("message", e => {
 		}
 		case "gameStarted": {
 			stopEffect();
-			roomCodeEntry.hidden = true;
+			preGame.style.display = "none";
 			gameFrame.style.visibility = "visible";
 			waitingForOpponentHolder.hidden = true;
 			roomCodeInputFieldHolder.hidden = false;
@@ -52,8 +52,8 @@ window.addEventListener("message", e => {
 		case "connectionLost": {
 			unloadWarning.abort();
 			gameFrame.style.visibility = "hidden";
-			roomCodeEntry.hidden = false;
-			gameFrame.src = "";
+			preGame.style.display = "flex";
+			gameFrame.contentWindow.location.replace("about:blank");
 			break;
 		}
 	}
@@ -72,7 +72,7 @@ function connect(websocketUrl) {
 		}
 	}, 100);
 
-	gameFrame.src = location.origin + "/game";
+	gameFrame.contentWindow.location.replace(location.origin + "/game");
 	loadingIndicator.classList.add("active");
 }
 
@@ -111,13 +111,13 @@ connectBtn.textContent = locale.mainMenu.connectToRoom;
 waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;
 copyInviteLink.textContent = locale.mainMenu.copyInviteLink;
 cancelWaitingBtn.textContent = locale.mainMenu.cancelWaiting;
-unofficialNotice.innerHTML = locale.mainMenu.unofficialNotice;
+unofficialFooter.innerHTML = locale.mainMenu.unofficialNotice;
 rulesButton.textContent = locale.mainMenu.rulesButton;
 
 rulesButton.href = locale.mainMenu.rulesLink;
 
-settingsButton.textContent = locale.mainMenu.settingsButton;
-deckMakerButton.textContent = locale.mainMenu.deckCreatorButton;
+settingsButton.title = locale.mainMenu.settingsButton;
+deckMakerButton.title = locale.mainMenu.deckCreatorButton;
 
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
@@ -159,10 +159,10 @@ uiUtils.makeCopyButton(copyInviteLink, locale.mainMenu.copyInviteLink);
 
 
 // drag&drop loading for replays
-roomCodeEntry.addEventListener("dragover", function(e) {
+preGame.addEventListener("dragover", function(e) {
 	e.preventDefault();
 });
-roomCodeEntry.addEventListener("drop", function(e) {
+preGame.addEventListener("drop", function(e) {
 	let file = e.dataTransfer.items[0].getAsFile();
 	if (!file || !file.name.endsWith(".replay")) {
 		return;

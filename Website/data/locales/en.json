@@ -3,7 +3,8 @@
 	"code": "en",
 
 	"general": {
-		"buttonCopied": "Copied!"
+		"buttonCopied": "Copied!",
+		"buttonBack": "Go back"
 	},
 
 	"mainMenu": {
@@ -16,7 +17,7 @@
 		"cancelWaiting": "Cancel",
 		"rulesButton": "Game Rules",
 		"rulesLink": "https://crossuniverse.net/rules",
-		"unofficialNotice": "This site is an unofficial, fan-made implementation of Cross Universe. Visit the official page at <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
+		"unofficialNotice": "This is a fan-made implementation of Cross Universe. The official page is at <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
 
 		"gamemode": "Gamemode:",
 		"gamemodes": {
@@ -541,8 +542,8 @@
 
 	"deckMaker": {
 		"title": "Deck Creator",
-		"deck": "Deck...",
-		"search": "Search...",
+		"deckButton": "Open deck [D]",
+		"searchButton": "Open advanced search [S]",
 
 		"searchResults": "Search Results",
 		"unitTokenColumn": "Unit/Token Column",

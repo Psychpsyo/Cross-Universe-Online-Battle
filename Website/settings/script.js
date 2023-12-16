@@ -298,6 +298,9 @@ async function setLanguage(language) {
 	refetchCardData();
 	await reloadLocale();
 
+	title.textContent = locale.settings.title;
+	headerBackButton.title = locale.general.buttonBack;
+
 	for (const [id, options] of Object.entries(settings)) {
 		document.getElementById(id + "Title").textContent = locale.settings[id].title;
 		for (const setting of options) {

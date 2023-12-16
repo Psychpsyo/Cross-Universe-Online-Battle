@@ -15,42 +15,49 @@
 		<link rel="stylesheet" href="styles/levitationEffect.css">
 	</head>
 	<body>
-		<main id="roomCodeEntry">
-			<div id="levitatingCards"></div>
-			<div id="centerDiv">
-				<div id="mainLogoHolder">
-					<img id="mainLogo" src="./images/logo.png" alt="">
-				</div>
-				<main id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
-					<div id="roomCodeInputFieldHolder">
-						<h1 id="roomCodeInputTitle"></h1><br>
-						<label for="roomCodeInputField" id="roomCodeInputLabel"></label>
-						<span><input id="roomCodeInputField" aria-atomic="true" autocomplete="off"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
-						<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
-						<select id="gameModeSelect">
-							<option id="gameModeNormalOption" value="normal"></option>
-							<option id="gameModeDraftOption" value="draft"></option>
-							<option id="gameModeNormalAutomaticOption" value="normalAutomatic"></option>
-							<option id="gameModeDraftAutomaticOption" value="draftAutomatic"></option>
-						</select><br>
-						<button id="connectBtn"></button>
+		<div id="preGame">
+			<div id="mainHeaderHolder">
+				<header>
+					<nav class="headerButtonsLeft">
+						<a id="settingsButton" class="svgButton" href="./settings"><img src="images/icons/settings.svg" alt="" draggable="false"></a>
+						<a id="deckMakerButton" class="svgButton" href="./deckMaker"><img src="images/icons/deck.svg" alt="" draggable="false"></a>
+					</nav>
+				</header>
+			</div>
+			<main id="mainMenu">
+				<section id="centeredDiv">
+					<div id="levitatingCards"></div>
+					<div id="mainLogoHolder">
+						<img id="mainLogo" src="./images/logo.png" alt="">
 					</div>
-					<div id="waitingForOpponentHolder" hidden>
-						<span id="waitingForOpponentText" aria-live="polite" aria-atomic="true"></span>
-						<div id="waitingBtnSpan">
-							<button id="copyInviteLink"></button>
-							<button id="cancelWaitingBtn"></button>
+					<div id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
+						<div id="roomCodeInputFieldHolder">
+							<h1 id="roomCodeInputTitle"></h1><br>
+							<label for="roomCodeInputField" id="roomCodeInputLabel"></label>
+							<span><input id="roomCodeInputField" aria-atomic="true" autocomplete="off"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
+							<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
+							<select id="gameModeSelect">
+								<option id="gameModeNormalOption" value="normal"></option>
+								<option id="gameModeDraftOption" value="draft"></option>
+								<option id="gameModeNormalAutomaticOption" value="normalAutomatic"></option>
+								<option id="gameModeDraftAutomaticOption" value="draftAutomatic"></option>
+							</select><br>
+							<button id="connectBtn"></button>
+						</div>
+						<div id="waitingForOpponentHolder" hidden>
+							<span id="waitingForOpponentText" aria-live="polite" aria-atomic="true"></span>
+							<div id="waitingBtnSpan">
+								<button id="copyInviteLink"></button>
+								<button id="cancelWaitingBtn"></button>
+							</div>
 						</div>
 					</div>
-				</main>
-				<nav id="mainNavigation">
 					<a id="rulesButton" class="bigButton" target="_blank"></a>
-					<a id="settingsButton" class="bigButton" href="./settings"></a>
-					<a id="deckMakerButton" class="bigButton" href="./deckMaker"></a>
-				</nav>
-			</div>
-			<footer id="unofficialFooter"><span id="unofficialNotice"></span></footer>
-		</main>
+				</section>
+				<section id="lobbyList" hidden></section>
+			</main>
+			<footer id="unofficialFooter"></footer>
+		</div>
 		<iframe id="gameFrame"></iframe>
 
 		<object id="loadingIndicator" class="active" type="image/svg+xml" data="./images/icons/loading.svg" width="150px" height="150px"></object>

@@ -3,7 +3,8 @@
 	"code": "de",
 
 	"general": {
-		"buttonCopied": "Kopiert!"
+		"buttonCopied": "Kopiert!",
+		"buttonBack": "Zurück"
 	},
 
 	"mainMenu": {
@@ -12,11 +13,11 @@
 		"rerollRoomcode": "Zufälligen Raum-Code generieren",
 		"connectToRoom": "Verbinden",
 		"waitingForOpponent": "Warte auf Gegner...",
-		"copyInviteLink": "Einladungslink kopieren",
+		"copyInviteLink": "Invite-Link kopieren",
 		"cancelWaiting": "Abbrechen",
 		"rulesButton": "Spielregeln",
 		"rulesLink": "https://crossuniverse.net/rules",
-		"unofficialNotice": "Diese Seite ist eine Fan-gemachte, unoffizielle Cross Universe Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
+		"unofficialNotice": "Diese Seite ist eine Cross Universe Fan-Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
 
 		"gamemode": "Spielmodus:",
 		"gamemodes": {
@@ -541,8 +542,8 @@
 
 	"deckMaker": {
 		"title": "Deck Editor",
-		"deck": "Deck...",
-		"search": "Suche...",
+		"deckButton": "Deck öffnen [D]",
+		"searchButton": "Erweiterte Suche öffnen [S]",
 
 		"searchResults": "Suchergebnisse",
 		"unitTokenColumn": "Units-/Tokenspalte",

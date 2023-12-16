@@ -7,6 +7,10 @@
 	src: local("OpenDyslexic"), url("/fonts/OpenDyslexic-Regular.woff2");
 }
 
+* {
+	box-sizing: border-box;
+}
+
 html {
 	--custom-font: "游ゴシック";
 	word-break: auto-phrase;
@@ -49,6 +53,7 @@ a {
 }
 
 #mainHeaderHolder > header {
+	position: relative;
 	text-align: center;
 	height: 1.75em;
 	border-bottom: 2px var(--theme-border-color) solid;
@@ -60,6 +65,24 @@ header > h1, header > h2, header > h3, header > h4 {
 	all: unset;
 	font-weight: bold;
 }
+
+.headerButtonsLeft, .headerButtonsRight {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	display: flex;
+	gap: .5em;
+}
+.headerButtonsLeft {
+	left: .5em;
+}
+.headerButtonsRight {
+	right: .5em;
+}
+header .svgButton {
+	height: 100%;
+}
+
 
 /* form controls */
 button, input, select, textarea {
@@ -115,19 +138,22 @@ textarea {
 }
 
 .svgButton {
+	display: inline-block;
 	background-color: transparent;
 	border: 0;
 	padding: 0;
+	font-size: inherit;
 }
 .svgButton > img {
-	height: 2.5em;
+	height: 100%;
+	padding: .2em;
 }
 .svgButton:hover > img {
-	transform: translateY(-.1em);
+	transform: translateY(-.05em);
 	filter: drop-shadow(0 .2em .1em #0008);
 }
 .svgButton:active > img {
-	transform: translateY(.1em);
+	transform: translateY(.05em);
 	filter: drop-shadow(0 0 .1em #0008);
 }
 .svgButton > img, .svgButton:disabled > img {
@@ -137,6 +163,7 @@ textarea {
 .svgButton:disabled {
 	opacity: 50%;
 }
+
 
 /* dialogs */
 dialog {

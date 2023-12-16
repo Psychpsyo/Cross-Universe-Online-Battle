@@ -43,7 +43,6 @@
 	width: 10%; /* Edge needs this or else the cards are massive */
 	aspect-ratio: 813 / 1185;
 	padding: .15vw;
-	box-sizing: border-box;
 	animation: cardEntry .2s;
 }
 
@@ -75,7 +74,6 @@
 	display: grid;
 	grid-template-columns: repeat(10, 1fr);
 	grid-template-rows: repeat(3, 1fr);
-	box-sizing: border-box;
 	border: 2px solid #eee;
 	aspect-ratio: 8130 / 3555;
 	background-color: var(--theme-shadow);
@@ -85,7 +83,6 @@
 .draftDeckList img {
 	width: 100%;
 	padding: 2%;
-	box-sizing: border-box;
 }
 
 #draftStartButton {

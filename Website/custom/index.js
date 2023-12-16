@@ -6,6 +6,7 @@ let unsavedChanges = false;
 
 // translate UI
 document.getElementById("title").textContent = locale.customCards.title;
+headerBackButton.title = locale.general.buttonBack;
 
 cardNameLabel.textContent = locale.customCards.cardName;
 cardLevelLabel.textContent = locale.customCards.cardLevel;

@@ -96,7 +96,6 @@ dialog #cardDetails {
 	align-items: center;
 
 	background-color: var(--theme-dialog-background-color);
-	box-sizing: border-box;
 	border-bottom: none;
 	border-radius: 1em 1em 0px 0px;
 }
@@ -123,7 +122,6 @@ dialog #cardDetails {
 	height: 100%;
 
 	background-color: var(--theme-dialog-background-color);
-	box-sizing: border-box;
 	border: 2px var(--theme-border-color) solid;
 	border-radius: 1em 0 1em 1em;
 
@@ -169,7 +167,6 @@ dialog #cardDetails {
 	flex-direction: column;
 	width: 30vw;
 	height: 100vh;
-	box-sizing: border-box;
 	z-index: 100;
 
 	border-right: 2px var(--theme-border-color) solid;
@@ -237,8 +234,9 @@ dialog #cardDetails {
 }
 .playerDeckButton {
 	position: absolute;
-	top: .6em;
-	left: .6em;
+	top: .3em;
+	left: .3em;
+	height: 2em;
 }
 #infoPanelVS {
 	position: absolute;
@@ -557,7 +555,6 @@ label[for="fileSelectDeckLoader"] {
 	overflow-y: scroll;
 	font-size: .75em;
 	padding: .4em 0;
-	box-sizing: border-box;
 	word-wrap: break-word;
 	background-color: #0003;
 }
@@ -588,7 +585,6 @@ label[for="fileSelectDeckLoader"] {
 
 #chatInput {
 	width: 100%;
-	box-sizing: border-box;
 	background: none;
 	border: none;
 	margin: 0;
@@ -631,7 +627,6 @@ dialog.popupSelectMenu {
 
 .cardGrid img {
 	width: 85%;
-	box-sizing: border-box;
 	margin: .3em auto;
 	user-select: none;
 }
@@ -731,7 +726,6 @@ dialog.popupSelectMenu {
 #deckSelectorDescription {
 	min-height: 30%;
 	padding: .25em .5em;
-	box-sizing: border-box;
 	border-top: 2px solid var(--theme-border-color);
 	white-space: pre-wrap;
 	text-align: left;

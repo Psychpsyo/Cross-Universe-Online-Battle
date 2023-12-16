@@ -124,7 +124,6 @@ main {
 /* Card Effect Editor */
 #effectEditor {
 	background-color: var(--theme-shadow);
-	box-sizing: border-box;
 	padding: 5px;
 	white-space: pre-wrap;
 	overflow-wrap: break-word;
@@ -168,7 +167,6 @@ main {
 	top: 0;
 	height: calc(100% - .5em);
 	width: .5em;
-	box-sizing: border-box;
 	margin: .25em 0;
 	border: 2px solid white;
 }
@@ -186,7 +184,6 @@ main {
 
 #cardEffectScript {
 	width: 100%;
-	box-sizing: border-box;
 }
 #scriptingExperimentalWarning {
 	white-space: pre-line;

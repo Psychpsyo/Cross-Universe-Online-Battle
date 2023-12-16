@@ -40,7 +40,6 @@
 	transform: translateX(-50%);
 	display: flex;
 	justify-content: center;
-	box-sizing: border-box;
 	padding: .5vh 1vh;
 	height: 35%;
 	border-radius: 1vh;

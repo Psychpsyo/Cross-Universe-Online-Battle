@@ -2,31 +2,42 @@ body {
 	overflow: hidden;
 }
 
-#unofficialFooter {
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	text-align: center;
-	width: 100vw;
-}
-#unofficialNotice {
-	display: inline-block;
-	padding: .5em;
-	background-color: var(--theme-shadow);
-	border-radius: 1em 1em 0 0;
+#preGame {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
 }
 
-#centerDiv {
+#unofficialFooter {
+	display: inline-block;
+	text-align: center;
+	width: 100vw;
+	background-color: var(--theme-shadow);
+	border-top: 2px var(--theme-border-color) solid;
+	height: 1.75em;
+	line-height: 1.75em;
+}
+
+#mainMenu {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+#lobbyList {
+	min-width: 15em;
+	background-color: var(--theme-shadow);
+	border-right: 2px var(--theme-border-color) solid;
+}
+
+#centeredDiv {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	gap: 5vh;
 	align-items: center;
 	text-align: center;
 	justify-content: center;
-
-	height: 100vh;
-	padding: 2em 0;
-	box-sizing: border-box;
 }
 
 #mainLogoHolder {
@@ -79,24 +90,10 @@ h1 {
 	margin: 0 auto;
 }
 
-#deckMakerButton, #settingsButton {
-	position: absolute;
-	top: 0;
-	width: 20vw;
-	height: 1.5em;
-
-	border-top: none;
-	border-radius: 0 0 1em 1em;
-}
-#deckMakerButton {
-	right: 2vw;
-}
-#settingsButton {
-	left: 2vw;
-}
-
 #levitatingCards {
 	position: absolute;
+	top: 0;
+	left: 0;
 	z-index: -100;
 	width: 100%;
 	height: 100%;

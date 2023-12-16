@@ -7,25 +7,12 @@ import * as uiUtils from "/modules/uiUtils.js";
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
 let contestWinnerTags = await fetch("data/contestWinnerTags.json").then(async response => await response.json());
 
-function markFirstLetter(string, letter) {
-	const parts = string.split(new RegExp(letter + "(.*)"));
-	const fragment = new DocumentFragment();
-	fragment.appendChild(document.createTextNode(parts[0]));
-	if (parts.length > 1) {
-		const underlined = document.createElement("span");
-		underlined.textContent = letter;
-		underlined.style.setProperty("text-decoration", "underline");
-		fragment.appendChild(underlined);
-		fragment.appendChild(document.createTextNode(parts[1]));
-	}
-	return fragment;
-}
-
 // translate page
 // main section
-deckCreatorTitle.textContent = locale.deckMaker.title;
-deckMakerDeckButton.appendChild(markFirstLetter(locale.deckMaker.deck, "D"));
-deckMakerSearchButton.appendChild(markFirstLetter(locale.deckMaker.search, "S"));
+title.textContent = locale.deckMaker.title;
+headerBackButton.title = locale.general.buttonBack;
+headerDeckButton.title = locale.deckMaker.deckButton;
+headerSearchButton.title = locale.deckMaker.searchButton;
 
 quickSearch.setAttribute("aria-label", locale.deckMaker.quickSearch.title);
 quickSearch.placeholder = locale.deckMaker.quickSearch.prompt;
@@ -390,11 +377,11 @@ document.getElementById("cardSearchSearchBtn").addEventListener("click", functio
 });
 
 //opening the search panel
-document.getElementById("deckMakerSearchButton").addEventListener("click", function() {
+document.getElementById("headerSearchButton").addEventListener("click", function() {
 	cardSearchPanel.showModal();
 });
 //opening the deck creation panel
-document.getElementById("deckMakerDeckButton").addEventListener("click", function() {
+document.getElementById("headerDeckButton").addEventListener("click", function() {
 	deckCreationPanel.showModal();
 });
 
