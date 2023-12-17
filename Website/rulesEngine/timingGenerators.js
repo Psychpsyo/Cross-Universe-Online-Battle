@@ -197,7 +197,11 @@ export function* spellItemDiscardGenerator(player, spellItem) {
 	// don't discard spells/items that equipped successfully
 	if (spellItem.equippedTo !== null) return;
 
-	yield [new actions.Discard(player, spellItem)];
+	yield [new actions.Discard(
+		player,
+		spellItem,
+		new ScriptValue("dueToReason", [spellItem.values.current.cardTypes.includes("spell")? "wasCast" : "wasDeployed"])
+	)];
 }
 
 export function* retireTimingGenerator(player, units) {

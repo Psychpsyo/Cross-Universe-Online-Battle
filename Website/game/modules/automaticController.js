@@ -403,6 +403,9 @@ export class AutomaticController extends InteractionController {
 				}
 				return;
 			}
+			case "replacementAbilityApplied": {
+				return autoUI.activate(events[0].card);
+			}
 			case "attackDeclarationEstablished": {
 				return autoUI.showCoolAttackAnim(events[0].target, events[0].attackers);
 			}
@@ -707,7 +710,19 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 			case "enterBattlePhase": {
-				response.value = await gameUI.askQuestion(locale.game.automatic.battlePhase.question, locale.game.automatic.battlePhase.enter, locale.game.automatic.battlePhase.skip);
+				response.value = await gameUI.askQuestion(
+					locale.game.automatic.battlePhase.question,
+					locale.game.automatic.battlePhase.enter,
+					locale.game.automatic.battlePhase.skip
+				);
+				break;
+			}
+			case "applyReplacementAbility": {
+				response.value = await gameUI.askQuestion(
+					locale.game.automatic.replacementAbilitySelect.question.replaceAll("{#CARDNAME}", (await Promise.all(request.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					locale.game.automatic.replacementAbilitySelect.yes,
+					locale.game.automatic.replacementAbilitySelect.no
+				);
 				break;
 			}
 			case "activateTriggerAbility":

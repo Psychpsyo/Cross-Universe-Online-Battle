@@ -240,6 +240,12 @@
 				"bottom": "Deck Bottom"
 			},
 
+			"replacementAbilitySelect": {
+				"question": "Do you want to apply the ability of '{#CARDNAME}'?",
+				"yes": "Yes",
+				"no": "No"
+			},
+
 			"orderSelect": {
 				"confirm": "Confirm",
 				"abilityPrompt": "Select the order in which to apply these static abilities to '{#CARDNAME}':",

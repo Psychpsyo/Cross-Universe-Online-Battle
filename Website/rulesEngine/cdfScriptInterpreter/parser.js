@@ -45,20 +45,33 @@ export function parseScript(tokenList, newEffectId, type) {
 			return new ast.TriggerRootNode(parseExpression());
 		}
 		case "modifier": {
-			return parseModifier();
+			// for static abilities
+			return parseModifier(true);
 		}
 		default: {
-			let steps = [];
-			while(pos < tokens.length) {
-				if (tokens[pos].type == "newLine") {
-					pos++;
-				} else {
-					steps.push(parseLine());
-				}
-			}
-			return new ast.ScriptRootNode(steps);
+			return parseSteps();
 		}
 	}
+}
+
+function parseSteps() {
+	let steps = [];
+	while(pos < tokens.length) {
+		switch (tokens[pos].type) {
+			case "newLine": {
+				pos++;
+				break;
+			}
+			case "rightBrace": {
+				return new ast.ScriptRootNode(steps);
+			}
+			default: {
+				steps.push(parseLine());
+				break;
+			}
+		}
+	}
+	return new ast.ScriptRootNode(steps);
 }
 
 function parseLine() {
@@ -143,7 +156,7 @@ function parseFunctionToken(player) {
 function parseExpression() {
 	let expression = [];
 	let needsReturnType = [];
-	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator", "if"].includes(tokens[pos].type)) {
+	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator", "if", "with"].includes(tokens[pos].type)) {
 		expression.push(parseValue());
 		if (tokens[pos]) {
 			switch (tokens[pos].type) {
@@ -622,31 +635,66 @@ function parseCardMatcher() {
 	return new ast.CardMatchNode(cardLists, conditions);
 }
 
-function parseModifier() {
+function parseModifier(forStaticAbility = false) {
 	let valueModifications = [];
+	let hasReplaceModification = false;
+	let hasNonReplaceModification = false;
 	while (tokens[pos] && tokens[pos].type != "rightBrace") {
 		switch (tokens[pos+1].type) {
-			case "cancel": {
-				valueModifications.push(parseAbilityCancelModification());
-				break;
-			}
 			case "cardProperty":
 			case "playerProperty": {
 				valueModifications = valueModifications.concat(parseValueModifications());
+				hasNonReplaceModification = true;
+				break;
+			}
+			case "cancel": {
+				valueModifications.push(parseAbilityCancelModification());
+				hasNonReplaceModification = true;
+				break;
+			}
+			case "replace": {
+				if (!forStaticAbility) throw new ScriptParserError("Replace modifiers are not allowed outside of static abilities.");
+				valueModifications.push(parseReplaceModification());
+				hasReplaceModification = true;
 				break;
 			}
 			default: {
-				throw new ScriptParserError("Unexpected '" + tokens[pos].type + "' token at start of modifier syntax instead.");
+				throw new ScriptParserError("Unexpected '" + tokens[pos].type + "' token at start of modifier syntax.");
 			}
 		}
+	}
+	if (hasReplaceModification && hasNonReplaceModification) {
+		throw new ScriptParserError("Modifier cannot contain both replacement effect and non-replacement effects.");
 	}
 	pos++;
 	return new ast.ModifierNode(valueModifications);
 }
 
+function parseReplaceModification() {
+	pos += 2;
+	const toReplace = parseExpression();
+
+	if (tokens[pos].type !== "with") {
+		throw new ScriptParserError("Expression in replace modification must be followed by a 'with' clause to indicate the replacement.");
+	}
+	pos++;
+
+	const replacement = parseLine();
+	pos++;
+
+	// maybe parse 'if' condition
+	let condition = null;
+	if (tokens[pos].type == "if") {
+		pos++;
+		condition = parseExpression();
+	}
+
+	return new valueModifiers.ActionReplaceModification(toReplace, replacement, condition);
+}
+
 function parseAbilityCancelModification() {
 	pos += 2;
-	let rightHandSide = parseExpression();
+	const rightHandSide = parseExpression();
 
 	// maybe parse 'if' condition
 	let condition = null;

@@ -160,6 +160,21 @@ export const orderCards = {
 	}
 }
 
+export const applyReplacementAbility = {
+	create: function(player, ability, card) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "applyReplacementAbility",
+			"ability": ability,
+			"card": card
+		}
+	},
+	validate: function(response, request) {
+		return response;
+	}
+}
+
 export const enterBattlePhase = {
 	create: function(player) {
 		return {

@@ -66,6 +66,9 @@ export class Modifier {
 			return values;
 		}
 		for (let modification of this.modifications) {
+			if (!(modification instanceof ValueModification)) {
+				continue;
+			}
 			let worksOnObject = true;
 			// only static abilities are influenced by unaffections/cancelling when already on a card
 			if (this.ctx.ability instanceof abilities.StaticAbility) {
@@ -121,18 +124,35 @@ export class Modifier {
 	}
 }
 
-export class ValueModification {
-	constructor(value, toBase, condition) {
-		this.value = value;
-		this.toBase = toBase;
+export class Modification {
+	constructor(condition) {
 		this.condition = condition;
-	}
-	modify(values, ctx, toBaseValues) {
-		return values;
 	}
 
 	bake(ctx) {
 		return this;
+	}
+
+	isUnitSpecific() {
+		return false;
+	}
+
+	canApplyTo(target, ctx) {
+		return true;
+	}
+	canFullyApplyTo(target, ctx) {
+		return this.canApplyTo(target, ctx);
+	}
+}
+
+export class ValueModification extends Modification {
+	constructor(value, toBase, condition) {
+		super(condition);
+		this.value = value;
+		this.toBase = toBase;
+	}
+	modify(values, ctx, toBaseValues) {
+		return values;
 	}
 
 	isUnitSpecific() {
@@ -153,9 +173,6 @@ export class ValueModification {
 			}
 		}
 		return true;
-	}
-	canFullyApplyTo(target, ctx) {
-		return this.canApplyTo(target, ctx);
 	}
 }
 
@@ -339,5 +356,13 @@ export class AbilityCancelModification extends ValueModification {
 			}
 		}
 		return true;
+	}
+}
+
+export class ActionReplaceModification extends Modification {
+	constructor(toReplace, replacement, condition) {
+		super(condition);
+		this.toReplace = toReplace;
+		this.replacement = replacement;
 	}
 }

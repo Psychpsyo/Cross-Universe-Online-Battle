@@ -33,11 +33,11 @@ function getUntilTimingList(ctxPlayer, until) {
 			return ctxPlayer.game.endOfUpcomingTurnTimings[0];
 		}
 		case "endOfYourNextTurn": {
-			let currentlyYourTurn = ctxPlayer.game.currentTurn().player == ctxPlayer;
+			let currentlyYourTurn = ctxPlayer.game.currentTurn().player === ctxPlayer;
 			return ctxPlayer.game.endOfUpcomingTurnTimings[currentlyYourTurn? 1 : 0];
 		}
 		case "endOfOpponentNextTurn": {
-			let currentlyOpponentTurn = ctxPlayer.game.currentTurn().player != ctxPlayer;
+			let currentlyOpponentTurn = ctxPlayer.game.currentTurn().player !== ctxPlayer;
 			return ctxPlayer.game.endOfUpcomingTurnTimings[currentlyOpponentTurn? 1 : 0];
 		}
 	}
@@ -65,14 +65,14 @@ export class Action {
 
 	undo() {}
 
-	isImpossible(timing) {
+	isImpossible() {
 		return false;
 	}
-	isPossible(timing) {
-		return !this.isImpossible(timing);
+	isPossible() {
+		return !this.isImpossible();
 	}
-	isFullyPossible(timing) {
-		return this.isPossible(timing);
+	isFullyPossible() {
+		return this.isPossible();
 	}
 }
 
@@ -92,10 +92,10 @@ export class ChangeMana extends Action {
 		return events.createManaChangedEvent(this.player);
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		return this.player.mana == 0 && this.amount < 0;
 	}
-	isFullyPossible(timing) {
+	isFullyPossible() {
 		return this.player.mana + this.amount >= 0;
 	}
 }
@@ -124,7 +124,7 @@ export class ChangeLife extends Action {
 		return events.createLifeChangedEvent(this.player);
 	}
 
-	isFullyPossible(timing) {
+	isFullyPossible() {
 		return this.player.life + this.amount >= 0;
 	}
 }
@@ -198,9 +198,9 @@ export class Place extends Action {
 		]);
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.current() === null) return true;
-		return getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Place).length;
+		return getAvailableZoneSlots(this.zone).length < this.timing.actions.filter(action => action instanceof Place).length;
 	}
 }
 
@@ -229,7 +229,7 @@ export class Summon extends Action {
 		this.zone.remove(this.card.current(), this._placeAction.targetIndex);
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.current() === null) return true;
 		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
 		return slotCard != null && slotCard != this.card.current();
@@ -263,7 +263,7 @@ export class Deploy extends Action {
 		this.zone.remove(this.card.current(), this._placeAction.targetIndex);
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.current() === null) return true;
 		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
 		return slotCard != null && slotCard != this.card.current();
@@ -297,7 +297,7 @@ export class Cast extends Action {
 		this.zone.remove(this.card.current(), this._placeAction.targetIndex);
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.current() === null) return true;
 		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
 		return slotCard != null && slotCard != this.card.current();
@@ -338,16 +338,16 @@ export class Move extends Action {
 		return event;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (!this.card.current()) return true;
 		if (this.card.current().isRemovedToken) return true;
 		if (this.card.current().zone?.type == "partner") return true;
 		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length === 0) return true;
 		return false;
 	}
-	isFullyPossible(timing) {
-		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Move).length) return false;
-		return this.isPossible(timing);
+	isFullyPossible() {
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < this.timing.actions.filter(action => action instanceof Move).length) return false;
+		return this.isPossible();
 	}
 }
 
@@ -385,16 +385,16 @@ export class Return extends Action {
 		return event;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (!this.card.current()) return true;
 		if (this.card.current().isRemovedToken) return true;
 		if (this.card.current().zone?.type == "partner") return true;
 		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length === 0) return true;
 		return false;
 	}
-	isFullyPossible(timing) {
-		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < timing.actions.filter(action => action instanceof Return).length) return false;
-		return this.isPossible(timing);
+	isFullyPossible() {
+		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < this.timing.actions.filter(action => action instanceof Return).length) return false;
+		return this.isPossible();
 	}
 }
 
@@ -449,7 +449,7 @@ export class Swap extends Action {
 		return event;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.cardA.current() === null) return true;
 		if (this.cardB.current() === null) return true;
 		if ((this.cardA.isToken && !(this.cardB.zone instanceof FieldZone)) ||
@@ -546,7 +546,7 @@ export class Discard extends Action {
 		return event;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.current().zone?.type === "partner") {
 			return true;
 		}
@@ -562,16 +562,21 @@ export class Destroy extends Action {
 
 	async* run() {
 		this.discard.card = this.discard.card.snapshot();
-		return events.createCardDiscardedEvent(this.discard.card, this.discard.card.owner.discardPile);
+		return events.createCardDestroyedEvent(this.discard.card, this.discard.card.owner.discardPile);
 		// destroying a card doesn't do anything.
 		// Only the accompanying discard actually does something
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.discard.card.zone?.type == "partner") {
 			return true;
 		}
 		return false;
+	}
+
+	replaceDiscardWith(newAction) {
+		this.discard = newAction;
+		this.properties = newAction.properties;
 	}
 }
 
@@ -603,7 +608,7 @@ export class Exile extends Action {
 		return event;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.zone?.type === "partner") {
 			return true;
 		}
@@ -643,7 +648,7 @@ export class ApplyStatChange extends Action {
 		this.card.current().values.modifierStack.pop();
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		// players are always around and anything that wants to apply to them can
 		if (this.toObject instanceof Player) return false;
 
@@ -663,7 +668,7 @@ export class ApplyStatChange extends Action {
 		ast.clearImplicit("card");
 		return validModifications === 0;
 	}
-	isFullyPossible(timing) {
+	isFullyPossible() {
 		// players are always around and anything that wants to apply to them can
 		if (this.toObject instanceof Player) return true;
 
@@ -746,7 +751,7 @@ export class SetAttackTarget extends Action {
 		}
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		return !(this.newTarget.values.current.cardTypes.includes("unit") && this.newTarget.zone instanceof zones.FieldZone);
 	}
 }
@@ -767,7 +772,7 @@ export class GiveAttack extends Action {
 		this.card.canAttackAgain = this.oldCanAttackAgain;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.isRemovedToken) return true;
 		return !this.card.values.current.cardTypes.includes("unit");
 	}
@@ -789,7 +794,7 @@ export class SelectEquipableUnit extends Action {
 		this.chosenUnit = requests.chooseCards.validate(response.value, selectionRequest)[0];
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		return this.spellItem.equipableTo.evalFull(new ScriptContext(this.spellItem, this.player))[0].get(this.player).length == 0;
 	}
 }
@@ -815,7 +820,7 @@ export class EquipCard extends Action {
 		this.equipment.equippedTo = null;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.equipment.current() === null) return true;
 		if (this.target.current() === null) return true;
 
@@ -857,7 +862,7 @@ export class View extends Action {
 		return events.createCardViewedEvent(this.player, this.card);
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		return this.card.isRemovedToken;
 	}
 }
@@ -880,7 +885,7 @@ export class Reveal extends Action {
 		this.card.current().hiddenFor = this.oldHiddenState;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.current() == null) return true;
 		if (this.card.isRemovedToken) return true;
 		return this.card.hiddenFor.length == 0;
@@ -911,12 +916,12 @@ export class ChangeCounters extends Action {
 		this.card.current().counters[this.type] = this.oldAmount;
 	}
 
-	isImpossible(timing) {
+	isImpossible() {
 		if (this.card.current() === null) return true;
 		if (this.card.isRemovedToken) return true;
 		return (this.card.counters[this.type] ?? 0) == 0 && this.amount < 0;
 	}
-	isFullyPossible(timing) {
+	isFullyPossible() {
 		if (this.card.current() === null) return true;
 		if (this.card.isRemovedToken) return false;
 		return (this.card.counters[this.type] ?? 0) + this.amount >= 0;

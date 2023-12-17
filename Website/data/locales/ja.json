@@ -240,6 +240,12 @@
 				"bottom": "デッキの下"
 			},
 
+			"replacementAbilitySelect": {
+				"question": null,
+				"yes": "はい",
+				"no": "いいえ"
+			},
+
 			"orderSelect": {
 				"confirm": null,
 				"abilityPrompt": null,

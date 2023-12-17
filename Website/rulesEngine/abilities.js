@@ -233,6 +233,7 @@ export class StaticAbility extends BaseAbility {
 		this.modifier = interpreter.buildAST("modifier", ability.id, ability.modifier, game);
 		this.applyTo = interpreter.buildAST("applyTarget", ability.id, ability.applyTo, game);
 		this.zoneEnterTimingIndex = 0;
+		this.mandatory = ability.mandatory; // for replace abilities
 	}
 
 	getTargets(card, player, evaluatingPlayer = player) {
@@ -240,9 +241,5 @@ export class StaticAbility extends BaseAbility {
 			return this.applyTo.evalFull(new ScriptContext(card, player, this, evaluatingPlayer))[0].get(player);
 		}
 		return [];
-	}
-
-	getModifier(card, player) {
-		return this.modifier.evalFull(new ScriptContext(card, player, this))[0].get(player);
 	}
 }

@@ -364,3 +364,12 @@ export function createCountersChangedEvent(card, type) {
 		"type": type
 	}
 }
+
+export function createReplacementAbilityAppliedEvent(card, ability) {
+	return {
+		"nature": "event",
+		"type": "replacementAbilityApplied",
+		"card": card,
+		"ability": ability
+	}
+}

@@ -141,7 +141,7 @@
 }
 #stackDisplayHolder {
 	display: flex;
-	height: 6em;
+	height: 6.5em;
 	padding: .25em;
 	gap: .25em;
 }

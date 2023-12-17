@@ -421,8 +421,8 @@ function parseCdfValues(cdf) {
 					break;
 				}
 				case "mandatory": {
-					if (ability.type != "trigger") {
-						throw new Error("CDF Parser Error: Only trigger abilities can be mandatory.");
+					if (!["trigger", "static"].includes(ability.type)) {
+						throw new Error("CDF Parser Error: Only static or trigger abilities can be mandatory.");
 					}
 					if (!["yes", "no"].includes(parts[1])) {
 						throw new Error("CDF Parser Error: 'mandatory' must be either 'yes' or 'no'.");

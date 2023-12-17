@@ -4,6 +4,8 @@ let keywordTokenTypes = {
 	if: "if",
 	unaffectedBy: "immunityAssignment",
 	cancel: "cancel",
+	replace: "replace",
+	with: "with",
 
 	thisCard: "thisCard",
 	attackTarget: "attackTarget",
@@ -156,6 +158,8 @@ let keywordTokenTypes = {
 	invalidEquipment: "dueToReason",
 	standardSummon: "dueToReason",
 	retire: "dueToReason",
+	wasCast: "dueToReason",
+	wasDeployed: "dueToReason",
 
 	forever: "untilIndicator",
 	endOfTurn: "untilIndicator",

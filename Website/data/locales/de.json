@@ -240,6 +240,12 @@
 				"bottom": "Unterseite"
 			},
 
+			"replacementAbilitySelect": {
+				"question": "Möchtest du die Fähigkeit von '{#CARDNAME}' anwenden?",
+				"yes": "Ja",
+				"no": "Nein"
+			},
+
 			"orderSelect": {
 				"confirm": "Bestätigen",
 				"abilityPrompt": "Wähle, in welcher Reihenfolge diese Statischen Fähigkeiten auf '{#CARDNAME}' angewandt werden sollen:",
