@@ -7,95 +7,22 @@
    viewBox="0 0 10.583333 10.583333"
    version="1.1"
    id="svg1"
-   sodipodi:docname="CU Icons.svg"
-   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
-   inkscape:export-filename="Cross-Universe-Online-Battle-Frontend\Website\images\icons\backArrow.svg"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#818181"
-     bordercolor="#999999"
-     borderopacity="1"
-     inkscape:showpageshadow="true"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="px"
-     showborder="true"
-     borderlayer="true"
-     inkscape:zoom="5.6568543"
-     inkscape:cx="150.87891"
-     inkscape:cy="46.934212"
-     inkscape:window-width="1920"
-     inkscape:window-height="1057"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="g20" />
   <defs
-     id="defs1">
-    <inkscape:path-effect
-       effect="fillet_chamfer"
-       id="path-effect20"
-       is_visible="true"
-       lpeversion="1"
-       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,1,1,0,0.45,0,1 @ F,0,0,1,0,0.25,0,1 @ F,0,1,1,0,0.45,0,1 @ F,0,0,1,0,0,0,1"
-       radius="0.45"
-       unit="px"
-       method="auto"
-       mode="F"
-       chamfer_steps="1"
-       flexible="false"
-       use_knot_distance="true"
-       apply_no_radius="true"
-       apply_with_radius="true"
-       only_selected="true"
-       hide_knots="false" />
-    <inkscape:path-effect
-       effect="fillet_chamfer"
-       id="path-effect18"
-       is_visible="true"
-       lpeversion="1"
-       nodesatellites_param="F,0,0,1,0,0.5,0,1 @ F,0,0,1,0,0.5,0,1 @ F,0,0,1,0,0.5,0,1"
-       radius="0.5"
-       unit="px"
-       method="auto"
-       mode="F"
-       chamfer_steps="1"
-       flexible="false"
-       use_knot_distance="true"
-       apply_no_radius="true"
-       apply_with_radius="true"
-       only_selected="false"
-       hide_knots="false" />
-  </defs>
+     id="defs1" />
   <g
      id="g20"
-     transform="translate(-29.104165,-2.6458332)"
-     inkscape:label="Left Arrow"
-     inkscape:highlight-color="#f3215a">
+     transform="translate(-29.104165,-2.6458335)">
     <path
        style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 33.48713,4.4687499 V 11.40625 a 0.22177485,0.22177485 156.08033 0 1 -0.370633,0.164394 L 29.474799,8.2731059 a 0.45274728,0.45274728 90 0 1 0,-0.6712119 l 3.641698,-3.2975382 a 0.22177485,0.22177485 23.919666 0 1 0.370633,0.1643941 z"
        id="path15"
-       sodipodi:nodetypes="cccc"
-       inkscape:path-effect="#path-effect18"
-       inkscape:original-d="M 33.48713,3.9687499 V 11.90625 L 29.104166,7.9374999 Z"
-       transform="translate(-0.22177501)"
-       inkscape:highlight-color="#f3215a" />
+       transform="translate(-0.22177501)" />
     <path
        style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
        d="m 31.749999,6.0854166 7.441674,-0.1247491 a 0.21505073,0.21505073 63.496915 0 1 0.173173,0.3472835 l -1.11729,1.4324233 a 0.32051292,0.32051292 90 0 0 0,0.3942512 l 1.11729,1.4324233 A 0.21505073,0.21505073 116.50309 0 1 39.191673,9.9143323 L 31.749999,9.7895832 Z"
        id="path19"
-       sodipodi:nodetypes="cccccc"
-       inkscape:path-effect="#path-effect20"
-       inkscape:original-d="M 31.749999,6.0854166 39.64161,5.9531249 38.093798,7.9374999 39.64161,9.9218749 31.749999,9.7895832 Z"
-       transform="translate(0.2707845)"
-       inkscape:highlight-color="#f3215a" />
+       transform="translate(0.2707845)" />
   </g>
 </svg>

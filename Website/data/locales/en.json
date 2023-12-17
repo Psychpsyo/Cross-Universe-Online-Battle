@@ -31,6 +31,11 @@
 		"deckCreatorButton": "Deck Creator"
 	},
 
+	"lobbies": {
+		"title": "Lobbies",
+		"join": "Join"
+	},
+
 	"game": {
 		"notices": {
 			"youStart": "You go first.",
@@ -338,13 +343,13 @@
 					"tokens": "Tokens",
 					"worldOfAmnesia": "World of Amnesia",
 					"hildRyeAle": "Knights of Heaven",
-					"serpentMountain": "Serpent Mountain",
+					"flamingMountain": "Flaming Mountain",
 					"makai": "Makai",
 					"chronoArk": "Chrono Ark",
 					"borders": "'Borders'",
 					"dragu": "Dragu",
-					"cardGameRecommendation": "Card Game Recommendation!!",
-					"cardGameDystopia": "I'm a Girl?! In this Dystopian Future Ruled by Cards"
+					"cardGameRecommendation": "カードゲームのススメ！！",
+					"cardGameDystopia": "俺が少女！？ここはカードに支配されたディストピアな未来世界"
 				}
 			},
 			"cardBack": "Custom Card Back Link:",

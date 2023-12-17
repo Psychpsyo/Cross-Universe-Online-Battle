@@ -309,7 +309,7 @@ function reloadCardList() {
 }
 
 function generateListCard(card) {
-	let listCard = document.createElement("div");
+	let listCard = document.createElement("li");
 	listCard.classList.add("listCard")
 
 	let canvas = document.createElement("canvas");

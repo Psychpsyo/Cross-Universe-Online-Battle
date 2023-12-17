@@ -61,7 +61,7 @@ a {
 	background-color: var(--theme-shadow);
 }
 
-header > h1, header > h2, header > h3, header > h4 {
+header > :is(h1, h2, h3, h4) {
 	all: unset;
 	font-weight: bold;
 }

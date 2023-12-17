@@ -3,7 +3,7 @@ import {refetchCardData} from "./profilePictureSelector.js";
 import {validateHotkeys, resetHotkeys, relabelAllHotkeys, editHotkey} from "./hotkeys.js";
 
 const languageNames = {
-	en: "🇺🇸 English",
+	en: "🇬🇧 English",
 	de: "🇩🇪 Deutsch",
 	ja: "🇯🇵 日本語"
 };

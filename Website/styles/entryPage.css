@@ -22,12 +22,57 @@ body {
 	flex-grow: 1;
 	display: flex;
 	flex-direction: row-reverse;
+	overflow: auto;
 }
 
-#lobbyList {
+#lobbies {
 	min-width: 15em;
 	background-color: var(--theme-shadow);
 	border-right: 2px var(--theme-border-color) solid;
+	display: none; /* flex; */
+	flex-direction: column;
+}
+#lobbyHeading {
+	display: block;
+	text-align: center;
+	padding: .15em;
+	border-bottom: 2px solid var(--theme-border-color);
+}
+#lobbyListHolder {
+	flex-grow: 1;
+	overflow-y: scroll;
+}
+#lobbyList {
+	all: unset;
+	box-sizing: border-box;
+	min-height: 100%;
+}
+#lobbyList:empty::before {
+	content: attr(data-message);
+	line-height: normal;
+	text-align: center;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	filter: opacity(75%);
+  }
+.lobby {
+	position: relative;
+	padding: .2em;
+	border-bottom: 2px solid var(--theme-border-color);
+}
+.lobby h2 {
+	all: unset;
+	display: block;
+}
+.lobbyUserIcon {
+	height: .8em;
+}
+.lobbyJoinBtn {
+	position: absolute;
+	bottom: .5em;
+	right: .5em;
 }
 
 #centeredDiv {

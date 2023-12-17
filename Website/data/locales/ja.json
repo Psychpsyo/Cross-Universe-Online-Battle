@@ -31,6 +31,11 @@
 		"deckCreatorButton": null
 	},
 
+	"lobbies": {
+		"title": null,
+		"join": null
+	},
+
 	"game": {
 		"notices": {
 			"youStart": null,
@@ -338,7 +343,7 @@
 					"tokens": "トークン",
 					"worldOfAmnesia": "忘却の世界",
 					"hildRyeAle": "天界騎士",
-					"serpentMountain": "蛇竜山",
+					"flamingMountain": "灼熱の山脈",
 					"makai": "魔界",
 					"chronoArk": "クロノ・アルク",
 					"borders": "『ボーダーズ』",

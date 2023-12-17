@@ -18,7 +18,7 @@
 		<div id="preGame">
 			<div id="mainHeaderHolder">
 				<header>
-					<nav class="headerButtonsLeft">
+					<nav class="headerButtonsRight">
 						<a id="settingsButton" class="svgButton" href="./settings"><img src="images/icons/settings.svg" alt="" draggable="false"></a>
 						<a id="deckMakerButton" class="svgButton" href="./deckMaker"><img src="images/icons/deck.svg" alt="" draggable="false"></a>
 					</nav>
@@ -54,13 +54,27 @@
 					</div>
 					<a id="rulesButton" class="bigButton" target="_blank"></a>
 				</section>
-				<section id="lobbyList" hidden></section>
+				<section id="lobbies">
+					<h1 id="lobbyHeading"></h1>
+					<div id="lobbyListHolder">
+						<ul id="lobbyList"><!--filled by JS--></ul>
+					</div>
+				</section>
 			</main>
 			<footer id="unofficialFooter"></footer>
 		</div>
 		<iframe id="gameFrame" scrolling="no"></iframe>
 
 		<object id="loadingIndicator" class="active" type="image/svg+xml" data="./images/icons/loading.svg" width="150px" height="150px"></object>
+
+		<template id="lobbyTemplate">
+			<li class="lobby">
+				<h2>[<span class="lobbyRegion"></span>] <span class="lobbyName"></span></h2>
+				<br>
+				<span><img class="lobbyUserIcon" src="images/icons/user.svg" alt="Users: "> <span class="lobbyUserCount">0/0</span></span>
+				<button class="lobbyJoinBtn"></button>
+			</li>
+		</template>
 
 		<script src="scripts/polyfills.js"></script>
 		<script src="scripts/localStorageSetup.js"></script>

@@ -31,6 +31,11 @@
 		"deckCreatorButton": "Deck Editor"
 	},
 
+	"lobbies": {
+		"title": "Lobbies",
+		"join": "Beitreten"
+	},
+
 	"game": {
 		"notices": {
 			"youStart": "Du bist zuerst dran.",
@@ -336,15 +341,15 @@
 					"spells": "Zauber",
 					"items": "Items",
 					"tokens": "Tokens",
-					"worldOfAmnesia": "World of Amnesia",
-					"heavenlyKnights": "Knights of Heaven",
-					"serpentMountain": "Serpent Mountain",
+					"worldOfAmnesia": "Die Welt der Vergessenheit",
+					"heavenlyKnights": "Die Himmelsritter",
+					"flamingMountain": "Loderner Berg",
 					"makai": "Makai",
 					"chronoArk": "Chrono Ark",
 					"borders": "'Borders'",
 					"dragu": "Dragu",
-					"cardGameRecommendation": "Card Game Recommendation!!",
-					"cardGameDystopia": "I'm a Girl?! In this Dystopian Future Ruled by Cards"
+					"cardGameRecommendation": "カードゲームのススメ！！",
+					"cardGameDystopia": "俺が少女！？ここはカードに支配されたディストピアな未来世界"
 				}
 			},
 			"cardBack": "Link für einen Kartenrücken:",

@@ -119,6 +119,9 @@ rulesButton.href = locale.mainMenu.rulesLink;
 settingsButton.title = locale.mainMenu.settingsButton;
 deckMakerButton.title = locale.mainMenu.deckCreatorButton;
 
+lobbyHeading.textContent = locale.lobbies.title;
+lobbyTemplate.content.querySelector(".lobbyJoinBtn").textContent = locale.lobbies.join;
+
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 loadingIndicator.classList.remove("active");
