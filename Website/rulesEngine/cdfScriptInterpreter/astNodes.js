@@ -488,7 +488,7 @@ export class PlayerPropertyNode extends AstNode {
 		super({
 			"life": "number",
 			"mana": "number",
-			"partner": "number",
+			"partner": "card",
 			"manaGainAmount": "number",
 			"standardDrawAmount": "number",
 			"needsToPayForPartner": "bool"
@@ -512,11 +512,11 @@ export class PlayerPropertyNode extends AstNode {
 	}
 
 	evalFull(ctx) {
-		return this.cards.evalFull(ctx).map(possibility => new ScriptValue(this.returnType, possibility.get(ctx.player).map(card => this.accessProperty(card)).flat()));
+		return this.players.evalFull(ctx).map(possibility => new ScriptValue(this.returnType, possibility.get(ctx.player).map(player => this.accessProperty(player)).flat()));
 	}
 
 	getChildNodes() {
-		return [this.cards];
+		return [this.players];
 	}
 
 	accessProperty(player) {
