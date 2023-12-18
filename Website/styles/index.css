@@ -7,7 +7,7 @@
 	src: local("OpenDyslexic"), url("/fonts/OpenDyslexic-Regular.woff2");
 }
 
-* {
+*, *::after, *::before {
 	box-sizing: border-box;
 }
 

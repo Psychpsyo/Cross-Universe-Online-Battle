@@ -366,9 +366,11 @@ function parseCdfValues(cdf) {
 		turnLimit: "any",
 		condition: null
 	};
-	let lines = cdf.replaceAll("\r", "").split("\n");
+	const lines = cdf.replaceAll("\r", "").split("\n");
 	let inAbility = false;
 	let abilitySection = "";
+	let abilityCount = 0;
+	let subAbilityCount = 0;
 	for (let line of lines) {
 		if (line === "") {
 			continue;
@@ -454,6 +456,29 @@ function parseCdfValues(cdf) {
 					ability.modifier = parts[1];
 					break;
 				}
+				case "[o": { // sub-ability
+					if (!["optional", "fast", "trigger", "static"].includes(parts[1])) {
+						throw new Error("CDF Parser Error: " + parts[1] + " is an invalid sub-ability type.");
+					}
+					subAbilityCount++;
+					data.abilities.push({
+						id: data.id + ":" + abilityCount + ":" + subAbilityCount,
+						isSubAbility: true,
+						type: parts[1],
+						cancellable: true,
+						turnLimit: "any",
+						globalTurnLimit: "any",
+						gameLimit: "any",
+						during: null,
+						after: null,
+						condition: null,
+						exec: "",
+						applyTo: "",
+						modifier: ""
+					});
+					abilitySection = "exec";
+					break;
+				}
 				default: {
 					if (ability[abilitySection].length > 0) {
 						ability[abilitySection] += "\n";
@@ -521,8 +546,10 @@ function parseCdfValues(cdf) {
 				if (parts[1] === "deploy" && !["standardItem", "continuousItem", "equipableItem"].includes(data.cardType)) {
 					throw new Error("CDF Parser Error: Only items can have deploy abilities.");
 				}
+				abilityCount++;
 				data.abilities.push({
-					id: data.id + ":" + data.abilities.length,
+					id: data.id + ":" + abilityCount,
+					isSubAbility: false,
 					type: parts[1],
 					cancellable: true,
 					turnLimit: "any",
@@ -537,6 +564,7 @@ function parseCdfValues(cdf) {
 				});
 				inAbility = true;
 				abilitySection = "exec";
+				subAbilityCount = 0;
 				break;
 			}
 			default: {
@@ -547,5 +575,7 @@ function parseCdfValues(cdf) {
 	for (const ability of data.abilities) {
 		interpreter.registerAbility(ability);
 	}
+	// sub abilities just needed to be registered, they can now be filtered out
+	data.abilities = data.abilities.filter(ability => !ability.isSubAbility);
 	return data;
 }

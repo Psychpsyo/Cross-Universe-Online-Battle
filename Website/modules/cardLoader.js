@@ -124,15 +124,22 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 	return card.hiddenFor.includes(localPlayer)? "images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
 }
 
+// TODO: nested sub-abilities do not work
 export async function getAbilityText(abilityID) {
 	let abilityInfo = abilityID.split(":");
 	let cardInfo = await getCardInfo(abilityInfo[0]);
-	let currentAbility = -1;
+	let currentAbility = 0;
 	for (const effect of cardInfo.effects) {
 		if (effect.type !== "rule") {
 			currentAbility++;
 			if (currentAbility == abilityInfo[1]) {
-				return effect.text;
+				// check if sub-ability
+				if (abilityInfo.length === 2) {
+					return effect.text;
+				}
+				// we have a sub-ability
+				const subAbilities = effect.text.split("●");
+				return "●" + subAbilities[parseInt(abilityInfo[2]) + 1].replace(locale.subEffectClosingBracket, "");
 			}
 		}
 	}

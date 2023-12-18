@@ -224,8 +224,8 @@ export class ValueAppendModification extends ValueModification {
 
 	modify(values, ctx, toBaseValues) {
 		if (toBaseValues === this.toBase) {
-			let newValues = this.newValues.evalFull(ctx)[0].get(ctx.player);
-			for (let newValue of newValues) {
+			const newValues = this.newValues.evalFull(ctx)[0].get(ctx.player);
+			for (const newValue of newValues) {
 				// abilities are always put onto cards in an un-cancelled state
 				if (this.value === "abilities") {
 					newValue.isCancelled = false;
@@ -239,13 +239,15 @@ export class ValueAppendModification extends ValueModification {
 	}
 
 	bake(ctx) {
-		let valueArray = this.newValues.evalFull(ctx)[0].get(ctx.player);
+		let valueArray = this.newValues.evalFull(ctx)[0];
+		const type = valueArray.type;
+		valueArray = valueArray.get(ctx.player);
 		if (valueArray.length == 0) {
 			return null;
 		}
 		// construct ability instances now
 		if (this.value === "abilities") {
-			valueArray = valueArray.map(val => makeAbility(val.id));
+			valueArray = valueArray.map(val => makeAbility(type === "abilityId"? val : val.id));
 		}
 		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
 	}

@@ -183,7 +183,7 @@ Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 
 // gets a card's ID from a link to its image
 function cardIdFromLink(imgLink) {
-	return imgLink.substr(imgLink.length - 10, 6);
+	return imgLink.substring(imgLink.length - 10, imgLink.length - 4);
 }
 
 function cardToAltText(card) {

@@ -19,7 +19,7 @@ export class ObjectValues {
 
 		// cloning abilities if this is for a card
 		if (this.initial instanceof CardValues) {
-			let abilities = this.initial.abilities;
+			let abilities = [...this.initial.abilities];
 			for (let ability of this.base.abilities.concat(this.current.abilities)) {
 				if (!abilities.includes(ability)) {
 					abilities.push(ability);

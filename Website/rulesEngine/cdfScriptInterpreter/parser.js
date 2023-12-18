@@ -290,6 +290,7 @@ function parseValue() {
 		}
 		case "cardType":
 		case "cardId":
+		case "abilityId":
 		case "counter":
 		case "dueToReason":
 		case "type": {

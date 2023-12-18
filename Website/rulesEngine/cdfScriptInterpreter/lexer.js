@@ -324,7 +324,7 @@ export function tokenize(code, game) {
 				while(code[pos + variableLength] && code[pos + variableLength].match(/[a-z]/i)) {
 					variableLength++;
 				}
-				let variableName = code.substr(pos, variableLength);
+				let variableName = code.substring(pos, pos + variableLength);
 				tokens.push({type: "variable", value: variableName});
 				pos += variableLength;
 				break;
@@ -335,11 +335,22 @@ export function tokenize(code, game) {
 					while(code[pos + wordLength] && code[pos + wordLength].match(/[a-z0-9]/i)) {
 						wordLength++;
 					}
-					let word = code.substr(pos, wordLength);
+					let word = code.substring(pos, pos + wordLength);
 					if (keywordTokenTypes[word]) {
 						tokens.push({type: keywordTokenTypes[word], value: word});
 					} else if (word.startsWith("CU")) {
-						tokens.push({type: "cardId", value: code.substr(pos + 2, wordLength - 2)});
+						if (code[pos + wordLength] === ":") {
+							// this is a card ability ID
+							const extraLength = code[pos + wordLength + 2] === ":"? 4 : 2; // might be a sub-ability
+							tokens.push({
+								type: "abilityId",
+								value: code.substring(pos + 2, pos + wordLength + extraLength)
+							});
+							pos += extraLength;
+						} else {
+							// this is a card ID
+							tokens.push({type: "cardId", value: code.substring(pos + 2, pos + wordLength)});
+						}
 					} else if (game.config.allTypes.includes(word)) {
 						tokens.push({type: "type", value: word});
 					} else if (game.config.allCounters.includes(word)) {
