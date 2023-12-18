@@ -116,10 +116,17 @@ export class Modifier {
 	}
 
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
-	bake(forObject) {
-		ast.setImplicit([forObject], forObject.cdfScriptType);
-		let bakedModifications = this.modifications.map(modification => modification.bake(this.ctx)).filter(modification => modification !== null);
-		ast.clearImplicit(forObject.cdfScriptType);
+	bake(target) {
+		ast.setImplicit([target], target.cdfScriptType);
+		const bakedModifications = this.modifications.map(modification => modification.bake(this.ctx)).filter(modification => modification !== null);
+		ast.clearImplicit(target.cdfScriptType);
+		return new Modifier(bakedModifications, this.ctx);
+	}
+
+	bakeStatic(target) {
+		ast.setImplicit([target], target.cdfScriptType);
+		const bakedModifications = this.modifications.map(modification => modification.bakeStatic(this.ctx)).filter(modification => modification !== null);
+		ast.clearImplicit(target.cdfScriptType);
 		return new Modifier(bakedModifications, this.ctx);
 	}
 }
@@ -130,6 +137,11 @@ export class Modification {
 	}
 
 	bake(ctx) {
+		return this;
+	}
+
+	// bakes a modifier for a static ability. (i.e. does not pre-compute expressions, only creates things like ability objects from their IDs)
+	bakeStatic(ctx) {
 		return this;
 	}
 
@@ -249,7 +261,15 @@ export class ValueAppendModification extends ValueModification {
 		if (this.value === "abilities") {
 			valueArray = valueArray.map(val => makeAbility(type === "abilityId"? val : val.id));
 		}
-		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray), this.toBase, this.condition);
+		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray, type), this.toBase, this.condition);
+	}
+
+	bakeStatic(ctx) {
+		let valueArray = this.newValues.evalFull(ctx)[0];
+		if (valueArray.type != "abilityId") return this;
+		const type = valueArray.type;
+		valueArray = valueArray.get(ctx.player).map(val => makeAbility(type === "abilityId"? val : val.id));
+		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray, type), this.toBase, this.condition);
 	}
 }
 

@@ -377,30 +377,58 @@ function* checkGameOver(game) {
 
 // iterates over all static abilities and activates/deactivates those that need it.
 function* getStaticAbilityPhasingTiming(game) {
-	let modificationActions = []; // the list of Apply/UnapplyStaticAbility actions that this will return as a timing.
-	let activeCards = game.players.map(player => player.getAllCards()).flat();
-	let possibleTargets = activeCards.concat(game.players);
-	let newApplications = new Map();
+	const modificationActions = []; // the list of Apply/UnapplyStaticAbility actions that this will return as a timing.
+	const activeCards = game.players.map(player => player.getActiveCards()).flat();
+	const possibleTargets = activeCards.concat(game.players);
+	const newApplications = new Map();
+	const abilityTargets = new Map(); // caches an abilities targets so they do not get recomputed
+
+	// unapplying old modifiers
+	for (const target of possibleTargets) {
+		// unapplying old static abilities from this object
+		for (const modifier of target.values.modifierStack) {
+			// is this a regular static ability?
+			if (!(modifier.ctx.ability instanceof abilities.StaticAbility) || (modifier.modifications[0] instanceof ActionReplaceModification)) continue;
+
+			// has this ability been removed from its card?
+			if (!modifier.ctx.card.values.current.abilities.includes(modifier.ctx.ability)) {
+				modificationActions.push(new actions.UnapplyStaticAbility(
+					modifier.ctx.card.currentOwner(), // have these be owned by the player that owns the card with the ability.
+					target,
+					modifier.ctx.ability
+				));
+				continue;
+			}
+			// else check if the object is still a valid target for the ability
+			if (!abilityTargets.has(modifier.ctx.ability)) {
+				abilityTargets.set(modifier.ctx.ability, modifier.ctx.ability.getTargets(modifier.ctx.card, modifier.ctx.card.currentOwner()));
+			}
+			if (!abilityTargets.get(modifier.ctx.ability).includes(target)) {
+				modificationActions.push(new actions.UnapplyStaticAbility(
+					modifier.ctx.card.currentOwner(), // have these be owned by the player that owns the card with the ability.
+					target,
+					modifier.ctx.ability
+				));
+			}
+		}
+	}
+
+	// applying new modifiers
 	for (const currentCard of activeCards) {
 		for (const ability of currentCard.values.current.abilities) {
-			if (ability instanceof abilities.StaticAbility && !(ability.modifier.modifications[0] instanceof ActionReplaceModification)) {
-				const eligibleTargets = ability.getTargets(currentCard, currentCard.currentOwner());
-				for (const target of possibleTargets) {
-					if (eligibleTargets.includes(target)) {
-						if (!target.values.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
-							// abilities are just dumped in a list here to be sorted later.
-							let applications = newApplications.get(target) ?? [];
-							applications.push(new StaticAbilityApplication(ability, currentCard));
-							newApplications.set(target, applications);
-						}
-					} else {
-						if (target.values.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
-							modificationActions.push(new actions.UnapplyStaticAbility(
-								currentCard.currentOwner(), // have these be owned by the player that owns the card with the ability.
-								target,
-								ability
-							));
-						}
+			// is this a regular static ability?
+			if (!(ability instanceof abilities.StaticAbility) || (ability.modifier.modifications[0] instanceof ActionReplaceModification)) continue;
+
+			if (!abilityTargets.has(ability)) {
+				abilityTargets.set(ability, ability.getTargets(currentCard, currentCard.currentOwner()));
+			}
+			for (const target of possibleTargets) {
+				if (abilityTargets.get(ability).includes(target)) {
+					if (!target.values.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
+						// abilities are just dumped in a list here to be sorted later.
+						let applications = newApplications.get(target) ?? [];
+						applications.push(new StaticAbilityApplication(ability, currentCard));
+						newApplications.set(target, applications);
 					}
 				}
 			}
@@ -412,7 +440,7 @@ function* getStaticAbilityPhasingTiming(game) {
 			modificationActions.push(new actions.ApplyStaticAbility(
 				application.source.currentOwner(), // have these be owned by the player that owns the card with the ability.
 				target,
-				application.getModifier()
+				application.getModifier().bakeStatic(target)
 			));
 		}
 	}

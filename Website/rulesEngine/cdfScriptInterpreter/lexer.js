@@ -157,6 +157,8 @@ let keywordTokenTypes = {
 	fight: "dueToReason",
 	invalidEquipment: "dueToReason",
 	standardSummon: "dueToReason",
+	deploy: "dueToReason",
+	cast: "dueToReason",
 	retire: "dueToReason",
 	wasCast: "dueToReason",
 	wasDeployed: "dueToReason",

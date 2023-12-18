@@ -793,6 +793,7 @@ window.addEventListener("dragover", function(e) {
 	e.preventDefault();
 });
 window.addEventListener("drop", function(e) {
+	if (e.dataTransfer.items.length === 0) return;
 	let file = e.dataTransfer.items[0].getAsFile();
 	if (!file || !(file.name.endsWith(".deck") || file.name.endsWith(".deckx"))) {
 		return;
