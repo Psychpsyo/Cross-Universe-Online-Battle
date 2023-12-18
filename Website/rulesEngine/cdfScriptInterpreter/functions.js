@@ -4,6 +4,7 @@ import * as events from "../events.js";
 import * as requests from "../inputRequests.js";
 import * as zones from "../zones.js";
 import {Card, BaseCard} from "../card.js";
+import {nChooseK} from "../math.js";
 import {ScriptValue, ScriptContext, DeckPosition} from "./structs.js";
 
 // general helper functions
@@ -53,29 +54,6 @@ function getZoneForCard(zoneList, card, ctx, forReturn) {
 		}
 	}
 	return rightType[0] ?? zoneList[0];
-}
-// returns all possible ways to choose k elements from a list of n elements.
-function nChooseK(n, k) {
-	let choices = [];
-	for (let i = k - 1; i >= 0; i--) {
-		choices.push(i);
-	}
-	let combinations = [];
-
-	combinations.push([...choices]);
-	while (choices[choices.length - 1] < n - k) {
-		for (let i = 0; i < k; i++) {
-			if (choices[i] < n - 1 - i) {
-				choices[i]++;
-				for (let j = 1; j <= i; j++) {
-					choices[i - j] = choices[i] + j;
-				}
-				combinations.push([...choices]);
-				break;
-			}
-		}
-	}
-	return combinations;
 }
 
 class ScriptFunction {
@@ -700,6 +678,7 @@ export function initFunctions() {
 
 			let combinations = [];
 			for (const amount of choiceAmounts) {
+				if (amount > eligibleCards.length) continue;
 				combinations = combinations.concat(nChooseK(eligibleCards.length, amount).map(list => new ScriptValue("card", list.map(i => eligibleCards[i]))));
 			}
 			return combinations;

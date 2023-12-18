@@ -7,6 +7,7 @@ import {BaseCard} from "../card.js";
 import {Modifier} from "../valueModifiers.js";
 import {ScriptValue, ScriptContext, DeckPosition} from "./structs.js";
 import {functions, initFunctions} from "./functions.js";
+import {cartesianProduct} from "../math.js";
 
 let implicit = {
 	card: [null],
@@ -26,24 +27,6 @@ export function setImplicit(objects, type) {
 }
 export function clearImplicit(type) {
 	implicit[type].pop();
-}
-// generates every possible combination [A1, A2, A3 ... Ax] so that An is from
-// the n-th array that was passed in and x is the amount of input arrays.
-function cartesianProduct(arrays) {
-	if (arrays.length == 0) {
-		return [];
-	}
-	let products = arrays[0].map(elem => [elem]);
-	for (let i = 1; i < arrays.length; i++) {
-		let newProducts = [];
-		for (const elemA of products) {
-			for (const elemB of arrays[i]) {
-				newProducts.push([...elemA, elemB]);
-			}
-		}
-		products = newProducts;
-	}
-	return products;
 }
 
 class AstNode {
