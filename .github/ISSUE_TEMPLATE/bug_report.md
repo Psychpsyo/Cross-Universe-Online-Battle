@@ -24,7 +24,7 @@ A clear and concise description of what should have happened.
 You may add screenshots to help explain your problem. (optional)
 
 **Environment:**
- - Browser [e.g. chrome, safari]
+ - Browser [e.g. firefox, safari]
 
 **Additional context**
 Add any other context about the problem here.
