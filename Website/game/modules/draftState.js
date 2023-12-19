@@ -54,7 +54,7 @@ export class DraftState extends GameState {
 				gameState.checkReadyConditions();
 			});
 
-			const player = await game.randomPlayer();
+			const player = await game.rng.nextPlayer();
 			this.setPlayer(player);
 			this.firstPlayer = player;
 			this.rerollCards();
@@ -100,7 +100,7 @@ export class DraftState extends GameState {
 			randomRanges.push(cardPool.length);
 		}
 
-		const randomValues = await game.randomInts(randomRanges);
+		const randomValues = await game.rng.nextInts(randomRanges);
 		for (let i = 0; i < 10; i++) {
 			let cardPool = this.format.cardPools[this.format.packContents[i].pool];
 			this.currentBooster.push({card: cardPool[randomValues[i]], forPlayer: this.format.packContents[i].player});

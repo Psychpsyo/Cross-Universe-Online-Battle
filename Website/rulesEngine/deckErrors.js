@@ -27,10 +27,3 @@ export class DeckTokenError extends InvalidDeckError {
 		this.cardId = cardId;
 	}
 }
-export class InsufficientRankError extends InvalidDeckError {
-	constructor(cardId) {
-		super("Player does not have the required rank to use " + cardId);
-		this.name = "InsufficientRankError";
-		this.cardId = cardId;
-	}
-}

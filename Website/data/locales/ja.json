@@ -28,7 +28,8 @@
 		},
 
 		"settingsButton": null,
-		"deckCreatorButton": null
+		"deckCreatorButton": null,
+		"reportBug": null
 	},
 
 	"lobbies": {
@@ -95,7 +96,7 @@
 				"notEnoughCards": null,
 				"tooManyOfCard": null,
 				"hasToken": null,
-				"insufficientRank": null,
+				"scriptError": null,
 				"unsupportedInAutomatic": null
 			}
 		},

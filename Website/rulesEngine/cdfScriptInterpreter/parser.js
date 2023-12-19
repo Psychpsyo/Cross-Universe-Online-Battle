@@ -1,8 +1,9 @@
 import * as ast from "./astNodes.js";
 import * as valueModifiers from "../valueModifiers.js";
 
-let pos; // the current position in the token stream
+let code; // the actual text representation of the code being parsed
 let tokens; // the token stream emitted by the lexer
+let pos; // the current position in the token stream
 let effectId; // The effect that is currently being parsed.
 let cardId; // the card the effect is on
 
@@ -14,17 +15,31 @@ let cardId; // the card the effect is on
 // }
 let foundVariables = {};
 
-class ScriptParserError extends Error {
-	constructor(message) {
-		super("On " + effectId + " : " + message);
+export class ScriptParserError extends Error {
+	constructor(message, startToken, endToken = startToken) {
+		// generate error message
+		message += "(on " + effectId + ")\n";
+		const lines = code.split("\n");
+		const maxLineNumberLenght = endToken.line.toString().length;
+		for (let i = startToken.line; i <= endToken.line; i++) {
+			message += "\n" + i.toString().padStart(maxLineNumberLenght) + ": " + lines[i];
+			const startColumn = i === startToken.line? startToken.column : 0;
+			const endColumn = i === endToken.line? endToken.column + endToken.value.length : lines[i].length - 1;
+			message += "\n" + " ".repeat(maxLineNumberLenght + 2 + startColumn) + "^".repeat(endColumn - startColumn);
+		}
+
+		super(message);
 		this.name = "ScriptParserError";
+		this.cardId = cardId;
+		this.effectId = effectId;
 	}
 }
 
-export function parseScript(tokenList, newEffectId, type) {
+export function parseScript(tokenList, newEffectId, type, originalCodeString) {
 	if (tokenList.length == 0) {
 		return null;
 	}
+	code = originalCodeString;
 	effectId = newEffectId;
 	cardId = effectId.substring(0, effectId.indexOf(":"));
 	tokens = tokenList;
@@ -89,7 +104,7 @@ function parseLine() {
 		if (!foundVariables[cardId][variableName]) {
 			foundVariables[cardId][variableName] = expr.returnType;
 		} else if (foundVariables[cardId][variableName] !== expr.returnType) {
-			new ScriptParserError("Invalid assignment of type " + expr.returnType + " to variable " + variableName + " of type " + foundVariables[cardId][variableName] + ".")
+			new ScriptParserError("Invalid assignment of type " + expr.returnType + " to variable " + variableName + " of type " + foundVariables[cardId][variableName] + ".", tokens[pos - 2]);
 		}
 	}
 	return new ast.LineNode(expr, variableName);
@@ -105,7 +120,7 @@ function parseFunction() {
 		case "player": {
 			player = parsePlayer();
 			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "function") {
-				throw new ScriptParserError("Failed to parse function.");
+				throw new ScriptParserError("Expected a function call here.", tokens[pos]);
 			}
 			pos++;
 			break;
@@ -113,13 +128,13 @@ function parseFunction() {
 		case "variable": {
 			player = parseVariable();
 			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "function") {
-				throw new ScriptParserError("Failed to parse function.");
+				throw new ScriptParserError("Expected a function call here.", tokens[pos]);
 			}
 			pos++;
 			break;
 		}
 		default: {
-			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' while trying to parse a function.");
+			throw new ScriptParserError("Expected a function call here.", tokens[pos]);
 		}
 	}
 
@@ -137,7 +152,7 @@ function parseFunctionToken(player) {
 	}
 
 	if (tokens[pos].type != "leftParen") {
-		throw new ScriptParserError("'" + functionName + "' must be followed by a '('.");
+		throw new ScriptParserError("'" + functionName + "' must be followed by a '('.", tokens[pos]);
 	}
 	pos++;
 
@@ -154,6 +169,7 @@ function parseFunctionToken(player) {
 }
 
 function parseExpression() {
+	const expressionStartPos = pos;
 	let expression = [];
 	let needsReturnType = [];
 	while (tokens[pos] && !["rightParen", "rightBracket", "rightBrace", "newLine", "separator", "if", "with"].includes(tokens[pos].type)) {
@@ -228,7 +244,7 @@ function parseExpression() {
 		}
 	}
 	if (expression.length > 1) {
-		throw new ScriptParserError("Failed to fully consolidate expression.");
+		throw new ScriptParserError("Failed to fully consolidate expression.", tokens[expressionStartPos], tokens[pos-1]);
 	}
 	while (needsReturnType.length > 0) {
 		for (let i = needsReturnType.length - 1; i >= 0; i--) {
@@ -323,7 +339,7 @@ function parseValue() {
 			if (tokens[pos].type == "rightParen") {
 				pos++;
 			} else {
-				throw new ScriptParserError("Found unwanted '" + tokens[pos].type + "' token instead of ')' at the end of parenthesized expression value.");
+				throw new ScriptParserError("Expected a ')' at the end of parenthesized expression value.", tokens[pos]);
 			}
 			return node;
 		}
@@ -347,7 +363,7 @@ function parseValue() {
 						return parseActionAccessor(variable);
 					}
 					default: {
-						throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access property of a variable.");
+						throw new ScriptParserError("'" + tokens[pos].value + "' does not start a valid variable property.", tokens[pos]);
 					}
 				}
 			}
@@ -400,7 +416,7 @@ function parseValue() {
 				if (tokens[pos].type == "actionAccessor") {
 					return parseActionAccessor(node);
 				} else {
-					throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access property of a currentTurn.");
+					throw new ScriptParserError("'" + tokens[pos].value + "' does not start a valid turn property.", tokens[pos]);
 				}
 			}
 			return node;
@@ -414,7 +430,7 @@ function parseValue() {
 			return node;
 		}
 		default: {
-			throw new ScriptParserError("A '" + tokens[pos].type + "' token does not start a valid value.");
+			throw new ScriptParserError("'" + tokens[pos].value + "' does not start a valid value.", tokens[pos]);
 		}
 	}
 }
@@ -430,7 +446,7 @@ function parsePlayerDotAccess(playerNode) {
 				if (property === "partner") {
 					return parseCardDotAccess(node);
 				} // else
-				throw new ScriptParserError("Unwanted 'dotOperator' after card property '" + property + "'.");
+				throw new ScriptParserError("Cannot access any properties of '" + property + "'.", tokens[pos-1]);
 			}
 			return node;
 		}
@@ -455,11 +471,11 @@ function parsePlayerDotAccess(playerNode) {
 			return node;
 		}
 	}
-	throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access player value.");
+	throw new ScriptParserError("'" + tokens[pos].value + "' does not begin a valid player value.", tokens[pos]);
 }
 function parseCardDotAccess(card) {
 	if (tokens[pos].type != "cardProperty") {
-		throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' when trying to access card property.");
+		throw new ScriptParserError("'" + tokens[pos].value + "' does not begin a valid card property.", tokens[pos]);
 	}
 	return parseCardProperty(card);
 }
@@ -481,7 +497,7 @@ function parseCardProperty(cardsNode) {
 				return parseCardDotAccess(node);
 			}
 			default: {
-				throw new ScriptParserError("Unwanted 'dotOperator' after card property '" + property + "'.");
+				throw new ScriptParserError("Cannot access any properties of '" + property + "'.", tokens[pos-1]);
 			}
 		}
 
@@ -500,7 +516,7 @@ function parseActionAccessor(actionsNode) {
 			let property = tokens[pos].value;
 			pos++;
 			if (tokens[pos].type !== "colon") {
-				throw new ScriptParserError("Accessor property must be followed by colon. Got " + tokens[pos].value + " instead.");
+				throw new ScriptParserError("'" + property + "' must be followed by a colon.", tokens[pos]);
 			}
 			pos++;
 			properties[property] = parseExpression();
@@ -518,7 +534,7 @@ function parseActionAccessor(actionsNode) {
 
 function parseVariable() {
 	if (!foundVariables[cardId][tokens[pos].value]) {
-		throw new ScriptParserError("Reference to unassigned variable " + tokens[pos].value + ".");
+		throw new ScriptParserError("Reference to unassigned variable " + tokens[pos].value + ".", tokens[pos]);
 	}
 	let node = new ast.VariableNode(tokens[pos].value, foundVariables[cardId][tokens[pos].value]);
 	pos++;
@@ -536,31 +552,36 @@ function parseNumber() {
 		negative = true;
 		pos++;
 	}
-	let value = tokens[pos].value;
+	let value = parseInt(tokens[pos].value);
 	if (negative) {
 		value *= -1;
 	}
-	let node = new ast.ValueArrayNode([value], "number");
+	const node = new ast.ValueArrayNode([value], "number");
 	pos++;
 	return node;
 }
 
 function parseBool() {
-	let node = new ast.BoolNode(tokens[pos].value);
+	const node = new ast.BoolNode(tokens[pos].value);
 	pos++;
 	return node;
 }
 
 function parseValueArray() {
-	let node = new ast.ValueArrayNode([tokens[pos].value], tokens[pos].type);
+	let value = tokens[pos].value;
+	if (["cardId", "abilityId"].includes(tokens[pos].type)) {
+		value = value.substring(2);
+	}
+	const node = new ast.ValueArrayNode([value], tokens[pos].type);
 	pos++;
 	return node;
 }
 
 function parseList() {
-	let elements = [];
+	const listStartPos = pos;
+	const elements = [];
 	pos++;
-	let type = tokens[pos].type;
+	const type = tokens[pos].type;
 	while (tokens[pos].type === type) {
 		elements.push(tokens[pos].value);
 		pos++;
@@ -569,13 +590,14 @@ function parseList() {
 		}
 	}
 	if (tokens[pos].type !== "rightBracket") {
-		throw new ScriptParserError("Expected a 'rightBracket' at the end of a list. Got '" + tokens[pos].type + "' instead.");
+		throw new ScriptParserError("Expected a ']' at the end of this list.", tokens[listStartPos], tokens[pos]);
 	}
 	pos++;
 	return new ast.ValueArrayNode(elements, type);
 }
 
 function parseZone() {
+	const zoneStartPos = pos;
 	let player = null;
 	switch (tokens[pos].type) {
 		case "zone": {
@@ -585,7 +607,7 @@ function parseZone() {
 		case "player": {
 			player = parsePlayer();
 			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "zone") {
-				throw new ScriptParserError("Failed to parse zone.");
+				throw new ScriptParserError("Failed to parse zone.", tokens[zoneStartPos], tokens[pos+1]);
 			}
 			pos++;
 			break;
@@ -593,13 +615,13 @@ function parseZone() {
 		case "variable": {
 			player = parseVariable();
 			if (tokens[pos].type != "dotOperator" || tokens[pos+1].type != "zone") {
-				throw new ScriptParserError("Failed to parse zone.");
+				throw new ScriptParserError("Failed to parse zone.", tokens[zoneStartPos], tokens[pos+1]);
 			}
 			pos++;
 			break;
 		}
 		default: {
-			throw new ScriptParserError("Encountered unwanted '" + tokens[pos].type + "' while trying to parse a zone.");
+			throw new ScriptParserError("Expected a zone here.", tokens[pos]);
 		}
 	}
 
@@ -616,7 +638,12 @@ function parseCardMatcher() {
 	pos++; // just skip over the 'from' token
 	let cardLists = [];
 	while (tokens[pos].type != "where" && tokens[pos].type != "rightBracket") {
-		cardLists.push(parseValue());
+		const valueStartPos = pos;
+		const source = parseValue();
+		if (!["zone", "card"].includes(source.returnType)) {
+			throw new ScriptParserError("Card matcher can only select from zones or card lists.", tokens[valueStartPos], tokens[pos-1]);
+		}
+		cardLists.push(source);
 		if (tokens[pos].type == "separator") {
 			pos++;
 		}
@@ -629,7 +656,7 @@ function parseCardMatcher() {
 	}
 
 	if (tokens[pos].type != "rightBracket") {
-		throw new ScriptParserError("Expected a 'rightBracket' token at the end of card matcher syntax. Got '" + tokens[pos].type + "' instead.");
+		throw new ScriptParserError("Card matcher must end in ']'.", tokens[pos]);
 	}
 
 	pos++;
@@ -637,6 +664,7 @@ function parseCardMatcher() {
 }
 
 function parseModifier(forStaticAbility = false) {
+	const modifierStartPos = pos;
 	let valueModifications = [];
 	let hasReplaceModification = false;
 	let hasNonReplaceModification = false;
@@ -654,18 +682,18 @@ function parseModifier(forStaticAbility = false) {
 				break;
 			}
 			case "replace": {
-				if (!forStaticAbility) throw new ScriptParserError("Replace modifiers are not allowed outside of static abilities.");
+				if (!forStaticAbility) throw new ScriptParserError("Replace modifiers are not allowed outside of static abilities.", tokens[pos+1]);
 				valueModifications.push(parseReplaceModification());
 				hasReplaceModification = true;
 				break;
 			}
 			default: {
-				throw new ScriptParserError("Unexpected '" + tokens[pos].type + "' token at start of modifier syntax.");
+				throw new ScriptParserError("'" + tokens[pos+1].value + "' does not start a valid modifier.", tokens[pos+1]);
 			}
 		}
 	}
 	if (hasReplaceModification && hasNonReplaceModification) {
-		throw new ScriptParserError("Modifier cannot contain both replacement effect and non-replacement effects.");
+		throw new ScriptParserError("Modifier cannot contain both replacement effect and non-replacement effects.", tokens[modifierStartPos], tokens[pos]);
 	}
 	pos++;
 	return new ast.ModifierNode(valueModifications);
@@ -676,7 +704,7 @@ function parseReplaceModification() {
 	const toReplace = parseExpression();
 
 	if (tokens[pos].type !== "with") {
-		throw new ScriptParserError("Expression in replace modification must be followed by a 'with' clause to indicate the replacement.");
+		throw new ScriptParserError("Expected a 'with' here.", tokens[pos]);
 	}
 	pos++;
 
@@ -708,22 +736,23 @@ function parseAbilityCancelModification() {
 }
 
 function parseValueModifications() {
+	const modificationStartPos = pos;
 	let valueIdentifiers = [];
 	let propertyType = null;
 	do {
 		pos++;
 		if (!["cardProperty", "playerProperty"].includes(tokens[pos].type)) {
-			throw new ScriptParserError("Expected only object property tokens at the start of a modifier assignment. Got '" + tokens[pos].type + "' instead.");
+			throw new ScriptParserError("'" + tokens[pos].value + "' is not a property that can be modified.", tokens[pos]);
 		}
 		if (propertyType && tokens[pos].type != propertyType) {
-			throw new ScriptParserError("All properties in a modifier assignment must belong to the same type of object. (player, card...)");
+			throw new ScriptParserError("This property does not belong to the same type of object (player, card...) as the previous ones.", tokens[pos]);
 		}
 		propertyType = tokens[pos].type;
 		valueIdentifiers.push(tokens[pos].value);
 		pos++;
 	} while (tokens[pos].type == "separator");
 
-	let toBaseValues = [];
+	const toBaseValues = [];
 	for (let i = 0; i < valueIdentifiers.length; i++) {
 		if (valueIdentifiers[i].startsWith("base")) {
 			valueIdentifiers[i] = valueIdentifiers[i][4].toLowerCase() + valueIdentifiers[i].substr(5);
@@ -737,9 +766,10 @@ function parseValueModifications() {
 	}
 
 	if (!["immunityAssignment", "equals", "plusAssignment", "minusAssignment", "divideAssignment", "swapAssignment"].includes(tokens[pos].type)) {
-		throw new ScriptParserError("Unwanted '" + tokens[pos].type + "' token as operator in modifier syntax.");
+		throw new ScriptParserError("'" + tokens[pos].value + "' is not a valid assignment operator in a modifier.", tokens[pos]);
 	}
-	let assignmentType = tokens[pos].type;
+	const assignmentPos = pos; // for later error messages
+	const assignmentType = tokens[pos].type;
 	pos++;
 
 	let rightHandSide;
@@ -747,7 +777,7 @@ function parseValueModifications() {
 		rightHandSide = parseExpression();
 	} else {
 		if (tokens[pos].type != propertyType) {
-			throw new ScriptParserError("Swap modifier (><) can only swap object properties with other properties for the same object type. (Got '" + tokens[pos].type + "' token when '" + propertyTypes + "' was expected.)");
+			throw new ScriptParserError("Swap modifier (><) cannot swap a " + propertyType + " with a " + tokens[pos].type + ".", tokens[modificationStartPos], tokens[pos]);
 		}
 		rightHandSide = tokens[pos].value;
 		pos++;
@@ -781,21 +811,21 @@ function parseValueModifications() {
 			}
 			case "minusAssignment": {
 				if (!["level", "attack", "defense", "manaGainAmount", "standardDrawAmount"].includes(valueIdentifier)) {
-					throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.");
+					throw new ScriptParserError("Modifier cannot subtract from non-number card property '" + valueIdentifier + "'.", tokens[modificationStartPos], tokens[assignmentPos]);
 				}
 				valueModifications.push(new valueModifiers.NumericChangeModification(valueIdentifier, new ast.UnaryMinusNode(rightHandSide), toBaseValues[i], condition));
 				break;
 			}
 			case "divideAssignment": {
 				if (!["level", "attack", "defense", "manaGainAmount", "standardDrawAmount"].includes(valueIdentifier)) {
-					throw new ScriptParserError("Modifier cannot divide non-number card property '" + valueIdentifier + "'.");
+					throw new ScriptParserError("Modifier cannot divide non-number card property '" + valueIdentifier + "'.", tokens[modificationStartPos], tokens[assignmentPos]);
 				}
 				valueModifications.push(new valueModifiers.NumericDivideModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				break;
 			}
 			case "swapAssignment": {
 				if (rightHandSide.startsWith("base") != toBaseValues[i]) {
-					throw new ScriptParserError("Swap modifier (><) cannot swap base value with non-base value.");
+					throw new ScriptParserError("Swap modifier (><) cannot swap base value with non-base value.", tokens[assignmentPos]);
 				}
 				if (toBaseValues[i]) {
 					rightHandSide = rightHandSide[4].toLowerCase() + rightHandSide.substr(5);

@@ -1,4 +1,4 @@
-let keywordTokenTypes = {
+const keywordTokenTypes = {
 	from: "from",
 	where: "where",
 	if: "if",
@@ -170,154 +170,180 @@ let keywordTokenTypes = {
 	endOfOpponentNextTurn: "untilIndicator"
 }
 
-export function tokenize(code, game) {
+export class ScriptLexerError extends Error {
+	constructor(message, code, effectId, line, startColumn, endColumn = startColumn) {
+		// generate error message
+		message += "(on " + effectId + ")\n";
+		const lines = code.split("\n");
+		message += "\n" + line.toString() + ": " + lines[line];
+		message += "\n" + " ".repeat(line.toString().length + 2 + startColumn) + "^".repeat(endColumn - startColumn);
+
+		super(message);
+		this.name = "ScriptLexerError";
+		this.cardId = effectId.substring(0, effectId.indexOf(":"));
+		this.effectId = effectId;
+	}
+}
+
+class ScriptToken {
+	constructor(type, value, line, column) {
+		this.type = type;
+		this.value = value;
+		this.line = line;
+		this.column = column;
+	}
+}
+
+export function tokenize(code, effectId, game) {
+	let line = 0;
+	let lineStart = 0;
 	let pos = 0;
-	let tokens = [];
+	const tokens = [];
 	while (pos < code.length) {
 		switch (code[pos]) {
 			case " ":
-			case "\t":
-			case "\n": {
+			case "\t": {
 				pos++;
 				break;
 			}
+			case "\n": {
+				pos++;
+				line++;
+				lineStart = pos;
+				break;
+			}
 			case "(": {
-				tokens.push({type: "leftParen"});
+				tokens.push(new ScriptToken("leftParen", "(", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case ")": {
-				tokens.push({type: "rightParen"});
+				tokens.push(new ScriptToken("rightParen", ")", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "[": {
-				tokens.push({type: "leftBracket"});
+				tokens.push(new ScriptToken("leftBracket", "[", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "]": {
-				tokens.push({type: "rightBracket"});
+				tokens.push(new ScriptToken("rightBracket", "]", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "{": {
-				tokens.push({type: "leftBrace"});
+				tokens.push(new ScriptToken("leftBrace", "{", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "}": {
-				tokens.push({type: "rightBrace"});
+				tokens.push(new ScriptToken("rightBrace", "{", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case ",": {
-				tokens.push({type: "separator"});
+				tokens.push(new ScriptToken("separator", ",", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case ";": {
-				tokens.push({type: "newLine"});
+				tokens.push(new ScriptToken("newLine", ";", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case ".": {
-				tokens.push({type: "dotOperator"});
+				tokens.push(new ScriptToken("dotOperator", ".", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case ":": {
-				tokens.push({type: "colon"});
+				tokens.push(new ScriptToken("colon", ":", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "?": {
-				if (code[pos+1] == "?") {
-					tokens.push({type: "youMayOperator"});
-					pos += 2;
-				} else {
-					tokens.push({type: "asmapOperator"});
-					pos++;
-				}
+				tokens.push(new ScriptToken("asmapOperator", "?", line, pos - lineStart));
+				pos++;
 				break;
 			}
 			case "&": {
-				tokens.push({type: "andOperator"});
+				tokens.push(new ScriptToken("andOperator", "&", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "|": {
-				tokens.push({type: "orOperator"});
+				tokens.push(new ScriptToken("orOperator", "|", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "-": {
 				if (code[pos+1] == "=") {
-					tokens.push({type: "minusAssignment"});
+					tokens.push(new ScriptToken("minusAssignment", "-=", line, pos - lineStart));
 					pos++;
 				} else {
-					tokens.push({type: "minus"});
+					tokens.push(new ScriptToken("minus", "-", line, pos - lineStart));
 				}
 				pos++;
 				break;
 			}
 			case "+": {
 				if (code[pos+1] == "=") {
-					tokens.push({type: "plusAssignment"});
+					tokens.push(new ScriptToken("plusAssignment", "+=", line, pos - lineStart));
 					pos++;
 				} else {
-					tokens.push({type: "plus"});
+					tokens.push(new ScriptToken("plus", "+", line, pos - lineStart));
 				}
 				pos++;
 				break;
 			}
 			case "*": {
-				tokens.push({type: "multiply"});
+				tokens.push(new ScriptToken("multiply", "*", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "/": {
 				if (code[pos+1] == "=") {
-					tokens.push({type: "divideAssignment"});
+					tokens.push(new ScriptToken("divideAssignment", "/=", line, pos - lineStart));
 					pos++;
 				} else {
-					tokens.push({type: "divide"});
+					tokens.push(new ScriptToken("divide", "/", line, pos - lineStart));
 				}
 				pos++;
 				break;
 			}
 			case "\\": {
-				tokens.push({type: "floorDivide"});
+				tokens.push(new ScriptToken("floorDivide", "\\", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "=": {
-				tokens.push({type: "equals"});
+				tokens.push(new ScriptToken("equals", "=", line, pos - lineStart));
 				pos++;
 				break;
 			}
 			case "!": {
 				if (code[pos+1] == "=") {
-					tokens.push({type: "notEquals"});
+					tokens.push(new ScriptToken("notEquals", "!=", line, pos - lineStart));
 					pos++;
 				} else {
-					tokens.push({type: "bang"});
+					tokens.push(new ScriptToken("bang", "!", line, pos - lineStart));
 				}
 				pos++;
 				break;
 			}
 			case ">": {
 				if (code[pos+1] == "<") {
-					tokens.push({type: "swapAssignment"});
+					tokens.push(new ScriptToken("swapAssignment", "><", line, pos - lineStart));
 					pos++;
 				} else {
-					tokens.push({type: "greaterThan"});
+					tokens.push(new ScriptToken("greaterThan", ">", line, pos - lineStart));
 				}
 				pos++;
 				break;
 			}
 			case "<": {
-				tokens.push({type: "lessThan"});
+				tokens.push(new ScriptToken("lessThan", "<", line, pos - lineStart));
 				pos++;
 				break;
 			}
@@ -326,8 +352,8 @@ export function tokenize(code, game) {
 				while(code[pos + variableLength] && code[pos + variableLength].match(/[a-z]/i)) {
 					variableLength++;
 				}
-				let variableName = code.substring(pos, pos + variableLength);
-				tokens.push({type: "variable", value: variableName});
+				const variableName = code.substring(pos, pos + variableLength);
+				tokens.push(new ScriptToken("variable", variableName, line, pos - lineStart));
 				pos += variableLength;
 				break;
 			}
@@ -339,26 +365,23 @@ export function tokenize(code, game) {
 					}
 					let word = code.substring(pos, pos + wordLength);
 					if (keywordTokenTypes[word]) {
-						tokens.push({type: keywordTokenTypes[word], value: word});
+						tokens.push(new ScriptToken(keywordTokenTypes[word], word, line, pos - lineStart));
 					} else if (word.startsWith("CU")) {
 						if (code[pos + wordLength] === ":") {
 							// this is a card ability ID
 							const extraLength = code[pos + wordLength + 2] === ":"? 4 : 2; // might be a sub-ability
-							tokens.push({
-								type: "abilityId",
-								value: code.substring(pos + 2, pos + wordLength + extraLength)
-							});
+							tokens.push(new ScriptToken("abilityId", code.substring(pos, pos + wordLength + extraLength), line, pos - lineStart));
 							pos += extraLength;
 						} else {
 							// this is a card ID
-							tokens.push({type: "cardId", value: code.substring(pos + 2, pos + wordLength)});
+							tokens.push(new ScriptToken("cardId", code.substring(pos, pos + wordLength), line, pos - lineStart));
 						}
 					} else if (game.config.allTypes.includes(word)) {
-						tokens.push({type: "type", value: word});
+						tokens.push(new ScriptToken("type", word, line, pos - lineStart));
 					} else if (game.config.allCounters.includes(word)) {
-						tokens.push({type: "counter", value: word});
+						tokens.push(new ScriptToken("counter", word, line, pos - lineStart));
 					} else {
-						throw new Error("Found unknown word while tokenizing: " + word);
+						throw new ScriptLexerError("Found unknown word '" + word + "' while tokenizing.", code, effectId, line, pos - lineStart, pos - lineStart + wordLength);
 					}
 					pos += wordLength;
 					break;
@@ -368,11 +391,11 @@ export function tokenize(code, game) {
 					while(code[pos + numLength] && code[pos + numLength].match(/[0-9]/i)) {
 						numLength++;
 					}
-					tokens.push({type: "number", value: parseInt(code.substr(pos, numLength))});
+					tokens.push(new ScriptToken("number", code.substr(pos, numLength), line, pos - lineStart));
 					pos += numLength;
 					break;
 				}
-				throw new Error("Found unknown character while tokenizing: " + code.codePointAt(pos));
+				throw new ScriptLexerError("Found unknown character '" + code.codePointAt(pos) + "' while tokenizing.", code, effectId, line, pos - lineStart);
 			}
 		}
 	}

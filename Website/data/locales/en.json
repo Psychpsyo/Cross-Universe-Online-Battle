@@ -28,7 +28,8 @@
 		},
 
 		"settingsButton": "Settings",
-		"deckCreatorButton": "Deck Creator"
+		"deckCreatorButton": "Deck Creator",
+		"reportBug": "Report a Bug"
 	},
 
 	"lobbies": {
@@ -95,7 +96,7 @@
 				"notEnoughCards": "The deck could not be loaded because it has less than {#DECKLIMIT} cards.",
 				"tooManyOfCard": "The deck could not be loaded because it contains too many copies of '{#CARDNAME}'.",
 				"hasToken": "The deck could not be loaded because it contains '{#CARDNAME}'.\n(Token cards may not be added to decks.)",
-				"insufficientRank": "The deck could not be loaded because it contains '{#CARDNAME}', which has a higher level than you current rank. (Lv{#LEVEL} > Rank{#RANK})",
+				"scriptError": "The deck could not be loaded because the card script for '{#CARDNAME}' contains errors.\n(there's more detailed information in your browser console)",
 				"unsupportedInAutomatic": "The deck could not be loaded because it contains '{#CARDNAME}', which is currently unsupported in automatic games."
 			}
 		},

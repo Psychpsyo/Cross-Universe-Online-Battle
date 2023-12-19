@@ -110,7 +110,6 @@ export class AutomaticController extends InteractionController {
 				let move = JSON.parse(message);
 				if (move.type == "choosePlayer") {
 					move.value = game.players[move.value].next().index;
-					generalUI.putChatMessage(game.players[move.value] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
 				}
 				this.opponentMoves.push(move);
 				this.opponentMoveEventTarget.dispatchEvent(new CustomEvent("input"));
@@ -289,24 +288,21 @@ export class AutomaticController extends InteractionController {
 				return;
 			}
 			case "damageDealt": {
-				for (const event of events) {
-					if (event.amount == 0) {
-						return;
-					}
-					await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
-				}
+				await Promise.all(events.map(async event => {
+					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+				}));
 				return this.gameSleep();
 			}
 			case "lifeChanged": {
-				for (const event of events) {
-					await gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
-				}
+				await Promise.all(events.map(async event => {
+					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+				}));
 				return this.gameSleep();
 			}
 			case "manaChanged": {
-				for (const event of events) {
-					await gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
-				}
+				await Promise.all(events.map(async event => {
+					return gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
+				}));
 				return this.gameSleep();
 			}
 			case "valueChanged": {
@@ -363,6 +359,7 @@ export class AutomaticController extends InteractionController {
 					autoUI.removeCardAttackDefenseOverlay(event.card);
 					if (!event.card.isToken || event.toZone instanceof zones.FieldZone) {
 						gameUI.insertCard(event.toZone, event.toIndex);
+						autoUI.addCardAttackDefenseOverlay(event.card.current());
 					}
 				}
 				return this.gameSleep(.25);

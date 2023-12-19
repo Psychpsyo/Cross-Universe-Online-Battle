@@ -5,6 +5,7 @@ level: 2
 types: Illusion, Ghost, Structure
 
 o: optional
+turnLimit: 1
 condition: thisCard.zone = field
 cost:
 $unit = SELECT(1, [from you.field where types = Figure & cardType = unit]);

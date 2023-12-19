@@ -5,6 +5,7 @@ import {locale} from "/modules/locale.js";
 import {socket} from "./netcode.js";
 import {toDeckx, countDeckCards} from "/modules/deckUtils.js";
 import {loadDeckPreview, openDeckView, closeDeckView} from "./generalUI.js";
+import {ScriptParserError} from "/rulesEngine/cdfScriptInterpreter/parser.js";
 import * as gameUI from "./gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
 import * as deckErrors from "/rulesEngine/deckErrors.js";
@@ -178,7 +179,7 @@ export class DeckState extends GameState {
 		} catch (e) {
 			switch (true) {
 				case e instanceof cardLoader.UnsupportedCardError: {
-					let cardInfo = await cardLoader.getCardInfo(e.cardId);
+					const cardInfo = await cardLoader.getCardInfo(e.cardId);
 					alert(locale.game.deckSelect.errors.unsupportedInAutomatic.replaceAll("{#CARDNAME}", cardInfo.name));
 					break;
 				}
@@ -191,18 +192,19 @@ export class DeckState extends GameState {
 					break;
 				}
 				case e instanceof deckErrors.CardAmountError: {
-					let cardInfo = await cardLoader.getCardInfo(e.cardId);
+					const cardInfo = await cardLoader.getCardInfo(e.cardId);
 					alert(locale.game.deckSelect.errors.tooManyOfCard.replaceAll("{#CARDNAME}", cardInfo.name));
 					break;
 				}
 				case e instanceof deckErrors.DeckTokenError: {
-					let cardInfo = await cardLoader.getCardInfo(e.cardId);
+					const cardInfo = await cardLoader.getCardInfo(e.cardId);
 					alert(locale.game.deckSelect.errors.hasToken.replaceAll("{#CARDNAME}", cardInfo.name));
 					break;
 				}
-				case e instanceof deckErrors.InsufficientRankError: {
-					let cardInfo = await cardLoader.getCardInfo(e.cardId);
-					alert(locale.game.deckSelect.errors.insufficientRank.replaceAll("{#CARDNAME}", cardInfo.name).replaceAll("{#LEVEL}", cardInfo.level).replaceAll("{#RANK}", localPlayer.rank));
+				case e instanceof ScriptParserError: {
+					console.error(e, e.stack);
+					const cardInfo = await cardLoader.getCardInfo(e.cardId);
+					alert(locale.game.deckSelect.errors.scriptError.replaceAll("{#CARDNAME}", cardInfo.name));
 					break;
 				}
 				default: {

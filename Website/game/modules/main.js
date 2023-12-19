@@ -1,4 +1,5 @@
 import {InitState} from "./initState.js";
+import {ReplayInitState} from "./replayInitState.js";
 import {locale} from "/modules/locale.js";
 
 document.documentElement.lang = locale.code;
@@ -50,6 +51,10 @@ window.addEventListener("message", e => {
 	switch (e.data.type) {
 		case "connect": {
 			new InitState(e.data.roomCode, e.data.gameMode, e.data.websocketUrl);
+			break;
+		}
+		case "replay": {
+			new ReplayInitState(e.data.data);
 			break;
 		}
 	}

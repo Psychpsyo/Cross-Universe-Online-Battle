@@ -398,6 +398,7 @@ export async function showCoolAttackAnim(defender, attackers) {
 		imgs[0].style.transform = "skew(5deg) scaleX(-1)";
 	} else {
 		imgs[0].style.setProperty("--left", -(cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
+		imgs[0].style.transform = "skew(5deg)";
 	}
 
 	for (let i = 0; i < attackers.length; i++) {
@@ -407,7 +408,7 @@ export async function showCoolAttackAnim(defender, attackers) {
 			imgs[i+1].style.transform = "skew(5deg) scaleX(-1)";
 		} else {
 			imgs[i+1].style.setProperty("--left", -(cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
-			imgs[i+1].style.transform = "";
+			imgs[i+1].style.transform = "skew(5deg)";
 		}
 	}
 

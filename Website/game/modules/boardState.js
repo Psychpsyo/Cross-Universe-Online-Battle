@@ -95,7 +95,9 @@ export class BoardState extends GameState {
 	}
 
 	givePartnerChoice() {
-		// do partner select
+		// Do we already have a partner? (happens when replays are loaded)
+		if (localPlayer.partnerZone.cards[0]) return;
+
 		if (players[localPlayer.index].deck.suggestedPartner) {
 			if (localStorage.getItem("partnerChoiceToggle") === "true") {
 				ui.askQuestion(locale.game.partnerSelect.useSuggestedQuestion, locale.game.partnerSelect.useSuggested, locale.game.partnerSelect.selectManually).then(result => {

@@ -14,6 +14,7 @@ function getRoomcode() {
 
 let websocketUrl = localStorage.getItem("websocketUrl") === ""? "wss://battle.crossuniverse.net:443/ws/" : localStorage.getItem("websocketUrl");
 let unloadWarning = new AbortController();
+let replayToLoad = null;
 
 // receiving messages from the iframe
 window.addEventListener("message", e => {
@@ -21,12 +22,20 @@ window.addEventListener("message", e => {
 
 	switch (e.data.type) {
 		case "ready": {
-			gameFrame.contentWindow.postMessage({
-				type: "connect",
-				roomCode: getRoomcode(),
-				gameMode: gameModeSelect.value,
-				websocketUrl: websocketUrl
-			});
+			if (replayToLoad) {
+				gameFrame.contentWindow.postMessage({
+					type: "replay",
+					data: replayToLoad
+				});
+				replayToLoad = null;
+			} else {
+				gameFrame.contentWindow.postMessage({
+					type: "connect",
+					roomCode: getRoomcode(),
+					gameMode: gameModeSelect.value,
+					websocketUrl: websocketUrl
+				});
+			}
 			break;
 		}
 		case "gameStarted": {
@@ -118,6 +127,7 @@ rulesButton.href = locale.mainMenu.rulesLink;
 
 settingsButton.title = locale.mainMenu.settingsButton;
 deckMakerButton.title = locale.mainMenu.deckCreatorButton;
+bugReportButton.title = locale.mainMenu.reportBug;
 
 lobbyHeading.textContent = locale.lobbies.title;
 lobbyTemplate.content.querySelector(".lobbyJoinBtn").textContent = locale.lobbies.join;
@@ -174,11 +184,11 @@ preGame.addEventListener("drop", function(e) {
 	e.preventDefault();
 
 	let reader = new FileReader();
-	reader.onload = function(e) {
-		import("/modules/replayInitState.js").then(initModule => {
-			new initModule.ReplayInitState(JSON.parse(e.target.result));
-		});
-	};
+	reader.addEventListener("load", e => {
+		replayToLoad = JSON.parse(e.target.result);
+		gameFrame.contentWindow.location.replace(location.origin + "/game");
+		loadingIndicator.classList.add("active");
+	});
 	reader.readAsText(file);
 });
 
