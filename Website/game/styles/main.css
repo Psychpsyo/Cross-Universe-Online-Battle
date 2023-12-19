@@ -554,7 +554,6 @@ label[for="fileSelectDeckLoader"] {
 	border-bottom: 2px var(--theme-border-color) solid;
 	overflow-y: scroll;
 	font-size: .75em;
-	padding: .4em 0;
 	word-wrap: break-word;
 	background-color: #0003;
 }
