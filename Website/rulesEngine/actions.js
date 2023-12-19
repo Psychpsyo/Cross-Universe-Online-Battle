@@ -645,7 +645,7 @@ export class ApplyStatChange extends Action {
 	}
 
 	undo() {
-		this.card.current().values.modifierStack.pop();
+		this.toObject.current().values.modifierStack.pop();
 	}
 
 	isImpossible() {
