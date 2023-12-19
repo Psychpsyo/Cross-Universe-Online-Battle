@@ -17,6 +17,10 @@ export class ReplayInitState extends GameState {
 		gameDiv.hidden = false;
 		window.top.postMessage({type: "gameStarted"});
 
+		// deck selection elements aren't needed anymore.
+		deckDropzone.remove();
+		deckSelector.classList.add("deckListDisable");
+
 		gameUI.init();
 		new BoardState(true);
 		gameState.doStartGame();

@@ -693,21 +693,23 @@ export class RemoveStatChange extends Action {
 		super(player);
 		this.object = object;
 		this.modifier = modifier;
-		this.index = -1;
+		this._index = -1;
 	}
 
 	async* run() {
 		if (this.object instanceof BaseCard) {
 			this.object = this.object.snapshot();
 		}
-		this.index = getObjectCurrent(this.object).values.modifierStack.indexOf(this.modifier);
-		if (this.index != -1) {
-			getObjectCurrent(this.object).values.modifierStack.splice(this.index, 1);
+		this._index = getObjectCurrent(this.object).values.modifierStack.indexOf(this.modifier);
+		if (this._index != -1) {
+			getObjectCurrent(this.object).values.modifierStack.splice(this._index, 1);
 		}
 	}
 
 	undo() {
-		getObjectCurrent(this.object).values.modifierStack.splice(this.index, 0, this.modifier);
+		if (this._index != -1) {
+			getObjectCurrent(this.object).values.modifierStack.splice(this._index, 0, this.modifier);
+		}
 	}
 }
 
@@ -966,6 +968,6 @@ export class UnapplyStaticAbility extends Action {
 	}
 
 	undo() {
-		getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 0, this._removed);
+		getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 0, ...this._removed);
 	}
 }

@@ -22,8 +22,12 @@ export class TimingRunner {
 
 		let generator = this.generatorFunction();
 		let timing = yield* this.getNextTiming(generator, null);
-		while(timing) {
+		while(timing instanceof Timing) {
 			if (this.isCost) {
+				// if an empty timing is generated as part of a cost
+				if (timing.actions.length === 0) {
+					return false;
+				}
 				for (let action of timing.actions) {
 					action.costIndex = 0;
 				}
@@ -42,7 +46,7 @@ export class TimingRunner {
 			}
 			timing = yield* this.getNextTiming(generator, timing);
 		}
-		return true;
+		return timing;
 	}
 
 	* getNextTiming(timingGenerator, previousTiming) {
@@ -51,7 +55,7 @@ export class TimingRunner {
 			generatorOutput = timingGenerator.next(yield generatorOutput.value);
 		}
 		if (generatorOutput.done) {
-			return null;
+			return generatorOutput.value;
 		}
 		return new Timing(this.game, generatorOutput.value);
 	}
@@ -127,16 +131,22 @@ export async function generateOptionTree(runner, endOfTreeCheck, generator = nul
 }
 
 // It follows: all different types of timing generators
+// They return true or false, depending on if all the actions within them were successful.
 export function* arrayTimingGenerator(actionArrays) {
-	for (let actionList of actionArrays) {
+	for (const actionList of actionArrays) {
 		yield actionList;
 	}
+	return true;
 }
 
 export function* combinedTimingGenerator(generators) {
-	for (let timingGenerator of generators) {
-		yield* timingGenerator;
+	let successful = false;
+	for (const timingGenerator of generators) {
+		if (yield* timingGenerator) {
+			successful = true;
+		}
 	}
+	return successful;
 }
 
 export function* abilityCostTimingGenerator(ability, card, player) {
@@ -145,16 +155,17 @@ export function* abilityCostTimingGenerator(ability, card, player) {
 	let actionList;
 	do {
 		if (ability.isCancelled) {
-			return;
+			return false;
 		}
 		actionList = timingGenerator.next(timing);
 		if (!actionList.done) {
 			if (actionList.value.length == 0) {
-				return;
+				return false;
 			}
 			timing = yield actionList.value;
 		}
 	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));
+	return true;
 }
 
 export function* abilityTimingGenerator(ability, card, player) {
@@ -163,45 +174,49 @@ export function* abilityTimingGenerator(ability, card, player) {
 	let actionList;
 	do {
 		if (ability.isCancelled) {
-			return;
+			return false;
 		}
 		actionList = timingGenerator.next(timing);
 		if (!actionList.done) {
 			if (actionList.value.length == 0) {
-				return;
+				return false;
 			}
 			timing = yield actionList.value;
 		}
 	} while (!actionList.done && (!(timing instanceof Timing) || timing.successful));
+	return true;
 }
 
 export function* standardDrawTimingGenerator(player) {
-	yield [new actions.Draw(player, player.values.current.standardDrawAmount)];
+	const timing = yield [new actions.Draw(player, player.values.current.standardDrawAmount)];
+	return timing.successful;
 }
 
 export function* equipTimingGenerator(equipChoiceAction, player, abilityGenerator = null) {
 	const timing = yield [new actions.EquipCard(player, equipChoiceAction.spellItem, equipChoiceAction.chosenUnit)];
-	if (!timing.successful) return;
+	if (!timing.successful) return false;
 
 	if (abilityGenerator !== null) {
-		yield* abilityGenerator;
+		return yield* abilityGenerator;
 	}
+	return true;
 }
 
 export function* spellItemDiscardGenerator(player, spellItem) {
 	// don't discard things that aren't on the field
-	if (!(spellItem.zone instanceof FieldZone)) return;
+	if (!(spellItem.zone instanceof FieldZone)) return true;
 	// don't discard continuous spells/items
-	if (spellItem.values.current.cardTypes.includes("continuousSpell")) return;
-	if (spellItem.values.current.cardTypes.includes("continuousItem")) return;
+	if (spellItem.values.current.cardTypes.includes("continuousSpell")) return true;
+	if (spellItem.values.current.cardTypes.includes("continuousItem")) return true;
 	// don't discard spells/items that equipped successfully
-	if (spellItem.equippedTo !== null) return;
+	if (spellItem.equippedTo !== null) return true;
 
-	yield [new actions.Discard(
+	const timing = yield [new actions.Discard(
 		player,
 		spellItem,
 		new ScriptValue("dueToReason", [spellItem.values.current.cardTypes.includes("spell")? "wasCast" : "wasDeployed"])
 	)];
+	return timing.successful;
 }
 
 export function* retireTimingGenerator(player, units) {
@@ -220,6 +235,7 @@ export function* retireTimingGenerator(player, units) {
 	if (gainedMana > 0) {
 		yield [new actions.ChangeMana(player, gainedMana)];
 	}
+	return true;
 }
 
 export function* fightTimingGenerator(attackDeclaration) {
@@ -285,4 +301,6 @@ export function* fightTimingGenerator(attackDeclaration) {
 		}
 		yield actionList;
 	}
+	// TODO: lazy, assumes fights can't be interrupted somehow
+	return true;
 }

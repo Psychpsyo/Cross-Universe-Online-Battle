@@ -59,6 +59,8 @@
 			"opponentCast": null,
 			"youDeployed": null,
 			"opponentDeployed": null,
+			"youActivated": null,
+			"opponentActivated": null,
 			"youRevealed": null,
 			"opponentRevealed": null,
 			"discarded": null,

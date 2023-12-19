@@ -59,6 +59,8 @@
 			"opponentCast": "Dein Gegner hat gecasted:",
 			"youDeployed": "Du hast deployed:",
 			"opponentDeployed": "Dein Gegner hat deployed:",
+			"youActivated": "Du hast aktiviert:",
+			"opponentActivated": "Dein Gegner hat aktiviert:",
 			"youRevealed": "Du hast gezeigt:",
 			"opponentRevealed": "Dein Gegner hat gezeigt:",
 			"discarded": "Abgeworfen:",

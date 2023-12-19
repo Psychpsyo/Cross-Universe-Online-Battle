@@ -413,6 +413,7 @@ export class AutomaticController extends InteractionController {
 			case "blockCreated": {
 				if (events[0].block instanceof blocks.AbilityActivation) {
 					await autoUI.activate(events[0].block.card);
+					generalUI.putChatMessage(locale.game.notices[events[0].block.player === localPlayer? "youActivated" : "opponentActivated"], "notice", [events[0].block.card]);
 				}
 				autoUI.newBlock(events[0].block);
 				return;
@@ -423,7 +424,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "playerSelected": {
 				if (events[0].player !== localPlayer) {
-					generalUI.putChatMessage(game.players[events[0].chosenPlayer] == localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
+					generalUI.putChatMessage(game.players[events[0].chosenPlayer] === localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
 				}
 				break;
 			}

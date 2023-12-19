@@ -25,6 +25,8 @@ export class BaseAbility {
 	snapshot() {
 		return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 	}
+
+	zoneMoveReset(game) {}
 }
 
 // This is the super class of all activatable activities that can have a cost and some processing
@@ -129,6 +131,11 @@ export class OptionalAbility extends Ability {
 	successfulActivation() {
 		this.turnActivationCount++;
 	}
+
+	zoneMoveReset(game) {
+		super.zoneMoveReset(game);
+		this.turnActivationCount = 0;
+	}
 }
 
 export class FastAbility extends Ability {
@@ -157,6 +164,11 @@ export class FastAbility extends Ability {
 
 	successfulActivation() {
 		this.turnActivationCount++;
+	}
+
+	zoneMoveReset(game) {
+		super.zoneMoveReset(game);
+		this.turnActivationCount = 0;
 	}
 }
 
@@ -225,6 +237,12 @@ export class TriggerAbility extends Ability {
 			this.usedDuring = true;
 		}
 	}
+
+	zoneMoveReset(game) {
+		super.zoneMoveReset(game);
+		this.turnActivationCount = 0;
+		this.triggerMetOnStacks = [];
+	}
 }
 
 export class StaticAbility extends BaseAbility {
@@ -241,5 +259,10 @@ export class StaticAbility extends BaseAbility {
 			return this.applyTo.evalFull(new ScriptContext(card, player, this, evaluatingPlayer))[0].get(player);
 		}
 		return [];
+	}
+
+	zoneMoveReset(game) {
+		super.zoneMoveReset(game);
+		this.zoneEnterTimingIndex = game.nextTimingIndex - 1;
 	}
 }

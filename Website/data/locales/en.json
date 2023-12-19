@@ -59,6 +59,8 @@
 			"opponentCast": "Your opponent cast:",
 			"youDeployed": "You deployed:",
 			"opponentDeployed": "Your opponent deployed:",
+			"youActivated": "You activated:",
+			"opponentActivated": "Your opponent activated:",
 			"youRevealed": "You revealed:",
 			"opponentRevealed": "Your opponent revealed:",
 			"discarded": "Discarded:",

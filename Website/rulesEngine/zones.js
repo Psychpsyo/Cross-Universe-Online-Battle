@@ -45,14 +45,9 @@ export class Zone {
 			}
 			card.attackCount = 0; // reset AFTER removing card from the attack since removing it increases the attackCount
 			card.canAttackAgain = false;
+			// reset abilities
 			for (const ability of card.values.current.abilities) {
-				// All of the card's trigger abilities aren't met anymore.
-				if (ability instanceof abilities.TriggerAbility) {
-					ability.triggerMetOnStacks = [];
-				} else if (ability instanceof abilities.StaticAbility) {
-					// static abilities need to update their zone enter timer
-					ability.zoneEnterTimingIndex = card.owner.game.nextTimingIndex - 1;
-				}
+				ability.zoneMoveReset(this.player.game);
 			}
 			// Effects that applied to the card before stop applying.
 			card.values.modifierStack = [];
