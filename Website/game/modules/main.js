@@ -40,7 +40,9 @@ document.addEventListener("keydown", async function(e) {
 					break;
 				}
 				default: {
-					gameState?.hotkeyPressed(name);
+					if (gameState?.hotkeyPressed(name)) {
+						e.preventDefault();
+					}
 				}
 			}
 		}

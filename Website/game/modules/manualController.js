@@ -215,13 +215,13 @@ export class ManualController extends InteractionController {
 
 	hotkeyPressed(name) {
 		switch(name) {
-			case "showDeck": {
+			case "searchDeck": {
 				gameUI.toggleCardSelect(localPlayer.deckZone);
-				break;
+				return true;
 			}
 			case "selectToken": {
 				gameUI.toggleCardSelect(this.tokenZone);
-				break;
+				return true;
 			}
 			case "destroyToken": {
 				let heldCard = this.playerInfos[localPlayer.index].heldCard;
@@ -229,21 +229,22 @@ export class ManualController extends InteractionController {
 					socket.send("[uiDroppedCard]" + gameState.getZoneName(localPlayer.discardPile) + "|0");
 					this.dropCard(localPlayer, localPlayer.discardPile, 0);
 				}
-				break;
+				return true;
 			}
 			case "drawCard": {
 				this.deckDraw(localPlayer);
-				break;
+				return true;
 			}
 			case "shuffleDeck": {
 				this.deckShuffle(localPlayer.deckZone);
-				break;
+				return true;
 			}
 			case "showDeckTop": {
 				this.deckShowTop(localPlayer, player.deckZone);
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	deckDraw(player) {

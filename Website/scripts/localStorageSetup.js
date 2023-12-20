@@ -148,6 +148,12 @@ let hotkeyDefaults = {
 		"shift": false,
 		"alt": false
 	},
+	"searchDeck": {
+		"keyCode": "KeyS",
+		"ctrl": false,
+		"shift": true,
+		"alt": false
+	},
 	"selectToken": {
 		"keyCode": "KeyT",
 		"ctrl": false,
@@ -180,7 +186,7 @@ let hotkeyDefaults = {
 	},
 	"shuffleDeck": {
 		"keyCode": "KeyS",
-		"ctrl": false,
+		"ctrl": true,
 		"shift": true,
 		"alt": false
 	},

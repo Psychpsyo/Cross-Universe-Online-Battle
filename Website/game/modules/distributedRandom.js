@@ -45,7 +45,7 @@ export class DistRandom extends CURandom {
 		return this.values.shift().map((value, i) => Math.floor((value + view.getFloat64(i * 8)) * ranges[i]) % ranges[i]);
 	}
 
-	async nextPlayer(game) {
+	async nextPlayerIndex(game) {
 		let player = await this.nextInt(game.players.length);
 		if (youAre == 1) {
 			player = (player + 1) % game.players.length;

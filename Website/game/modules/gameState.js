@@ -4,5 +4,7 @@ export class GameState {
 	receiveMessage(command, message) {
 		return false;
 	}
-	hotkeyPressed(name) {}
+	hotkeyPressed(name) {
+		return false;
+	}
 }

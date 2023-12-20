@@ -111,6 +111,11 @@ const settings = {
 			action: editHotkey
 		},
 		{
+			id: "searchDeck",
+			type: "button",
+			action: editHotkey
+		},
+		{
 			id: "selectToken",
 			type: "button",
 			action: editHotkey

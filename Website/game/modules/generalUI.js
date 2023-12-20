@@ -305,6 +305,18 @@ export function loadDeckPreview(deck) {
 		});
 	});
 
+	// set the name
+	if (deck.name) {
+		deckViewTitle.classList.remove("greyedOut");
+		deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
+	} else {
+		deckViewTitle.textContent = "";
+	}
+	if (deckViewTitle.textContent === "") {
+		deckViewTitle.textContent = locale.game.deckSelect.unnamedDeck;
+		deckViewTitle.classList.add("greyedOut");
+	}
+
 	// set the description
 	if (deck.description) {
 		deckSelectorDescription.textContent = deck.description[locale.code] ?? deck.description.en ?? deck.description[Object.keys(deck.description)[0]] ?? "";
@@ -312,7 +324,7 @@ export function loadDeckPreview(deck) {
 	} else {
 		deckSelectorDescription.textContent = "";
 	}
-	if (deckSelectorDescription.textContent == "") {
+	if (deckSelectorDescription.textContent === "") {
 		deckSelectorDescription.textContent = locale.game.deckSelect.noDescriptionSet;
 		deckSelectorDescription.classList.add("greyedOut");
 	}
@@ -343,18 +355,7 @@ export function init() {
 		document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
 		document.getElementById("playerDeckButtonImage" + i).alt = locale.game.playerInfo.viewDeck;
 		document.getElementById("playerDeckButton" + i).addEventListener("click", function() {
-			let deck = players[i].deck;
-			if (deck.name) {
-				deckViewTitle.classList.remove("greyedOut");
-				deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
-			} else {
-				deckViewTitle.textContent = "";
-			}
-			if (deckViewTitle.textContent == "") {
-				deckViewTitle.textContent = locale.game.deckSelect.unnamedDeck;
-				deckViewTitle.classList.add("greyedOut");
-			}
-			loadDeckPreview(deck);
+			loadDeckPreview(players[i].deck);
 			openDeckView();
 		});
 	}

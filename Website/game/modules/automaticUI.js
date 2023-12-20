@@ -101,9 +101,14 @@ export function updateBattlePhaseIndicator() {
 
 export function indicatePass() {
 	passBtn.disabled = false;
+	// stack 1 block 1 uses the more descriptive 'NEXT PHASE' label instead of 'PASS'
+	if (game.currentStack().index === 1 && game.currentStack().blocks.length === 0) {
+		passBtn.textContent = locale.game.automatic.actions.nextPhase;
+	}
 }
 export function clearPass() {
 	passBtn.disabled = true;
+	passBtn.textContent = locale.game.automatic.actions.pass;
 }
 
 export function indicateYourMove() {

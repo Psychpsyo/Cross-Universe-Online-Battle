@@ -6,6 +6,7 @@ import {socket} from "./netcode.js";
 import {ManualController} from "./manualController.js";
 import {AutomaticController} from "./automaticController.js";
 import * as ui from "./gameUI.js";
+import * as generalUI from "./generalUI.js"
 
 export class BoardState extends GameState {
 	constructor(automatic) {
@@ -69,27 +70,36 @@ export class BoardState extends GameState {
 		switch(name) {
 			case "showYourDiscard": {
 				ui.toggleCardSelect(localPlayer.discardPile);
-				break;
+				return true;
 			}
 			case "showOpponentDiscard": {
 				ui.toggleCardSelect(game.players[0].discardPile);
-				break;
+				return true;
 			}
 			case "showYourExile": {
 				ui.toggleCardSelect(localPlayer.exileZone);
-				break;
+				return true;
 			}
 			case "showOpponentExile": {
 				ui.toggleCardSelect(game.players[0].exileZone);
-				break;
+				return true;
+			}
+			case "showDeck": {
+				if (deckSelector.open) {
+					generalUI.closeDeckView();
+				} else {
+					generalUI.loadDeckPreview(players[1].deck);
+					generalUI.openDeckView();
+				}
+				return true;
 			}
 			case "showField": {
 				ui.closeCardSelect();
-				closeCardPreview();
-				break;
+				generalUI.closeCardPreview();
+				return true;
 			}
 			default: {
-				this.controller.hotkeyPressed(name);
+				return this.controller.hotkeyPressed(name);
 			}
 		}
 	}

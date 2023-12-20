@@ -5,15 +5,17 @@ export class InteractionController {
 	receiveMessage(command, message) {
 		return false;
 	}
-	
+
 	async startGame() {}
-	
+
 	// returns whether or not the card was fully grabbed from the zone
 	grabCard(player, zone, index) {
 		return false;
 	}
-	
+
 	dropCard(player, zone, index) {}
-	
-	hotkeyPressed(name) {}
+
+	hotkeyPressed(name) {
+		return false;
+	}
 }

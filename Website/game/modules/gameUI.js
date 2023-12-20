@@ -752,7 +752,7 @@ export function openCardSelect(zone) {
 	cardSelectorGrid.parentNode.scrollTop = 0;
 }
 export function closeCardSelect() {
-	if (cardSelectorMainSlot.zone.type =="deck") {
+	if (cardSelectorMainSlot.zone?.type === "deck") {
 		for (let card of cardSelectorMainSlot.zone.cards) {
 			card.hideFrom(localPlayer);
 		}

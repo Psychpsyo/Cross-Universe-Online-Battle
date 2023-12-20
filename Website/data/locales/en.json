@@ -175,6 +175,7 @@
 		"automatic": {
 			"actions": {
 				"pass": "PASS",
+				"nextPhase": "NEXT PHASE",
 				"attack": "ATTACK"
 			},
 
@@ -416,7 +417,8 @@
 			"showOpponentDiscard": "Show Opponent Discard Pile:",
 			"showYourExile": "Show Your Exile Zone:",
 			"showOpponentExile": "Show Opponent Exile Zone:",
-			"showDeck": "Search Your Deck:",
+			"showDeck": "Show Your Deck:",
+			"searchDeck": "Search Your Deck:",
 			"selectToken": "Open Token Selector:",
 			"showField": "Show Field:",
 			"destroyToken": "Destroy Grabbed Token:",

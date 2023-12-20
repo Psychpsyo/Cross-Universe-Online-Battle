@@ -175,6 +175,7 @@
 		"automatic": {
 			"actions": {
 				"pass": null,
+				"nextPhase": null,
 				"attack": null
 			},
 
@@ -417,6 +418,7 @@
 			"showYourExile": null,
 			"showOpponentExile": null,
 			"showDeck": null,
+			"searchDeck": null,
 			"selectToken": null,
 			"showField": null,
 			"destroyToken": null,

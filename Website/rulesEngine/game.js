@@ -235,7 +235,7 @@ export class Game {
 		if (this.isReplaying) {
 			return this.players[this.replay.rngLog[this.replayRngPosition++]];
 		}
-		let result = await this.rng.nextPlayer(this);
+		let result = await this.rng.nextPlayerIndex(this);
 		this.replay.rngLog.push(result);
 		this.replayRngPosition++;
 		return this.players[result];

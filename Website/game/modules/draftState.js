@@ -54,7 +54,7 @@ export class DraftState extends GameState {
 				gameState.checkReadyConditions();
 			});
 
-			const player = await game.rng.nextPlayer();
+			const player = game.players[await game.rng.nextPlayerIndex(game)];
 			this.setPlayer(player);
 			this.firstPlayer = player;
 			this.rerollCards();

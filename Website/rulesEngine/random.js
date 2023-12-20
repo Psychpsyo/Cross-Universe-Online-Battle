@@ -10,7 +10,7 @@ export class CURandom {
 		return await Promise.all(ranges.map(range => this.nextInt(range)));
 	}
 
-	async nextPlayer(game) {
+	async nextPlayerIndex(game) {
 		return this.nextInt(game.players.length);
 	}
 }

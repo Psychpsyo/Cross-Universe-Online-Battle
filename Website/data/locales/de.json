@@ -175,6 +175,7 @@
 		"automatic": {
 			"actions": {
 				"pass": "PASSEN",
+				"nextPhase": "NÄCHSTE PHASE",
 				"attack": "ANGREIFEN"
 			},
 
@@ -416,7 +417,8 @@
 			"showOpponentDiscard": "Gegnerischen Ablagestapel zeigen:",
 			"showYourExile": "Eigenes Exil zeigen:",
 			"showOpponentExile": "Gegnerisches Exil zeigen:",
-			"showDeck": "Dein Deck durchsuchen:",
+			"showDeck": "Dein Deck anzeigen:",
+			"searchDeck": "Dein Deck durchsuchen:",
 			"selectToken": "Token-Menü öffnen:",
 			"showField": "Feld zeigen:",
 			"destroyToken": "Gehaltenes Token zerstören:",
