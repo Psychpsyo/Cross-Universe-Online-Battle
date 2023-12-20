@@ -16,7 +16,7 @@ class Block {
 		if (this.costTimingRunner) {
 			this.costTimingRunner.isCost = true;
 		}
-		this.followupTimings = [];
+		this.followupTiming = null;
 		this.isCancelled = false;
 	}
 

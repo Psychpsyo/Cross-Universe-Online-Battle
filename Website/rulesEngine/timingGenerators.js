@@ -16,8 +16,12 @@ export class TimingRunner {
 	}
 
 	async* run(isPrediction = false) {
-		for (const timing of await (yield* runInterjectedTimings(this.game, isPrediction))) {
-			this.timings.push(timing);
+		const interjected = await (yield* runInterjectedTimings(this.game, isPrediction));
+		if (interjected) {
+			this.timings.push(interjected);
+			while(this.timings[this.timings.length - 1].followupTiming) {
+				this.timings.push(this.timings[this.timings.length - 1].followupTiming);
+			}
 		}
 
 		let generator = this.generatorFunction();
@@ -34,8 +38,8 @@ export class TimingRunner {
 			}
 			this.timings.push(timing);
 			await (yield* timing.run(isPrediction));
-			for (const followup of timing.followupTimings) {
-				this.timings.push(followup);
+			while(this.timings[this.timings.length - 1].followupTiming) {
+				this.timings.push(this.timings[this.timings.length - 1].followupTiming);
 			}
 			if (!timing.successful) {
 				// We only need to pop 1 since unsuccessful timings never have followups

@@ -111,9 +111,7 @@ export class Stack {
 			yield [createBlockStartedEvent(this.blocks[i])];
 			yield* this.blocks[i].run();
 			this.executingBlock = null;
-			for (const timing of await (yield* runInterjectedTimings(this.phase.turn.game, false))) {
-				this.blocks[i].followupTimings.push(timing);
-			}
+			this.blocks[i].followupTiming = await (yield* runInterjectedTimings(this.phase.turn.game, false));
 		}
 		this.processed = true;
 	}

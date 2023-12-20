@@ -201,7 +201,9 @@ export class ManaSupplyPhase extends Phase {
 
 	async* runTiming() {
 		await (yield* this.timings[this.timings.length - 1].run());
-		this.timings.push(...this.timings[this.timings.length - 1].followupTimings);
+		while(this.timings[this.timings.length - 1].followupTiming) {
+			this.timings.push(this.timings[this.timings.length - 1].followupTiming);
+		}
 	}
 
 	getTimings() {
@@ -338,8 +340,10 @@ export class EndPhase extends StackPhase {
 			this.turn.endOfTurnTimings = []; // might be filled with new timings by what happens
 			for (let i = 0; i < timings.length; i++) {
 				await (yield* timings[i].run());
-				timings.splice(i + 1, 0, ...timings[i].followupTimings);
-				i += timings[i].followupTimings.length;
+				while (timings[i].followupTiming) {
+					timings.splice(i + 1, 0, timings[i].followupTiming);
+					i++;
+				}
 			}
 		} while (this.triggerAbilitiesMet());
 	}

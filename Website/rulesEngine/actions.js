@@ -701,15 +701,11 @@ export class RemoveStatChange extends Action {
 			this.object = this.object.snapshot();
 		}
 		this._index = getObjectCurrent(this.object).values.modifierStack.indexOf(this.modifier);
-		if (this._index != -1) {
-			getObjectCurrent(this.object).values.modifierStack.splice(this._index, 1);
-		}
+		getObjectCurrent(this.object).values.modifierStack.splice(this._index, 1);
 	}
 
 	undo() {
-		if (this._index != -1) {
-			getObjectCurrent(this.object).values.modifierStack.splice(this._index, 0, this.modifier);
-		}
+		getObjectCurrent(this.object).values.modifierStack.splice(this._index, 0, this.modifier);
 	}
 }
 
@@ -963,11 +959,11 @@ export class UnapplyStaticAbility extends Action {
 		if (this.object instanceof BaseCard) {
 			this.object = this.object.snapshot();
 		}
-		this._modifierIndex = getObjectCurrent(this.object).values.modifierStack.findIndex(modifier => modifier.ability === this.ability);
-		this._removed = getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 1);
+		this._modifierIndex = getObjectCurrent(this.object).values.modifierStack.findIndex(modifier => modifier.ctx.ability === this.ability);
+		this._removed = getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 1)[0];
 	}
 
 	undo() {
-		getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 0, ...this._removed);
+		getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 0, this._removed);
 	}
 }

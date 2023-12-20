@@ -22,7 +22,7 @@ export class Timing {
 		}
 		this.costCompletions = [];
 		this.successful = false;
-		this.followupTimings = [];
+		this.followupTiming = [];
 	}
 
 	// replaces the given action, if possible
@@ -244,9 +244,7 @@ export class Timing {
 			}
 		}
 
-		for (const timing of await (yield* runInterjectedTimings(this.game, isPrediction, this.actions))) {
-			this.followupTimings.push(timing);
-		}
+		this.followupTiming = await (yield* runInterjectedTimings(this.game, isPrediction, this.actions));
 	}
 
 	* undo() {
@@ -346,14 +344,11 @@ class StaticAbilityApplication {
 // This is run after every regular timing and right after blocks start and end.
 // It takes care of updating static abilities.
 export async function* runInterjectedTimings(game, isPrediction) {
-	let timings = [];
-	let staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
-	while (staticAbilityPhasingTiming) {
-		timings.push(staticAbilityPhasingTiming);
-		await (yield* staticAbilityPhasingTiming.run(isPrediction));
-		staticAbilityPhasingTiming = yield* getStaticAbilityPhasingTiming(game);
+	const timing = yield* getStaticAbilityPhasingTiming(game);
+	if (timing) {
+		await (yield* timing.run(isPrediction));
 	}
-	return timings;
+	return timing;
 }
 
 function* checkGameOver(game) {
