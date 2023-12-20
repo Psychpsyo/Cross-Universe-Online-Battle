@@ -282,7 +282,8 @@ export class ThisCardNode extends AstNode {
 		super("card");
 	}
 	* eval(ctx) {
-		return new ScriptValue("card", [ctx.card]);
+		const card = ctx.card.current();
+		return new ScriptValue("card", card? [card] : []);
 	}
 }
 export class AttackTargetNode extends AstNode {

@@ -130,8 +130,8 @@ function isImportant(request) {
 		}
 	}
 
+	const currentStack = game.currentStack();
 	if (localStorage.getItem("passOnStackTwo") === "true") {
-		let currentStack = game.currentStack();
 		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
 			if (request.type != "activateTriggerAbility" &&
 				(request.type != "castSpell" || request.eligibleSpells.find(isSpellItemTriggered) === undefined) &&
@@ -143,9 +143,10 @@ function isImportant(request) {
 	}
 
 	let currentPhase = game.currentPhase();
-	if (((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||
+	if (currentStack.blocks.find(block => !(block instanceof blocks.StandardDraw)) === undefined &&
+		(((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||
 		((currentPhase instanceof phases.EndPhase) && localStorage.getItem("passInEndPhase") === "true") ||
-		((currentPhase instanceof phases.BattlePhase) && localStorage.getItem("passInBattlePhase") === "true")
+		((currentPhase instanceof phases.BattlePhase) && localStorage.getItem("passInBattlePhase") === "true"))
 	) {
 		switch (request.type) {
 			case "activateTriggerAbility": {
