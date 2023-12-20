@@ -401,8 +401,10 @@
 			"title": "Automatic Games",
 			"passOnOnlyOption": "Auto-pass when it is the only real option",
 			"passInDrawPhase": "Pass through draw phase if you have no draw phase specific options or triggers",
+			"passInBattlePhase": "Pass in the battle phase if you have no battle phase specific options or triggers",
 			"passInEndPhase": "Pass through end phase if you have no end phase specific options or triggers",
 			"passOnStackTwo": "Pass on empty stacks 2+ if you have no trigger abilities or conditional spells",
+			"passOnOwnBlocks": "Pass on your own actions if opponent did not intervene",
 			"passOnAttackDeclaration": "Pass in response to attack declarations"
 		},
 

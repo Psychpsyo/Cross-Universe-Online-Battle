@@ -184,6 +184,14 @@ const settings = {
 			type: "toggle"
 		},
 		{
+			id: "passInBattlePhase",
+			type: "toggle"
+		},
+		{
+			id: "passOnOwnBlocks",
+			type: "toggle"
+		},
+		{
 			id: "passOnStackTwo",
 			type: "toggle"
 		},

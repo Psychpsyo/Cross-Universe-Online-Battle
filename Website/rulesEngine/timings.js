@@ -282,7 +282,7 @@ export class Timing {
 		// decks need to be shuffled after cards are added to them.
 		let unshuffledDecks = [];
 		for (const action of lastActions) {
-			if (action instanceof actions.Move && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
+			if ((action instanceof actions.Move || action instanceof actions.Return) && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
 				if (unshuffledDecks.indexOf(action.zone) === -1) {
 					unshuffledDecks.push(action.zone);
 				}

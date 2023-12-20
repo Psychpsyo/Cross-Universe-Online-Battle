@@ -31,6 +31,7 @@ export function getAutoResponse(requests) {
 	if (requests.length == 1) {
 		let request = requests[0];
 		switch (request.type) {
+			// choosing cards where there is only one possible option
 			case "chooseCards": {
 				if (Math.min(...request.validAmounts) == request.from.length) {
 					let choice = [];
@@ -44,6 +45,7 @@ export function getAutoResponse(requests) {
 				}
 				break;
 			}
+			// activating trigger abilities when it is the only option
 			case "activateTriggerAbility": {
 				if (request.eligibleAbilities.length == 1) {
 					return {
@@ -56,19 +58,29 @@ export function getAutoResponse(requests) {
 	}
 
 	// passing
-	if (!requests.find(request => request.type == "pass")) {
+	if (!requests.find(request => request.type === "pass")) {
 		return null;
 	}
 
 	if (localStorage.getItem("passOnAttackDeclaration") === "true") {
-		let currentStack = game.currentStack();
+		const currentStack = game.currentStack();
 		if (currentStack.blocks[0] instanceof blocks.AttackDeclaration) {
 			return {type: "pass"};
 		}
 	}
 
+	if (localStorage.getItem("passOnOwnBlocks") === "true") {
+		const currentStack = game.currentStack();
+		if (currentStack.index === 1 &&
+			currentStack.blocks.length === 1 &&
+			!currentStack.blocks.find(block => block.player !== requests[0].player)
+		) {
+			return {type: "pass"};
+		}
+	}
+
 	let importantRequests = 0;
-	for (let request of requests) {
+	for (const request of requests) {
 		if (isImportant(request)) {
 			importantRequests++;
 		}
@@ -132,7 +144,8 @@ function isImportant(request) {
 
 	let currentPhase = game.currentPhase();
 	if (((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||
-		((currentPhase instanceof phases.EndPhase) && localStorage.getItem("passInEndPhase") === "true")
+		((currentPhase instanceof phases.EndPhase) && localStorage.getItem("passInEndPhase") === "true") ||
+		((currentPhase instanceof phases.BattlePhase) && localStorage.getItem("passInBattlePhase") === "true")
 	) {
 		switch (request.type) {
 			case "activateTriggerAbility": {
@@ -149,6 +162,9 @@ function isImportant(request) {
 					}
 				}
 				break;
+			}
+			case "doAttackDeclaration": {
+				return true;
 			}
 		}
 		return false;

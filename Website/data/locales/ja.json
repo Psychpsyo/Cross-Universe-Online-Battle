@@ -401,8 +401,10 @@
 			"title": null,
 			"passOnOnlyOption": null,
 			"passInDrawPhase": null,
+			"passInBattlePhase": null,
 			"passInEndPhase": null,
 			"passOnStackTwo": null,
+			"passOnOwnBlocks": null,
 			"passOnAttackDeclaration": null
 		},
 
