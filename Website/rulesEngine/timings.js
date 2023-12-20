@@ -198,10 +198,12 @@ export class Timing {
 		}
 
 		// sometimes actions prompt certain other actions to be performed at the same time
+		// TODO: These need to be checked for legality and substitution just like the original actions
 		let followupActions = this.actions;
 		do {
 			followupActions = this.getFollowupActions(game, followupActions);
 			for (const action of followupActions) {
+				this.actions.push(action);
 				let event = await (yield* action.run());
 				if (event) {
 					events.push(event);
@@ -253,13 +255,13 @@ export class Timing {
 			return;
 		}
 		let events = [];
-		for (let action of this.actions) {
-			let event = action.undo();
+		for (let i = this.actions.length - 1; i >= 0; i--) {
+			const event = this.actions[i].undo();
 			if (event) {
 				events.push(event);
 			}
 		}
-		let valueChangeEvents = recalculateObjectValues(this.game);
+		const valueChangeEvents = recalculateObjectValues(this.game);
 		if (valueChangeEvents.length > 0) {
 			yield valueChangeEvents;
 		}

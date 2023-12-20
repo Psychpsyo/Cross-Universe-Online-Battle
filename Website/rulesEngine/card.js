@@ -295,6 +295,7 @@ export class SnapshotCard extends BaseCard {
 
 		this.hiddenFor = [...card.hiddenFor];
 		this.globalId = card.globalId;
+		this._actualGlobalId = card.globalId; // not to be changed by other things, this is what a card will be restored to, not what the snapshot counts as.
 		this._actualCard = card; // will not be cleared by card moving and is only for restoring a card on undo
 	}
 
@@ -313,7 +314,7 @@ export class SnapshotCard extends BaseCard {
 		}
 		this.zone?.add(this._actualCard, this.index, false);
 		this.placedTo?.place(this._actualCard, this.index);
-		if (this._actualCard.globalId != this.globalId) {
+		if (this._actualCard.globalId != this._actualGlobalId) {
 			this._actualCard.undoInvalidateSnapshots();
 		}
 		this._actualCard.lastFieldSidePlayer = this.lastFieldSidePlayer;
