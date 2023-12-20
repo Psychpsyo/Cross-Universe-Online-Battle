@@ -101,9 +101,9 @@ export function updateBattlePhaseIndicator() {
 
 export function indicatePass() {
 	passBtn.disabled = false;
-	// stack 1 block 1 uses the more descriptive 'NEXT PHASE' label instead of 'PASS'
+	// stack 1 block 1 uses the more descriptive 'NEXT PHASE'/'END TURN' label instead of 'PASS'
 	if (game.currentStack().index === 1 && game.currentStack().blocks.length === 0) {
-		passBtn.textContent = locale.game.automatic.actions.nextPhase;
+		passBtn.textContent = locale.game.automatic.actions[game.currentPhase().types.includes("endPhase")? "endTurn" : "nextPhase"];
 	}
 }
 export function clearPass() {

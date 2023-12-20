@@ -174,9 +174,10 @@
 
 		"automatic": {
 			"actions": {
-				"pass": null,
-				"nextPhase": null,
-				"attack": null
+				"pass": "放棄する",
+				"nextPhase": "次のステップ",
+				"endTurn": "ターンエンド",
+				"attack": "攻撃する"
 			},
 
 			"stacks": {
@@ -210,8 +211,6 @@
 
 			"battlePhase": {
 				"question": null,
-				"cardEffectQuestion": null,
-				"startingPlayerQuestion": null,
 				"enter": null,
 				"skip": null
 			},
@@ -229,6 +228,8 @@
 
 			"playerSelect": {
 				"question": null,
+				"cardEffectQuestion": null,
+				"startingPlayerQuestion": null,
 				"you": null,
 				"opponent": null
 			},

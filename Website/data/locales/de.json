@@ -176,6 +176,7 @@
 			"actions": {
 				"pass": "PASSEN",
 				"nextPhase": "NÄCHSTE PHASE",
+				"endTurn": "ZUG BEENDEN",
 				"attack": "ANGREIFEN"
 			},
 

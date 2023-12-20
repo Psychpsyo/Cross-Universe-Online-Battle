@@ -176,6 +176,7 @@
 			"actions": {
 				"pass": "PASS",
 				"nextPhase": "NEXT PHASE",
+				"endTurn": "END TURN",
 				"attack": "ATTACK"
 			},
 
