@@ -221,7 +221,7 @@ export class Card extends BaseCard {
 					data.types ?? [],
 					data.attack ?? null,
 					data.defense ?? null,
-					data.abilities.map(ability => interpreter.makeAbility(ability.id, player.game)),
+					data.abilities.map(ability => interpreter.makeAbility(ability, player.game)),
 					baseCardTypes.includes("unit")? 1 : null,
 					baseCardTypes.includes("unit")? true : null,
 					baseCardTypes.includes("unit")? true : null
@@ -540,6 +540,14 @@ function parseCdfValues(cdf) {
 				break;
 			}
 			case "o": {
+				inAbility = true;
+				abilitySection = "exec";
+				subAbilityCount = 0;
+				// this is only supported to instantiate tokens, not actually a part of cdf files.
+				if (parts[1].startsWith("CU")) {
+					data.abilities.push(parts[1].substring(2));
+					break;
+				}
 				if (!["cast", "deploy", "optional", "fast", "trigger", "static"].includes(parts[1])) {
 					throw new Error("CDF Parser Error: " + parts[1] + " is an invalid ability type.");
 				}
@@ -565,9 +573,6 @@ function parseCdfValues(cdf) {
 					applyTo: "",
 					modifier: ""
 				});
-				inAbility = true;
-				abilitySection = "exec";
-				subAbilityCount = 0;
 				break;
 			}
 			default: {
@@ -576,9 +581,11 @@ function parseCdfValues(cdf) {
 		}
 	}
 	for (const ability of data.abilities) {
-		interpreter.registerAbility(ability);
+		if (typeof ability !== "string") {
+			interpreter.registerAbility(ability);
+		}
 	}
 	// sub abilities just needed to be registered, they can now be filtered out
-	data.abilities = data.abilities.filter(ability => !ability.isSubAbility);
+	data.abilities = data.abilities.filter(ability => !ability.isSubAbility).map(ability => typeof ability === "string"? ability : ability.id);
 	return data;
 }

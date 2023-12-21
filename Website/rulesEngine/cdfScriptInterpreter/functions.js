@@ -878,27 +878,32 @@ export function initFunctions() {
 	// Creates tokens
 	// TODO: refactor to SUMMONTOKENS
 	TOKENS: new ScriptFunction(
-		["number", "cardId", "cardId", "number", "type", "number", "number"],
-		[null, null, null, null, null, null, null],
+		["number", "cardId", "cardId", "number", "type", "number", "number", "abilityId"],
+		[null, null, null, null, null, null, null, new ast.ValueArrayNode([], "abilityId")],
 		"card",
 		function*(astNode, ctx) {
-			let amount = (yield* this.getParameter(astNode, "number", 0).eval(ctx)).get(ctx.player)[0];
-			let name = (yield* this.getParameter(astNode, "cardId", 1).eval(ctx)).get(ctx.player)[0];
-			let level = (yield* this.getParameter(astNode, "number", 1).eval(ctx)).get(ctx.player)[0];
-			let types = (yield* this.getParameter(astNode, "type", 0).eval(ctx)).get(ctx.player);
-			let attack = (yield* this.getParameter(astNode, "number", 2).eval(ctx)).get(ctx.player)[0];
-			let defense = (yield* this.getParameter(astNode, "number", 3).eval(ctx)).get(ctx.player)[0];
-			let cards = [];
+			const cardIds = (yield* this.getParameter(astNode, "cardId", 0).eval(ctx)).get(ctx.player);
+			const amount = (yield* this.getParameter(astNode, "number", 0).eval(ctx)).get(ctx.player)[0];
+			const name = (yield* this.getParameter(astNode, "cardId", 1).eval(ctx)).get(ctx.player)[0];
+			const level = (yield* this.getParameter(astNode, "number", 1).eval(ctx)).get(ctx.player)[0];
+			const types = (yield* this.getParameter(astNode, "type", 0).eval(ctx)).get(ctx.player);
+			const attack = (yield* this.getParameter(astNode, "number", 2).eval(ctx)).get(ctx.player)[0];
+			const defense = (yield* this.getParameter(astNode, "number", 3).eval(ctx)).get(ctx.player)[0];
+			const abilities = (yield* this.getParameter(astNode, "abilityId", 0).eval(ctx)).get(ctx.player);
+			const cards = [];
 			for (let i = 0; i < amount; i++) {
 				// TODO: Give player control over the specific token variant that gets selected
-				let cardIds = (yield* this.getParameter(astNode, "cardId", 0).eval(ctx)).get(ctx.player);
-				cards.push(new Card(ctx.player, `id: CU${cardIds[i % cardIds.length]}
+				let tokenCdf = `id: CU${cardIds[i % cardIds.length]}
 cardType: token
 name: CU${name}
 level: ${level}
 types: ${types.join(",")}
 attack: ${attack}
-defense: ${defense}`));
+defense: ${defense}`;
+				for (const ability of abilities) {
+					tokenCdf += "\no: CU" + ability;
+				}
+				cards.push(new Card(ctx.player, tokenCdf));
 			}
 			return new ScriptValue("card", cards);
 		},
