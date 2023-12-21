@@ -58,12 +58,21 @@ export class Modifier {
 	constructor(modifications, ctx) {
 		this.modifications = modifications;
 		this.ctx = ctx;
+		this._wasStaticCancelled = false;
 	}
 
 	modify(object, toBaseValues, toUnaffections) {
 		let values = toBaseValues? object.values.base : object.values.current;
+		// cancelled static abilities and re-baking them once they un-cancel
 		if (this.ctx.ability instanceof abilities.StaticAbility && this.ctx.ability.isCancelled) {
-			return values;
+			if (this.ctx.ability.isCancelled) {
+				this._wasStaticCancelled = true;
+				return values;
+			} else if (this._wasStaticCancelled) {
+				// static ability became un-cancelled => re-bake modifications
+				this._wasStaticCancelled = false;
+				this.modifications = this._bakeModificationsStatic(object);
+			}
 		}
 		for (let modification of this.modifications) {
 			if (!(modification instanceof ValueModification)) {
@@ -124,10 +133,14 @@ export class Modifier {
 	}
 
 	bakeStatic(target) {
+		return new Modifier(this._bakeModificationsStatic(target), this.ctx);
+	}
+
+	_bakeModificationsStatic(target) {
 		ast.setImplicit([target], target.cdfScriptType);
 		const bakedModifications = this.modifications.map(modification => modification.bakeStatic(this.ctx)).filter(modification => modification !== null);
 		ast.clearImplicit(target.cdfScriptType);
-		return new Modifier(bakedModifications, this.ctx);
+		return bakedModifications;
 	}
 }
 
@@ -267,6 +280,7 @@ export class ValueAppendModification extends ValueModification {
 	bakeStatic(ctx) {
 		let valueArray = this.newValues.evalFull(ctx)[0];
 		if (valueArray.type != "abilityId") return this;
+
 		const type = valueArray.type;
 		valueArray = valueArray.get(ctx.player).map(val => makeAbility(type === "abilityId"? val : val.id));
 		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray, type), this.toBase, this.condition);
