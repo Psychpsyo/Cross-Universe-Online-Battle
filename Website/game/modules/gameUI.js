@@ -466,6 +466,7 @@ class FieldCardSlot extends UiCardSlot {
 		} else {
 			this.fieldSlot.src = "images/cardHidden.png";
 			this.clearDragSource(null);
+			clearCounters(fieldSlotIndexFromZone(this.zone, this.index));
 		}
 	}
 	insert(index) {
@@ -977,4 +978,25 @@ export async function askQuestion(question, yesButton, noButton) {
 			resolve(false);
 		}, {once: true});
 	});
+}
+
+
+// adds a new counter element to a card
+export function addCounter(slotIndex, name) {
+	const counter = document.createElement("div");
+	counter.classList.add("counter");
+	counter.textContent = "1";
+	if (name) {
+		counter.title = name;
+	}
+
+	const holder = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder");
+	holder.insertBefore(counter, holder.querySelector(".counterAddBtn"));
+	return counter;
+}
+
+export function clearCounters(slotIndex) {
+	for (const counter of document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").querySelectorAll(".counter")) {
+		counter.remove();
+	}
 }

@@ -377,15 +377,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "cardsSwapped":
 			case "undoCardsSwapped": {
-				for (const event of events) {
-					gameUI.updateCard(event.cardA.zone, event.cardA.index);
-					gameUI.updateCard(event.cardB.zone, event.cardB.index);
-					await Promise.all([
-						autoUI.updateCardAttackDefenseOverlay(event.cardA, true),
-						autoUI.updateCardAttackDefenseOverlay(event.cardB, true)
-					]);
-				}
-				return;
+				return Promise.all(events.map(event => autoUI.showCardSwap(event.cardA, event.cardB)));
 			}
 			case "actionCancelled": {
 				for (const event of events) {
@@ -402,6 +394,9 @@ export class AutomaticController extends InteractionController {
 			}
 			case "replacementAbilityApplied": {
 				return autoUI.activate(events[0].card);
+			}
+			case "countersChanged": {
+				return Promise.all(events.map(event => autoUI.updateCounters(event.card.current(), event.counterType)));
 			}
 			case "attackDeclarationEstablished": {
 				return autoUI.showCoolAttackAnim(events[0].target, events[0].attackers);

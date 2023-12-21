@@ -361,7 +361,7 @@ export function createCountersChangedEvent(card, type) {
 		"nature": "event",
 		"type": "countersChanged",
 		"card": card,
-		"type": type
+		"counterType": type
 	}
 }
 

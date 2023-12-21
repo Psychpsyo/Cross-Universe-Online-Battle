@@ -433,6 +433,29 @@ export async function showCoolAttackAnim(defender, attackers) {
 	coolAttackVisual.classList.remove("visible");
 }
 
+// card movements
+export async function showCardSwap(cardA, cardB) {
+	for (const card of [cardA.current(), cardB.current()]) {
+		gameUI.updateCard(card.zone, card.index);
+		// handle counters
+		if (card.zone instanceof FieldZone) {
+			const slotIndex = gameUI.fieldSlotIndexFromZone(card.zone, card.index);
+			gameUI.clearCounters(slotIndex);
+			for (const counter in card.counters) {
+				if ((card.counters[counter] ?? 0) === 0) continue;
+
+				const counterElem = gameUI.addCounter(slotIndex, locale.counters[counter]);
+				counterElem.classList.add("counterType" + counter);
+				counterElem.textContent = card.counters[counter];
+			}
+		}
+	}
+	return Promise.all([
+		updateCardAttackDefenseOverlay(cardA.current(), true),
+		updateCardAttackDefenseOverlay(cardB.current(), true)
+	]);
+}
+
 // card attack/defense overlays
 const attackUiValues = new Map();
 const defenseUiValues = new Map();
@@ -482,4 +505,22 @@ export async function updateCardAttackDefenseOverlay(card, instant) {
 		attackUiValues.get(slot).set(card.values.current.attack, instant),
 		defenseUiValues.get(slot).set(card.values.current.defense, instant)
 	]);
+}
+
+// counter visuals
+export async function updateCounters(card, type) {
+	const slotIndex = gameUI.fieldSlotIndexFromZone(card.zone, card.index);
+	const counterHolder = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder");
+	let counterElem = counterHolder.querySelector(".counterType" + type);
+	if (counterElem === null) {
+		counterElem = gameUI.addCounter(slotIndex, locale.counters[type]);
+		counterElem.classList.add("counterType" + type);
+	}
+	const counterCount = card.counters[type] ?? 0;
+	if (counterCount === 0) {
+		counterElem.remove();
+		return gameState.controller.gameSleep(.2);
+	}
+	counterElem.textContent = counterCount;
+	return gameState.controller.gameSleep(.2);
 }

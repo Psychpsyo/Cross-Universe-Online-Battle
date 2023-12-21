@@ -224,21 +224,19 @@ export function showDeckOptions(deckZone) {
 
 // adds a counter to the specified field slot
 function addCounter(slotIndex) {
-	let counter = document.createElement("div");
-	counter.classList.add("counter");
-	counter.textContent = "1";
+	const counter = gameUI.addCounter(slotIndex); document.createElement("div");
 	// prevent middle click default actions
 	counter.addEventListener("mousedown", function (e) {e.preventDefault();})
 	// edit the counter
 	counter.addEventListener("click", function(e) {
 		this.textContent = parseInt(this.textContent) + 1;
-		let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substr(5));
-		let counterIndex = Array.from(this.parentElement.children).indexOf(this);
+		const fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
+		const counterIndex = Array.from(this.parentElement.children).indexOf(this);
 		socket.send("[counterIncrease]" + fieldSlot + "|" + counterIndex);
 	});
 	counter.addEventListener("auxclick", function(e) {
-		let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substr(5));
-		let counterIndex = Array.from(this.parentElement.children).indexOf(this);
+		const fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
+		const counterIndex = Array.from(this.parentElement.children).indexOf(this);
 		switch (e.button) {
 			case 1:
 				this.remove();
@@ -256,6 +254,4 @@ function addCounter(slotIndex) {
 		}
 		e.preventDefault();
 	});
-
-	document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").prepend(counter);
 }

@@ -749,6 +749,20 @@
 		"Ninjutsu": "忍法",
 		"Song": "歌"
 	},
+	"counters": {
+		"Chaos": "カオス",
+		"Charge": "蓄電",
+		"Ember": "火種",
+		"Emergence": "羽化",
+		"Heaven": "天上",
+		"Invasion": "侵蝕",
+		"Protection": "守護",
+		"Rose": "ローズ",
+		"Stinger": "毒針",
+		"Time": "時刻",
+		"Weakness": "衰弱",
+		"Wrath": "祟り"
+	},
 
 	"customCards": {
 		"title": null,

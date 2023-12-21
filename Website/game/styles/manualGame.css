@@ -1,36 +1,13 @@
-/* counters */
-.counterHolder {
-	position: absolute;
-	display: flex;
-	width: 1.5em;
-	z-index: 5;
-	font-size: .8em;
-}
-#p0Grid .counterHolder {
-	flex-direction: column-reverse;
-	bottom: 0;
-	left: 0;
-}
-#p1Grid .counterHolder {
-	top: 0;
-	right: 0;
-	flex-direction: column;
-}
-.counter {
-	text-align: center;
-	background-color: black;
-	border-radius: .5em;
-	border: 2px var(--theme-border-color) solid;
-}
+/* Counter (+) Button */
 .counterAddBtn {
 	display: none;
 	text-align: center;
-	background-color: #aaa;
-	border-radius: .5em;
+	background-color: #888;
+	border-radius: 50%;
 	border: 2px var(--theme-border-color) solid;
 	font-weight: bold;
 }
-.fieldCardContainer:hover .counterAddBtn {
+.fieldCardContainer:hover img:not([src="images/cardHidden.png"]) ~ .counterHolder .counterAddBtn {
 	display: block;
 }
 

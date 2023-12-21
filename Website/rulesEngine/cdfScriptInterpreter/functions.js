@@ -335,11 +335,11 @@ export function initFunctions() {
 		[null, null],
 		"number",
 		function*(astNode, ctx) {
-			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
-			let type = (yield* this.getParameter(astNode, "counter").eval(ctx)).get(ctx.player)[0];
+			const cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
+			const type = (yield* this.getParameter(astNode, "counter").eval(ctx)).get(ctx.player)[0];
 
 			let total = 0;
-			for (let card of cards) {
+			for (const card of cards) {
 				if (card.counters[type]) {
 					total += card.counters[type];
 				}

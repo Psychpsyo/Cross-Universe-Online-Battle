@@ -804,3 +804,28 @@ dialog.popupSelectMenu {
 #mainGameBlackoutContent::first-line {
 	font-size: 2em;
 }
+
+/* counters */
+.counterHolder {
+	position: absolute;
+	display: flex;
+	width: 1.5em;
+	z-index: 5;
+	font-size: .8em;
+}
+#p0Grid .counterHolder {
+	flex-direction: column-reverse;
+	bottom: 0;
+	left: 0;
+}
+#p1Grid .counterHolder {
+	top: 0;
+	right: 0;
+	flex-direction: column;
+}
+.counter {
+	text-align: center;
+	background-color: black;
+	border-radius: 50%;
+	border: 2px var(--theme-border-color) solid;
+}

@@ -749,6 +749,20 @@
 		"Ninjutsu": "Ninjutsu",
 		"song": "Song"
 	},
+	"counters": {
+		"Chaos": "Chaos",
+		"Charge": "Charge",
+		"Ember": "Ember",
+		"Emergence": "Emergence",
+		"Heaven": "Heaven",
+		"Invasion": "Invasion",
+		"Protection": "Protection",
+		"Rose": "Rose",
+		"Stinger": "Stinger",
+		"Time": "Time",
+		"Weakness": "Weakness",
+		"Wrath": "Wrath"
+	},
 
 	"customCards": {
 		"title": "Custom Karten",

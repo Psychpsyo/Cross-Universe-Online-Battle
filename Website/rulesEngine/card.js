@@ -262,6 +262,7 @@ export class Card extends BaseCard {
 }
 
 // a card with all its values frozen so it can be held in internal logs of what Actions happened in a Timing.
+// these are also used in many actions undo() functions as a state to restore a card to.
 export class SnapshotCard extends BaseCard {
 	constructor(card, equippedToSnapshot, equipmentSnapshot) {
 		super(card.owner, card.cardId, card.isToken, card.values.clone(), card.deckLimit, card.equipableTo, card.turnLimit, card.condition);
@@ -295,6 +296,7 @@ export class SnapshotCard extends BaseCard {
 
 		this.hiddenFor = [...card.hiddenFor];
 		this.globalId = card.globalId;
+
 		this._actualGlobalId = card.globalId; // not to be changed by other things, this is what a card will be restored to, not what the snapshot counts as.
 		this._actualCard = card; // will not be cleared by card moving and is only for restoring a card on undo
 	}
