@@ -393,12 +393,13 @@ export const chooseZoneSlot = {
 }
 
 export const chooseAbilityOrder = {
-	create: function(player, card, abilities) {
+	create: function(player, card, abilities, sourceCards) {
 		return {
 			"nature": "request",
 			"player": player,
 			"type": "chooseAbilityOrder",
 			"abilities": abilities,
+			"sourceCards": sourceCards,
 			"applyTo": card
 		}
 	},
@@ -413,5 +414,8 @@ export const chooseAbilityOrder = {
 			}
 		}
 		return response;
+	},
+	generateValidResponses: function(request) {
+		return nChooseK(request.abilities.length, request.abilities.length);
 	}
 }

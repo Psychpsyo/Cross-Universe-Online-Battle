@@ -20,7 +20,6 @@ localStorage.setItem("passInBattlePhase", localStorage.getItem("passInBattlePhas
 localStorage.setItem("passInDrawPhase", localStorage.getItem("passInDrawPhase") ?? true);
 localStorage.setItem("passInEndPhase", localStorage.getItem("passInEndPhase") ?? true);
 localStorage.setItem("passOnAttackDeclaration", localStorage.getItem("passOnAttackDeclaration") ?? true);
-localStorage.setItem("passOnOnlyOption", localStorage.getItem("passOnOnlyOption") ?? true);
 localStorage.setItem("passOnOwnBlocks", localStorage.getItem("passOnOwnBlocks") ?? true);
 localStorage.setItem("passOnStackTwo", localStorage.getItem("passOnStackTwo") ?? true);
 localStorage.setItem("previewCardLanguage", localStorage.getItem("previewCardLanguage") ?? false);

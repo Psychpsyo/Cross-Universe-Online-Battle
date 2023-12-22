@@ -515,7 +515,7 @@ function* orderStaticAbilityApplications(target, applications) {
 			let orderedAbilities = [0];
 			// is sorting necessary for this bucket?
 			if (bucket.applications.length !== 1) {
-				const request = chooseAbilityOrder.create(bucket.player, target, bucket.applications.map(elem => elem.ability));
+				const request = chooseAbilityOrder.create(bucket.player, target, bucket.applications.map(elem => elem.ability), bucket.applications.map(elem => elem.source));
 				const response = yield [request];
 				if (response.type != "chooseAbilityOrder") {
 					throw new Error("Wrong response type supplied during ability ordering (expected 'chooseAbilityOrder', got '" + response.type + "')");

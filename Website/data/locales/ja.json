@@ -400,7 +400,6 @@
 
 		"auto": {
 			"title": null,
-			"passOnOnlyOption": null,
 			"passInDrawPhase": null,
 			"passInBattlePhase": null,
 			"passInEndPhase": null,

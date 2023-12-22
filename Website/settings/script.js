@@ -172,10 +172,6 @@ const settings = {
 	],
 	auto: [
 		{
-			id: "passOnOnlyOption",
-			type: "toggle"
-		},
-		{
 			id: "passInDrawPhase",
 			type: "toggle"
 		},

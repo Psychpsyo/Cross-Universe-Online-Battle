@@ -251,7 +251,7 @@ export class StaticAbility extends BaseAbility {
 		this.modifier = interpreter.buildAST("modifier", ability.id, ability.modifier, game);
 		this.applyTo = interpreter.buildAST("applyTarget", ability.id, ability.applyTo, game);
 		this.zoneEnterTimingIndex = 0;
-		this.mandatory = ability.mandatory; // for replace abilities
+		this.mandatory = ability.mandatory; // for action-replacing abilities
 	}
 
 	getTargets(card, player, evaluatingPlayer = player) {

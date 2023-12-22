@@ -400,7 +400,6 @@
 
 		"auto": {
 			"title": "Automatic Games",
-			"passOnOnlyOption": "Auto-pass when it is the only real option",
 			"passInDrawPhase": "Pass through draw phase if you have no draw phase specific options or triggers",
 			"passInBattlePhase": "Pass in the battle phase if you have no battle phase specific options or triggers",
 			"passInEndPhase": "Pass through end phase if you have no end phase specific options or triggers",

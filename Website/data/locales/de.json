@@ -400,7 +400,6 @@
 
 		"auto": {
 			"title": "Automatische Runden",
-			"passOnOnlyOption": "Auto-passen wenn es die einzige vernünftige Option ist",
 			"passInDrawPhase": "In der Drawphase auto-passen, wenn du keine Drawphase-spezifischen Optionen oder Trigger hast",
 			"passInBattlePhase": "In der Battlephase auto-passen, wenn du keine Battlephase-spezifischen Optionen oder Trigger hast",
 			"passInEndPhase": "In der Endphase auto-passen, wenn du keine Endphase-spezifischen Optionen oder Trigger hast",
