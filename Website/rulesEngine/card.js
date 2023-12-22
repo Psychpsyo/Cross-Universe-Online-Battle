@@ -39,6 +39,17 @@ export class BaseCard {
 
 		this.hiddenFor = [];
 		this.globalId = 0;
+
+		// set ability references to this card
+		for (const ability of this.values.initial.abilities) {
+			ability.card = this;
+		}
+		for (const ability of this.values.base.abilities) {
+			ability.card = this;
+		}
+		for (const ability of this.values.current.abilities) {
+			ability.card = this;
+		}
 	}
 
 	// makes a snapshot of this card.

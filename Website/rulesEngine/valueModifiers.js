@@ -127,7 +127,7 @@ export class Modifier {
 	// converts the modifier to one that won't change when the underlying expressions that derive its values change.
 	bake(target) {
 		ast.setImplicit([target], target.cdfScriptType);
-		const bakedModifications = this.modifications.map(modification => modification.bake(this.ctx)).filter(modification => modification !== null);
+		const bakedModifications = this.modifications.map(modification => modification.bake(this.ctx, target)).filter(modification => modification !== null);
 		ast.clearImplicit(target.cdfScriptType);
 		return new Modifier(bakedModifications, this.ctx);
 	}
@@ -138,7 +138,7 @@ export class Modifier {
 
 	_bakeModificationsStatic(target) {
 		ast.setImplicit([target], target.cdfScriptType);
-		const bakedModifications = this.modifications.map(modification => modification.bakeStatic(this.ctx)).filter(modification => modification !== null);
+		const bakedModifications = this.modifications.map(modification => modification.bakeStatic(this.ctx, target)).filter(modification => modification !== null);
 		ast.clearImplicit(target.cdfScriptType);
 		return bakedModifications;
 	}
@@ -149,12 +149,12 @@ export class Modification {
 		this.condition = condition;
 	}
 
-	bake(ctx) {
+	bake(ctx, target) {
 		return this;
 	}
 
 	// bakes a modifier for a static ability. (i.e. does not pre-compute expressions, only creates things like ability objects from their IDs)
-	bakeStatic(ctx) {
+	bakeStatic(ctx, target) {
 		return this;
 	}
 
@@ -232,7 +232,7 @@ export class ValueSetModification extends ValueModification {
 		return values;
 	}
 
-	bake(ctx) {
+	bake(ctx, target) {
 		let valueArray = this.newValue.evalFull(ctx)[0].get(ctx.player);
 		if (valueArray.length == 0) {
 			return null;
@@ -263,7 +263,7 @@ export class ValueAppendModification extends ValueModification {
 		return values;
 	}
 
-	bake(ctx) {
+	bake(ctx, target) {
 		let valueArray = this.newValues.evalFull(ctx)[0];
 		const type = valueArray.type;
 		valueArray = valueArray.get(ctx.player);
@@ -273,16 +273,22 @@ export class ValueAppendModification extends ValueModification {
 		// construct ability instances now
 		if (this.value === "abilities") {
 			valueArray = valueArray.map(val => makeAbility(type === "abilityId"? val : val.id));
+			for (const ability of valueArray) {
+				ability.card = target;
+			}
 		}
 		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray, type), this.toBase, this.condition);
 	}
 
-	bakeStatic(ctx) {
+	bakeStatic(ctx, target) {
 		let valueArray = this.newValues.evalFull(ctx)[0];
 		if (valueArray.type != "abilityId") return this;
 
 		const type = valueArray.type;
 		valueArray = valueArray.get(ctx.player).map(val => makeAbility(type === "abilityId"? val : val.id));
+		for (const ability of valueArray) {
+			ability.card = target;
+		}
 		return new ValueAppendModification(this.value, new ast.ValueArrayNode(valueArray, type), this.toBase, this.condition);
 	}
 }
@@ -301,7 +307,7 @@ export class NumericChangeModification extends ValueModification {
 		return values;
 	}
 
-	bake(ctx) {
+	bake(ctx, target) {
 		let valueArray = this.amount.evalFull(ctx)[0].get(ctx.player);
 		if (valueArray.length == 0) {
 			return null;
@@ -329,7 +335,7 @@ export class NumericDivideModification extends ValueModification {
 		return values;
 	}
 
-	bake(ctx) {
+	bake(ctx, target) {
 		let valueArray = this.byAmount.evalFull(ctx)[0].get(ctx.player);
 		if (valueArray.length == 0) {
 			return null;
@@ -367,7 +373,7 @@ export class AbilityCancelModification extends ValueModification {
 		return values;
 	}
 
-	bake(ctx) {
+	bake(ctx, target) {
 		let abilities = this.abilities.evalFull(ctx)[0].get(ctx.player);
 		return new AbilityCancelModification(this.value, new ast.ValueArrayNode(abilities), this.toBase, this.condition);
 	}

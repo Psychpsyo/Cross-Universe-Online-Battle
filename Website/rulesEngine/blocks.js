@@ -201,9 +201,9 @@ export class Fight extends Block {
 }
 
 export class AbilityActivation extends Block {
-	constructor(stack, player, card, ability) {
+	constructor(stack, player, ability) {
 		// by the time this block executes, the snapshot might not be able to resolve to a card anymore (good)
-		card = card.snapshot();
+		const card = ability.card.snapshot();
 		super("abilityActivationBlock", stack, player,
 			new timingGenerators.TimingRunner(() =>
 				timingGenerators.abilityTimingGenerator(ability, card, player),

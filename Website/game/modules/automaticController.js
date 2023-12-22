@@ -393,7 +393,7 @@ export class AutomaticController extends InteractionController {
 				return;
 			}
 			case "replacementAbilityApplied": {
-				return autoUI.activate(events[0].card);
+				return autoUI.activate(events[0].ability.card);
 			}
 			case "countersChanged": {
 				return Promise.all(events.map(event => autoUI.updateCounters(event.card.current(), event.counterType)));
@@ -712,7 +712,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "applyReplacementAbility": {
 				response.value = await gameUI.askQuestion(
-					locale.game.automatic.replacementAbilitySelect.question.replaceAll("{#CARDNAME}", (await Promise.all(request.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					locale.game.automatic.replacementAbilitySelect.question.replaceAll("{#CARDNAME}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
 					locale.game.automatic.replacementAbilitySelect.yes,
 					locale.game.automatic.replacementAbilitySelect.no
 				);
@@ -726,7 +726,7 @@ export class AutomaticController extends InteractionController {
 						gameUI.addCardButton(
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
-							locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].index + 1),
+							locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i]) + 1),
 							"activateAbility",
 							function() {
 								resolve(i);

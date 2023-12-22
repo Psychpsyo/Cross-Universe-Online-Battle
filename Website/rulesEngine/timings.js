@@ -71,26 +71,26 @@ export class Timing {
 	* _handleSubstitutionAbilities() {
 		const activeCards = game.players.map(player => player.getAllCards()).flat();
 		const possibleTargets = activeCards.concat(game.players);
-		const newApplications = new Map();
+		const applyAbilities = new Map();
 		for (const currentCard of activeCards) {
 			for (const ability of currentCard.values.current.abilities) {
 				if (ability instanceof abilities.StaticAbility && ability.modifier.modifications[0] instanceof ActionReplaceModification) {
-					const eligibleTargets = ability.getTargets(currentCard, currentCard.currentOwner());
+					const eligibleTargets = ability.getTargets(currentCard.currentOwner());
 					for (const target of possibleTargets) {
 						if (eligibleTargets.includes(target)) {
 							// abilities are just dumped in a list here to be sorted later.
-							const applications = newApplications.get(target) ?? [];
-							applications.push(new StaticAbilityApplication(ability, currentCard));
-							newApplications.set(target, applications);
+							const abilities = applyAbilities.get(target) ?? [];
+							abilities.push(ability);
+							applyAbilities.set(target, abilities);
 						}
 					}
 				}
 			}
 		}
 
-		for (const [target, applications] of newApplications) {
-			for (const application of yield* orderStaticAbilityApplications(target, applications)) {
-				const modifier = application.getModifier();
+		for (const [target, abilities] of applyAbilities) {
+			for (const ability of yield* orderStaticAbilities(target, abilities)) {
+				const modifier = ability.getModifier();
 				for (const modification of modifier.modifications) {
 					for (let i = 0; i < this.actions.length; i++) {
 						ast.setImplicit([this.actions[i]], "action");
@@ -123,14 +123,14 @@ export class Timing {
 						if (foundInvalidReplacement) continue;
 
 						// ask player if they want to apply optional replacement
-						if (!application.ability.mandatory) {
-							const response = yield [applyReplacementAbility.create(application.source.currentOwner(), application.ability, application.source)];
+						if (!ability.mandatory) {
+							const response = yield [applyReplacementAbility.create(ability)];
 							response.value = applyReplacementAbility.validate(response.value);
 							if (!response.value) continue;
 						}
 
 						// apply the replacements
-						yield [createReplacementAbilityAppliedEvent(application.source, application.ability)];
+						yield [createReplacementAbilityAppliedEvent(ability)];
 						this._replaceAction(this.actions[i], replacements);
 					}
 				}
@@ -238,7 +238,7 @@ export class Timing {
 						for (let ability of card.values.current.abilities) {
 							if (ability instanceof abilities.TriggerAbility ||
 								ability instanceof abilities.CastAbility) {
-								ability.checkTrigger(card, player);
+								ability.checkTrigger(player);
 							}
 						}
 					}
@@ -330,19 +330,6 @@ export class Timing {
 	}
 }
 
-// used in ordering static abilities when applying them
-class StaticAbilityApplication {
-	constructor(ability, source) {
-		this.ability = ability;
-		this.source = source;
-	}
-
-	getModifier() {
-		const player = this.source.currentOwner();
-		return this.ability.modifier.evalFull(new ScriptContext(this.source, player, this.ability))[0].get(player);
-	}
-}
-
 // This is run after every regular timing and right after blocks start and end.
 // It takes care of updating static abilities.
 export async function* runInterjectedTimings(game, isPrediction) {
@@ -377,7 +364,7 @@ function* getStaticAbilityPhasingTiming(game) {
 	const modificationActions = []; // the list of Apply/UnapplyStaticAbility actions that this will return as a timing.
 	const activeCards = game.players.map(player => player.getActiveCards()).flat();
 	const possibleTargets = activeCards.concat(game.players);
-	const newApplications = new Map();
+	const applyAbilities = new Map();
 	const abilityTargets = new Map(); // caches an abilities targets so they do not get recomputed
 
 	// unapplying old modifiers
@@ -398,7 +385,7 @@ function* getStaticAbilityPhasingTiming(game) {
 			}
 			// else check if the object is still a valid target for the ability
 			if (!abilityTargets.has(modifier.ctx.ability)) {
-				abilityTargets.set(modifier.ctx.ability, modifier.ctx.ability.getTargets(modifier.ctx.card, modifier.ctx.card.currentOwner()));
+				abilityTargets.set(modifier.ctx.ability, modifier.ctx.ability.getTargets(modifier.ctx.card.currentOwner()));
 			}
 			if (!abilityTargets.get(modifier.ctx.ability).includes(target)) {
 				modificationActions.push(new actions.UnapplyStaticAbility(
@@ -417,27 +404,27 @@ function* getStaticAbilityPhasingTiming(game) {
 			if (!(ability instanceof abilities.StaticAbility) || (ability.modifier.modifications[0] instanceof ActionReplaceModification)) continue;
 
 			if (!abilityTargets.has(ability)) {
-				abilityTargets.set(ability, ability.getTargets(currentCard, currentCard.currentOwner()));
+				abilityTargets.set(ability, ability.getTargets(currentCard.currentOwner()));
 			}
 			for (const target of possibleTargets) {
 				if (abilityTargets.get(ability).includes(target)) {
 					if (!target.values.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
 						// abilities are just dumped in a list here to be sorted later.
-						let applications = newApplications.get(target) ?? [];
-						applications.push(new StaticAbilityApplication(ability, currentCard));
-						newApplications.set(target, applications);
+						const abilities = applyAbilities.get(target) ?? [];
+						abilities.push(ability);
+						applyAbilities.set(target, abilities);
 					}
 				}
 			}
 		}
 	}
 
-	for (const [target, applications] of newApplications) {
-		for (const application of yield* orderStaticAbilityApplications(target, applications)) {
+	for (const [target, abilities] of applyAbilities) {
+		for (const ability of yield* orderStaticAbilities(target, abilities)) {
 			modificationActions.push(new actions.ApplyStaticAbility(
-				application.source.currentOwner(), // have these be owned by the player that owns the card with the ability.
+				ability.card.currentOwner(), // have these be owned by the player that owns the card with the ability.
 				target,
-				application.getModifier().bakeStatic(target)
+				ability.getModifier().bakeStatic(target)
 			));
 		}
 	}
@@ -448,61 +435,61 @@ function* getStaticAbilityPhasingTiming(game) {
 	return new Timing(game, modificationActions);
 }
 
-function* orderStaticAbilityApplications(target, applications) {
-	const orderedApplications = [];
+function* orderStaticAbilities(target, abilities) {
+	const orderedAbilities = [];
 
 	const fieldEnterBuckets = {};
-	for (let i = applications.length - 1; i >= 0; i--) {
+	for (let i = abilities.length - 1; i >= 0; i--) {
 		// a card's own abilities go first.
-		if (target instanceof BaseCard && applications[i].source === target) {
-			orderedApplications.push(applications[i]);
-			applications.splice(i, 1);
+		if (target instanceof BaseCard && abilities[i].card === target) {
+			orderedAbilities.push(abilities[i]);
+			abilities.splice(i, 1);
 		} else {
-			// otherwise the applications get ordered by when they entered the field
-			const lastMoved = applications[i].ability.zoneEnterTimingIndex;
+			// otherwise the abilities get ordered by when they entered the field
+			const lastMoved = abilities[i].zoneEnterTimingIndex;
 			if (fieldEnterBuckets[lastMoved] === undefined) {
 				fieldEnterBuckets[lastMoved] = [];
 			}
-			fieldEnterBuckets[lastMoved].push(applications[i]);
+			fieldEnterBuckets[lastMoved].push(abilities[i]);
 		}
 	}
 
-	// sort abilities by when they were put on the field, then by application category bucket. (whose field they are on)
+	// sort abilities by when they were put on the field, then by category bucket. (whose field they are on)
 	for (const timing of Object.keys(fieldEnterBuckets)) {
 		let applyBuckets = [];
 		switch (true) {
 			case target instanceof BaseCard: { // applying to cards
-				applyBuckets.push({player: target.currentOwner(), applications: []}); // abilities on same side of field
-				applyBuckets.push({player: target.currentOwner().next(), applications: []}); // abilities on other side of field
-				for (const application of fieldEnterBuckets[timing]) {
-					if (application.source.currentOwner() === target.currentOwner()) {
-						applyBuckets[0].applications.push(application);
+				applyBuckets.push({player: target.currentOwner(), abilities: []}); // abilities on same side of field
+				applyBuckets.push({player: target.currentOwner().next(), abilities: []}); // abilities on other side of field
+				for (const ability of fieldEnterBuckets[timing]) {
+					if (ability.card.currentOwner() === target.currentOwner()) {
+						applyBuckets[0].abilities.push(ability);
 					} else {
-						applyBuckets[1].applications.push(application);
+						applyBuckets[1].abilities.push(ability);
 					}
 				}
 				break;
 			}
 			case target instanceof Player: { // applying to players
-				applyBuckets.push({player: target, applications: []}); // abilities on same side of field
-				applyBuckets.push({player: target.next(), applications: []}); // abilities on other side of field
-				for (const application of fieldEnterBuckets[timing]) {
-					if (application.source.currentOwner() === target) {
-						applyBuckets[0].applications.push(application);
+				applyBuckets.push({player: target, abilities: []}); // abilities on same side of field
+				applyBuckets.push({player: target.next(), abilities: []}); // abilities on other side of field
+				for (const ability of fieldEnterBuckets[timing]) {
+					if (ability.card.currentOwner() === target) {
+						applyBuckets[0].abilities.push(ability);
 					} else {
-						applyBuckets[1].applications.push(application);
+						applyBuckets[1].abilities.push(ability);
 					}
 				}
 				break;
 			}
 			default: { // applying to everything else (game processes like fights)
-				applyBuckets.push({player: game.currentTurn().player, applications: []}); // abilities owned by the turn player
-				applyBuckets.push({player: game.currentTurn().player.next(), applications: []}); // abilities owned by the non-turn player
-				for (const application of fieldEnterBuckets[timing]) {
-					if (application.source.currentOwner() === buckets[0].player) {
-						applyBuckets[0].applications.push(application);
+				applyBuckets.push({player: game.currentTurn().player, abilities: []}); // abilities owned by the turn player
+				applyBuckets.push({player: game.currentTurn().player.next(), abilities: []}); // abilities owned by the non-turn player
+				for (const ability of fieldEnterBuckets[timing]) {
+					if (ability.card.currentOwner() === buckets[0].player) {
+						applyBuckets[0].abilities.push(ability);
 					} else {
-						applyBuckets[1].applications.push(application);
+						applyBuckets[1].abilities.push(ability);
 					}
 				}
 			}
@@ -510,26 +497,26 @@ function* orderStaticAbilityApplications(target, applications) {
 
 		// ordering abilities in the buckets
 		for (const bucket of applyBuckets) {
-			if (bucket.applications.length === 0) continue;
+			if (bucket.abilities.length === 0) continue;
 
-			let orderedAbilities = [0];
+			let ordering = [0];
 			// is sorting necessary for this bucket?
-			if (bucket.applications.length !== 1) {
-				const request = chooseAbilityOrder.create(bucket.player, target, bucket.applications.map(elem => elem.ability), bucket.applications.map(elem => elem.source));
+			if (bucket.abilities.length !== 1) {
+				const request = chooseAbilityOrder.create(bucket.player, target, bucket.abilities);
 				const response = yield [request];
 				if (response.type != "chooseAbilityOrder") {
 					throw new Error("Wrong response type supplied during ability ordering (expected 'chooseAbilityOrder', got '" + response.type + "')");
 				}
-				orderedAbilities = chooseAbilityOrder.validate(response.value, request);
+				ordering = chooseAbilityOrder.validate(response.value, request);
 			}
 			// actually apply the abilities
-			for (const index of orderedAbilities) {
-				orderedApplications.push(bucket.applications[index]);
+			for (const index of ordering) {
+				orderedAbilities.push(bucket.abilities[index]);
 			}
 		}
 	}
 
-	return orderedApplications;
+	return orderedAbilities;
 }
 
 function recalculateObjectValues(game) {

@@ -11,7 +11,7 @@ export class ObjectValues {
 	}
 
 	clone() {
-		let newValues = new ObjectValues(this.initial.clone());
+		const newValues = new ObjectValues(this.initial.clone());
 		newValues.base = this.base.clone();
 		newValues.current = this.current.clone();
 		newValues.modifierStack = [...this.modifierStack];
@@ -19,13 +19,13 @@ export class ObjectValues {
 
 		// cloning abilities if this is for a card
 		if (this.initial instanceof CardValues) {
-			let abilities = [...this.initial.abilities];
-			for (let ability of this.base.abilities.concat(this.current.abilities)) {
+			const abilities = [...this.initial.abilities];
+			for (const ability of this.base.abilities.concat(this.current.abilities)) {
 				if (!abilities.includes(ability)) {
 					abilities.push(ability);
 				}
 			}
-			let abilitySnapshots = abilities.map(ability => ability.snapshot());
+			const abilitySnapshots = abilities.map(ability => ability.snapshot());
 			newValues.initial.abilities = newValues.initial.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
 			newValues.base.abilities = newValues.base.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);
 			newValues.current.abilities = newValues.current.abilities.map(ability => abilitySnapshots[abilities.indexOf(ability)]);

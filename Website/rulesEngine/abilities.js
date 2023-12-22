@@ -12,14 +12,15 @@ export class BaseAbility {
 		if (ability.condition) {
 			this.condition = interpreter.buildAST("condition", ability.id, ability.condition, game);
 		}
+		this.card = null; // set by the card later
 	}
 
-	isConditionMet(card, player, evaluatingPlayer = player) {
-		return this.condition === null || this.condition.evalFull(new ScriptContext(card, player, this, evaluatingPlayer))[0].get(player);
+	isConditionMet(player, evaluatingPlayer = player) {
+		return this.condition === null || this.condition.evalFull(new ScriptContext(this.card, player, this, evaluatingPlayer))[0].get(player);
 	}
 
 	canActivate(card, player, evaluatingPlayer = player) {
-		return !this.isCancelled && this.isConditionMet(card, player, evaluatingPlayer);
+		return !this.isCancelled && this.isConditionMet(player, evaluatingPlayer);
 	}
 
 	snapshot() {
@@ -82,12 +83,12 @@ export class CastAbility extends Ability {
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during spell casting
 	canActivate(card, player, evaluatingPlayer = player) {
-		return (this.isConditionMet(card, player, evaluatingPlayer)) &&
+		return (this.isConditionMet(player, evaluatingPlayer)) &&
 			(this.after === null || this.triggerMetOnStacks.includes(player.game.currentStack().index - 1));
 	}
 
-	checkTrigger(card, player) {
-		if (this.after == null || this.after.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
+	checkTrigger(player) {
+		if (this.after == null || this.after.evalFull(new ScriptContext(this.card, player, this))[0].get(player)) {
 			this.triggerMetOnStacks.push(player.game.currentStack().index);
 		}
 	}
@@ -100,7 +101,7 @@ export class DeployAbility extends Ability {
 
 	// does not call super.canActivate() to not perform a redundant and inaccurate cost check during item deployment
 	canActivate(card, player, evaluatingPlayer = player) {
-		return this.isConditionMet(card, player, evaluatingPlayer);
+		return this.isConditionMet(player, evaluatingPlayer);
 	}
 }
 
@@ -209,20 +210,20 @@ export class TriggerAbility extends Ability {
 		return super.canActivate(card, player, evaluatingPlayer);
 	}
 
-	checkTrigger(card, player) {
+	checkTrigger(player) {
 		if (this.after === null) {
 			return;
 		}
-		if (this.after.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
+		if (this.after.evalFull(new ScriptContext(this.card, player, this))[0].get(player)) {
 			this.triggerMetOnStacks.push(player.game.currentStack().index);
 		}
 	}
 
-	checkDuring(card, player) {
+	checkDuring(player) {
 		if (!this.during) {
 			return;
 		}
-		if (!this.during.evalFull(new ScriptContext(card, player, this))[0].get(player)) {
+		if (!this.during.evalFull(new ScriptContext(this.card, player, this))[0].get(player)) {
 			this.triggerMetOnStacks = [];
 			this.usedDuring = false;
 		} else if (!this.usedDuring) {
@@ -254,11 +255,16 @@ export class StaticAbility extends BaseAbility {
 		this.mandatory = ability.mandatory; // for action-replacing abilities
 	}
 
-	getTargets(card, player, evaluatingPlayer = player) {
-		if (this.isConditionMet(card, player, evaluatingPlayer = player)) {
-			return this.applyTo.evalFull(new ScriptContext(card, player, this, evaluatingPlayer))[0].get(player);
+	getTargets(player, evaluatingPlayer = player) {
+		if (this.isConditionMet(player, evaluatingPlayer = player)) {
+			return this.applyTo.evalFull(new ScriptContext(this.card, player, this, evaluatingPlayer))[0].get(player);
 		}
 		return [];
+	}
+
+	getModifier() {
+		const player = this.card.currentOwner();
+		return this.modifier.evalFull(new ScriptContext(this.card, player, this))[0].get(player);
 	}
 
 	zoneMoveReset(game) {

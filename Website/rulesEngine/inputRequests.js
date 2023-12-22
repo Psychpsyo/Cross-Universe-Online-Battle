@@ -138,13 +138,12 @@ export const orderCards = {
 }
 
 export const applyReplacementAbility = {
-	create: function(player, ability, card) {
+	create: function(player, ability) {
 		return {
 			"nature": "request",
 			"player": player,
 			"type": "applyReplacementAbility",
-			"ability": ability,
-			"card": card
+			"ability": ability
 		}
 	},
 	validate: function(response, request) {
@@ -393,13 +392,12 @@ export const chooseZoneSlot = {
 }
 
 export const chooseAbilityOrder = {
-	create: function(player, card, abilities, sourceCards) {
+	create: function(player, card, abilities) {
 		return {
 			"nature": "request",
 			"player": player,
 			"type": "chooseAbilityOrder",
 			"abilities": abilities,
-			"sourceCards": sourceCards,
 			"applyTo": card
 		}
 	},

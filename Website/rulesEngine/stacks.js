@@ -20,16 +20,16 @@ export class Stack {
 			for (let card of player.getActiveCards()) {
 				for (let ability of card.values.current.abilities) {
 					if (ability instanceof abilities.TriggerAbility) {
-						ability.checkDuring(card, player);
+						ability.checkDuring(player);
 					}
 				}
 			}
 		}
 		while (true) {
-			let inputRequests = await this.phase.getBlockOptions(this);
-			let response = yield inputRequests;
+			const inputRequests = await this.phase.getBlockOptions(this);
+			const response = yield inputRequests;
 
-			let responseValue = requests[response.type].validate(response.value, inputRequests.find(request => request.type == response.type));
+			const responseValue = requests[response.type].validate(response.value, inputRequests.find(request => request.type == response.type));
 
 			let nextBlock;
 			switch (response.type) {
@@ -73,8 +73,7 @@ export class Stack {
 				case "activateOptionalAbility":
 				case "activateFastAbility":
 				case "activateTriggerAbility": {
-					let ability = responseValue.card.values.current.abilities[responseValue.index];
-					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), responseValue.card, ability);
+					nextBlock = new blocks.AbilityActivation(this, this.getNextPlayer(), responseValue);
 					break;
 				}
 			}

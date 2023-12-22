@@ -102,10 +102,9 @@ export class StackPhase extends Phase {
 		let eligibleAbilities = [];
 		let player = stack.getNextPlayer();
 		for (let card of player.getActiveCards()) {
-			let cardAbilities = card.values.current.abilities;
-			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.FastAbility && await cardAbilities[i].canActivate(card, player)) {
-					eligibleAbilities.push({card: card, index: i});
+			for (const ability of card.values.current.abilities) {
+				if (ability instanceof abilities.FastAbility && await ability.canActivate(ability.card, player)) {
+					eligibleAbilities.push(ability);
 				}
 			}
 		}
@@ -116,10 +115,9 @@ export class StackPhase extends Phase {
 		let eligibleAbilities = [];
 		let player = stack.getNextPlayer();
 		for (let card of player.getActiveCards()) {
-			let cardAbilities = card.values.current.abilities;
-			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.TriggerAbility && await cardAbilities[i].canActivate(card, player)) {
-					eligibleAbilities.push({card: card, index: i});
+			for (const ability of card.values.current.abilities) {
+				if (ability instanceof abilities.TriggerAbility && await ability.canActivate(ability.card, player)) {
+					eligibleAbilities.push(ability);
 				}
 			}
 		}
@@ -272,10 +270,9 @@ export class MainPhase extends StackPhase {
 	async getActivatableOptionalAbilities() {
 		let eligibleAbilities = [];
 		for (let card of this.turn.player.getActiveCards()) {
-			let cardAbilities = card.values.current.abilities;
-			for (let i = 0; i < cardAbilities.length; i++) {
-				if (cardAbilities[i] instanceof abilities.OptionalAbility && await cardAbilities[i].canActivate(card, this.turn.player)) {
-					eligibleAbilities.push({card: card, index: i});
+			for (const ability of card.values.current.abilities) {
+				if (ability instanceof abilities.OptionalAbility && await ability.canActivate(ability.card, this.turn.player)) {
+					eligibleAbilities.push(ability);
 				}
 			}
 		}
@@ -373,8 +370,7 @@ function getOptionPriority(option) {
 	if (option.type == "activateTriggerAbility") {
 		let hasMandatory = false;
 		for (let i = option.eligibleAbilities.length -1; i >= 0; i--) {
-			let ability = option.eligibleAbilities[i].card.values.current.abilities[option.eligibleAbilities[i].index];
-			if (ability.mandatory) {
+			if (option.eligibleAbilities[i].mandatory) {
 				if (!hasMandatory) {
 					option.eligibleAbilities.splice(i + 1);
 					hasMandatory = true;
