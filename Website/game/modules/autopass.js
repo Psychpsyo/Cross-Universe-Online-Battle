@@ -47,9 +47,16 @@ export function getAutoResponse(requests) {
 				}
 				break;
 			}
-			// activating trigger abilities when it is the only option
+			// activating mandatory trigger abilities (when they are the same, so the order probably doesn't matter)
 			case "activateTriggerAbility": {
-				if (request.eligibleAbilities.length === 1) {
+				const compareTo = request.eligibleAbilities[0];
+				let autoSortable = true;
+				for (let i = 1; i < request.eligibleAbilities.length; i++) {
+					if (compareTo.id !== request.eligibleAbilities[i].id) {
+						autoSortable = false;
+					}
+				}
+				if (autoSortable) {
 					return {
 						type: "activateTriggerAbility",
 						value: 0
