@@ -406,8 +406,7 @@
 			"passInBattlePhase": null,
 			"passInEndPhase": null,
 			"passOnStackTwo": null,
-			"passOnOwnBlocks": null,
-			"passOnAttackDeclaration": null
+			"passOnOwnBlocks": null
 		},
 
 		"hotkeys": {

@@ -97,14 +97,6 @@ export function getAutoResponse(requests) {
 		return {type: "pass"};
 	}
 
-	// passing in response to attack declarations
-	if (localStorage.getItem("passOnAttackDeclaration") === "true") {
-		const currentStack = game.currentStack();
-		if (currentStack.blocks[0] instanceof blocks.AttackDeclaration) {
-			return {type: "pass"};
-		}
-	}
-
 	// passing in response to your own actions
 	if (localStorage.getItem("passOnOwnBlocks") === "true") {
 		const currentStack = game.currentStack();

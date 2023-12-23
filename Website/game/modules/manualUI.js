@@ -181,33 +181,33 @@ export function receiveMessage(command, message) {
 			return true;
 		}
 		case "counterIncrease": {
-			let slotIndex = 19 - message.substr(0, message.indexOf("|"));
-			let counterIndex = message.substr(message.indexOf("|") + 1);
-			let counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
-			counter.innerHTML = parseInt(counter.innerHTML) + 1;
+			const slotIndex = 19 - message.substr(0, message.indexOf("|"));
+			const counterIndex = message.substr(message.indexOf("|") + 1);
+			const counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
+			gameUI.setCounter(counter, parseInt(counter.innerHTML) + 1);
 			return true;
 		}
 		case "counterDecrease": {
-			let slotIndex = 19 - message.substr(0, message.indexOf("|"));
-			let counterIndex = message.substr(message.indexOf("|") + 1);
-			let counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
-			counter.innerHTML = parseInt(counter.innerHTML) - 1;
+			const slotIndex = 19 - message.substr(0, message.indexOf("|"));
+			const counterIndex = message.substr(message.indexOf("|") + 1);
+			const counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
+			gameUI.setCounter(counter, parseInt(counter.innerHTML) - 1);
 			return true;
 		}
 		case "counterRemove": {
-			let slotIndex = 19 - message.substr(0, message.indexOf("|"));
-			let counterIndex = message.substr(message.indexOf("|") + 1);
+			const slotIndex = 19 - message.substr(0, message.indexOf("|"));
+			const counterIndex = message.substr(message.indexOf("|") + 1);
 			document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
 			return true;
 		}
 		case "revealCard": { // opponent revealed a presented card
-			let index = parseInt(message);
+			const index = parseInt(message);
 			gameState.controller.playerInfos[0].presentedZone.cards[index].showTo(localPlayer);
 			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
 			return true;
 		}
 		case "unrevealCard": { // opponent hid a presented card
-			let index = parseInt(message);
+			const index = parseInt(message);
 			gameState.controller.playerInfos[0].presentedZone.cards[index].hideFrom(localPlayer);
 			gameUI.updateCard(gameState.controller.playerInfos[0].presentedZone, index);
 			return true;
@@ -229,7 +229,7 @@ function addCounter(slotIndex) {
 	counter.addEventListener("mousedown", function (e) {e.preventDefault();})
 	// edit the counter
 	counter.addEventListener("click", function(e) {
-		this.textContent = parseInt(this.textContent) + 1;
+		gameUI.setCounter(this, parseInt(this.textContent) + 1);
 		const fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
 		const counterIndex = Array.from(this.parentElement.children).indexOf(this);
 		socket.send("[counterIncrease]" + fieldSlot + "|" + counterIndex);
@@ -247,7 +247,7 @@ function addCounter(slotIndex) {
 					this.remove();
 					socket.send("[counterRemove]" + fieldSlot + "|" + counterIndex);
 				} else {
-					this.textContent = parseInt(this.textContent) - 1;
+					gameUI.setCounter(this, parseInt(this.textContent) - 1);
 					socket.send("[counterDecrease]" + fieldSlot + "|" + counterIndex);
 				}
 				break;

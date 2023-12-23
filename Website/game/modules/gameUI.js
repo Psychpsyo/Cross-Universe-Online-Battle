@@ -995,6 +995,13 @@ export function addCounter(slotIndex, name) {
 	return counter;
 }
 
+export function setCounter(counterElem, value) {
+	counterElem.textContent = value;
+	if (value == 6 || value == 9) {
+		counterElem.textContent += ".";
+	}
+}
+
 export function clearCounters(slotIndex) {
 	for (const counter of document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").querySelectorAll(".counter")) {
 		counter.remove();

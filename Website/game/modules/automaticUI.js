@@ -113,9 +113,12 @@ export function clearPass() {
 
 export function indicateYourMove() {
 	stackDisplayHolder.classList.add("yourMove");
+	mainGameArea.classList.add("yourMove");
+
 }
 export function clearYourMove() {
 	stackDisplayHolder.classList.remove("yourMove");
+	mainGameArea.classList.remove("yourMove");
 }
 
 export function newStack(number) {
@@ -446,7 +449,7 @@ export async function showCardSwap(cardA, cardB) {
 
 				const counterElem = gameUI.addCounter(slotIndex, locale.counters[counter]);
 				counterElem.classList.add("counterType" + counter);
-				counterElem.textContent = card.counters[counter];
+				gameUI.setCounter(counterElem, card.counters[counter]);
 			}
 		}
 	}

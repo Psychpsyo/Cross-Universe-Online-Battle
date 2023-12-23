@@ -266,7 +266,6 @@ dialog #cardDetails {
 #gameInteractions {
 	text-align: center;
 	padding: .5em;
-	user-select: none;
 }
 #gameInteractions > div:not(:last-child) {
 	padding-bottom: .5em;
@@ -815,6 +814,7 @@ dialog.popupSelectMenu {
 	width: 1.5em;
 	z-index: 5;
 	font-size: .8em;
+	letter-spacing: -.1em;
 }
 #p0Grid .counterHolder {
 	flex-direction: column-reverse;

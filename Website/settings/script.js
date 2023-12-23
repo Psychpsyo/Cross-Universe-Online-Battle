@@ -190,10 +190,6 @@ const settings = {
 		{
 			id: "passOnStackTwo",
 			type: "toggle"
-		},
-		{
-			id: "passOnAttackDeclaration",
-			type: "toggle"
 		}
 	],
 	advanced: [

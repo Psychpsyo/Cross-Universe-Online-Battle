@@ -190,7 +190,7 @@
 				"summon": "Summon",
 				"cast": "Cast",
 				"deploy": "Deploy",
-				"activate": "Activation",
+				"activate": "Activated",
 				"retire": "Retire",
 				"declare": "Attack",
 				"fight": "Fight"
@@ -406,8 +406,7 @@
 			"passInBattlePhase": "Pass in the battle phase if you have no battle phase specific options or triggers",
 			"passInEndPhase": "Pass through end phase if you have no end phase specific options or triggers",
 			"passOnStackTwo": "Pass on empty stacks 2+ if you have no trigger abilities or conditional spells",
-			"passOnOwnBlocks": "Pass on your own actions if opponent did not intervene",
-			"passOnAttackDeclaration": "Pass in response to attack declarations"
+			"passOnOwnBlocks": "Pass on your own actions if opponent did not intervene"
 		},
 
 		"hotkeys": {
