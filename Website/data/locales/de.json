@@ -297,6 +297,8 @@
 		"enterMessage": "Nachricht schreiben...",
 		"you": "Du",
 		"opponent": "Gegner",
+		"replayYou": "Magier 1",
+		"replayOpponent": "Magier 2",
 		"colon": ": "
 	},
 

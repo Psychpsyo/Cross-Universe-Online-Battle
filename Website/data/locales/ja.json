@@ -297,6 +297,8 @@
 		"enterMessage": "Enter Message...",
 		"you": "自分",
 		"opponent": "相手",
+		"replayYou": "魔術師１",
+		"replayOpponent": "魔術師２",
 		"colon": "："
 	},
 
