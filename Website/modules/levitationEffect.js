@@ -47,7 +47,7 @@ function getRandomCardLink() {
 	const date = new Date();
 	const day = date.getDate();
 	const month = date.getMonth();
-	if (month === 11 && (day === 24 || day === 25 || day === 26)) {
+	if (month === 11 && ([23, 24, 25, 26].includes(day))) {
 		return cardBaseUrl + locale.code + "/" + christmasCards[Math.floor(Math.random(christmasCards.length))] + ".jpg";
 	}
 	if (month === 3 && day === 1) {
