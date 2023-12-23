@@ -317,6 +317,8 @@ export class SnapshotCard extends BaseCard {
 		return this;
 	}
 
+	// restored this snapshot to the card it is a snapshot of.
+	// Note: Do not use snapshot after restoring!
 	restore() {
 		this._actualCard.isRemovedToken = this.isRemovedToken;
 
@@ -334,8 +336,17 @@ export class SnapshotCard extends BaseCard {
 
 		this._actualCard.hiddenFor = [...this.hiddenFor];
 
-		// also ends up restoring snapshotted abilities
+		// restoring snapshotted abilities and fixing up their card references
 		this._actualCard.values = this.values;
+		for (const ability of this.values.initial.abilities) {
+			ability.card = this._actualCard;
+		}
+		for (const ability of this.values.base.abilities) {
+			ability.card = this._actualCard;
+		}
+		for (const ability of this.values.current.abilities) {
+			ability.card = this._actualCard;
+		}
 
 		this._actualCard.equippedTo = this.equippedTo?._actualCard ?? null;
 		if (this.equippedTo && !this._actualCard.equippedTo.equipments.includes(this._actualCard)) {

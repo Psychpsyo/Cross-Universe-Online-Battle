@@ -74,7 +74,7 @@ export class Timing {
 		const applyAbilities = new Map();
 		for (const currentCard of activeCards) {
 			for (const ability of currentCard.values.current.abilities) {
-				if (ability instanceof abilities.StaticAbility && ability.modifier.modifications[0] instanceof ActionReplaceModification) {
+				if (ability instanceof abilities.StaticAbility && ability.getModifier().modifications[0] instanceof ActionReplaceModification) {
 					const eligibleTargets = ability.getTargets(currentCard.currentOwner());
 					for (const target of possibleTargets) {
 						if (eligibleTargets.includes(target)) {
@@ -365,7 +365,7 @@ function* getStaticAbilityPhasingTiming(game) {
 	const activeCards = game.players.map(player => player.getActiveCards()).flat();
 	const possibleTargets = activeCards.concat(game.players);
 	const applyAbilities = new Map();
-	const abilityTargets = new Map(); // caches an abilities targets so they do not get recomputed
+	const abilityTargets = new Map(); // caches the abilities targets so they do not get recomputed
 
 	// unapplying old modifiers
 	for (const target of possibleTargets) {
@@ -401,7 +401,7 @@ function* getStaticAbilityPhasingTiming(game) {
 	for (const currentCard of activeCards) {
 		for (const ability of currentCard.values.current.abilities) {
 			// is this a regular static ability?
-			if (!(ability instanceof abilities.StaticAbility) || (ability.modifier.modifications[0] instanceof ActionReplaceModification)) continue;
+			if (!(ability instanceof abilities.StaticAbility) || (ability.getModifier().modifications[0] instanceof ActionReplaceModification)) continue;
 
 			if (!abilityTargets.has(ability)) {
 				abilityTargets.set(ability, ability.getTargets(currentCard.currentOwner()));
@@ -509,7 +509,7 @@ function* orderStaticAbilities(target, abilities) {
 				}
 				ordering = chooseAbilityOrder.validate(response.value, request);
 			}
-			// actually apply the abilities
+			// we got the order for the abilities
 			for (const index of ordering) {
 				orderedAbilities.push(bucket.abilities[index]);
 			}
