@@ -1,10 +1,10 @@
 
-import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createValueChangedEvent, createReplacementAbilityAppliedEvent} from "./events.js";
-import {chooseAbilityOrder, applyReplacementAbility} from "./inputRequests.js";
+import {createActionCancelledEvent, createPlayerWonEvent, createGameDrawnEvent, createValueChangedEvent, createActionModificationAbilityAppliedEvent} from "./events.js";
+import {chooseAbilityOrder, chooseCards, applyActionModificationAbility} from "./inputRequests.js";
 import {Player} from "./player.js";
 import {ScriptContext, ScriptValue} from "./cdfScriptInterpreter/structs.js";
 import {BaseCard} from "./card.js";
-import {recalculateModifiedValuesFor, ActionReplaceModification} from "./valueModifiers.js";
+import {recalculateModifiedValuesFor, ActionReplaceModification, ActionModification} from "./valueModifiers.js";
 import * as abilities from "./abilities.js";
 import * as phases from "./phases.js";
 import * as actions from "./actions.js";
@@ -42,96 +42,199 @@ export class Timing {
 		this.actions.splice(this.actions.indexOf(action), 1, ...replacements);
 	}
 
-	// returns a list of actionCancelled events
-	_cancelImpossibleActions() {
-		const actionCancelledEvents = [];
-		for (let i = 0; i < this.actions.length; i++) {
-			if (this.actions[i].isImpossible()) {
-				const action = this.actions[i];
-				this.actions.splice(i, 1);
-				i--;
-				actionCancelledEvents.push(createActionCancelledEvent(action));
-				if (action.costIndex >= 0) {
-					this.costCompletions[action.costIndex] = false;
-					for (let j = this.actions.length - 1; j >= 0; j--) {
-						if (this.actions[j].costIndex === action.costIndex) {
-							this.actions.splice(j, i);
-							if (j <= i) {
-								i--;
-							}
-						}
-					}
-				}
+	// cancels the given action and any implied actions and returns the actionCancelledEvents for all of them
+	_cancelAction(action) {
+		const events = [];
+		for (const cancelled of action.setIsCancelled()) {
+			events.push(createActionCancelledEvent(cancelled));
+			if (cancelled.costIndex >= 0) {
+				this.costCompletions[cancelled.costIndex] = false;
 			}
 		}
-		return actionCancelledEvents;
+		return events;
 	}
 
-	// applies static abilities like that on 'Substitution Doll'
-	* _handleSubstitutionAbilities() {
-		const activeCards = game.players.map(player => player.getAllCards()).flat();
+	// returns a list of actionCancelled events and sets impossible actions to cancelled
+	_cancelImpossibleActions() {
+		let events = [];
+		for (const action of this.actions) {
+			if (action.isCancelled) continue;
+			if (action.isImpossible()) {
+				events = events.concat(this._cancelAction(action));
+			}
+		}
+		return events;
+	}
+
+	// applies static abilities like that on 'Substitution Doll' or 'Norma, of the Sandstorm'
+	* _handleModificationAbilities() {
+		// gather abilities
+		const activeCards = this.game.players.map(player => player.getAllCards()).flat();
 		const possibleTargets = activeCards.concat(game.players);
-		const applyAbilities = new Map();
+		const applicableAbilities = new Map();
+		const targets = new Map();
+		for (const player of this.game.players) {
+			targets.set(player, []);
+		}
 		for (const currentCard of activeCards) {
 			for (const ability of currentCard.values.current.abilities) {
-				if (ability instanceof abilities.StaticAbility && ability.getModifier().modifications[0] instanceof ActionReplaceModification) {
+				if (ability instanceof abilities.StaticAbility && ability.getModifier().modifications[0] instanceof ActionModification) {
+					if (!ability.canApply(currentCard, currentCard.currentOwner())) continue;
+
+					// go through all targets that this ability could apply to
 					const eligibleTargets = ability.getTargets(currentCard.currentOwner());
+					if (eligibleTargets.length === 0) continue;
+
+					// add all the targets
 					for (const target of possibleTargets) {
-						if (eligibleTargets.includes(target)) {
-							// abilities are just dumped in a list here to be sorted later.
-							const abilities = applyAbilities.get(target) ?? [];
-							abilities.push(ability);
-							applyAbilities.set(target, abilities);
+						if (!eligibleTargets.includes(target)) continue;
+
+						// check if there is an action that this ability could apply to for this card
+						const modifier = ability.getModifier();
+
+						// for replacement abilities, we need to figure out if the replacement is not already happening.
+						if (modifier.modifications[0] instanceof ActionReplaceModification) {
+							let replacements;
+							let replacementsValid = true;
+							// TODO: This currently yields requests to the user but should ideally play through all options to figure out if a valid
+							//       replacement can be constructed. This does not currently matter on any official cards.
+							for (const output of modifier.modifications[0].replacement.eval(modifier.ctx)) {
+								if (output[0] instanceof actions.Action) {
+									replacements = output;
+									for (const action of this.actions) {
+										for (const replacement of replacements) {
+											if (action.isIdenticalTo(replacement)) replacementsValid = false;
+										}
+									}
+									break;
+								}
+								yield output;
+							}
+							if (!replacementsValid) continue;
 						}
+
+						let foundMatching = false;
+						for (const action of this.actions) {
+							// can't modify cancelled actions as they are not about to happen
+							if (action.isCancelled) continue;
+
+							ast.setImplicit([action], "action");
+							ast.setImplicit([target], "card");
+							const doesMatch = (yield* modifier.modifications[0].toModify.eval(modifier.ctx)).get();
+							ast.clearImplicit("card");
+							ast.clearImplicit("action");
+							if (doesMatch) {
+								foundMatching = true;
+								break;
+							}
+						}
+						if (!foundMatching) continue;
+
+						// abilities are just dumped in a list here to be sorted later.
+						const abilities = applicableAbilities.get(target) ?? [];
+						abilities.push(ability);
+						applicableAbilities.set(target, abilities);
+						// also keep track of which targets will need to be affected
+						const player = ability.card.currentOwner();
+						const oldTargets = targets.get(target.currentOwner());
+						oldTargets.push(target);
+						targets.set(target.currentOwner(), oldTargets);
 					}
 				}
 			}
 		}
 
-		for (const [target, abilities] of applyAbilities) {
-			for (const ability of yield* orderStaticAbilities(target, abilities)) {
-				const modifier = ability.getModifier();
-				for (const modification of modifier.modifications) {
+		// go through all cards in turn player, non-turn player order
+		for (const player of [game.currentTurn().player, game.currentTurn().player.next()]) {
+			const remainingCards = targets.get(player);
+			while (remainingCards.length > 0) {
+				let target;
+				if (remainingCards.length > 1) {
+					const request = chooseCards.create(player, remainingCards, [1], "nextCardToApplyStaticAbilityTo");
+					const response = yield [request];
+					if (response.type != "chooseCards") {
+						throw new Error("Wrong response type supplied during action modification application (expected 'chooseCards', got '" + response.type + "')");
+					}
+					target = chooseCards.validate(response.value, request)[0];
+				} else {
+					target = remainingCards[0];
+				}
+				remainingCards.splice(remainingCards.indexOf(target), 1);
+
+				// apply modifications to this card
+				for (const ability of yield* orderStaticAbilities(target, applicableAbilities.get(target))) {
+					const modifier = ability.getModifier();
+					let didApply = false;
 					for (let i = 0; i < this.actions.length; i++) {
+						// can't modify cancelled actions as they are not about to happen
+						if (this.actions[i].isCancelled) continue;
+
 						ast.setImplicit([this.actions[i]], "action");
-						const doesMatch = (yield* modification.toReplace.eval(modifier.ctx)).get();
+						ast.setImplicit([target], "card");
+						const doesMatch = (yield* modifier.modifications[0].toModify.eval(modifier.ctx)).get();
+						ast.clearImplicit("card");
 						ast.clearImplicit("action");
 						if (!doesMatch) continue;
 						// otherwise, this action can be replaced
 
+						let replacements;
 						// gather replacements
-						let replacements = null;
-						for (const output of modification.replacement.eval(modifier.ctx)) {
-							if (output[0] instanceof actions.Action) {
-								replacements = output;
-								break;
+						if (modifier.modifications[0] instanceof ActionReplaceModification) {
+							for (const output of modifier.modifications[0].replacement.eval(modifier.ctx)) {
+								if (output[0] instanceof actions.Action) {
+									replacements = output;
+									break;
+								}
+								yield output;
 							}
-							yield output;
+
+							// process replacements
+							let foundInvalidReplacement = false;
+							for (const replacement of replacements) {
+								replacement.costIndex = this.actions[i].costIndex;
+								replacement.timing = this;
+
+								if (!replacement.isFullyPossible()) {
+									foundInvalidReplacement = true;
+									break;
+								}
+							}
+							if (foundInvalidReplacement) continue;
 						}
 
-						// process replacements
-						let foundInvalidReplacement = false;
-						for (const replacement of replacements) {
-							replacement.costIndex = this.actions[i].costIndex;
-							replacement.timing = this;
-
-							if (!replacement.isFullyPossible()) {
-								foundInvalidReplacement = true;
-								break;
-							}
-						}
-						if (foundInvalidReplacement) continue;
-
-						// ask player if they want to apply optional replacement
+						// ask player if they want to apply optional modification
 						if (!ability.mandatory) {
-							const response = yield [applyReplacementAbility.create(ability)];
-							response.value = applyReplacementAbility.validate(response.value);
+							const response = yield [applyActionModificationAbility.create(ability.card.currentOwner(), ability, target)];
+							response.value = applyActionModificationAbility.validate(response.value);
 							if (!response.value) continue;
 						}
 
-						// apply the replacements
-						yield [createReplacementAbilityAppliedEvent(ability)];
-						this._replaceAction(this.actions[i], replacements);
+						// apply the modification
+						yield [createActionModificationAbilityAppliedEvent(ability)];
+						if (modifier.modifications[0] instanceof ActionReplaceModification) {
+							this._replaceAction(this.actions[i], replacements);
+						} else { // cancel ability instead
+							yield this._cancelAction(this.actions[i]);
+						}
+						ability.successfulApplication();
+						didApply = true;
+						break;
+					}
+
+					// remove ability from the remaining ones if it is no longer usable
+					if (didApply && !ability.canApply(ability.card, ability.card.currentOwner())) {
+						for (let i = remainingCards.length - 1; i >= 0; i--) {
+							const abilities = applicableAbilities.get(remainingCards[i]);
+							const index = abilities.indexOf(ability);
+							if (index === -1) continue;
+							abilities.splice(index, 1);
+							if (abilities.length === 0) {
+								applicableAbilities.delete(remainingCards[i]);
+								remainingCards.splice(i, 1);
+							} else {
+								applicableAbilities.set(remainingCards[i], abilities);
+							}
+						}
 					}
 				}
 			}
@@ -139,20 +242,19 @@ export class Timing {
 	}
 
 	isFullyPossible(costIndex) {
-		for (let action of this.actions) {
-			if (action.costIndex == costIndex && !action.isFullyPossible()) {
+		for (const action of this.actions) {
+			if (action.costIndex === costIndex && (!action.isFullyPossible() || action.isCancelled)) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	// returns whether or not the timing completed sucessfully
 	async* run(isPrediction = false) {
 		this.index = this.game.nextTimingIndex;
 		this.game.nextTimingIndex++;
 
-		for (let action of this.actions) {
+		for (const action of this.actions) {
 			if (action.costIndex >= this.costCompletions.length) {
 				this.costCompletions.push(true);
 			}
@@ -165,25 +267,25 @@ export class Timing {
 		}
 
 		// apply static substitution abilities to the rest
-		yield* this._handleSubstitutionAbilities();
+		yield* this._handleModificationAbilities();
 
 		if (this.costCompletions.length > 0) {
 			// empty costs count as successful completion
-			if (this.actions.length == 0 && this.costCompletions.includes(true)) {
+			if (this.actions.length === 0 && this.costCompletions.includes(true)) {
 				this.successful = true;
 				return;
 			}
 			for (let i = 0; i < this.costCompletions.length; i++) {
 				this.costCompletions[i] = this.costCompletions[i] && this.isFullyPossible(i);
 			}
-			for (let i = this.actions.length - 1; i >= 0; i--) {
-				if (!this.costCompletions[this.actions[i].costIndex]) {
-					this.actions.splice(i, 1);
+			for (const action of this.actions) {
+				if (!this.costCompletions[action.costIndex]) {
+					action.isCancelled = true;
 				}
 			}
 		}
-		// empty timings are not successful, they interrupt their block or indicate that paying all costs failed.
-		if (this.actions.length == 0) {
+		// fully cancelled timings are not successful, they interrupt their block or indicate that paying all costs failed.
+		if (!this.actions.find(action => !action.isCancelled)) {
 			this.game.nextTimingIndex--;
 			return;
 		}
@@ -191,7 +293,9 @@ export class Timing {
 		// run actions and collect events
 		let events = [];
 		for (const action of this.actions) {
-			let event = await (yield* action.run());
+			if (action.isCancelled) continue;
+
+			const event = await (yield* action.run());
 			if (event) {
 				events.push(event);
 			}
@@ -274,6 +378,7 @@ export class Timing {
 		// cards need to be revealed if added from deck to hand
 		let unrevealedCards = [];
 		for (const action of lastActions) {
+			if (action.isCancelled) continue;
 			if (action instanceof actions.Move && action.zone.type === "hand" && action.card.zone.type === "deck") {
 				if (unrevealedCards.indexOf(action.card) === -1) {
 					unrevealedCards.push(action.card);
@@ -284,6 +389,7 @@ export class Timing {
 		// decks need to be shuffled after cards are added to them.
 		let unshuffledDecks = [];
 		for (const action of lastActions) {
+			if (action.isCancelled) continue;
 			if ((action instanceof actions.Move || action instanceof actions.Return) && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
 				if (unshuffledDecks.indexOf(action.zone) === -1) {
 					unshuffledDecks.push(action.zone);
@@ -364,7 +470,6 @@ function* getStaticAbilityPhasingTiming(game) {
 	const modificationActions = []; // the list of Apply/UnapplyStaticAbility actions that this will return as a timing.
 	const activeCards = game.players.map(player => player.getActiveCards()).flat();
 	const possibleTargets = activeCards.concat(game.players);
-	const applyAbilities = new Map();
 	const abilityTargets = new Map(); // caches the abilities targets so they do not get recomputed
 
 	// unapplying old modifiers
@@ -372,7 +477,7 @@ function* getStaticAbilityPhasingTiming(game) {
 		// unapplying old static abilities from this object
 		for (const modifier of target.values.modifierStack) {
 			// is this a regular static ability?
-			if (!(modifier.ctx.ability instanceof abilities.StaticAbility) || (modifier.modifications[0] instanceof ActionReplaceModification)) continue;
+			if (!(modifier.ctx.ability instanceof abilities.StaticAbility) || (modifier.modifications[0] instanceof ActionModification)) continue;
 
 			// has this ability been removed from its card?
 			if (!modifier.ctx.card.values.current.abilities.includes(modifier.ctx.ability)) {
@@ -398,10 +503,11 @@ function* getStaticAbilityPhasingTiming(game) {
 	}
 
 	// applying new modifiers
+	const applicableAbilities = new Map();
 	for (const currentCard of activeCards) {
 		for (const ability of currentCard.values.current.abilities) {
 			// is this a regular static ability?
-			if (!(ability instanceof abilities.StaticAbility) || (ability.getModifier().modifications[0] instanceof ActionReplaceModification)) continue;
+			if (!(ability instanceof abilities.StaticAbility) || (ability.getModifier().modifications[0] instanceof ActionModification)) continue;
 
 			if (!abilityTargets.has(ability)) {
 				abilityTargets.set(ability, ability.getTargets(currentCard.currentOwner()));
@@ -410,16 +516,16 @@ function* getStaticAbilityPhasingTiming(game) {
 				if (abilityTargets.get(ability).includes(target)) {
 					if (!target.values.modifierStack.find(modifier => modifier.ctx.ability === ability)) {
 						// abilities are just dumped in a list here to be sorted later.
-						const abilities = applyAbilities.get(target) ?? [];
+						const abilities = applicableAbilities.get(target) ?? [];
 						abilities.push(ability);
-						applyAbilities.set(target, abilities);
+						applicableAbilities.set(target, abilities);
 					}
 				}
 			}
 		}
 	}
 
-	for (const [target, abilities] of applyAbilities) {
+	for (const [target, abilities] of applicableAbilities) {
 		for (const ability of yield* orderStaticAbilities(target, abilities)) {
 			modificationActions.push(new actions.ApplyStaticAbility(
 				ability.card.currentOwner(), // have these be owned by the player that owns the card with the ability.

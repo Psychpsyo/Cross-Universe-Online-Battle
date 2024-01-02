@@ -111,18 +111,23 @@ export class OptionalAbility extends Ability {
 		this.turnLimit = interpreter.buildAST("turnLimit", ability.id, ability.turnLimit, game);
 		this.globalTurnLimit = interpreter.buildAST("globalTurnLimit", ability.id, ability.globalTurnLimit, game);
 		this.gameLimit = interpreter.buildAST("gameLimit", ability.id, ability.gameLimit, game);
+		this.zoneDurationLimit = interpreter.buildAST("zoneDurationLimit", ability.id, ability.zoneDurationLimit, game);
 		this.turnActivationCount = 0;
+		this.zoneActivationCount = 0;
 	}
 
 	async canActivate(card, player, evaluatingPlayer = player) {
 		let ctx = new ScriptContext(card, player, this, evaluatingPlayer);
 		if (this.turnActivationCount >= this.turnLimit.evalFull(ctx)[0].getJsNum(player)) return false;
 
-		let gameLimit = this.gameLimit.evalFull(ctx)[0].getJsNum(player);
+		const gameLimit = this.gameLimit.evalFull(ctx)[0].getJsNum(player);
 		if (gameLimit !== Infinity && player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length >= gameLimit)
 			return false;
 
-		let globalTurnLimit = this.globalTurnLimit.evalFull(ctx)[0].getJsNum(player);
+		if (this.zoneActivationCount >= this.zoneDurationLimit.evalFull(ctx)[0].getJsNum(player))
+			return false;
+
+		const globalTurnLimit = this.globalTurnLimit.evalFull(ctx)[0].getJsNum(player);
 		if (globalTurnLimit !== Infinity && player.game.currentTurn().getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length >= globalTurnLimit)
 			return false;
 
@@ -131,11 +136,13 @@ export class OptionalAbility extends Ability {
 
 	successfulActivation() {
 		this.turnActivationCount++;
+		this.zoneActivationCount++;
 	}
 
 	zoneMoveReset(game) {
 		super.zoneMoveReset(game);
 		this.turnActivationCount = 0;
+		this.zoneActivationCount = 0;
 	}
 }
 
@@ -145,7 +152,9 @@ export class FastAbility extends Ability {
 		this.turnLimit = interpreter.buildAST("turnLimit", ability.id, ability.turnLimit, game);
 		this.globalTurnLimit = interpreter.buildAST("globalTurnLimit", ability.id, ability.globalTurnLimit, game);
 		this.gameLimit = interpreter.buildAST("gameLimit", ability.id, ability.gameLimit, game);
+		this.zoneDurationLimit = interpreter.buildAST("zoneDurationLimit", ability.id, ability.zoneDurationLimit, game);
 		this.turnActivationCount = 0;
+		this.zoneActivationCount = 0;
 	}
 
 	async canActivate(card, player, evaluatingPlayer = player) {
@@ -154,6 +163,9 @@ export class FastAbility extends Ability {
 
 		let gameLimit = this.gameLimit.evalFull(ctx)[0].getJsNum(player);
 		if (gameLimit !== Infinity && player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length >= gameLimit)
+			return false;
+
+		if (this.zoneActivationCount >= this.zoneDurationLimit.evalFull(ctx)[0].getJsNum(player))
 			return false;
 
 		let globalTurnLimit = this.globalTurnLimit.evalFull(ctx)[0].getJsNum(player);
@@ -165,11 +177,13 @@ export class FastAbility extends Ability {
 
 	successfulActivation() {
 		this.turnActivationCount++;
+		this.zoneActivationCount++;
 	}
 
 	zoneMoveReset(game) {
 		super.zoneMoveReset(game);
 		this.turnActivationCount = 0;
+		this.zoneActivationCount = 0;
 	}
 }
 
@@ -180,6 +194,7 @@ export class TriggerAbility extends Ability {
 		this.turnLimit = interpreter.buildAST("turnLimit", ability.id, ability.turnLimit, game);
 		this.globalTurnLimit = interpreter.buildAST("globalTurnLimit", ability.id, ability.globalTurnLimit, game);
 		this.gameLimit = interpreter.buildAST("gameLimit", ability.id, ability.gameLimit, game);
+		this.zoneDurationLimit = interpreter.buildAST("zoneDurationLimit", ability.id, ability.zoneDurationLimit, game);
 		this.during = null;
 		if (ability.during) {
 			this.during = interpreter.buildAST("during", ability.id, ability.during, game);
@@ -191,6 +206,7 @@ export class TriggerAbility extends Ability {
 		}
 		this.triggerMetOnStacks = [];
 		this.turnActivationCount = 0;
+		this.zoneActivationCount = 0;
 	}
 
 	async canActivate(card, player, evaluatingPlayer = player) {
@@ -201,6 +217,9 @@ export class TriggerAbility extends Ability {
 
 		let gameLimit = this.gameLimit.evalFull(ctx)[0].getJsNum(player);
 		if (gameLimit !== Infinity && player.game.getBlocks().filter(block => block instanceof blocks.AbilityActivation && block.ability.id === this.id && block.player === player).length >= gameLimit)
+			return false;
+
+		if (this.zoneActivationCount >= this.zoneDurationLimit.evalFull(ctx)[0].getJsNum(player))
 			return false;
 
 		let globalTurnLimit = this.globalTurnLimit.evalFull(ctx)[0].getJsNum(player);
@@ -233,6 +252,7 @@ export class TriggerAbility extends Ability {
 
 	successfulActivation() {
 		this.turnActivationCount++;
+		this.zoneActivationCount++;
 		this.triggerMetOnStacks = [];
 		if (this.during) {
 			this.usedDuring = true;
@@ -242,6 +262,7 @@ export class TriggerAbility extends Ability {
 	zoneMoveReset(game) {
 		super.zoneMoveReset(game);
 		this.turnActivationCount = 0;
+		this.zoneActivationCount = 0;
 		this.triggerMetOnStacks = [];
 	}
 }
@@ -253,6 +274,12 @@ export class StaticAbility extends BaseAbility {
 		this.applyTo = interpreter.buildAST("applyTarget", ability.id, ability.applyTo, game);
 		this.zoneEnterTimingIndex = 0;
 		this.mandatory = ability.mandatory; // for action-replacing abilities
+
+		// all of these are for cancel or replacement static abilities.
+		this.turnLimit = interpreter.buildAST("turnLimit", ability.id, ability.turnLimit, game);
+		this.zoneDurationLimit = interpreter.buildAST("zoneDurationLimit", ability.id, ability.zoneDurationLimit, game);
+		this.turnApplicationCount = 0;
+		this.zoneApplicationCount = 0;
 	}
 
 	getTargets(player, evaluatingPlayer = player) {
@@ -267,8 +294,29 @@ export class StaticAbility extends BaseAbility {
 		return this.modifier.evalFull(new ScriptContext(this.card, player, this))[0].get(player);
 	}
 
+	// only for replacement and cancel abilities
+	canApply(card, player, evaluatingPlayer = player) {
+		if (this.isCancelled) return false;
+
+		if (!this.isConditionMet(player, evaluatingPlayer)) return false;
+
+		const ctx = new ScriptContext(card, player, this, evaluatingPlayer);
+		if (this.turnApplicationCount >= this.turnLimit.evalFull(ctx)[0].getJsNum(player)) return false;
+
+		if (this.zoneApplicationCount >= this.zoneDurationLimit.evalFull(ctx)[0].getJsNum(player)) return false;
+
+		return super.canActivate(card, player, evaluatingPlayer);
+	}
+
+	successfulApplication() {
+		this.turnApplicationCount++;
+		this.zoneApplicationCount++;
+	}
+
 	zoneMoveReset(game) {
 		super.zoneMoveReset(game);
 		this.zoneEnterTimingIndex = game.nextTimingIndex - 1;
+		this.turnApplicationCount = 0;
+		this.zoneApplicationCount = 0;
 	}
 }

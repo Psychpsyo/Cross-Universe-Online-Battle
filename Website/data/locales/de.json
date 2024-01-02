@@ -131,7 +131,8 @@
 			"attackTarget": "Wähle, wen du angreifst:",
 			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':",
 			"equipTarget": "Wähle, welche Unit du mit '{#CARDNAME}' ausrüsten möchtest:",
-			"cardEffectMove": "Wähle welche Karte(n) für den Effekt von '{#CARDNAME}' verschoben werden sollen:"
+			"cardEffectMove": "Wähle welche Karte(n) für den Effekt von '{#CARDNAME}' verschoben werden sollen:",
+			"nextCardToApplyStaticAbilityTo": "Wähle, auf welche deiner Units als nächstes Statische Fähigkeiten angewandt werden sollen."
 		},
 
 		"fieldLabels": {
@@ -245,8 +246,8 @@
 				"bottom": "Unterseite"
 			},
 
-			"replacementAbilitySelect": {
-				"question": "Möchtest du die Fähigkeit von '{#CARDNAME}' anwenden?",
+			"modificationAbilityPrompt": {
+				"question": "Möchtest du die Fähigkeit von '{#CARD}' auf '{#TARGET}' anwenden?",
 				"yes": "Ja",
 				"no": "Nein"
 			},
@@ -264,9 +265,12 @@
 				"selectingHandDiscard": "Dein Gegner wählt Handkarte(n), weil er mehr als 8 hat.",
 				"selectingEquipTarget": "Dein Gegner wählt aus, welche Unit er mit '{#CARDNAME}' ausrüsten möchte.",
 				"selectingAttackTarget": "Dein Gegner wählt eine Unit zum Angriff aus.",
+				"selectingNextCardToApplyStaticAbilityTo": "Dein Gegner wählt aus, auf welche seiner Units als nächstes Statische Fähigkeiten angewandt werden sollen.",
+
 				"selectingPlayer": "Dein Gegner wählt einen Spieler.",
 				"effectSelectingPlayer": "Dein Gegner wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
 				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt.",
+
 				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
 				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'."
 			},
@@ -403,7 +407,7 @@
 		"auto": {
 			"title": "Automatische Runden",
 			"passInDrawPhase": "In der Drawphase auto-passen, wenn du keine Drawphase-spezifischen Optionen oder Trigger hast",
-			"passInBattlePhase": "In der Battlephase auto-passen, wenn du keine Battlephase-spezifischen Optionen oder Trigger hast",
+			"passInBattlePhase": "In der Battlephase auto-passen, wenn du keine Antworten oder Battlephase-spezifischen Optionen hast",
 			"passInEndPhase": "In der Endphase auto-passen, wenn du keine Endphase-spezifischen Optionen oder Trigger hast",
 			"passOnStackTwo": "Auf leeren Stacks 2+ auto-passen, wenn du keine Trigger-Fähigkeiten oder konditionsbedingte Zauber hast",
 			"passOnOwnBlocks": "Auf deine eigenen Blöcke auto-passen, wenn dein Gegner nichts gespielt hat"

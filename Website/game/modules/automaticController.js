@@ -392,7 +392,7 @@ export class AutomaticController extends InteractionController {
 				}
 				return;
 			}
-			case "replacementAbilityApplied": {
+			case "actionModificationAbilityApplied": {
 				return autoUI.activate(events[0].ability.card);
 			}
 			case "countersChanged": {
@@ -472,6 +472,10 @@ export class AutomaticController extends InteractionController {
 							message = locale.game.automatic.opponentActions.selectingAttackTarget;
 							break;
 						}
+						case "nextCardToApplyStaticAbilityTo": {
+							message = locale.game.automatic.opponentActions.selectingNextCardToApplyStaticAbilityTo;
+							break;
+						}
 						default: {
 							if (request.reason.startsWith("cardEffect:")) {
 								message = locale.game.automatic.opponentActions.effectSelectingCards.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
@@ -543,6 +547,10 @@ export class AutomaticController extends InteractionController {
 					}
 					case "selectAttackTarget": {
 						title = locale.game.cardChoice.attackTarget;
+						break;
+					}
+					case "nextCardToApplyStaticAbilityTo": {
+						title = locale.game.cardChoice.nextCardToApplyStaticAbilityTo;
 						break;
 					}
 					default: {
@@ -710,11 +718,13 @@ export class AutomaticController extends InteractionController {
 				);
 				break;
 			}
-			case "applyReplacementAbility": {
+			case "applyActionModificationAbility": {
 				response.value = await gameUI.askQuestion(
-					locale.game.automatic.replacementAbilitySelect.question.replaceAll("{#CARDNAME}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
-					locale.game.automatic.replacementAbilitySelect.yes,
-					locale.game.automatic.replacementAbilitySelect.no
+					locale.game.automatic.modificationAbilityPrompt.question
+						.replaceAll("{#CARD}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
+						.replaceAll("{#TARGET}", (await Promise.all(request.target.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					locale.game.automatic.modificationAbilityPrompt.yes,
+					locale.game.automatic.modificationAbilityPrompt.no
 				);
 				break;
 			}

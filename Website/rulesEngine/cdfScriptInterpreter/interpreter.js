@@ -13,6 +13,7 @@ let alreadyParsed = {
 	equipableTo: {},
 	exec: {},
 	gameLimit: {},
+	zoneDurationLimit: {},
 	globalTurnLimit: {},
 	modifier: {},
 	trigger: {},

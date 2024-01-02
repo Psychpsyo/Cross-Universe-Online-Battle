@@ -197,9 +197,8 @@ dialog {
 
 .centerDialog header {
 	border-bottom: 2px solid var(--theme-border-color);
-	padding: .3em .5em;
+	padding: .3em;
 	text-align: center;
-	white-space: nowrap;
 }
 
 .centerDialog > section > button:last-child {

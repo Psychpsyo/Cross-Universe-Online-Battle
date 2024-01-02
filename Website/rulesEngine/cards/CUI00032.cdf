@@ -8,4 +8,4 @@ o: deploy
 cost:
 $unit = SELECT(1, [from field where level < 6 & cardType = unit]);
 exec:
-APPLY($unit, {cancel abilities}, endOfTurn);
+APPLY($unit, {cancelAbilities}, endOfTurn);

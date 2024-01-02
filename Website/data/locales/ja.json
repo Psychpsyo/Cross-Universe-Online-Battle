@@ -131,7 +131,8 @@
 			"attackTarget": null,
 			"cardEffect": null,
 			"equipTarget": null,
-			"cardEffectMove": null
+			"cardEffectMove": null,
+			"nextCardToApplyStaticAbilityTo": null
 		},
 
 		"fieldLabels": {
@@ -245,7 +246,7 @@
 				"bottom": "デッキの下"
 			},
 
-			"replacementAbilitySelect": {
+			"modificationAbilityPrompt": {
 				"question": null,
 				"yes": "はい",
 				"no": "いいえ"
@@ -264,9 +265,12 @@
 				"selectingHandDiscard": null,
 				"selectingAttackTarget": null,
 				"selectingEquipTarget": null,
+				"selectingNextCardToApplyStaticAbilityTo": null,
+
 				"selectingPlayer": null,
 				"effectSelectingPlayer": null,
 				"selectingStartingPlayer": null,
+
 				"selectingType": null,
 				"selectingDeckSide": null
 			},

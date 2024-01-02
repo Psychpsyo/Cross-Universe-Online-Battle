@@ -57,6 +57,7 @@ export class Action {
 		this.timing = null; // Is set by the Timing itself
 		this.costIndex = -1; // If this is positive, it indicates that this action is to be treated as a cost, together with other actions of the same costIndex
 		this.properties = properties;
+		this.isCancelled = false; // even cancelled timings stay in the game logs for abilities like that of 'Firewall Golem'
 	}
 
 	// Returns the event that represents this action.
@@ -73,6 +74,18 @@ export class Action {
 	}
 	isFullyPossible() {
 		return this.isPossible();
+	}
+
+	// This is necessary for things like Destroys that also need to cancel their inner action.
+	// Returns the action(s) that actually got cancelled.
+	setIsCancelled() {
+		this.isCancelled = true;
+		return [this];
+	}
+
+	// Used during replacement calculation
+	isIdenticalTo(other) {
+		return false;
 	}
 }
 
@@ -202,6 +215,11 @@ export class Place extends Action {
 		if (this.card.current() === null) return true;
 		return getAvailableZoneSlots(this.zone).length < this.timing.actions.filter(action => action instanceof Place).length;
 	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
+	}
 }
 
 export class Summon extends Action {
@@ -233,6 +251,11 @@ export class Summon extends Action {
 		if (this.card.current() === null) return true;
 		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
 		return slotCard != null && slotCard != this.card.current();
+	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
 	}
 }
 
@@ -268,6 +291,11 @@ export class Deploy extends Action {
 		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
 		return slotCard != null && slotCard != this.card.current();
 	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
+	}
 }
 
 export class Cast extends Action {
@@ -301,6 +329,11 @@ export class Cast extends Action {
 		if (this.card.current() === null) return true;
 		let slotCard = this._placeAction.zone.get(this._placeAction.targetIndex);
 		return slotCard != null && slotCard != this.card.current();
+	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
 	}
 }
 
@@ -349,6 +382,11 @@ export class Move extends Action {
 		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < this.timing.actions.filter(action => action instanceof Move).length) return false;
 		return this.isPossible();
 	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
+	}
 }
 
 export class Return extends Action {
@@ -395,6 +433,11 @@ export class Return extends Action {
 	isFullyPossible() {
 		if (this.zone instanceof zones.FieldZone && getAvailableZoneSlots(this.zone).length < this.timing.actions.filter(action => action instanceof Return).length) return false;
 		return this.isPossible();
+	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
 	}
 }
 
@@ -552,6 +595,11 @@ export class Discard extends Action {
 		}
 		return false;
 	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
+	}
 }
 
 export class Destroy extends Action {
@@ -577,6 +625,17 @@ export class Destroy extends Action {
 	replaceDiscardWith(newAction) {
 		this.discard = newAction;
 		this.properties = newAction.properties;
+	}
+
+	setIsCancelled() {
+		this.isCancelled = true;
+		this.discard.isCancelled = true;
+		return [this, this.discard];
+	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.discard.card.current() === other.discard.card.current();
 	}
 }
 
@@ -613,6 +672,11 @@ export class Exile extends Action {
 			return true;
 		}
 		return false;
+	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
 	}
 }
 
@@ -727,6 +791,10 @@ export class CancelAttack extends Action {
 			this.timing.game.currentAttackDeclaration.isCancelled = this.wasCancelled;
 		}
 	}
+
+	isIdenticalTo(other) {
+		return this.constructor === other.constructor;
+	}
 }
 
 export class SetAttackTarget extends Action {
@@ -752,27 +820,37 @@ export class SetAttackTarget extends Action {
 	isImpossible() {
 		return !(this.newTarget.values.current.cardTypes.includes("unit") && this.newTarget.zone instanceof zones.FieldZone);
 	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.newTarget.current() === other.newTarget.current();
+	}
 }
 
 export class GiveAttack extends Action {
 	constructor(player, card) {
 		super(player);
 		this.card = card;
-		this.oldCanAttackAgain = null;
+		this._oldCanAttackAgain = null;
 	}
 
 	async* run() {
-		this.oldCanAttackAgain = this.card.canAttackAgain;
+		this._oldCanAttackAgain = this.card.canAttackAgain;
 		this.card.canAttackAgain = true;
 	}
 
 	undo() {
-		this.card.canAttackAgain = this.oldCanAttackAgain;
+		this.card.canAttackAgain = this._oldCanAttackAgain;
 	}
 
 	isImpossible() {
 		if (this.card.isRemovedToken) return true;
 		return !this.card.values.current.cardTypes.includes("unit");
+	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
 	}
 }
 
@@ -869,24 +947,29 @@ export class Reveal extends Action {
 	constructor(player, card) {
 		super(player);
 		this.card = card;
-		this.oldHiddenState = null;
+		this._oldHiddenState = null;
 	}
 
 	async* run() {
-		this.oldHiddenState = this.card.current().hiddenFor;
+		this._oldHiddenState = this.card.current().hiddenFor;
 		this.card.current().hiddenFor = [];
 		this.card = this.card.snapshot();
 		return events.createCardRevealedEvent(this.player, this.card);
 	}
 
 	undo() {
-		this.card.current().hiddenFor = this.oldHiddenState;
+		this.card.current().hiddenFor = this._oldHiddenState;
 	}
 
 	isImpossible() {
 		if (this.card.current() == null) return true;
 		if (this.card.isRemovedToken) return true;
 		return this.card.hiddenFor.length == 0;
+	}
+
+	isIdenticalTo(other) {
+		if (this.constructor !== other.constructor) return false;
+		return this.card.current() === other.card.current();
 	}
 }
 

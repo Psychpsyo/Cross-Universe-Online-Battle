@@ -361,29 +361,32 @@ export class ValueSwapModification extends ValueModification {
 }
 
 export class AbilityCancelModification extends ValueModification {
-	constructor(value, abilities, toBase, condition) {
+	constructor(value, toBase, condition) {
 		super(value, toBase, condition);
 		this.abilities = abilities;
 	}
 
 	modify(values, ctx, toBaseValues) {
-		for (const toCancel of this.abilities.evalFull(ctx)[0].get(ctx.player)) {
-			toCancel.isCancelled = true;
+		if (toBaseValues === this.toBase) {
+			for (const ability of values.abilities) {
+				if (ability.cancellable) {
+					ability.isCancelled = true;
+				}
+			}
 		}
 		return values;
 	}
 
 	bake(ctx, target) {
-		let abilities = this.abilities.evalFull(ctx)[0].get(ctx.player);
-		return new AbilityCancelModification(this.value, new ast.ValueArrayNode(abilities), this.toBase, this.condition);
+		return this;
 	}
 
 	canApplyTo(target, ctx) {
 		if (!super.canApplyTo(target, ctx)) return false;
 
 		let validAbilities = 0;
-		for (const iterAbility of this.abilities.evalFull(ctx)[0].get(ctx.player)) {
-			if (iterAbility.cancellable && !iterAbility.isCancelled) {
+		for (const ability of target.values.current.abilities) {
+			if (ability.cancellable && !ability.isCancelled) {
 				validAbilities++;
 			}
 		}
@@ -392,8 +395,8 @@ export class AbilityCancelModification extends ValueModification {
 	canFullyApplyTo(target, ctx) {
 		if (!this.canApplyTo(target, ctx)) return false;
 
-		for (const iterAbility of this.abilities.evalFull(ctx)[0].get(ctx.player)) {
-			if (!iterAbility.cancellable || iterAbility.isCancelled) {
+		for (const ability of target.values.current.abilities.evalFull(ctx)[0].get(ctx.player)) {
+			if (!ability.cancellable || ability.isCancelled) {
 				return false;
 			}
 		}
@@ -401,10 +404,21 @@ export class AbilityCancelModification extends ValueModification {
 	}
 }
 
-export class ActionReplaceModification extends Modification {
-	constructor(toReplace, replacement, condition) {
+// These are intentionally very empty since the actual functionality is inside of the Timing class
+export class ActionModification extends Modification {
+	constructor(toModify, condition) {
 		super(condition);
-		this.toReplace = toReplace;
+		this.toModify = toModify;
+	}
+}
+export class ActionReplaceModification extends ActionModification {
+	constructor(toReplace, replacement, condition) {
+		super(toReplace, condition);
 		this.replacement = replacement;
+	}
+}
+export class ActionCancelModification extends ActionModification {
+	constructor(toCancel, condition) {
+		super(toCancel, condition);
 	}
 }

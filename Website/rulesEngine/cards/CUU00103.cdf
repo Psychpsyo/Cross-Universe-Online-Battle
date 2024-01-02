@@ -10,4 +10,4 @@ deckLimit: any
 o: fast
 turnLimit: COUNT([from you.field where self != thisCard & cardType = unit & types = thisCard.types])
 condition: thisCard.zone = field
-APPLY(SELECT(1, [from field where cardType = [enchantSpell, continuousSpell, equipableItem, continuousItem]]), {cancel abilities}, endOfTurn);
+APPLY(SELECT(1, [from field where cardType = [enchantSpell, continuousSpell, equipableItem, continuousItem]]), {cancelAbilities}, endOfTurn);

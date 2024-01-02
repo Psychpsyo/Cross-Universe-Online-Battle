@@ -980,15 +980,16 @@ export class ActionAccessorNode extends AstNode {
 		this.actionProperties = actionProperties;
 	}
 	* eval(ctx) {
-		let values = [];
-		let actionList = [];
+		const values = [];
+		let actionList;
 		if (this.actionsNode instanceof CurrentTurnNode) {
 			actionList = game.currentTurn().getActions();
 		} else {
 			actionList = (yield* this.actionsNode.eval(ctx)).get(ctx.player);
 		}
-		for (let action of actionList) {
-			let actionCards = this.getActionValues(action);
+		for (const action of actionList) {
+			if (action.isCancelled) continue;
+			const actionCards = this.getActionValues(action);
 			let hasProperties = true;
 			setImplicit(actionCards, "card");
 			for (const property of Object.keys(this.actionProperties)) {

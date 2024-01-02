@@ -131,7 +131,8 @@
 			"attackTarget": "Select the attack target:",
 			"cardEffect": "Select card(s) for the effect of '{#CARDNAME}':",
 			"equipTarget": "Select what unit to equip '{#CARDNAME}' to:",
-			"cardEffectMove": "Select which card(s) to move for the effect of '{#CARDNAME}':"
+			"cardEffectMove": "Select which card(s) to move for the effect of '{#CARDNAME}':",
+			"nextCardToApplyStaticAbilityTo": "Select for which of your cards static abilities should be handled next."
 		},
 
 		"fieldLabels": {
@@ -245,8 +246,8 @@
 				"bottom": "Deck Bottom"
 			},
 
-			"replacementAbilitySelect": {
-				"question": "Do you want to apply the ability of '{#CARDNAME}'?",
+			"modificationAbilityPrompt": {
+				"question": "Do you want to apply the ability of '{#CARD}' to '{#TARGET}'?",
 				"yes": "Yes",
 				"no": "No"
 			},
@@ -264,9 +265,12 @@
 				"selectingHandDiscard": "Your opponent is selecting card(s) from hand to discard down to 8.",
 				"selectingEquipTarget": "Your opponent is selecting what unit to equip '{#CARDNAME}' to.",
 				"selectingAttackTarget": "Your opponent is selecting the attack target.",
+				"selectingNextCardToApplyStaticAbilityTo": "Your opponent is selecting for which of their cards static abilities should be handled next.",
+
 				"selectingPlayer": "Your opponent is selecting a player.",
 				"effectSelectingPlayer": "Your opponent is selecting a player for the effect of '{#CARDNAME}'.",
 				"selectingStartingPlayer": "Your opponent is selecting who goes first.",
+
 				"selectingType": "Your opponent is selecting a type for the effect of '{#CARDNAME}'.",
 				"selectingDeckSide": "Your opponent is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'."
 			},
@@ -403,7 +407,7 @@
 		"auto": {
 			"title": "Automatic Games",
 			"passInDrawPhase": "Pass through draw phase if you have no draw phase specific options or triggers",
-			"passInBattlePhase": "Pass in the battle phase if you have no battle phase specific options or triggers",
+			"passInBattlePhase": "Pass in the battle phase if you have no responses or battle phase specific options",
 			"passInEndPhase": "Pass through end phase if you have no end phase specific options or triggers",
 			"passOnStackTwo": "Pass on empty stacks 2+ if you have no trigger abilities or conditional spells",
 			"passOnOwnBlocks": "Pass on your own actions if opponent did not intervene"

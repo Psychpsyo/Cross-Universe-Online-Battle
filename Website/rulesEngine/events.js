@@ -365,10 +365,18 @@ export function createCountersChangedEvent(card, type) {
 	}
 }
 
-export function createReplacementAbilityAppliedEvent(ability) {
+export function createActionModificationAbilityAppliedEvent(ability) {
 	return {
 		"nature": "event",
-		"type": "replacementAbilityApplied",
+		"type": "actionModificationAbilityApplied",
+		"ability": ability
+	}
+}
+
+export function createCancelAbilityAppliedEvent(ability) {
+	return {
+		"nature": "event",
+		"type": "cancelAbilityApplied",
 		"ability": ability
 	}
 }

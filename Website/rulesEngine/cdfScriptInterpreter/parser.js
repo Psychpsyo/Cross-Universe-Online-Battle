@@ -52,6 +52,7 @@ export function parseScript(tokenList, newEffectId, type, originalCodeString) {
 		case "during":
 		case "equipableTo":
 		case "gameLimit":
+		case "zoneDurationLimit":
 		case "globalTurnLimit":
 		case "turnLimit": {
 			return parseExpression();
@@ -666,7 +667,7 @@ function parseCardMatcher() {
 function parseModifier(forStaticAbility = false) {
 	const modifierStartPos = pos;
 	let valueModifications = [];
-	let hasReplaceModification = false;
+	let hasActionModification = false;
 	let hasNonReplaceModification = false;
 	while (tokens[pos] && tokens[pos].type != "rightBrace") {
 		switch (tokens[pos+1].type) {
@@ -676,15 +677,25 @@ function parseModifier(forStaticAbility = false) {
 				hasNonReplaceModification = true;
 				break;
 			}
-			case "cancel": {
+			case "cancelAbilities": {
 				valueModifications.push(parseAbilityCancelModification());
 				hasNonReplaceModification = true;
 				break;
 			}
+			case "cancel": {
+				const modificationStartToken = tokens[pos+1];
+				if (!forStaticAbility) throw new ScriptParserError("Cancel modifiers are not allowed outside of static abilities. (Did you mean cancelAbilities?)", modificationStartToken);
+				valueModifications.push(parseCancelModification());
+				if (hasActionModification) throw new ScriptParserError("A modifier can't have more than one replace or cancel modification.", modificationStartToken, tokens[pos-1]);
+				hasActionModification = true;
+				break;
+			}
 			case "replace": {
-				if (!forStaticAbility) throw new ScriptParserError("Replace modifiers are not allowed outside of static abilities.", tokens[pos+1]);
+				const modificationStartToken = tokens[pos+1];
+				if (!forStaticAbility) throw new ScriptParserError("Replace modifiers are not allowed outside of static abilities.", modificationStartToken);
 				valueModifications.push(parseReplaceModification());
-				hasReplaceModification = true;
+				if (hasActionModification) throw new ScriptParserError("A modifier can't have more than one replace or cancel modification.", modificationStartToken, tokens[pos-1]);
+				hasActionModification = true;
 				break;
 			}
 			default: {
@@ -692,11 +703,20 @@ function parseModifier(forStaticAbility = false) {
 			}
 		}
 	}
-	if (hasReplaceModification && hasNonReplaceModification) {
-		throw new ScriptParserError("Modifier cannot contain both replacement effect and non-replacement effects.", tokens[modifierStartPos], tokens[pos]);
+	if (hasActionModification && hasNonReplaceModification) {
+		throw new ScriptParserError("Modifier cannot contain both action modification effects and non-action modification effects.", tokens[modifierStartPos], tokens[pos]);
 	}
 	pos++;
 	return new ast.ModifierNode(valueModifications);
+}
+
+// parses the if <condition> that can follow any of the below modifications
+function parseIfCondition() {
+	if (tokens[pos] && tokens[pos].type === "if") {
+		pos++;
+		return parseExpression();
+	}
+	return null;
 }
 
 function parseReplaceModification() {
@@ -711,28 +731,20 @@ function parseReplaceModification() {
 	const replacement = parseLine();
 	pos++;
 
-	// maybe parse 'if' condition
-	let condition = null;
-	if (tokens[pos].type == "if") {
-		pos++;
-		condition = parseExpression();
-	}
+	return new valueModifiers.ActionReplaceModification(toReplace, replacement, parseIfCondition());
+}
 
-	return new valueModifiers.ActionReplaceModification(toReplace, replacement, condition);
+function parseCancelModification() {
+	pos += 2;
+	const toCancel = parseExpression();
+
+	return new valueModifiers.ActionCancelModification(toCancel, parseIfCondition());
 }
 
 function parseAbilityCancelModification() {
 	pos += 2;
-	const rightHandSide = parseExpression();
 
-	// maybe parse 'if' condition
-	let condition = null;
-	if (tokens[pos].type == "if") {
-		pos++;
-		condition = parseExpression();
-	}
-
-	return new valueModifiers.AbilityCancelModification("abilities", rightHandSide, false, condition);
+	return new valueModifiers.AbilityCancelModification("abilities", false, parseIfCondition());
 }
 
 function parseValueModifications() {
@@ -784,11 +796,7 @@ function parseValueModifications() {
 	}
 
 	// maybe parse 'if' condition
-	let condition = null;
-	if (tokens[pos].type == "if") {
-		pos++;
-		condition = parseExpression();
-	}
+	let condition = parseIfCondition();
 
 	let valueModifications = [];
 	for (const [i, valueIdentifier] of valueIdentifiers.entries()) {

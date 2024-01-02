@@ -4,6 +4,7 @@ const keywordTokenTypes = {
 	if: "if",
 	unaffectedBy: "immunityAssignment",
 	cancel: "cancel",
+	cancelAbilities: "cancelAbilities",
 	replace: "replace",
 	with: "with",
 

@@ -423,6 +423,10 @@ function parseCdfValues(cdf) {
 					ability.gameLimit = parts[1];
 					break;
 				}
+				case "zoneDurationLimit": {
+					ability.zoneDurationLimit = parts[1];
+					break;
+				}
 				case "condition": {
 					ability.condition = parts[1];
 					break;
@@ -494,6 +498,7 @@ function parseCdfValues(cdf) {
 						turnLimit: "any",
 						globalTurnLimit: "any",
 						gameLimit: "any",
+						zoneDurationLimit: "any",
 						during: null,
 						after: null,
 						condition: null,
@@ -588,6 +593,7 @@ function parseCdfValues(cdf) {
 					turnLimit: "any",
 					globalTurnLimit: "any",
 					gameLimit: "any",
+					zoneDurationLimit: "any",
 					during: null,
 					after: null,
 					condition: null,

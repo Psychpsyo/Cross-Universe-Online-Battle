@@ -168,15 +168,15 @@ export class Game {
 			this.endOfUpcomingTurnTimings.push([]);
 			yield [createTurnStartedEvent()];
 
-			let turnGenerator = this.currentTurn().run();
+			const turnGenerator = this.currentTurn().run();
 			let generatorOutput = await turnGenerator.next();
 			while (!generatorOutput.done) {
 				let playerInput;
-				let actionList = generatorOutput.value;
-				if (actionList.length == 0) {
+				const actionList = generatorOutput.value;
+				if (actionList.length === 0) {
 					return;
 				}
-				if (actionList[0].nature == "event") {
+				if (actionList[0].nature === "event") {
 					playerInput = yield actionList;
 				} else if (this.isReplaying && this.replay.inputLog.length > this.replayPosition) { // we're currently stepping through an unfinished replay
 					playerInput = this.replay.inputLog[this.replayPosition++];
@@ -192,7 +192,7 @@ export class Game {
 				generatorOutput = await turnGenerator.next(playerInput);
 			}
 
-			for (let card of this.getFieldCards(currentPlayer).concat(this.getFieldCards(currentPlayer.next()))) {
+			for (const card of this.getFieldCards(currentPlayer).concat(this.getFieldCards(currentPlayer.next()))) {
 				if (card) {
 					card.endOfTurnReset();
 				}

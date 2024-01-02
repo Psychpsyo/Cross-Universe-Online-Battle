@@ -137,16 +137,20 @@ export const orderCards = {
 	}
 }
 
-export const applyReplacementAbility = {
-	create: function(player, ability) {
+export const applyActionModificationAbility = {
+	create: function(player, ability, target) {
 		return {
 			"nature": "request",
 			"player": player,
-			"type": "applyReplacementAbility",
-			"ability": ability
+			"type": "applyActionModificationAbility",
+			"ability": ability,
+			"target": target
 		}
 	},
 	validate: function(response, request) {
+		if (typeof response !== "boolean") {
+			throw new Error("Supplied an incorrect response value. Expected a Boolean but got '" + (typeof response) + "' instead.");
+		}
 		return response;
 	}
 }

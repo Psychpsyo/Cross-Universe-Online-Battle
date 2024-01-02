@@ -182,7 +182,7 @@ export function* abilityTimingGenerator(ability, card, player) {
 		}
 		actionList = timingGenerator.next(timing);
 		if (!actionList.done) {
-			if (actionList.value.length == 0) {
+			if (actionList.value.length === 0) {
 				return false;
 			}
 			timing = yield actionList.value;
