@@ -140,6 +140,8 @@ cardInfoToDeck.textContent = locale.deckMaker.cardInfo.toDeck;
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 
+// DONE TRANSLATING
+
 window.deckList = [];
 recalculateDeckStats();
 
@@ -810,3 +812,14 @@ window.addEventListener("beforeunload", function(e) {
 		e.returnValue = "";
 	}
 }, {"signal": unloadWarning.signal});
+
+// .deck or .deckx files getting opened with the PWA
+if ("launchQueue" in window) {
+	window.launchQueue.setConsumer(launchParams => {
+		if (launchParams.files && launchParams.files.length > 0) {
+			launchParams.files[0].getFile().then(file => {
+				loadDeckFile(file);
+			});
+		}
+	});
+}
