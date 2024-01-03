@@ -243,7 +243,7 @@ export class DeployItem extends Block {
 			timingGenerators.arrayTimingGenerator([[placeAction]])
 		];
 		let execTimingGenerators = [
-			timingGenerators.arrayTimingGenerator([[new actions.Deploy(player, placeAction, new ScriptValue("dueToReason", "deploy"))]])
+			timingGenerators.arrayTimingGenerator([[new actions.Deploy(player, placeAction, new ScriptValue("dueToReason", "deployment"))]])
 		];
 
 		// equipable items
@@ -314,7 +314,7 @@ export class CastSpell extends Block {
 			timingGenerators.arrayTimingGenerator([[placeAction]])
 		];
 		let execTimingGenerators = [
-			timingGenerators.arrayTimingGenerator([[new actions.Cast(player, placeAction, new ScriptValue("dueToReason", "cast"))]])
+			timingGenerators.arrayTimingGenerator([[new actions.Cast(player, placeAction, new ScriptValue("dueToReason", "casting"))]])
 		];
 
 		// enchant spells
