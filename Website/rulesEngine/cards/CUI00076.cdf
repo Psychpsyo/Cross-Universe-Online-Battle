@@ -6,7 +6,7 @@ types: Light, Earth, Plant
 
 o: deploy
 condition: COUNT([from you.unitZone]) = 0
-SUMMON(TOKENS(1, CUT00023, CUT00023, 0, [Light, Earth, Plant], 0, 0, CUI00076:1:1));
+SUMMONTOKENS(1, CUT00023, 0, [Light, Earth, Plant], 0, 0, CUI00076:1:1);
 
 [o: trigger
 during: currentPhase = endPhase

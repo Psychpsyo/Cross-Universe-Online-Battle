@@ -12,7 +12,7 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand]));
 exec:
-SUMMON(TOKENS(1, CUT00015, CUT00015, 0, [Illusion, Beast], 0, 0));
+SUMMONTOKENS(1, CUT00015, 0, [Illusion, Beast], 0, 0);
 APPLY(thisCard, {canAttack = no}, endOfTurn);
 
 o: optional

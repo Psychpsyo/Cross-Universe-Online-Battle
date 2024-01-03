@@ -421,3 +421,23 @@ export const chooseAbilityOrder = {
 		return nChooseK(request.abilities.length, request.abilities.length);
 	}
 }
+
+export const selectTokenAmount = {
+	create: function(player, eligibleAmounts) {
+		return {
+			"nature": "request",
+			"player": player,
+			"type": "selectTokenAmount",
+			"eligibleAmounts": eligibleAmounts
+		}
+	},
+	validate: function(response, request) {
+		if (!request.eligibleAmounts.includes(response)) {
+			throw new Error("Supplied incorrect amount of tokens to summon. Got " + response + " when it should have been between any of these: " + request.eligibleAmounts);
+		}
+		return response;
+	},
+	generateValidResponses: function(request) {
+		return request.eligibleAmounts;
+	}
+}

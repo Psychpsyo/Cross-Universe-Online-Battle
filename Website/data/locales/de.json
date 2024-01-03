@@ -132,6 +132,8 @@
 			"cardEffect": "Wähle Karte(n) für den Effekt von '{#CARDNAME}':",
 			"equipTarget": "Wähle, welche Unit du mit '{#CARDNAME}' ausrüsten möchtest:",
 			"cardEffectMove": "Wähle welche Karte(n) für den Effekt von '{#CARDNAME}' verschoben werden sollen:",
+			"cardEffectReturn": "Wähle welche Karte(n) für den Effekt von '{#CARDNAME}' zurückgelegt werden sollen:",
+			"cardEffectSummon": "Es ist nicht genug Platz in der Unitzone.\nWähle welche Karte(n) für den Effekt von '{#CARDNAME}' beschworen werden sollen:",
 			"nextCardToApplyStaticAbilityTo": "Wähle, auf welche deiner Units als nächstes Statische Fähigkeiten angewandt werden sollen."
 		},
 

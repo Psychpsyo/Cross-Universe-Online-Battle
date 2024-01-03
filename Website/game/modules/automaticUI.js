@@ -524,6 +524,6 @@ export async function updateCounters(card, type) {
 		counterElem.remove();
 		return gameState.controller.gameSleep(.2);
 	}
-	counterElem.textContent = counterCount;
+	gameUI.setCounter(counterElem, counterCount);
 	return gameState.controller.gameSleep(.2);
 }

@@ -713,7 +713,7 @@ document.getElementById("fileImportBtn").addEventListener("click", function() {
 	document.getElementById("fileImportInput").click();
 });
 document.getElementById("deckCodeImportBtn").addEventListener("click", function() {
-	const deckCode = prompt(locale.deckMaker.deckMenu.deckCodeImportPrompt).trim();
+	const deckCode = prompt(locale.deckMaker.deckMenu.deckCodeImportPrompt)?.trim();
 	if (deckCode) {
 		loadDeck(deckUtils.decodeDeckCode(deckCode));
 	}

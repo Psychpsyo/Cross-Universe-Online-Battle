@@ -394,13 +394,13 @@ export function initFunctions() {
 		[null, null],
 		"action",
 		function*(astNode, ctx) {
-			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
-			let moveActions = [];
-			let zoneMoveCards = new Map();
+			const cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
+			const moveActions = [];
+			const zoneMoveCards = new Map();
 			for (const card of cards) {
 				ast.setImplicit([card], "card");
-				let zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
-				let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, false);
+				const zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
+				const zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, false);
 				let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 				if (zoneValue instanceof DeckPosition) {
 					index = zoneValue.isTop? -1 : 0;
@@ -411,14 +411,17 @@ export function initFunctions() {
 			}
 
 			for (const [zone, cards] of zoneMoveCards.entries()) {
-				let freeSlots = zone.getFreeSpaceCount();
+				const freeSlots = zone.getFreeSpaceCount();
 				if (freeSlots < cards.length) {
-					let selectionRequest = new requests.chooseCards.create(ctx.player, cards, [freeSlots], "cardEffectMove:" + ctx.ability.id);
-					let response = yield [selectionRequest];
+					if (freeSlots.length === 0) {
+						return new ScriptValue("tempActions", []);
+					}
+					const selectionRequest = new requests.chooseCards.create(ctx.player, cards, [freeSlots], "cardEffectMove:" + ctx.ability.id);
+					const response = yield [selectionRequest];
 					if (response.type != "chooseCards") {
 						throw new Error("Incorrect response type supplied during card move selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 					}
-					let movedCards = requests.chooseCards.validate(response.value, selectionRequest);
+					const movedCards = requests.chooseCards.validate(response.value, selectionRequest);
 					for (let i = moveActions.length - 1; i >= 0; i--) {
 						if (moveActions[i].zone === zone && !movedCards.includes(moveActions[i].card)) {
 							moveActions.splice(i, 1);
@@ -516,16 +519,16 @@ export function initFunctions() {
 		[null, null],
 		"action",
 		function*(astNode, ctx) {
-			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
-			let returnActions = [];
-			let zoneReturnCards = new Map();
+			const cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
+			const returnActions = [];
+			const zoneReturnCards = new Map();
 			for (const card of cards) {
 				if (card.current() === null) {
 					continue;
 				}
 				ast.setImplicit([card], "card");
-				let zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
-				let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, true);
+				const zoneValue = (yield* this.getParameter(astNode, "zone").eval(new ScriptContext(card, ctx.player, ctx.ability, ctx.evaluatingPlayer))).get(ctx.player);
+				const zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx, true);
 				let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
 				if (zoneValue instanceof DeckPosition) {
 					index = zoneValue.isTop? -1 : 0;
@@ -536,14 +539,14 @@ export function initFunctions() {
 			}
 
 			for (const [zone, cards] of zoneReturnCards.entries()) {
-				let freeSlots = zone.getFreeSpaceCount();
+				const freeSlots = zone.getFreeSpaceCount();
 				if (freeSlots < cards.length) {
-					let selectionRequest = new requests.chooseCards.create(ctx.player, cards, [freeSlots], "cardEffectReturn:" + ctx.ability.id);
-					let response = yield [selectionRequest];
+					const selectionRequest = new requests.chooseCards.create(ctx.player, cards, [freeSlots], "cardEffectReturn:" + ctx.ability.id);
+					const response = yield [selectionRequest];
 					if (response.type != "chooseCards") {
 						throw new Error("Incorrect response type supplied during card return selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
 					}
-					let returnedCards = requests.chooseCards.validate(response.value, selectionRequest);
+					const returnedCards = requests.chooseCards.validate(response.value, selectionRequest);
 					for (let i = returnActions.length - 1; i >= 0; i--) {
 						if (returnActions[i].zone === zone && !returnedCards.includes(returnActions[i].card)) {
 							returnActions.splice(i, 1);
@@ -802,33 +805,46 @@ export function initFunctions() {
 		[null, new ast.ZoneNode("unitZone", new ast.PlayerNode("you")), new ast.BoolNode("yes")],
 		"action",
 		function*(astNode, ctx) {
-			// TODO: Make player choose which cards to summon if only a limited amount can be summoned
 			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
-			let zone = (yield* this.getParameter(astNode, "zone").eval(ctx)).get(ctx.player).find(zone => zone.type === "unit");
-			let payCost = (yield* this.getParameter(astNode, "bool").eval(ctx)).get(ctx.player);
+			const zone = (yield* this.getParameter(astNode, "zone").eval(ctx)).get(ctx.player).find(zone => zone.type === "unit");
+			const payCost = (yield* this.getParameter(astNode, "bool").eval(ctx)).get(ctx.player);
 
-			let costs = [];
-			let placeActions = [];
+			// remove cards that can no longer be summoned
+			for (let i = cards.length - 1; i >= 0; i--) {
+				if (cards[i].current() === null) {
+					cards.splice(i, 1);
+				}
+			}
+			// make player choose which cards to summon if there is not enough space
+			const freeZoneSlots = zone.getFreeSpaceCount();
+			if (freeZoneSlots < cards.length) {
+				// Not being able to summon enough units must interrupt the block
+				if (freeZoneSlots === 0) return new ScriptValue("tempActions", []);
+				if (!astNode.asManyAsPossible) return new ScriptValue("tempActions", []);
+
+				const selectionRequest = new requests.chooseCards.create(ctx.player, cards, [freeZoneSlots], "cardEffectSummon:" + ctx.ability.id);
+				const response = yield [selectionRequest];
+				if (response.type != "chooseCards") {
+					throw new Error("Incorrect response type supplied during card summon selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
+				}
+				cards = requests.chooseCards.validate(response.value, selectionRequest);
+			}
+
+			const costs = [];
+			const placeActions = [];
+
+
 			for (let i = 0; i < cards.length; i++) {
 				if (cards[i].current() === null) {
 					continue;
 				}
-				let availableZoneSlots = [];
-				for (let i = 0; i < zone.cards.length; i++) {
-					if (zone.get(i) === null) {
-						availableZoneSlots.push(i);
-					}
-				}
-				if (availableZoneSlots.length == 0) {
-					break;
-				}
-				let placeCost = new actions.Place(ctx.player, cards[i].current(), zone);
+				const placeCost = new actions.Place(ctx.player, cards[i], zone);
 				placeCost.costIndex = i;
 				costs.push(placeCost);
 				placeActions.push(placeCost);
 
 				if (payCost) {
-					let costActions = cards[i].getSummoningCost(ctx.player);
+					const costActions = cards[i].getSummoningCost(ctx.player);
 					// TODO: Figure out if this needs to account for multi-action costs and how to handle those.
 					for (const actionList of costActions) {
 						for (const action of actionList) {
@@ -838,8 +854,8 @@ export function initFunctions() {
 					}
 				}
 			}
-			let timing = yield costs;
-			let summons = [];
+			const timing = yield costs;
+			const summons = [];
 			for (let i = 0; i < timing.costCompletions.length; i++) {
 				if (timing.costCompletions[i]) {
 					summons.push(new actions.Summon(
@@ -853,6 +869,96 @@ export function initFunctions() {
 			return new ScriptValue("tempActions", summons);
 		},
 		hasCardTarget,
+		undefined // TODO: Write evalFull
+	),
+
+	// summons some number of the specified tokens to the given zone
+	SUMMONTOKENS: new ScriptFunction(
+		["number", "cardId", "number", "type", "number", "number", "abilityId", "zone"],
+		[null, null, null, null, null, null, new ast.ValueArrayNode([], "abilityId"), new ast.ZoneNode("unitZone", new ast.PlayerNode("you"))],
+		"action",
+		function*(astNode, ctx) {
+			const amounts = (yield* this.getParameter(astNode, "number", 0).eval(ctx)).get(ctx.player);
+			const name = (yield* this.getParameter(astNode, "cardId", 0).eval(ctx)).get(ctx.player);
+			const level = (yield* this.getParameter(astNode, "number", 1).eval(ctx)).get(ctx.player)[0];
+			const types = (yield* this.getParameter(astNode, "type", 0).eval(ctx)).get(ctx.player);
+			const attack = (yield* this.getParameter(astNode, "number", 2).eval(ctx)).get(ctx.player)[0];
+			const defense = (yield* this.getParameter(astNode, "number", 3).eval(ctx)).get(ctx.player)[0];
+			const abilities = (yield* this.getParameter(astNode, "abilityId", 0).eval(ctx)).get(ctx.player);
+
+			const zone = (yield* this.getParameter(astNode, "zone").eval(ctx)).get(ctx.player).find(zone => zone.type === "unit");
+
+			// get how many tokens to summon
+			let amount;
+			if (amounts === "any") {
+				amount = Infinity;
+			} else if (amounts.length === 1) {
+				amount = amounts[0];
+			} else {
+				const selectionRequest = new requests.selectTokenAmount.create(ctx.player, amounts);
+				const response = yield [selectionRequest];
+				if (response.type != "selectTokenAmount") {
+					throw new Error("Incorrect response type supplied during token amount selection. (expected \"selectTokenAmount\", got \"" + response.type + "\" instead)");
+				}
+				amount = requests.selectTokenAmount.validate(response.value, selectionRequest);
+			}
+
+			const freeSpaces = zone.getFreeSpaceCount()
+			if (amount > freeSpaces && !astNode.asManyAsPossible) {
+				// Not being able to summon enough tokens must interrupt the block
+				return new ScriptValue("tempActions", []);
+			}
+
+			// create those tokens
+			const cards = [];
+			for (let i = Math.min(amount, freeSpaces); i > 0; i--) {
+				// TODO: Give player control over the specific token variant that gets selected
+				let tokenCdf = `id: CU${name}
+cardType: token
+name: CU${name}
+level: ${level}
+types: ${types.join(",")}
+attack: ${attack}
+defense: ${defense}`;
+				for (const ability of abilities) {
+					tokenCdf += "\no: CU" + ability;
+				}
+				cards.push(new Card(ctx.player, tokenCdf));
+			}
+
+			// TODO: unify all this with the one from the SUMMON function once that gets more in-depth
+			const costs = [];
+			const placeActions = [];
+			for (let i = 0; i < cards.length; i++) {
+				const placeCost = new actions.Place(ctx.player, cards[i], zone);
+				placeCost.costIndex = i;
+				costs.push(placeCost);
+				placeActions.push(placeCost);
+
+				const costActions = cards[i].getSummoningCost(ctx.player);
+				// TODO: Figure out if this needs to account for multi-action costs and how to handle those.
+				for (const actionList of costActions) {
+					for (const action of actionList) {
+						action.costIndex = i;
+						costs.push(action);
+					}
+				}
+			}
+			const timing = yield costs;
+			const summons = [];
+			for (let i = 0; i < timing.costCompletions.length; i++) {
+				if (timing.costCompletions[i]) {
+					summons.push(new actions.Summon(
+						ctx.player,
+						placeActions[i],
+						new ScriptValue("dueToReason", "effect"),
+						new ScriptValue("by", ctx.card)
+					));
+				}
+			}
+			return new ScriptValue("tempActions", summons);
+		},
+		alwaysHasTarget,
 		undefined // TODO: Write evalFull
 	),
 
@@ -872,42 +978,6 @@ export function initFunctions() {
 			return this.getParameter(astNode, "card", 0).evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined &&
 				   this.getParameter(astNode, "card", 1).evalFull(ctx).find(list => list.get(ctx.player).length > 0) !== undefined;
 		},
-		undefined // TODO: Write evalFull
-	),
-
-	// Creates tokens
-	// TODO: refactor to SUMMONTOKENS
-	TOKENS: new ScriptFunction(
-		["number", "cardId", "cardId", "number", "type", "number", "number", "abilityId"],
-		[null, null, null, null, null, null, null, new ast.ValueArrayNode([], "abilityId")],
-		"card",
-		function*(astNode, ctx) {
-			const cardIds = (yield* this.getParameter(astNode, "cardId", 0).eval(ctx)).get(ctx.player);
-			const amount = (yield* this.getParameter(astNode, "number", 0).eval(ctx)).get(ctx.player)[0];
-			const name = (yield* this.getParameter(astNode, "cardId", 1).eval(ctx)).get(ctx.player)[0];
-			const level = (yield* this.getParameter(astNode, "number", 1).eval(ctx)).get(ctx.player)[0];
-			const types = (yield* this.getParameter(astNode, "type", 0).eval(ctx)).get(ctx.player);
-			const attack = (yield* this.getParameter(astNode, "number", 2).eval(ctx)).get(ctx.player)[0];
-			const defense = (yield* this.getParameter(astNode, "number", 3).eval(ctx)).get(ctx.player)[0];
-			const abilities = (yield* this.getParameter(astNode, "abilityId", 0).eval(ctx)).get(ctx.player);
-			const cards = [];
-			for (let i = 0; i < amount; i++) {
-				// TODO: Give player control over the specific token variant that gets selected
-				let tokenCdf = `id: CU${cardIds[i % cardIds.length]}
-cardType: token
-name: CU${name}
-level: ${level}
-types: ${types.join(",")}
-attack: ${attack}
-defense: ${defense}`;
-				for (const ability of abilities) {
-					tokenCdf += "\no: CU" + ability;
-				}
-				cards.push(new Card(ctx.player, tokenCdf));
-			}
-			return new ScriptValue("card", cards);
-		},
-		alwaysHasTarget,
 		undefined // TODO: Write evalFull
 	),
 

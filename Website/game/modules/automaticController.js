@@ -554,13 +554,7 @@ export class AutomaticController extends InteractionController {
 						break;
 					}
 					default: {
-						if (request.reason.startsWith("cardEffect:")) {
-							title = locale.game.cardChoice.cardEffect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
-						} else if (request.reason.startsWith("equipTarget:")) {
-							title = locale.game.cardChoice.equipTarget.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
-						} else if (request.reason.startsWith("cardEffectMove:")) {
-							title = locale.game.cardChoice.cardEffectMove.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
-						}
+						title = locale.game.cardChoice[request.reason.substring(0, request.reason.indexOf(":"))]?.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name) ?? locale.game.cardChoice.genericTitle;
 					}
 				}
 				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts);

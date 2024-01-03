@@ -132,8 +132,8 @@ const keywordTokenTypes = {
 	SHUFFLE: "function",
 	SUM: "function",
 	SUMMON: "function",
+	SUMMONTOKENS: "function",
 	SWAP: "function",
-	TOKENS: "function",
 	VIEW: "function",
 
 	attacked: "actionAccessor",
