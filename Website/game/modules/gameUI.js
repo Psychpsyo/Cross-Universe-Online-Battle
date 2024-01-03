@@ -215,8 +215,8 @@ export function init() {
 export function receiveMessage(command, message) {
 	switch (command) {
 		case "uiGrabbedCard": { // opponent picked up a card
-			let zone = zoneToLocal(message.substr(0, message.indexOf("|")));
-			let index = message.substr(message.indexOf("|") + 1);
+			let zone = zoneToLocal(message.substring(0, message.indexOf("|")));
+			let index = message.substring(message.indexOf("|") + 1);
 
 			grabCard(game.players[0], zone, index);
 			return true;
@@ -225,8 +225,8 @@ export function receiveMessage(command, message) {
 			let zone = null;
 			let index = 0;
 			if (message != "") {
-				zone = zoneToLocal(message.substr(0, message.indexOf("|")));
-				index = message.substr(message.indexOf("|") + 1);
+				zone = zoneToLocal(message.substring(0, message.indexOf("|")));
+				index = message.substring(message.indexOf("|") + 1);
 			}
 			dropCard(game.players[0], zone, index);
 			return true;
@@ -237,8 +237,8 @@ export function receiveMessage(command, message) {
 			return true;
 		}
 		case "placeCursor": { // move the opponent's cursor somewhere on the field
-			uiPlayers[0].targetX = message.substr(0, message.indexOf("|")) * -1;
-			uiPlayers[0].targetY = 1 - message.substr(message.indexOf("|") + 1);
+			uiPlayers[0].targetX = message.substring(0, message.indexOf("|")) * -1;
+			uiPlayers[0].targetY = 1 - message.substring(message.indexOf("|") + 1);
 			if (uiPlayers[0].dragCardElem.hidden) {
 				uiPlayers[0].dragCardElem.hidden = false;
 				uiPlayers[0].cursorElem.hidden = false;

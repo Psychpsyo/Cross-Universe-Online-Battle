@@ -8,8 +8,8 @@ export function zoneToLocal(name) {
 	if (name == "undefined") {
 		throw new Error("asfasdg");
 	}
-	let playerIndex = (parseInt(name.substr(name.length - 1)) + 1) % 2;
-	name = name.substr(0, name.length - 1);
+	let playerIndex = (parseInt(name.substring(name.length - 1)) + 1) % 2;
+	name = name.substring(0, name.length - 1);
 	return gameState.zones[name + playerIndex];
 }
 

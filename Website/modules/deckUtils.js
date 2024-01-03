@@ -58,19 +58,19 @@ export function toDeckx(cuDeck) {
 	//set partner
 	jsonDeck["cards"] = [];
 	if (cuDeck["Partner"]) {
-		jsonDeck["suggestedPartner"] = cuDeck["Partner"].substr(2);
-		jsonDeck["cards"].push({"id": cuDeck["Partner"].substr(2), "amount": 1});
+		jsonDeck["suggestedPartner"] = cuDeck["Partner"].substring(2);
+		jsonDeck["cards"].push({"id": cuDeck["Partner"].substring(2), "amount": 1});
 	}
 
 	//add the rest of the cards
 	for (const card of cuDeck["Cards"]) {
 		let alreadyThere = jsonDeck["cards"].filter(oldCard => {
-			return oldCard["id"] === card.substr(2);
+			return oldCard["id"] === card.substring(2);
 		});
 		if (alreadyThere[0]) {
 			alreadyThere[0]["amount"]++;
 		} else {
-			jsonDeck["cards"].push({"id": card.substr(2), "amount": 1});
+			jsonDeck["cards"].push({"id": card.substring(2), "amount": 1});
 		}
 	}
 

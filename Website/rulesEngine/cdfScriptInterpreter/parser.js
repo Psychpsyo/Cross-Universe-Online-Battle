@@ -767,7 +767,7 @@ function parseValueModifications() {
 	const toBaseValues = [];
 	for (let i = 0; i < valueIdentifiers.length; i++) {
 		if (valueIdentifiers[i].startsWith("base")) {
-			valueIdentifiers[i] = valueIdentifiers[i][4].toLowerCase() + valueIdentifiers[i].substr(5);
+			valueIdentifiers[i] = valueIdentifiers[i][4].toLowerCase() + valueIdentifiers[i].substring(5);
 			toBaseValues.push(true);
 		} else {
 			toBaseValues.push(false);
@@ -836,7 +836,7 @@ function parseValueModifications() {
 					throw new ScriptParserError("Swap modifier (><) cannot swap base value with non-base value.", tokens[assignmentPos]);
 				}
 				if (toBaseValues[i]) {
-					rightHandSide = rightHandSide[4].toLowerCase() + rightHandSide.substr(5);
+					rightHandSide = rightHandSide[4].toLowerCase() + rightHandSide.substring(5);
 				}
 				valueModifications.push(new valueModifiers.ValueSwapModification(valueIdentifier, rightHandSide, toBaseValues[i], condition));
 				break;

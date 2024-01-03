@@ -29,12 +29,12 @@ class Phase {
 		let opponentPhase = false;
 		if (phaseIndicator.startsWith("opponent")) {
 			opponentPhase = true;
-			phaseIndicator = phaseIndicator.substr(8);
+			phaseIndicator = phaseIndicator.substring(8);
 		} else if (phaseIndicator.startsWith("you")) {
 			yourPhase = true;
-			phaseIndicator = phaseIndicator.substr(3);
+			phaseIndicator = phaseIndicator.substring(3);
 		}
-		phaseIndicator = phaseIndicator[0].toLowerCase() + phaseIndicator.substr(1);
+		phaseIndicator = phaseIndicator[0].toLowerCase() + phaseIndicator.substring(1);
 		if ((yourPhase && player != this.turn.player) ||
 			(opponentPhase && player == this.turn.player) ||
 			!this.types.includes(phaseIndicator)) {

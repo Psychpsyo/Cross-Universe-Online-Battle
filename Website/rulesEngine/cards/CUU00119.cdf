@@ -8,5 +8,5 @@ defense: 200
 
 o: optional
 zoneDurationLimit: 1
-condition: thisCard.zone = field
+condition: thisCard.zone = field & currentTurn = you.turn
 DRAW(1);

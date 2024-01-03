@@ -91,7 +91,7 @@ export function init() {
 	// event listeners to add counters and sync those additions.
 	for (let btn of Array.from(document.getElementsByClassName("counterAddBtn"))) {
 		btn.addEventListener("click", function() {
-			let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substr(5));
+			let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
 			addCounter(fieldSlot);
 			socket.send("[counterAdd]" + fieldSlot);
 		});
@@ -181,22 +181,22 @@ export function receiveMessage(command, message) {
 			return true;
 		}
 		case "counterIncrease": {
-			const slotIndex = 19 - message.substr(0, message.indexOf("|"));
-			const counterIndex = message.substr(message.indexOf("|") + 1);
+			const slotIndex = 19 - message.substring(0, message.indexOf("|"));
+			const counterIndex = message.substring(message.indexOf("|") + 1);
 			const counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
 			gameUI.setCounter(counter, parseInt(counter.innerHTML) + 1);
 			return true;
 		}
 		case "counterDecrease": {
-			const slotIndex = 19 - message.substr(0, message.indexOf("|"));
-			const counterIndex = message.substr(message.indexOf("|") + 1);
+			const slotIndex = 19 - message.substring(0, message.indexOf("|"));
+			const counterIndex = message.substring(message.indexOf("|") + 1);
 			const counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
 			gameUI.setCounter(counter, parseInt(counter.innerHTML) - 1);
 			return true;
 		}
 		case "counterRemove": {
-			const slotIndex = 19 - message.substr(0, message.indexOf("|"));
-			const counterIndex = message.substr(message.indexOf("|") + 1);
+			const slotIndex = 19 - message.substring(0, message.indexOf("|"));
+			const counterIndex = message.substring(message.indexOf("|") + 1);
 			document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
 			return true;
 		}

@@ -15,6 +15,7 @@ exec:
 SUMMON(SELECT(1, [from you.deck where name = CUU00121]));
 
 o: trigger
+mandatory: no
 during: attackers = thisCard
 condition: thisCard.zone = field
 APPLY(thisCard, {attack += COUNT([from field where name = CUU00121]) * 250}, endOfTurn);

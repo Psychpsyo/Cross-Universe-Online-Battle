@@ -111,7 +111,7 @@ export class ManualController extends InteractionController {
 			}
 			case "deckOrder": { // opponent shuffled a deck
 				let deck = zoneToLocal("deck" + message[0]);
-				message = message.substr(2);
+				message = message.substring(2);
 				let order = message.split("|").map(i => parseInt(i));
 				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
 				deck.reindex();

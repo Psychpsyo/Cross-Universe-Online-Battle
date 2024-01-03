@@ -392,7 +392,7 @@ export function tokenize(code, effectId, game) {
 					while(code[pos + numLength] && code[pos + numLength].match(/[0-9]/i)) {
 						numLength++;
 					}
-					tokens.push(new ScriptToken("number", code.substr(pos, numLength), line, pos - lineStart));
+					tokens.push(new ScriptToken("number", code.substring(pos, pos + numLength), line, pos - lineStart));
 					pos += numLength;
 					break;
 				}

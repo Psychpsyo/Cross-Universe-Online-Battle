@@ -69,9 +69,9 @@ export function putChatMessage(message, type, cards) {
 		if (message.indexOf(":", message.indexOf(":") + 1) == -1) {
 			break;
 		}
-		let foundEmoji = message.substr(message.indexOf(":") + 1, message.indexOf(":", message.indexOf(":") + 1) - (message.indexOf(":") + 1));
+		let foundEmoji = message.substring(message.indexOf(":") + 1, message.indexOf(":", message.indexOf(":") + 1));
 		if (allEmoji.includes(foundEmoji)) {
-			messageDiv.appendChild(document.createTextNode(message.substr(0, message.indexOf(":"))));
+			messageDiv.appendChild(document.createTextNode(message.substring(0, message.indexOf(":"))));
 			let emojiImg = document.createElement("img");
 			emojiImg.src = "images/emoji/" + foundEmoji + ".png";
 			emojiImg.classList.add("emoji");
@@ -79,10 +79,10 @@ export function putChatMessage(message, type, cards) {
 			emojiImg.title = ":" + foundEmoji + ":";
 			emojiImg.draggable = false;
 			messageDiv.appendChild(emojiImg);
-			message = message.substr(message.indexOf(":", message.indexOf(":") + 1) + 1);
+			message = message.substring(message.indexOf(":", message.indexOf(":") + 1) + 1);
 		} else {
-			messageDiv.appendChild(document.createTextNode(message.substr(0, message.indexOf(":", message.indexOf(":") + 1))));
-			message = message.substr(message.indexOf(":", message.indexOf(":") + 1));
+			messageDiv.appendChild(document.createTextNode(message.substring(0, message.indexOf(":", message.indexOf(":") + 1))));
+			message = message.substring(message.indexOf(":", message.indexOf(":") + 1));
 		}
 	}
 	messageDiv.appendChild(document.createTextNode(message));

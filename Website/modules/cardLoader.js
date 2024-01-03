@@ -22,7 +22,7 @@ export class UnsupportedCardError extends Error {
 
 export function getCardImageFromID(cardId, language = localStorage.getItem("language")) {
 	if (cardId.startsWith("C")) {
-		return customCardURLs[parseInt(cardId.substr(1))];
+		return customCardURLs[parseInt(cardId.substring(1))];
 	}
 	return (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")) + (cardLanguages.includes(language)? language : "en") + "/" + cardId + ".jpg";
 }
@@ -151,7 +151,7 @@ export async function deckToCdfList(deck, automatic, player) {
 	for (let i = 0; i < deckList.length; i++) {
 		if (deckList[i].startsWith("C")) {
 			let oldId = deckList[i];
-			deckList[i] = await registerCustomCard(deck.customs[parseInt(deckList[i].substr(1)) - 1], player);
+			deckList[i] = await registerCustomCard(deck.customs[parseInt(deckList[i].substring(1)) - 1], player);
 			if (deck.suggestedPartner == oldId) {
 				deck.suggestedPartner = deckList[i];
 			}
