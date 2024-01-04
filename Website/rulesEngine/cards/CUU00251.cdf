@@ -12,7 +12,7 @@ condition: thisCard.zone = field
 cost:
 APPLY(thisCard, {level -= 1, attack, defense -= 100});
 exec:
-DISCARD(opponent.DECKTOP?(2));
+DISCARD?(opponent.DECKTOP?(2));
 
 o: trigger
 mandatory: no

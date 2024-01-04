@@ -5,4 +5,4 @@ level: 1
 types: Fire
 
 o: cast
-both.DISCARD(DECKTOP?(2));
+both.DISCARD?(DECKTOP?(2));

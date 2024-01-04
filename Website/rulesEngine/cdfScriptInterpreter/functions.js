@@ -603,10 +603,13 @@ export function initFunctions() {
 		[null, null, new ast.BoolNode("no")],
 		"card",
 		function*(astNode, ctx) {
-			let choiceAmount = (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player);
+			let choiceAmounts = (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player);
 			let eligibleCards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
 			let atRandom = (yield* this.getParameter(astNode, "bool").eval(ctx)).get(ctx.player);
-			if (eligibleCards.length === 0) {
+			// If the player can't choose enough and the card doesn't say 'as many as possible', no cards are chosen.
+			// TODO: In theory, the effect should interrupt here, but SELECT() is currently a request, not an action.
+			const chooseAtLeast = (choiceAmounts === "any" || astNode.asManyAsPossible)? 1 : Math.min(...choiceAmounts);
+			if (eligibleCards.length < chooseAtLeast) {
 				return new ScriptValue("card", []);
 			}
 
@@ -619,7 +622,7 @@ export function initFunctions() {
 					card.showTo(ctx.player);
 				}
 			}
-			let selectionRequest = new requests.chooseCards.create(ctx.player, eligibleCards, choiceAmount == "any"? [] : choiceAmount, "cardEffect:" + ctx.ability.id);
+			let selectionRequest = new requests.chooseCards.create(ctx.player, eligibleCards, choiceAmounts === "any"? [] : choiceAmounts, "cardEffect:" + ctx.ability.id);
 			let response = yield [selectionRequest];
 			if (response.type != "chooseCards") {
 				throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
@@ -669,8 +672,9 @@ export function initFunctions() {
 		function(astNode, ctx) {
 			let choiceAmounts = this.getParameter(astNode, "number").evalFull(ctx)[0].get(ctx.player);
 			let eligibleCards = this.getParameter(astNode, "card").evalFull(ctx)[0].get(ctx.player);
-			if (eligibleCards.length == 0) {
-				return [new ScriptValue("card", [])];
+			const chooseAtLeast = (choiceAmounts === "any" || astNode.asManyAsPossible)? 1 : Math.min(...choiceAmounts);
+			if (eligibleCards.length < chooseAtLeast) {
+				return new ScriptValue("card", []);
 			}
 			if (choiceAmounts === "any") {
 				choiceAmounts = [];
