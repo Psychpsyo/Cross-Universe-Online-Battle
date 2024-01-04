@@ -3,14 +3,15 @@ import {DeckPosition} from "./cdfScriptInterpreter/structs.js";
 import {nChooseK} from "./math.js";
 
 export const chooseCards = {
-	create: function(player, cards, validAmounts, reason) {
+	create: function(player, cards, validAmounts, reason, validate = () => true) {
 		return {
 			"nature": "request",
 			"player": player,
 			"type": "chooseCards",
 			"from": cards,
 			"validAmounts": validAmounts,
-			"reason": reason
+			"reason": reason,
+			"validate": validate
 		}
 	},
 	validate: function(response, request) {
@@ -20,6 +21,7 @@ export const chooseCards = {
 			request.validAmounts.length === 0 || request.validAmounts.some(amount => amount <= request.from.length)
 		)) {
 			if (!request.validAmounts.includes(response.length) && request.validAmounts.length > 0) {
+				console.log(response, request);
 				throw new Error("Chose invalid amount of cards.");
 			}
 		} else if (response.length != request.from.length) {
@@ -30,15 +32,23 @@ export const chooseCards = {
 				throw new Error("Chose an invalid card index: " + cardIndex);
 			}
 		}
-		return response.map(cardIndex => request.from[cardIndex]);
+		const cards = response.map(cardIndex => request.from[cardIndex]);
+		if (!request.validate(cards)) {
+			throw new Error("Card selection did not satisfy validator function.");
+		}
+		return cards;
 	},
 	generateValidResponses: function(request) {
-		let combinations = [];
+		const combinations = [];
 		for (const amount of request.validAmounts) {
 			if (amount > request.from.length) {
 				continue;
 			}
-			combinations = combinations.concat(nChooseK(request.from.length, amount));
+			for (const newCombination of nChooseK(request.from.length, amount)) {
+				if (request.validate(newCombination.map(cardIndex => request.from[cardIndex]))) {
+					combinations.push(newCombination);
+				}
+			}
 		}
 		return combinations;
 	}

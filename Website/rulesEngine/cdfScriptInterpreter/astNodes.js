@@ -159,7 +159,11 @@ export class FunctionNode extends AstNode {
 		if (players.length == 1) {
 			let value = yield* this.function.run(this, new ScriptContext(ctx.card, players[0], ctx.ability));
 			if (value.type === "tempActions") { // actions need to be executed
-				let timing = yield value.get(ctx.player);
+				const timing = yield value.get(ctx.player);
+				// TODO: Rework return values for action functions so that this is handled inside the function object as a post-processing step or so
+				if (timing.actions[0] instanceof actions.SelectCards) {
+					return new ScriptValue("card", timing.actions[0].selected);
+				}
 				return new ScriptValue("action", timing.actions);
 			} else {
 				return value;
@@ -176,16 +180,27 @@ export class FunctionNode extends AstNode {
 		}
 
 		if (type === "tempActions") { // actions need to be executed
+			type = "action";
+
 			let actions = [];
 			for (const iterPlayer of players) {
 				actions = actions.concat(valueMap.get(iterPlayer));
 			}
-			let timing = yield actions;
+			const timing = yield actions;
 			valueMap = new Map();
-			for (const action of timing.actions) {
-				valueMap.set(action.player, (valueMap.get(action.player) ?? []).concat(action));
+
+
+			// TODO: Rework return values for action functions so that this is handled inside the function object as a post-processing step or so
+			if (timing.actions[0] instanceof actions.SelectCards) {
+				type = "card";
+				for (const action of timing.actions) {
+					valueMap.set(action.player, action.selected);
+				}
+			} else {
+				for (const action of timing.actions) {
+					valueMap.set(action.player, (valueMap.get(action.player) ?? []).concat(action));
+				}
 			}
-			type = "action"
 		}
 		return new ScriptValue(type, valueMap);
 	}

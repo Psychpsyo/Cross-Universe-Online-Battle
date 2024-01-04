@@ -909,7 +909,7 @@ function animate(currentTime) {
 }
 
 // card choice modal (blocking card selector)
-export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1]) {
+export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1], validate = () => true) {
 	return new Promise(resolve => {
 		let validOptions = 0;
 		for (let i = 0; i < cards.length; i++) {
@@ -938,16 +938,14 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 					} else {
 						cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
 					}
-					cardChoiceConfirm.disabled = (validAmounts.length > 0 && !validAmounts.includes(cardChoiceSelected.length)) || cardChoiceSelected.length == 0;
+					cardChoiceConfirm.disabled = (validAmounts.length > 0 && !validAmounts.includes(cardChoiceSelected.length)) ||
+					                             cardChoiceSelected.length === 0 ||
+												 !validate(cardChoiceSelected.map(index => cards[index]));
 				});
 			} else {
 				cardImg.classList.add("unselectableCard");
 			}
 			cardChoiceGrid.appendChild(cardImg);
-		}
-		if (validAmounts.length > 0 && validOptions < Math.min(...validAmounts)) {
-			// if too many cards are expected, assume that choosing all is a valid option
-			validAmounts = [validOptions];
 		}
 		cardChoiceMenu.addEventListener("close", function() {
 			resolve(this.returnValue.split("|").map(val => parseInt(val)));

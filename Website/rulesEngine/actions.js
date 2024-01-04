@@ -1050,3 +1050,52 @@ export class UnapplyStaticAbility extends Action {
 		getObjectCurrent(this.object).values.modifierStack.splice(this._modifierIndex, 0, this._removed);
 	}
 }
+
+export class SelectCards extends Action {
+	constructor(player, eligibleCards, validAmounts, abilityId, validate, atRandom) {
+		super(player);
+		this.eligibleCards = eligibleCards;
+		this.atRandom = atRandom;
+
+		this.selectionRequest = new requests.chooseCards.create(
+			player,
+			eligibleCards,
+			validAmounts,
+			"cardEffect:" + abilityId,
+			validate
+		);
+
+		this.selected = null;
+	}
+
+	async* run() {
+		const wasHidden = [];
+		for (const card of this.eligibleCards) {
+			wasHidden.push(card.hiddenFor.includes(this.player));
+			if (this.atRandom) {
+				card.hideFrom(this.player);
+			} else {
+				card.showTo(this.player);
+			}
+		}
+		const response = yield [this.selectionRequest];
+		if (response.type != "chooseCards") {
+			throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
+		}
+		for (let i = 0; i < this.eligibleCards.length; i++) {
+			if (wasHidden[i]) {
+				this.eligibleCards[i].hideFrom(this.player);
+			}
+		}
+		this.selected = requests.chooseCards.validate(response.value, this.selectionRequest).map(card => card.snapshot());
+		return events.createCardsSelectedEvent(this.player, this.selected);
+	}
+
+	undo() {
+		// ???
+	}
+
+	isImpossible() {
+		return requests.chooseCards.generateValidResponses(this.selectionRequest).length === 0;
+	}
+}

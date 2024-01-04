@@ -557,7 +557,7 @@ export class AutomaticController extends InteractionController {
 						title = locale.game.cardChoice[request.reason.substring(0, request.reason.indexOf(":"))]?.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name) ?? locale.game.cardChoice.genericTitle;
 					}
 				}
-				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts);
+				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts, request.validate);
 				break;
 			}
 			case "choosePlayer": {

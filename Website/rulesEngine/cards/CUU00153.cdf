@@ -12,8 +12,8 @@ condition: thisCard.zone = field
 cost:
 LOSELIFE(200);
 exec:
-$destroys = DESTROY(SELECT(1, [from field where level < thisCard.level & cardType = [spell, item]]));
-APPLY(thisCard, {level += $destroys.destroyed.level});
+$destructions = DESTROY(SELECT(1, [from field where level < thisCard.level & cardType = [spell, item]]));
+APPLY(thisCard, {level += $destructions.destroyed.level});
 
 o: static
 applyTo: thisCard

@@ -230,15 +230,13 @@ export function initFunctions() {
 		"bool",
 		function*(astNode, ctx) {
 			let list = (yield* this.getParameter(astNode, "*").eval(ctx)).get(ctx.player);
-			for (let i = 0; i < list.length; i++) {
-				for (let j = 0; j < list.length; j++) {
-					if (i == j) {
-						continue;
-					}
-					for (const element of list[j]) {
-						if (equalityCompare(list[i], element)) {
-							return new ScriptValue("bool", false);
-						}
+			if (list.length === 1) {
+				return new ScriptValue("bool", true);
+			}
+			for (let i = 0; i < list.length - 1; i++) {
+				for (let j = i + 1; j < list.length; j++) {
+					if (equalityCompare(list[i], list[j])) {
+						return new ScriptValue("bool", false);
 					}
 				}
 			}
@@ -598,84 +596,54 @@ export function initFunctions() {
 	),
 
 	// Makes the executing player choose X cards from the given ones, either selecting at random or not.
+	// The last parameter is a validator that takes any possible selection as implicit cards and returns whether
+	// those conform to any additional constraints the card text imposes. (all having different names, for example)
 	SELECT: new ScriptFunction(
-		["number", "card", "bool"],
-		[null, null, new ast.BoolNode("no")],
+		["number", "card", "bool", "bool"],
+		[null, null, new ast.BoolNode("yes"), new ast.BoolNode("no")],
 		"card",
 		function*(astNode, ctx) {
-			let choiceAmounts = (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player);
-			let eligibleCards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
-			let atRandom = (yield* this.getParameter(astNode, "bool").eval(ctx)).get(ctx.player);
+			const choiceAmounts = (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player);
+			const eligibleCards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
+			const atRandom = (yield* this.getParameter(astNode, "bool", 1).eval(ctx)).get(ctx.player);
+			const validator = this.getParameter(astNode, "bool");
 			// If the player can't choose enough and the card doesn't say 'as many as possible', no cards are chosen.
 			// TODO: In theory, the effect should interrupt here, but SELECT() is currently a request, not an action.
 			const chooseAtLeast = (choiceAmounts === "any" || astNode.asManyAsPossible)? 1 : Math.min(...choiceAmounts);
 			if (eligibleCards.length < chooseAtLeast) {
-				return new ScriptValue("card", []);
+				return new ScriptValue("tempActions", []);
 			}
 
-			let wasHidden = [];
-			for (let card of eligibleCards) {
-				wasHidden.push(card.hiddenFor.includes(ctx.player));
-				if (atRandom) {
-					card.hideFrom(ctx.player);
-				} else {
-					card.showTo(ctx.player);
-				}
-			}
-			let selectionRequest = new requests.chooseCards.create(ctx.player, eligibleCards, choiceAmounts === "any"? [] : choiceAmounts, "cardEffect:" + ctx.ability.id);
-			let response = yield [selectionRequest];
-			if (response.type != "chooseCards") {
-				throw new Error("Incorrect response type supplied during card selection. (expected \"chooseCards\", got \"" + response.type + "\" instead)");
-			}
-			for (let i = 0; i < eligibleCards.length; i++) {
-				if (wasHidden[i]) {
-					eligibleCards[i].hideFrom(ctx.player);
-				}
-			}
-			let cards = requests.chooseCards.validate(response.value, selectionRequest);
-			yield [events.createCardsSelectedEvent(ctx.player, cards.map(card => card.current().snapshot()))];
-			return new ScriptValue("card", cards);
+			const selectAction = new actions.SelectCards(
+				ctx.player,
+				eligibleCards,
+				choiceAmounts === "any"? [] : choiceAmounts,
+				ctx.ability.id,
+				cards => {
+					ast.setImplicit(cards, "card");
+					const result = validator.evalFull(ctx)[0].get(ctx.player);
+					ast.clearImplicit("card");
+					return result;
+				},
+				atRandom
+			);
+
+			return new ScriptValue("tempActions", [selectAction]);
 		},
 		function(astNode, ctx) {
-			let amountsRequired = this.getParameter(astNode, "number").evalFull(ctx);
-			let availableOptions = this.getParameter(astNode, "card").evalFull(ctx).map(option => option.get(ctx.player));
-			let atRandom = this.getParameter(astNode, "bool").evalFull(ctx)[0].get(ctx.player);
-
-			let foundTarget = false;
-			for (let i = 0; i < availableOptions.length; i++) {
-				let wasHidden = [];
-				for (let card of availableOptions[i]) {
-					wasHidden.push(card.hiddenFor.includes(ctx.player));
-					if (atRandom) {
-						card.hideFrom(ctx.player);
-					} else {
-						card.showTo(ctx.player);
-					}
-				}
-
-				let required = amountsRequired[i].get(ctx.player);
-				if (required === "any" && availableOptions[i].length > 0) foundTarget = true;
-				if (Math.min(...required) <= availableOptions[i].length) foundTarget = true;
-
-				for (let j = 0; j < availableOptions[i].length; j++) {
-					if (wasHidden[j]) {
-						availableOptions[i][j].hideFrom(ctx.player);
-					}
-				}
-
-				if (foundTarget) {
-					break;
-				}
-			}
-			return foundTarget;
+			// Use the full eval to see if there is any valid choices for the player.
+			// Yes, this could lazily stop after finding the first valid choice but for now this is good enough.
+			return this.runFull(astNode, ctx).length > 0;
 		},
 		function(astNode, ctx) {
+			// TODO: iterate over every combination of eligible cards & choice amounts
+			const eligibleCards = this.getParameter(astNode, "card").evalFull(ctx)[0].get(ctx.player);
 			let choiceAmounts = this.getParameter(astNode, "number").evalFull(ctx)[0].get(ctx.player);
-			let eligibleCards = this.getParameter(astNode, "card").evalFull(ctx)[0].get(ctx.player);
 			const chooseAtLeast = (choiceAmounts === "any" || astNode.asManyAsPossible)? 1 : Math.min(...choiceAmounts);
-			if (eligibleCards.length < chooseAtLeast) {
-				return new ScriptValue("card", []);
-			}
+
+			if (eligibleCards.length < chooseAtLeast) return [];
+
+			// expand 'any' to a list of all possible numbers
 			if (choiceAmounts === "any") {
 				choiceAmounts = [];
 				for (let i = 1; i <= eligibleCards.length; i++) {
@@ -683,10 +651,18 @@ export function initFunctions() {
 				}
 			}
 
-			let combinations = [];
+			const combinations = [];
+			const validator = this.getParameter(astNode, "bool");
 			for (const amount of choiceAmounts) {
 				if (amount > eligibleCards.length) continue;
-				combinations = combinations.concat(nChooseK(eligibleCards.length, amount).map(list => new ScriptValue("card", list.map(i => eligibleCards[i]))));
+				const cardLists = nChooseK(eligibleCards.length, amount).map(list => list.map(i => eligibleCards[i]));
+				for (const list of cardLists) {
+					ast.setImplicit(list, "card");
+					if(validator.evalFull(ctx)[0].get(ctx.player)) {
+						combinations.push(new ScriptValue("card", list));
+					}
+					ast.clearImplicit("card");
+				}
 			}
 			return combinations;
 		}

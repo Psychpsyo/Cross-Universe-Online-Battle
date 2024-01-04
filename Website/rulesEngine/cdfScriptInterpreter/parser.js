@@ -534,7 +534,7 @@ function parseActionAccessor(actionsNode) {
 }
 
 function parseVariable() {
-	if (!foundVariables[cardId][tokens[pos].value]) {
+	if (!foundVariables[cardId]?.[tokens[pos].value]) {
 		throw new ScriptParserError("Reference to unassigned variable " + tokens[pos].value + ".", tokens[pos]);
 	}
 	let node = new ast.VariableNode(tokens[pos].value, foundVariables[cardId][tokens[pos].value]);

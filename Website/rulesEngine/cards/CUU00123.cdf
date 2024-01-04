@@ -9,4 +9,4 @@ defense: 400
 o: optional
 turnLimit: 1
 condition: thisCard.zone = exile
-VIEW(SELECT(1, [from opponent.hand], yes));
+VIEW(SELECT(1, [from opponent.hand], yes, yes));
