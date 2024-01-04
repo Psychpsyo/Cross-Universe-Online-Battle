@@ -234,7 +234,7 @@ export class MainPhase extends StackPhase {
 	}
 
 	async getBlockOptions(stack) {
-		let options = await super.getBlockOptions(stack);
+		const options = await super.getBlockOptions(stack);
 		if (stack.canDoNormalActions()) {
 			// turn actions
 			if (!this.turn.hasStandardSummoned) {
@@ -242,15 +242,15 @@ export class MainPhase extends StackPhase {
 			}
 			options.push(requests.deployItem.create(this.turn.player, await this.getDeployableItems()));
 			if (!this.turn.hasRetired) {
-				let eligibleUnits = [];
-				for (let card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
+				const eligibleUnits = [];
+				for (const card of this.turn.player.unitZone.cards.concat(this.turn.player.partnerZone.cards)) {
 					if (card) {
 						// RULES: Note that you cannot retire units that have been summoned this turn or the turn before.
-						let recentTurnActions = this.turn.game.turns[this.turn.game.turns.length - 1].getActions();
+						let recentTurnActions = this.turn.getActions();
 						if (this.turn.game.turns.lenght > 1) {
 							recentTurnActions = this.turn.game.turns[this.turn.game.turns.length - 2].getActions().concat(recentTurnActions);
 						}
-						let summons = recentTurnActions.filter(action => action instanceof actions.Summon && action.globalId === card.globalId);
+						let summons = recentTurnActions.filter(action => action instanceof actions.Summon && action.card.globalId === card.globalId);
 						if (summons.length > 0) {
 							continue;
 						}
