@@ -77,7 +77,7 @@
 	"U00107": {"flip": true, "left": 35},
 	"U00108": {"flip": true, "left": 40},
 	"U00109": {"flip": true, "left": 25},
-	"U00110": {"neverFlip": true, "left": 40},
+	"U00110": {"flip": true, "left": 40},
 	"U00111": {"flip": true},
 	"U00112": {"left": 65},
 	"U00113": {"left": 35},

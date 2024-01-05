@@ -36,7 +36,7 @@ export function getAutoResponse(requests) {
 			// choosing cards where there is only one possible option
 			case "chooseCards": {
 				const minAmount = Math.min(...request.validAmounts);
-				if (minAmount === request.from.length || request.reason === "nextCardToApplyStaticAbilityTo") {
+				if (request.reason === "nextCardToApplyStaticAbilityTo") {
 					const choice = [];
 					for (let i = 0; i < minAmount; i++) {
 						choice.push(i);

@@ -174,7 +174,7 @@ const keywordTokenTypes = {
 export class ScriptLexerError extends Error {
 	constructor(message, code, effectId, line, startColumn, endColumn = startColumn) {
 		// generate error message
-		message += "(on " + effectId + ")\n";
+		message += " (on " + effectId + ")\n";
 		const lines = code.split("\n");
 		message += "\n" + line.toString() + ": " + lines[line];
 		message += "\n" + " ".repeat(line.toString().length + 2 + startColumn) + "^".repeat(endColumn - startColumn);

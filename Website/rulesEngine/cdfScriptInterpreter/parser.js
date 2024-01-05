@@ -18,7 +18,7 @@ let foundVariables = {};
 export class ScriptParserError extends Error {
 	constructor(message, startToken, endToken = startToken) {
 		// generate error message
-		message += "(on " + effectId + ")\n";
+		message += " (on " + effectId + ")\n";
 		const lines = code.split("\n");
 		const maxLineNumberLenght = endToken.line.toString().length;
 		for (let i = startToken.line; i <= endToken.line; i++) {
