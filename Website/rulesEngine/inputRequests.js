@@ -40,7 +40,14 @@ export const chooseCards = {
 	},
 	generateValidResponses: function(request) {
 		const combinations = [];
-		for (const amount of request.validAmounts) {
+		// we need to account for an empty list representing 'any amount'
+		const validAmounts = request.validAmounts;
+		if (validAmounts.length === 0) {
+			for (let i = 1; i <= request.from.length; i++) {
+				validAmounts.push(i);
+			}
+		}
+		for (const amount of validAmounts) {
 			if (amount > request.from.length) {
 				continue;
 			}

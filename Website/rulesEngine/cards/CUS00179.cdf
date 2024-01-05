@@ -8,6 +8,7 @@ condition: COUNT([from you.discard where level > 5 & types = Mage & cardType = u
 o: cast
 cost:
 EXILE(SELECT(3, [from you.discard where types = Book & cardType = item], DIFFERENT(name)));
+exec:
 APPLY(SELECT(1, [from field where level = 0 & types = Mage & cardType = unit]), {abilities += CUS00119:1:1}, endOfTurn);
 
 [o: static
