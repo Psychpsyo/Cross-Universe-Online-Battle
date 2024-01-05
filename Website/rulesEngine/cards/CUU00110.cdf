@@ -20,4 +20,4 @@ condition: thisCard.zone = field
 cost:
 LOSELIFE(100);
 exec:
-RETURN(ORDER(SELECT(3, [from you.discard where types = Book], DIFFERENT(name))), baseOwner.deckBottom);
+MOVE(ORDER(SELECT(3, [from you.discard where types = Book], DIFFERENT(name))), baseOwner.deckBottom);

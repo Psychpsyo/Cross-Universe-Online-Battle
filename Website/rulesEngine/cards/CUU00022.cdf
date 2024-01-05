@@ -14,4 +14,4 @@ $items = SELECT(2, [from you.discard where cardType = equipableItem], DIFFERENT(
 exec:
 $chosen = opponent.SELECT(1, $items);
 MOVE([from discard where self = $chosen], baseOwner.hand);
-RETURN([from discard where self = $items - $chosen], baseOwner.deck);
+MOVE([from discard where self = $items - $chosen], baseOwner.deck);

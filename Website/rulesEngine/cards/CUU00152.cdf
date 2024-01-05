@@ -14,4 +14,4 @@ GAINLIFE(COUNT([from you.discard where types = thisCard.types]) * 50)
 o: trigger
 mandatory: no
 after: discarded = thisCard
-RETURN([from discard where self = thisCard], baseOwner.deckTop);
+MOVE([from discard where self = thisCard], baseOwner.deckTop);

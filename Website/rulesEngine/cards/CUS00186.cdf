@@ -5,7 +5,7 @@ level: 0
 types: Water
 
 o: cast
-RETURN(opponent.SELECT(1, [from opponent.discard]), baseOwner.deck);
+MOVE(opponent.SELECT(1, [from opponent.discard]), baseOwner.deck);
 GAINLIFE(200);
 
 o: trigger
@@ -14,4 +14,4 @@ after: discarded(from: deck) = thisCard
 cost:
 EXILE([from discard where self = thisCard]);
 exec:
-RETURN(SELECT(1, [from you.discard where types = Water]), baseOwner.deckBottom);
+MOVE(SELECT(1, [from you.discard where types = Water]), baseOwner.deckBottom);

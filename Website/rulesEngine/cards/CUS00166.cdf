@@ -7,4 +7,4 @@ types: Light
 o: cast
 $cards = SELECT(2, [from you.deck where level < 9 & types = Angel]);
 SHUFFLE($cards);
-RETURN(ORDER($cards), deckTop);
+MOVE(ORDER($cards), deckTop);

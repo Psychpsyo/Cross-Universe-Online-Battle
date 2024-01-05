@@ -12,5 +12,5 @@ condition: thisCard.zone = field
 cost:
 $cards = SELECT(3, [from you.discard where types = Earth]);
 exec:
-RETURN([from discard where self = $cards], baseOwner.deck);
+MOVE([from discard where self = $cards], baseOwner.deck);
 DRAW(1);

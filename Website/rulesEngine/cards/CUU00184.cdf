@@ -16,4 +16,4 @@ mandatory: no
 condition: thisCard.zone = field
 after: COUNT([from destroyed(dueTo: fight, by: thisCard) where cardType = unit]) > 0
 DESTROY(SELECT(1, [from opponent.field where cardType = [spell, item]]));
-RETURN([from field where self = thisCard], baseOwner.hand);
+MOVE([from field where self = thisCard], baseOwner.hand);

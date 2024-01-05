@@ -351,7 +351,6 @@ export class AutomaticController extends InteractionController {
 			}
 			case "cardDiscarded":
 			case "cardExiled":
-			case "cardReturned":
 			case "cardMoved": {
 				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => event.card));
 				for (const event of events) {

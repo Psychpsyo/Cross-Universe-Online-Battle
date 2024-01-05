@@ -13,4 +13,4 @@ after: destroyed(from: field) = thisCard
 cost:
 DISCARD(SELECT(1, [from you.hand where types = thisCard.types]));
 exec:
-RETURN([from discard where self = thisCard], field);
+MOVE([from discard where self = thisCard], field);

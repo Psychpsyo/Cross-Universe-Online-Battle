@@ -19,4 +19,4 @@ cost:
 LOSELIFE(100);
 exec:
 $cards = SELECT(2, [from discard]);
-RETURN($cards + thisCard, baseOwner.deck);
+MOVE($cards + thisCard, baseOwner.deck);

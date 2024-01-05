@@ -390,7 +390,7 @@ export class Timing {
 		let unshuffledDecks = [];
 		for (const action of lastActions) {
 			if (action.isCancelled) continue;
-			if ((action instanceof actions.Move || action instanceof actions.Return) && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
+			if (action instanceof actions.Move && action.zone instanceof zones.DeckZone && action.targetIndex === null) {
 				if (unshuffledDecks.indexOf(action.zone) === -1) {
 					unshuffledDecks.push(action.zone);
 				}

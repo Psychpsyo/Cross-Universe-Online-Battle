@@ -12,4 +12,4 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand where types = Wind]));
 exec:
-RETURN([from field where cardType = [spell, item]], baseOwner.hand);
+MOVE([from field where cardType = [spell, item]], baseOwner.hand);

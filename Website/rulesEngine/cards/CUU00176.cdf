@@ -17,4 +17,4 @@ o: trigger
 mandatory: no
 after: destroyed(from: field) = thisCard & COUNT([from you.discard where name = CUS00176]) > 0
 DESTROY(SELECT(2, [from you.field where types = thisCard.types]));
-RETURN([from discard where self = thisCard], field);
+MOVE([from discard where self = thisCard], field);

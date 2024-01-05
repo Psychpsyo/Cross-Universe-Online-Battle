@@ -12,4 +12,4 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand where cardType = spell]));
 exec:
-RETURN(SELECT(1, [from discard where cardType = unit]), baseOwner.deckBottom);
+MOVE(SELECT(1, [from discard where cardType = unit]), baseOwner.deckBottom);

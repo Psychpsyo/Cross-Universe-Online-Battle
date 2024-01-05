@@ -5,5 +5,5 @@ level: 1
 types:
 
 o: cast
-$cards = RETURN([from you.hand], deck);
-DRAW(COUNT($cards.returned));
+$cards = MOVE([from you.hand], deck);
+DRAW(COUNT($cards.moved));

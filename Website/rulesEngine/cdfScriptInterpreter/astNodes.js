@@ -985,7 +985,6 @@ export class ActionAccessorNode extends AstNode {
 			"exiled": "card",
 			"moved": "card",
 			"retired": "card",
-			"returned": "card",
 			"summoned": "card",
 			"targeted": "card",
 			"viewed": "card"
@@ -1077,12 +1076,6 @@ export class ActionAccessorNode extends AstNode {
 			}
 			case "retired": {
 				if (action instanceof actions.Discard && action.properties.dueTo.get().includes("retire")) {
-					return [action.card];
-				}
-				break;
-			}
-			case "returned": {
-				if (action instanceof actions.Return) {
 					return [action.card];
 				}
 				break;

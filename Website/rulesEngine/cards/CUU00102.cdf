@@ -14,4 +14,4 @@ modifier: {attack, defense += COUNT([from you.deck]) * 50}
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-RETURN([from field where cardType = [spell, item]], baseOwner.deck);
+MOVE([from field where cardType = [spell, item]], baseOwner.deck);

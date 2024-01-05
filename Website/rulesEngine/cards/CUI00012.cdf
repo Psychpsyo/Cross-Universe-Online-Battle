@@ -12,4 +12,4 @@ modifier: {defense += 100}
 o: trigger
 mandatory: yes
 after: discarded(from: [deck, field]) = thisCard
-RETURN(thisCard, baseOwner.deck);
+MOVE(thisCard, baseOwner.deck);

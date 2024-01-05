@@ -15,7 +15,7 @@ exec:
 $views = VIEW(opponent.DECKTOP(2));
 $toExile = SELECT(1, $views.viewed);
 EXILE($toExile);
-RETURN($views.viewed - $toExile, opponent.deckTop);
+MOVE($views.viewed - $toExile, opponent.deckTop);
 
 o: optional
 turnLimit: 1

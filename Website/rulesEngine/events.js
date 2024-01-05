@@ -198,17 +198,6 @@ export function createCardMovedEvent(player, card, toZone, toIndex) {
 	}
 }
 
-export function createCardReturnedEvent(player, card, toZone, toIndex) {
-	return {
-		"nature": "event",
-		"type": "cardReturned",
-		"player": player,
-		"card": card,
-		"toZone": toZone,
-		"toIndex": toIndex
-	}
-}
-
 export function createUndoCardsMovedEvent(movedCards) {
 	return {
 		"nature": "event",

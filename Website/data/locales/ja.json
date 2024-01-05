@@ -66,7 +66,6 @@
 			"discarded": null,
 			"exiled": null,
 			"moved": null,
-			"returned": null,
 			"viewed": null
 		},
 
@@ -132,7 +131,6 @@
 			"cardEffect": null,
 			"equipTarget": null,
 			"cardEffectMove": null,
-			"cardEffectReturn": null,
 			"cardEffectSummon": null,
 			"nextCardToApplyStaticAbilityTo": null
 		},

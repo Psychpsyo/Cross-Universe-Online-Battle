@@ -13,4 +13,4 @@ cost:
 $player = SELECTPLAYER();
 exec:
 $views = both.VIEW($player.DECKTOP(1));
-RETURN($views.viewed, SELECTDECKSIDE($player));
+MOVE($views.viewed, SELECTDECKSIDE($player));

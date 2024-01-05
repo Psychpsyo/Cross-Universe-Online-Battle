@@ -9,4 +9,4 @@ defense: 200
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-RETURN(SELECT(1, [from field where cardType = [spell, item]]), baseOwner.hand);
+MOVE(SELECT(1, [from field where cardType = [spell, item]]), baseOwner.hand);

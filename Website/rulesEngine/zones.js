@@ -11,6 +11,9 @@ export class Zone {
 
 	// returns the index at which the card was inserted.
 	add(card, index, clearValues = true) {
+		// needed later in clearValues
+		const cameFromField = card.zone instanceof FieldZone;
+
 		if (card.zone === this && card.index < index) {
 			index--;
 		}
@@ -45,12 +48,15 @@ export class Zone {
 			}
 			card.attackCount = 0; // reset AFTER removing card from the attack since removing it increases the attackCount
 			card.canAttackAgain = false;
+
 			// reset abilities
 			for (const ability of card.values.current.abilities) {
 				ability.zoneMoveReset(this.player.game);
 			}
+
 			// Effects that applied to the card before stop applying.
 			card.values.modifierStack = [];
+
 			// equipments get unequipped
 			if (card.equippedTo) {
 				card.equippedTo.equipments.splice(card.equippedTo.equipments.indexOf(card), 1);
@@ -60,6 +66,14 @@ export class Zone {
 				equipment.equippedTo = null;
 			}
 			card.equipments = [];
+
+			// if the card didn't come from the field, forget what side of the field it was last on (reset it to its owner)
+			// Also, if the card goes to deck, otherwise 'Scout Dog' could just bring cards from deck to opponent field.
+			// TODO: figure out how this works for the hand.
+			if (!cameFromField || this instanceof DeckZone) {
+				card.lastFieldSidePlayer = null;
+			}
+
 			// Snapshots pointing to this card become invalid. (The card stops being tracked as that specific instance)
 			card.invalidateSnapshots();
 		}

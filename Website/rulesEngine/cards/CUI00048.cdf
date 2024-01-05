@@ -19,5 +19,5 @@ DAMAGE(200);
 o: trigger
 mandatory: yes
 after: discarded(from: field) = thisCard
-RETURN([from you.discard where name != CUI00048], you.deck);
+MOVE([from you.discard where name != CUI00048], you.deck);
 EXILE(thisCard);
