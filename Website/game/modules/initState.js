@@ -3,7 +3,7 @@ import {DistRandom} from "./distributedRandom.js";
 import {GameState} from "./gameState.js";
 import {DraftState} from "./draftState.js";
 import {DeckState} from "./deckState.js";
-import {Game} from "/rulesEngine/game.js";
+import {Game} from "/rulesEngine/src/game.js";
 import {socket, connectTo, youAre} from "./netcode.js";
 
 export class InitState extends GameState {

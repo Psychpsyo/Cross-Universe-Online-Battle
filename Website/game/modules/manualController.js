@@ -2,8 +2,8 @@
 
 import {InteractionController} from "./interactionController.js";
 import {locale} from "/modules/locale.js";
-import {Zone} from "/rulesEngine/zones.js";
-import {Card} from "/rulesEngine/card.js";
+import {Zone} from "/rulesEngine/src/zones.js";
+import {Card} from "/rulesEngine/src/card.js";
 import {socket, zoneToLocal} from "./netcode.js";
 import {putChatMessage} from "./generalUI.js";
 import * as gameUI from "./gameUI.js";

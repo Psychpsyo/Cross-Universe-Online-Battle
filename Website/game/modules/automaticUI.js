@@ -2,10 +2,10 @@
 
 import {locale} from "/modules/locale.js";
 import {previewCard, closeCardPreview, cardAlignmentInfo} from "./generalUI.js";
-import {FieldZone} from "/rulesEngine/zones.js";
+import {FieldZone} from "/rulesEngine/src/zones.js";
 import * as gameUI from "./gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
-import * as blocks from "/rulesEngine/blocks.js";
+import * as blocks from "/rulesEngine/src/blocks.js";
 
 let currentActivePhaseElem = null;
 

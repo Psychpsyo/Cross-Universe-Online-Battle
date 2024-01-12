@@ -1,10 +1,10 @@
 
 import {locale} from "/modules/locale.js";
 import {deckToCardIdList} from "/modules/deckUtils.js";
-import {Card} from "/rulesEngine/card.js";
+import {Card} from "/rulesEngine/src/card.js";
 import {socket} from "./netcode.js";
 import * as cardLoader from "/modules/cardLoader.js";
-import * as abilities from "/rulesEngine/abilities.js";
+import * as abilities from "/rulesEngine/src/abilities.js";
 
 const abilityTypes = new Map([
 	[abilities.CastAbility, "cast"],

@@ -5,10 +5,10 @@ import {locale} from "/modules/locale.js";
 import {socket} from "./netcode.js";
 import {toDeckx, countDeckCards} from "/modules/deckUtils.js";
 import {loadDeckPreview, openDeckView, closeDeckView} from "./generalUI.js";
-import {ScriptParserError} from "/rulesEngine/cdfScriptInterpreter/parser.js";
+import {ScriptParserError} from "/rulesEngine/src/cdfScriptInterpreter/parser.js";
 import * as gameUI from "./gameUI.js";
 import * as cardLoader from "/modules/cardLoader.js";
-import * as deckErrors from "/rulesEngine/deckErrors.js";
+import * as deckErrors from "/rulesEngine/src/deckErrors.js";
 
 let builtInDecks = [];
 let currentDeckList = "default";

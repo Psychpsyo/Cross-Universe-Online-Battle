@@ -2,7 +2,7 @@
 // get identical random numbers that can't be influenced by either player by implementing
 // a commit-then-reveal protocol.
 
-import {CURandom} from "/rulesEngine/random.js";
+import {CURandom} from "/rulesEngine/src/random.js";
 import {socket, youAre} from "./netcode.js";
 
 export class DistRandom extends CURandom {

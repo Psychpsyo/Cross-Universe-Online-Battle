@@ -3,7 +3,7 @@ import {socket, zoneToLocal} from "./netcode.js";
 import {previewCard, closeCardPreview} from "./generalUI.js";
 import {locale} from "/modules/locale.js";
 import {getCardImage} from "/modules/cardLoader.js";
-import {Card} from "/rulesEngine/card.js";
+import {Card} from "/rulesEngine/src/card.js";
 import * as fieldOverlay from "./fieldOverlay.js";
 
 let cardSlots = [];

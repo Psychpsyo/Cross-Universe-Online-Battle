@@ -1,4 +1,4 @@
-import {Game} from "/rulesEngine/game.js";
+import {Game} from "/rulesEngine/src/game.js";
 import {GameState} from "./gameState.js";
 import {BoardState} from "./boardState.js";
 import {locale} from "/modules/locale.js";

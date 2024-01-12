@@ -1,0 +1,3 @@
+[submodule "Website/rulesEngine"]
+	path = Website/rulesEngine
+	url = https://github.com/Psychpsyo/Galaxy-Engine

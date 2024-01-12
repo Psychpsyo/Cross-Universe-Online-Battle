@@ -1,12 +1,12 @@
 // This module exports the getAutoResponse() function which the automatic simulator uses to figure out
 // whether or not to automatically perform an action for the player, such as passing priority.
 
-import * as phases from "/rulesEngine/phases.js";
-import * as abilities from "/rulesEngine/abilities.js";
-import * as ast from "/rulesEngine/cdfScriptInterpreter/astNodes.js";
-import * as blocks from "/rulesEngine/blocks.js";
-import * as modifiers from "../../rulesEngine/valueModifiers.js";
-import {ScriptContext} from "../../rulesEngine/cdfScriptInterpreter/structs.js";
+import * as phases from "/rulesEngine/src/phases.js";
+import * as abilities from "/rulesEngine/src/abilities.js";
+import * as ast from "/rulesEngine/src/cdfScriptInterpreter/astNodes.js";
+import * as blocks from "/rulesEngine/src/blocks.js";
+import * as modifiers from "../../rulesEngine/src/valueModifiers.js";
+import {ScriptContext} from "../../rulesEngine/src/cdfScriptInterpreter/structs.js";
 
 // track ctrl to disable the autoresponder when it's held
 let ctrlHeld = false;

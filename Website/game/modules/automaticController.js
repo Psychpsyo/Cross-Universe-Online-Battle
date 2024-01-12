@@ -4,15 +4,15 @@ import {locale} from "/modules/locale.js";
 import {InteractionController} from "./interactionController.js";
 import {socket} from "./netcode.js";
 import {getAutoResponse} from "./autopass.js";
-import {BaseCard} from "/rulesEngine/card.js";
-import {Player} from "/rulesEngine/player.js";
+import {BaseCard} from "/rulesEngine/src/card.js";
+import {Player} from "/rulesEngine/src/player.js";
 import * as gameUI from "./gameUI.js";
 import * as autoUI from "./automaticUI.js";
 import * as generalUI from "./generalUI.js";
-import * as actions from "/rulesEngine/actions.js";
-import * as blocks from "/rulesEngine/blocks.js";
+import * as actions from "/rulesEngine/src/actions.js";
+import * as blocks from "/rulesEngine/src/blocks.js";
 import * as cardLoader from "/modules/cardLoader.js";
-import * as zones from "/rulesEngine/zones.js";
+import * as zones from "/rulesEngine/src/zones.js";
 
 export class AutomaticController extends InteractionController {
 	constructor() {
