@@ -910,6 +910,7 @@ function animate(currentTime) {
 
 // card choice modal (blocking card selector)
 export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1], validate = () => true) {
+	console.log(validAmounts);
 	return new Promise(resolve => {
 		let validOptions = 0;
 		for (let i = 0; i < cards.length; i++) {
@@ -926,7 +927,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 					e.stopPropagation();
 					previewCard(cards[i]);
 					if (this.classList.toggle("cardHighlight")) {
-						if (validAmounts.length == 1 && validAmounts[0] == 1 && cardChoiceSelected.length > 0) {
+						if (validAmounts.length === 1 && validAmounts[0] === 1 && cardChoiceSelected.length > 0) {
 							for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
 								if (elem != this) {
 									elem.classList.remove("cardHighlight");

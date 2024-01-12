@@ -305,13 +305,19 @@ function parseValue() {
 		case "function": {
 			return parseFunction();
 		}
-		case "cardType":
 		case "cardId":
-		case "abilityId":
+		case "abilityId": {
+			const node = new ast.ValueArrayNode([tokens[pos].value.substring(2)], tokens[pos].type);
+			pos++;
+			return node;
+		}
+		case "cardType":
 		case "counter":
 		case "dueToReason":
 		case "type": {
-			return parseValueArray();
+			const node = new ast.ValueArrayNode([tokens[pos].value], tokens[pos].type);
+			pos++;
+			return node;
 		}
 		case "phaseType": {
 			let node = new ast.PhaseNode(null, tokens[pos].value);
@@ -568,23 +574,25 @@ function parseBool() {
 	return node;
 }
 
-function parseValueArray() {
-	let value = tokens[pos].value;
-	if (["cardId", "abilityId"].includes(tokens[pos].type)) {
-		value = value.substring(2);
-	}
-	const node = new ast.ValueArrayNode([value], tokens[pos].type);
-	pos++;
-	return node;
-}
-
 function parseList() {
 	const listStartPos = pos;
 	const elements = [];
 	pos++;
 	const type = tokens[pos].type;
 	while (tokens[pos].type === type) {
-		elements.push(tokens[pos].value);
+		let value = tokens[pos].value;
+		switch (type) {
+			case "number": {
+				value = parseInt(value);
+				break;
+			}
+			case "cardId":
+			case "abilityId": {
+				value = value.substring(2);
+				break;
+			}
+		}
+		elements.push(value);
 		pos++;
 		if (tokens[pos].type === "separator") {
 			pos++;
