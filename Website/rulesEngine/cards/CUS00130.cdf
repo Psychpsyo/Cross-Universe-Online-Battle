@@ -6,5 +6,5 @@ types: Curse, Landmine
 
 o: cast
 after: declared.owner = opponent
-$destructions = DESTROY(SELECT(1, [from attackers where owner = opponent & cardType = unit]));
-DAMAGE($destructions.destroyed.level * 50);
+$destroyed = DESTROY(SELECT(1, [from attackers where owner = opponent & cardType = unit]));
+DAMAGE($destroyed.level * 50);

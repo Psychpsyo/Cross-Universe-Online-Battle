@@ -157,14 +157,18 @@ export class FunctionNode extends AstNode {
 	* eval(ctx) {
 		let players = (yield* this.player.eval(ctx)).get(ctx.player);
 		if (players.length == 1) {
-			let value = yield* this.function.run(this, new ScriptContext(ctx.card, players[0], ctx.ability));
+			const value = yield* this.function.run(this, new ScriptContext(ctx.card, players[0], ctx.ability));
 			if (value.type === "tempActions") { // actions need to be executed
-				const timing = yield value.get(ctx.player);
-				// TODO: Rework return values for action functions so that this is handled inside the function object as a post-processing step or so
-				if (timing.actions[0] instanceof actions.SelectCards) {
-					return new ScriptValue("card", timing.actions[0].selected);
+				const actions = value.get(ctx.player);
+				const timing = yield actions;
+				let values = [];
+				for (const action of timing.actions) {
+					if (actions.includes(action) && !action.isCancelled) {
+						const actualValues = this.function.finalizeReturnValue(action);
+						if (actualValues !== undefined) values = values.concat(actualValues);
+					}
 				}
-				return new ScriptValue("action", timing.actions);
+				return new ScriptValue(this.function.returnType, values);
 			} else {
 				return value;
 			}
@@ -180,7 +184,7 @@ export class FunctionNode extends AstNode {
 		}
 
 		if (type === "tempActions") { // actions need to be executed
-			type = "action";
+			type = this.function.returnType;
 
 			let actions = [];
 			for (const iterPlayer of players) {
@@ -189,16 +193,10 @@ export class FunctionNode extends AstNode {
 			const timing = yield actions;
 			valueMap = new Map();
 
-
-			// TODO: Rework return values for action functions so that this is handled inside the function object as a post-processing step or so
-			if (timing.actions[0] instanceof actions.SelectCards) {
-				type = "card";
-				for (const action of timing.actions) {
-					valueMap.set(action.player, action.selected);
-				}
-			} else {
-				for (const action of timing.actions) {
-					valueMap.set(action.player, (valueMap.get(action.player) ?? []).concat(action));
+			for (const action of timing.actions) {
+				if (actions.includes(action) && !action.isCancelled) {
+					const actualValues = this.function.finalizeReturnValue(action);
+					if (actualValues !== undefined) valueMap.set(action.player, (valueMap.get(action.player) ?? []).concat(actualValues));
 				}
 			}
 		}
@@ -207,8 +205,16 @@ export class FunctionNode extends AstNode {
 	evalFull(ctx) {
 		let players = this.player.evalFull(ctx)[0].get(ctx.player);
 		if (players.length == 1) {
-			let result = this.function.runFull?.(this, new ScriptContext(ctx.card, players[0], ctx.ability, ctx.evaluatingPlayer));
-			return result ?? super.evalFull(new ScriptContext(ctx.card, players[0], ctx.ability, ctx.evaluatingPlayer));
+			const result =
+				this.function.runFull?.(this, new ScriptContext(ctx.card, players[0], ctx.ability, ctx.evaluatingPlayer)) ??
+				super.evalFull(new ScriptContext(ctx.card, players[0], ctx.ability, ctx.evaluatingPlayer));
+			if (result.type === "tempActions") { // actions need to be executed
+				return new ScriptValue(
+					this.function.returnType,
+					result.get(ctx.player).map(action => this.function.finalizeReturnValue(action)).filter(val => val !== undefined).flat()
+				);
+			}
+			return result;
 		}
 		// otherwise this is a both.FUNCTION() and must create split values, while executing for the turn player first
 		players.unshift(players.splice(players.indexOf(ctx.game.currentTurn().player), 1)[0]);
@@ -219,9 +225,12 @@ export class FunctionNode extends AstNode {
 		return cartesianProduct(values).map(list => {
 			let valueMap = new Map();
 			for (let i = 0; i < list.length; i++) {
-				valueMap.set(players[i], list[i].get(players[i]));
+				valueMap.set(
+					players[i],
+					list[i].get(players[i]).map(action => this.function.finalizeReturnValue(action)).filter(val => val !== undefined).flat()
+				);
 			}
-			return new ScriptValue(list[0].type, valueMap);
+			return new ScriptValue(this.function.returnType, valueMap);
 		});
 	}
 	hasAllTargets(ctx) {

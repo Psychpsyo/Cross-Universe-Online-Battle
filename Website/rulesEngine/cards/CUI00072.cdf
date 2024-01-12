@@ -10,8 +10,8 @@ condition: thisCard.zone = field
 cost:
 $unit = SELECT(1, [from you.field where types = Figure & cardType = unit]);
 exec:
-$discard = DISCARD(SELECT(1, [from you.hand where types = Ghost & cardType = unit]));
-APPLY([from $unit where cardType = unit], {attack += $discard.discarded.level * 50}, endOfTurn);
+$discarded = DISCARD(SELECT(1, [from you.hand where types = Ghost & cardType = unit]));
+APPLY([from $unit where cardType = unit], {attack += $discarded.level * 50}, endOfTurn);
 
 o: static
 applyTo: [from you.field where baseTypes = Figure & cardType = unit]

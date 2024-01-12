@@ -11,5 +11,5 @@ mandatory: no
 during: currentPhase = endPhase & COUNT([from currentTurn.destroyed(dueTo: fight, by: thisCard) where cardType = unit]) > 0
 condition: thisCard.zone = field
 EXILE(thisCard);
-$moves = MOVE(SELECT(1, [from you.hand, you.deck where name = CUU00228]), field);
-PUTCOUNTERS($moves.moved, Emergence, 1);
+$moved = MOVE(SELECT(1, [from you.hand, you.deck where name = CUU00228]), field);
+PUTCOUNTERS($moved, Emergence, 1);

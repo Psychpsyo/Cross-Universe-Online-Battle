@@ -57,13 +57,16 @@ function getZoneForCard(zoneList, card, ctx) {
 }
 
 class ScriptFunction {
-	constructor(parameterTypes = [], defaultValues = [], returnType, func, hasAllTargets, funcFull) {
+	// finalizeRetVal is used to 'post-process' the returned actions after they have been merged for players and executed.
+	// It is only called for functions that return tempAction
+	constructor(parameterTypes = [], defaultValues = [], returnType, func, hasAllTargets, funcFull, finalizeReturnValue = value => value) {
 		this.parameterTypes = parameterTypes;
 		this.defaultValues = defaultValues;
 		this.returnType = returnType;
 		this.run = func.bind(this);
 		this.hasAllTargets = hasAllTargets.bind(this);
 		this.runFull = funcFull?.bind(this);
+		this.finalizeReturnValue = finalizeReturnValue.bind(this);
 	}
 
 	// gets the right astNode of the given type
@@ -165,12 +168,15 @@ export function initFunctions() {
 	DAMAGE: new ScriptFunction(
 		["number"],
 		[null],
-		"action",
+		"number",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", [new actions.DealDamage(ctx.player, (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player)[0])]);
 		},
 		alwaysHasTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [action.amount];
+		}
 	),
 
 	// Returns the top X cards of the executing player's deck
@@ -199,7 +205,7 @@ export function initFunctions() {
 	DESTROY: new ScriptFunction(
 		["card"],
 		[null],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current());
 			let discards = cards.map(card => new actions.Discard(
@@ -212,14 +218,12 @@ export function initFunctions() {
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			let cardLists = this.getParameter(astNode, "card").evalFull(ctx).map(option => option.get(ctx.player).filter(card => card.current()));
-			let discardLists = cardLists.map(cards => cards.map(card => new actions.Discard(
-				ctx.player,
-				card.current(),
-				new ScriptValue("dueToReason", ["effect"]),
-				new ScriptValue("card", [ctx.card.snapshot()])
-			)));
-			return discardLists.map(discards => new ScriptValue("action", discards.concat(discards.map(discard => new actions.Destroy(discard)))));
+			return this.getParameter(astNode, "card").evalFull(ctx);
+		},
+		function(action) {
+			if (action instanceof actions.Destroy) {
+				return [action.discard.card];
+			}
 		}
 	),
 
@@ -250,7 +254,7 @@ export function initFunctions() {
 	DISCARD: new ScriptFunction(
 		["card"],
 		[null],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(
 				ctx.player,
@@ -261,12 +265,10 @@ export function initFunctions() {
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Discard(
-				ctx.player,
-				card.current(),
-				new ScriptValue("dueToReason", ["effect"]),
-				new ScriptValue("card", [ctx.card.snapshot()])
-			))));
+			return this.getParameter(astNode, "card").evalFull(ctx);
+		},
+		function(action) {
+			return [action.card];
 		}
 	),
 
@@ -274,7 +276,7 @@ export function initFunctions() {
 	DRAW: new ScriptFunction(
 		["number"],
 		[null],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			let amount = (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player)[0];
 			if (astNode.asManyAsPossible) {
@@ -283,23 +285,27 @@ export function initFunctions() {
 			return new ScriptValue("tempActions", [new actions.Draw(ctx.player, amount)]);
 		},
 		alwaysHasTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return action.drawnCards;
+		}
 	),
 
 	// Exiles the passed-in cards
 	EXILE: new ScriptFunction(
 		["card", "untilIndicator"],
 		[null, new ast.UntilIndicatorNode("forever")],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			let until = (yield* this.getParameter(astNode, "untilIndicator").eval(ctx)).get(ctx.player);
 			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current(), until)));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			// TODO: make this re-evaluate the until indicator with an implicit card
-			let until = this.getParameter(astNode, "untilIndicator").evalFull(ctx)[0].get(ctx.player);
-			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.Exile(ctx.player, card.current(), until))));
+			return this.getParameter(astNode, "card").evalFull(ctx);
+		},
+		function(action) {
+			return [action.card];
 		}
 	),
 
@@ -307,24 +313,30 @@ export function initFunctions() {
 	GAINLIFE: new ScriptFunction(
 		["number"],
 		[null],
-		"action",
+		"number",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", [new actions.ChangeLife(ctx.player, (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player)[0])]);
 		},
 		alwaysHasTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [action.amount];
+		}
 	),
 
 	// The executing player gains X mana
 	GAINMANA: new ScriptFunction(
 		["number"],
 		[null],
-		"action",
+		"number",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", [new actions.ChangeMana(ctx.player, (yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player)[0])]);
 		},
 		alwaysHasTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [action.amount];
+		}
 	),
 
 	// Returns how many counters of the given type are on the given cards
@@ -366,31 +378,37 @@ export function initFunctions() {
 	LOSELIFE: new ScriptFunction(
 		["number"],
 		[null],
-		"action",
+		"number",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", [new actions.ChangeLife(ctx.player, -(yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player)[0])]);
 		},
 		alwaysHasTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [-action.amount];
+		}
 	),
 
 	// The executing player loses X mana
 	LOSEMANA: new ScriptFunction(
 		["number"],
 		[null],
-		"action",
+		"number",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", [new actions.ChangeMana(ctx.player, -(yield* this.getParameter(astNode, "number").eval(ctx)).get(ctx.player)[0])]);
 		},
 		alwaysHasTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [-action.amount];
+		}
 	),
 
 	// Move cards from where they are to certain zone(s)
 	MOVE: new ScriptFunction(
 		["card", "zone"],
 		[null, null],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			const cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
 			const moveActions = [];
@@ -432,24 +450,10 @@ export function initFunctions() {
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			let cardPossibilities = this.getParameter(astNode, "card").evalFull(ctx).map(possibilities => possibilities.get(ctx.player));
-			let moveActions = [];
-			for (let cards of cardPossibilities) {
-				moveActions.push([]);
-				for (const card of cards) {
-					ast.setImplicit([card], "card");
-					// TODO: this might need to handle multiple zone possibilities
-					let zoneValue = this.getParameter(astNode, "zone").evalFull(ctx)[0].get(ctx.player);
-					let zone = getZoneForCard(zoneValue instanceof DeckPosition? zoneValue.decks : zoneValue, card, ctx);
-					let index = (zone instanceof zones.FieldZone || zone instanceof zones.DeckZone)? null : -1;
-					if (zoneValue instanceof DeckPosition) {
-						index = zoneValue.isTop? -1 : 0;
-					}
-					moveActions[moveActions.length - 1].push(new actions.Move(ctx.player, card, zone, index));
-					ast.clearImplicit("card");
-				}
-			}
-			return moveActions.map(actions => new ScriptValue("action", actions));
+			return this.getParameter(astNode, "card").evalFull(ctx);
+		},
+		function(action) {
+			return [action.card];
 		}
 	),
 
@@ -515,13 +519,16 @@ export function initFunctions() {
 	REVEAL: new ScriptFunction(
 		["card"],
 		[null],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).map(card => new actions.Reveal(ctx.player, card)));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).map(card => new actions.Reveal(ctx.player, card))));
+			return this.getParameter(astNode, "card").evalFull(ctx);
+		},
+		function(action) {
+			return [action.card];
 		}
 	),
 
@@ -595,6 +602,9 @@ export function initFunctions() {
 				}
 			}
 			return combinations;
+		},
+		function(action) {
+			return action.selected;
 		}
 	),
 
@@ -668,13 +678,16 @@ export function initFunctions() {
 	SETATTACKTARGET: new ScriptFunction(
 		["card"],
 		[null],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			let newTarget = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player)[0];
 			return new ScriptValue("tempActions", [new actions.SetAttackTarget(ctx.player, newTarget)]);
 		},
 		hasCardTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [action.newTarget];
+		}
 	),
 
 	// The executing player shuffles their deck without the given cards
@@ -713,7 +726,7 @@ export function initFunctions() {
 	SUMMON: new ScriptFunction(
 		["card", "zone", "bool"],
 		[null, new ast.ZoneNode("unitZone", new ast.PlayerNode("you")), new ast.BoolNode("yes")],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			let cards = (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player);
 			const zone = (yield* this.getParameter(astNode, "zone").eval(ctx)).get(ctx.player).find(zone => zone.type === "unit");
@@ -779,14 +792,17 @@ export function initFunctions() {
 			return new ScriptValue("tempActions", summons);
 		},
 		hasCardTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [action.card];
+		}
 	),
 
 	// summons some number of the specified tokens to the given zone
 	SUMMONTOKENS: new ScriptFunction(
 		["number", "cardId", "number", "type", "number", "number", "abilityId", "zone"],
 		[null, null, null, null, null, null, new ast.ValueArrayNode([], "abilityId"), new ast.ZoneNode("unitZone", new ast.PlayerNode("you"))],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			const amounts = (yield* this.getParameter(astNode, "number", 0).eval(ctx)).get(ctx.player);
 			const name = (yield* this.getParameter(astNode, "cardId", 0).eval(ctx)).get(ctx.player);
@@ -869,7 +885,10 @@ defense: ${defense}`;
 			return new ScriptValue("tempActions", summons);
 		},
 		alwaysHasTarget,
-		undefined // TODO: Write evalFull
+		undefined, // TODO: Write evalFull
+		function(action) {
+			return [action.card];
+		}
 	),
 
 	// Swaps two cards with eachother
@@ -895,13 +914,16 @@ defense: ${defense}`;
 	VIEW: new ScriptFunction(
 		["card"],
 		[null],
-		"action",
+		"card",
 		function*(astNode, ctx) {
 			return new ScriptValue("tempActions", (yield* this.getParameter(astNode, "card").eval(ctx)).get(ctx.player).filter(card => card.current()).map(card => new actions.View(ctx.player, card.current())));
 		},
 		hasCardTarget,
 		function(astNode, ctx) {
-			return this.getParameter(astNode, "card").evalFull(ctx).map(option => new ScriptValue("action", option.get(ctx.player).filter(card => card.current()).map(card => new actions.View(ctx.player, card.current()))));
+			return this.getParameter(astNode, "card").evalFull(ctx);
+		},
+		function(action) {
+			return [action.card];
 		}
 	)
 }

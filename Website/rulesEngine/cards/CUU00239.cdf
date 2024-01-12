@@ -10,8 +10,8 @@ o: trigger
 mandatory: no
 condition: thisCard.zone = field
 after: COUNT([from destroyed(dueTo: fight, by: thisCard) where cardType = unit]) > 0
-$moves = MOVE(SELECT(1, [from opponent.exile where cardType = unit]), baseOwner.deck);
-opponent.DAMAGE($moves.moved.level * 50);
+$moved = MOVE(SELECT(1, [from opponent.exile where cardType = unit]), baseOwner.deck);
+opponent.DAMAGE($moved.level * 50);
 
 o: trigger
 mandatory: no

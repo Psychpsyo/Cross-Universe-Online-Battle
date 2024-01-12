@@ -9,5 +9,5 @@ defense: 700
 o: fast
 turnLimit: 1
 condition: thisCard.zone = field
-$discards = DISCARD(SELECT(any, [from you.hand]));
-APPLY(thisCard, {defense += COUNT($discards.discarded) * 100}, endOfTurn);
+$discarded = DISCARD(SELECT(any, [from you.hand]));
+APPLY(thisCard, {defense += COUNT($discarded) * 100}, endOfTurn);

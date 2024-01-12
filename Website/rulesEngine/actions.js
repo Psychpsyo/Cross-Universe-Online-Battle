@@ -117,11 +117,11 @@ export class ChangeLife extends Action {
 	constructor(player, amount) {
 		super(player);
 		this.amount = amount;
-		this.oldAmount = null;
+		this._oldAmount = null;
 	}
 
 	async* run() {
-		this.oldAmount = this.player.life;
+		this._oldAmount = this.player.life;
 		this.player.life = Math.max(this.player.life + this.amount, 0);
 		if (this.player.life === 0) {
 			this.player.next().victoryConditions.push("lifeZero");
@@ -133,7 +133,7 @@ export class ChangeLife extends Action {
 		if (this.player.life === 0) {
 			this.player.next().victoryConditions.pop();
 		}
-		this.player.life = this.oldAmount;
+		this.player.life = this._oldAmount;
 		return events.createLifeChangedEvent(this.player);
 	}
 

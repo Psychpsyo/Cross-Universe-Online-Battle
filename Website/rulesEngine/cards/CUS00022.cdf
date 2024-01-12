@@ -6,5 +6,5 @@ types:
 
 o: cast
 $type = SELECTTYPE(allTypes);
-$moves = MOVE(SELECT(any, [from you.hand where types = $type]), deck);
-MOVE(SELECT(1, [from you.deck where types = $type & level = COUNT($moves.moved)]), hand);
+$moved = MOVE(SELECT(any, [from you.hand where types = $type]), deck);
+MOVE(SELECT(1, [from you.deck where types = $type & level = COUNT($moved)]), hand);

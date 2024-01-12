@@ -6,5 +6,5 @@ types: Dark, Landmine
 
 o: cast
 after: declared.owner = opponent
-$destructions = DESTROY([from field where cardType = unit]);
-DAMAGE(SUM([from $destructions.destroyed where owner = opponent].level) * 50);
+$destroyed = DESTROY([from field where cardType = unit]);
+DAMAGE(SUM([from $destroyed where owner = opponent].level) * 50);

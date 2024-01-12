@@ -5,5 +5,5 @@ level: 4
 types:
 
 o: cast
-$discards = DISCARD([from opponent.hand]);
-opponent.DRAW(COUNT($discards.discarded));
+$discarded = DISCARD([from opponent.hand]);
+opponent.DRAW(COUNT($discarded));

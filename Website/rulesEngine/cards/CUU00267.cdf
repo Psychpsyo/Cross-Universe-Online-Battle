@@ -9,8 +9,8 @@ defense: 0
 o: trigger
 mandatory: no
 after: summoned = thisCard
-$exiles = EXILE(SELECT([1, 2, 3], [from you.discard]));
-GAINLIFE(COUNT($exiles.exiled) * 100);
+$exiled = EXILE(SELECT([1, 2, 3], [from you.discard]));
+GAINLIFE(COUNT($exiled) * 100);
 
 o: optional
 turnLimit: 1

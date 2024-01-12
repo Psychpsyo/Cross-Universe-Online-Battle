@@ -18,5 +18,5 @@ APPLY(thisCard, {canAttack = no}, endOfTurn);
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-$exile = EXILE(SELECT(1, [from you.discard where types = thisCard.types]));
-APPLY(SELECT(1, [from you.field where name = CUT00015]), {baseAttack += $exile.exiled.level * 50}, endOfTurn);
+$exiled = EXILE(SELECT(1, [from you.discard where types = thisCard.types]));
+APPLY(SELECT(1, [from you.field where name = CUT00015]), {baseAttack += $exiled.level * 50}, endOfTurn);

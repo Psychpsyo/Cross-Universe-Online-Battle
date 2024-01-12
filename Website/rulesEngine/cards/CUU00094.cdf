@@ -9,8 +9,8 @@ defense: 600
 o: optional
 turnLimit: 1
 condition: thisCard.zone = field
-$destroy = DESTROY(SELECT(1, [from you.field where self != thisCard & cardType = unit]));
-APPLY(thisCard, {attack += $destroy.destroyed.level * 100}, endOfTurn);
+$destroyed = DESTROY(SELECT(1, [from you.field where self != thisCard & cardType = unit]));
+APPLY(thisCard, {attack += $destroyed.level * 100}, endOfTurn);
 
 o: optional
 turnLimit: 1

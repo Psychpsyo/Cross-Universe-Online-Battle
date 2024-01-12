@@ -10,6 +10,6 @@ o: optional
 turnLimit: 1
 condition: thisCard.zone = field
 cost:
-$discard = DISCARD(SELECT(1, [from you.hand where cardType = unit]));
+$discarded = DISCARD(SELECT(1, [from you.hand where cardType = unit]));
 exec:
-APPLY(thisCard, {attack += $discard.discarded.level * 50}, endOfTurn);
+APPLY(thisCard, {attack += $discarded.level * 50}, endOfTurn);

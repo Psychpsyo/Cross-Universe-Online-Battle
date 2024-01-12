@@ -12,10 +12,10 @@ condition: thisCard.zone = field
 cost:
 DISCARD(SELECT(1, [from you.hand]));
 exec:
-$views = VIEW(opponent.DECKTOP(2));
-$toExile = SELECT(1, $views.viewed);
+$viewed = VIEW(opponent.DECKTOP(2));
+$toExile = SELECT(1, $viewed);
 EXILE($toExile);
-MOVE($views.viewed - $toExile, opponent.deckTop);
+MOVE($viewed - $toExile, opponent.deckTop);
 
 o: optional
 turnLimit: 1
