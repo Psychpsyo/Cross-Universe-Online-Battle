@@ -1,5 +1,5 @@
-import {renderCard} from "/custom/renderer.js";
-import {locale} from "/modules/locale.js";
+import {renderCard} from "/custom/renderer.mjs";
+import {locale} from "/scripts/locale.mjs";
 
 let currentlyEditing = window.crypto.randomUUID();
 let unsavedChanges = false;

@@ -1,12 +1,12 @@
-import {GameState} from "./gameState.js";
-import {BoardState} from "./boardState.js";
-import {Card} from "/rulesEngine/src/card.js";
-import {locale} from "/modules/locale.js";
-import {socket} from "./netcode.js";
-import {deckFromCardList} from "/modules/deckUtils.js";
-import {previewCard} from "./generalUI.js";
-import * as gameUI from "./gameUI.js";
-import * as cardLoader from "/modules/cardLoader.js";
+import {GameState} from "./gameState.mjs";
+import {BoardState} from "./boardState.mjs";
+import {Card} from "/rulesEngine/src/card.mjs";
+import {locale} from "/scripts/locale.mjs";
+import {socket} from "./netcode.mjs";
+import {deckFromCardList} from "/scripts/deckUtils.mjs";
+import {previewCard} from "./generalUI.mjs";
+import * as gameUI from "./gameUI.mjs";
+import * as cardLoader from "/scripts/cardLoader.mjs";
 
 export class DraftState extends GameState {
 	constructor(automatic) {

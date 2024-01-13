@@ -1,4 +1,4 @@
-import {locale} from "/modules/locale.js";
+import {locale} from "/scripts/locale.mjs";
 
 // copy buttons (they show "Copied!" after being clicked)
 function showCopied() {

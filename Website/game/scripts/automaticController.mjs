@@ -1,18 +1,18 @@
 // This module exports the controller for the automatic simulator which verifies the cross universe game rules
 
-import {locale} from "/modules/locale.js";
-import {InteractionController} from "./interactionController.js";
-import {socket} from "./netcode.js";
-import {getAutoResponse} from "./autopass.js";
-import {BaseCard} from "/rulesEngine/src/card.js";
-import {Player} from "/rulesEngine/src/player.js";
-import * as gameUI from "./gameUI.js";
-import * as autoUI from "./automaticUI.js";
-import * as generalUI from "./generalUI.js";
-import * as actions from "/rulesEngine/src/actions.js";
-import * as blocks from "/rulesEngine/src/blocks.js";
-import * as cardLoader from "/modules/cardLoader.js";
-import * as zones from "/rulesEngine/src/zones.js";
+import {locale} from "/scripts/locale.mjs";
+import {InteractionController} from "./interactionController.mjs";
+import {socket} from "./netcode.mjs";
+import {getAutoResponse} from "./autopass.mjs";
+import {BaseCard} from "/rulesEngine/src/card.mjs";
+import {Player} from "/rulesEngine/src/player.mjs";
+import * as gameUI from "./gameUI.mjs";
+import * as autoUI from "./automaticUI.mjs";
+import * as generalUI from "./generalUI.mjs";
+import * as actions from "/rulesEngine/src/actions.mjs";
+import * as blocks from "/rulesEngine/src/blocks.mjs";
+import * as cardLoader from "/scripts/cardLoader.mjs";
+import * as zones from "/rulesEngine/src/zones.mjs";
 
 export class AutomaticController extends InteractionController {
 	constructor() {

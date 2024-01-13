@@ -1,4 +1,4 @@
-import {locale} from "/modules/locale.js";
+import {locale} from "/scripts/locale.mjs";
 
 let cardsSoFar = 0;
 let effectElement = null;

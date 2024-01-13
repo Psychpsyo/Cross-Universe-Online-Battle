@@ -1,5 +1,5 @@
-import {getCardImageFromID} from "/modules/cardLoader.js";
-import {locale} from "/modules/locale.js";
+import {getCardImageFromID} from "/scripts/cardLoader.mjs";
+import {locale} from "/scripts/locale.mjs";
 
 const categoryLinks = {
 	"cardGameRecommendation": "https://crossuniverse.jp/原作小説/",

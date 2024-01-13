@@ -1,5 +1,5 @@
 // Utility functions for handling and converting decks
-import {locale} from "/modules/locale.js";
+import {locale} from "/scripts/locale.mjs";
 
 // Creates a .deckx from a list of cards, a name and a description, with respect to the current user-selected locale.
 export function deckFromCardList(cards, partner = null, name = null, description = null) {

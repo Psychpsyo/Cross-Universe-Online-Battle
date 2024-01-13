@@ -1,10 +1,10 @@
-import {cardActions} from "./cardActions.js";
-import {socket, zoneToLocal} from "./netcode.js";
-import {previewCard, closeCardPreview} from "./generalUI.js";
-import {locale} from "/modules/locale.js";
-import {getCardImage} from "/modules/cardLoader.js";
-import {Card} from "/rulesEngine/src/card.js";
-import * as fieldOverlay from "./fieldOverlay.js";
+import {cardActions} from "./cardActions.mjs";
+import {socket, zoneToLocal} from "./netcode.mjs";
+import {previewCard, closeCardPreview} from "./generalUI.mjs";
+import {locale} from "/scripts/locale.mjs";
+import {getCardImage} from "/scripts/cardLoader.mjs";
+import {Card} from "/rulesEngine/src/card.mjs";
+import * as fieldOverlay from "./fieldOverlay.mjs";
 
 let cardSlots = [];
 export let uiPlayers = [];
@@ -910,7 +910,6 @@ function animate(currentTime) {
 
 // card choice modal (blocking card selector)
 export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1], validate = () => true) {
-	console.log(validAmounts);
 	return new Promise(resolve => {
 		let validOptions = 0;
 		for (let i = 0; i < cards.length; i++) {

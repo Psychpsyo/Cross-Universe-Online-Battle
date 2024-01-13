@@ -1,6 +1,6 @@
-import {InitState} from "./initState.js";
-import {ReplayInitState} from "./replayInitState.js";
-import {locale} from "/modules/locale.js";
+import {InitState} from "./initState.mjs";
+import {ReplayInitState} from "./replayInitState.mjs";
+import {locale} from "/scripts/locale.mjs";
 
 document.documentElement.lang = locale.code;
 

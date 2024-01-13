@@ -1,7 +1,7 @@
-import {locale} from "/modules/locale.js";
-import * as cardLoader from "/modules/cardLoader.js";
-import * as deckUtils from "/modules/deckUtils.js";
-import * as uiUtils from "/modules/uiUtils.js";
+import {locale} from "/scripts/locale.mjs";
+import * as cardLoader from "/scripts/cardLoader.mjs";
+import * as deckUtils from "/scripts/deckUtils.mjs";
+import * as uiUtils from "/scripts/uiUtils.mjs";
 
 //load illustrator & contest winner tags
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());

@@ -1,5 +1,5 @@
-import {locale} from "/modules/locale.js";
-import * as cardLoader from "/modules/cardLoader.js";
+import {locale} from "/scripts/locale.mjs";
+import * as cardLoader from "/scripts/cardLoader.mjs";
 
 document.getElementById("handGeneratorTitle").textContent = locale["deckMaker"]["startingHandGenerator"]["title"];
 document.getElementById("regenerateStartingHand").textContent = locale["deckMaker"]["startingHandGenerator"]["redraw"];

@@ -1,4 +1,4 @@
-import {locale} from "/modules/locale.js";
+import {locale} from "/scripts/locale.mjs";
 
 function loadImage(imageUrl) {
 	return new Promise((resolve, reject) => {

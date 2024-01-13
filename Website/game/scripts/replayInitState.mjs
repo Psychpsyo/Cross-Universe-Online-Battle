@@ -1,9 +1,9 @@
-import {Game} from "/rulesEngine/src/game.js";
-import {GameState} from "./gameState.js";
-import {BoardState} from "./boardState.js";
-import {locale} from "/modules/locale.js";
-import * as gameUI from "./gameUI.js";
-import * as generalUI from "./generalUI.js";
+import {Game} from "/rulesEngine/src/game.mjs";
+import {GameState} from "./gameState.mjs";
+import {BoardState} from "./boardState.mjs";
+import {locale} from "/scripts/locale.mjs";
+import * as gameUI from "./gameUI.mjs";
+import * as generalUI from "./generalUI.mjs";
 
 export class ReplayInitState extends GameState {
 	constructor(replay) {

@@ -1,6 +1,6 @@
-import {reloadLocale, locale} from "/modules/locale.js";
-import {refetchCardData} from "./profilePictureSelector.js";
-import {validateHotkeys, resetHotkeys, relabelAllHotkeys, editHotkey} from "./hotkeys.js";
+import {reloadLocale, locale} from "/scripts/locale.mjs";
+import {refetchCardData} from "./profilePictureSelector.mjs";
+import {validateHotkeys, resetHotkeys, relabelAllHotkeys, editHotkey} from "./hotkeys.mjs";
 
 const languageNames = {
 	en: "🇬🇧 English",

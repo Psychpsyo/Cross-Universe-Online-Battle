@@ -1,6 +1,6 @@
 // This file handles displaying lines on the field (for equipable items and stuff) by modifying an SVG element.
 
-import {FieldZone} from "/rulesEngine/src/zones.js";
+import {FieldZone} from "/rulesEngine/src/zones.mjs";
 
 // the field graphic is 70vh tall so card slots are positioned relative to that.
 let vh = 1024 / 70;

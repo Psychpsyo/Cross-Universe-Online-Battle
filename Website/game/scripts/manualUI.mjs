@@ -1,9 +1,9 @@
 // this file holds all the code needed for UI that is required during manual games.
 
-import {locale} from "/modules/locale.js";
-import {socket} from "./netcode.js";
-import * as gameUI from "./gameUI.js";
-import {putChatMessage} from "./generalUI.js";
+import {locale} from "/scripts/locale.mjs";
+import {socket} from "./netcode.mjs";
+import * as gameUI from "./gameUI.mjs";
+import {putChatMessage} from "./generalUI.mjs";
 
 export function init() {
 	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());

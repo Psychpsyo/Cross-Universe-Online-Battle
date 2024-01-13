@@ -1,10 +1,10 @@
-import * as generalUI from "./generalUI.js";
-import {DistRandom} from "./distributedRandom.js";
-import {GameState} from "./gameState.js";
-import {DraftState} from "./draftState.js";
-import {DeckState} from "./deckState.js";
-import {Game} from "/rulesEngine/src/game.js";
-import {socket, connectTo, youAre} from "./netcode.js";
+import * as generalUI from "./generalUI.mjs";
+import {DistRandom} from "./distributedRandom.mjs";
+import {GameState} from "./gameState.mjs";
+import {DraftState} from "./draftState.mjs";
+import {DeckState} from "./deckState.mjs";
+import {Game} from "/rulesEngine/src/game.mjs";
+import {socket, connectTo, youAre} from "./netcode.mjs";
 
 export class InitState extends GameState {
 	constructor(roomcode, gameMode, websocketUrl) {

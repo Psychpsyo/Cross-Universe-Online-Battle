@@ -2,7 +2,7 @@ import * as THREE from "three";
 import {VRButton} from "three/addons/webxr/VRButton.js";
 import {XRControllerModelFactory} from 'three/addons/webxr/XRControllerModelFactory';
 import WebXRPolyfill from "webxr-polyfill";
-import {getCardImageFromID} from "/modules/cardLoader.js";
+import {getCardImageFromID} from "/scripts/cardLoader.mjs";
 
 const polyfill = new WebXRPolyfill();
 const textureLoader = new THREE.TextureLoader();

@@ -1,7 +1,7 @@
 
-import {locale} from "/modules/locale.js";
-import {renderCard} from "/custom/renderer.js";
-import {deckToCardIdList} from "/modules/deckUtils.js";
+import {locale} from "/scripts/locale.mjs";
+import {renderCard} from "/custom/renderer.mjs";
+import {deckToCardIdList} from "/scripts/deckUtils.mjs";
 
 export let cardInfoCache = {};
 let cdfCache = {};

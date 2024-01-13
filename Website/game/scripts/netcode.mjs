@@ -1,5 +1,5 @@
-import {putChatMessage} from "./generalUI.js";
-import {locale} from "/modules/locale.js";
+import {putChatMessage} from "./generalUI.mjs";
+import {locale} from "/scripts/locale.mjs";
 
 export let socket = null;
 export let youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and player selection, as far as the board is concerned, the local player is always player 1.)

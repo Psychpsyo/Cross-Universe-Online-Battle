@@ -1,12 +1,12 @@
 // This module exports the board state which is the main game state where the players actually play.
 
-import {locale} from "/modules/locale.js";
-import {GameState} from "./gameState.js";
-import {socket} from "./netcode.js";
-import {ManualController} from "./manualController.js";
-import {AutomaticController} from "./automaticController.js";
-import * as ui from "./gameUI.js";
-import * as generalUI from "./generalUI.js"
+import {locale} from "/scripts/locale.mjs";
+import {GameState} from "./gameState.mjs";
+import {socket} from "./netcode.mjs";
+import {ManualController} from "./manualController.mjs";
+import {AutomaticController} from "./automaticController.mjs";
+import * as ui from "./gameUI.mjs";
+import * as generalUI from "./generalUI.mjs";
 
 export class BoardState extends GameState {
 	constructor(automatic) {

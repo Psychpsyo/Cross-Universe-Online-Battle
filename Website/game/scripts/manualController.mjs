@@ -1,14 +1,14 @@
 // This module exports the manual controller, used for manually operated Cross Universe games.
 
-import {InteractionController} from "./interactionController.js";
-import {locale} from "/modules/locale.js";
-import {Zone} from "/rulesEngine/src/zones.js";
-import {Card} from "/rulesEngine/src/card.js";
-import {socket, zoneToLocal} from "./netcode.js";
-import {putChatMessage} from "./generalUI.js";
-import * as gameUI from "./gameUI.js";
-import * as manualUI from "./manualUI.js";
-import * as cardLoader from "/modules/cardLoader.js";
+import {InteractionController} from "./interactionController.mjs";
+import {locale} from "/scripts/locale.mjs";
+import {Zone} from "/rulesEngine/src/zones.mjs";
+import {Card} from "/rulesEngine/src/card.mjs";
+import {socket, zoneToLocal} from "./netcode.mjs";
+import {putChatMessage} from "./generalUI.mjs";
+import * as gameUI from "./gameUI.mjs";
+import * as manualUI from "./manualUI.mjs";
+import * as cardLoader from "/scripts/cardLoader.mjs";
 
 class tokenZone {
 	constructor() {
