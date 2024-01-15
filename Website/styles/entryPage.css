@@ -46,11 +46,11 @@ body {
 #lobbyListHolder {
 	flex-grow: 1;
 	overflow-y: scroll;
+	position: relative;
 }
 #lobbyList {
 	all: unset;
 	box-sizing: border-box;
-	min-height: 100%;
 }
 #lobbyList:empty::before {
 	content: attr(data-message);
@@ -61,6 +61,7 @@ body {
 	left: 0;
 	transform: translateY(-50%);
 	filter: opacity(75%);
+	width: 100%;
   }
 .lobby {
 	position: relative;

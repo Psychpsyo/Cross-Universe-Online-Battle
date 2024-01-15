@@ -36,7 +36,10 @@
 		"title": null,
 		"join": null,
 		"userIconAlt": null,
-		"newLobbyButton": null
+		"newLobbyButton": null,
+
+		"noLobbyServer": null,
+		"noOpenLobbies": null
 	},
 
 	"game": {

@@ -131,6 +131,7 @@ bugReportButton.title = locale.mainMenu.reportBug;
 
 lobbyHeading.textContent = locale.lobbies.title;
 newLobbyBtn.title = locale.lobbies.newLobbyButton;
+lobbyList.dataset.message = locale.lobbies.noLobbyServer;
 
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");

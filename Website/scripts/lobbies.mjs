@@ -11,7 +11,7 @@ function connectWebsocket() {
 	lobbyConnection = new WebSocket("ws://localhost:4538");
 	console.log("connecting...");
 	lobbyConnection.addEventListener("open", function() {
-		console.log("opened websocket");
+		lobbyList.dataset.message = locale.lobbies.noOpenLobbies;
 		newLobbyBtn.addEventListener("click", () => {
 			lobbyConnection.send(JSON.stringify({
 				"type": "openLobby",
@@ -27,7 +27,7 @@ function connectWebsocket() {
 	lobbyConnection.addEventListener("message", e => receiveMessage(JSON.parse(e.data)));
 
 	lobbyConnection.addEventListener("close", () => {
-		console.log("websocket closed");
+		lobbyList.dataset.message = locale.lobbies.noLobbyServer;
 		connectWebsocket();
 	});
 }
@@ -44,6 +44,9 @@ function displayLobby(lobby) {
 	lobbyElem.querySelector(".lobbyLanguage").textContent = lobby.language.toUpperCase();
 	lobbyElem.querySelector(".lobbyUserCount").textContent = lobby.userCount;
 	lobbyElem.querySelector(".lobbyUserLimit").textContent = lobby.userLimit;
+	if (lobby.userCount >= lobby.userLimit) {
+		lobbyElem.querySelector(".lobbyJoinBtn").disabled = true;
+	}
 
 	lobbyList.appendChild(lobbyElem);
 }

@@ -36,7 +36,10 @@
 		"title": "Lobbies",
 		"join": "Beitreten",
 		"userIconAlt": "Spieler:",
-		"newLobbyButton": "Neue Lobby erstellen"
+		"newLobbyButton": "Neue Lobby erstellen",
+
+		"noLobbyServer": "Konnte den Lobby-Server nicht erreichen.\n:(",
+		"noOpenLobbies": "Keine offenen Lobbies gefunden.\n:("
 	},
 
 	"game": {
