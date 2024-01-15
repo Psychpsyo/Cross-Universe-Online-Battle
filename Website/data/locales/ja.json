@@ -34,7 +34,9 @@
 
 	"lobbies": {
 		"title": null,
-		"join": null
+		"join": null,
+		"userIconAlt": null,
+		"newLobbyButton": null
 	},
 
 	"game": {
@@ -555,6 +557,9 @@
 			"title": null,
 			"websocketUrl": null,
 			"websocketUrlTitle": null,
+
+			"lobbyServerUrl": null,
+			"lobbyServerUrlTitle": null,
 			"cardImageUrl": null,
 			"cardImageUrlTitle": null,
 			"cardDataApiUrl": null,

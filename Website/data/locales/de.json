@@ -34,7 +34,9 @@
 
 	"lobbies": {
 		"title": "Lobbies",
-		"join": "Beitreten"
+		"join": "Beitreten",
+		"userIconAlt": "Spieler:",
+		"newLobbyButton": "Neue Lobby erstellen"
 	},
 
 	"game": {
@@ -555,6 +557,8 @@
 			"title": "Technisches",
 			"websocketUrl": "Websocket URL:",
 			"websocketUrlTitle": "Hier kannst du einen Override für den Server einstellen, durch welchen Spiele verbunden und geproxied werden.\nWenn du hier nicht das Gleiche, wie dein Gegner eingibst, könnt ihr NICHT miteinander spielen.",
+			"lobbyServerUrl": "Lobby Server URL:",
+			"lobbyServerUrlTitle": "Hier kannst du einen Override für den Server einstellen, über dem Lobbies abgerufen und registriert werden.\nWenn hier nicht das Gleiche, wie bei Anderen steht, werdet ihr eure Lobbies nicht finden können.",
 			"cardImageUrl": "URL für Kartenbilder:",
 			"cardImageUrlTitle": "Hier kannst du einen Override für den Server einstellen, von dem Kartenbilder geladen werden. Solch ein Server sollte in der Lage sein sowohl Englische als auch Japanische Kartenbilder zu liefern und sollte einen /random Endpoint anbieten, welcher auf ein zufälliges Kartenbild verweist.",
 			"cardDataApiUrl": "URL für Kartendaten API:",

@@ -13,6 +13,7 @@ localStorage.setItem("devMode", localStorage.getItem("devMode") ?? false);
 localStorage.setItem("fieldLabelToggle", localStorage.getItem("fieldLabelToggle") ?? true);
 localStorage.setItem("fieldLeftToggle", localStorage.getItem("fieldLeftToggle") ?? false);
 localStorage.setItem("language", localStorage.getItem("language") ?? (navigator.language.startsWith("ja")? "ja" : "en"));
+localStorage.setItem("lobbyServerUrl", localStorage.getItem("lobbyServerUrl") ?? "");
 localStorage.setItem("mainMenuCards", localStorage.getItem("mainMenuCards") ?? true);
 localStorage.setItem("opponentCardLanguage", localStorage.getItem("opponentCardLanguage") ?? true);
 localStorage.setItem("partnerChoiceToggle", localStorage.getItem("partnerChoiceToggle") ?? false);

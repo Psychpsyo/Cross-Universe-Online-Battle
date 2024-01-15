@@ -149,11 +149,11 @@ textarea {
 	padding: .2em;
 }
 .svgButton:hover > img {
-	transform: translateY(-.05em);
+	transform: translateY(-3.5%);
 	filter: drop-shadow(0 .2em .1em #0008);
 }
 .svgButton:active > img {
-	transform: translateY(.05em);
+	transform: translateY(3.5%);
 	filter: drop-shadow(0 0 .1em #0008);
 }
 .svgButton > img, .svgButton:disabled > img {

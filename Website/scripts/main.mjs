@@ -130,7 +130,7 @@ deckMakerButton.title = locale.mainMenu.deckCreatorButton;
 bugReportButton.title = locale.mainMenu.reportBug;
 
 lobbyHeading.textContent = locale.lobbies.title;
-lobbyTemplate.content.querySelector(".lobbyJoinBtn").textContent = locale.lobbies.join;
+newLobbyBtn.title = locale.lobbies.newLobbyButton;
 
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");

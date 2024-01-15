@@ -28,14 +28,20 @@ body {
 	min-width: 15em;
 	background-color: var(--theme-shadow);
 	border-right: 2px var(--theme-border-color) solid;
-	display: none; /* flex; */
+	display: flex;
 	flex-direction: column;
 }
-#lobbyHeading {
-	display: block;
+#lobbies > header {
+	position: relative;
 	text-align: center;
 	padding: .15em;
 	border-bottom: 2px solid var(--theme-border-color);
+}
+#newLobbyBtn {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
 }
 #lobbyListHolder {
 	flex-grow: 1;

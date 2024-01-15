@@ -198,6 +198,10 @@ const settings = {
 			type: "text"
 		},
 		{
+			id: "lobbyServerUrl",
+			type: "text"
+		},
+		{
 			id: "cardImageUrl",
 			type: "text"
 		},
@@ -384,6 +388,7 @@ async function setLanguage(language) {
 	relabelAllHotkeys();
 
 	websocketUrlInput.placeholder = "wss://battle.crossuniverse.net:443/ws/";
+	lobbyServerUrlInput.placeholder = "wss://battle.crossuniverse.net:443/lobbies/";
 	cardImageUrlInput.placeholder = "https://crossuniverse.net/images/cards/";
 	cardDataApiUrlInput.placeholder = "https://crossuniverse.net/cardInfo/";
 

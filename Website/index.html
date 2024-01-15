@@ -57,7 +57,10 @@
 					<a id="rulesButton" class="bigButton" target="_blank"></a>
 				</section>
 				<section id="lobbies">
-					<h1 id="lobbyHeading"></h1>
+					<header>
+						<h1 id="lobbyHeading"></h1>
+						<button id="newLobbyBtn" class="svgButton" disabled><img src="images/icons/newLobby.svg" alt="" draggable="false"></button>
+					</header>
 					<div id="lobbyListHolder">
 						<ul id="lobbyList"><!--filled by JS--></ul>
 					</div>
@@ -71,9 +74,11 @@
 
 		<template id="lobbyTemplate">
 			<li class="lobby">
-				<h2>[<span class="lobbyRegion"></span>] <span class="lobbyName"></span></h2>
+				<h2>[<span class="lobbyLanguage"></span>] <span class="lobbyName"></span></h2>
 				<br>
-				<span><img class="lobbyUserIcon" src="images/icons/user.svg" alt="Users: "> <span class="lobbyUserCount">0/0</span></span>
+				<span>
+					<img class="lobbyUserIcon" src="images/icons/user.svg" alt=""> <span class="lobbyUserCount">0</span>/<span class="lobbyUserLimit">0</span>
+				</span>
 				<button class="lobbyJoinBtn"></button>
 			</li>
 		</template>
@@ -82,5 +87,6 @@
 		<script src="scripts/localStorageSetup.js"></script>
 		<script src="scripts/navigationHandler.js"></script>
 		<script src="scripts/main.mjs" type="module"></script>
+		<script src="scripts/lobbies.mjs" type="module"></script>
 	</body>
 </html>
