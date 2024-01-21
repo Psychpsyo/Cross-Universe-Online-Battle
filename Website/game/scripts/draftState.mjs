@@ -2,6 +2,7 @@ import {GameState} from "./gameState.mjs";
 import {BoardState} from "./boardState.mjs";
 import {Card} from "/rulesEngine/src/card.mjs";
 import {locale} from "/scripts/locale.mjs";
+import {setPlayerDeck} from "./utils.mjs";
 import {socket} from "./netcode.mjs";
 import {deckFromCardList} from "/scripts/deckUtils.mjs";
 import {previewCard} from "./generalUI.mjs";
@@ -185,12 +186,15 @@ export class DraftState extends GameState {
 			// load decks
 			let deckSetupPromises = [];
 			for (let i = 0; i < 2; i++) {
-				players[i].deck = deckFromCardList(Array.from(document.getElementById("draftDeckList" + i).childNodes).map(img => img.dataset.cardId), null, locale.draft.deckName, locale.draft.deckDescription);
-				deckSetupPromises.push(cardLoader.deckToCdfList(players[i].deck, this.automatic, game.players[i]).then(deck => {
-					game.players[i].setDeck(deck);
-					gameUI.updateCard(game.players[i].deckZone, -1);
-					document.getElementById("playerDeckButton" + i).disabled = false;
-				}));
+				deckSetupPromises.push(
+					setPlayerDeck(
+						game.players[i],
+						deckFromCardList(Array.from(document.getElementById("draftDeckList" + i).childNodes).map(img => img.dataset.cardId), null, locale.draft.deckName, locale.draft.deckDescription),
+						this.automatic
+					).then(() => {
+						document.getElementById("playerDeckButton" + i).disabled = false;
+					})
+				);
 			}
 			loadingIndicator.classList.add("active");
 			await Promise.all(deckSetupPromises);

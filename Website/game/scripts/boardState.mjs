@@ -7,6 +7,7 @@ import {ManualController} from "./manualController.mjs";
 import {AutomaticController} from "./automaticController.mjs";
 import * as ui from "./gameUI.mjs";
 import * as generalUI from "./generalUI.mjs";
+import * as musicSystem from "./musicSystem/mainSystem.mjs";
 
 export class BoardState extends GameState {
 	constructor(automatic) {
@@ -155,6 +156,7 @@ export class BoardState extends GameState {
 		if (game.players[0].partnerZone.cards[0] && game.players[1].partnerZone.cards[0]) {
 			mainGameBlackout.classList.add("hidden");
 			this.controller.startGame();
+			musicSystem.evalRules();
 		}
 	}
 }

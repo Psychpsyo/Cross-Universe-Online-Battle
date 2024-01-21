@@ -19,7 +19,7 @@ export function deckFromCardList(cards, partner = null, name = null, description
 		if (alreadyThere[0]) {
 			alreadyThere[0].amount++;
 		} else {
-			deck.cards.push({"id": card, "amount": 1});
+			deck.cards.push({id: card, amount: 1});
 		}
 	}
 
@@ -47,32 +47,36 @@ export function basicDeckFromCardList(cards, partner = null, name = null, descri
 
 // Converts an official Cross Universe .deck format file to .deckx with respect to the current user-selected locale.
 export function toDeckx(cuDeck) {
-	let jsonDeck = {};
+	const jsonDeck = {
+		name: {},
+		description: {},
+		cards: []
+	};
 
 	//set name
-	jsonDeck["name"] = {};
-	jsonDeck["name"][locale.code] = cuDeck["Name"] ?? locale.deckxDefaultName;
-	jsonDeck["description"] = {};
-	jsonDeck["description"][locale.code] = cuDeck["Description"] ?? "";
+	jsonDeck.name[locale.code] = cuDeck.Name ?? locale.deckxDefaultName;
+	jsonDeck.description[locale.code] = cuDeck.Description ?? "";
 
 	//set partner
-	jsonDeck["cards"] = [];
-	if (cuDeck["Partner"]) {
-		jsonDeck["suggestedPartner"] = cuDeck["Partner"].substring(2);
-		jsonDeck["cards"].push({"id": cuDeck["Partner"].substring(2), "amount": 1});
+	if (cuDeck.Partner) {
+		jsonDeck.suggestedPartner = cuDeck.Partner.substring(2);
+		jsonDeck.cards.push({id: cuDeck.Partner.substring(2), amount: 1});
 	}
 
 	//add the rest of the cards
-	for (const card of cuDeck["Cards"]) {
-		let alreadyThere = jsonDeck["cards"].filter(oldCard => {
-			return oldCard["id"] === card.substring(2);
+	for (const card of cuDeck.Cards) {
+		let alreadyThere = jsonDeck.cards.filter(oldCard => {
+			return oldCard.id === card.substring(2);
 		});
 		if (alreadyThere[0]) {
-			alreadyThere[0]["amount"]++;
+			alreadyThere[0].amount++;
 		} else {
-			jsonDeck["cards"].push({"id": card.substring(2), "amount": 1});
+			jsonDeck.cards.push({id: card.substring(2), amount: 1});
 		}
 	}
+
+	// copy over _extra object, if it exists
+	jsonDeck._extra = cuDeck._extra;
 
 	return jsonDeck;
 }

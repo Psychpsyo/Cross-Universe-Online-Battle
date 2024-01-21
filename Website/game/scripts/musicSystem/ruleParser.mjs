@@ -1,0 +1,3 @@
+function tokenize(rule) {
+
+}

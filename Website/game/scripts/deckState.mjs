@@ -6,6 +6,7 @@ import {socket} from "./netcode.mjs";
 import {toDeckx, countDeckCards} from "/scripts/deckUtils.mjs";
 import {loadDeckPreview, openDeckView, closeDeckView} from "./generalUI.mjs";
 import {ScriptParserError} from "/rulesEngine/src/cdfScriptInterpreter/parser.mjs";
+import {setPlayerDeck} from "./utils.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
 import * as deckErrors from "/rulesEngine/src/deckErrors.mjs";
@@ -154,11 +155,8 @@ export class DeckState extends GameState {
 		switch (command) {
 			case "deck": {
 				let deck = JSON.parse(message);
-				cardLoader.deckToCdfList(deck, this.automatic, game.players[0]).then(cdfList => {
-					players[0].deck = deck;
-					game.players[0].setDeck(cdfList);
-					gameUI.updateCard(game.players[0].deckZone, -1);
-					gameState.checkReadyConditions();
+				setPlayerDeck(game.players[0], deck, this.automatic).then(() => {
+					this.checkReadyConditions();
 				});
 				return true;
 			}
@@ -175,7 +173,7 @@ export class DeckState extends GameState {
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
 		loadingIndicator.classList.add("active");
 		try {
-			localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
+			await setPlayerDeck(localPlayer, deck, this.automatic);
 		} catch (e) {
 			switch (true) {
 				case e instanceof cardLoader.UnsupportedCardError: {
@@ -218,17 +216,13 @@ export class DeckState extends GameState {
 			loadingIndicator.classList.remove("active");
 		}
 
-		// deck selection elements aren't needed anymore.
+		// sync the deck
+		socket.send("[deck]" + JSON.stringify(deck));
+
+		// update UI
 		deckDropzone.remove();
 		deckSelector.classList.add("deckListDisable");
-
-		// sync and load the deck
-		socket.send("[deck]" + JSON.stringify(deck));
-		players[localPlayer.index].deck = deck;
-
-		gameUI.updateCard(localPlayer.deckZone, -1);
 		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
-
 		playerDeckButton1.disabled = false;
 
 		this.checkReadyConditions();

@@ -1,0 +1,70 @@
+{
+	"defaultRules": [
+		{"include": "gameOver"},
+		{"include": "lowLife"},
+		{"include": "generic"}
+	],
+	"defaultRuleSet": {
+		"gameOver": [
+			{
+				"state": "victory",
+				"condition": "gameWon"
+			},
+			{
+				"state": "defeat",
+				"condition": "opponent_gameWon"
+			}
+		],
+		"lowLife": [
+			{
+				"state": "lowLife",
+				"condition": "life < 200"
+			}
+		],
+		"generic": [
+			{
+				"state": "hugeUnit",
+				"condition": "field has level 8+ unit"
+			},
+			{
+				"state": "bigUnit",
+				"condition": "field has level 6+ unit"
+			}
+		]
+	},
+	"defaultStates": {
+		"base": {
+			"song": "base",
+			"fadeIn": 5
+		},
+		"bigUnit": {
+			"song": "bigUnit",
+			"fadeIn": 1.5
+		},
+		"hugeUnit": {
+			"song": "hugeUnit",
+			"fadeIn": 0.5
+		},
+		"lowLife": {
+			"song": "lowLife",
+			"fadeIn": 0.5,
+			"fadeOut": 2.5
+		},
+		"victory": {
+			"song": "victory",
+			"fadeIn": 2.5
+		},
+		"defeat": {
+			"song": "victory",
+			"fadeIn": 2.5
+		},
+		"hope": {
+			"song": "hope",
+			"fadeIn": 1
+		},
+		"despair": {
+			"song": "despair",
+			"fadeIn": 1
+		}
+	}
+}
