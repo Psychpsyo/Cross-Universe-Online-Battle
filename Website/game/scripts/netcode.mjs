@@ -24,8 +24,8 @@ export function connectTo(targetRoomcode, websocketUrl) {
 
 // receiving messages
 function receiveMessage(e) {
-	const message = e.data.substring(message.indexOf("]") + 1);
-	const command = e.data.substring(1, message.indexOf("]"));
+	const message = e.data.substring(e.data.indexOf("]") + 1);
+	const command = e.data.substring(1, e.data.indexOf("]"));
 
 	switch (command) {
 		case "chat": { // incoming chat message
