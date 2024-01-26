@@ -2,14 +2,13 @@
 
 import {locale} from "/scripts/locale.mjs";
 import {openCardSelect} from "./gameUI.mjs";
-import {putChatMessage} from "./generalUI.mjs";
 import {socket} from "./netcode.mjs";
 
 export let cardActions = {
 	"I00040": {
 		"roll": function() {
 			let result = Math.floor(Math.random() * 6) + 1;
-			putChatMessage(locale.cardActions.I00040.yourRoll.replace("{#RESULT}", result), "notice");
+			chat.putMessage(locale.cardActions.I00040.yourRoll.replace("{#RESULT}", result), "notice");
 			socket.send("[dice]" + result);
 		}
 	},

@@ -59,65 +59,18 @@ export function createAbilityFragment(abilityText) {
 	return fragment;
 }
 
+// chat
+chat.addEventListener("message", function(e) {
+	socket.send("[chat]" + e.data);
+	this.putMessage(players[1].name + locale["chat"]["colon"] + e.data);
+});
 
-// chat box
-let allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
-export function putChatMessage(message, type, cards) {
-	let messageDiv = document.createElement("div");
-
-	while (message.indexOf(":") != -1) {
-		if (message.indexOf(":", message.indexOf(":") + 1) == -1) {
-			break;
-		}
-		let foundEmoji = message.substring(message.indexOf(":") + 1, message.indexOf(":", message.indexOf(":") + 1));
-		if (allEmoji.includes(foundEmoji)) {
-			messageDiv.appendChild(document.createTextNode(message.substring(0, message.indexOf(":"))));
-			let emojiImg = document.createElement("img");
-			emojiImg.src = "images/emoji/" + foundEmoji + ".png";
-			emojiImg.classList.add("emoji");
-			emojiImg.alt = ":" + foundEmoji + ":";
-			emojiImg.title = ":" + foundEmoji + ":";
-			emojiImg.draggable = false;
-			messageDiv.appendChild(emojiImg);
-			message = message.substring(message.indexOf(":", message.indexOf(":") + 1) + 1);
-		} else {
-			messageDiv.appendChild(document.createTextNode(message.substring(0, message.indexOf(":", message.indexOf(":") + 1))));
-			message = message.substring(message.indexOf(":", message.indexOf(":") + 1));
-		}
-	}
-	messageDiv.appendChild(document.createTextNode(message));
-
-	if (cards) {
-		let cardHolder = document.createElement("div");
-		cardHolder.classList.add("chatCardHolder");
-		for (let card of cards) {
-			if (card.hiddenFor.includes(localPlayer) && card.current()) {
-				card = card.current().snapshot();
-			}
-			let cardImg = document.createElement("img");
-			cardImg.src = cardLoader.getCardImage(card);
-			cardImg.addEventListener("click", function () {
-				previewCard(card);
-			});
-			cardImg.addEventListener("dragstart", e => e.preventDefault());
-			cardHolder.appendChild(cardImg);
-		}
-		messageDiv.appendChild(cardHolder);
-	}
-
-	if (type) {
-		messageDiv.classList.add(type);
-	}
-	chatBox.appendChild(messageDiv);
-	chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight;
-}
-
+// card previewing
 export function closeCardPreview() {
 	cardDetails.style.setProperty("--side-distance", "-50vh");
 	currentPreviewedCard = null;
 }
 
-// previews a card
 export async function previewCard(card, specific = true) {
 	if (!card?.cardId || card.hiddenFor.includes(localPlayer)) {
 		return;
@@ -341,9 +294,6 @@ export function closeDeckView() {
 
 // init function
 export function init() {
-	chatHeader.textContent = locale.chat.title;
-	chatInput.placeholder = locale.chat.enterMessage;
-
 	cardDetailsAttack.textContent = locale.cardDetailsAttack;
 	cardDetailsDefense.textContent = locale.cardDetailsDefense;
 	cardDetailsLevel.textContent = locale.cardDetailsLevel;
@@ -374,22 +324,6 @@ export function init() {
 	if (cardAlignmentInfo[players[1].profilePicture]?.flip) {
 		profilePicture1.style.transform = "scaleX(-1)";
 	}
-
-	// chat
-	document.getElementById("chatInput").addEventListener("keyup", function(e) {
-		if (e.code == "Enter" && this.value != "") {
-			socket.send("[chat]" + this.value);
-			putChatMessage(players[1].name + locale["chat"]["colon"] + this.value);
-			this.value = "";
-		}
-		if (e.code == "Escape") {
-			this.blur();
-		}
-	});
-	document.getElementById("chatInput").addEventListener("keydown", function(e) {
-		e.stopPropagation();
-	});
-
 
 	// card preview
 	document.addEventListener("click", function() {

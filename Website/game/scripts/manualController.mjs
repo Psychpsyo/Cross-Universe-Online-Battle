@@ -5,7 +5,6 @@ import {locale} from "/scripts/locale.mjs";
 import {Zone} from "/rulesEngine/src/zones.mjs";
 import {Card} from "/rulesEngine/src/card.mjs";
 import {socket, zoneToLocal} from "./netcode.mjs";
-import {putChatMessage} from "./generalUI.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as manualUI from "./manualUI.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
@@ -63,7 +62,7 @@ export class ManualController extends InteractionController {
 	async startGame() {
 		this.deckShuffle(localPlayer.deckZone);
 		let startingPlayer = await game.randomPlayer();
-		putChatMessage(startingPlayer === localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
+		chat.putMessage(startingPlayer === localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
 		addPartnerRevealButton();
 	}
 
@@ -118,7 +117,7 @@ export class ManualController extends InteractionController {
 				for (let i = 0; i < deck.cards.length; i++) {
 					gameUI.updateCard(deck, i);
 				}
-				putChatMessage(deck.player.index == 1? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+				chat.putMessage(deck.player.index == 1? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
 				return true;
 			}
 			case "showHand": {
@@ -280,7 +279,7 @@ export class ManualController extends InteractionController {
 			gameUI.updateCard(deckZone, i);
 		}
 		socket.send("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
-		putChatMessage(locale.game.notices[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
+		chat.putMessage(locale.game.notices[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
 	deckToTop(player, deckZone) {
 		if (player === localPlayer) {

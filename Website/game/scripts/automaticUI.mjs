@@ -527,3 +527,22 @@ export async function updateCounters(card, type) {
 	gameUI.setCounter(counterElem, counterCount);
 	return gameState.controller.gameSleep(.2);
 }
+
+// generates a card list to insert in chat
+export function chatCards(cards) {
+	const cardHolder = document.createElement("div");
+	cardHolder.classList.add("chatCardHolder");
+	for (const card of cards) {
+		if (card.hiddenFor.includes(localPlayer) && card.current()) {
+			card = card.current().snapshot();
+		}
+		const cardImg = document.createElement("img");
+		cardImg.src = cardLoader.getCardImage(card);
+		cardImg.addEventListener("click", function () {
+			previewCard(card);
+		});
+		cardImg.addEventListener("dragstart", e => e.preventDefault());
+		cardHolder.appendChild(cardImg);
+	}
+	return cardHolder;
+}

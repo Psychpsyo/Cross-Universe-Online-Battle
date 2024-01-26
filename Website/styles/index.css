@@ -81,6 +81,7 @@ header > :is(h1, h2, h3, h4) {
 }
 header .svgButton {
 	height: 100%;
+	overflow: hidden;
 }
 
 

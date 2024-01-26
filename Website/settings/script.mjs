@@ -31,7 +31,8 @@ const settings = {
 	profile: [
 		{
 			id: "username",
-			type: "text"
+			type: "text",
+			maxLength: 100
 		},
 		{
 			id: "profilePicture",
@@ -415,15 +416,18 @@ function newToggle(setting, block) {
 }
 
 function newTextInput(setting, block) {
-	let holder = document.createElement("div");
-	let input = document.createElement("input");
+	const holder = document.createElement("div");
+	const input = document.createElement("input");
 	input.type = "text";
 	input.id = setting.id + "Input";
 	input.value = localStorage.getItem(setting.id);
+	if (setting.maxLength) {
+		input.maxLength = setting.maxLength;
+	}
 	input.addEventListener("change", function() {
 		localStorage.setItem(setting.id, this.value);
 	});
-	let label = document.createElement("label");
+	const label = document.createElement("label");
 	label.id = setting.id + "Label";
 	label.htmlFor = input.id;
 	holder.appendChild(label);

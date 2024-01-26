@@ -21,13 +21,13 @@ export class InitState extends GameState {
 		switch (command) {
 			case "playerFound": { // another player entered the roomcode (Note: This is sent by the server, not the other client.)
 				// send your own username and card back if you have any
-				if (localStorage.getItem("username") !== "") {
+				if (localStorage.getItem("username")) {
 					socket.send("[username]" + localStorage.getItem("username"));
 				}
-				if (localStorage.getItem("profilePicture") !== "") {
+				if (localStorage.getItem("profilePicture")) {
 					socket.send("[profilePicture]" + localStorage.getItem("profilePicture"));
 				}
-				if (localStorage.getItem("cardBack") !== "") {
+				if (localStorage.getItem("cardBack")) {
 					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
 				}
 				socket.send("[language]" + localStorage.getItem("language"));
@@ -41,17 +41,19 @@ export class InitState extends GameState {
 				return true;
 			}
 			case "username": {
-				players[0].name = message;
+				if (message) {
+					players[0].name = message.substring(0, 100);
+				}
 				return true;
 			}
 			case "profilePicture": {
-				if (message.match(/^[USIT]\d{5}$/)) {
+				if (/^[USIT]\d{5}$/.test(message)) {
 					players[0].profilePicture = message;
 				}
 				return true;
 			}
 			case "cardBack": {
-				if (localStorage.getItem("cardBackToggle") == "false") {
+				if (localStorage.getItem("cardBackToggle") === "false") {
 					document.documentElement.style.setProperty("--p0-card-back", "url('" + message + "')");
 				}
 				return true;

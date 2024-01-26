@@ -1,4 +1,3 @@
-import {putChatMessage} from "./generalUI.mjs";
 import {locale} from "/scripts/locale.mjs";
 
 export let socket = null;
@@ -29,7 +28,7 @@ function receiveMessage(e) {
 
 	switch (command) {
 		case "chat": { // incoming chat message
-			putChatMessage(players[0].name + locale["chat"]["colon"] + message);
+			chat.putMessage(players[0].name + locale["chat"]["colon"] + message.substring(0, 10_000));
 			break;
 		}
 		case "distRandValue": {

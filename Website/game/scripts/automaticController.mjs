@@ -204,17 +204,17 @@ export class AutomaticController extends InteractionController {
 		switch (type) {
 			case "deckShuffled": {
 				for (const event of events) {
-					generalUI.putChatMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+					chat.putMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
 				}
 				return this.gameSleep();
 			}
 			case "startingPlayerSelected": {
-				generalUI.putChatMessage(events[0].player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
+				chat.putMessage(events[0].player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
 				for (const [playerIndex, cards] of Object.entries(Object.groupBy(events.map(event => event.cards).flat(), card => card.owner.index))) {
-					generalUI.putChatMessage(locale.game.notices[playerIndex == localPlayer.index? "youDrew" : "opponentDrew"], "notice", cards);
+					chat.putMessage(locale.game.notices[playerIndex == localPlayer.index? "youDrew" : "opponentDrew"], "notice", autoUI.chatCards(cards));
 				}
 				await Promise.all(events.map(async event => {
 					for (let i = event.cards.length; i > 0; i--) {
@@ -234,7 +234,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "cardRevealed": {
 				for (const [playerIndex, events] of Object.entries(Object.groupBy(events, event => event.player.index))) {
-					generalUI.putChatMessage(locale.game.notices[playerIndex == localPlayer.index? "youRevealed" : "opponentRevealed"], "notice", events.map(event => event.card));
+					chat.putMessage(locale.game.notices[playerIndex == localPlayer.index? "youRevealed" : "opponentRevealed"], "notice", autoUI.chatCards(events.map(event => event.card)));
 				}
 				await Promise.all(events.map(async event => {
 					switch (event.card.zone.type) {
@@ -248,7 +248,7 @@ export class AutomaticController extends InteractionController {
 			case "cardViewed": {
 				let localPlayerViewed = events.filter(event => event.player === localPlayer);
 				if (localPlayerViewed.length > 0) {
-					generalUI.putChatMessage(locale.game.notices.viewed, "notice", localPlayerViewed.map(event => event.card));
+					chat.putMessage(locale.game.notices.viewed, "notice", autoUI.chatCards(localPlayerViewed.map(event => event.card)));
 				}
 				await Promise.all(events.map(async event => {
 					switch (event.card.zone.type) {
@@ -336,7 +336,7 @@ export class AutomaticController extends InteractionController {
 			case "cardDeployed":
 			case "cardSummoned": {
 				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
-					generalUI.putChatMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", eventList.map(event => event.card));
+					chat.putMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", autoUI.chatCards(eventList.map(event => event.card)));
 				}
 				for (const event of events) {
 					gameUI.insertCard(event.toZone, event.toIndex);
@@ -352,7 +352,7 @@ export class AutomaticController extends InteractionController {
 			case "cardDiscarded":
 			case "cardExiled":
 			case "cardMoved": {
-				generalUI.putChatMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", events.map(event => event.card));
+				chat.putMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", autoUI.chatCards(events.map(event => event.card)));
 				for (const event of events) {
 					gameUI.removeCard(event.card.zone, event.card.index);
 					autoUI.removeCardAttackDefenseOverlay(event.card);
@@ -407,7 +407,7 @@ export class AutomaticController extends InteractionController {
 			case "blockCreated": {
 				if (events[0].block instanceof blocks.AbilityActivation) {
 					await autoUI.activate(events[0].block.card);
-					generalUI.putChatMessage(locale.game.notices[events[0].block.player === localPlayer? "youActivated" : "opponentActivated"], "notice", [events[0].block.card]);
+					chat.putMessage(locale.game.notices[events[0].block.player === localPlayer? "youActivated" : "opponentActivated"], "notice", autoUI.chatCards([events[0].block.card]));
 				}
 				autoUI.newBlock(events[0].block);
 				return;
@@ -418,19 +418,19 @@ export class AutomaticController extends InteractionController {
 			}
 			case "playerSelected": {
 				if (events[0].player !== localPlayer) {
-					generalUI.putChatMessage(game.players[events[0].chosenPlayer] === localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
+					chat.putMessage(game.players[events[0].chosenPlayer] === localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
 				}
 				break;
 			}
 			case "typeSelected": {
 				if (events[0].player !== localPlayer) {
-					generalUI.putChatMessage(locale.game.notices.opponentChoseType.replaceAll("{#TYPE}", locale.types[events[0].chosenType]), "notice");
+					chat.putMessage(locale.game.notices.opponentChoseType.replaceAll("{#TYPE}", locale.types[events[0].chosenType]), "notice");
 				}
 				break;
 			}
 			case "deckSideSelected": {
 				if (events[0].player !== localPlayer) {
-					generalUI.putChatMessage(locale.game.notices.opponentChoseDeckSide[events[0].chosenSide], "notice");
+					chat.putMessage(locale.game.notices.opponentChoseDeckSide[events[0].chosenSide], "notice");
 				}
 				break;
 			}

@@ -17,15 +17,12 @@ window.players = [
 		language: null
 	},
 	{
-		name: localStorage.getItem("username"),
+		name: localStorage.getItem("username")? locale.chat.you : localStorage.getItem("username"),
 		profilePicture: localStorage.getItem("profilePicture"),
 		deck: null,
 		language: localStorage.getItem("language")
 	}
 ];
-if (players[1].name == "") {
-	players[1].name = locale.chat.you;
-}
 
 // handle hotkeys
 document.addEventListener("keydown", async function(e) {

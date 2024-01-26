@@ -35,8 +35,20 @@
 	"lobbies": {
 		"title": "Lobbies",
 		"join": "Join",
+		"joinPassword": "Join 🔒",
 		"userIconAlt": "Users:",
 		"newLobbyButton": "Create new Lobby",
+
+		"enterPassword": "Enter lobby password:",
+		"wrongPassword": "The password you entered was incorrect.",
+		"joinFailedInvalid": "Failed to join lobby:\nThe lobby does not exist anymore.",
+		"joinFailedUserLimit": "Failed to join lobby:\nThe lobby is full.",
+		"hostCloseConfirmation": "Do you really want to shut down this lobby?\nEverybody will be kicked but games already in progress will continue.",
+		"kickMessage": "The host shut down the lobby.",
+
+		"unnamedUser": "Unnamed Sorcerer",
+		"userJoined": "{#name} has joined the lobby.",
+		"userLeft": "{#name} has left the lobby.",
 
 		"noLobbyServer": "Couldn't connect to lobby server.\n:(",
 		"noOpenLobbies": "No open lobbies found.\n:("

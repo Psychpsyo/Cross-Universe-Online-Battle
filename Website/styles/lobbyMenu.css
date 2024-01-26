@@ -1,0 +1,20 @@
+#lobbyHeader {
+	display: none;
+}
+
+#lobbyTitle {
+	font-weight: bold;
+}
+
+#lobbyMiddle {
+	flex-grow: 1;
+}
+
+#lobbyRight {
+	display: flex;
+	flex-direction: column;
+	width: 30vw;
+
+	border-left: 2px var(--theme-border-color) solid;
+	background-color: var(--theme-shadow);
+}

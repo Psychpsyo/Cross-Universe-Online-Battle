@@ -14,11 +14,17 @@
 		<link rel="stylesheet" href="styles/entryPage.css">
 		<link rel="stylesheet" href="styles/loadingIndicator.css">
 		<link rel="stylesheet" href="styles/levitationEffect.css">
+		<link rel="stylesheet" href="styles/lobbyMenu.css">
+		<link rel="stylesheet" href="styles/chat.css">
 	</head>
 	<body>
 		<div id="preGame">
 			<div id="mainHeaderHolder">
 				<header>
+					<nav id="lobbyHeader" class="headerButtonsLeft">
+						<button id="leaveLobbyButton" class="svgButton"><img src="images/icons/backArrow.svg" alt="" draggable="false"></button>
+						<span id="lobbyTitle"></span>
+					</nav>
 					<nav class="headerButtonsRight">
 						<a id="settingsButton" class="svgButton" href="./settings"><img src="images/icons/settings.svg" alt="" draggable="false"></a>
 						<a id="deckMakerButton" class="svgButton" href="./deckMaker"><img src="images/icons/deck.svg" alt="" draggable="false"></a>
@@ -59,11 +65,27 @@
 				<section id="lobbies">
 					<header>
 						<h1 id="lobbyHeading"></h1>
-						<button id="newLobbyBtn" class="svgButton" disabled><img src="images/icons/newLobby.svg" alt="" draggable="false"></button>
+						<button id="newLobbyBtn" class="svgButton" disabled autocomplete="off"><img src="images/icons/newLobby.svg" alt="" draggable="false"></button>
 					</header>
 					<div id="lobbyListHolder">
 						<ul id="lobbyList"><!--filled by JS--></ul>
 					</div>
+				</section>
+			</main>
+			<main id="lobbyMenu">
+				<section id="lobbyLeft">
+					USERS:
+					<ul>
+						<li>
+							<img>
+						</li>
+					</ul>
+				</section>
+				<section id="lobbyMiddle">
+
+				</section>
+				<section id="lobbyRight">
+					<chat-box id="lobbyChat"></chat-box>
 				</section>
 			</main>
 			<footer id="unofficialFooter"></footer>
@@ -80,6 +102,12 @@
 					<img class="lobbyUserIcon" src="images/icons/user.svg" alt=""> <span class="lobbyUserCount">0</span>/<span class="lobbyUserLimit">0</span>
 				</span>
 				<button class="lobbyJoinBtn"></button>
+			</li>
+		</template>
+
+		<template id="lobbyUserTemplate">
+			<li>
+
 			</li>
 		</template>
 

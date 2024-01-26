@@ -17,11 +17,16 @@ body {
 	line-height: 1.75em;
 }
 
-#mainMenu {
+main {
 	flex-grow: 1;
 	display: flex;
-	flex-direction: row-reverse;
 	overflow: auto;
+}
+#mainMenu {
+	flex-direction: row-reverse;
+}
+#lobbyMenu {
+	display: none;
 }
 
 #lobbies {
@@ -52,7 +57,7 @@ body {
 	all: unset;
 	box-sizing: border-box;
 }
-#lobbyList:empty::before {
+#lobbyList:empty::before, #lobbyList:-moz-only-whitespace::before {
 	content: attr(data-message);
 	line-height: normal;
 	text-align: center;

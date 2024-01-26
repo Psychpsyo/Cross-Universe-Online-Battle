@@ -35,8 +35,20 @@
 	"lobbies": {
 		"title": null,
 		"join": null,
+		"joinPassword": null,
 		"userIconAlt": null,
 		"newLobbyButton": null,
+
+		"enterPassword": null,
+		"wrongPassword": null,
+		"joinFailedInvalid": null,
+		"joinFailedUserLimit": null,
+		"hostCloseConfirmation": null,
+		"kickMessage": null,
+
+		"unnamedUser": null,
+		"userJoined": null,
+		"userLeft": null,
 
 		"noLobbyServer": null,
 		"noOpenLobbies": null

@@ -35,8 +35,20 @@
 	"lobbies": {
 		"title": "Lobbies",
 		"join": "Beitreten",
+		"joinPassword": "Beitreten 🔒",
 		"userIconAlt": "Spieler:",
 		"newLobbyButton": "Neue Lobby erstellen",
+
+		"enterPassword": "Lobbypasswort eingeben:",
+		"wrongPassword": "Das eingegebene Passwort war falsch.",
+		"joinFailedInvalid": "Konnte der Lobby nicht beitreten:\nDie Lobby existiert nicht mehr.",
+		"joinFailedUserLimit": "Konnte der Lobby nicht beitreten:\nDie Lobby ist voll.",
+		"hostCloseConfirmation": "Möchtest du diese Lobby wirklich schliessen?\nDies wird alle Spieler kicken, aber wird bereits begonnene Spiele nicht unterbrechen.",
+		"kickMessage": "Der Host hat die Lobby geschlossen.",
+
+		"unnamedUser": "Namensloser Magier",
+		"userJoined": "{#name} ist der Lobby beigetreten.",
+		"userLeft": "{#name} hat die Lobby verlassen.",
 
 		"noLobbyServer": "Konnte den Lobby-Server nicht erreichen.\n:(",
 		"noOpenLobbies": "Keine offenen Lobbies gefunden.\n:("
