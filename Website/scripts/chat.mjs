@@ -74,5 +74,4 @@ class ChatBox extends HTMLElement {
 		this.messageArea.textContent = "";
 	}
 }
-
 customElements.define("chat-box", ChatBox);

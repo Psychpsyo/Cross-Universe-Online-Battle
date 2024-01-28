@@ -578,5 +578,7 @@
 	"S00231": {"neverFlip": true, "left": 45},
 	"S00232": {"left": 25},
 	"S00233": {"left": 25},
-	"S00234": {"neverFlip": true}
+	"S00234": {"neverFlip": true},
+	"S00235": {"left": 38.5},
+	"S00236": {"flip": true}
 }

@@ -96,7 +96,7 @@ function closeLobby() {
 
 // show or hide the actual in-lobby menu
 async function openLobbyScreen() {
-	await import("scripts/chat.mjs");
+	await import("./chat.mjs");
 	lobbyTitle.textContent = currentLobby.name;
 	lobbyChat.clear();
 
