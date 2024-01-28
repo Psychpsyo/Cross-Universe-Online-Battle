@@ -532,7 +532,7 @@ export async function updateCounters(card, type) {
 export function chatCards(cards) {
 	const cardHolder = document.createElement("div");
 	cardHolder.classList.add("chatCardHolder");
-	for (const card of cards) {
+	for (let card of cards) {
 		if (card.hiddenFor.includes(localPlayer) && card.current()) {
 			card = card.current().snapshot();
 		}

@@ -541,6 +541,9 @@ label[for="fileSelectDeckLoader"] {
 	padding: .75em;
 	flex-grow: 1;
 }
+.chatCardHolder > img {
+	max-height: 5em;
+}
 
 dialog.popupSelectMenu {
 	transform: translateX(-10%);
