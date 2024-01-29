@@ -1,7 +1,11 @@
 import {locale} from "/scripts/locale.mjs";
+import "/scripts/profilePicture.mjs";
 
 // lobby template translation
 lobbyTemplate.content.querySelector(".lobbyUserIcon").textContent = locale.lobbies.userIconAlt;
+userListHeader.textContent = locale.lobbies.players;
+lobbyUserTemplate.content.querySelector(".challengeBtn").textContent = locale.lobbies.challenge;
+lobbyUserTemplate.content.querySelector(".kickBtn").textContent = locale.lobbies.kick;
 
 class Lobby {
 	constructor(name, userLimit, hasPassword, users, password = null) {
@@ -9,21 +13,43 @@ class Lobby {
 		this.userLimit = userLimit;
 		this.hasPassword = hasPassword;
 		this.password = password;
-		this.users = users;
+		this.users = [];
+
+		for (const user of users) {
+			this.addUser(user);
+		}
+	}
+
+	addUser(user) {
+		this.users.push(user);
+		// add to UI
+		const userElem = lobbyUserTemplate.content.cloneNode(true);
+		userElem.querySelector(".user").id = "userElem" + user.id;
+		userElem.querySelector(".username").textContent = user.name;
+		if (!isHosting) {
+			userElem.querySelector(".kickBtn").disabled = true;
+		}
+		userList.appendChild(userElem);
+		document.getElementById("userElem" + user.id).querySelector("profile-picture").setIcon(user.profilePicture);
+	}
+	// removes and returns a user with the given id
+	removeUser(id) {
+		document.getElementById("userElem" + id).remove();
+		return this.users.splice(this.users.findIndex(user => user.id === id), 1)[0];
 	}
 }
 class User {
 	// this sanitizes the incoming data
-	constructor(name, icon, id) {
+	constructor(name, profilePicture, id) {
 		// sanitize name
 		if (typeof name !== "string" || name.length === 0) {
 			name = locale.lobbies.unnamedUser;
 		} else {
 			name = name.substring(0, 100);
 		}
-		// sanitize icon
-		if (!/^[USIT]\d{5}$/.test(icon)) {
-			icon = "S00093";
+		// sanitize profile picture
+		if (!/^[USIT]\d{5}$/.test(profilePicture)) {
+			profilePicture = "S00093";
 		}
 
 		this.name = name;
@@ -31,7 +57,7 @@ class User {
 		for (let i = 2; currentLobby && currentLobby.users.find(user => user.name === this.name); i++) {
 			this.name = `${name} (${i})`;
 		}
-		this.icon = icon;
+		this.profilePicture = profilePicture;
 		this.id = id;
 	}
 }
@@ -110,17 +136,18 @@ function closeLobbyScreen() {
 	lobbyMenu.style.display = "none";
 	mainMenu.style.display = "flex";
 	lobbyHeader.style.display = "none";
+	userList.innerHTML = "";
 }
 
 // websocket stuff
 function connectWebsocket() {
-	lobbyServerWs = new WebSocket("ws://localhost:4538");
+	lobbyServerWs = new WebSocket(localStorage.getItem("lobbyServerUrl")? localStorage.getItem("lobbyServerUrl") : "wss://battle.crossuniverse.net:443/lobbies/");
 	lobbyServerWs.addEventListener("open", function() {
 		lobbyList.dataset.message = locale.lobbies.noOpenLobbies;
 		newLobbyBtn.addEventListener("click", () => {
 			currentLobby = new Lobby(
 				"my cool lobby",
-				2,
+				8,
 				false,
 				[new User(
 					localStorage.getItem("username"),
@@ -219,7 +246,7 @@ function receiveWsMessage(e) {
 				const connection = peerConnections.splice(peerConnections.findIndex(peer => peer.connection === pc), 1)[0];
 				// needs to check for isHosting in case the lobby is being shut down
 				if (isHosting && connection.userId) {
-					const user = currentLobby.users.splice(currentLobby.users.findIndex(user => user.id === connection.userId), 1)[0];
+					const user = currentLobby.removeUser(connection.userId);
 					broadcast(JSON.stringify({type: "userLeft", id: user.id}));
 					lobbyServerWs.send(JSON.stringify({type: "setUserCount", newCount: currentLobby.users.length}));
 					lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), "notice");
@@ -312,7 +339,7 @@ function receiveWebRtcHostMessage(e) {
 				type: "handshake",
 				password: password,
 				name: localStorage.getItem("username"),
-				icon: localStorage.getItem("profilePicture")
+				profilePicture: localStorage.getItem("profilePicture")
 			}));
 			break;
 		}
@@ -330,7 +357,7 @@ function receiveWebRtcHostMessage(e) {
 				message.lobby.name,
 				message.lobby.userLimit,
 				message.lobby.hasPassword,
-				message.lobby.users.map(user => new User(user.name, user.icon, user.id))
+				message.lobby.users.map(user => new User(user.name, user.profilePicture, user.id))
 			)
 			ownUserId = message.youAre;
 			openLobbyScreen();
@@ -352,15 +379,15 @@ function receiveWebRtcHostMessage(e) {
 		case "userJoined": {
 			const user = new User(
 				message.name,
-				message.icon,
+				message.profilePicture,
 				message.id
 			);
-			currentLobby.users.push(user);
+			currentLobby.addUser(user);
 			lobbyChat.putMessage(locale.lobbies.userJoined.replaceAll("{#name}", user.name), "notice");
 			break;
 		}
 		case "userLeft": {
-			const user = currentLobby.users.splice(currentLobby.users.findIndex(user => user.id === message.id), 1)[0];
+			const user = currentLobby.removeUser(message.id);
 			lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), "notice");
 			break;
 		}
@@ -387,8 +414,8 @@ function receiveWebRtcVisitorMessage(e) {
 				break;
 			}
 
-			const newUser = new User(message.name, message.icon, ++largestUserId);
-			currentLobby.users.push(newUser);
+			const newUser = new User(message.name, message.profilePicture, ++largestUserId);
+			currentLobby.addUser(newUser);
 			peer.userId = newUser.id;
 
 			this.send(JSON.stringify({
@@ -404,7 +431,7 @@ function receiveWebRtcVisitorMessage(e) {
 			broadcast(JSON.stringify({
 				type: "userJoined",
 				name: newUser.name,
-				icon: newUser.icon,
+				profilePicture: newUser.profilePicture,
 				id: newUser.id
 			}), this);
 			lobbyServerWs.send(JSON.stringify({type: "setUserCount", newCount: currentLobby.users.length}));

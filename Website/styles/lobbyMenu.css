@@ -6,6 +6,11 @@
 	font-weight: bold;
 }
 
+#lobbyLeft {
+	background-color: var(--theme-shadow);
+	min-width: 15em;
+}
+
 #lobbyMiddle {
 	flex-grow: 1;
 }
@@ -17,4 +22,33 @@
 
 	border-left: 2px var(--theme-border-color) solid;
 	background-color: var(--theme-shadow);
+}
+
+#userListHeader {
+	text-align: center;
+	border-bottom: 2px solid var(--theme-border-color);
+}
+#userList {
+	all: unset;
+    box-sizing: border-box;
+}
+
+.user {
+	display: flex;
+	padding: 10px;
+	border-bottom: 2px solid var(--theme-border-color);
+}
+.user profile-picture {
+	width: 4em;
+	--border-width: 3px;
+}
+.userRight {
+	position: relative;
+	flex-grow: 1;
+}
+.userOptions {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	white-space: nowrap;
 }

@@ -16,6 +16,7 @@
 		<link rel="stylesheet" href="styles/levitationEffect.css">
 		<link rel="stylesheet" href="styles/lobbyMenu.css">
 		<link rel="stylesheet" href="styles/chat.css">
+		<link rel="stylesheet" href="styles/profilePicture.css">
 	</head>
 	<body>
 		<div id="preGame">
@@ -74,12 +75,8 @@
 			</main>
 			<main id="lobbyMenu">
 				<section id="lobbyLeft">
-					USERS:
-					<ul>
-						<li>
-							<img>
-						</li>
-					</ul>
+					<header id="userListHeader"></header>
+					<ul id="userList"></ul>
 				</section>
 				<section id="lobbyMiddle">
 
@@ -106,8 +103,14 @@
 		</template>
 
 		<template id="lobbyUserTemplate">
-			<li>
-
+			<li class="user">
+				<profile-picture></profile-picture>
+				<div class="userRight">
+					<span class="username"></span>
+					<span class="userOptions">
+						<button class="challengeBtn"></button> <button class="kickBtn"></button>
+					</span>
+				</div>
 			</li>
 		</template>
 

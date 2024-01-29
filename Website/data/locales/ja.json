@@ -39,6 +39,9 @@
 		"userIconAlt": null,
 		"newLobbyButton": null,
 
+		"noLobbyServer": null,
+		"noOpenLobbies": null,
+
 		"enterPassword": null,
 		"wrongPassword": null,
 		"joinFailedInvalid": null,
@@ -46,12 +49,13 @@
 		"hostCloseConfirmation": null,
 		"kickMessage": null,
 
+		"players": "プレーヤー",
+		"challenge": null,
+		"kick": null,
+
 		"unnamedUser": null,
 		"userJoined": null,
-		"userLeft": null,
-
-		"noLobbyServer": null,
-		"noOpenLobbies": null
+		"userLeft": null
 	},
 
 	"game": {

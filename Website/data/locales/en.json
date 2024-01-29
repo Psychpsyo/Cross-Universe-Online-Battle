@@ -39,6 +39,9 @@
 		"userIconAlt": "Users:",
 		"newLobbyButton": "Create new Lobby",
 
+		"noLobbyServer": "Couldn't connect to lobby server.\n:(",
+		"noOpenLobbies": "No open lobbies found.\n:(",
+
 		"enterPassword": "Enter lobby password:",
 		"wrongPassword": "The password you entered was incorrect.",
 		"joinFailedInvalid": "Failed to join lobby:\nThe lobby does not exist anymore.",
@@ -46,12 +49,13 @@
 		"hostCloseConfirmation": "Do you really want to shut down this lobby?\nEverybody will be kicked but games already in progress will continue.",
 		"kickMessage": "The host shut down the lobby.",
 
+		"players": "Players",
+		"challenge": "Challenge",
+		"kick": "Kick",
+
 		"unnamedUser": "Unnamed Sorcerer",
 		"userJoined": "{#name} has joined the lobby.",
-		"userLeft": "{#name} has left the lobby.",
-
-		"noLobbyServer": "Couldn't connect to lobby server.\n:(",
-		"noOpenLobbies": "No open lobbies found.\n:("
+		"userLeft": "{#name} has left the lobby."
 	},
 
 	"game": {

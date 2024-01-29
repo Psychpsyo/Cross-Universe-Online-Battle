@@ -12,8 +12,8 @@ function getRoomcode() {
 	return roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value;
 }
 
-let websocketUrl = localStorage.getItem("websocketUrl") === ""? "wss://battle.crossuniverse.net:443/ws/" : localStorage.getItem("websocketUrl");
-let unloadWarning = new AbortController();
+const unloadWarning = new AbortController();
+let websocketUrl = localStorage.getItem("websocketUrl")? localStorage.getItem("websocketUrl") : "wss://battle.crossuniverse.net:443/ws/";
 let replayToLoad = null;
 
 // receiving messages from the iframe
