@@ -729,7 +729,9 @@ export class AutomaticController extends InteractionController {
 						gameUI.addCardButton(
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
-							locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i]) + 1),
+							request.eligibleAbilities[i].card.values.current.abilities.length === 1?
+								locale.game.automatic.cardOptions.activate :
+								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i]) + 1),
 							"activateAbility",
 							function() {
 								resolve(i);
