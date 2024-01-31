@@ -731,7 +731,7 @@ export class AutomaticController extends InteractionController {
 							request.eligibleAbilities[i].card.index,
 							request.eligibleAbilities[i].card.values.current.abilities.length === 1?
 								locale.game.automatic.cardOptions.activate :
-								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i]) + 1),
+								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i].current()) + 1),
 							"activateAbility",
 							function() {
 								resolve(i);
