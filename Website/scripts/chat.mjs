@@ -34,7 +34,7 @@ class ChatBox extends HTMLElement {
 	}
 
 	// displays a message in chat. extraContent is an html element to be included in the message
-	// type can be undefined or either "notice", "warning" or "error"
+	// type can be undefined or either "notice", "warning", "error" or "success"
 	putMessage(message, type, extraContent) {
 		const messageDiv = document.createElement("div");
 

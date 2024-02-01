@@ -44,18 +44,29 @@
 
 		"enterPassword": "Lobbypasswort eingeben:",
 		"wrongPassword": "Das eingegebene Passwort war falsch.",
+		"joinFailedError": "Beim beitreten der Lobby is ein Fehler aufgetreten.",
 		"joinFailedInvalid": "Konnte der Lobby nicht beitreten:\nDie Lobby existiert nicht mehr.",
 		"joinFailedUserLimit": "Konnte der Lobby nicht beitreten:\nDie Lobby ist voll.",
 		"hostCloseConfirmation": "Möchtest du diese Lobby wirklich schliessen?\nDies wird alle Spieler kicken, aber wird bereits begonnene Spiele nicht unterbrechen.",
-		"kickMessage": "Der Host hat die Lobby geschlossen.",
+		"kickMessages": {
+			"kicked": "Du wurdest aus der Lobby gekickt.",
+			"closing": "Der Host hat die Lobby geschlossen."
+		},
 
 		"players": "Spieler",
 		"challenge": "Herausfordern",
+		"cancelChallenge": "Herausforderung canceln",
 		"kick": "Kicken",
+
+		"incomingChallenge": "{#name} fordert dich heraus. Annehmen?",
+		"challengeAccepted": "{#name} hat deine Herausforderung angenommen.\nEin Spiel wird gestartet.",
+		"challengeDenied": "{#name} has deine Herausforderung abgelehnt.",
+		"challengeCancelled": "{#name} hat die Herausforderung gecancelt.",
 
 		"unnamedUser": "Namensloser Magier",
 		"userJoined": "{#name} ist der Lobby beigetreten.",
-		"userLeft": "{#name} hat die Lobby verlassen."
+		"userLeft": "{#name} hat die Lobby verlassen.",
+		"userKicked": "{#name} wurde aus der Lobby gekickt."
 	},
 
 	"game": {

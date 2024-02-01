@@ -29,6 +29,9 @@ chat-box > div > .warning {
 chat-box > div > .error {
 	background-color: #802929;
 }
+chat-box > div > .success {
+	background-color: #298030;
+}
 chat-box > div > img {
 	max-height: 5em;
 }

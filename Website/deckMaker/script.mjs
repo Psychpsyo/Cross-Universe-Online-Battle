@@ -811,7 +811,7 @@ window.addEventListener("beforeunload", function(e) {
 		e.preventDefault();
 		e.returnValue = "";
 	}
-}, {"signal": unloadWarning.signal});
+}, {signal: unloadWarning.signal});
 
 // .deck or .deckx files getting opened with the PWA
 if ("launchQueue" in window) {

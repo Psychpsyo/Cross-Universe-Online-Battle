@@ -110,7 +110,7 @@ main {
 	filter: drop-shadow(0 .2em 0.3em black);
 }
 
-#centerRoomCodeDiv {
+#centerRoomCode {
 	line-height: 1.75em;
 
 	background-color: var(--theme-shadow);
@@ -121,8 +121,7 @@ main {
 	width: fit-content;
 }
 
-h1 {
-	all: unset;
+h1, legend {
 	font-weight: bold;
 }
 

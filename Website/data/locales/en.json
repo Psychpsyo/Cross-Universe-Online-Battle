@@ -44,18 +44,29 @@
 
 		"enterPassword": "Enter lobby password:",
 		"wrongPassword": "The password you entered was incorrect.",
+		"joinFailedError": "An error occured while trying to join the lobby.",
 		"joinFailedInvalid": "Failed to join lobby:\nThe lobby does not exist anymore.",
 		"joinFailedUserLimit": "Failed to join lobby:\nThe lobby is full.",
 		"hostCloseConfirmation": "Do you really want to shut down this lobby?\nEverybody will be kicked but games already in progress will continue.",
-		"kickMessage": "The host shut down the lobby.",
+		"kickMessages": {
+			"kicked": "You were kicked from the lobby.",
+			"closing": "The host shut down the lobby."
+		},
 
 		"players": "Players",
 		"challenge": "Challenge",
+		"cancelChallenge": "Cancel Challenge",
 		"kick": "Kick",
+
+		"incomingChallenge": "{#name} is challenging you. Start a game?",
+		"challengeAccepted": "{#name} has accepted your challenge. Starting the game now.",
+		"challengeDenied": "{#name} did not accept your challenge.",
+		"challengeCancelled": "{#name} cancelled their challenge.",
 
 		"unnamedUser": "Unnamed Sorcerer",
 		"userJoined": "{#name} has joined the lobby.",
-		"userLeft": "{#name} has left the lobby."
+		"userLeft": "{#name} has left the lobby.",
+		"userKicked": "{#name} was kicked from the lobby."
 	},
 
 	"game": {

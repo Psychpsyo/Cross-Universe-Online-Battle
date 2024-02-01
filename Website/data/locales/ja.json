@@ -44,18 +44,29 @@
 
 		"enterPassword": null,
 		"wrongPassword": null,
+		"joinFailedError": null,
 		"joinFailedInvalid": null,
 		"joinFailedUserLimit": null,
 		"hostCloseConfirmation": null,
-		"kickMessage": null,
+		"kickMessages": {
+			"kicked": null,
+			"closing": null
+		},
 
 		"players": "プレーヤー",
 		"challenge": null,
+		"cancelChallenge": null,
 		"kick": null,
+
+		"incomingChallenge": null,
+		"challengeAccepted": null,
+		"challengeDenied": null,
+		"challengeCancelled": null,
 
 		"unnamedUser": null,
 		"userJoined": null,
-		"userLeft": null
+		"userLeft": null,
+		"userKicked": null
 	},
 
 	"game": {

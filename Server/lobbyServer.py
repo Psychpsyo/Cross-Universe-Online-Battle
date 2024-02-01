@@ -1,7 +1,8 @@
+# This is the server code responsible for handling the webRTC signalling for lobbies.
+
 import asyncio
 import json
 import websockets
-from collections import ChainMap;
 
 connections = []
 connectionData = {}
@@ -194,7 +195,6 @@ async def clientConnection(websocket):
 	try:
 		async for message in websocket:
 			data = json.loads(message)
-			print(data)
 			if (data["type"] in socketFunctions):
 				await socketFunctions[data["type"]](websocket, data)
 			else:

@@ -1,4 +1,15 @@
+// This file implements pretty much the entire lobby system
+//
+// Note on the cryptography parts:
+// Public keys are initially generated and sent to the host to be passed to other users.
+// Since this lets the host perform a man-in-the-middle attack, the keys should ideally be signed beforehand to stop that.
+// (probably through some sort of as of yet nonexistant identity provider/account system or similar)
+// For now, the rest of the cryptography implementation is here since I wrote a lot of it before noticing this obvious problem.
+//
+// TODO: Refactor all of this into separate host and client code
+
 import {locale} from "/scripts/locale.mjs";
+import {startGame} from "/scripts/gameStarter.mjs";
 import "/scripts/profilePicture.mjs";
 
 // lobby template translation
@@ -7,17 +18,27 @@ userListHeader.textContent = locale.lobbies.players;
 lobbyUserTemplate.content.querySelector(".challengeBtn").textContent = locale.lobbies.challenge;
 lobbyUserTemplate.content.querySelector(".kickBtn").textContent = locale.lobbies.kick;
 
+const unloadWarning = new AbortController();
+
 class Lobby {
-	constructor(name, userLimit, hasPassword, users, password = null) {
+	constructor(name, userLimit, hasPassword, users, ownUserId, ownRsaKeyPair, ownEcdsaKeyPair, password = null) {
 		this.name = name;
 		this.userLimit = userLimit;
 		this.hasPassword = hasPassword;
+		this.ownUserId = ownUserId;
+		// the RSA keys are for encryption, the ecdsa keys are for signatures
+		this.ownRsaKeyPair = ownRsaKeyPair;
+		this.ownEcdsaKeyPair = ownEcdsaKeyPair;
+		this.ownChatSequenceNum = 0; // used to prevent replay attacks on chat messages
 		this.password = password;
-		this.users = [];
 
+		this.users = [];
 		for (const user of users) {
 			this.addUser(user);
 		}
+
+		this.currentlyChallenging = null; // the user that is currently being challenge
+		this.currentlyAcceptedChallenger = null;
 	}
 
 	addUser(user) {
@@ -26,21 +47,69 @@ class Lobby {
 		const userElem = lobbyUserTemplate.content.cloneNode(true);
 		userElem.querySelector(".user").id = "userElem" + user.id;
 		userElem.querySelector(".username").textContent = user.name;
-		if (!isHosting) {
-			userElem.querySelector(".kickBtn").disabled = true;
+		if (user.id === this.ownUserId) {
+			userElem.querySelector(".userOptions").remove();
+		} else {
+			userElem.querySelector(".challengeBtn").addEventListener("click", async function() {
+				if (currentLobby.currentlyChallenging === user) {
+					cancelCurrentChallenge();
+					return;
+				}
+				if (currentLobby.currentlyChallenging) cancelCurrentChallenge();
+
+				currentLobby.currentlyChallenging = user;
+				this.textContent = locale.lobbies.cancelChallenge;
+				loadingIndicator.classList.add("active");
+
+				const signature = await signString("challenge", `offer|${user.id}`, ++user.lastSentChallengeSequenceNum);
+				if (isHosting) {
+					getUserConnection(user.id).dataChannel.send(JSON.stringify({
+						type: "challenge",
+						from: currentLobby.ownUserId,
+						signature: signature
+					}));
+				} else {
+					hostDataChannel.send(JSON.stringify({
+						type: "challenge",
+						to: user.id,
+						signature: signature
+					}));
+				}
+			});
+
+			if (!isHosting) { // only host can kick people
+				userElem.querySelector(".kickBtn").disabled = true;
+			} else {
+				userElem.querySelector(".kickBtn").addEventListener("click", () => {
+					this.removeUser(user.id);
+					const peer = getUserConnection(user.id);
+					peer.dataChannel.send('{"type": "kick", "reason": "kicked"}');
+					peer.connection.close();
+					broadcast(JSON.stringify({
+						type: "userKicked",
+						id: user.id
+					}));
+					lobbyChat.putMessage(locale.lobbies.userKicked.replaceAll("{#name}", user.name), "warning");
+				});
+			}
 		}
+
 		userList.appendChild(userElem);
 		document.getElementById("userElem" + user.id).querySelector("profile-picture").setIcon(user.profilePicture);
 	}
 	// removes and returns a user with the given id
 	removeUser(id) {
+		const index = this.users.findIndex(user => user.id === id);
+		if (index === -1) return null;
 		document.getElementById("userElem" + id).remove();
-		return this.users.splice(this.users.findIndex(user => user.id === id), 1)[0];
+		return this.users.splice(index, 1)[0];
 	}
 }
 class User {
 	// this sanitizes the incoming data
-	constructor(name, profilePicture, id) {
+	constructor(name, profilePicture, id, rsaPublicKey, ecdsaPublicKey, rsaPublicKeyJwk, ecdsaPublicKeyJwk, lastChatSequenceNum = 0) {
+		this.id = id;
+
 		// sanitize name
 		if (typeof name !== "string" || name.length === 0) {
 			name = locale.lobbies.unnamedUser;
@@ -58,14 +127,36 @@ class User {
 			this.name = `${name} (${i})`;
 		}
 		this.profilePicture = profilePicture;
-		this.id = id;
+		this.rsaPublicKey = rsaPublicKey;
+		this.ecdsaPublicKey = ecdsaPublicKey;
+
+		// needed for toJSON since exporting a key is async
+		this.rsaPublicKeyJwk = rsaPublicKeyJwk;
+		this.ecdsaPublicKeyJwk = ecdsaPublicKeyJwk;
+
+		// used to prevent replay attacks
+		this.lastChatSequenceNum = lastChatSequenceNum;
+		this.lastChallengeSequenceNum = 0; // this one is only checked by the client for simplicity and so can start at 0
+
+		// this is for sent challenges
+		this.lastSentChallengeSequenceNum = 0;
+	}
+
+	toJSON() {
+		return {
+			id: this.id,
+			name: this.name,
+			profilePicture: this.profilePicture,
+			rsaPublicKey: this.rsaPublicKeyJwk,
+			ecdsaPublicKey: this.ecdsaPublicKeyJwk,
+			lastChatSequenceNum: this.lastChatSequenceNum
+		}
 	}
 }
 
 let lobbyServerWs;
 let currentLobby = null;
 let isHosting = false;
-let ownUserId = 0;
 const webRtcConfig = {
 	"iceServers": [
 		{
@@ -81,17 +172,93 @@ let doneHandshake = false; // Whether or not the user already did the handshake 
 const peerConnections = []; // connections to the other users when hosting a lobby
 let largestUserId = 0; // largest ID given to a user in the lobby
 
+// utility functions
+function clearCurrentlyChallenging() {
+	document.getElementById("userElem" + currentLobby.currentlyChallenging.id).querySelector(".challengeBtn").textContent = locale.lobbies.challenge;
+	currentLobby.currentlyChallenging = null;
+	loadingIndicator.classList.remove("active");
+}
+async function cancelCurrentChallenge() {
+	const user = currentLobby.currentlyChallenging;
+	clearCurrentlyChallenging();
+
+	const message = {
+		type: "challengeCancelled",
+		signature: await signString("challenge", `challengeCancelled|${user.id}`, ++user.lastSentChallengeSequenceNum)
+	}
+
+	if (isHosting) {
+		message.from = currentLobby.ownUserId;
+		getUserConnection(user.id).dataChannel.send(JSON.stringify(message));
+	} else {
+		message.to = user.id;
+		hostDataChannel.send(JSON.stringify(message));
+	}
+}
+async function acceptOrDenyChallenge(fromUser, signature) {
+	if (!await verifySignature(signature, "challenge", `offer|${currentLobby.ownUserId}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+
+	const accepted = !currentLobby.currentlyAcceptedChallenger && confirm(locale.lobbies.incomingChallenge.replaceAll("{#name}", fromUser.name));
+	const response = {type: accepted? "challengeAccepted" : "challengeDenied"};
+	if (accepted) {
+		response.roomCode = Math.random().toString();
+		currentLobby.currentlyAcceptedChallenger = fromUser;
+		// force the default websocket for now. (it will get replaced with webRTC stuff down the line anyways)
+		startGame(response.roomCode, "normalAutomatic", "wss://battle.crossuniverse.net:443/ws/");
+	}
+	response.signature = await signString("challenge", `${response.type}|${fromUser.id}${accepted? "|" + response.roomCode : ""}`, ++fromUser.lastSentChallengeSequenceNum);
+
+	if (isHosting) {
+		response.from = currentLobby.ownUserId;
+		getUserConnection(fromUser.id).dataChannel.send(JSON.stringify(response));
+	} else {
+		response.to = fromUser.id;
+		hostDataChannel.send(JSON.stringify(response));
+	}
+}
+async function challengeGotAccepted(byUser, signature, roomCode) {
+	byUser.lastChallengeSequenceNum++;
+	if (!currentLobby.currentlyChallenging || currentLobby.currentlyChallenging.id !== byUser.id) return;
+	if (!await verifySignature(signature, "challenge", `challengeAccepted|${currentLobby.ownUserId}|${roomCode}`, byUser.lastChallengeSequenceNum, byUser)) return;
+	lobbyChat.putMessage(locale.lobbies.challengeAccepted.replaceAll("{#name}", byUser.name), "success");
+	clearCurrentlyChallenging();
+
+	// force the default websocket for now. (it will get replaced with webRTC stuff down the line anyways)
+	startGame(roomCode, "normalAutomatic", "wss://battle.crossuniverse.net:443/ws/");
+}
+async function challengeGotDenied(byUser, signature) {
+	byUser.lastChallengeSequenceNum++;
+	if (!currentLobby.currentlyChallenging || currentLobby.currentlyChallenging.id !== byUser.id) return;
+	if (!await verifySignature(signature, "challenge", `challengeDenied|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
+	lobbyChat.putMessage(locale.lobbies.challengeDenied.replaceAll("{#name}", byUser.name), "error");
+	clearCurrentlyChallenging();
+}
+async function challengeGotCancelled(byUser, signature) {
+	byUser.lastChallengeSequenceNum++;
+	if (!currentLobby.currentlyAcceptedChallenger || currentLobby.currentlyAcceptedChallenger.id !== byUser.id) return;
+	if (!await verifySignature(signature, "challenge", `challengeCancelled|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
+	gameFrame.style.visibility = "hidden";
+	preGame.style.display = "flex";
+	gameFrame.contentWindow.location.replace("about:blank");
+	alert(locale.lobbies.challengeCancelled.replaceAll("{#name}", byUser.name));
+}
 function getUserFromId(id) {
 	return currentLobby.users.find(user => user.id === id);
 }
 
-// for host convenience
+// host-specific
 function getUserFromDataChannel(dataChannel) {
 	const peer = peerConnections.find(peer => peer.dataChannel === dataChannel);
 	if (peer.userId) {
 		return getUserFromId(peer.userId);
 	}
 	return null;
+}
+function getConnectionFromDataChannel(dataChannel) {
+	return peerConnections.find(peer => peer.dataChannel === dataChannel);
+}
+function getUserConnection(userId) {
+	return peerConnections.find(peer => peer.userId === userId);
 }
 function broadcast(message, excludeDataChannel = null) {
 	for (const peer of peerConnections) {
@@ -114,7 +281,7 @@ function closeLobby() {
 	isHosting = false;
 	lobbyServerWs.send('{"type": "closeLobby"}');
 	for (const peer of peerConnections) {
-		peer.dataChannel.send('{"type": "kick"}');
+		peer.dataChannel.send('{"type": "kick", "reason": "closing"}');
 		peer.connection.close();
 	}
 	closeLobbyScreen();
@@ -130,13 +297,25 @@ async function openLobbyScreen() {
 
 	lobbyMenu.style.display = "flex";
 	mainMenu.style.display = "none";
+	loadingIndicator.classList.remove("active");
+
+	if (isHosting) {
+		// host needs to confirm reloading the page if there is someone else in the lobby
+		window.addEventListener("beforeunload", e => {
+			if (currentLobby.users.length === 1) return;
+			e.preventDefault();
+			e.returnValue = "";
+		}, {signal: unloadWarning.signal});
+	}
 }
 function closeLobbyScreen() {
 	currentLobby = null;
 	lobbyMenu.style.display = "none";
+	centerRoomCode.disabled = false;
 	mainMenu.style.display = "flex";
 	lobbyHeader.style.display = "none";
 	userList.innerHTML = "";
+	unloadWarning.abort();
 }
 
 // websocket stuff
@@ -144,7 +323,12 @@ function connectWebsocket() {
 	lobbyServerWs = new WebSocket(localStorage.getItem("lobbyServerUrl")? localStorage.getItem("lobbyServerUrl") : "wss://battle.crossuniverse.net:443/lobbies/");
 	lobbyServerWs.addEventListener("open", function() {
 		lobbyList.dataset.message = locale.lobbies.noOpenLobbies;
-		newLobbyBtn.addEventListener("click", () => {
+		newLobbyBtn.addEventListener("click", async () => {
+			loadingIndicator.classList.add("active");
+
+			const rsaKeyPair = await generateRsaKeyPair();
+			const ecdsaKeyPair = await generateEcdsaKeyPair();
+
 			currentLobby = new Lobby(
 				"my cool lobby",
 				8,
@@ -152,14 +336,19 @@ function connectWebsocket() {
 				[new User(
 					localStorage.getItem("username"),
 					localStorage.getItem("profilePicture"),
-					0
+					0,
+					rsaKeyPair.publicKey,
+					ecdsaKeyPair.publicKey,
+					await crypto.subtle.exportKey("jwk", rsaKeyPair.publicKey),
+					await crypto.subtle.exportKey("jwk", ecdsaKeyPair.publicKey)
 				)],
+				0,
+				rsaKeyPair,
+				ecdsaKeyPair,
 				null
 			);
 			largestUserId = 0;
-			ownUserId = 0;
 			isHosting = true;
-			openLobbyScreen();
 			lobbyServerWs.send(JSON.stringify({
 				type: "openLobby",
 				name: currentLobby.name,
@@ -168,6 +357,7 @@ function connectWebsocket() {
 				hasPassword: currentLobby.hasPassword,
 				language: locale.code
 			}));
+			openLobbyScreen();
 		});
 		newLobbyBtn.disabled = false;
 	});
@@ -246,9 +436,13 @@ function receiveWsMessage(e) {
 				const connection = peerConnections.splice(peerConnections.findIndex(peer => peer.connection === pc), 1)[0];
 				// needs to check for isHosting in case the lobby is being shut down
 				if (isHosting && connection.userId) {
-					const user = currentLobby.removeUser(connection.userId);
-					broadcast(JSON.stringify({type: "userLeft", id: user.id}));
 					lobbyServerWs.send(JSON.stringify({type: "setUserCount", newCount: currentLobby.users.length}));
+
+					// check if the user still exists ( = this disconnect was initiated from their end, unexpectedly)
+					const user = currentLobby.removeUser(connection.userId);
+					if (!user) return;
+
+					broadcast(JSON.stringify({type: "userLeft", id: user.id}));
 					lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), "notice");
 				}
 			});
@@ -270,7 +464,6 @@ function receiveWsMessage(e) {
 		}
 		case "joinRequestAnswer": {
 			hostConnection.setRemoteDescription({type: "answer", sdp: message.sdp});
-			loadingIndicator.classList.remove("active");
 			break;
 		}
 		case "error": {
@@ -293,6 +486,7 @@ function receiveWsMessage(e) {
 
 // webRTC stuff
 async function joinLobby(lobbyId) {
+	centerRoomCode.disabled = true;
 	loadingIndicator.classList.add("active");
 
 	// create connection
@@ -319,13 +513,18 @@ async function joinLobby(lobbyId) {
 	await hostConnection.setLocalDescription(await hostConnection.createOffer());
 }
 
+// used during connection to a lobby
+let tempRsaKeyPair;
+let tempEcdsaKeyPair;
+
 // messages that were sent by the host of a lobby
-function receiveWebRtcHostMessage(e) {
+async function receiveWebRtcHostMessage(e) {
 	const message = JSON.parse(e.data);
 
 	switch (message.type) {
 		case "handshake": {
-			if (doneHandshake) break;
+			if (doneHandshake) break; // prevents the host from spamming the password prompt
+			doneHandshake = true;
 			let password = null;
 			if (message.needsPassword) {
 				password = prompt(locale.lobbies.enterPassword);
@@ -334,12 +533,18 @@ function receiveWebRtcHostMessage(e) {
 					break;
 				}
 			}
-			doneHandshake = true;
+
+			// generate key pairs
+			tempRsaKeyPair = await generateRsaKeyPair(); // RSA for encryption
+			tempEcdsaKeyPair = await generateEcdsaKeyPair(); // ECDSA for signaures
+
 			this.send(JSON.stringify({
 				type: "handshake",
 				password: password,
 				name: localStorage.getItem("username"),
-				profilePicture: localStorage.getItem("profilePicture")
+				profilePicture: localStorage.getItem("profilePicture"),
+				rsaPublicKey: await crypto.subtle.exportKey("jwk", tempRsaKeyPair.publicKey),
+				ecdsaPublicKey: await crypto.subtle.exportKey("jwk", tempEcdsaKeyPair.publicKey)
 			}));
 			break;
 		}
@@ -353,26 +558,51 @@ function receiveWebRtcHostMessage(e) {
 			break;
 		}
 		case "welcomeIn": {
-			currentLobby = new Lobby(
-				message.lobby.name,
-				message.lobby.userLimit,
-				message.lobby.hasPassword,
-				message.lobby.users.map(user => new User(user.name, user.profilePicture, user.id))
-			)
-			ownUserId = message.youAre;
-			openLobbyScreen();
+			try {
+				currentLobby = new Lobby(
+					message.lobby.name,
+					message.lobby.userLimit,
+					message.lobby.hasPassword,
+					await Promise.all(
+						message.lobby.users.map(async user => new User(
+							user.name,
+							user.profilePicture,
+							user.id,
+							// I hate that these are async, it is quite annoying.
+							await crypto.subtle.importKey("jwk", user.rsaPublicKey, {name: "RSA-OAEP", hash: "SHA-512"}, false, ["encrypt"]),
+							await crypto.subtle.importKey("jwk", user.ecdsaPublicKey, {name: "ECDSA", namedCurve: "P-256"}, false, ["verify"]),
+							user.rsaPublicKey,
+							user.ecdsaPublicKey,
+							user.lastChatSequenceNum
+						))
+					),
+					message.youAre,
+					tempRsaKeyPair,
+					tempEcdsaKeyPair
+				)
+				openLobbyScreen();
+			} catch (error) {
+				leaveLobby();
+				alert(locale.lobbies.joinFailedError);
+				console.error(error);
+			} finally {
+				tempRsaKeyPair = undefined;
+				tempEcdsaKeyPair = undefined;
+			}
 			break;
 		}
 		case "kick": {
 			leaveLobby();
 			setTimeout(() => {
-				alert(locale.lobbies.kickMessage);
+				alert(locale.lobbies.kickMessages[message.reason] ?? locale.lobbies.kickMessages.kicked);
 			}, 0);
 			break;
 		}
 		case "chat": {
 			const user = getUserFromId(message.userId);
 			if (!user || typeof message.message !== "string") break;
+			if (!await verifySignature(message.signature, "chat", message.message, ++user.lastChatSequenceNum, user)) break;
+
 			lobbyChat.putMessage(user.name + locale["chat"]["colon"] + message.message.substring(0, 10_000));
 			break;
 		}
@@ -380,7 +610,9 @@ function receiveWebRtcHostMessage(e) {
 			const user = new User(
 				message.name,
 				message.profilePicture,
-				message.id
+				message.id,
+				message.rsaPublicKey,
+				message.ecdsaPublicKey
 			);
 			currentLobby.addUser(user);
 			lobbyChat.putMessage(locale.lobbies.userJoined.replaceAll("{#name}", user.name), "notice");
@@ -391,16 +623,45 @@ function receiveWebRtcHostMessage(e) {
 			lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), "notice");
 			break;
 		}
+		case "userKicked": {
+			const user = currentLobby.removeUser(message.id);
+			lobbyChat.putMessage(locale.lobbies.userKicked.replaceAll("{#name}", user.name), "warning");
+			break;
+		}
+		case "challenge": {
+			const user = getUserFromId(message.from);
+			if (!user) break;
+			acceptOrDenyChallenge(user, message.signature);
+			break;
+		}
+		case "challengeAccepted": {
+			const user = getUserFromId(message.from);
+			if (!user) break;
+			challengeGotAccepted(user, message.signature, message.roomCode);
+			break;
+		}
+		case "challengeDenied": {
+			const user = getUserFromId(message.from);
+			if (!user) break;
+			challengeGotDenied(user, message.signature);
+			break;
+		}
+		case "challengeCancelled": {
+			const user = getUserFromId(message.from);
+			if (!user) break;
+			challengeGotCancelled(user, message.signature);
+			break;
+		}
 	}
 }
 
 // messages that were sent by a visitor in your hosted lobby
-function receiveWebRtcVisitorMessage(e) {
+async function receiveWebRtcVisitorMessage(e) {
 	const message = JSON.parse(e.data);
 
 	switch (message.type) {
 		case "handshake": {
-			const peer = peerConnections.find(peer => peer.dataChannel === this);
+			const peer = getConnectionFromDataChannel(this);
 			if (peer.userId !== null) break; // They already are a user and should not be handshaking anymore
 			if (message.password !== currentLobby.password) {
 				this.send('{"type": "wrongPassword"}');
@@ -413,8 +674,15 @@ function receiveWebRtcVisitorMessage(e) {
 				peer.connection.close();
 				break;
 			}
-
-			const newUser = new User(message.name, message.profilePicture, ++largestUserId);
+			const newUser = new User(
+				message.name,
+				message.profilePicture,
+				++largestUserId,
+				await crypto.subtle.importKey("jwk", message.rsaPublicKey, {name: "RSA-OAEP", hash: "SHA-512"}, true, ["encrypt"]),
+				await crypto.subtle.importKey("jwk", message.ecdsaPublicKey, {name: "ECDSA", namedCurve: "P-256"}, true, ["verify"]),
+				message.rsaPublicKey,
+				message.ecdsaPublicKey
+			);
 			currentLobby.addUser(newUser);
 			peer.userId = newUser.id;
 
@@ -432,7 +700,9 @@ function receiveWebRtcVisitorMessage(e) {
 				type: "userJoined",
 				name: newUser.name,
 				profilePicture: newUser.profilePicture,
-				id: newUser.id
+				id: newUser.id,
+				rsaPublicKey: message.rsaPublicKey,
+				ecdsaPublicKey: message.ecdsaPublicKey
 			}), this);
 			lobbyServerWs.send(JSON.stringify({type: "setUserCount", newCount: currentLobby.users.length}));
 			lobbyChat.putMessage(locale.lobbies.userJoined.replaceAll("{#name}", newUser.name), "notice");
@@ -441,14 +711,68 @@ function receiveWebRtcVisitorMessage(e) {
 		case "chat": {
 			const user = getUserFromDataChannel(this);
 			if (!user || typeof message.message !== "string") break;
+			if (!await verifySignature(message.signature, "chat", message.message, ++user.lastChatSequenceNum, user)) break;
 
 			message.message = message.message.substring(0, 10_000);
 			broadcast(JSON.stringify({
 				type: "chat",
 				message: message.message,
-				userId: user.id
+				userId: user.id,
+				signature: message.signature
 			}));
 			lobbyChat.putMessage(user.name + locale["chat"]["colon"] + message.message);
+			break;
+		}
+		case "challenge": {
+			if (message.to === currentLobby.ownUserId) { // is for me?
+				acceptOrDenyChallenge(getUserFromDataChannel(this), message.signature);
+				break;
+			}
+			// otherwise, forward to recipient
+			getUserConnection(message.to)?.send(JSON.stringify({
+				type: "challenge",
+				from: getConnectionFromDataChannel(this).userId
+			}));
+			break;
+		}
+		case "challengeAccepted": {
+			if (message.to === currentLobby.ownUserId) { // is for me?
+				challengeGotAccepted(getUserFromDataChannel(this), message.signature, message.roomCode);
+				break;
+			}
+			// otherwise, forward to recipient
+			getUserConnection(message.to)?.send(JSON.stringify({
+				type: "challengeAccepted",
+				from: getConnectionFromDataChannel(this).userId,
+				roomCode: message.roomCode,
+				signature: message.signature
+			}));
+			break;
+		}
+		case "challengeDenied": {
+			if (message.to === currentLobby.ownUserId) { // is for me?
+				challengeGotDenied(getUserFromDataChannel(this), message.signature);
+				break;
+			}
+			// otherwise, forward to recipient
+			getUserConnection(message.to)?.send(JSON.stringify({
+				type: "challengeDenied",
+				from: getConnectionFromDataChannel(this).userId,
+				signature: message.signature
+			}));
+			break;
+		}
+		case "challengeCancelled": {
+			if (message.to === currentLobby.ownUserId) { // is for me?
+				challengeGotCancelled(getUserFromDataChannel(this), message.signature);
+				break;
+			}
+			// otherwise, forward to recipient
+			getUserConnection(message.to)?.send(JSON.stringify({
+				type: "challengeCancelled",
+				from: getConnectionFromDataChannel(this).userId,
+				signature: message.signature
+			}));
 			break;
 		}
 	}
@@ -486,18 +810,70 @@ leaveLobbyButton.addEventListener("click", function() {
 	}
 });
 
-lobbyChat.addEventListener("message", function(e) {
+lobbyChat.addEventListener("message", async function(e) {
+	const signature = await signString("chat", e.data, ++currentLobby.ownChatSequenceNum);
 	if (isHosting) {
 		broadcast(JSON.stringify({
 			type: "chat",
 			message: e.data,
-			userId: ownUserId
+			userId: currentLobby.ownUserId,
+			signature: signature
 		}));
-		lobbyChat.putMessage(getUserFromId(ownUserId).name + locale["chat"]["colon"] + e.data);
+		lobbyChat.putMessage(getUserFromId(currentLobby.ownUserId).name + locale["chat"]["colon"] + e.data);
 	} else {
 		hostDataChannel.send(JSON.stringify({
 			type: "chat",
-			message: e.data
+			message: e.data,
+			signature: signature
 		}));
 	}
 });
+
+// crypto helper stuff
+async function generateRsaKeyPair() {
+	return crypto.subtle.generateKey(
+		{
+			name: "RSA-OAEP",
+			modulusLength: 4096,
+			publicExponent: new Uint8Array([1,0,1]),
+			hash: "SHA-512"
+		},
+		true,
+		["encrypt", "decrypt"]
+	);
+}
+async function generateEcdsaKeyPair() {
+	return crypto.subtle.generateKey(
+		{
+			name: "ECDSA",
+			namedCurve: "P-256"
+		},
+		true,
+		["sign", "verify"]
+	);
+}
+// the purpose in the following two function makes sure that different types of messages, with different sequence counters are never interchangeable
+async function signString(purpose, toSign, sequenceNumber) {
+	return u8tos(new Uint8Array(
+		await crypto.subtle.sign(
+			{name: "ECDSA", hash: "SHA-256"},
+			currentLobby.ownEcdsaKeyPair.privateKey,
+			new TextEncoder().encode(`${purpose}|${sequenceNumber}|${toSign}`)
+		)
+	));
+}
+async function verifySignature(signature, purpose, signedString, sequenceNumber, user) {
+	return crypto.subtle.verify(
+		{name: "ECDSA", hash: "SHA-256"},
+		user.ecdsaPublicKey,
+		stou8(signature),
+		new TextEncoder().encode(`${purpose}|${sequenceNumber}|${signedString}`))
+}
+
+// Uint8Array <=> String conversion
+function stou8(string) {
+	return new Uint8Array(string.split("").map(char => char.charCodeAt(0)));
+}
+function u8tos(array) {
+	return String.fromCharCode.apply(null, array);
+}

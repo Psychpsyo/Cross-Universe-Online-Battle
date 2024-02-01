@@ -39,9 +39,9 @@
 					<div id="mainLogoHolder">
 						<img id="mainLogo" src="./images/logo.png" alt="">
 					</div>
-					<div id="centerRoomCodeDiv" aria-labelledby="roomCodeInputTitle">
+					<fieldset id="centerRoomCode" aria-labelledby="roomCodeInputTitle">
 						<div id="roomCodeInputFieldHolder">
-							<h1 id="roomCodeInputTitle"></h1><br>
+							<legend id="roomCodeInputTitle"></legend>
 							<label for="roomCodeInputField" id="roomCodeInputLabel"></label>
 							<span><input id="roomCodeInputField" aria-atomic="true" autocomplete="off"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
 							<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
@@ -54,16 +54,16 @@
 							<button id="connectBtn"></button>
 						</div>
 						<div id="waitingForOpponentHolder" hidden>
-							<span id="waitingForOpponentText" aria-live="polite" aria-atomic="true"></span>
+							<legend id="waitingForOpponentText" aria-live="polite" aria-atomic="true"></legend>
 							<div id="waitingBtnSpan">
 								<button id="copyInviteLink"></button>
 								<button id="cancelWaitingBtn"></button>
 							</div>
 						</div>
-					</div>
+					</fieldset>
 					<a id="rulesButton" class="bigButton" target="_blank"></a>
 				</section>
-				<section id="lobbies" hidden>
+				<section id="lobbies">
 					<header>
 						<h1 id="lobbyHeading"></h1>
 						<button id="newLobbyBtn" class="svgButton" disabled autocomplete="off"><img src="images/icons/newLobby.svg" alt="" draggable="false"></button>
@@ -88,6 +88,7 @@
 			<footer id="unofficialFooter"></footer>
 		</div>
 		<iframe id="gameFrame" scrolling="no"></iframe>
+		<script>gameFrame.src="about:blank"</script> <!-- Firefox makes the iframe point to the game on page refresh otherwise -->
 
 		<object id="loadingIndicator" class="active" type="image/svg+xml" data="./images/icons/loading.svg" width="150px" height="150px"></object>
 

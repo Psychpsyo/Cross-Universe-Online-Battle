@@ -1,78 +1,26 @@
 import {locale} from "/scripts/locale.mjs";
 import {startEffect, stopEffect} from "/scripts/levitationEffect.mjs";
+import {startGame, loadReplay} from "/scripts/gameStarter.mjs";
 import * as uiUtils from "/scripts/uiUtils.mjs";
 
 // randomizing the default room code
 function randomizeRoomcode() {
-	let roomcode = 10000 + (Math.floor(Math.random() * 90000));
-	roomCodeInputField.placeholder = roomcode;
-	roomCodeInputField.value = roomcode;
+	const roomCode = 10000 + (Math.floor(Math.random() * 90000));
+	roomCodeInputField.placeholder = roomCode;
+	roomCodeInputField.value = roomCode;
 }
 function getRoomcode() {
 	return roomCodeInputField.value == ""? roomCodeInputField.placeholder : roomCodeInputField.value;
 }
 
-const unloadWarning = new AbortController();
 let websocketUrl = localStorage.getItem("websocketUrl")? localStorage.getItem("websocketUrl") : "wss://battle.crossuniverse.net:443/ws/";
-let replayToLoad = null;
-
-// receiving messages from the iframe
-window.addEventListener("message", e => {
-	if (e.source !== gameFrame.contentWindow) return;
-
-	switch (e.data.type) {
-		case "ready": {
-			if (replayToLoad) {
-				gameFrame.contentWindow.postMessage({
-					type: "replay",
-					data: replayToLoad
-				});
-				replayToLoad = null;
-			} else {
-				gameFrame.contentWindow.postMessage({
-					type: "connect",
-					roomCode: getRoomcode(),
-					gameMode: gameModeSelect.value,
-					websocketUrl: websocketUrl
-				});
-			}
-			break;
-		}
-		case "gameStarted": {
-			stopEffect();
-			preGame.style.display = "none";
-			gameFrame.style.visibility = "visible";
-			waitingForOpponentHolder.hidden = true;
-			roomCodeInputFieldHolder.hidden = false;
-			loadingIndicator.classList.remove("active");
-
-			// prevent user from accidently leaving the site
-			window.addEventListener("beforeunload", e => {
-				e.preventDefault();
-				e.returnValue = "";
-			}, {"signal": unloadWarning.signal});
-			break;
-		}
-		case "playerWon":
-		case "gameDrawn": {
-			unloadWarning.abort();
-			break;
-		}
-		case "connectionLost": {
-			unloadWarning.abort();
-			gameFrame.style.visibility = "hidden";
-			preGame.style.display = "flex";
-			gameFrame.contentWindow.location.replace("about:blank");
-			break;
-		}
-	}
-});
 
 // connecting
-function connect(websocketUrl) {
+function connect(overrideWebsocketUrl) {
 	// hide input field and show waiting indicator
 	roomCodeInputFieldHolder.hidden = true;
 	waitingForOpponentHolder.hidden = false;
+	lobbies.style.display = "none";
 	// refresh the "Waiting for Opponent" text so screen readers read it out.
 	setTimeout(() => {
 		if (typeof waitingForOpponentText !== "undefined") {
@@ -81,12 +29,16 @@ function connect(websocketUrl) {
 		}
 	}, 100);
 
-	gameFrame.contentWindow.location.replace(location.origin + "/game");
-	loadingIndicator.classList.add("active");
+	startGame(getRoomcode(), gameModeSelect.value, overrideWebsocketUrl ?? websocketUrl).then(showGameScreen).then(showGameScreen);
+}
+function showGameScreen() {
+	waitingForOpponentHolder.hidden = true;
+	roomCodeInputFieldHolder.hidden = false;
+	lobbies.style.display = "flex";
 }
 
 // check if a room code is given in the query string
-const queryString = new URLSearchParams(window.location.search);
+const queryString = new URLSearchParams(location.search);
 if (queryString.get("id")) {
 	roomCodeInputField.placeholder = queryString.get("id");
 	let gameMode = queryString.get("m");
@@ -137,13 +89,13 @@ document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");
 loadingIndicator.classList.remove("active");
 
-// randomize roomcode button
+// randomize room code button
 roomCodeRefresh.addEventListener("click", function() {
 	randomizeRoomcode();
 	roomCodeInputField.setAttribute("aria-live", "polite");
 });
 
-// pressing enter in the roomcode entry field to connect
+// pressing enter in the room code entry field to connect
 roomCodeInputField.addEventListener("keyup", function(e) {
 	if (e.code == "Enter") {
 		connect();
@@ -158,6 +110,7 @@ cancelWaitingBtn.addEventListener("click", function() {
 	gameFrame.removeAttribute("src");
 	waitingForOpponentHolder.hidden = true;
 	roomCodeInputFieldHolder.hidden = false;
+	lobbies.style.display = "flex";
 	roomCodeInputField.focus();
 	loadingIndicator.classList.remove("active");
 });
@@ -186,9 +139,8 @@ preGame.addEventListener("drop", function(e) {
 
 	let reader = new FileReader();
 	reader.addEventListener("load", e => {
-		replayToLoad = JSON.parse(e.target.result);
-		gameFrame.contentWindow.location.replace(location.origin + "/game");
-		loadingIndicator.classList.add("active");
+		loadReplay(JSON.parse(e.target.result));
+		lobbies.style.display = "none";
 	});
 	reader.readAsText(file);
 });
