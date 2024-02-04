@@ -10,6 +10,7 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Room Code",
 		"enterRoomcode": "Room Code:",
+		"gameMode": "Game Mode:",
 		"rerollRoomcode": "Generate random room code",
 		"connectToRoom": "Connect",
 		"waitingForOpponent": "Waiting for Opponent...",
@@ -19,17 +20,16 @@
 		"rulesLink": "https://crossuniverse.net/rules",
 		"unofficialNotice": "This is a fan-made implementation of Cross Universe. The official page is at <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
 
-		"gamemode": "Gamemode:",
-		"gamemodes": {
-			"normal": "Normal",
-			"draft": "Draft",
-			"normalAutomatic": "Automatic (WIP)",
-			"draftAutomatic": "Auto Draft (WIP)"
-		},
-
 		"settingsButton": "Settings",
 		"deckCreatorButton": "Deck Creator",
 		"reportBug": "Report a Bug"
+	},
+
+	"gameModes": {
+		"normal": "Normal",
+		"draft": "Draft",
+		"manual": "Manual",
+		"automatic": "Automatic"
 	},
 
 	"lobbies": {
@@ -38,6 +38,7 @@
 		"joinPassword": "Join 🔒",
 		"userIconAlt": "Users:",
 		"newLobbyButton": "Create new Lobby",
+		"defaultName": "{#name} Lobby",
 
 		"noLobbyServer": "Couldn't connect to lobby server.\n:(",
 		"noOpenLobbies": "No open lobbies found.\n:(",
@@ -57,16 +58,41 @@
 		"challenge": "Challenge",
 		"cancelChallenge": "Cancel Challenge",
 		"kick": "Kick",
+		"status": {
+			"setStatus": "Set Status",
+			"present": "Present",
+			"inGame": "In Game",
+			"busy": "Busy"
+		},
 
-		"incomingChallenge": "{#name} is challenging you. Start a game?",
-		"challengeAccepted": "{#name} has accepted your challenge. Starting the game now.",
-		"challengeDenied": "{#name} did not accept your challenge.",
-		"challengeCancelled": "{#name} cancelled their challenge.",
+		"incomingChallenge": "{#name} is challenging you to a game:",
+		"acceptChallenge": "Accept",
+		"denyChallenge": "Deny",
+		"challengeAccepted": "Accepted",
+		"challengeDenied": "Denied",
+		"challengeCancelled": "Cancelled",
+		"challengerLeft": "Player Left",
+
+		"challengeAcceptedMessage": "{#name} has accepted your challenge. Starting the game now.",
+		"challengeDeniedMessage": "{#name} did not accept your challenge.",
+		"challengeCancelledAfterAccept": "{#name} has cancelled the challenge after you accepted it.",
 
 		"unnamedUser": "Unnamed Sorcerer",
 		"userJoined": "{#name} has joined the lobby.",
 		"userLeft": "{#name} has left the lobby.",
-		"userKicked": "{#name} was kicked from the lobby."
+		"userKicked": "{#name} was kicked from the lobby.",
+
+		"settings": {
+			"title": "Lobby Settings",
+			"name": "Name:",
+			"namePlaceholder": "Unnamed Lobby",
+			"userLimit": "User Limit:",
+			"hasPassword": "Has Password:",
+			"password": "Password:",
+			"gameMode": "Game Mode:",
+			"automatic": "Automatic Mode:",
+			"automaticTitle": "Determines whether or not the game rules are checked automatically.\nNote: Not all cards exist in automatic games."
+		}
 	},
 
 	"game": {

@@ -12,33 +12,98 @@ import {locale} from "/scripts/locale.mjs";
 import {startGame} from "/scripts/gameStarter.mjs";
 import "/scripts/profilePicture.mjs";
 
-// lobby template translation
+const unloadWarning = new AbortController();
+const settingsList = ["name", "userLimit", "hasPassword", "password", "gameMode", "automatic"];
+const settingsTypes = {
+	name: "string",
+	userLimit: "number",
+	hasPassword: "boolean",
+	password: "string",
+	gameMode: "string",
+	automatic: "boolean"
+}
+const settingsLimits = {
+	name: {maxLength: 100, stripWhitespace: true},
+	userLimit: {min: 1, max: 1000},
+	password: {maxLength: 100},
+	gameMode: {options: ["normal", "draft"]}
+}
+const possibleStatuses = ["present", "busy", "inGame"];
+
+// lobby translation
 lobbyTemplate.content.querySelector(".lobbyUserIcon").textContent = locale.lobbies.userIconAlt;
 userListHeader.textContent = locale.lobbies.players;
 lobbyUserTemplate.content.querySelector(".challengeBtn").textContent = locale.lobbies.challenge;
 lobbyUserTemplate.content.querySelector(".kickBtn").textContent = locale.lobbies.kick;
+for (const option of lobbyUserTemplate.content.querySelector(".statusSelect").children) {
+	option.textContent = locale.lobbies.status[option.value];
+}
 
-const unloadWarning = new AbortController();
+lobbySettingsHeader.textContent = locale.lobbies.settings.title;
+for (const setting of settingsList) {
+	getSettingLabel(setting).textContent = locale.lobbies.settings[setting];
+	// while we're looping, might as well attach the event listeners
+	getSettingInput(setting).addEventListener("change",
+	settingsTypes[setting] === "boolean"?
+		function() {currentLobby.setSetting(setting, this.checked)} :
+		function() {currentLobby.setSetting(setting, this.value)}
+	);
+}
+lobbyNameInput.placeholder = locale.lobbies.settings.namePlaceholder;
+lobbyAutomaticInput.title = locale.lobbies.settings.automaticTitle;
+lobbyGameModeNormal.textContent = locale.gameModes.normal;
+lobbyGameModeDraft.textContent = locale.gameModes.draft;
+
+// settings helper functions
+function sanitizeSettingsValue(setting, value) {
+	switch (settingsTypes[setting]) {
+		case "number": {
+			return Math.min(Math.max(value, settingsLimits[setting].min), settingsLimits[setting].max);
+		}
+		case "boolean": {
+			return value;
+		}
+		case "string": {
+			if ("options" in settingsLimits[setting]) {
+				return settingsLimits[setting].options.includes(value)? value : settingsLimits[setting].options[0];
+			}
+			if (settingsLimits[setting].stripWhitespace) {
+				value = value.trim();
+			}
+			return value.substring(0, settingsLimits[setting].maxLength);
+		}
+	}
+	throw new Error("Failed to sanitize lobby settings input:", setting, value);
+}
+function getSettingInput(setting) {
+	return document.getElementById(`lobby${setting[0].toUpperCase() + setting.substring(1)}Input`);
+}
+function getSettingLabel(setting) {
+	return document.getElementById(`lobby${setting[0].toUpperCase() + setting.substring(1)}Label`);
+}
 
 class Lobby {
-	constructor(name, userLimit, hasPassword, users, ownUserId, ownRsaKeyPair, ownEcdsaKeyPair, password = null) {
-		this.name = name;
-		this.userLimit = userLimit;
-		this.hasPassword = hasPassword;
+	constructor(name, userLimit, hasPassword, password, users, ownUserId, ownRsaKeyPair, ownEcdsaKeyPair) {
+		this.setSetting("name", name);
+		this.setSetting("userLimit", userLimit);
+		this.setSetting("hasPassword", hasPassword);
+		this.setSetting("password", password);
+		this.setSetting("gameMode", "normal");
+		this.setSetting("automatic", false);
 		this.ownUserId = ownUserId;
 		// the RSA keys are for encryption, the ecdsa keys are for signatures
 		this.ownRsaKeyPair = ownRsaKeyPair;
 		this.ownEcdsaKeyPair = ownEcdsaKeyPair;
 		this.ownChatSequenceNum = 0; // used to prevent replay attacks on chat messages
-		this.password = password;
 
 		this.users = [];
 		for (const user of users) {
 			this.addUser(user);
 		}
+		this.largestUserId = 0; // largest ID given to a user in this lobby (host only, so it can just start at 0)
 
 		this.currentlyChallenging = null; // the user that is currently being challenge
-		this.currentlyAcceptedChallenger = null;
+		this.playingAgainst = null; // the opponent that is currently being played against
 	}
 
 	addUser(user) {
@@ -46,10 +111,24 @@ class Lobby {
 		// add to UI
 		const userElem = lobbyUserTemplate.content.cloneNode(true);
 		userElem.querySelector(".user").id = "userElem" + user.id;
-		userElem.querySelector(".username").textContent = user.name;
+		const nameElem = userElem.querySelector(".username");
+		nameElem.textContent = user.name;
+		if (user.placeholderName) {
+			nameElem.classList.add("textPlaceholder");
+		}
+		const statusElem = userElem.querySelector(".userStatusText");
+		statusElem.textContent = locale.lobbies.status[user.status];
+		statusElem.classList.add(user.status + "Status");
 		if (user.id === this.ownUserId) {
-			userElem.querySelector(".userOptions").remove();
+			userElem.querySelector(".otherUserOptions").remove();
+			userElem.querySelector(".statusSelect").addEventListener("change", async function() {
+				if (this.value !== "setStatus" && this.value !== user.status) {
+					syncNewStatus(this.value);
+				}
+				this.value = "setStatus";
+			});
 		} else {
+			userElem.querySelector(".localUserOptions").remove();
 			userElem.querySelector(".challengeBtn").addEventListener("click", async function() {
 				if (currentLobby.currentlyChallenging === user) {
 					cancelCurrentChallenge();
@@ -104,16 +183,47 @@ class Lobby {
 		document.getElementById("userElem" + id).remove();
 		return this.users.splice(index, 1)[0];
 	}
+
+	setSetting(name, value) {
+		value = sanitizeSettingsValue(name, value);
+		this[name] = value;
+		getSettingInput(name)[settingsTypes[name] === "boolean"? "checked" : "value"] = value;
+		switch (name) {
+			case "name": {
+				lobbyTitle.textContent = value? value : locale.lobbies.settings.namePlaceholder;
+				break;
+			}
+			case "hasPassword": {
+				lobbyPasswordInput.disabled = !value;
+				break;
+			}
+		}
+		if (isHosting) {
+			broadcast(JSON.stringify({
+				type: "settingUpdated",
+				name: name,
+				value: name === "password"? "*".repeat(value.length) : value
+			}));
+			if (lobbyServerWs.readyState === 1 && ["name", "userLimit", "hasPassword"].includes(name)) {
+				lobbyServerWs.send(JSON.stringify({
+					type: `set${name[0].toUpperCase()}${name.substring(1)}`,
+					newValue: value
+				}));
+			}
+		}
+	}
 }
 class User {
 	// this sanitizes the incoming data
-	constructor(name, profilePicture, id, rsaPublicKey, ecdsaPublicKey, rsaPublicKeyJwk, ecdsaPublicKeyJwk, lastChatSequenceNum = 0) {
+	constructor(name, profilePicture, id, rsaPublicKey, ecdsaPublicKey, rsaPublicKeyJwk, ecdsaPublicKeyJwk, status = "present", lastPublicSequenceNum = 0) {
 		this.id = id;
 
 		// sanitize name
 		if (typeof name !== "string" || name.length === 0) {
+			this.placeholderName = true;
 			name = locale.lobbies.unnamedUser;
 		} else {
+			this.placeholderName = false;
 			name = name.substring(0, 100);
 		}
 		// sanitize profile picture
@@ -127,6 +237,8 @@ class User {
 			this.name = `${name} (${i})`;
 		}
 		this.profilePicture = profilePicture;
+		this.status = status;
+
 		this.rsaPublicKey = rsaPublicKey;
 		this.ecdsaPublicKey = ecdsaPublicKey;
 
@@ -134,12 +246,22 @@ class User {
 		this.rsaPublicKeyJwk = rsaPublicKeyJwk;
 		this.ecdsaPublicKeyJwk = ecdsaPublicKeyJwk;
 
+		this.hasSentChallenge = false; // whether or not this user has sent us a challenge
+
 		// used to prevent replay attacks
-		this.lastChatSequenceNum = lastChatSequenceNum;
+		this.lastPublicSequenceNum = lastPublicSequenceNum;
 		this.lastChallengeSequenceNum = 0; // this one is only checked by the client for simplicity and so can start at 0
 
 		// this is for sent challenges
 		this.lastSentChallengeSequenceNum = 0;
+	}
+
+	setStatus(newStatus) {
+		const statusElem = document.getElementById("userElem" + this.id).querySelector(".userStatusText");
+		statusElem.classList.remove(this.status + "Status");
+		this.status = newStatus;
+		statusElem.textContent = locale.lobbies.status[this.status];
+		statusElem.classList.add(this.status + "Status");
 	}
 
 	toJSON() {
@@ -149,7 +271,8 @@ class User {
 			profilePicture: this.profilePicture,
 			rsaPublicKey: this.rsaPublicKeyJwk,
 			ecdsaPublicKey: this.ecdsaPublicKeyJwk,
-			lastChatSequenceNum: this.lastChatSequenceNum
+			status: this.status,
+			lastPublicSequenceNum: this.lastPublicSequenceNum
 		}
 	}
 }
@@ -170,13 +293,32 @@ let hostConnection = null; // connection to the host when joining a lobby
 let hostDataChannel = null; // data channel for communication with the lobby host
 let doneHandshake = false; // Whether or not the user already did the handshake for the current lobby. This is to prevent a malicious host from spamming password popups.
 const peerConnections = []; // connections to the other users when hosting a lobby
-let largestUserId = 0; // largest ID given to a user in the lobby
 
 // utility functions
+async function syncNewStatus(status) {
+	const signature = await signString("public", `status|${status}`, ++currentLobby.ownChatSequenceNum);
+	if (isHosting) {
+		broadcast(JSON.stringify({
+			type: "userStatus",
+			status: status,
+			userId: currentLobby.ownUserId,
+			signature: signature
+		}));
+		getUserFromId(currentLobby.ownUserId).setStatus(status);
+	} else {
+		hostDataChannel.send(JSON.stringify({
+			type: "setStatus",
+			status: status,
+			signature: signature
+		}));
+	}
+}
 function clearCurrentlyChallenging() {
-	document.getElementById("userElem" + currentLobby.currentlyChallenging.id).querySelector(".challengeBtn").textContent = locale.lobbies.challenge;
-	currentLobby.currentlyChallenging = null;
 	loadingIndicator.classList.remove("active");
+	if (currentLobby.users.includes(currentLobby.currentlyChallenging)) { // check in case they left
+		document.getElementById("userElem" + currentLobby.currentlyChallenging.id).querySelector(".challengeBtn").textContent = locale.lobbies.challenge;
+		currentLobby.currentlyChallenging = null;
+	}
 }
 async function cancelCurrentChallenge() {
 	const user = currentLobby.currentlyChallenging;
@@ -195,16 +337,56 @@ async function cancelCurrentChallenge() {
 		hostDataChannel.send(JSON.stringify(message));
 	}
 }
-async function acceptOrDenyChallenge(fromUser, signature) {
+async function presentChallengeInChat(fromUser, signature) {
 	if (!await verifySignature(signature, "challenge", `offer|${currentLobby.ownUserId}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+	if (currentLobby.playingAgainst || fromUser.hasSentChallenge) {
+		acceptOrDenyChallenge(fromUser, false);
+		return;
+	}
+	fromUser.hasSentChallenge = true;
 
-	const accepted = !currentLobby.currentlyAcceptedChallenger && confirm(locale.lobbies.incomingChallenge.replaceAll("{#name}", fromUser.name));
+	const chatInsert = document.createElement("fieldset");
+	chatInsert.id = "challengeElem" + fromUser.id;
+	chatInsert.classList.add("challengePrompt");
+	const acceptBtn = document.createElement("button");
+	const denyBtn = document.createElement("button");
+	acceptBtn.textContent = locale.lobbies.acceptChallenge;
+	denyBtn.textContent = locale.lobbies.denyChallenge;
+	acceptBtn.addEventListener("click", function() {
+		resolveAnyChatChallenge(fromUser.id, locale.lobbies.challengeAccepted);
+		acceptOrDenyChallenge(fromUser, true);
+	});
+	denyBtn.addEventListener("click", function() {
+		resolveAnyChatChallenge(fromUser.id, locale.lobbies.challengeDenied);
+		acceptOrDenyChallenge(fromUser, false);
+	});
+	chatInsert.appendChild(acceptBtn);
+	chatInsert.appendChild(denyBtn);
+
+	lobbyChat.putMessage(locale.lobbies.incomingChallenge.replaceAll("{#name}", fromUser.name), "notice", chatInsert);
+}
+function resolveAnyChatChallenge(userId, resolutionString) {
+	const lobbyElem = document.getElementById("challengeElem" + userId);
+	if (lobbyElem) {
+		lobbyElem.removeAttribute("id");
+		lobbyElem.dataset.resolvedText = resolutionString;
+		lobbyElem.disabled = true;
+	}
+}
+
+async function acceptOrDenyChallenge(fromUser, accepted) {
+	fromUser.hasSentChallenge = false;
 	const response = {type: accepted? "challengeAccepted" : "challengeDenied"};
 	if (accepted) {
 		response.roomCode = Math.random().toString();
-		currentLobby.currentlyAcceptedChallenger = fromUser;
+		currentLobby.playingAgainst = fromUser;
+
+		syncNewStatus("inGame");
 		// force the default websocket for now. (it will get replaced with webRTC stuff down the line anyways)
-		startGame(response.roomCode, "normalAutomatic", "wss://battle.crossuniverse.net:443/ws/");
+		startGame(response.roomCode, currentLobby.gameMode, currentLobby.automatic, "wss://battle.crossuniverse.net:443/ws/").then(() => {
+			currentLobby.playingAgainst = null;
+			syncNewStatus("present");
+		});
 	}
 	response.signature = await signString("challenge", `${response.type}|${fromUser.id}${accepted? "|" + response.roomCode : ""}`, ++fromUser.lastSentChallengeSequenceNum);
 
@@ -220,27 +402,36 @@ async function challengeGotAccepted(byUser, signature, roomCode) {
 	byUser.lastChallengeSequenceNum++;
 	if (!currentLobby.currentlyChallenging || currentLobby.currentlyChallenging.id !== byUser.id) return;
 	if (!await verifySignature(signature, "challenge", `challengeAccepted|${currentLobby.ownUserId}|${roomCode}`, byUser.lastChallengeSequenceNum, byUser)) return;
-	lobbyChat.putMessage(locale.lobbies.challengeAccepted.replaceAll("{#name}", byUser.name), "success");
+	lobbyChat.putMessage(locale.lobbies.challengeAcceptedMessage.replaceAll("{#name}", byUser.name), "success");
 	clearCurrentlyChallenging();
+	currentLobby.playingAgainst = byUser;
 
+	syncNewStatus("inGame");
 	// force the default websocket for now. (it will get replaced with webRTC stuff down the line anyways)
-	startGame(roomCode, "normalAutomatic", "wss://battle.crossuniverse.net:443/ws/");
+	startGame(roomCode, currentLobby.gameMode, currentLobby.automatic, "wss://battle.crossuniverse.net:443/ws/").then(() => {
+		currentLobby.playingAgainst = null;
+		syncNewStatus("present");
+	});
 }
 async function challengeGotDenied(byUser, signature) {
 	byUser.lastChallengeSequenceNum++;
 	if (!currentLobby.currentlyChallenging || currentLobby.currentlyChallenging.id !== byUser.id) return;
 	if (!await verifySignature(signature, "challenge", `challengeDenied|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
-	lobbyChat.putMessage(locale.lobbies.challengeDenied.replaceAll("{#name}", byUser.name), "error");
+	lobbyChat.putMessage(locale.lobbies.challengeDeniedMessage.replaceAll("{#name}", byUser.name), "error");
 	clearCurrentlyChallenging();
 }
 async function challengeGotCancelled(byUser, signature) {
 	byUser.lastChallengeSequenceNum++;
-	if (!currentLobby.currentlyAcceptedChallenger || currentLobby.currentlyAcceptedChallenger.id !== byUser.id) return;
 	if (!await verifySignature(signature, "challenge", `challengeCancelled|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
-	gameFrame.style.visibility = "hidden";
-	preGame.style.display = "flex";
-	gameFrame.contentWindow.location.replace("about:blank");
-	alert(locale.lobbies.challengeCancelled.replaceAll("{#name}", byUser.name));
+	byUser.hasSentChallenge = false;
+	if (currentLobby.playingAgainst && currentLobby.playingAgainst.id === byUser.id) {
+		gameFrame.style.visibility = "hidden";
+		preGame.style.display = "flex";
+		gameFrame.contentWindow.location.replace("about:blank");
+		alert(locale.lobbies.challengeCancelledAfterAccept.replaceAll("{#name}", byUser.name));
+	} else {
+		resolveAnyChatChallenge(byUser.id, locale.lobbies.challengeCancelled);
+	}
 }
 function getUserFromId(id) {
 	return currentLobby.users.find(user => user.id === id);
@@ -261,12 +452,58 @@ function getUserConnection(userId) {
 	return peerConnections.find(peer => peer.userId === userId);
 }
 function broadcast(message, excludeDataChannel = null) {
-	for (const peer of peerConnections) {
-		if (peer.dataChannel !== excludeDataChannel) {
-			peer.dataChannel.send(message);
+	for (const user of currentLobby.users) {
+		if (user.id === currentLobby.ownUserId) continue;
+		const dc = getUserConnection(user.id).dataChannel;
+		if (dc !== excludeDataChannel) {
+			dc.send(message);
 		}
 	}
 }
+
+// opening a new lobby
+newLobbyBtn.addEventListener("click", async () => {
+	loadingIndicator.classList.add("active");
+
+	const rsaKeyPair = await generateRsaKeyPair();
+	const ecdsaKeyPair = await generateEcdsaKeyPair();
+
+	let lobbyName = "";
+	if (localStorage.getItem("username")) {
+		lobbyName = locale.lobbies.defaultName.replaceAll("{#name}", localStorage.getItem("username"));
+	}
+
+	currentLobby = new Lobby(
+		lobbyName,
+		8,
+		true,
+		Math.floor(Math.random() * 999999999999).toString().padStart(12, 0), // TODO: replace this with something better (initial lobby creation menu?)
+		[new User(
+			localStorage.getItem("username"),
+			localStorage.getItem("profilePicture"),
+			0,
+			rsaKeyPair.publicKey,
+			ecdsaKeyPair.publicKey,
+			await crypto.subtle.exportKey("jwk", rsaKeyPair.publicKey),
+			await crypto.subtle.exportKey("jwk", ecdsaKeyPair.publicKey)
+		)],
+		0,
+		rsaKeyPair,
+		ecdsaKeyPair
+	);
+	isHosting = true;
+	if (lobbyServerWs.readyState === 1) {
+		lobbyServerWs.send(JSON.stringify({
+			type: "openLobby",
+			name: currentLobby.name,
+			userCount: currentLobby.users.length,
+			userLimit: currentLobby.userLimit,
+			hasPassword: currentLobby.hasPassword,
+			language: locale.code
+		}));
+	}
+	openLobbyScreen();
+});
 
 // leaving lobby as a visitor
 function leaveLobby() {
@@ -279,7 +516,9 @@ function leaveLobby() {
 // closing a lobby as the host
 function closeLobby() {
 	isHosting = false;
-	lobbyServerWs.send('{"type": "closeLobby"}');
+	if (lobbyServerWs.readyState === 1) {
+		lobbyServerWs.send('{"type": "closeLobby"}');
+	}
 	for (const peer of peerConnections) {
 		peer.dataChannel.send('{"type": "kick", "reason": "closing"}');
 		peer.connection.close();
@@ -290,7 +529,7 @@ function closeLobby() {
 // show or hide the actual in-lobby menu
 async function openLobbyScreen() {
 	await import("./chat.mjs");
-	lobbyTitle.textContent = currentLobby.name;
+	lobbySettings.disabled = !isHosting;
 	lobbyChat.clear();
 
 	lobbyHeader.style.display = "flex";
@@ -312,9 +551,11 @@ function closeLobbyScreen() {
 	currentLobby = null;
 	lobbyMenu.style.display = "none";
 	centerRoomCode.disabled = false;
+	newLobbyBtn.disabled = false;
 	mainMenu.style.display = "flex";
 	lobbyHeader.style.display = "none";
 	userList.innerHTML = "";
+	loadingIndicator.classList.remove("active");
 	unloadWarning.abort();
 }
 
@@ -323,43 +564,6 @@ function connectWebsocket() {
 	lobbyServerWs = new WebSocket(localStorage.getItem("lobbyServerUrl")? localStorage.getItem("lobbyServerUrl") : "wss://battle.crossuniverse.net:443/lobbies/");
 	lobbyServerWs.addEventListener("open", function() {
 		lobbyList.dataset.message = locale.lobbies.noOpenLobbies;
-		newLobbyBtn.addEventListener("click", async () => {
-			loadingIndicator.classList.add("active");
-
-			const rsaKeyPair = await generateRsaKeyPair();
-			const ecdsaKeyPair = await generateEcdsaKeyPair();
-
-			currentLobby = new Lobby(
-				"my cool lobby",
-				8,
-				false,
-				[new User(
-					localStorage.getItem("username"),
-					localStorage.getItem("profilePicture"),
-					0,
-					rsaKeyPair.publicKey,
-					ecdsaKeyPair.publicKey,
-					await crypto.subtle.exportKey("jwk", rsaKeyPair.publicKey),
-					await crypto.subtle.exportKey("jwk", ecdsaKeyPair.publicKey)
-				)],
-				0,
-				rsaKeyPair,
-				ecdsaKeyPair,
-				null
-			);
-			largestUserId = 0;
-			isHosting = true;
-			lobbyServerWs.send(JSON.stringify({
-				type: "openLobby",
-				name: currentLobby.name,
-				userCount: currentLobby.users.length,
-				userLimit: currentLobby.userLimit,
-				hasPassword: currentLobby.hasPassword,
-				language: locale.code
-			}));
-			openLobbyScreen();
-		});
-		newLobbyBtn.disabled = false;
 	});
 
 	lobbyServerWs.addEventListener("open", () => {
@@ -378,15 +582,10 @@ function connectWebsocket() {
 	lobbyServerWs.addEventListener("close", () => {
 		lobbyList.dataset.message = locale.lobbies.noLobbyServer;
 		lobbyList.innerHTML = "";
-		newLobbyBtn.disabled = true;
 		connectWebsocket();
 	});
 }
 connectWebsocket();
-
-window.addEventListener("unload", () => {
-	// TODO: close lobby if hosting
-});
 
 function receiveWsMessage(e) {
 	const message = JSON.parse(e.data);
@@ -408,18 +607,26 @@ function receiveWsMessage(e) {
 		}
 		case "lobbyUserCountChanged": {
 			const lobbyElem = document.getElementById("lobbyElem" + message.lobbyId);
-			lobbyElem.querySelector(".lobbyUserCount").textContent = message.newCount;
+			lobbyElem.querySelector(".lobbyUserCount").textContent = message.newValue;
 			setConnectButtonEnabled(lobbyElem);
 			break;
 		}
 		case "lobbyUserLimitChanged": {
 			const lobbyElem = document.getElementById("lobbyElem" + message.lobbyId);
-			lobbyElem.querySelector(".lobbyUserLimit").textContent = message.newLimit;
+			lobbyElem.querySelector(".lobbyUserLimit").textContent = message.newValue;
 			setConnectButtonEnabled(lobbyElem);
 			break;
 		}
 		case "lobbyHasPasswordChanged": {
-			document.getElementById("lobbyElem" + message.lobbyId).querySelector(".lobbyJoinBtn").textContent = locale.lobbies[message.newHasPassword? "joinPassword" : "join"];
+			document.getElementById("lobbyElem" + message.lobbyId).querySelector(".lobbyJoinBtn").textContent = locale.lobbies[message.newValue? "joinPassword" : "join"];
+			break;
+		}
+		case "lobbyNameChanged": {
+			const nameField = document.getElementById("lobbyElem" + message.lobbyId).querySelector(".lobbyName")
+			nameField.textContent = message.newValue? message.newValue : locale.lobbies.settings.namePlaceholder;
+			if (message.newValue === "" !== nameField.classList.contains("textPlaceholder")) {
+				nameField.classList.toggle("textPlaceholder");
+			}
 			break;
 		}
 		case "joinRequest": {
@@ -428,7 +635,7 @@ function receiveWsMessage(e) {
 			dc.addEventListener("open", () => {
 				dc.send(JSON.stringify({
 					type: "handshake",
-					needsPassword: currentLobby.password? true : false
+					needsPassword: currentLobby.hasPassword
 				}));
 			});
 			dc.addEventListener("message", receiveWebRtcVisitorMessage);
@@ -436,14 +643,21 @@ function receiveWsMessage(e) {
 				const connection = peerConnections.splice(peerConnections.findIndex(peer => peer.connection === pc), 1)[0];
 				// needs to check for isHosting in case the lobby is being shut down
 				if (isHosting && connection.userId) {
-					lobbyServerWs.send(JSON.stringify({type: "setUserCount", newCount: currentLobby.users.length}));
-
 					// check if the user still exists ( = this disconnect was initiated from their end, unexpectedly)
 					const user = currentLobby.removeUser(connection.userId);
 					if (!user) return;
 
 					broadcast(JSON.stringify({type: "userLeft", id: user.id}));
-					lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), "notice");
+					if (lobbyServerWs.readyState === 1) {
+						lobbyServerWs.send(JSON.stringify({type: "setUserCount", newValue: currentLobby.users.length}));
+					}
+					let chatType = "notice";
+					if (currentLobby.currentlyChallenging === user) {
+						clearCurrentlyChallenging();
+						chatType = "error";
+					}
+					resolveAnyChatChallenge(user.id, locale.lobbies.challengerLeft);
+					lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), chatType);
 				}
 			});
 
@@ -486,7 +700,7 @@ function receiveWsMessage(e) {
 
 // webRTC stuff
 async function joinLobby(lobbyId) {
-	centerRoomCode.disabled = true;
+	disableJoinMenus();
 	loadingIndicator.classList.add("active");
 
 	// create connection
@@ -563,9 +777,10 @@ async function receiveWebRtcHostMessage(e) {
 					message.lobby.name,
 					message.lobby.userLimit,
 					message.lobby.hasPassword,
+					message.lobby.password,
 					await Promise.all(
 						message.lobby.users.map(async user => new User(
-							user.name,
+							user.namePlaceholder? "" : user.name,
 							user.profilePicture,
 							user.id,
 							// I hate that these are async, it is quite annoying.
@@ -573,7 +788,8 @@ async function receiveWebRtcHostMessage(e) {
 							await crypto.subtle.importKey("jwk", user.ecdsaPublicKey, {name: "ECDSA", namedCurve: "P-256"}, false, ["verify"]),
 							user.rsaPublicKey,
 							user.ecdsaPublicKey,
-							user.lastChatSequenceNum
+							user.status,
+							user.lastPublicSequenceNum
 						))
 					),
 					message.youAre,
@@ -601,9 +817,17 @@ async function receiveWebRtcHostMessage(e) {
 		case "chat": {
 			const user = getUserFromId(message.userId);
 			if (!user || typeof message.message !== "string") break;
-			if (!await verifySignature(message.signature, "chat", message.message, ++user.lastChatSequenceNum, user)) break;
+			if (!await verifySignature(message.signature, "public", `chat|${message.message}`, ++user.lastPublicSequenceNum, user)) break;
 
 			lobbyChat.putMessage(user.name + locale["chat"]["colon"] + message.message.substring(0, 10_000));
+			break;
+		}
+		case "userStatus": {
+			const user = getUserFromId(message.userId);
+			if (!user || !possibleStatuses.includes(message.status)) break;
+			if (!await verifySignature(message.signature, "public", `status|${message.status}`, ++user.lastPublicSequenceNum, user)) break;
+
+			user.setStatus(message.status);
 			break;
 		}
 		case "userJoined": {
@@ -611,8 +835,8 @@ async function receiveWebRtcHostMessage(e) {
 				message.name,
 				message.profilePicture,
 				message.id,
-				message.rsaPublicKey,
-				message.ecdsaPublicKey
+				await crypto.subtle.importKey("jwk", message.rsaPublicKey, {name: "RSA-OAEP", hash: "SHA-512"}, true, ["encrypt"]),
+				await crypto.subtle.importKey("jwk", message.ecdsaPublicKey, {name: "ECDSA", namedCurve: "P-256"}, true, ["verify"])
 			);
 			currentLobby.addUser(user);
 			lobbyChat.putMessage(locale.lobbies.userJoined.replaceAll("{#name}", user.name), "notice");
@@ -620,7 +844,13 @@ async function receiveWebRtcHostMessage(e) {
 		}
 		case "userLeft": {
 			const user = currentLobby.removeUser(message.id);
-			lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), "notice");
+			let chatType = "notice";
+			if (currentLobby.currentlyChallenging === user) {
+				clearCurrentlyChallenging();
+				chatType = "error";
+			}
+			resolveAnyChatChallenge(user.id, locale.lobbies.challengerLeft);
+			lobbyChat.putMessage(locale.lobbies.userLeft.replaceAll("{#name}", user.name), chatType);
 			break;
 		}
 		case "userKicked": {
@@ -628,10 +858,16 @@ async function receiveWebRtcHostMessage(e) {
 			lobbyChat.putMessage(locale.lobbies.userKicked.replaceAll("{#name}", user.name), "warning");
 			break;
 		}
+		case "settingUpdated": {
+			if (!settingsList.includes(message.name)) break;
+			if (settingsTypes[message.name] !== typeof message.value) break;
+			currentLobby.setSetting(message.name, message.value);
+			break;
+		}
 		case "challenge": {
 			const user = getUserFromId(message.from);
 			if (!user) break;
-			acceptOrDenyChallenge(user, message.signature);
+			presentChallengeInChat(user, message.signature);
 			break;
 		}
 		case "challengeAccepted": {
@@ -663,7 +899,7 @@ async function receiveWebRtcVisitorMessage(e) {
 		case "handshake": {
 			const peer = getConnectionFromDataChannel(this);
 			if (peer.userId !== null) break; // They already are a user and should not be handshaking anymore
-			if (message.password !== currentLobby.password) {
+			if (currentLobby.hasPassword && message.password !== currentLobby.password) {
 				this.send('{"type": "wrongPassword"}');
 				peer.connection.close();
 				break;
@@ -677,14 +913,14 @@ async function receiveWebRtcVisitorMessage(e) {
 			const newUser = new User(
 				message.name,
 				message.profilePicture,
-				++largestUserId,
+				++currentLobby.largestUserId,
 				await crypto.subtle.importKey("jwk", message.rsaPublicKey, {name: "RSA-OAEP", hash: "SHA-512"}, true, ["encrypt"]),
 				await crypto.subtle.importKey("jwk", message.ecdsaPublicKey, {name: "ECDSA", namedCurve: "P-256"}, true, ["verify"]),
 				message.rsaPublicKey,
 				message.ecdsaPublicKey
 			);
-			currentLobby.addUser(newUser);
 			peer.userId = newUser.id;
+			currentLobby.addUser(newUser);
 
 			this.send(JSON.stringify({
 				type: "welcomeIn",
@@ -692,6 +928,7 @@ async function receiveWebRtcVisitorMessage(e) {
 					name: currentLobby.name,
 					users: currentLobby.users,
 					hasPassword: currentLobby.hasPassword,
+					password: "*".repeat(currentLobby.password.length),
 					userLimit: currentLobby.userLimit
 				},
 				youAre: newUser.id
@@ -704,34 +941,54 @@ async function receiveWebRtcVisitorMessage(e) {
 				rsaPublicKey: message.rsaPublicKey,
 				ecdsaPublicKey: message.ecdsaPublicKey
 			}), this);
-			lobbyServerWs.send(JSON.stringify({type: "setUserCount", newCount: currentLobby.users.length}));
+			if (lobbyServerWs.readyState === 1) {
+				lobbyServerWs.send(JSON.stringify({type: "setUserCount", newValue: currentLobby.users.length}));
+			}
 			lobbyChat.putMessage(locale.lobbies.userJoined.replaceAll("{#name}", newUser.name), "notice");
 			break;
 		}
 		case "chat": {
 			const user = getUserFromDataChannel(this);
 			if (!user || typeof message.message !== "string") break;
-			if (!await verifySignature(message.signature, "chat", message.message, ++user.lastChatSequenceNum, user)) break;
 
-			message.message = message.message.substring(0, 10_000);
+			// broadcast before verifying the signature since every client needs to get the signature to not loose out on a sequence number
 			broadcast(JSON.stringify({
 				type: "chat",
 				message: message.message,
 				userId: user.id,
 				signature: message.signature
 			}));
-			lobbyChat.putMessage(user.name + locale["chat"]["colon"] + message.message);
+
+			if (!await verifySignature(message.signature, "public", `chat|${message.message}`, ++user.lastPublicSequenceNum, user)) break;
+			lobbyChat.putMessage(user.name + locale["chat"]["colon"] + message.message.substring(0, 10_000));
+			break;
+		}
+		case "setStatus": {
+			const user = getUserFromDataChannel(this);
+			if (!user || !possibleStatuses.includes(message.status)) break;
+
+			// broadcast before verifying the signature since every client needs to get the signature to not loose out on a sequence number
+			broadcast(JSON.stringify({
+				type: "userStatus",
+				status: message.status,
+				userId: user.id,
+				signature: message.signature
+			}));
+
+			if (!await verifySignature(message.signature, "public", `status|${message.status}`, ++user.lastPublicSequenceNum, user)) break;
+			user.setStatus(message.status);
 			break;
 		}
 		case "challenge": {
 			if (message.to === currentLobby.ownUserId) { // is for me?
-				acceptOrDenyChallenge(getUserFromDataChannel(this), message.signature);
+				presentChallengeInChat(getUserFromDataChannel(this), message.signature);
 				break;
 			}
 			// otherwise, forward to recipient
-			getUserConnection(message.to)?.send(JSON.stringify({
+			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
 				type: "challenge",
-				from: getConnectionFromDataChannel(this).userId
+				from: getConnectionFromDataChannel(this).userId,
+				signature: message.signature
 			}));
 			break;
 		}
@@ -741,7 +998,7 @@ async function receiveWebRtcVisitorMessage(e) {
 				break;
 			}
 			// otherwise, forward to recipient
-			getUserConnection(message.to)?.send(JSON.stringify({
+			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
 				type: "challengeAccepted",
 				from: getConnectionFromDataChannel(this).userId,
 				roomCode: message.roomCode,
@@ -755,7 +1012,7 @@ async function receiveWebRtcVisitorMessage(e) {
 				break;
 			}
 			// otherwise, forward to recipient
-			getUserConnection(message.to)?.send(JSON.stringify({
+			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
 				type: "challengeDenied",
 				from: getConnectionFromDataChannel(this).userId,
 				signature: message.signature
@@ -768,7 +1025,7 @@ async function receiveWebRtcVisitorMessage(e) {
 				break;
 			}
 			// otherwise, forward to recipient
-			getUserConnection(message.to)?.send(JSON.stringify({
+			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
 				type: "challengeCancelled",
 				from: getConnectionFromDataChannel(this).userId,
 				signature: message.signature
@@ -785,7 +1042,11 @@ function setConnectButtonEnabled(lobbyElem) {
 function displayLobby(lobby) {
 	const lobbyElem = lobbyTemplate.content.cloneNode(true);
 	lobbyElem.querySelector(".lobby").id = "lobbyElem" + lobby.id;
-	lobbyElem.querySelector(".lobbyName").textContent = lobby.name;
+	const nameField = lobbyElem.querySelector(".lobbyName");
+	nameField.textContent = lobby.name? lobby.name : locale.lobbies.settings.namePlaceholder;
+	if (!lobby.name) {
+		nameField.classList.add("textPlaceholder");
+	}
 	lobbyElem.querySelector(".lobbyLanguage").textContent = lobby.language.toUpperCase();
 	lobbyElem.querySelector(".lobbyUserCount").textContent = lobby.userCount;
 	lobbyElem.querySelector(".lobbyUserLimit").textContent = lobby.userLimit;
@@ -799,6 +1060,10 @@ function displayLobby(lobby) {
 function lobbyJoinBtnPressed() {
 	joinLobby(parseInt(this.closest(".lobby").id.substring(9)));
 }
+function disableJoinMenus() {
+	centerRoomCode.disabled = true;
+	newLobbyBtn.disabled = true;
+}
 
 leaveLobbyButton.addEventListener("click", function() {
 	if (isHosting) {
@@ -811,7 +1076,7 @@ leaveLobbyButton.addEventListener("click", function() {
 });
 
 lobbyChat.addEventListener("message", async function(e) {
-	const signature = await signString("chat", e.data, ++currentLobby.ownChatSequenceNum);
+	const signature = await signString("public", `chat|${e.data}`, ++currentLobby.ownChatSequenceNum);
 	if (isHosting) {
 		broadcast(JSON.stringify({
 			type: "chat",

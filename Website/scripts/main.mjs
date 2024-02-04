@@ -29,12 +29,19 @@ function connect(overrideWebsocketUrl) {
 		}
 	}, 100);
 
-	startGame(getRoomcode(), gameModeSelect.value, overrideWebsocketUrl ?? websocketUrl).then(showGameScreen).then(showGameScreen);
-}
-function showGameScreen() {
-	waitingForOpponentHolder.hidden = true;
-	roomCodeInputFieldHolder.hidden = false;
-	lobbies.style.display = "flex";
+	let gameMode = gameModeSelect.value;
+	let automatic = false;
+	if (gameMode.endsWith("Automatic")) {
+		automatic = true;
+		gameMode = gameMode.substring(0, gameMode.length - 9);
+	}
+	stopEffect();
+	startGame(getRoomcode(), gameMode, automatic, overrideWebsocketUrl ?? websocketUrl).then(() => {
+		waitingForOpponentHolder.hidden = true;
+		roomCodeInputFieldHolder.hidden = false;
+		lobbies.style.display = "flex";
+		startEffect();
+	});
 }
 
 // check if a room code is given in the query string
@@ -52,21 +59,18 @@ if (queryString.get("id")) {
 	randomizeRoomcode();
 }
 
-// this is an awful fix to make Chromium browsers work when the page reloads while the game iframe is up.
-setTimeout(function() {
-	window.scrollTo(0, 0);
-}, 1000);
-
 // translate main menu
 roomCodeInputTitle.textContent = locale.mainMenu.roomCodeInputTitle;
 roomCodeInputLabel.textContent = locale.mainMenu.enterRoomcode;
 roomCodeRefresh.setAttribute("aria-label", locale.mainMenu.rerollRoomcode);
 
-gameModeSelectorLabel.textContent = locale.mainMenu.gamemode;
-gameModeNormalOption.textContent = locale.mainMenu.gamemodes.normal;
-gameModeDraftOption.textContent = locale.mainMenu.gamemodes.draft;
-gameModeNormalAutomaticOption.textContent = locale.mainMenu.gamemodes.normalAutomatic;
-gameModeDraftAutomaticOption.textContent = locale.mainMenu.gamemodes.draftAutomatic;
+gameModeSelectorLabel.textContent = locale.mainMenu.gameMode;
+gameModeManualGroup.label = locale.gameModes.manual;
+gameModeNormalOption.textContent = locale.gameModes.normal;
+gameModeDraftOption.textContent = locale.gameModes.draft;
+gameModeAutomaticGroup.label = locale.gameModes.automatic;
+gameModeNormalAutomaticOption.textContent = locale.gameModes.normal + " [A]";
+gameModeDraftAutomaticOption.textContent = locale.gameModes.draft + " [A]";
 
 connectBtn.textContent = locale.mainMenu.connectToRoom;
 waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;
@@ -139,7 +143,10 @@ preGame.addEventListener("drop", function(e) {
 
 	let reader = new FileReader();
 	reader.addEventListener("load", e => {
-		loadReplay(JSON.parse(e.target.result));
+		stopEffect();
+		loadReplay(JSON.parse(e.target.result)).then(() => {
+			startEffect();
+		});
 		lobbies.style.display = "none";
 	});
 	reader.readAsText(file);

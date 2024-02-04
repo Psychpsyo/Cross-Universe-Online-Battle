@@ -7,14 +7,15 @@ import {Game} from "/rulesEngine/src/game.mjs";
 import {socket, connectTo, youAre} from "./netcode.mjs";
 
 export class InitState extends GameState {
-	constructor(roomcode, gameMode, websocketUrl) {
+	constructor(roomcode, gameMode, automatic, websocketUrl) {
 		super();
 		gameState = this;
 
 		this.gameMode = gameMode;
+		this.automatic = automatic;
 		this.opponentReady = false;
 
-		connectTo(roomcode + gameMode, websocketUrl);
+		connectTo(roomcode + gameMode + (automatic? "Automatic" : "Manual"), websocketUrl);
 	}
 
 	receiveMessage(command, message) {
@@ -90,19 +91,11 @@ export class InitState extends GameState {
 		// Start game
 		switch (this.gameMode) {
 			case "normal": {
-				new DeckState(false);
+				new DeckState(this.automatic);
 				break;
 			}
 			case "draft": {
-				new DraftState(false);
-				break;
-			}
-			case "normalAutomatic": {
-				new DeckState(true);
-				break;
-			}
-			case "draftAutomatic": {
-				new DraftState(true);
+				new DraftState(this.automatic);
 				break;
 			}
 		}

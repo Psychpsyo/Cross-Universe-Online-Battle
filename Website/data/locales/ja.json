@@ -10,6 +10,7 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Battle ID",
 		"enterRoomcode": "対戦ID：",
+		"gameMode": "ゲームモード：",
 		"rerollRoomcode": null,
 		"connectToRoom": "接続",
 		"waitingForOpponent": "承認待ち",
@@ -19,17 +20,16 @@
 		"rulesLink": "https://crossuniverse.jp/%e2%97%86%e2%97%86%e2%97%86%e3%82%af%e3%83%ad%e3%82%b9%e3%83%a6%e3%83%8b%e3%83%90%e3%83%bc%e3%82%b9%e3%81%a8%e3%81%af%e2%97%86%e2%97%86%e2%97%86/",
 		"unofficialNotice": "クロスユニバースのファンサイトです。公式はこちらへ。（<a href=\"https://www.crossuniverse.jp\">https://crossuniverse.jp/</a>）",
 
-		"gamemode": "ゲームモード：",
-		"gamemodes": {
-			"normal": "ノーマル",
-			"draft": "ドラフト",
-			"normalAutomatic": null,
-			"draftAutomatic": null
-		},
-
 		"settingsButton": null,
 		"deckCreatorButton": null,
 		"reportBug": null
+	},
+
+	"gameModes": {
+		"normal": "ノーマル",
+		"draft": "ドラフト",
+		"manual": null,
+		"automatic": null
 	},
 
 	"lobbies": {
@@ -38,6 +38,7 @@
 		"joinPassword": null,
 		"userIconAlt": null,
 		"newLobbyButton": null,
+		"defaultName": null,
 
 		"noLobbyServer": null,
 		"noOpenLobbies": null,
@@ -57,16 +58,41 @@
 		"challenge": null,
 		"cancelChallenge": null,
 		"kick": null,
+		"status": {
+			"setStatus": null,
+			"present": null,
+			"inGame": null,
+			"busy": null
+		},
 
 		"incomingChallenge": null,
+		"acceptChallenge": null,
+		"denyChallenge": null,
 		"challengeAccepted": null,
 		"challengeDenied": null,
 		"challengeCancelled": null,
+		"challengerLeft": null,
+
+		"challengeAcceptedMessage": null,
+		"challengeDeniedMessage": null,
+		"challengeCancelledAfterAccept": null,
 
 		"unnamedUser": null,
 		"userJoined": null,
 		"userLeft": null,
-		"userKicked": null
+		"userKicked": null,
+
+		"settings": {
+			"title": null,
+			"name": "名前：",
+			"namePlaceholder": null,
+			"userLimit": null,
+			"hasPassword": null,
+			"password": "パスワード：",
+			"gameMode": "ゲームモード：",
+			"automatic": null,
+			"automaticTitle": null
+		}
 	},
 
 	"game": {

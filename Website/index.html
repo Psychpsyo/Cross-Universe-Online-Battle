@@ -46,10 +46,14 @@
 							<span><input id="roomCodeInputField" aria-atomic="true" autocomplete="off"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
 							<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
 							<select id="gameModeSelect">
-								<option id="gameModeNormalOption" value="normal"></option>
-								<option id="gameModeDraftOption" value="draft"></option>
-								<option id="gameModeNormalAutomaticOption" value="normalAutomatic"></option>
-								<option id="gameModeDraftAutomaticOption" value="draftAutomatic"></option>
+								<optgroup id="gameModeManualGroup">
+									<option id="gameModeNormalOption" value="normal"></option>
+									<option id="gameModeDraftOption" value="draft"></option>
+								</optgroup>
+								<optgroup id="gameModeAutomaticGroup">
+									<option id="gameModeNormalAutomaticOption" value="normalAutomatic"></option>
+									<option id="gameModeDraftAutomaticOption" value="draftAutomatic"></option>
+								</optgroup>
 							</select><br>
 							<button id="connectBtn"></button>
 						</div>
@@ -66,24 +70,58 @@
 				<section id="lobbies">
 					<header>
 						<h1 id="lobbyHeading"></h1>
-						<button id="newLobbyBtn" class="svgButton" disabled autocomplete="off"><img src="images/icons/newLobby.svg" alt="" draggable="false"></button>
+						<button id="newLobbyBtn" class="svgButton" autocomplete="off"><img src="images/icons/newLobby.svg" alt="" draggable="false"></button>
 					</header>
 					<div id="lobbyListHolder">
-						<ul id="lobbyList"><!--filled by JS--></ul>
+						<ul id="lobbyList"></ul>
 					</div>
 				</section>
 			</main>
 			<main id="lobbyMenu">
 				<section id="lobbyLeft">
-					<header id="userListHeader"></header>
-					<ul id="userList"></ul>
+					<header id="userListHeader" class="lobbyHeader"></header>
+					<div id="userListHolder">
+						<ul id="userList"></ul>
+					</div>
 				</section>
-				<section id="lobbyMiddle">
+				<div id="lobbyMiddle">
 
-				</section>
-				<section id="lobbyRight">
+				</div>
+				<div id="lobbyRight">
+					<section>
+						<header id="lobbySettingsHeader" class="lobbyHeader"></header>
+						<fieldset id="lobbySettings">
+							<div class="optionListingItem">
+								<label id="lobbyNameLabel" for="lobbyNameInput"></label>
+								<input id="lobbyNameInput" type="text" maxlength="100">
+							</div>
+							<div class="optionListingItem">
+								<label id="lobbyUserLimitLabel" for="lobbyUserLimitInput"></label>
+								<input id="lobbyUserLimitInput" type="number" min="1" max="1000">
+							</div>
+							<div class="optionListingItem">
+								<label id="lobbyHasPasswordLabel" for="lobbyHasPasswordInput"></label>
+								<div><input id="lobbyHasPasswordInput" type="checkbox"></div>
+							</div>
+							<div class="optionListingItem">
+								<label id="lobbyPasswordLabel" for="lobbyPasswordInput"></label>
+								<input id="lobbyPasswordInput" type="password" maxlength="100">
+							</div>
+							<div class="optionListingItem">
+								<label id="lobbyGameModeLabel" for="lobbyGameModeInput"></label>
+								<select id="lobbyGameModeInput">
+									<option id="lobbyGameModeNormal" value="normal"></option>
+									<option id="lobbyGameModeDraft" value="draft"></option>
+								</select>
+							</div>
+							<div class="optionListingItem">
+								<label id="lobbyAutomaticLabel" for="lobbyAutomaticInput"></label>
+								<div><input id="lobbyAutomaticInput" type="checkbox"></div>
+							</div>
+						</fieldset>
+					</section>
 					<chat-box id="lobbyChat"></chat-box>
-				</section>
+				</div>
 			</main>
 			<footer id="unofficialFooter"></footer>
 		</div>
@@ -107,9 +145,17 @@
 			<li class="user">
 				<profile-picture></profile-picture>
 				<div class="userRight">
-					<span class="username"></span>
-					<span class="userOptions">
+					<div class="username"></div>
+					<div class="userStatusText"></div>
+					<span class="userOptions otherUserOptions">
 						<button class="challengeBtn"></button> <button class="kickBtn"></button>
+					</span>
+					<span class="userOptions localUserOptions">
+						<select class="statusSelect">
+							<option value="setStatus" hidden></option>
+							<option value="present"></option>
+							<option value="busy"></option>
+						</select>
 					</span>
 				</div>
 			</li>

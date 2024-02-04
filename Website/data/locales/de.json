@@ -10,6 +10,7 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Mit Raum-Code verbinden",
 		"enterRoomcode": "Raum-Code:",
+		"gameMode": "Spielmodus:",
 		"rerollRoomcode": "Zufälligen Raum-Code generieren",
 		"connectToRoom": "Verbinden",
 		"waitingForOpponent": "Warte auf Gegner...",
@@ -19,17 +20,16 @@
 		"rulesLink": "https://crossuniverse.net/rules",
 		"unofficialNotice": "Diese Seite ist eine Cross Universe Fan-Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
 
-		"gamemode": "Spielmodus:",
-		"gamemodes": {
-			"normal": "Normal",
-			"draft": "Draft",
-			"normalAutomatic": "Automatisch (WIP)",
-			"draftAutomatic": "Auto-Draft (WIP)"
-		},
-
 		"settingsButton": "Einstellungen",
 		"deckCreatorButton": "Deck Editor",
 		"reportBug": "Melde einen Bug"
+	},
+
+	"gameModes": {
+		"normal": "Normal",
+		"draft": "Draft",
+		"manual": "Manuell",
+		"automatic": "Automatisch"
 	},
 
 	"lobbies": {
@@ -38,6 +38,7 @@
 		"joinPassword": "Beitreten 🔒",
 		"userIconAlt": "Spieler:",
 		"newLobbyButton": "Neue Lobby erstellen",
+		"defaultName": "{#name} Lobby",
 
 		"noLobbyServer": "Konnte den Lobby-Server nicht erreichen.\n:(",
 		"noOpenLobbies": "Keine offenen Lobbies gefunden.\n:(",
@@ -57,16 +58,41 @@
 		"challenge": "Herausfordern",
 		"cancelChallenge": "Herausforderung canceln",
 		"kick": "Kicken",
+		"status": {
+			"setStatus": "Set Status",
+			"present": "Anwesend",
+			"inGame": "Im Spiel",
+			"busy": "Beschäftigt"
+		},
 
-		"incomingChallenge": "{#name} fordert dich heraus. Annehmen?",
-		"challengeAccepted": "{#name} hat deine Herausforderung angenommen.\nEin Spiel wird gestartet.",
-		"challengeDenied": "{#name} has deine Herausforderung abgelehnt.",
-		"challengeCancelled": "{#name} hat die Herausforderung gecancelt.",
+		"incomingChallenge": "{#name} fordert dich heraus:",
+		"acceptChallenge": "Annehmen",
+		"denyChallenge": "Ablehnen",
+		"challengeAccepted": "Angenommen",
+		"challengeDenied": "Abgelehnt",
+		"challengeCancelled": "Gecancelt",
+		"challengerLeft": "Spieler ist gegangen",
+
+		"challengeAcceptedMessage": "{#name} hat deine Herausforderung angenommen.\nEin Spiel wird gestartet.",
+		"challengeDeniedMessage": "{#name} has deine Herausforderung abgelehnt.",
+		"challengeCancelledAfterAccept": "{#name} hat die Herausforderung gecancelt, nachdem du sie akzeptiert hast.",
 
 		"unnamedUser": "Namensloser Magier",
 		"userJoined": "{#name} ist der Lobby beigetreten.",
 		"userLeft": "{#name} hat die Lobby verlassen.",
-		"userKicked": "{#name} wurde aus der Lobby gekickt."
+		"userKicked": "{#name} wurde aus der Lobby gekickt.",
+
+		"settings": {
+			"title": "Lobby-Einstellungen",
+			"name": "Name:",
+			"namePlaceholder": "Unbenannte Lobby",
+			"userLimit": "Nutzerlimit:",
+			"hasPassword": "Mit Passwort:",
+			"password": "Passwort:",
+			"gameMode": "Spielmodus:",
+			"automatic": "Automatisch:",
+			"automaticTitle": "Bestimmt, ob die Spielregeln automatisch überprüft werden oder nicht.\nAnmerkung: In automatischen Spielen gibt es nicht alle Karten."
+		}
 	},
 
 	"game": {

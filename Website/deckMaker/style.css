@@ -88,25 +88,6 @@ h1, h2, h3, h4 {
 	overflow-y: scroll;
 }
 
-.optionListingItem {
-	display: flex;
-	width: 100%;
-	padding: .1em;
-}
-
-.optionListingItem > :first-child {
-	margin-right: 1em;
-	width: 8em;
-	flex-shrink: 0;
-	text-align: right;
-	white-space: nowrap;
-}
-
-.optionListingItem > :last-child {
-	flex-grow: 1;
-	min-width: 0;
-}
-
 /*card search panel*/
 .cardSearchMinus {
 	padding: 0 1em;

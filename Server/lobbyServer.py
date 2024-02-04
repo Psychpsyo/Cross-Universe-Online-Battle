@@ -91,7 +91,7 @@ async def closeLobby(websocket, data):
 	removeLobby(connectionData[websocket]["hostedLobby"])
 
 async def setUserCount(websocket, data):
-	if "newCount" not in data or type(data["newCount"]) is not int:
+	if "newValue" not in data or type(data["newValue"]) is not int:
 		await websocket.send('{"type": "error", "code": "invalidUserCount"}')
 		return
 
@@ -100,16 +100,16 @@ async def setUserCount(websocket, data):
 		await websocket.send('{"type": "error", "code": "cannotSetUserCountOnNone"}')
 		return
 
-	hostedLobby["data"]["userCount"] = data["newCount"]
+	hostedLobby["data"]["userCount"] = data["newValue"]
 	websockets.broadcast(connections, json.dumps({
 		"type": "lobbyUserCountChanged",
 		"lobbyId": hostedLobby["data"]["id"],
-		"newCount": data["newCount"]
+		"newValue": data["newValue"]
 	}))
 
 # client wants to set user limit on its lobby
 async def setUserLimit(websocket, data):
-	if "newLimit" not in data or type(data["newLimit"]) is not int:
+	if "newValue" not in data or type(data["newValue"]) is not int or data["newValue"] < 1 or data["newValue"] > 1000:
 		await websocket.send('{"type": "error", "code": "invalidUserLimit"}')
 		return
 
@@ -118,16 +118,16 @@ async def setUserLimit(websocket, data):
 		await websocket.send('{"type": "error", "code": "cannotSetUserLimitOnNone"}')
 		return
 
-	hostedLobby["data"]["userLimit"] = data["newLimit"]
+	hostedLobby["data"]["userLimit"] = data["newValue"]
 	websockets.broadcast(connections, json.dumps({
 		"type": "lobbyUserLimitChanged",
 		"lobbyId": hostedLobby["data"]["id"],
-		"newLimit": data["newLimit"]
+		"newValue": data["newValue"]
 	}))
 
 # client wants to adjust password status on its lobby
 async def setHasPassword(websocket, data):
-	if "newHasPassword" not in data or type(data["newHasPassword"]) is not bool:
+	if "newValue" not in data or type(data["newValue"]) is not bool:
 		await websocket.send('{"type": "error", "code": "invalidHasPassword"}')
 		return
 
@@ -136,11 +136,29 @@ async def setHasPassword(websocket, data):
 		await websocket.send('{"type": "error", "code": "cannotSetHasPasswordOnNone"}')
 		return
 
-	hostedLobby["data"]["hasPassword"] = data["newHasPassword"]
+	hostedLobby["data"]["hasPassword"] = data["newValue"]
 	websockets.broadcast(connections, json.dumps({
 		"type": "lobbyHasPasswordChanged",
 		"lobbyId": hostedLobby["data"]["id"],
-		"newHasPassword": data["newHasPassword"]
+		"newValue": data["newValue"]
+	}))
+
+# client wants to adjust password status on its lobby
+async def setName(websocket, data):
+	if "newValue" not in data or type(data["newValue"]) is not str:
+		await websocket.send('{"type": "error", "code": "invalidName"}')
+		return
+
+	hostedLobby = connectionData[websocket]["hostedLobby"]
+	if hostedLobby == None:
+		await websocket.send('{"type": "error", "code": "cannotSetNameOnNone"}')
+		return
+
+	hostedLobby["data"]["name"] = data["newValue"].strip()[:100]
+	websockets.broadcast(connections, json.dumps({
+		"type": "lobbyNameChanged",
+		"lobbyId": hostedLobby["data"]["id"],
+		"newValue": hostedLobby["data"]["name"]
 	}))
 
 async def joinLobby(websocket, data):
@@ -174,6 +192,7 @@ socketFunctions = {
 	"setUserCount": setUserCount,
 	"setUserLimit": setUserLimit,
 	"setHasPassword": setHasPassword,
+	"setName": setName,
 	"joinLobby": joinLobby,
 	"joinLobbyAnswer": joinLobbyAnswer
 }

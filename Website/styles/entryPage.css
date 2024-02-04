@@ -67,7 +67,7 @@ main {
 	transform: translateY(-50%);
 	filter: opacity(75%);
 	width: 100%;
-  }
+}
 .lobby {
 	position: relative;
 	padding: .2em;

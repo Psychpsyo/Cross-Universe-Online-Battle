@@ -1,14 +1,17 @@
 let resolveStartPromise = null;
 
 let startingGameSettings = null; // An object, containing the game parameters for the currently starting game
-export function startGame(roomCode, gameMode, websocketUrl) {
+// starts a game and returns a promise that resolves when the game is over.
+export async function startGame(roomCode, gameMode, automatic, websocketUrl) {
 	return new Promise((resolve, reject) => {
 		if (replayToLoad || resolveStartPromise) {
+			console.log("The fuck?");
 			reject();
 		}
 		startingGameSettings = {
 			roomCode: roomCode,
 			gameMode: gameMode,
+			automatic: automatic,
 			websocketUrl: websocketUrl
 		}
 		resolveStartPromise = resolve;
@@ -18,7 +21,7 @@ export function startGame(roomCode, gameMode, websocketUrl) {
 }
 
 let replayToLoad = null;
-export async function loadReplay(replay) {
+export async function* loadReplay(replay) {
 	return new Promise((resolve, reject) => {
 		if (startingGameSettings || resolveStartPromise) {
 			reject();
@@ -50,6 +53,7 @@ window.addEventListener("message", e => {
 					type: "connect",
 					roomCode: startingGameSettings.roomCode,
 					gameMode: startingGameSettings.gameMode,
+					automatic: startingGameSettings.automatic,
 					websocketUrl: startingGameSettings.websocketUrl
 				});
 				startingGameSettings = null;
@@ -65,8 +69,6 @@ window.addEventListener("message", e => {
 				e.returnValue = "";
 			}, {signal: unloadWarning.signal});
 
-			resolveStartPromise();
-			resolveStartPromise = null;
 			preGame.style.display = "none";
 			gameFrame.style.visibility = "visible";
 			break;
@@ -78,6 +80,8 @@ window.addEventListener("message", e => {
 		}
 		case "connectionLost": {
 			unloadWarning.abort();
+			resolveStartPromise();
+			resolveStartPromise = null;
 			gameFrame.style.visibility = "hidden";
 			preGame.style.display = "flex";
 			gameFrame.contentWindow.location.replace("about:blank");

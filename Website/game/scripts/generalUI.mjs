@@ -258,26 +258,26 @@ export function loadDeckPreview(deck) {
 
 	// set the name
 	if (deck.name) {
-		deckViewTitle.classList.remove("greyedOut");
+		deckViewTitle.classList.remove("textPlaceholder");
 		deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
 	} else {
 		deckViewTitle.textContent = "";
 	}
 	if (deckViewTitle.textContent === "") {
 		deckViewTitle.textContent = locale.game.deckSelect.unnamedDeck;
-		deckViewTitle.classList.add("greyedOut");
+		deckViewTitle.classList.add("textPlaceholder");
 	}
 
 	// set the description
 	if (deck.description) {
 		deckSelectorDescription.textContent = deck.description[locale.code] ?? deck.description.en ?? deck.description[Object.keys(deck.description)[0]] ?? "";
-		deckSelectorDescription.classList.remove("greyedOut");
+		deckSelectorDescription.classList.remove("textPlaceholder");
 	} else {
 		deckSelectorDescription.textContent = "";
 	}
 	if (deckSelectorDescription.textContent === "") {
 		deckSelectorDescription.textContent = locale.game.deckSelect.noDescriptionSet;
-		deckSelectorDescription.classList.add("greyedOut");
+		deckSelectorDescription.classList.add("textPlaceholder");
 	}
 }
 

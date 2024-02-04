@@ -66,7 +66,7 @@ class ChatBox extends HTMLElement {
 			messageDiv.classList.add(type);
 		}
 		this.messageArea.appendChild(messageDiv);
-		this.scrollTop = this.scrollHeight - this.clientHeight;
+		this.messageArea.scrollTop = this.messageArea.scrollHeight - this.messageArea.clientHeight;
 	}
 
 	// empties the chat
