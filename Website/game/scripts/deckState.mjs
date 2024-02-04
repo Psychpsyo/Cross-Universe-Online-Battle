@@ -144,7 +144,7 @@ export class DeckState extends GameState {
 		defaultDecksBtn.textContent = locale.game.deckSelect.deckListDefault;
 		legacyDecksBtn.textContent = locale.game.deckSelect.deckListLegacy;
 		loadSelectedDeckBtn.textContent = locale.game.deckSelect.deckListLoadSelected;
-		mainGameBlackoutContent.textContent = locale.game.deckSelect.chooseYourDeck;
+		gameUI.showBlackoutMessage(locale.game.deckSelect.chooseYourDeck);
 
 		mainGameArea.hidden = false;
 		gameUI.init();
@@ -172,7 +172,7 @@ export class DeckState extends GameState {
 	}
 
 	async loadDeck(deck) {
-		mainGameBlackoutContent.textContent = locale.game.deckSelect.loadingDeck;
+		gameUI.showBlackoutMessage(locale.game.deckSelect.loadingDeck);
 		loadingIndicator.classList.add("active");
 		try {
 			localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
@@ -212,7 +212,7 @@ export class DeckState extends GameState {
 					alert(locale.game.deckSelect.errors.generic);
 				}
 			}
-			mainGameBlackoutContent.textContent = locale.game.deckSelect.chooseYourDeck;
+			gameUI.showBlackoutMessage(locale.game.deckSelect.chooseYourDeck);
 			return;
 		} finally {
 			loadingIndicator.classList.remove("active");
@@ -227,7 +227,7 @@ export class DeckState extends GameState {
 		players[localPlayer.index].deck = deck;
 
 		gameUI.updateCard(localPlayer.deckZone, -1);
-		mainGameBlackoutContent.textContent = locale.game.deckSelect.waitingForOpponent;
+		gameUI.showBlackoutMessage(locale.game.deckSelect.waitingForOpponent);
 
 		playerDeckButton1.disabled = false;
 

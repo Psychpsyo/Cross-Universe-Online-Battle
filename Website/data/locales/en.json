@@ -10,6 +10,7 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Room Code",
 		"enterRoomcode": "Room Code:",
+		"gameMode": "Game Mode:",
 		"rerollRoomcode": "Generate random room code",
 		"connectToRoom": "Connect",
 		"waitingForOpponent": "Waiting for Opponent...",
@@ -19,17 +20,16 @@
 		"rulesLink": "https://crossuniverse.net/rules",
 		"unofficialNotice": "This is a fan-made implementation of Cross Universe. The official page is at <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
 
-		"gamemode": "Gamemode:",
-		"gamemodes": {
-			"normal": "Normal",
-			"draft": "Draft",
-			"normalAutomatic": "Automatic (WIP)",
-			"draftAutomatic": "Auto Draft (WIP)"
-		},
-
 		"settingsButton": "Settings",
 		"deckCreatorButton": "Deck Creator",
 		"reportBug": "Report a Bug"
+	},
+
+	"gameModes": {
+		"normal": "Normal",
+		"draft": "Draft",
+		"manual": "Manual",
+		"automatic": "Automatic"
 	},
 
 	"lobbies": {
@@ -38,24 +38,69 @@
 		"joinPassword": "Join 🔒",
 		"userIconAlt": "Users:",
 		"newLobbyButton": "Create new Lobby",
+		"defaultName": "{#name} Lobby",
+
+		"noLobbyServer": "Couldn't connect to lobby server.\n:(",
+		"noOpenLobbies": "No open lobbies found.\n:(",
 
 		"enterPassword": "Enter lobby password:",
 		"wrongPassword": "The password you entered was incorrect.",
+		"joinFailedError": "An error occured while trying to join the lobby.",
 		"joinFailedInvalid": "Failed to join lobby:\nThe lobby does not exist anymore.",
 		"joinFailedUserLimit": "Failed to join lobby:\nThe lobby is full.",
 		"hostCloseConfirmation": "Do you really want to shut down this lobby?\nEverybody will be kicked but games already in progress will continue.",
-		"kickMessage": "The host shut down the lobby.",
+		"kickMessages": {
+			"kicked": "You were kicked from the lobby.",
+			"closing": "The host shut down the lobby."
+		},
+		"lostConnection": "Lost connection the lobby host.",
+
+		"players": "Players",
+		"challenge": "Challenge",
+		"cancelChallenge": "Cancel Challenge",
+		"kick": "Kick",
+		"status": {
+			"setStatus": "Set Status",
+			"present": "Present",
+			"inGame": "In Game",
+			"busy": "Busy"
+		},
+
+		"incomingChallenge": "{#name} is challenging you to a game:",
+		"acceptChallenge": "Accept",
+		"denyChallenge": "Deny",
+		"challengeAccepted": "Accepted",
+		"challengeDenied": "Denied",
+		"challengeCancelled": "Cancelled",
+		"challengerLeft": "Player Left",
+
+		"challengeAcceptedMessage": "{#name} has accepted your challenge. Starting the game now.",
+		"challengeDeniedMessage": "{#name} did not accept your challenge.",
+		"challengeCancelledAfterAccept": "{#name} has cancelled the challenge after you accepted it.",
 
 		"unnamedUser": "Unnamed Sorcerer",
 		"userJoined": "{#name} has joined the lobby.",
 		"userLeft": "{#name} has left the lobby.",
+		"userKicked": "{#name} was kicked from the lobby.",
 
-		"noLobbyServer": "Couldn't connect to lobby server.\n:(",
-		"noOpenLobbies": "No open lobbies found.\n:("
+		"settings": {
+			"title": "Lobby Settings",
+			"name": "Name:",
+			"namePlaceholder": "Unnamed Lobby",
+			"userLimit": "User Limit:",
+			"hasPassword": "Has Password:",
+			"password": "Password:",
+			"gameMode": "Game Mode:",
+			"automatic": "Automatic Mode:",
+			"automaticTitle": "Determines whether or not the game rules are checked automatically.\nNote: Not all cards exist in automatic games."
+		}
 	},
 
 	"game": {
 		"notices": {
+			"opponentLeft": "Your opponent left the game.",
+			"connectionLost": "Lost connection to your opponent.\nThis is currently unrecoverable so you can leave the game now: ",
+
 			"youStart": "You go first.",
 			"opponentStarts": "Your opponent goes first.",
 			"yourDeckShuffled": "Your deck was shuffled.",
@@ -160,6 +205,28 @@
 			"exileZone": "Exile\nZone",
 			"discardPile": "Discard\nPile",
 			"deck": "Deck"
+		},
+
+		"gameOver": {
+			"youWon": "You Won!",
+			"youLost": "You Lost!",
+			"draw": "Draw!",
+			"bothWon": "Both players won.",
+			"winReasons": {
+				"lifeZero": "Your opponent ran out of life points.",
+				"partnerCostTooHigh": "Your opponent couldn't pay for their partner.",
+				"drawFromEmptyDeck": "Your opponent drew from an empty deck.",
+				"cardEffect": "You won due to the effect of {#CARDNAME}."
+			},
+			"loseReasons": {
+				"lifeZero": "You ran out of life points.",
+				"partnerCostTooHigh": "You couldn't pay for your partner.",
+				"drawFromEmptyDeck": "You drew from an empty deck.",
+				"cardEffect": "Your opponent won due to the effect of {#CARDNAME}."
+			},
+			"leaveGame": "Leave Game",
+			"showField": "Show Field",
+			"reopenGameOverMenu": "Reopen Game Over Menu"
 		},
 
 		"manual": {
@@ -290,25 +357,6 @@
 
 				"selectingType": "Your opponent is selecting a type for the effect of '{#CARDNAME}'.",
 				"selectingDeckSide": "Your opponent is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'."
-			},
-
-			"gameOver": {
-				"youWon": "You Won!",
-				"youLost": "You Lost!",
-				"draw": "Draw!",
-				"bothWon": "Both players won.",
-				"winReasons": {
-					"lifeZero": "Your opponent ran out of life points.",
-					"partnerCostTooHigh": "Your opponent couldn't pay for their partner.",
-					"drawFromEmptyDeck": "Your opponent drew from an empty deck.",
-					"cardEffect": "You won due to the effect of {#CARDNAME}."
-				},
-				"loseReasons": {
-					"lifeZero": "You ran out of life points.",
-					"partnerCostTooHigh": "You couldn't pay for your partner.",
-					"drawFromEmptyDeck": "You drew from an empty deck.",
-					"cardEffect": "Your opponent won due to the effect of {#CARDNAME}."
-				}
 			}
 		}
 	},

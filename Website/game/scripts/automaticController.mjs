@@ -278,12 +278,12 @@ export class AutomaticController extends InteractionController {
 				return;
 			}
 			case "playerWon": {
-				await autoUI.playerWon(events[0].player);
+				gameUI.playerWon(events[0].player);
 				window.top.postMessage({type: "playerWon", players: [events[0].player.index]});
 				return;
 			}
 			case "gameDrawn": {
-				await autoUI.gameDrawn();
+				gameUI.gameDrawn();
 				window.top.postMessage({type: "gameDrawn"});
 				return;
 			}
@@ -729,7 +729,9 @@ export class AutomaticController extends InteractionController {
 						gameUI.addCardButton(
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
-							locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i]) + 1),
+							request.eligibleAbilities[i].card.values.current.abilities.length === 1?
+								locale.game.automatic.cardOptions.activate :
+								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i].current()) + 1),
 							"activateAbility",
 							function() {
 								resolve(i);

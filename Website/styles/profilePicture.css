@@ -1,0 +1,9 @@
+profile-picture {
+	display: inline-block;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	border: var(--border-width) solid white;
+	background-position-x: center;
+	background-position-y: 22.5%;
+	background-size: 180%;
+}

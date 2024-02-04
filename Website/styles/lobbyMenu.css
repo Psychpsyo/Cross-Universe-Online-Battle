@@ -6,6 +6,13 @@
 	font-weight: bold;
 }
 
+#lobbyLeft {
+	background-color: var(--theme-shadow);
+	min-width: 15em;
+	display: flex;
+	flex-direction: column;
+}
+
 #lobbyMiddle {
 	flex-grow: 1;
 }
@@ -17,4 +24,83 @@
 
 	border-left: 2px var(--theme-border-color) solid;
 	background-color: var(--theme-shadow);
+}
+
+.lobbyHeader {
+	text-align: center;
+	border-bottom: 2px solid var(--theme-border-color);
+}
+#userListHolder {
+	flex-grow: 1;
+	overflow-y: scroll;
+}
+#userList {
+	all: unset;
+    box-sizing: border-box;
+}
+
+.user {
+	display: flex;
+	padding: 10px;
+	gap: 10px;
+	border-bottom: 2px solid var(--theme-border-color);
+}
+.user profile-picture {
+	width: 4em;
+	--border-width: 3px;
+}
+.userRight {
+	position: relative;
+	flex-grow: 1;
+}
+.userOptions {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	white-space: nowrap;
+}
+.userStatusText {
+	transform: translateY(-.1em);
+	font-size: .65em;
+	font-weight: bold;
+}
+.userStatusText option {
+	color: black;
+}
+.presentStatus {
+	color: lightgreen;
+}
+.inGameStatus, .busyStatus {
+	color: red;
+}
+
+#lobbySettings {
+	padding: .5em;
+	border: none;
+	border-bottom: 2px solid var(--theme-border-color);
+	margin: 0; /* MS Edge needs it */
+}
+
+.challengePrompt {
+	position: relative;
+	display: flex;
+	justify-content: space-evenly;
+	border: none;
+	padding: .4em;
+}
+.challengePrompt button {
+	font-size: .75em;
+}
+.challengePrompt::after {
+	content: attr(data-resolved-text);
+	text-align: center;
+	width: 100%;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+
+	font-size: 1.5em;
+  	font-weight: bold;
+ 	filter: drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em black) drop-shadow(0 0 .1em #0008);
 }

@@ -10,6 +10,7 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Mit Raum-Code verbinden",
 		"enterRoomcode": "Raum-Code:",
+		"gameMode": "Spielmodus:",
 		"rerollRoomcode": "Zufälligen Raum-Code generieren",
 		"connectToRoom": "Verbinden",
 		"waitingForOpponent": "Warte auf Gegner...",
@@ -19,17 +20,16 @@
 		"rulesLink": "https://crossuniverse.net/rules",
 		"unofficialNotice": "Diese Seite ist eine Cross Universe Fan-Implementation. Die offizielle Seite findest du unter <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
 
-		"gamemode": "Spielmodus:",
-		"gamemodes": {
-			"normal": "Normal",
-			"draft": "Draft",
-			"normalAutomatic": "Automatisch (WIP)",
-			"draftAutomatic": "Auto-Draft (WIP)"
-		},
-
 		"settingsButton": "Einstellungen",
 		"deckCreatorButton": "Deck Editor",
 		"reportBug": "Melde einen Bug"
+	},
+
+	"gameModes": {
+		"normal": "Normal",
+		"draft": "Draft",
+		"manual": "Manuell",
+		"automatic": "Automatisch"
 	},
 
 	"lobbies": {
@@ -38,24 +38,69 @@
 		"joinPassword": "Beitreten 🔒",
 		"userIconAlt": "Spieler:",
 		"newLobbyButton": "Neue Lobby erstellen",
+		"defaultName": "{#name} Lobby",
+
+		"noLobbyServer": "Konnte den Lobby-Server nicht erreichen.\n:(",
+		"noOpenLobbies": "Keine offenen Lobbies gefunden.\n:(",
 
 		"enterPassword": "Lobbypasswort eingeben:",
 		"wrongPassword": "Das eingegebene Passwort war falsch.",
+		"joinFailedError": "Beim beitreten der Lobby is ein Fehler aufgetreten.",
 		"joinFailedInvalid": "Konnte der Lobby nicht beitreten:\nDie Lobby existiert nicht mehr.",
 		"joinFailedUserLimit": "Konnte der Lobby nicht beitreten:\nDie Lobby ist voll.",
 		"hostCloseConfirmation": "Möchtest du diese Lobby wirklich schliessen?\nDies wird alle Spieler kicken, aber wird bereits begonnene Spiele nicht unterbrechen.",
-		"kickMessage": "Der Host hat die Lobby geschlossen.",
+		"kickMessages": {
+			"kicked": "Du wurdest aus der Lobby gekickt.",
+			"closing": "Der Host hat die Lobby geschlossen."
+		},
+		"lostConnection": "Verbindung zum Host der Lobby verloren.",
+
+		"players": "Spieler",
+		"challenge": "Herausfordern",
+		"cancelChallenge": "Herausforderung canceln",
+		"kick": "Kicken",
+		"status": {
+			"setStatus": "Set Status",
+			"present": "Anwesend",
+			"inGame": "Im Spiel",
+			"busy": "Beschäftigt"
+		},
+
+		"incomingChallenge": "{#name} fordert dich heraus:",
+		"acceptChallenge": "Annehmen",
+		"denyChallenge": "Ablehnen",
+		"challengeAccepted": "Angenommen",
+		"challengeDenied": "Abgelehnt",
+		"challengeCancelled": "Gecancelt",
+		"challengerLeft": "Spieler ist gegangen",
+
+		"challengeAcceptedMessage": "{#name} hat deine Herausforderung angenommen.\nEin Spiel wird gestartet.",
+		"challengeDeniedMessage": "{#name} has deine Herausforderung abgelehnt.",
+		"challengeCancelledAfterAccept": "{#name} hat die Herausforderung gecancelt, nachdem du sie akzeptiert hast.",
 
 		"unnamedUser": "Namensloser Magier",
 		"userJoined": "{#name} ist der Lobby beigetreten.",
 		"userLeft": "{#name} hat die Lobby verlassen.",
+		"userKicked": "{#name} wurde aus der Lobby gekickt.",
 
-		"noLobbyServer": "Konnte den Lobby-Server nicht erreichen.\n:(",
-		"noOpenLobbies": "Keine offenen Lobbies gefunden.\n:("
+		"settings": {
+			"title": "Lobby-Einstellungen",
+			"name": "Name:",
+			"namePlaceholder": "Unbenannte Lobby",
+			"userLimit": "Nutzerlimit:",
+			"hasPassword": "Mit Passwort:",
+			"password": "Passwort:",
+			"gameMode": "Spielmodus:",
+			"automatic": "Automatisch:",
+			"automaticTitle": "Bestimmt, ob die Spielregeln automatisch überprüft werden oder nicht.\nAnmerkung: In automatischen Spielen gibt es nicht alle Karten."
+		}
 	},
 
 	"game": {
 		"notices": {
+			"opponentLeft": "Dein Gegner hat das Spiel verlassen.",
+			"connectionLost": "Die Verbindung zu deinem Gegner ist abgebrochen.\n(Die Verbindung kann nicht wieder hergestellt werden, also kannst du das Spiel nun verlassen.)",
+
 			"youStart": "Du bist zuerst dran.",
 			"opponentStarts": "Dein Gegner ist zuerst dran.",
 			"yourDeckShuffled": "Dein Deck wurde gemischt.",
@@ -160,6 +205,28 @@
 			"exileZone": "Exil",
 			"discardPile": "Ablage-\nstapel",
 			"deck": "Deck"
+		},
+
+		"gameOver": {
+			"youWon": "Gewonnen!",
+			"youLost": "Verloren!",
+			"draw": "Unentschieden!",
+			"bothWon": "Beide Spieler haben gewonnen.",
+			"winReasons": {
+				"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
+				"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
+				"drawFromEmptyDeck": "Dein Gegner musste vom leeren Deck ziehen.",
+				"cardEffect": "Du hast durch den Effekt von {#CARDNAME} gewonnen."
+			},
+			"loseReasons": {
+				"lifeZero": "Deine LP sind auf 0 gesunken.",
+				"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
+				"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
+				"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
+			},
+			"leaveGame": "Spiel verlassen",
+			"showField": "Feld anzeigen",
+			"reopenGameOverMenu": "Game-Over-Menü wieder öffnen"
 		},
 
 		"manual": {
@@ -290,25 +357,6 @@
 
 				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
 				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'."
-			},
-
-			"gameOver": {
-				"youWon": "Gewonnen!",
-				"youLost": "Verloren!",
-				"draw": "Unentschieden!",
-				"bothWon": "Beide Spieler haben gewonnen.",
-				"winReasons": {
-					"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
-					"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
-					"drawFromEmptyDeck": "Dein Gegner musste vom leeren Deck ziehen.",
-					"cardEffect": "Du hast durch den Effekt von {#CARDNAME} gewonnen."
-				},
-				"loseReasons": {
-					"lifeZero": "Deine LP sind auf 0 gesunken.",
-					"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
-					"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
-					"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
-				}
 			}
 		}
 	},

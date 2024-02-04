@@ -17,7 +17,7 @@ window.players = [
 		language: null
 	},
 	{
-		name: localStorage.getItem("username")? locale.chat.you : localStorage.getItem("username"),
+		name: localStorage.getItem("username")? localStorage.getItem("username") : locale.chat.you,
 		profilePicture: localStorage.getItem("profilePicture"),
 		deck: null,
 		language: localStorage.getItem("language")
@@ -49,7 +49,7 @@ document.addEventListener("keydown", async function(e) {
 window.addEventListener("message", e => {
 	switch (e.data.type) {
 		case "connect": {
-			new InitState(e.data.roomCode, e.data.gameMode, e.data.websocketUrl);
+			new InitState(e.data.roomCode, e.data.gameMode, e.data.automatic, e.data.websocketUrl);
 			break;
 		}
 		case "replay": {

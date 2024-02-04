@@ -3,6 +3,7 @@ import {locale} from "/scripts/locale.mjs";
 import {deckToCardIdList} from "/scripts/deckUtils.mjs";
 import {Card} from "/rulesEngine/src/card.mjs";
 import {socket} from "./netcode.mjs";
+import "/scripts/profilePicture.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
 import * as abilities from "/rulesEngine/src/abilities.mjs";
 
@@ -16,9 +17,6 @@ const abilityTypes = new Map([
 ]);
 
 let currentPreviewedCard = null;
-
-// used for profile pictures here but also used for things like the cool attack visuals by automatic games
-export const cardAlignmentInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
 
 export function createAbilityFragment(abilityText) {
 	const fragment = new DocumentFragment();
@@ -260,26 +258,26 @@ export function loadDeckPreview(deck) {
 
 	// set the name
 	if (deck.name) {
-		deckViewTitle.classList.remove("greyedOut");
+		deckViewTitle.classList.remove("textPlaceholder");
 		deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
 	} else {
 		deckViewTitle.textContent = "";
 	}
 	if (deckViewTitle.textContent === "") {
 		deckViewTitle.textContent = locale.game.deckSelect.unnamedDeck;
-		deckViewTitle.classList.add("greyedOut");
+		deckViewTitle.classList.add("textPlaceholder");
 	}
 
 	// set the description
 	if (deck.description) {
 		deckSelectorDescription.textContent = deck.description[locale.code] ?? deck.description.en ?? deck.description[Object.keys(deck.description)[0]] ?? "";
-		deckSelectorDescription.classList.remove("greyedOut");
+		deckSelectorDescription.classList.remove("textPlaceholder");
 	} else {
 		deckSelectorDescription.textContent = "";
 	}
 	if (deckSelectorDescription.textContent === "") {
 		deckSelectorDescription.textContent = locale.game.deckSelect.noDescriptionSet;
-		deckSelectorDescription.classList.add("greyedOut");
+		deckSelectorDescription.classList.add("textPlaceholder");
 	}
 }
 
@@ -313,16 +311,7 @@ export function init() {
 	// profile pictures
 	for (let i = 0; i < 2; i++) {
 		document.getElementById("username" + i).textContent = players[i].name;
-		document.getElementById("profilePicture" + i).style.backgroundImage = "url('" + cardLoader.getCardImageFromID(players[i].profilePicture) + "')";
-		if (cardAlignmentInfo[players[i].profilePicture]?.left) {
-			document.getElementById("profilePicture" + i).style.backgroundPositionX = cardAlignmentInfo[players[i].profilePicture].left + "%";
-		}
-	}
-	if (!cardAlignmentInfo[players[0].profilePicture]?.flip && !cardAlignmentInfo[players[0].profilePicture]?.neverFlip) {
-		profilePicture0.style.transform = "scaleX(-1)";
-	}
-	if (cardAlignmentInfo[players[1].profilePicture]?.flip) {
-		profilePicture1.style.transform = "scaleX(-1)";
+		document.getElementById("profilePicture" + i).setIcon(players[i].profilePicture, i === 0);
 	}
 
 	// card preview

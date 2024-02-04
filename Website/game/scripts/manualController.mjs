@@ -354,8 +354,10 @@ export class ManualController extends InteractionController {
 		}
 		await gameUI.uiPlayers[player.index].life.set(value, false);
 		if (value === 0) {
-			playerDeckButton0.disabled = false;
-			window.top.postMessage({type: "playerWon", players: [player.next().index]});
+			const winner = player.next();
+			winner.victoryConditions.push("lifeZero");
+			gameUI.playerWon(winner);
+			window.top.postMessage({type: "playerWon", players: [winner.index]});
 		}
 	}
 	setMana(player, value) {
