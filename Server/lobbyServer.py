@@ -197,7 +197,7 @@ socketFunctions = {
 	"joinLobbyAnswer": joinLobbyAnswer
 }
 
-async def clientConnection(websocket):
+async def clientConnection(websocket, path):
 	global allLobbies
 	connections.append(websocket)
 
