@@ -206,23 +206,6 @@ export function clearRetire() {
 	retireOptions.style.display = "none";
 }
 
-export function playerWon(player) {
-	let displayText = player == localPlayer? locale.game.automatic.gameOver.youWon : locale.game.automatic.gameOver.youLost;
-	displayText += "\n\n";
-	displayText += locale.game.automatic.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.victoryConditions[0]];
-	finishGame(displayText);
-}
-export function gameDrawn() {
-	finishGame(locale.game.automatic.gameOver.draw + "\n\n" + locale.game.automatic.gameOver.bothWon);
-}
-
-function finishGame(message) {
-	closeCardPreview();
-	mainGameBlackoutContent.textContent = message;
-	mainGameBlackout.classList.remove("hidden");
-	playerDeckButton0.disabled = false;
-}
-
 export function setAttackTarget(target) {
 	let targetOffset;
 	let targetDistance;

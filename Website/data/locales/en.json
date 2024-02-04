@@ -53,6 +53,7 @@
 			"kicked": "You were kicked from the lobby.",
 			"closing": "The host shut down the lobby."
 		},
+		"lostConnection": "Lost connection the lobby host.",
 
 		"players": "Players",
 		"challenge": "Challenge",
@@ -97,6 +98,9 @@
 
 	"game": {
 		"notices": {
+			"opponentLeft": "Your opponent left the game.",
+			"connectionLost": "Lost connection to your opponent.\nThis is currently unrecoverable so you can leave the game now: ",
+
 			"youStart": "You go first.",
 			"opponentStarts": "Your opponent goes first.",
 			"yourDeckShuffled": "Your deck was shuffled.",
@@ -201,6 +205,28 @@
 			"exileZone": "Exile\nZone",
 			"discardPile": "Discard\nPile",
 			"deck": "Deck"
+		},
+
+		"gameOver": {
+			"youWon": "You Won!",
+			"youLost": "You Lost!",
+			"draw": "Draw!",
+			"bothWon": "Both players won.",
+			"winReasons": {
+				"lifeZero": "Your opponent ran out of life points.",
+				"partnerCostTooHigh": "Your opponent couldn't pay for their partner.",
+				"drawFromEmptyDeck": "Your opponent drew from an empty deck.",
+				"cardEffect": "You won due to the effect of {#CARDNAME}."
+			},
+			"loseReasons": {
+				"lifeZero": "You ran out of life points.",
+				"partnerCostTooHigh": "You couldn't pay for your partner.",
+				"drawFromEmptyDeck": "You drew from an empty deck.",
+				"cardEffect": "Your opponent won due to the effect of {#CARDNAME}."
+			},
+			"leaveGame": "Leave Game",
+			"showField": "Show Field",
+			"reopenGameOverMenu": "Reopen Game Over Menu"
 		},
 
 		"manual": {
@@ -331,25 +357,6 @@
 
 				"selectingType": "Your opponent is selecting a type for the effect of '{#CARDNAME}'.",
 				"selectingDeckSide": "Your opponent is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'."
-			},
-
-			"gameOver": {
-				"youWon": "You Won!",
-				"youLost": "You Lost!",
-				"draw": "Draw!",
-				"bothWon": "Both players won.",
-				"winReasons": {
-					"lifeZero": "Your opponent ran out of life points.",
-					"partnerCostTooHigh": "Your opponent couldn't pay for their partner.",
-					"drawFromEmptyDeck": "Your opponent drew from an empty deck.",
-					"cardEffect": "You won due to the effect of {#CARDNAME}."
-				},
-				"loseReasons": {
-					"lifeZero": "You ran out of life points.",
-					"partnerCostTooHigh": "You couldn't pay for your partner.",
-					"drawFromEmptyDeck": "You drew from an empty deck.",
-					"cardEffect": "Your opponent won due to the effect of {#CARDNAME}."
-				}
 			}
 		}
 	},

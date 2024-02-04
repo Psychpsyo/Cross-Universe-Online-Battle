@@ -718,6 +718,11 @@ dialog.popupSelectMenu {
 	font-size: 1em;
 }
 
+@property --content-opacity { /* needs to be interpolatable */
+	syntax: "<number>";
+	inherits: true;
+	initial-value: 1;
+}
 #mainGameBlackout {
 	position: absolute;
 	top: 0;
@@ -727,30 +732,43 @@ dialog.popupSelectMenu {
 	color: #eee;
 	background-color: #000b;
 	z-index: 90;
-	transition: color 2s, background-color 2.5s;
+	/* color is transitioned to support browsers that don't have @property yet. (Firefox, older Safari) */
+	transition: color 2s, background-color 2.5s, --content-opacity 2s;
+	--content-opacity: 1; /* also for Firefox, cause the @property initial-value doesn't work */
 }
-
 #mainGameBlackout.hidden {
-	transition: color .5s, background-color .5s;
+	transition: color .5s, background-color .5s, --content-opacity 2s;
 	color: transparent;
 	background-color: transparent;
+	--content-opacity: 0;
 	pointer-events: none;
+	user-select: none;
 }
-
 #mainGameBlackoutContent {
 	height: 100%;
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	font-weight: bold;
-	white-space: pre;
-	text-align: center;
-	filter: drop-shadow(black 0 0 .15em);
-	user-select: none;
+	gap: .5em;
+	filter: opacity(var(--content-opacity)) drop-shadow(black 0 0 .15em);
 }
-
-#mainGameBlackoutContent::first-line {
-	font-size: 2em;
+#blackoutMessageHolder {
+	text-align: center;
+	font-weight: bold;
+}
+#blackoutMainMessage {
+	font-size: 1.5em;
+}
+#blackoutSubtitle {
+	font-size: .85em;
+}
+#showFieldBtn {
+	position: absolute;
+	bottom: 1em;
+	right: 1em;
+	filter: drop-shadow(black 0 0 .15em);
+	z-index: 91;
 }
 
 /* counters */

@@ -5,7 +5,6 @@ let startingGameSettings = null; // An object, containing the game parameters fo
 export async function startGame(roomCode, gameMode, automatic, websocketUrl) {
 	return new Promise((resolve, reject) => {
 		if (replayToLoad || resolveStartPromise) {
-			console.log("The fuck?");
 			reject();
 		}
 		startingGameSettings = {
@@ -78,7 +77,7 @@ window.addEventListener("message", e => {
 			unloadWarning.abort();
 			break;
 		}
-		case "connectionLost": {
+		case "leaveGame": {
 			unloadWarning.abort();
 			resolveStartPromise();
 			resolveStartPromise = null;

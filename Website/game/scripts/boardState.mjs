@@ -29,7 +29,8 @@ export class BoardState extends GameState {
 		draftGameSetupMenu.remove();
 
 		// show game area
-		mainGameBlackoutContent.textContent = "";
+		blackoutMainMessage.textContent = "";
+		blackoutSubtitle.textContent = "";
 		mainGameArea.hidden = false;
 
 		this.controller = automatic? new AutomaticController() : new ManualController();
@@ -143,7 +144,7 @@ export class BoardState extends GameState {
 	}
 	// called after partner selection
 	getPartnerFromDeck(partnerPosInDeck = -1) {
-		mainGameBlackoutContent.textContent = locale.game.partnerSelect.waitingForOpponent;
+		ui.showBlackoutMessage(locale.game.partnerSelect.waitingForOpponent);
 		if (partnerPosInDeck == -1) {
 			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == players[localPlayer.index].deck.suggestedPartner});
 		}

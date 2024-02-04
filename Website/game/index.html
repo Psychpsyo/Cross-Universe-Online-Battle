@@ -396,9 +396,16 @@
 						<div id="opponentActionDisplay"></div>
 					</div>
 
-					<div id="mainGameBlackout">
-						<div id="mainGameBlackoutContent"></div>
-					</div>
+					<section id="mainGameBlackout">
+						<div id="mainGameBlackoutContent"> <!-- So that the drop shadow doesn't apply to the darker background -->
+							<div id="blackoutMessageHolder">
+								<span id="blackoutMainMessage"></span><br>
+								<span id="blackoutSubtitle"></span>
+							</div>
+							<button id="leaveGameBtn" hidden></button>
+						</div>
+					</section>
+					<button id="showFieldBtn" hidden></button>
 				</main>
 			</div>
 

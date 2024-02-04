@@ -27,6 +27,8 @@ for (const elem of Array.from(document.querySelectorAll(".manaTitle"))) {
 }
 
 cardChoiceConfirm.textContent = locale.game.cardChoice.confirm;
+leaveGameBtn.textContent = locale.game.gameOver.leaveGame;
+showFieldBtn.textContent = locale.game.gameOver.showField;
 
 if (localStorage.getItem("fieldLabelToggle") == "true") {
 	document.querySelectorAll(".fieldLabelUnitZone").forEach(label => {
@@ -1005,3 +1007,43 @@ export function clearCounters(slotIndex) {
 		counter.remove();
 	}
 }
+
+
+// blackout-overlay
+export function showBlackoutMessage(message, subtitle = "") {
+	closeCardPreview();
+	blackoutMainMessage.textContent = message;
+	blackoutSubtitle.textContent = subtitle;
+	mainGameBlackout.classList.remove("hidden");
+}
+
+export function playerWon(player) {
+	finishGame(
+		player == localPlayer? locale.game.gameOver.youWon : locale.game.gameOver.youLost,
+		locale.game.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.victoryConditions[0]]
+	);
+}
+export function gameDrawn() {
+	finishGame(locale.game.gameOver.draw, locale.game.gameOver.bothWon);
+}
+
+function finishGame(message, subtitle) {
+	showBlackoutMessage(message, subtitle);
+	playerDeckButton0.disabled = false;
+	leaveGameBtn.hidden = false;
+	showFieldBtn.hidden = false;
+}
+
+leaveGameBtn.addEventListener("click", () => {
+	window.top.postMessage({type: "leaveGame"});
+	socket?.send("[leave]");
+});
+showFieldBtn.addEventListener("click", function() {
+	if (mainGameBlackout.hidden) {
+		mainGameBlackout.hidden = false;
+		this.textContent = locale.game.gameOver.showField;
+	} else {
+		mainGameBlackout.hidden = true;
+		this.textContent = locale.game.gameOver.reopenGameOverMenu;
+	}
+});

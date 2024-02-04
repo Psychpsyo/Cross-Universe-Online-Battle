@@ -13,6 +13,7 @@ chat-box > div {
 	border-bottom: 2px var(--theme-border-color) solid;
 	overflow-y: scroll;
 	font-size: .75em;
+	white-space: pre-wrap;
 	word-wrap: break-word;
 	background-color: #0003;
 }

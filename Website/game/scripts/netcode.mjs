@@ -21,6 +21,20 @@ export function connectTo(targetRoomcode, websocketUrl) {
 	socket.addEventListener("message", receiveMessage);
 }
 
+let opponentLeft = false;
+function makeChatLeaveButton() {
+	const holder = document.createElement("div");
+	holder.style.setProperty("text-align", "center");
+	holder.style.setProperty("padding-bottom", ".35em");
+	const button = document.createElement("button");
+	button.textContent = locale.game.gameOver.leaveGame;
+	button.addEventListener("click", () => {
+		window.top.postMessage({type: "leaveGame"});
+	});
+	holder.appendChild(button);
+	return holder;
+}
+
 // receiving messages
 function receiveMessage(e) {
 	const message = e.data.substring(e.data.indexOf("]") + 1);
@@ -39,13 +53,22 @@ function receiveMessage(e) {
 			game.rng.importCypherKey(message);
 			return true;
 		}
-		case "quit": { // opponent quit the game (or crashed)
+		case "quit": { // opponent force-quit the game or crashed (This is sent by the proxy server and will be different with webRTC in teh future)
 			socket.close();
+			if (!opponentLeft) {
+				chat.putMessage(locale.game.notices.connectionLost, "error", makeChatLeaveButton());
+			}
 			window.top.postMessage({type: "connectionLost"});
 			break;
 		}
+		case "leave": {
+			socket.close();
+			opponentLeft = true;
+			chat.putMessage(locale.game.notices.opponentLeft, "error", makeChatLeaveButton());
+			break;
+		}
 		case "youAre": { // Indicates if this client is player 0 or 1.
-			// TODO: This message is currently just sent by the server for simplicity but who is player 0 or 1 should really be negotiated by the clients in this initial handshake.
+			// TODO: This message is currently just sent by the server for simplicity but who is player 0 or 1 should really be negotiated by the clients in an initial handshake.
 			youAre = parseInt(message);
 			return true;
 		}

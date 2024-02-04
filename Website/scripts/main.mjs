@@ -40,7 +40,7 @@ function connect(overrideWebsocketUrl) {
 		waitingForOpponentHolder.hidden = true;
 		roomCodeInputFieldHolder.hidden = false;
 		lobbies.style.display = "flex";
-		startEffect();
+		startEffect(levitatingCards);
 	});
 }
 
@@ -145,7 +145,7 @@ preGame.addEventListener("drop", function(e) {
 	reader.addEventListener("load", e => {
 		stopEffect();
 		loadReplay(JSON.parse(e.target.result)).then(() => {
-			startEffect();
+			startEffect(levitatingCards);
 		});
 		lobbies.style.display = "none";
 	});

@@ -53,6 +53,7 @@
 			"kicked": "Du wurdest aus der Lobby gekickt.",
 			"closing": "Der Host hat die Lobby geschlossen."
 		},
+		"lostConnection": "Verbindung zum Host der Lobby verloren.",
 
 		"players": "Spieler",
 		"challenge": "Herausfordern",
@@ -97,6 +98,9 @@
 
 	"game": {
 		"notices": {
+			"opponentLeft": "Dein Gegner hat das Spiel verlassen.",
+			"connectionLost": "Die Verbindung zu deinem Gegner ist abgebrochen.\n(Die Verbindung kann nicht wieder hergestellt werden, also kannst du das Spiel nun verlassen.)",
+
 			"youStart": "Du bist zuerst dran.",
 			"opponentStarts": "Dein Gegner ist zuerst dran.",
 			"yourDeckShuffled": "Dein Deck wurde gemischt.",
@@ -201,6 +205,28 @@
 			"exileZone": "Exil",
 			"discardPile": "Ablage-\nstapel",
 			"deck": "Deck"
+		},
+
+		"gameOver": {
+			"youWon": "Gewonnen!",
+			"youLost": "Verloren!",
+			"draw": "Unentschieden!",
+			"bothWon": "Beide Spieler haben gewonnen.",
+			"winReasons": {
+				"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
+				"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
+				"drawFromEmptyDeck": "Dein Gegner musste vom leeren Deck ziehen.",
+				"cardEffect": "Du hast durch den Effekt von {#CARDNAME} gewonnen."
+			},
+			"loseReasons": {
+				"lifeZero": "Deine LP sind auf 0 gesunken.",
+				"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
+				"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
+				"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
+			},
+			"leaveGame": "Spiel verlassen",
+			"showField": "Feld anzeigen",
+			"reopenGameOverMenu": "Game-Over-Menü wieder öffnen"
 		},
 
 		"manual": {
@@ -331,25 +357,6 @@
 
 				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
 				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'."
-			},
-
-			"gameOver": {
-				"youWon": "Gewonnen!",
-				"youLost": "Verloren!",
-				"draw": "Unentschieden!",
-				"bothWon": "Beide Spieler haben gewonnen.",
-				"winReasons": {
-					"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
-					"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
-					"drawFromEmptyDeck": "Dein Gegner musste vom leeren Deck ziehen.",
-					"cardEffect": "Du hast durch den Effekt von {#CARDNAME} gewonnen."
-				},
-				"loseReasons": {
-					"lifeZero": "Deine LP sind auf 0 gesunken.",
-					"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
-					"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
-					"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
-				}
 			}
 		}
 	},

@@ -463,6 +463,7 @@ function broadcast(message, excludeDataChannel = null) {
 
 // opening a new lobby
 newLobbyBtn.addEventListener("click", async () => {
+	disableJoinMenus();
 	loadingIndicator.classList.add("active");
 
 	const rsaKeyPair = await generateRsaKeyPair();
@@ -720,7 +721,10 @@ async function joinLobby(lobbyId) {
 	hostDataChannel.addEventListener("message", receiveWebRtcHostMessage);
 	hostDataChannel.addEventListener("close", () => {
 		// leave the lobby if we haven't already
-		if (hostConnection) leaveLobby();
+		if (hostConnection) {
+			leaveLobby();
+			alert(locale.lobbies.lostConnection);
+		}
 	});
 
 	// set local description
@@ -809,9 +813,7 @@ async function receiveWebRtcHostMessage(e) {
 		}
 		case "kick": {
 			leaveLobby();
-			setTimeout(() => {
-				alert(locale.lobbies.kickMessages[message.reason] ?? locale.lobbies.kickMessages.kicked);
-			}, 0);
+			alert(locale.lobbies.kickMessages[message.reason] ?? locale.lobbies.kickMessages.kicked);
 			break;
 		}
 		case "chat": {
