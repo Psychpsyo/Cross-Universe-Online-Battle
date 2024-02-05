@@ -281,7 +281,7 @@ let lobbyServerWs;
 let currentLobby = null;
 let isHosting = false;
 const webRtcConfig = {
-	"iceServers": [
+	iceServers: [
 		{
 			"urls": "turn:turn.battle.crossuniverse.net:38573",
 			"username": "bob",
@@ -521,7 +521,9 @@ function closeLobby() {
 		lobbyServerWs.send('{"type": "closeLobby"}');
 	}
 	for (const peer of peerConnections) {
-		peer.dataChannel.send('{"type": "kick", "reason": "closing"}');
+		if (peer.dataChannel.readyState === "open") {
+			peer.dataChannel.send('{"type": "kick", "reason": "closing"}');
+		}
 		peer.connection.close();
 	}
 	closeLobbyScreen();
