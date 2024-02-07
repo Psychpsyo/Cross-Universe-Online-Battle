@@ -235,7 +235,7 @@
 				"shuffle": "Mischen",
 				"search": "Suchen",
 				"showTop": "Oberste Zeigen",
-				"dropTop": "Oben Drauf",
+				"dropTop": "Obendrauf",
 				"dropShuffle": "Reinmischen",
 				"dropBottom": "Unten Drunter",
 				"dropCancel": "Abbrechen"
@@ -701,9 +701,9 @@
 			"illustrator": "Illustrator:",
 			"idea": "Idee:",
 			"mentionedCards": "Erwähnte Karten:",
-			"mentionedOn": "Erwähnt Auf:",
+			"mentionedOn": "Erwähnt auf:",
 			"visibleCards": "Sichtbare Karten:",
-			"visibleOn": "Sichtbar Auf:",
+			"visibleOn": "Sichtbar auf:",
 			"toDeck": "Dem Deck Hinzufügen"
 		},
 

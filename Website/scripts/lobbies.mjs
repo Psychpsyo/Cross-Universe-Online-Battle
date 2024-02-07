@@ -281,11 +281,11 @@ let lobbyServerWs;
 let currentLobby = null;
 let isHosting = false;
 const webRtcConfig = {
-	"iceServers": [
+	iceServers: [
 		{
-			"urls": "turn:turn.battle.crossuniverse.net:38573",
-			"username": "bob",
-			"credential": "12345"
+			urls: "turn:turn.battle.crossuniverse.net:38573",
+			username: "bob", // TODO: make signaling server hand out changing credentials
+			credential: "12345"
 		}
 	]
 };
@@ -521,7 +521,9 @@ function closeLobby() {
 		lobbyServerWs.send('{"type": "closeLobby"}');
 	}
 	for (const peer of peerConnections) {
-		peer.dataChannel.send('{"type": "kick", "reason": "closing"}');
+		if (peer.dataChannel.readyState === "open") {
+			peer.dataChannel.send('{"type": "kick", "reason": "closing"}');
+		}
 		peer.connection.close();
 	}
 	closeLobbyScreen();
@@ -632,6 +634,15 @@ function receiveWsMessage(e) {
 		}
 		case "joinRequest": {
 			const pc = new RTCPeerConnection(webRtcConfig);
+			pc.addEventListener("icegatheringstatechange", () => {
+				if (pc.iceGatheringState === "complete") {
+					lobbyServerWs.send(JSON.stringify({
+						"type": "joinLobbyAnswer",
+						"sdp": pc.localDescription.sdp // use this instead of answer to have ice candidates included
+					}));
+				}
+			});
+
 			const dc = pc.createDataChannel("data", {negotiated: true, id: 0});
 			dc.addEventListener("open", () => {
 				dc.send(JSON.stringify({
@@ -668,13 +679,7 @@ function receiveWsMessage(e) {
 				userId: null
 			});
 			pc.setRemoteDescription({type: "offer", sdp: message.sdp});
-			pc.createAnswer().then(async answer => {
-				await pc.setLocalDescription(answer);
-				lobbyServerWs.send(JSON.stringify({
-					"type": "joinLobbyAnswer",
-					"sdp": pc.localDescription.sdp // use this instead of answer to have ice candidates included
-				}));
-			});
+			pc.createAnswer().then(answer => pc.setLocalDescription(answer));
 			break;
 		}
 		case "joinRequestAnswer": {
