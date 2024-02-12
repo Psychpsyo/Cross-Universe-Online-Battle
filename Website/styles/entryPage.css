@@ -94,6 +94,7 @@ main {
 	align-items: center;
 	text-align: center;
 	justify-content: center;
+	flex-grow: 1;
 }
 
 #mainLogoHolder {

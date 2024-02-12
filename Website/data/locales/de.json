@@ -308,7 +308,7 @@
 			"cardOptions": {
 				"attack": "Angreifen",
 				"activate": "Aktivieren",
-				"activateMultiple": "Aktiviere #{#ABILITY}"
+				"activateMultiple": "Aktiviere {#ABILITY}"
 			},
 
 			"playerSelect": {
