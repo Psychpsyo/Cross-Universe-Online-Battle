@@ -40,7 +40,8 @@ const christmasCards = [
 	"U00229",
 	"U00233",
 	"U00245",
-	"U00256"
+	"U00256",
+	"U00287"
 ];
 const cardBaseUrl = (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl"));
 function getRandomCardLink() {
@@ -57,13 +58,13 @@ function getRandomCardLink() {
 }
 
 function spawnCard(parentElement) {
-	let card = document.createElement("div");
+	const card = document.createElement("div");
 	card.classList.add("levitateCard");
 
-	let floatSeconds = Math.random() * 15 + 35;
+	const floatSeconds = Math.random() * 15 + 35;
 	card.style.setProperty("--float-time", floatSeconds + "s");
 	card.style.setProperty("--spin-delay", Math.random() * -20 + "s");
-	let size = Math.random() * 5 + 7.5;
+	const size = Math.random() * 5 + 7.5;
 	card.style.width = size + "vh";
 	card.style.zIndex = Math.floor(size * 10000);
 	let position = Math.random() * 30;
@@ -71,7 +72,7 @@ function spawnCard(parentElement) {
 		position += 70;
 	}
 	card.style.left = position + "%";
-	card.style.backgroundImage = "url('" + getRandomCardLink() + "')";
+	card.style.backgroundImage = `url('${getRandomCardLink()}')`;
 	cardsSoFar++;
 
 	parentElement.appendChild(card);
