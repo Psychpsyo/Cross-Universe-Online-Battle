@@ -160,6 +160,7 @@
 				"tooManyOfCard": "Das Deck konnte nicht geladen werden, weil es zu viele '{#CARDNAME}' enthält.",
 				"hasToken": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält.\n(Decks dürfen keine Token-Karten enthalten.)",
 				"scriptError": "Das Deck konnte nicht geladen werden, weil das Kartenscript für '{#CARDNAME}' Fehler enthält.\n(detailliertere Infos gibt es in deiner Browser-Konsole)",
+				"nonexistantCard": "Das Deck konnte nicht geladen werden, da die Karte mit ID {#CARDID} nicht geladen werden konnte.",
 				"unsupportedInAutomatic": "Das Deck konnte nicht geladen werden, weil es '{#CARDNAME}' enthält. Diese Karte existiert im automatischen Modus noch nicht."
 			}
 		},
@@ -308,7 +309,7 @@
 			"cardOptions": {
 				"attack": "Angreifen",
 				"activate": "Aktivieren",
-				"activateMultiple": "Aktiviere #{#ABILITY}"
+				"activateMultiple": "Aktiviere {#ABILITY}"
 			},
 
 			"playerSelect": {

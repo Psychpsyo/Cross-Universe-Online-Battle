@@ -14,6 +14,9 @@ import * as blocks from "/rulesEngine/src/blocks.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
 import * as zones from "/rulesEngine/src/zones.mjs";
 
+// for ability activation buttons
+const circledDigits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
+
 export class AutomaticController extends InteractionController {
 	constructor() {
 		super();
@@ -726,12 +729,13 @@ export class AutomaticController extends InteractionController {
 			case "activateOptionalAbility": {
 				let activated = await new Promise((resolve, reject) => {
 					for (let i = 0; i < request.eligibleAbilities.length; i++) {
+						const abilityIndex = request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i].current()) + 1;
 						gameUI.addCardButton(
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
 							request.eligibleAbilities[i].card.values.current.abilities.length === 1?
 								locale.game.automatic.cardOptions.activate :
-								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i].current()) + 1),
+								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", circledDigits[abilityIndex] ?? abilityIndex),
 							"activateAbility",
 							function() {
 								resolve(i);
