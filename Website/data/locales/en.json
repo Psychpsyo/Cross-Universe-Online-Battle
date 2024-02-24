@@ -160,6 +160,7 @@
 				"tooManyOfCard": "The deck could not be loaded because it contains too many copies of '{#CARDNAME}'.",
 				"hasToken": "The deck could not be loaded because it contains '{#CARDNAME}'.\n(Token cards may not be added to decks.)",
 				"scriptError": "The deck could not be loaded because the card script for '{#CARDNAME}' contains errors.\n(there's more detailed information in your browser console)",
+				"nonexistantCard": "The deck could not be loaded because the card with ID {#CARDID} could not be loaded.",
 				"unsupportedInAutomatic": "The deck could not be loaded because it contains '{#CARDNAME}', which is currently unsupported in automatic games."
 			}
 		},

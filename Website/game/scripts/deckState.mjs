@@ -207,6 +207,10 @@ export class DeckState extends GameState {
 					alert(locale.game.deckSelect.errors.scriptError.replaceAll("{#CARDNAME}", cardInfo.name));
 					break;
 				}
+				case e instanceof cardLoader.NonexistantCardError: {
+					alert(locale.game.deckSelect.errors.nonexistantCard.replaceAll("{#CARDID}", "CU" + e.cardId));
+					break;
+				}
 				default: {
 					console.error(e, e.stack);
 					alert(locale.game.deckSelect.errors.generic);

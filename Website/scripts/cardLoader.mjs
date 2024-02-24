@@ -12,6 +12,14 @@ let resoniteAvailability = null;
 
 const cardLanguages = ["en", "ja"];
 
+// to be thrown when a card does now exist
+export class NonexistantCardError extends Error {
+	constructor(cardId) {
+		super(`Card with ID ${cardId} does not exist.`);
+		this.cardId = cardId;
+	}
+}
+
 export class UnsupportedCardError extends Error {
 	constructor(cardId) {
 		super("Card " + cardId + " is currently unsupported in automatic matches.");
@@ -34,6 +42,9 @@ export async function getCardInfo(cardId) {
 			cardInfoEndpoint + "?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId,
 			{cache: "force-cache"}
 		);
+		if (!response.ok) {
+			throw new NonexistantCardError(cardId);
+		}
 		cardInfoCache[cardId] = await response.json();
 	}
 	return cardInfoCache[cardId];

@@ -160,6 +160,7 @@
 				"tooManyOfCard": null,
 				"hasToken": null,
 				"scriptError": null,
+				"nonexistantCard": null,
 				"unsupportedInAutomatic": null
 			}
 		},
