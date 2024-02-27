@@ -729,13 +729,13 @@ export class AutomaticController extends InteractionController {
 			case "activateOptionalAbility": {
 				let activated = await new Promise((resolve, reject) => {
 					for (let i = 0; i < request.eligibleAbilities.length; i++) {
-						const abilityIndex = request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i].current()) + 1;
+						const abilityIndex = request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i].current());
 						gameUI.addCardButton(
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
 							request.eligibleAbilities[i].card.values.current.abilities.length === 1?
 								locale.game.automatic.cardOptions.activate :
-								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", circledDigits[abilityIndex] ?? abilityIndex),
+								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", circledDigits[abilityIndex] ?? (abilityIndex + 1)),
 							"activateAbility",
 							function() {
 								resolve(i);

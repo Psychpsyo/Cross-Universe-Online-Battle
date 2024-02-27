@@ -219,6 +219,7 @@
 	"U00284": {"flip": true, "left": 52},
 	"U00285": {"flip": true, "left": 48},
 	"U00286": {"flip": true, "left": 35},
+	"U00287": {"flip": true},
 
 	"T00001": {"flip": true, "left": 45},
 	"T00002": {"flip": true, "left": 46},
@@ -580,5 +581,6 @@
 	"S00233": {"left": 25},
 	"S00234": {"neverFlip": true},
 	"S00235": {"left": 38.5},
-	"S00236": {"flip": true}
+	"S00236": {"flip": true},
+	"S00237": {"left": 55}
 }
