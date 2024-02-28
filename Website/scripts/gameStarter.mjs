@@ -2,16 +2,15 @@ let resolveStartPromise = null;
 
 let startingGameSettings = null; // An object, containing the game parameters for the currently starting game
 // starts a game and returns a promise that resolves when the game is over.
-export async function startGame(roomCode, gameMode, automatic, websocketUrl) {
+export async function startGame(isCaller, gameMode, automatic) {
 	return new Promise((resolve, reject) => {
 		if (replayToLoad || resolveStartPromise) {
 			reject();
 		}
 		startingGameSettings = {
-			roomCode: roomCode,
+			isCaller: isCaller,
 			gameMode: gameMode,
-			automatic: automatic,
-			websocketUrl: websocketUrl
+			automatic: automatic
 		}
 		resolveStartPromise = resolve;
 		gameFrame.contentWindow.location.replace(location.origin + "/game");
@@ -50,10 +49,9 @@ window.addEventListener("message", e => {
 			} else {
 				gameFrame.contentWindow.postMessage({
 					type: "connect",
-					roomCode: startingGameSettings.roomCode,
+					isCaller: startingGameSettings.isCaller,
 					gameMode: startingGameSettings.gameMode,
-					automatic: startingGameSettings.automatic,
-					websocketUrl: startingGameSettings.websocketUrl
+					automatic: startingGameSettings.automatic
 				});
 				startingGameSettings = null;
 			}

@@ -1,7 +1,7 @@
 // this file holds all the code needed for UI that is required during manual games.
 
 import {locale} from "/scripts/locale.mjs";
-import {socket} from "./netcode.mjs";
+import {netSend} from "./netcode.mjs";
 import * as gameUI from "./gameUI.mjs";
 
 export function init() {
@@ -32,13 +32,13 @@ export function init() {
 
 	//showing/hiding your hand
 	function hideHand() {
-		socket.send("[hideHand]");
+		netSend("[hideHand]");
 		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.showHand;
 		document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
 		document.getElementById("hand1").classList.remove("shown");
 	}
 	function showHand() {
-		socket.send("[showHand]");
+		netSend("[showHand]");
 		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.hideHand;
 		document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
 		document.getElementById("hand1").classList.add("shown");
@@ -92,7 +92,7 @@ export function init() {
 		btn.addEventListener("click", function() {
 			let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
 			addCounter(fieldSlot);
-			socket.send("[counterAdd]" + fieldSlot);
+			netSend("[counterAdd]" + fieldSlot);
 		});
 	}
 
@@ -231,7 +231,7 @@ function addCounter(slotIndex) {
 		gameUI.setCounter(this, parseInt(this.textContent) + 1);
 		const fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
 		const counterIndex = Array.from(this.parentElement.children).indexOf(this);
-		socket.send("[counterIncrease]" + fieldSlot + "|" + counterIndex);
+		netSend("[counterIncrease]" + fieldSlot + "|" + counterIndex);
 	});
 	counter.addEventListener("auxclick", function(e) {
 		const fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
@@ -239,15 +239,15 @@ function addCounter(slotIndex) {
 		switch (e.button) {
 			case 1:
 				this.remove();
-				socket.send("[counterRemove]" + fieldSlot + "|" + counterIndex);
+				netSend("[counterRemove]" + fieldSlot + "|" + counterIndex);
 				break;
 			case 2:
 				if (parseInt(this.textContent) == 0) {
 					this.remove();
-					socket.send("[counterRemove]" + fieldSlot + "|" + counterIndex);
+					netSend("[counterRemove]" + fieldSlot + "|" + counterIndex);
 				} else {
 					gameUI.setCounter(this, parseInt(this.textContent) - 1);
-					socket.send("[counterDecrease]" + fieldSlot + "|" + counterIndex);
+					netSend("[counterDecrease]" + fieldSlot + "|" + counterIndex);
 				}
 				break;
 		}

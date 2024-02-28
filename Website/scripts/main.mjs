@@ -14,6 +14,26 @@ function getRoomcode() {
 }
 
 let websocketUrl = localStorage.getItem("websocketUrl")? localStorage.getItem("websocketUrl") : "wss://battle.crossuniverse.net:443/ws/";
+let socket = null; // used for signalling through room code
+
+window.addEventListener("message", async e => {
+	if (e.source !== gameFrame.contentWindow) return;
+	if (e.data.type !== "sdp") return;
+
+	switch (e.data.type) {
+		case "sdp": {
+			// does not send if socket is null (in that case, the game was opened in a lobby)
+			socket?.send("[sdp]" + e.data.sdp);
+			break;
+		}
+		case "gameStarted": {
+			// signalling socket isn't needed anymore once game has started
+			socket.close();
+			socket = null;
+			break;
+		}
+	}
+});
 
 // connecting
 function connect(overrideWebsocketUrl) {
@@ -36,11 +56,36 @@ function connect(overrideWebsocketUrl) {
 		gameMode = gameMode.substring(0, gameMode.length - 9);
 	}
 	stopEffect();
-	startGame(getRoomcode(), gameMode, automatic, overrideWebsocketUrl ?? websocketUrl).then(() => {
-		waitingForOpponentHolder.hidden = true;
-		roomCodeInputFieldHolder.hidden = false;
-		lobbies.style.display = "flex";
-		startEffect(levitatingCards);
+
+	// Signalling for the game
+	socket = new WebSocket(overrideWebsocketUrl ?? websocketUrl);
+	socket.addEventListener("open", () => {
+		socket.send("[roomcode]" + getRoomcode());
+	});
+	socket.addEventListener("message", e => {
+		const message = e.data.substring(e.data.indexOf("]") + 1);
+		const command = e.data.substring(1, e.data.indexOf("]"));
+
+		switch (command) {
+			case "youAre": {
+				startGame(parseInt(message) === 0, gameMode, automatic).then(() => {
+					socket?.close(); // might've already closed at game start
+					socket = null;
+					waitingForOpponentHolder.hidden = true;
+					roomCodeInputFieldHolder.hidden = false;
+					lobbies.style.display = "flex";
+					startEffect(levitatingCards);
+				});
+				break;
+			}
+			case "sdp": {
+				gameFrame.contentWindow.postMessage({
+					type: "sdp",
+					sdp: message
+				});
+				break;
+			}
+		}
 	});
 }
 

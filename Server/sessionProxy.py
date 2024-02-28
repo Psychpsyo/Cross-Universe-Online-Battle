@@ -1,5 +1,6 @@
-# This is the server that handles proxying of the client's websocket connections during a game.
-# It is old and bad and will be thrown out in favour of webRTC soon™
+# This used to be the proxy server for the entire game.
+# It now only acts as the signalling server for room code battles.
+# That's why it does a bit more than it needs to in some places.
 
 import asyncio
 import websockets

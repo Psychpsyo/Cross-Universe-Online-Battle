@@ -2,7 +2,7 @@
 
 import {locale} from "/scripts/locale.mjs";
 import {InteractionController} from "./interactionController.mjs";
-import {socket} from "./netcode.mjs";
+import {netSend} from "./netcode.mjs";
 import {getAutoResponse} from "./autopass.mjs";
 import {BaseCard} from "/rulesEngine/src/card.mjs";
 import {Player} from "/rulesEngine/src/player.mjs";
@@ -73,7 +73,7 @@ export class AutomaticController extends InteractionController {
 
 					let autoResponse = getAutoResponse(localRequests);
 					if (autoResponse) {
-						socket.send("[inputRequestResponse]" + JSON.stringify(autoResponse));
+						netSend("[inputRequestResponse]" + JSON.stringify(autoResponse));
 						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
 					} else {
 						playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
@@ -791,7 +791,7 @@ export class AutomaticController extends InteractionController {
 			}
 		}
 		this.madeMoveTarget.dispatchEvent(new CustomEvent("move"));
-		socket.send("[inputRequestResponse]" + JSON.stringify(response));
+		netSend("[inputRequestResponse]" + JSON.stringify(response));
 		return response;
 	}
 
@@ -801,7 +801,7 @@ export class AutomaticController extends InteractionController {
 
 	cancelRetire(player) {
 		if (player == localPlayer) {
-			socket.send("[cancelRetire]");
+			netSend("[cancelRetire]");
 		}
 		for (let card of this.playerInfos[player.index].retiring) {
 			gameUI.clearDragSource(card.zone, card.index, player);
