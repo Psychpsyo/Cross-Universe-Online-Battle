@@ -76,7 +76,16 @@ connectBtn.textContent = locale.mainMenu.connectToRoom;
 waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;
 copyInviteLink.textContent = locale.mainMenu.copyInviteLink;
 cancelWaitingBtn.textContent = locale.mainMenu.cancelWaiting;
-unofficialFooter.innerHTML = locale.mainMenu.unofficialNotice;
+{ // scope this variable since it's very temporary
+	const footerNoticeParts = locale.mainMenu.unofficialNotice.split("{#LINK}");
+	const anchor = document.createElement("a");
+	anchor.textContent = "crossuniverse.jp";
+	anchor.href = locale.code === "ja"? "https://crossuniverse.jp" : "https://crossuniverse.net/jp";
+	anchor.target = "_blank";
+	unofficialFooter.appendChild(document.createTextNode(footerNoticeParts[0]));
+	unofficialFooter.appendChild(anchor);
+	unofficialFooter.appendChild(document.createTextNode(footerNoticeParts[1]));
+}
 rulesButton.textContent = locale.mainMenu.rulesButton;
 
 rulesButton.href = locale.mainMenu.rulesLink;
