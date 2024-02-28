@@ -2,7 +2,7 @@
 import {locale} from "/scripts/locale.mjs";
 import {deckToCardIdList} from "/scripts/deckUtils.mjs";
 import {Card} from "/rulesEngine/src/card.mjs";
-import {socket} from "./netcode.mjs";
+import {netSend} from "./netcode.mjs";
 import "/scripts/profilePicture.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
 import * as abilities from "/rulesEngine/src/abilities.mjs";
@@ -59,7 +59,7 @@ export function createAbilityFragment(abilityText) {
 
 // chat
 chat.addEventListener("message", function(e) {
-	socket.send("[chat]" + e.data);
+	netSend("[chat]" + e.data);
 	this.putMessage(players[1].name + locale["chat"]["colon"] + e.data);
 });
 

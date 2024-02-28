@@ -18,7 +18,7 @@
 		"cancelWaiting": "Cancel",
 		"rulesButton": "Game Rules",
 		"rulesLink": "https://crossuniverse.net/rules",
-		"unofficialNotice": "This is a fan-made implementation of Cross Universe. The official page is at <a href=\"https://www.crossuniverse.jp\">crossuniverse.jp</a>!",
+		"unofficialNotice": "This is a fan-made implementation of Cross Universe. The official page is at {#LINK}!",
 
 		"settingsButton": "Settings",
 		"deckCreatorButton": "Deck Creator",

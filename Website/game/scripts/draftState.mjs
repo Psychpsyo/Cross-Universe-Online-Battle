@@ -2,7 +2,7 @@ import {GameState} from "./gameState.mjs";
 import {BoardState} from "./boardState.mjs";
 import {Card} from "/rulesEngine/src/card.mjs";
 import {locale} from "/scripts/locale.mjs";
-import {socket} from "./netcode.mjs";
+import {netSend} from "./netcode.mjs";
 import {deckFromCardList} from "/scripts/deckUtils.mjs";
 import {previewCard} from "./generalUI.mjs";
 import * as gameUI from "./gameUI.mjs";
@@ -47,7 +47,7 @@ export class DraftState extends GameState {
 			});
 
 			draftStartButton.addEventListener("click", function() {
-				socket.send("[ready]");
+				netSend("[ready]");
 				gameState.pressedReady = true;
 				draftStartButton.textContent = locale.draft.waitingForOpponent;
 				draftStartButton.setAttribute("disabled", "");
@@ -144,7 +144,7 @@ export class DraftState extends GameState {
 			if (!gameState.isForPlayer(this, localPlayer)) return;
 
 			// sync this to the opponent first, since this element may get destroyed by draftAddToDeck if that triggers a reroll.
-			socket.send("[picked]" + Array.from(this.parentElement.childNodes).indexOf(this));
+			netSend("[picked]" + Array.from(this.parentElement.childNodes).indexOf(this));
 			gameState.addToDeck(this, 1);
 		});
 		draftCardSelection.appendChild(card);

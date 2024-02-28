@@ -2,7 +2,7 @@
 import {GameState} from "./gameState.mjs";
 import {BoardState} from "./boardState.mjs";
 import {locale} from "/scripts/locale.mjs";
-import {socket} from "./netcode.mjs";
+import {netSend} from "./netcode.mjs";
 import {toDeckx, countDeckCards} from "/scripts/deckUtils.mjs";
 import {loadDeckPreview, openDeckView, closeDeckView} from "./generalUI.mjs";
 import {ScriptParserError} from "/rulesEngine/src/cdfScriptInterpreter/parser.mjs";
@@ -227,7 +227,7 @@ export class DeckState extends GameState {
 		deckSelector.classList.add("deckListDisable");
 
 		// sync and load the deck
-		socket.send("[deck]" + JSON.stringify(deck));
+		netSend("[deck]" + JSON.stringify(deck));
 		players[localPlayer.index].deck = deck;
 
 		gameUI.updateCard(localPlayer.deckZone, -1);
@@ -241,7 +241,7 @@ export class DeckState extends GameState {
 	checkReadyConditions() {
 		if (!players.find(player => player.deck == null)) {
 			if (!this.ready) {
-				socket.send("[ready]");
+				netSend("[ready]");
 				this.ready = true;
 			}
 			if (this.opponentReady) {

@@ -1,5 +1,5 @@
 import {cardActions} from "./cardActions.mjs";
-import {socket, zoneToLocal} from "./netcode.mjs";
+import {netSend, zoneToLocal} from "./netcode.mjs";
 import {previewCard, closeCardPreview} from "./generalUI.mjs";
 import {locale} from "/scripts/locale.mjs";
 import {getCardImage} from "/scripts/cardLoader.mjs";
@@ -64,6 +64,16 @@ if (localStorage.getItem("alwaysShowCardButtons") == "true") {
 	document.documentElement.classList.add("alwaysShowCardButtons");
 }
 
+// These are assigned/calculated as follows:
+//  +----+----+----+----+----+
+//  |  0 |  1 |  2 |  3 |  4 | <- Opponent Spell/Item/Partner Zones
+//  +----+----+----+----+----+
+//  |  5 |  6 |  7 |  8 |  9 | <- Opponent Unit Zone
+//  +----+----+----+----+----+
+//  | 10 | 11 | 12 | 13 | 14 | <- Your Unit Zone
+//  +----+----+----+----+----+
+//  | 15 | 16 | 17 | 18 | 19 | <- Your Spell/Item/Partner Zones
+//  +----+----+----+----+----+
 export function fieldSlotIndexFromZone(zone, index) {
 	switch(zone) {
 		case game.players[0].partnerZone: {
@@ -88,7 +98,7 @@ export function fieldSlotIndexFromZone(zone, index) {
 	return -1;
 }
 
-// performant field rect tracking
+// performant field rect tracking (where the field is on the page)
 let fieldRect;
 function recalculateFieldRect() {
 	fieldRect = document.getElementById("field").getBoundingClientRect();
@@ -101,7 +111,7 @@ function hideCursor() {
 		return;
 	}
 	cursorHidden = true;
-	socket?.send("[hideCursor]");
+	netSend("[hideCursor]");
 }
 
 export function init() {
@@ -162,7 +172,7 @@ export function init() {
 		}
 		// check if the normalized cursor position is within the bounds of the visual field
 		if (Math.abs(uiPlayers[1].posX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
-			socket?.send("[placeCursor]" + uiPlayers[1].posX + "|" + uiPlayers[1].posY);
+			netSend("[placeCursor]" + uiPlayers[1].posX + "|" + uiPlayers[1].posY, false);
 			cursorHidden = false;
 		} else {
 			hideCursor();
@@ -305,7 +315,7 @@ export function clearDragSource(zone, index, player) {
 
 export function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
-		socket?.send("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
+		netSend("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
 		return true;
 	}
 	return false;
@@ -313,7 +323,7 @@ export function grabCard(player, zone, index) {
 export function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
-			socket?.send("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
+			netSend("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
 		}
 		gameState.controller.dropCard(player, zone, index);
 	}
@@ -628,7 +638,7 @@ class PresentedCardSlot extends UiCardSlot {
 			this.revealBtn.textContent = locale.game.manual.presented[this.isRevealed? "hide" : "reveal"];
 			this.revealBtn.addEventListener("click", function() {
 				this.isRevealed = !this.isRevealed;
-				socket?.send((this.isRevealed? "[revealCard]" : "[unrevealCard]") + this.index);
+				netSend((this.isRevealed? "[revealCard]" : "[unrevealCard]") + this.index);
 				this.revealBtn.textContent = locale.game.manual.presented[this.isRevealed? "hide" : "reveal"];
 			}.bind(this));
 			this.cardElem.appendChild(this.revealBtn);
@@ -1036,7 +1046,7 @@ function finishGame(message, subtitle) {
 
 leaveGameBtn.addEventListener("click", () => {
 	window.top.postMessage({type: "leaveGame"});
-	socket?.send("[leave]");
+	netSend("[leave]");
 });
 showFieldBtn.addEventListener("click", function() {
 	if (mainGameBlackout.hidden) {

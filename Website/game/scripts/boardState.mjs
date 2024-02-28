@@ -2,7 +2,7 @@
 
 import {locale} from "/scripts/locale.mjs";
 import {GameState} from "./gameState.mjs";
-import {socket} from "./netcode.mjs";
+import {netSend} from "./netcode.mjs";
 import {ManualController} from "./manualController.mjs";
 import {AutomaticController} from "./automaticController.mjs";
 import * as ui from "./gameUI.mjs";
@@ -148,7 +148,7 @@ export class BoardState extends GameState {
 		if (partnerPosInDeck == -1) {
 			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == players[localPlayer.index].deck.suggestedPartner});
 		}
-		socket.send("[choosePartner]" + partnerPosInDeck);
+		netSend("[choosePartner]" + partnerPosInDeck);
 		this.setPartner(localPlayer, partnerPosInDeck);
 	}
 

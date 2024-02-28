@@ -4,10 +4,10 @@ import {GameState} from "./gameState.mjs";
 import {DraftState} from "./draftState.mjs";
 import {DeckState} from "./deckState.mjs";
 import {Game} from "/rulesEngine/src/game.mjs";
-import {socket, connectTo, youAre} from "./netcode.mjs";
+import {netSend, callOpponent, youAre} from "./netcode.mjs";
 
 export class InitState extends GameState {
-	constructor(roomcode, gameMode, automatic, websocketUrl) {
+	constructor(isCaller, gameMode, automatic) {
 		super();
 		gameState = this;
 
@@ -15,32 +15,30 @@ export class InitState extends GameState {
 		this.automatic = automatic;
 		this.opponentReady = false;
 
-		connectTo(roomcode + gameMode + (automatic? "Automatic" : "Manual"), websocketUrl);
+		callOpponent(isCaller).then(() => {
+			// send your own info
+			if (localStorage.getItem("username")) {
+				netSend("[username]" + localStorage.getItem("username"));
+			}
+			if (localStorage.getItem("profilePicture")) {
+				netSend("[profilePicture]" + localStorage.getItem("profilePicture"));
+			}
+			if (localStorage.getItem("cardBack")) {
+				netSend("[cardBack]" + localStorage.getItem("cardBack"));
+			}
+			netSend("[language]" + localStorage.getItem("language"));
+
+			// set up the game
+			game = new Game();
+			game.rng = new DistRandom();
+			localPlayer = game.players[1];
+			netSend("[ready]");
+			this.checkReadyConditions();
+		});
 	}
 
 	receiveMessage(command, message) {
 		switch (command) {
-			case "playerFound": { // another player entered the roomcode (Note: This is sent by the server, not the other client.)
-				// send your own username and card back if you have any
-				if (localStorage.getItem("username")) {
-					socket.send("[username]" + localStorage.getItem("username"));
-				}
-				if (localStorage.getItem("profilePicture")) {
-					socket.send("[profilePicture]" + localStorage.getItem("profilePicture"));
-				}
-				if (localStorage.getItem("cardBack")) {
-					socket.send("[cardBack]" + localStorage.getItem("cardBack"));
-				}
-				socket.send("[language]" + localStorage.getItem("language"));
-
-				game = new Game();
-				game.rng = new DistRandom();
-				localPlayer = game.players[1];
-				socket.send("[ready]");
-				this.checkReadyConditions();
-
-				return true;
-			}
 			case "username": {
 				if (message) {
 					players[0].name = message.substring(0, 100);

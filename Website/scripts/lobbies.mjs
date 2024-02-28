@@ -374,21 +374,49 @@ function resolveAnyChatChallenge(userId, resolutionString) {
 	}
 }
 
+window.addEventListener("message", async e => {
+	if (e.source !== gameFrame.contentWindow) return;
+	if (!currentLobby?.playingAgainst) return; // if not playing against anyone, there is no lobby-based signalling
+	if (e.data.type !== "sdp") return;
+
+	const message = {
+		type: "sdp",
+		sdp: e.data.sdp
+		// TODO: encrypt sdp something like this.
+		// Below code does not work because RSA-OAEP has
+		// a maximum size for the data to encrypt.
+		//
+		//sdp: u8tos(await crypto.subtle.encrypt(
+		//	{name: "RSA-OAEP"},
+		//	currentLobby.playingAgainst.rsaPublicKey,
+		//	stou8(e.data.sdp)
+		//))
+	}
+
+	message.signature = await signString("challenge", `sdp|${currentLobby.playingAgainst.id}|${message.sdp}`, ++currentLobby.playingAgainst.lastSentChallengeSequenceNum);
+
+	if (isHosting) {
+		message.from = currentLobby.ownUserId;
+		getUserConnection(currentLobby.playingAgainst.id).dataChannel.send(JSON.stringify(message));
+	} else {
+		message.to = currentLobby.playingAgainst.id;
+		hostDataChannel.send(JSON.stringify(message));
+	}
+});
+
 async function acceptOrDenyChallenge(fromUser, accepted) {
 	fromUser.hasSentChallenge = false;
 	const response = {type: accepted? "challengeAccepted" : "challengeDenied"};
 	if (accepted) {
-		response.roomCode = Math.random().toString();
 		currentLobby.playingAgainst = fromUser;
 
 		syncNewStatus("inGame");
-		// force the default websocket for now. (it will get replaced with webRTC stuff down the line anyways)
-		startGame(response.roomCode, currentLobby.gameMode, currentLobby.automatic, "wss://battle.crossuniverse.net:443/ws/").then(() => {
+		startGame(true, currentLobby.gameMode, currentLobby.automatic).then(() => {
 			currentLobby.playingAgainst = null;
 			syncNewStatus("present");
 		});
 	}
-	response.signature = await signString("challenge", `${response.type}|${fromUser.id}${accepted? "|" + response.roomCode : ""}`, ++fromUser.lastSentChallengeSequenceNum);
+	response.signature = await signString("challenge", `${response.type}|${fromUser.id}`, ++fromUser.lastSentChallengeSequenceNum);
 
 	if (isHosting) {
 		response.from = currentLobby.ownUserId;
@@ -398,17 +426,16 @@ async function acceptOrDenyChallenge(fromUser, accepted) {
 		hostDataChannel.send(JSON.stringify(response));
 	}
 }
-async function challengeGotAccepted(byUser, signature, roomCode) {
+async function challengeGotAccepted(byUser, signature) {
 	byUser.lastChallengeSequenceNum++;
 	if (!currentLobby.currentlyChallenging || currentLobby.currentlyChallenging.id !== byUser.id) return;
-	if (!await verifySignature(signature, "challenge", `challengeAccepted|${currentLobby.ownUserId}|${roomCode}`, byUser.lastChallengeSequenceNum, byUser)) return;
+	if (!await verifySignature(signature, "challenge", `challengeAccepted|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
 	lobbyChat.putMessage(locale.lobbies.challengeAcceptedMessage.replaceAll("{#name}", byUser.name), "success");
 	clearCurrentlyChallenging();
 	currentLobby.playingAgainst = byUser;
 
 	syncNewStatus("inGame");
-	// force the default websocket for now. (it will get replaced with webRTC stuff down the line anyways)
-	startGame(roomCode, currentLobby.gameMode, currentLobby.automatic, "wss://battle.crossuniverse.net:443/ws/").then(() => {
+	startGame(false, currentLobby.gameMode, currentLobby.automatic).then(() => {
 		currentLobby.playingAgainst = null;
 		syncNewStatus("present");
 	});
@@ -432,6 +459,22 @@ async function challengeGotCancelled(byUser, signature) {
 	} else {
 		resolveAnyChatChallenge(byUser.id, locale.lobbies.challengeCancelled);
 	}
+}
+async function sdpReceived(fromUser, sdp, signature) {
+	if (!await verifySignature(signature, "challenge", `sdp|${currentLobby.ownUserId}|${sdp}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+	gameFrame.contentWindow.postMessage({
+		type: "sdp",
+		sdp: sdp
+		// TODO: decrypt sdp something like this.
+		// Below code does not work because RSA-OAEP has
+		// a maximum size for the data to encrypt.
+		//
+		//sdp: u8tos(await crypto.subtle.decrypt(
+		//	{name: "RSA-OAEP"},
+		//	currentLobby.ownRsaKeyPair.privateKey,
+		//	stou8(sdp)
+		//))
+	});
 }
 function getUserFromId(id) {
 	return currentLobby.users.find(user => user.id === id);
@@ -880,7 +923,7 @@ async function receiveWebRtcHostMessage(e) {
 		case "challengeAccepted": {
 			const user = getUserFromId(message.from);
 			if (!user) break;
-			challengeGotAccepted(user, message.signature, message.roomCode);
+			challengeGotAccepted(user, message.signature);
 			break;
 		}
 		case "challengeDenied": {
@@ -893,6 +936,12 @@ async function receiveWebRtcHostMessage(e) {
 			const user = getUserFromId(message.from);
 			if (!user) break;
 			challengeGotCancelled(user, message.signature);
+			break;
+		}
+		case "sdp": { // opponent sent an SDP for game connection signalling
+			const user = getUserFromId(message.from);
+			if (user !== currentLobby.playingAgainst) break;
+			sdpReceived(user, message.sdp, message.signature);
 			break;
 		}
 	}
@@ -1001,14 +1050,13 @@ async function receiveWebRtcVisitorMessage(e) {
 		}
 		case "challengeAccepted": {
 			if (message.to === currentLobby.ownUserId) { // is for me?
-				challengeGotAccepted(getUserFromDataChannel(this), message.signature, message.roomCode);
+				challengeGotAccepted(getUserFromDataChannel(this), message.signature);
 				break;
 			}
 			// otherwise, forward to recipient
 			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
 				type: "challengeAccepted",
 				from: getConnectionFromDataChannel(this).userId,
-				roomCode: message.roomCode,
 				signature: message.signature
 			}));
 			break;
@@ -1035,6 +1083,20 @@ async function receiveWebRtcVisitorMessage(e) {
 			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
 				type: "challengeCancelled",
 				from: getConnectionFromDataChannel(this).userId,
+				signature: message.signature
+			}));
+			break;
+		}
+		case "sdp": {
+			if (message.to === currentLobby.ownUserId) { // is for me?
+				sdpReceived(getUserFromDataChannel(this), message.sdp, message.signature);
+				break;
+			}
+			// otherwise, forward to recipient
+			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
+				type: "sdp",
+				from: getConnectionFromDataChannel(this).userId,
+				sdp: message.sdp,
 				signature: message.signature
 			}));
 			break;

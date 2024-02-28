@@ -1,6 +1,7 @@
 import {InitState} from "./initState.mjs";
 import {ReplayInitState} from "./replayInitState.mjs";
 import {locale} from "/scripts/locale.mjs";
+import {incomingSdp} from "./netcode.mjs";
 
 document.documentElement.lang = locale.code;
 
@@ -49,11 +50,15 @@ document.addEventListener("keydown", async function(e) {
 window.addEventListener("message", e => {
 	switch (e.data.type) {
 		case "connect": {
-			new InitState(e.data.roomCode, e.data.gameMode, e.data.automatic, e.data.websocketUrl);
+			new InitState(e.data.isCaller, e.data.gameMode, e.data.automatic, e.data.websocketUrl);
 			break;
 		}
 		case "replay": {
 			new ReplayInitState(e.data.data);
+			break;
+		}
+		case "sdp": {
+			incomingSdp(e.data.sdp);
 			break;
 		}
 	}

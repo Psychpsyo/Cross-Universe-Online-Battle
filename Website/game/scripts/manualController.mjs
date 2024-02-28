@@ -4,7 +4,7 @@ import {InteractionController} from "./interactionController.mjs";
 import {locale} from "/scripts/locale.mjs";
 import {Zone} from "/rulesEngine/src/zones.mjs";
 import {Card} from "/rulesEngine/src/card.mjs";
-import {socket, zoneToLocal} from "./netcode.mjs";
+import {netSend, zoneToLocal} from "./netcode.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as manualUI from "./manualUI.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
@@ -39,7 +39,7 @@ function addPartnerRevealButton() {
 		gameUI.clearCardButtons(localPlayer.partnerZone, 0, "revealPartner");
 		localPlayer.partnerZone.cards[0].hiddenFor = [];
 		gameUI.updateCard(localPlayer.partnerZone, 0);
-		socket.send("[revealPartner]");
+		netSend("[revealPartner]");
 	}, true);
 }
 
@@ -151,7 +151,7 @@ export class ManualController extends InteractionController {
 		}
 		if (zone == this.tokenZone) {
 			cardLoader.getManualCdf(zone.cards[index].cardId).then(cdf => this.playerInfos[player.index].setHeld(new Card(localPlayer, cdf)));
-			socket.send("[grabToken]" + zone.cards[index].cardId);
+			netSend("[grabToken]" + zone.cards[index].cardId);
 			return false;
 		}
 		for (const playerInfo of this.playerInfos) {
@@ -225,7 +225,7 @@ export class ManualController extends InteractionController {
 			case "destroyToken": {
 				let heldCard = this.playerInfos[localPlayer.index].heldCard;
 				if (heldCard && heldCard.isToken) {
-					socket.send("[uiDroppedCard]" + gameState.getZoneName(localPlayer.discardPile) + "|0");
+					netSend("[uiDroppedCard]" + gameState.getZoneName(localPlayer.discardPile) + "|0");
 					this.dropCard(localPlayer, localPlayer.discardPile, 0);
 				}
 				return true;
@@ -251,7 +251,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		if (player === localPlayer) {
-			socket.send("[drawCard]");
+			netSend("[drawCard]");
 		}
 		let card = player.deckZone.cards[player.deckZone.cards.length - 1];
 		let insertedIndex = player.handZone.add(card, player.handZone.cards.length, false);
@@ -278,31 +278,31 @@ export class ManualController extends InteractionController {
 		for (let i = 0; i < deckZone.cards.length; i++) {
 			gameUI.updateCard(deckZone, i);
 		}
-		socket.send("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
+		netSend("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
 		chat.putMessage(locale.game.notices[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
 	}
 	deckToTop(player, deckZone) {
 		if (player === localPlayer) {
-			socket.send("[deckToTop]" + deckZone.player.index);
+			netSend("[deckToTop]" + deckZone.player.index);
 		}
 		this.dropCard(player, deckZone, deckZone.cards.length);
 	}
 	deckToBottom(player, deckZone) {
 		if (player === localPlayer) {
-			socket.send("[deckToBottom]" + deckZone.player.index);
+			netSend("[deckToBottom]" + deckZone.player.index);
 		}
 		this.dropCard(player, deckZone, 0);
 	}
 	deckShuffleIn(player, deckZone) {
 		this.dropCard(player, deckZone, 0);
 		if (player === localPlayer) {
-			socket.send("[deckShuffleIn]" + deckZone.player.index);
+			netSend("[deckShuffleIn]" + deckZone.player.index);
 			this.deckShuffle(deckZone);
 		}
 	}
 	deckCancelDrop(player) {
 		if (player === localPlayer) {
-			socket.send("[deckCancel]");
+			netSend("[deckCancel]");
 		}
 		let card = this.playerInfos[player.index].heldCard;
 
@@ -314,7 +314,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		if (player === localPlayer) {
-			socket.send("[deckShowTop]" + deckZone.player.index);
+			netSend("[deckShowTop]" + deckZone.player.index);
 		}
 		let card = deckZone.cards[deckZone.cards.length - 1];
 		let presentedZone = this.playerInfos[player.index].presentedZone;
@@ -338,7 +338,7 @@ export class ManualController extends InteractionController {
 			gameUI.insertCard(zone.player.deckZone, 0);
 		}
 		if (zone.player === localPlayer) {
-			socket.send("[returnAllToDeck]" + gameState.getZoneName(zone));
+			netSend("[returnAllToDeck]" + gameState.getZoneName(zone));
 			this.deckShuffle(localPlayer.deckZone);
 		}
 	}
@@ -350,7 +350,7 @@ export class ManualController extends InteractionController {
 		}
 		player.life = value;
 		if (player === localPlayer) {
-			socket.send("[life]" + localPlayer.life);
+			netSend("[life]" + localPlayer.life);
 		}
 		await gameUI.uiPlayers[player.index].life.set(value, false);
 		if (value === 0) {
@@ -368,7 +368,7 @@ export class ManualController extends InteractionController {
 		player.mana = value;
 		gameUI.uiPlayers[player.index].mana.set(value, true);
 		if (player === localPlayer) {
-			socket.send("[mana]" + localPlayer.mana);
+			netSend("[mana]" + localPlayer.mana);
 		}
 	}
 }
