@@ -742,6 +742,7 @@
 			"copyDeckCode": null,
 			"importDeckFromCode": null,
 			"deckCodeImportPrompt": null,
+			"printDeck": null,
 			"drawStartingHand": null
 		},
 

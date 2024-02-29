@@ -741,6 +741,7 @@
 			"copyDeckCode": "Deck-Code kopieren",
 			"importDeckFromCode": "Deck-Code importieren",
 			"deckCodeImportPrompt": "Füge deinen Deck-Code hier ein.\n(Er sollte in etwa so aussehen: a4z8bb3n558a77sa1gi2h8pg8a2v4i58a )",
+			"printDeck": "Deck Ausdrucken",
 			"drawStartingHand": "Starthand ziehen"
 		},
 
