@@ -121,6 +121,9 @@ export async function getCdf(cardId) {
 			}
 		} else {
 			const response = await fetch("/rulesEngine/cards/CU" + cardId + ".cdf", {cache: "force-cache"});
+			if (!response.ok) {
+				throw new NonexistantCardError(cardId);
+			}
 			cdfCache[cardId] = await response.text();
 		}
 	}
