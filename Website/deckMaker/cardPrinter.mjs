@@ -39,12 +39,14 @@ cardPrinterDiv.id = "cardPrinterDiv";
 document.body.appendChild(cardPrinterDiv);
 }
 
-export function setCards(images, width = "6.3cm") {
+// needs to be called at some point before printing, like the beforeprint event handler
+export function setCards(images, width = "6.3cm", backside = false) {
 	cardPrinterDiv.innerHTML = "";
 	if (width instanceof Number) {
 		width = width + "cm";
 	}
 	cardPrinterDiv.style.setProperty("--card-width", width);
+	cardPrinterDiv.style.setProperty("direction", backside? "rtl" : "ltr");
 	for (let image of images) {
 		if (!(image instanceof Image)) {
 			const src = image;

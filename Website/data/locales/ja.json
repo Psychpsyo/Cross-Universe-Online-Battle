@@ -743,6 +743,7 @@
 			"importDeckFromCode": null,
 			"deckCodeImportPrompt": null,
 			"printDeck": null,
+			"printCardBacks": null,
 			"drawStartingHand": null
 		},
 
