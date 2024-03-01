@@ -2,7 +2,7 @@ import {locale} from "/scripts/locale.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
 import * as deckUtils from "/scripts/deckUtils.mjs";
 import * as uiUtils from "/scripts/uiUtils.mjs";
-import * as cardPrinter from "./cardPrinter/cardPrinter.mjs";
+import * as cardPrinter from "./cardPrinter.mjs";
 
 //load illustrator & contest winner tags
 let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
@@ -66,6 +66,7 @@ fileImportBtn.textContent = locale.deckMaker.deckMenu.importDeckFromFile;
 deckCodeCopyBtn.textContent = locale.deckMaker.deckMenu.copyDeckCode;
 deckCodeImportBtn.textContent = locale.deckMaker.deckMenu.importDeckFromCode;
 printDeckBtn.textContent = locale.deckMaker.deckMenu.printDeck;
+printCardBacksBtn.textContent = locale.deckMaker.deckMenu.printCardBacks;
 startingHandGenBtn.textContent = locale.deckMaker.deckMenu.drawStartingHand;
 
 //search panel
@@ -509,6 +510,7 @@ async function addCardToDeck(cardId) {
 
 	if (deckList.length >= 0) {
 		printDeckBtn.disabled = false;
+		printCardBacksBtn.disabled = false;
 	}
 	if (deckList.length >= 5) {
 		startingHandGenBtn.disabled = false;
@@ -549,6 +551,7 @@ async function removeCardFromDeck(cardId) {
 
 	if (deckList.length == 0) {
 		printDeckBtn.disabled = true;
+		printCardBacksBtn.disabled = true;
 	}
 	if (deckList.length < 5) {
 		startingHandGenBtn.disabled = true;
@@ -833,7 +836,17 @@ if ("launchQueue" in window) {
 }
 
 // printing out decks
+let printBack = false;
 printDeckBtn.addEventListener("click", () => print());
+printCardBacksBtn.addEventListener("click", () => {
+	printBack = true;
+	print();
+});
 window.addEventListener("beforeprint", () => {
-	cardPrinter.setCards(deckList.map(cardId => cardLoader.getCardImageFromID(cardId)));
+	if (printBack) {
+		printBack = false;
+		cardPrinter.setCards(deckList.map(cardId => "/images/cardBack.jpg"), undefined, true);
+	} else {
+		cardPrinter.setCards(deckList.map(cardId => cardLoader.getCardImageFromID(cardId)));
+	}
 });
