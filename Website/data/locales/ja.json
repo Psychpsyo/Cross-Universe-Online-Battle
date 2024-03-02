@@ -31,6 +31,11 @@
 		"manual": null,
 		"automatic": null
 	},
+	"draftFormats": {
+		"beginner": null,
+		"mayhem": null,
+		"og137": "OG-137"
+	},
 
 	"lobbies": {
 		"title": null,
@@ -92,7 +97,9 @@
 			"password": "パスワード：",
 			"gameMode": "ゲームモード：",
 			"automatic": null,
-			"automaticTitle": null
+			"automaticTitle": null,
+			"oldManaRule": null,
+			"oldManaRuleTitle": null
 		}
 	},
 

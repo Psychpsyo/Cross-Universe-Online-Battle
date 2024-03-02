@@ -50,7 +50,13 @@ document.addEventListener("keydown", async function(e) {
 window.addEventListener("message", e => {
 	switch (e.data.type) {
 		case "connect": {
-			new InitState(e.data.isCaller, e.data.gameMode, e.data.automatic, e.data.websocketUrl);
+			new InitState(
+				e.data.isCaller,
+				e.data.gameMode,
+				e.data.automatic,
+				e.data.useOldManaRule,
+				e.data.draftFormat
+			);
 			break;
 		}
 		case "replay": {
