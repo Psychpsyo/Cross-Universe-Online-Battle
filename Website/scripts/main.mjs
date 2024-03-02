@@ -49,12 +49,6 @@ function connect(overrideWebsocketUrl) {
 		}
 	}, 100);
 
-	let gameMode = gameModeSelect.value;
-	let automatic = false;
-	if (gameMode.endsWith("Automatic")) {
-		automatic = true;
-		gameMode = gameMode.substring(0, gameMode.length - 9);
-	}
 	stopEffect();
 
 	// Signalling for the game
@@ -68,7 +62,10 @@ function connect(overrideWebsocketUrl) {
 
 		switch (command) {
 			case "youAre": {
-				startGame(parseInt(message) === 0, gameMode, automatic).then(() => {
+				startGame(parseInt(message) === 0, {
+					gameMode: "normal",
+					automatic: gameModeSelect.value === "automatic"
+				}).then(() => {
 					socket?.close(); // might've already closed at game start
 					socket = null;
 					waitingForOpponentHolder.hidden = true;
@@ -93,11 +90,12 @@ function connect(overrideWebsocketUrl) {
 const queryString = new URLSearchParams(location.search);
 if (queryString.get("id")) {
 	roomCodeInputField.placeholder = queryString.get("id");
-	let gameMode = queryString.get("m");
-	if (!["normal", "draft", "normalAutomatic", "draftAutomatic"].includes(gameMode)) {
-		gameMode = "normal";
+	const gameMode = queryString.get("m");
+	if (!["manual", "automatic"].includes(gameMode)) {
+		gameMode = "manual";
+	} else {
+		gameModeSelect.value = gameMode;
 	}
-	gameModeSelect.value = gameMode;
 	websocketUrl ??= queryString.get("s");
 	connect();
 } else {
@@ -110,12 +108,8 @@ roomCodeInputLabel.textContent = locale.mainMenu.enterRoomcode;
 roomCodeRefresh.setAttribute("aria-label", locale.mainMenu.rerollRoomcode);
 
 gameModeSelectorLabel.textContent = locale.mainMenu.gameMode;
-gameModeManualGroup.label = locale.gameModes.manual;
-gameModeNormalOption.textContent = locale.gameModes.normal;
-gameModeDraftOption.textContent = locale.gameModes.draft;
-gameModeAutomaticGroup.label = locale.gameModes.automatic;
-gameModeNormalAutomaticOption.textContent = locale.gameModes.normal + " [A]";
-gameModeDraftAutomaticOption.textContent = locale.gameModes.draft + " [A]";
+gameModeManualOption.textContent = locale.gameModes.manual;
+gameModeAutomaticOption.textContent = locale.gameModes.automatic;
 
 connectBtn.textContent = locale.mainMenu.connectToRoom;
 waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;

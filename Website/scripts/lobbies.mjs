@@ -13,20 +13,23 @@ import {startGame} from "/scripts/gameStarter.mjs";
 import "/scripts/profilePicture.mjs";
 
 const unloadWarning = new AbortController();
-const settingsList = ["name", "userLimit", "hasPassword", "password", "gameMode", "automatic"];
+const settingsList = ["name", "userLimit", "hasPassword", "password", "gameMode", "draftFormat", "automatic", "oldManaRule"];
 const settingsTypes = {
 	name: "string",
 	userLimit: "number",
 	hasPassword: "boolean",
 	password: "string",
 	gameMode: "string",
-	automatic: "boolean"
+	draftFormat: "string",
+	automatic: "boolean",
+	oldManaRule: "boolean"
 }
 const settingsLimits = {
 	name: {maxLength: 100, stripWhitespace: true},
 	userLimit: {min: 1, max: 1000},
 	password: {maxLength: 100},
-	gameMode: {options: ["normal", "draft"]}
+	gameMode: {options: ["normal", "draft"]},
+	draftFormat: {options: ["beginner", "mayhem", "og137"]}
 }
 const possibleStatuses = ["present", "busy", "inGame"];
 
@@ -50,9 +53,13 @@ for (const setting of settingsList) {
 	);
 }
 lobbyNameInput.placeholder = locale.lobbies.settings.namePlaceholder;
-lobbyAutomaticInput.title = locale.lobbies.settings.automaticTitle;
+lobbyAutomatic.title = locale.lobbies.settings.automaticTitle;
 lobbyGameModeNormal.textContent = locale.gameModes.normal;
 lobbyGameModeDraft.textContent = locale.gameModes.draft;
+lobbyDraftFormatBeginner.textContent = locale.draftFormats.beginner;
+lobbyDraftFormatMayhem.textContent = locale.draftFormats.mayhem;
+lobbyDraftFormatOG.textContent = locale.draftFormats.og137;
+lobbyOldManaRule.title = locale.lobbies.settings.oldManaRuleTitle;
 
 // settings helper functions
 function sanitizeSettingsValue(setting, value) {
@@ -83,13 +90,15 @@ function getSettingLabel(setting) {
 }
 
 class Lobby {
-	constructor(name, userLimit, hasPassword, password, users, ownUserId, ownRsaKeyPair, ownEcdsaKeyPair) {
+	constructor(name, userLimit, hasPassword, password, gameMode, draftFormat, automatic, oldManaRule, users, ownUserId, ownRsaKeyPair, ownEcdsaKeyPair) {
 		this.setSetting("name", name);
 		this.setSetting("userLimit", userLimit);
 		this.setSetting("hasPassword", hasPassword);
 		this.setSetting("password", password);
-		this.setSetting("gameMode", "normal");
-		this.setSetting("automatic", false);
+		this.setSetting("gameMode", gameMode);
+		this.setSetting("draftFormat", draftFormat);
+		this.setSetting("automatic", automatic);
+		this.setSetting("oldManaRule", oldManaRule);
 		this.ownUserId = ownUserId;
 		// the RSA keys are for encryption, the ecdsa keys are for signatures
 		this.ownRsaKeyPair = ownRsaKeyPair;
@@ -195,6 +204,14 @@ class Lobby {
 			}
 			case "hasPassword": {
 				lobbyPasswordInput.disabled = !value;
+				break;
+			}
+			case "gameMode": {
+				lobbyDraftFormat.style.display = value === "draft"? "flex" : "none";
+				break;
+			}
+			case "automatic": {
+				lobbyOldManaRule.style.display = value? "flex" : "none";
 				break;
 			}
 		}
@@ -410,11 +427,7 @@ async function acceptOrDenyChallenge(fromUser, accepted) {
 	if (accepted) {
 		currentLobby.playingAgainst = fromUser;
 
-		syncNewStatus("inGame");
-		startGame(true, currentLobby.gameMode, currentLobby.automatic).then(() => {
-			currentLobby.playingAgainst = null;
-			syncNewStatus("present");
-		});
+		beginGame(true);
 	}
 	response.signature = await signString("challenge", `${response.type}|${fromUser.id}`, ++fromUser.lastSentChallengeSequenceNum);
 
@@ -434,11 +447,21 @@ async function challengeGotAccepted(byUser, signature) {
 	clearCurrentlyChallenging();
 	currentLobby.playingAgainst = byUser;
 
+	beginGame(false);
+}
+async function beginGame(isCaller) {
 	syncNewStatus("inGame");
-	startGame(false, currentLobby.gameMode, currentLobby.automatic).then(() => {
-		currentLobby.playingAgainst = null;
-		syncNewStatus("present");
-	});
+	const gameOptions = {
+		gameMode: currentLobby.gameMode,
+		automatic: currentLobby.automatic,
+		useOldManaRule: currentLobby.oldManaRule
+	}
+	if (currentLobby.gameMode === "draft") {
+		gameOptions.draftFormat = await (await fetch("data/draftFormats/beginner.json")).json();
+	}
+	await startGame(isCaller, gameOptions)
+	currentLobby.playingAgainst = null;
+	syncNewStatus("present");
 }
 async function challengeGotDenied(byUser, signature) {
 	byUser.lastChallengeSequenceNum++;
@@ -521,7 +544,11 @@ newLobbyBtn.addEventListener("click", async () => {
 		lobbyName,
 		8,
 		true,
-		Math.floor(Math.random() * 999999999999).toString().padStart(12, 0), // TODO: replace this with something better (initial lobby creation menu?)
+		Math.floor(Math.random() * 999999999999).toString().padStart(12, 0), // TODO: better initial password (initial lobby creation menu?)
+		"normal",
+		"beginner",
+		false,
+		false,
 		[new User(
 			localStorage.getItem("username"),
 			localStorage.getItem("profilePicture"),
@@ -830,6 +857,10 @@ async function receiveWebRtcHostMessage(e) {
 					message.lobby.userLimit,
 					message.lobby.hasPassword,
 					message.lobby.password,
+					message.lobby.gameMode,
+					message.lobby.draftFormat,
+					message.lobby.automatic,
+					message.lobby.oldManaRule,
 					await Promise.all(
 						message.lobby.users.map(async user => new User(
 							user.namePlaceholder? "" : user.name,
@@ -983,9 +1014,13 @@ async function receiveWebRtcVisitorMessage(e) {
 				lobby: {
 					name: currentLobby.name,
 					users: currentLobby.users,
+					userLimit: currentLobby.userLimit,
 					hasPassword: currentLobby.hasPassword,
 					password: "*".repeat(currentLobby.password.length),
-					userLimit: currentLobby.userLimit
+					gameMode: currentLobby.gameMode,
+					draftFormat: currentLobby.draftFormat,
+					automatic: currentLobby.automatic,
+					oldManaRule: currentLobby.oldManaRule
 				},
 				youAre: newUser.id
 			}));

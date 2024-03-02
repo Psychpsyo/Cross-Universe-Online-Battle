@@ -31,6 +31,11 @@
 		"manual": "Manual",
 		"automatic": "Automatic"
 	},
+	"draftFormats": {
+		"beginner": "Beginner",
+		"mayhem": "Mayhem",
+		"og137": "OG-137"
+	},
 
 	"lobbies": {
 		"title": "Lobbies",
@@ -91,8 +96,11 @@
 			"hasPassword": "Has Password:",
 			"password": "Password:",
 			"gameMode": "Game Mode:",
+			"draftFormat": "Draft Format:",
 			"automatic": "Automatic Mode:",
-			"automaticTitle": "Determines whether or not the game rules are checked automatically.\nNote: Not all cards exist in automatic games."
+			"automaticTitle": "Determines whether or not the game rules are checked automatically.\nNote: Not all cards exist in automatic games.",
+			"oldManaRule": "Old Mana Rule:",
+			"oldManaRuleTitle": "Before a February 2021 rules revision, both players would always gain mana at the start of the first player's turn.\nThis re-enables that version of the rules.\nNote: There is a reason this got changed, and newer cards are not balanced to work under the old rules."
 		}
 	},
 

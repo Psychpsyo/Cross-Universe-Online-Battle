@@ -46,14 +46,8 @@
 							<span><input id="roomCodeInputField" aria-atomic="true" autocomplete="off"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
 							<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
 							<select id="gameModeSelect">
-								<optgroup id="gameModeManualGroup">
-									<option id="gameModeNormalOption" value="normal"></option>
-									<option id="gameModeDraftOption" value="draft"></option>
-								</optgroup>
-								<optgroup id="gameModeAutomaticGroup">
-									<option id="gameModeNormalAutomaticOption" value="normalAutomatic"></option>
-									<option id="gameModeDraftAutomaticOption" value="draftAutomatic"></option>
-								</optgroup>
+								<option id="gameModeManualOption" value="manual"></option>
+								<option id="gameModeAutomaticOption" value="automatic"></option>
 							</select><br>
 							<button id="connectBtn"></button>
 						</div>
@@ -114,9 +108,21 @@
 									<option id="lobbyGameModeDraft" value="draft"></option>
 								</select>
 							</div>
-							<div class="optionListingItem">
+							<div id="lobbyDraftFormat" class="optionListingItem">
+								<label id="lobbyDraftFormatLabel" for="lobbyDraftFormatInput"></label>
+								<select id="lobbyDraftFormatInput">
+									<option id="lobbyDraftFormatBeginner" value="beginner"></option>
+									<option id="lobbyDraftFormatMayhem" value="mayhem" hidden><!-- TODO: implement mayhem drafts --></option>
+									<option id="lobbyDraftFormatOG" value="og137"></option>
+								</select>
+							</div>
+							<div id="lobbyAutomatic" class="optionListingItem">
 								<label id="lobbyAutomaticLabel" for="lobbyAutomaticInput"></label>
 								<div><input id="lobbyAutomaticInput" type="checkbox"></div>
+							</div>
+							<div id="lobbyOldManaRule" class="optionListingItem">
+								<label id="lobbyOldManaRuleLabel" for="lobbyOldManaRuleInput"></label>
+								<div><input id="lobbyOldManaRuleInput" type="checkbox"></div>
 							</div>
 						</fieldset>
 					</section>

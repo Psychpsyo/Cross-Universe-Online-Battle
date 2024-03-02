@@ -31,6 +31,11 @@
 		"manual": "Manuell",
 		"automatic": "Automatisch"
 	},
+	"draftFormats": {
+		"beginner": "Anfänger",
+		"mayhem": "Mayhem",
+		"og137": "OG-137"
+	},
 
 	"lobbies": {
 		"title": "Lobbies",
@@ -60,7 +65,7 @@
 		"cancelChallenge": "Herausforderung canceln",
 		"kick": "Kicken",
 		"status": {
-			"setStatus": "Set Status",
+			"setStatus": "Status Ändern",
 			"present": "Anwesend",
 			"inGame": "Im Spiel",
 			"busy": "Beschäftigt"
@@ -91,8 +96,11 @@
 			"hasPassword": "Mit Passwort:",
 			"password": "Passwort:",
 			"gameMode": "Spielmodus:",
+			"draftFormat": "Draftformat:",
 			"automatic": "Automatisch:",
-			"automaticTitle": "Bestimmt, ob die Spielregeln automatisch überprüft werden oder nicht.\nAnmerkung: In automatischen Spielen gibt es nicht alle Karten."
+			"automaticTitle": "Bestimmt, ob die Spielregeln automatisch überprüft werden oder nicht.\nAnmerkung: In automatischen Spielen gibt es nicht alle Karten.",
+			"oldManaRule": "Alte Manaregeln:",
+			"oldManaRuleTitle": "Vor einer Regelüberarbeitung im Februar 2021 bekamen beide Spieler ihr Mana im Zug des ersten Spielers.\nDieser Toggle reaktiviert diese alte Regel.\nAnmerkung: Die Regeln wurden nicht grundlos geändert und das Balancing neuer Karten ist nicht an die alten Regeln angepasst."
 		}
 	},
 

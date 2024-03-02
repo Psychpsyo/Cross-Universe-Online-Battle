@@ -9,14 +9,16 @@ import * as gameUI from "./gameUI.mjs";
 import * as cardLoader from "/scripts/cardLoader.mjs";
 
 export class DraftState extends GameState {
-	constructor(automatic) {
+	constructor(automatic, format) {
 		super();
 		gameState = this;
 
 		this.automatic = automatic;
 		game.config.validateCardAmounts = false;
 
-		this.format = null;
+		this.format = format;
+		format.packCount = Math.ceil(format.deckSize * 2 / format.cardPicks);
+
 		this.currentBooster = [];
 		this.takenCards = 0;
 		this.packsOpened = 0;
@@ -34,33 +36,45 @@ export class DraftState extends GameState {
 		deckDropzone.remove();
 		deckSelector.classList.add("deckListDisable");
 
-		fetch("data/draftFormats/" + (this.automatic? "autoFormat" : "beginnerFormat") + ".json").then(async function(format) {
-			format = await format.json();
-			format.packCount = Math.ceil(format.deckSize * 2 / format.cardPicks);
-			this.format = format;
+		draftDeckCount0.textContent = "0/" + format.deckSize;
+		draftDeckCount1.textContent = "0/" + format.deckSize;
 
-			draftDeckCount0.textContent = "0/" + format.deckSize;
-			draftDeckCount1.textContent = "0/" + format.deckSize;
+		document.querySelectorAll(".draftDeckList").forEach(deckList => {
+			deckList.style.aspectRatio = "8130 / " + (Math.ceil(format.deckSize / 10) * 1185);
+		});
 
-			document.querySelectorAll(".draftDeckList").forEach(deckList => {
-				deckList.style.aspectRatio = "8130 / " + (Math.ceil(this.format.deckSize / 10) * 1185);
-			});
+		draftStartButton.addEventListener("click", function() {
+			netSend("[ready]");
+			gameState.pressedReady = true;
+			draftStartButton.textContent = locale.draft.waitingForOpponent;
+			draftStartButton.setAttribute("disabled", "");
+			gameState.checkReadyConditions();
+		});
 
-			draftStartButton.addEventListener("click", function() {
-				netSend("[ready]");
-				gameState.pressedReady = true;
-				draftStartButton.textContent = locale.draft.waitingForOpponent;
-				draftStartButton.setAttribute("disabled", "");
-				gameState.checkReadyConditions();
-			});
+		// setup that needs async
+		game.rng.nextPlayerIndex(game).then((async index => {
+			// must remove unsupported cards from card pools
+			if (this.automatic) {
+				for (const [_, pool] of Object.entries(this.format.cardPools)) {
+					for (let i = pool.length - 1; i >= 0; i--) {
+						if (!await cardLoader.isCardScripted(pool[i])) {
+							pool.splice(i, 1);
+						}
+					}
+					// TODO: prefer card types that are in the original pool
+					// A pool of only spells should have a replacement spell inserted instead of a unit
+					if (pool.length === 0) {
+						pool.push("U00004");
+					}
+				}
+			}
 
-			const player = game.players[await game.rng.nextPlayerIndex(game)];
-			this.setPlayer(player);
-			this.firstPlayer = player;
+			// select starting player and begin
+			this.firstPlayer = game.players[index];
+			this.setPlayer(this.firstPlayer);
 			this.rerollCards();
-
 			draftGameSetupMenu.hidden = false;
-		}.bind(this));
+		}).bind(this));
 	}
 	receiveMessage(command, message) {
 		switch (command) {

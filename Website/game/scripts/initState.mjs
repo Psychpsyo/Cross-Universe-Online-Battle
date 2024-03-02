@@ -7,12 +7,13 @@ import {Game} from "/rulesEngine/src/game.mjs";
 import {netSend, callOpponent, youAre} from "./netcode.mjs";
 
 export class InitState extends GameState {
-	constructor(isCaller, gameMode, automatic) {
+	constructor(isCaller, gameMode = "normal", automatic = false, useOldManaRule = false, draftFormat = null) {
 		super();
 		gameState = this;
 
 		this.gameMode = gameMode;
 		this.automatic = automatic;
+		this.draftFormat = draftFormat;
 		this.opponentReady = false;
 
 		callOpponent(isCaller).then(() => {
@@ -30,6 +31,7 @@ export class InitState extends GameState {
 
 			// set up the game
 			game = new Game();
+			game.config.useOldManaRule = useOldManaRule;
 			game.rng = new DistRandom();
 			localPlayer = game.players[1];
 			netSend("[ready]");
@@ -70,7 +72,7 @@ export class InitState extends GameState {
 		return false;
 	}
 
-	checkReadyConditions() {
+	async checkReadyConditions() {
 		if (!this.opponentReady || youAre === null) return;
 
 		// disable dropping files onto this window once the game starts to it doesn't happen on accident (like when loading a deck)
@@ -93,7 +95,10 @@ export class InitState extends GameState {
 				break;
 			}
 			case "draft": {
-				new DraftState(this.automatic);
+				new DraftState(
+					this.automatic,
+					this.draftFormat
+				);
 				break;
 			}
 		}
