@@ -836,6 +836,7 @@ if ("launchQueue" in window) {
 }
 
 // printing out decks
+if (!navigator.userAgent.toLowerCase().includes("chrome")) chromeWarning.remove();
 let printBack = false;
 printDeckBtn.addEventListener("click", () => print());
 printCardBacksBtn.addEventListener("click", () => {
