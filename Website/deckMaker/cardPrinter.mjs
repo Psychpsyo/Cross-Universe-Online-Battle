@@ -17,7 +17,7 @@ styleElem.textContent = `
 	}
 
 	#cardPrinterDiv {
-		display: grid;
+		display: ${navigator.userAgent.toLowerCase().includes("chrome")? "block" : "grid"};
   		grid-template-columns: repeat(auto-fill, var(--card-width));
 		justify-content: center;
 		gap: 1pt;
