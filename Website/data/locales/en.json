@@ -743,7 +743,7 @@
 			},
 
 			"levelDistribution": "Level Distribution:",
-			"options": "Options",
+			"options": "Options:",
 			"exportDeck": "Export (.deck)",
 			"importDeckFromFile": "Import from File",
 			"copyDeckCode": "Copy Deck Code",
