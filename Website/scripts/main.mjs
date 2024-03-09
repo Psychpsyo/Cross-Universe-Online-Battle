@@ -54,7 +54,7 @@ function connect(overrideWebsocketUrl) {
 	// Signalling for the game
 	socket = new WebSocket(overrideWebsocketUrl ?? websocketUrl);
 	socket.addEventListener("open", () => {
-		socket.send("[roomcode]" + getRoomcode());
+		socket.send("[roomcode]" + getRoomcode() + gameModeSelect.value);
 	});
 	socket.addEventListener("message", e => {
 		const message = e.data.substring(e.data.indexOf("]") + 1);
