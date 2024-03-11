@@ -41,6 +41,7 @@ function connect(overrideWebsocketUrl) {
 	roomCodeInputFieldHolder.hidden = true;
 	waitingForOpponentHolder.hidden = false;
 	lobbies.style.display = "none";
+	loadingIndicator.classList.add("active");
 	// refresh the "Waiting for Opponent" text so screen readers read it out.
 	setTimeout(() => {
 		if (typeof waitingForOpponentText !== "undefined") {
