@@ -3,7 +3,7 @@
 import {locale} from "/scripts/locale.mjs";
 import {InteractionController} from "./interactionController.mjs";
 import {netSend} from "./netcode.mjs";
-import {getAutoResponse} from "./autopass.mjs";
+import * as autopass from "./autopass.mjs";
 import {BaseCard} from "/rulesEngine/src/card.mjs";
 import {Player} from "/rulesEngine/src/player.mjs";
 import * as gameUI from "./gameUI.mjs";
@@ -16,6 +16,38 @@ import * as zones from "/rulesEngine/src/zones.mjs";
 
 // for ability activation buttons
 const circledDigits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
+
+// track ctrl to disable the autopass when it's held
+let ctrlHeld = false;
+let oldPassMode;
+function ctrlReleased() {
+	if (ctrlHeld) {
+		ctrlHeld = false;
+		if (passModeSelect.value === "never") {
+			passModeSelect.value = oldPassMode;
+		}
+	}
+}
+window.addEventListener("keydown", function(e) {
+	if (e.key === "Control" && !ctrlHeld) {
+		ctrlHeld = true;
+		oldPassMode = passModeSelect.value;
+		passModeSelect.value = "never";
+	}
+});
+window.addEventListener("keyup", function(e) {
+	if (e.key === "Control") {
+		ctrlReleased();
+	}
+});
+window.addEventListener("blur", ctrlReleased);
+function setPassMode(newValue) {
+	if (ctrlHeld) {
+		oldPassMode = newValue;
+	} else {
+		passModeSelect.value = newValue;
+	}
+}
 
 export class AutomaticController extends InteractionController {
 	constructor() {
@@ -52,14 +84,14 @@ export class AutomaticController extends InteractionController {
 			let returnValue;
 			switch (updates.value[0].nature) {
 				case "event": {
-					let groupedEvents = Object.groupBy(updates.value, event => event.type);
+					const groupedEvents = Object.groupBy(updates.value, event => event.type);
 					await Promise.all(Object.entries(groupedEvents).map(keyValue => this.handleEvents(keyValue[0], keyValue[1])));
 					break;
 				}
 				case "request": {
 					// This code is way more general than it needs to be since there is never cases where both players need to act at the same time.
-					let localRequests = [];
-					let playerPromises = [];
+					const localRequests = [];
+					const playerPromises = [];
 					for (let i = 0; i < game.players.length; i++) {
 						playerPromises.push([]);
 					}
@@ -71,7 +103,11 @@ export class AutomaticController extends InteractionController {
 						}
 					}
 
-					let autoResponse = getAutoResponse(localRequests);
+					const autoResponse = passModeSelect.value === "never"? null : autopass.getAutoResponse(
+						localRequests,
+						passModeSelect.value.startsWith("until"),
+						localStorage.getItem("usePrivateInfoForAutopass")
+					);
 					if (autoResponse) {
 						netSend("[inputRequestResponse]" + JSON.stringify(autoResponse));
 						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
@@ -79,20 +115,20 @@ export class AutomaticController extends InteractionController {
 						playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
 					}
 
-					let responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
+					const responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
 
 					returnValue = responsePromises.map(promise => promise.value).filter(value => value !== undefined)[0];
 
 					autoUI.clearYourMove();
 					autoUI.clearOpponentAction();
 					this.waitingForOpponentInput = false;
-					for (let playerInfo of this.playerInfos) {
+					for (const playerInfo of this.playerInfos) {
 						playerInfo.canStandardSummon = [];
 						playerInfo.canDeploy = [];
 						playerInfo.canCast = [];
 						playerInfo.canRetire = [];
 					}
-					for (let button of this.unitAttackButtons) {
+					for (const button of this.unitAttackButtons) {
 						button.parentElement.classList.remove("visible");
 						button.remove();
 					}
@@ -264,10 +300,18 @@ export class AutomaticController extends InteractionController {
 			}
 			case "turnStarted": {
 				autoUI.startTurn();
+				if (passModeSelect.value === "untilNextTurn" ||
+					passModeSelect.value === "untilMyNextTurn" && game.currentTurn().player === localPlayer
+				) {
+					setPassMode("auto");
+				}
 				return this.gameSleep();
 			}
 			case "phaseStarted": {
 				autoUI.startPhase(events[0].phase.types[0]);
+				if (passModeSelect.value === "untilNextPhase") {
+					setPassMode("auto");
+				}
 				return this.gameSleep();
 			}
 			case "blockCreationAborted": {
@@ -411,6 +455,9 @@ export class AutomaticController extends InteractionController {
 				if (events[0].block instanceof blocks.AbilityActivation) {
 					await autoUI.activate(events[0].block.card);
 					chat.putMessage(locale.game.notices[events[0].block.player === localPlayer? "youActivated" : "opponentActivated"], "notice", autoUI.chatCards([events[0].block.card]));
+				}
+				if (passModeSelect.value === "untilBattle" && events[0].block instanceof blocks.AttackDeclaration) {
+					setPassMode("auto");
 				}
 				autoUI.newBlock(events[0].block);
 				return;

@@ -79,7 +79,19 @@
 						<div id="stackDisplayHolder" data-block=""></div>
 						<hr>
 						<div id="automaticButtonArea">
-							<button id="passBtn" autocomplete="off" disabled></button><button id="attackBtn" autocomplete="off" disabled></button>
+							<button id="passBtn" autocomplete="off" disabled></button>
+							<button id="attackBtn" autocomplete="off" disabled></button>
+							<div id="passMode">
+								<label id="passModeLabel" for="passModeSelect"></label>
+								<select id="passModeSelect">
+									<option value="auto"></option>
+									<option value="never"></option>
+									<option value="untilMyNextTurn"></option>
+									<option value="untilBattle"></option>
+									<option value="untilNextTurn"></option>
+									<option value="untilNextPhase"></option>
+								</select>
+							</div>
 						</div>
 					</div>
 					<div id="deckDropzone">

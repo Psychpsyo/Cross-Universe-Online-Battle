@@ -173,6 +173,10 @@ const settings = {
 	],
 	auto: [
 		{
+			id: "usePrivateInfoForAutopass",
+			type: "toggle"
+		},
+		{
 			id: "passInDrawPhase",
 			type: "toggle"
 		},

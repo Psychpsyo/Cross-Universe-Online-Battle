@@ -8,27 +8,7 @@ import * as blocks from "/rulesEngine/src/blocks.mjs";
 import * as modifiers from "/rulesEngine/src/valueModifiers.mjs";
 import {ScriptContext} from "/rulesEngine/src/cdfScriptInterpreter/structs.mjs";
 
-// track ctrl to disable the autoresponder when it's held
-let ctrlHeld = false;
-window.addEventListener("keydown", function(e) {
-	if (e.key == "Control") {
-		ctrlHeld = true;
-	}
-});
-window.addEventListener("keyup", function(e) {
-	if (e.key == "Control") {
-		ctrlHeld = false;
-	}
-});
-window.addEventListener("blur", function(e) {
-	ctrlHeld = false;
-});
-
-export function getAutoResponse(requests) {
-	if (ctrlHeld) {
-		return null;
-	}
-
+export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
 	// non-pass actions
 	if (requests.length == 1) {
 		const request = requests[0];
@@ -83,9 +63,8 @@ export function getAutoResponse(requests) {
 	}
 
 	// passing
-	if (!requests.find(request => request.type === "pass")) {
-		return null;
-	}
+	if (!requests.find(request => request.type === "pass")) return null;
+	if (alwaysPass) return {type: "pass"};
 
 	// passing on no real options (only retiring partners, casting spells from a selection of 0 and so on)
 	let importantRequests = 0;
@@ -94,7 +73,15 @@ export function getAutoResponse(requests) {
 			importantRequests++;
 		}
 	}
-	if (importantRequests == 0) {
+	const player = requests[0].player;
+	if (importantRequests == 0 &&
+		// Either using hidden info is allowed or the player's hand has no cards that are hidden from any other player
+		(useHiddenInfo || player.handZone.cards.find(card => {
+			for (const hiddenFor of card.hiddenFor) {
+				if (hiddenFor !== player) return true;
+			}
+			return false;
+		}) === undefined)) {
 		return {type: "pass"};
 	}
 
