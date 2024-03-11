@@ -96,6 +96,7 @@
 			"hasPassword": null,
 			"password": "パスワード：",
 			"gameMode": "ゲームモード：",
+			"draftFormat": null,
 			"automatic": null,
 			"automaticTitle": null,
 			"oldManaRule": null,
@@ -270,7 +271,16 @@
 				"pass": "放棄する",
 				"nextPhase": "次のステップ",
 				"endTurn": "ターンエンド",
-				"attack": "攻撃する"
+				"attack": "攻撃する",
+				"passMode": null,
+				"passModes": {
+					"auto": null,
+					"never": null,
+					"untilMyNextTurn": null,
+					"untilBattle": null,
+					"untilNextTurn": null,
+					"untilNextPhase": null
+				}
 			},
 
 			"stacks": {
@@ -479,6 +489,7 @@
 
 		"auto": {
 			"title": null,
+			"usePrivateInfoForAutopass": null,
 			"passInDrawPhase": null,
 			"passInBattlePhase": null,
 			"passInEndPhase": null,

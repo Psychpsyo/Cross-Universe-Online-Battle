@@ -271,7 +271,16 @@
 				"pass": "PASS",
 				"nextPhase": "NEXT PHASE",
 				"endTurn": "END TURN",
-				"attack": "ATTACK"
+				"attack": "ATTACK",
+				"passMode": "Pass Mode:",
+				"passModes": {
+					"auto": "Auto",
+					"never": "Never",
+					"untilMyNextTurn": "Until Start of my Turn",
+					"untilBattle": "Until Opponent Attacks",
+					"untilNextTurn": "Until Next Turn",
+					"untilNextPhase": "Until Next Phase"
+				}
 			},
 
 			"stacks": {
@@ -480,11 +489,12 @@
 
 		"auto": {
 			"title": "Automatic Games",
-			"passInDrawPhase": "Pass through draw phase if you have no draw phase specific options or triggers",
-			"passInBattlePhase": "Pass in the battle phase if you have no responses or battle phase specific options",
-			"passInEndPhase": "Pass through end phase if you have no end phase specific options or triggers",
-			"passOnStackTwo": "Pass on empty stacks 2+ if you have no trigger abilities or conditional spells",
-			"passOnOwnBlocks": "Pass on your own actions if opponent did not intervene"
+			"usePrivateInfoForAutopass": "Allow auto-pass to use hand knowledge",
+			"passInDrawPhase": "Auto-pass through draw phase if you have no draw phase specific options or triggers",
+			"passInBattlePhase": "Auto-pass in the battle phase if you have no responses or battle phase specific options",
+			"passInEndPhase": "Auto-pass through end phase if you have no end phase specific options or triggers",
+			"passOnStackTwo": "Auto-pass on empty stacks 2+ if you have no trigger abilities or conditional spells",
+			"passOnOwnBlocks": "Auto-pass on your own actions if opponent did not intervene"
 		},
 
 		"hotkeys": {

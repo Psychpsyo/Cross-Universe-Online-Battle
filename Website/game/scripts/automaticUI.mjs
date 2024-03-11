@@ -1,7 +1,7 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
 import {locale} from "/scripts/locale.mjs";
-import {previewCard, closeCardPreview} from "./generalUI.mjs";
+import {previewCard} from "./generalUI.mjs";
 import {cardAlignmentInfo} from "/scripts/profilePicture.mjs";
 import {FieldZone} from "/rulesEngine/src/zones.mjs";
 import * as gameUI from "./gameUI.mjs";
@@ -22,6 +22,11 @@ export function init() {
 	retireCancelBtn.textContent = locale.game.automatic.retire.dropCancel;
 	passBtn.textContent = locale.game.automatic.actions.pass;
 	attackBtn.textContent = locale.game.automatic.actions.attack;
+
+	passModeLabel.textContent = locale.game.automatic.actions.passMode;
+	for (const option of passModeSelect.children) {
+		option.textContent = locale.game.automatic.actions.passModes[option.value];
+	}
 
 	typePopupConfirm.textContent = locale.game.automatic.typeSelect.select;
 
@@ -74,7 +79,7 @@ export function startTurn(speed) {
 	currentActivePhaseElem?.classList.remove("current");
 	currentActivePhaseElem = null;
 
-	if (game.currentTurn().player == localPlayer) {
+	if (game.currentTurn().player === localPlayer) {
 		opponentTurnDisplayLabel.classList.add("hidden");
 		window.setTimeout(() => {
 			yourTurnDisplayLabel.classList.remove("hidden");

@@ -271,7 +271,16 @@
 				"pass": "PASSEN",
 				"nextPhase": "NÄCHSTE PHASE",
 				"endTurn": "ZUG BEENDEN",
-				"attack": "ANGREIFEN"
+				"attack": "ANGREIFEN",
+				"passMode": "Passmodus:",
+				"passModes": {
+					"auto": "Auto",
+					"never": "Nie",
+					"untilMyNextTurn": "Bis zum Anfang meines Zuges",
+					"untilBattle": "Bis mein Gegner angreift",
+					"untilNextTurn": "Bis zum nächsten Zug",
+					"untilNextPhase": "Bus zur nächsten Phase"
+				}
 			},
 
 			"stacks": {
@@ -480,6 +489,7 @@
 
 		"auto": {
 			"title": "Automatische Runden",
+			"usePrivateInfoForAutopass": "Auto-Pass darf Hand-Informationen verwenden",
 			"passInDrawPhase": "In der Drawphase auto-passen, wenn du keine Drawphase-spezifischen Optionen oder Trigger hast",
 			"passInBattlePhase": "In der Battlephase auto-passen, wenn du keine Antworten oder Battlephase-spezifischen Optionen hast",
 			"passInEndPhase": "In der Endphase auto-passen, wenn du keine Endphase-spezifischen Optionen oder Trigger hast",

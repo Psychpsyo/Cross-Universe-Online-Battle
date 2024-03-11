@@ -190,10 +190,15 @@
 	border-color: orange;
 	filter: opacity(100%);
 }
+
 #automaticButtonArea {
 	display: flex;
 	justify-content: space-around;
 	padding: .25em;
+}
+#passMode {
+	width: min-content;
+	font-size: .75em;
 }
 
 #opponentActionHolder {
