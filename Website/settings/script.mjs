@@ -49,7 +49,7 @@ const settings = {
 			type: "toggle"
 		},
 		{
-			id: "cardBackToggle",
+			id: "hideOpponentCardBacks",
 			type: "toggle"
 		},
 		{

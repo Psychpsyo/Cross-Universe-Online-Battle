@@ -467,7 +467,7 @@
 		"customization": {
 			"title": null,
 			"fieldLabelToggle": null,
-			"cardBackToggle": null,
+			"hideOpponentCardBacks": null,
 			"opponentCardLanguage": null,
 			"previewCardLanguage": null,
 			"fieldLeftToggle": null,

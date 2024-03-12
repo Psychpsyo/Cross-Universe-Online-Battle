@@ -472,7 +472,7 @@
 		"customization": {
 			"title": "Customization",
 			"fieldLabelToggle": "Show Field Labels",
-			"cardBackToggle": "Disable Opponent Card Backs",
+			"hideOpponentCardBacks": "Disable Opponent Card Backs",
 			"opponentCardLanguage": "Show Opponent Cards in their Language",
 			"previewCardLanguage": "Also Show Card Preview in that Language",
 			"fieldLeftToggle": "Place Field on The Left Side of your Screen",

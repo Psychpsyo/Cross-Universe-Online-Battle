@@ -3,7 +3,9 @@ import {ReplayInitState} from "./replayInitState.mjs";
 import {locale} from "/scripts/locale.mjs";
 import {incomingSdp} from "./netcode.mjs";
 
+// setup
 document.documentElement.lang = locale.code;
+document.documentElement.style.setProperty("--p1-card-back", "url('" + localStorage.getItem("cardBack") + "')");
 
 // global variables
 window.game = null;
