@@ -54,8 +54,8 @@ for (const setting of settingsList) {
 }
 lobbyNameInput.placeholder = locale.lobbies.settings.namePlaceholder;
 lobbyAutomatic.title = locale.lobbies.settings.automaticTitle;
-lobbyGameModeNormal.textContent = locale.gameModes.normal;
-lobbyGameModeDraft.textContent = locale.gameModes.draft;
+lobbyGameModeNormal.textContent = locale.lobbies.settings.gameModes.normal;
+lobbyGameModeDraft.textContent = locale.lobbies.settings.gameModes.draft;
 lobbyDraftFormatBeginner.textContent = locale.draftFormats.beginner;
 lobbyDraftFormatMayhem.textContent = locale.draftFormats.mayhem;
 lobbyDraftFormatOG.textContent = locale.draftFormats.og137;
