@@ -128,11 +128,13 @@ cancelWaitingBtn.textContent = locale.mainMenu.cancelWaiting;
 }
 rulesButton.textContent = locale.mainMenu.rulesButton;
 
-rulesButton.href = locale.mainMenu.rulesLink;
-
 settingsButton.title = locale.mainMenu.settingsButton;
 deckMakerButton.title = locale.mainMenu.deckCreatorButton;
 bugReportButton.title = locale.mainMenu.reportBug;
+discordButton.title = locale.mainMenu.joinDiscord;
+
+rulesButton.href = locale.mainMenu.rulesLink;
+discordButton.href = locale.mainMenu.discordLink;
 
 lobbyHeading.textContent = locale.lobbies.title;
 newLobbyBtn.title = locale.lobbies.newLobbyButton;

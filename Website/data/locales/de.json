@@ -17,12 +17,14 @@
 		"copyInviteLink": "Invite-Link kopieren",
 		"cancelWaiting": "Abbrechen",
 		"rulesButton": "Spielregeln",
-		"rulesLink": "https://crossuniverse.net/rules",
 		"unofficialNotice": "Diese Seite ist eine Cross Universe Fan-Implementation. Die offizielle Seite findest du unter {#LINK}!",
+		"rulesLink": "https://crossuniverse.net/rules",
+		"discordLink": "https://discord.gg/Zbge49Q79B",
 
 		"settingsButton": "Einstellungen",
 		"deckCreatorButton": "Deck Editor",
-		"reportBug": "Melde einen Bug"
+		"reportBug": "Melde einen Fehler",
+		"joinDiscord": "Discord beitreten"
 	},
 
 	"gameModes": {
