@@ -301,7 +301,7 @@ export function init() {
 	infoPanelVS.textContent = locale.game.playerInfo.vs;
 	for (let i = 0; i < 2; i++) {
 		document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
-		document.getElementById("playerDeckButtonImage" + i).alt = locale.game.playerInfo.viewDeck;
+		document.getElementById("playerDeckButtonImg" + i).alt = locale.game.playerInfo.viewDeck;
 		document.getElementById("playerDeckButton" + i).addEventListener("click", function() {
 			loadDeckPreview(players[i].deck);
 			openDeckView();

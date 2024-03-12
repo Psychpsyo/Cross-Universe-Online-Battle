@@ -10,27 +10,29 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Mit Raum-Code verbinden",
 		"enterRoomcode": "Raum-Code:",
-		"gameMode": "Spielmodus:",
 		"rerollRoomcode": "Zufälligen Raum-Code generieren",
+		"gameMode": "Spielmodus:",
+		"gameModes": {
+			"manual": "Manuell",
+			"manualTitle": "Im manuellen Modus überprüft der Computer die Spielregeln nicht.\nEs gibt alle Karten, aber du musst dich mit deinem Gegner unterhalten, als würdet ihr IRL zusammen spielen.",
+			"automatic": "Automatisch",
+			"automaticTitle": "Im automatischen Modus überprüft der Computer die Spielregeln.\nEs gibt noch nicht alle Karten und das Spielerlebnis ist noch nicht optimal, kann aber angenehmer sein, als manuell zu spielen."
+		},
 		"connectToRoom": "Verbinden",
 		"waitingForOpponent": "Warte auf Gegner...",
 		"copyInviteLink": "Invite-Link kopieren",
 		"cancelWaiting": "Abbrechen",
 		"rulesButton": "Spielregeln",
-		"rulesLink": "https://crossuniverse.net/rules",
 		"unofficialNotice": "Diese Seite ist eine Cross Universe Fan-Implementation. Die offizielle Seite findest du unter {#LINK}!",
+		"rulesLink": "https://crossuniverse.net/rules",
+		"discordLink": "https://discord.gg/Zbge49Q79B",
 
 		"settingsButton": "Einstellungen",
 		"deckCreatorButton": "Deck Editor",
-		"reportBug": "Melde einen Bug"
+		"reportBug": "Melde einen Fehler",
+		"joinDiscord": "Discord beitreten"
 	},
 
-	"gameModes": {
-		"normal": "Normal",
-		"draft": "Draft",
-		"manual": "Manuell",
-		"automatic": "Automatisch"
-	},
 	"draftFormats": {
 		"beginner": "Anfänger",
 		"mayhem": "Mayhem",
@@ -96,6 +98,10 @@
 			"hasPassword": "Mit Passwort:",
 			"password": "Passwort:",
 			"gameMode": "Spielmodus:",
+			"gameModes": {
+				"normal": "Normal",
+				"draft": "Draft"
+			},
 			"draftFormat": "Draftformat:",
 			"automatic": "Automatisch:",
 			"automaticTitle": "Bestimmt, ob die Spielregeln automatisch überprüft werden oder nicht.\nAnmerkung: In automatischen Spielen gibt es nicht alle Karten.",
@@ -116,6 +122,7 @@
 			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
 			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt.",
 			"opponentChoseType": "Dein Gegner hat Typ {#TYPE} gewählt.",
+			"opponentChoseAbility": "Dein Gegner hat gewählt:\n{#ABILITY}",
 			"opponentChoseDeckSide": {
 				"top": "Dein Gegner hat die Deckoberseite gewählt.",
 				"bottom": "Dein Gegner hat die Deckunterseite gewählt."
@@ -374,6 +381,7 @@
 				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt.",
 
 				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
+				"selectingEffect": "Dein Gegner wählt einen Effekt für den Effekt von '{#CARDNAME}'.",
 				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'."
 			}
 		}

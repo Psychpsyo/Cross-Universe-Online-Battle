@@ -148,6 +148,7 @@ textarea {
 .svgButton > img {
 	height: 100%;
 	padding: .2em;
+	aspect-ratio: 1;
 }
 .svgButton:hover > img {
 	transform: translateY(-3.5%);

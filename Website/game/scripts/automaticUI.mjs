@@ -310,13 +310,13 @@ export function clearOpponentAction() {
 	opponentActionDisplay.classList.remove("shown");
 }
 
-export async function promptTypeSelection(message, types) {
+export async function promptDropdownSelection(message, options) {
 	typeSelectPopupText.textContent = message;
 	typePopupSelection.innerHTML = "";
-	for (let i = 0; i < types.length; i++) {
+	for (let i = 0; i < options.length; i++) {
 		let option = document.createElement("option");
 		option.value = i;
-		option.textContent = locale.types[types[i]];
+		option.textContent = options[i];
 		typePopupSelection.add(option);
 	}
 	typeSelectPopup.showModal();

@@ -314,6 +314,7 @@ async function setLanguage(language) {
 
 	title.textContent = locale.settings.title;
 	headerBackButton.title = locale.general.buttonBack;
+	headerBackButtonImg.alt = locale.general.buttonBack;
 
 	for (const [id, options] of Object.entries(settings)) {
 		document.getElementById(id + "Title").textContent = locale.settings[id].title;

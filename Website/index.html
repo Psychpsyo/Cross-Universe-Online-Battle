@@ -27,9 +27,10 @@
 						<span id="lobbyTitle"></span>
 					</nav>
 					<nav class="headerButtonsRight">
-						<a id="settingsButton" class="svgButton" href="./settings"><img src="images/icons/settings.svg" alt="" draggable="false"></a>
-						<a id="deckMakerButton" class="svgButton" href="./deckMaker"><img src="images/icons/deck.svg" alt="" draggable="false"></a>
-						<a id="bugReportButton" class="svgButton" target="_blank" href="https://github.com/Psychpsyo/Cross-Universe-Online-Frontend/issues/new?template=bug_report.md"><img src="images/icons/bugReport.svg" alt="" draggable="false"></a>
+						<a id="settingsButton" class="svgButton" href="./settings"><img id="settingsButtonImg" src="images/icons/settings.svg" alt="" draggable="false"></a>
+						<a id="deckMakerButton" class="svgButton" href="./deckMaker"><img id="deckMakerButtonImg" src="images/icons/deck.svg" alt="" draggable="false"></a>
+						<a id="bugReportButton" class="svgButton" target="_blank" href="https://github.com/Psychpsyo/Cross-Universe-Online-Frontend/issues/new?template=bug_report.md"><img id="bugReportButtonImg" src="images/icons/bugReport.svg" alt="" draggable="false"></a>
+						<a id="discordButton" class="svgButton" target="_blank"><img id="discordButtonImg" src="images/icons/discord.svg" alt="" draggable="false"></a>
 					</nav>
 				</header>
 			</div>
@@ -46,8 +47,8 @@
 							<span><input id="roomCodeInputField" aria-atomic="true" autocomplete="off"><button id="roomCodeRefresh" aria-label="Generate random room code">⟳</button></span><br>
 							<label for="gameModeSelect" id="gameModeSelectorLabel"></label>
 							<select id="gameModeSelect">
-								<option id="gameModeManualOption" value="manual"></option>
-								<option id="gameModeAutomaticOption" value="automatic"></option>
+								<option value="manual"></option>
+								<option value="automatic"></option>
 							</select><br>
 							<button id="connectBtn"></button>
 						</div>
@@ -64,7 +65,7 @@
 				<section id="lobbies">
 					<header>
 						<h1 id="lobbyHeading"></h1>
-						<button id="newLobbyBtn" class="svgButton" autocomplete="off"><img src="images/icons/newLobby.svg" alt="" draggable="false"></button>
+						<button id="newLobbyBtn" class="svgButton" autocomplete="off"><img id="newLobbyBtnImg" src="images/icons/newLobby.svg" alt="" draggable="false"></button>
 					</header>
 					<div id="lobbyListHolder">
 						<ul id="lobbyList"></ul>

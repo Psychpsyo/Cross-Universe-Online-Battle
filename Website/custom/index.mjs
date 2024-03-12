@@ -7,6 +7,7 @@ let unsavedChanges = false;
 // translate UI
 document.getElementById("title").textContent = locale.customCards.title;
 headerBackButton.title = locale.general.buttonBack;
+headerBackButtonImg.alt = locale.general.buttonBack;
 
 cardNameLabel.textContent = locale.customCards.cardName;
 cardLevelLabel.textContent = locale.customCards.cardLevel;
@@ -19,7 +20,7 @@ Array.from(cardType.children).forEach(elem => {
 	elem.textContent = locale[elem.value + "CardDetailType"];
 });
 
-cardTypes.title = locale.customCards.possibleTypes.replace("{#TYPES}", Object.values(locale.types).map(val => val.replace(" ", "_")).join(locale.customCards.possibleTypesSeperator))
+cardTypes.title = locale.customCards.possibleTypes.replace("{#TYPES}", Object.values(locale.types).map(val => val.replace(" ", "_")).join(locale.customCards.possibleTypesSeperator));
 
 enableScriptingLabel.textContent = locale.customCards.enableScripting;
 scriptingExperimentalWarning.textContent = locale.customCards.scriptingExperimentalWarning;

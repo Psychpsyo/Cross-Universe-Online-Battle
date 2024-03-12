@@ -12,8 +12,11 @@ let contestWinnerTags = await fetch("data/contestWinnerTags.json").then(async re
 // main section
 title.textContent = locale.deckMaker.title;
 headerBackButton.title = locale.general.buttonBack;
+headerBackButtonImg.alt = locale.general.buttonBack;
 headerDeckButton.title = locale.deckMaker.deckButton;
+headerDeckButtonImg.alt = locale.deckMaker.deckButton;
 headerSearchButton.title = locale.deckMaker.searchButton;
+headerSearchButtonImg.alt = locale.deckMaker.searchButton;
 
 quickSearch.setAttribute("aria-label", locale.deckMaker.quickSearch.title);
 quickSearch.placeholder = locale.deckMaker.quickSearch.prompt;

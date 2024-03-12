@@ -106,11 +106,14 @@ if (queryString.get("id")) {
 // translate main menu
 roomCodeInputTitle.textContent = locale.mainMenu.roomCodeInputTitle;
 roomCodeInputLabel.textContent = locale.mainMenu.enterRoomcode;
+roomCodeRefresh.title = locale.mainMenu.rerollRoomcode;
 roomCodeRefresh.setAttribute("aria-label", locale.mainMenu.rerollRoomcode);
 
 gameModeSelectorLabel.textContent = locale.mainMenu.gameMode;
-gameModeManualOption.textContent = locale.gameModes.manual;
-gameModeAutomaticOption.textContent = locale.gameModes.automatic;
+for (const option of gameModeSelect.children) {
+	option.textContent = locale.mainMenu.gameModes[option.value];
+	option.title = locale.mainMenu.gameModes[option.value + "Title"];
+}
 
 connectBtn.textContent = locale.mainMenu.connectToRoom;
 waitingForOpponentText.textContent = locale.mainMenu.waitingForOpponent;
@@ -128,14 +131,21 @@ cancelWaitingBtn.textContent = locale.mainMenu.cancelWaiting;
 }
 rulesButton.textContent = locale.mainMenu.rulesButton;
 
-rulesButton.href = locale.mainMenu.rulesLink;
-
 settingsButton.title = locale.mainMenu.settingsButton;
+settingsButtonImg.alt = locale.mainMenu.settingsButton;
 deckMakerButton.title = locale.mainMenu.deckCreatorButton;
+deckMakerButtonImg.alt = locale.mainMenu.deckCreatorButton;
 bugReportButton.title = locale.mainMenu.reportBug;
+bugReportButtonImg.alt = locale.mainMenu.reportBug;
+discordButton.title = locale.mainMenu.joinDiscord;
+discordButtonImg.alt = locale.mainMenu.joinDiscord;
+
+rulesButton.href = locale.mainMenu.rulesLink;
+discordButton.href = locale.mainMenu.discordLink;
 
 lobbyHeading.textContent = locale.lobbies.title;
 newLobbyBtn.title = locale.lobbies.newLobbyButton;
+newLobbyBtnImg.alt = locale.lobbies.newLobbyButton;
 lobbyList.dataset.message = locale.lobbies.noLobbyServer;
 
 document.documentElement.lang = locale.code;
