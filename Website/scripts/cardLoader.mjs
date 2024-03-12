@@ -140,20 +140,20 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 
 // TODO: nested sub-abilities do not work
 export async function getAbilityText(abilityID) {
-	let abilityInfo = abilityID.split(":");
-	let cardInfo = await getCardInfo(abilityInfo[0]);
+	const abilityInfo = abilityID.split(":");
+	const cardInfo = await getCardInfo(abilityInfo[0]);
 	let currentAbility = 0;
 	for (const effect of cardInfo.effects) {
 		if (effect.type !== "rule") {
 			currentAbility++;
 			if (currentAbility == abilityInfo[1]) {
-				// check if sub-ability
-				if (abilityInfo.length === 2) {
-					return effect.text;
-				}
+				// check if not sub-ability
+				if (abilityInfo.length === 2) return effect.text;
+
 				// we have a sub-ability
 				const subAbilities = effect.text.split("●");
-				return "●" + subAbilities[parseInt(abilityInfo[2]) + 1].replace(locale.subEffectClosingBracket, "");
+				// TODO: multiline sub-abilities do not get un-indented after the first line
+				return "●" + subAbilities[parseInt(abilityInfo[2]) + 1].replace(locale.subEffectClosingBracket, "").trim();
 			}
 		}
 	}
