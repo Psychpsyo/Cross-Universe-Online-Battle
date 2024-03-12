@@ -10,8 +10,14 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Battle ID",
 		"enterRoomcode": "対戦ID：",
-		"gameMode": "ゲームモード：",
 		"rerollRoomcode": null,
+		"gameMode": "ゲームモード：",
+		"gameModes": {
+			"manual": null,
+			"manualTitle": null,
+			"automatic": null,
+			"automaticTitle": null
+		},
 		"connectToRoom": "接続",
 		"waitingForOpponent": "承認待ち",
 		"copyInviteLink": null,
@@ -27,12 +33,6 @@
 		"joinDiscord": null
 	},
 
-	"gameModes": {
-		"normal": "ノーマル",
-		"draft": "ドラフト",
-		"manual": null,
-		"automatic": null
-	},
 	"draftFormats": {
 		"beginner": null,
 		"mayhem": null,
@@ -98,6 +98,10 @@
 			"hasPassword": null,
 			"password": "パスワード：",
 			"gameMode": "ゲームモード：",
+			"gameModes": {
+				"normal": "ノーマル",
+				"draft": "ドラフト"
+			},
 			"draftFormat": null,
 			"automatic": null,
 			"automaticTitle": null,

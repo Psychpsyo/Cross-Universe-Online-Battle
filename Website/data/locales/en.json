@@ -10,8 +10,14 @@
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Room Code",
 		"enterRoomcode": "Room Code:",
-		"gameMode": "Game Mode:",
 		"rerollRoomcode": "Generate random room code",
+		"gameMode": "Game Mode:",
+		"gameModes": {
+			"manual": "Manual",
+			"manualTitle": "In manual mode, the game rules aren't handled automatically.\nAll cards are supported but you'll need to communicate with your opponent as if you were playing IRL.",
+			"automatic": "Automatic",
+			"automaticTitle": "In automatic mode, the game handles the rules automatically.\nNot all cards are supported yet and it still needs improvements but it can be more comfortable than playing manually."
+		},
 		"connectToRoom": "Connect",
 		"waitingForOpponent": "Waiting for Opponent...",
 		"copyInviteLink": "Copy Invite Link",
@@ -27,12 +33,6 @@
 		"joinDiscord": "Join the Discord"
 	},
 
-	"gameModes": {
-		"normal": "Normal",
-		"draft": "Draft",
-		"manual": "Manual",
-		"automatic": "Automatic"
-	},
 	"draftFormats": {
 		"beginner": "Beginner",
 		"mayhem": "Mayhem",
@@ -98,6 +98,10 @@
 			"hasPassword": "Has Password:",
 			"password": "Password:",
 			"gameMode": "Game Mode:",
+			"gameModes": {
+				"normal": "Normal",
+				"draft": "Draft"
+			},
 			"draftFormat": "Draft Format:",
 			"automatic": "Automatic Mode:",
 			"automaticTitle": "Determines whether or not the game rules are checked automatically.\nNote: Not all cards exist in automatic games.",
