@@ -17,38 +17,6 @@ import * as zones from "/rulesEngine/src/zones.mjs";
 // for ability activation buttons
 const circledDigits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
 
-// track ctrl to disable the autopass when it's held
-let ctrlHeld = false;
-let oldPassMode;
-function ctrlReleased() {
-	if (ctrlHeld) {
-		ctrlHeld = false;
-		if (passModeSelect.value === "never") {
-			passModeSelect.value = oldPassMode;
-		}
-	}
-}
-window.addEventListener("keydown", function(e) {
-	if (e.key === "Control" && !ctrlHeld) {
-		ctrlHeld = true;
-		oldPassMode = passModeSelect.value;
-		passModeSelect.value = "never";
-	}
-});
-window.addEventListener("keyup", function(e) {
-	if (e.key === "Control") {
-		ctrlReleased();
-	}
-});
-window.addEventListener("blur", ctrlReleased);
-function setPassMode(newValue) {
-	if (ctrlHeld) {
-		oldPassMode = newValue;
-	} else {
-		passModeSelect.value = newValue;
-	}
-}
-
 export class AutomaticController extends InteractionController {
 	constructor() {
 		super();
@@ -74,6 +42,23 @@ export class AutomaticController extends InteractionController {
 		this.unitAttackButtons = [];
 		this.declaredAttackers = [];
 		this.fieldPlaceIndex = null;
+
+		// track ctrl to disable the autopass when it's held
+		this.ctrlHeld = false;
+		this.oldPassMode;
+		window.addEventListener("keydown", e => {
+			if (e.key === "Control" && !this.ctrlHeld) {
+				this.ctrlHeld = true;
+				this.oldPassMode = passModeSelect.value;
+				passModeSelect.value = "never";
+			}
+		});
+		window.addEventListener("keyup", e => {
+			if (e.key === "Control") {
+				this.ctrlReleased();
+			}
+		});
+		window.addEventListener("blur", this.ctrlReleased.bind(this));
 	}
 
 	async startGame() {
@@ -303,14 +288,14 @@ export class AutomaticController extends InteractionController {
 				if (passModeSelect.value === "untilNextTurn" ||
 					passModeSelect.value === "untilMyNextTurn" && game.currentTurn().player === localPlayer
 				) {
-					setPassMode("auto");
+					this.setPassMode("auto");
 				}
 				return this.gameSleep();
 			}
 			case "phaseStarted": {
 				autoUI.startPhase(events[0].phase.types[0]);
 				if (passModeSelect.value === "untilNextPhase") {
-					setPassMode("auto");
+					this.setPassMode("auto");
 				}
 				return this.gameSleep();
 			}
@@ -457,7 +442,7 @@ export class AutomaticController extends InteractionController {
 					chat.putMessage(locale.game.notices[events[0].block.player === localPlayer? "youActivated" : "opponentActivated"], "notice", autoUI.chatCards([events[0].block.card]));
 				}
 				if (passModeSelect.value === "untilBattle" && events[0].block instanceof blocks.AttackDeclaration) {
-					setPassMode("auto");
+					this.setPassMode("auto");
 				}
 				autoUI.newBlock(events[0].block);
 				return;
@@ -923,6 +908,23 @@ export class AutomaticController extends InteractionController {
 			this.addAttacker(index);
 		}
 		this.validateAttackButtons();
+	}
+
+	// pass mode related stuff
+	ctrlReleased() {
+		if (this.ctrlHeld) {
+			this.ctrlHeld = false;
+			if (passModeSelect.value === "never") {
+				passModeSelect.value = this.oldPassMode;
+			}
+		}
+	}
+	setPassMode(newValue) {
+		if (this.ctrlHeld) {
+			this.oldPassMode = newValue;
+		} else {
+			passModeSelect.value = newValue;
+		}
 	}
 }
 
