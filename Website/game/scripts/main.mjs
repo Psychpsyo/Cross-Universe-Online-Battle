@@ -1,9 +1,11 @@
 import {InitState} from "./initState.mjs";
 import {ReplayInitState} from "./replayInitState.mjs";
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {incomingSdp} from "./netcode.mjs";
 
+// setup
 document.documentElement.lang = locale.code;
+document.documentElement.style.setProperty("--p1-card-back", "url('" + localStorage.getItem("cardBack") + "')");
 
 // global variables
 window.game = null;
@@ -70,4 +72,4 @@ window.addEventListener("message", e => {
 	}
 });
 
-window.top.postMessage({type: "ready"});
+window.parent.postMessage({type: "ready"});

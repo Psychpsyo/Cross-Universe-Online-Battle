@@ -1,7 +1,7 @@
 
-import {locale} from "/scripts/locale.mjs";
-import {renderCard} from "/custom/renderer.mjs";
-import {deckToCardIdList} from "/scripts/deckUtils.mjs";
+import {locale} from "./locale.mjs";
+import {renderCard} from "../custom/renderer.mjs";
+import {deckToCardIdList} from "./deckUtils.mjs";
 
 export let cardInfoCache = {};
 let cdfCache = {};
@@ -120,7 +120,7 @@ export async function getCdf(cardId) {
 				throw new UnsupportedCardError(cardId);
 			}
 		} else {
-			const response = await fetch("/rulesEngine/cards/CU" + cardId + ".cdf", {cache: "force-cache"});
+			const response = await fetch("./rulesEngine/cards/CU" + cardId + ".cdf", {cache: "force-cache"});
 			if (!response.ok) {
 				throw new NonexistantCardError(cardId);
 			}
@@ -132,28 +132,28 @@ export async function getCdf(cardId) {
 
 export function getCardImage(card, useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true") {
 	if (!card) {
-		return "images/cardHidden.png";
+		return "./images/cardHidden.png";
 	}
 	let language = (useOwnerLanguage? players[card.owner.index].language : null) ?? localStorage.getItem("language");
-	return card.hiddenFor.includes(localPlayer)? "images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
+	return card.hiddenFor.includes(localPlayer)? "./images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
 }
 
 // TODO: nested sub-abilities do not work
 export async function getAbilityText(abilityID) {
-	let abilityInfo = abilityID.split(":");
-	let cardInfo = await getCardInfo(abilityInfo[0]);
+	const abilityInfo = abilityID.split(":");
+	const cardInfo = await getCardInfo(abilityInfo[0]);
 	let currentAbility = 0;
 	for (const effect of cardInfo.effects) {
 		if (effect.type !== "rule") {
 			currentAbility++;
 			if (currentAbility == abilityInfo[1]) {
-				// check if sub-ability
-				if (abilityInfo.length === 2) {
-					return effect.text;
-				}
+				// check if not sub-ability
+				if (abilityInfo.length === 2) return effect.text;
+
 				// we have a sub-ability
 				const subAbilities = effect.text.split("●");
-				return "●" + subAbilities[parseInt(abilityInfo[2]) + 1].replace(locale.subEffectClosingBracket, "");
+				// TODO: multiline sub-abilities do not get un-indented after the first line
+				return "●" + subAbilities[parseInt(abilityInfo[2]) + 1].replace(locale.subEffectClosingBracket, "").trim();
 			}
 		}
 	}
@@ -195,7 +195,7 @@ export async function isCardScripted(cardId) {
 	}
 	if (!scriptedCardList) {
 		scriptedCardList = (async() => {
-			let response = await fetch("/data/scriptedCardsList.json");
+			let response = await fetch("./data/scriptedCardsList.json");
 			return response.json();
 		})();
 	}

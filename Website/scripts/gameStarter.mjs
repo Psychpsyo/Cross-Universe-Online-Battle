@@ -12,7 +12,7 @@ export async function startGame(isCaller, options = {}) {
 			options: options
 		}
 		resolveStartPromise = resolve;
-		gameFrame.contentWindow.location.replace(location.origin + "/game");
+		gameFrame.contentWindow.location.replace(location.href.substring(0, location.href.lastIndexOf("/")) + "/game/index.html");
 		loadingIndicator.classList.add("active");
 	});
 }
@@ -25,7 +25,7 @@ export async function* loadReplay(replay) {
 		}
 		replayToLoad = replay;
 		resolveStartPromise = resolve;
-		gameFrame.contentWindow.location.replace(location.origin + "/game");
+		gameFrame.contentWindow.location.replace(location.href.substring(0, location.href.lastIndexOf("/")) + "/game/index.html");
 		loadingIndicator.classList.add("active");
 	});
 }

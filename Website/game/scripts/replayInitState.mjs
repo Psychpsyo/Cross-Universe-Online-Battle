@@ -1,7 +1,7 @@
-import {Game} from "/rulesEngine/src/game.mjs";
+import {Game} from "../../rulesEngine/src/game.mjs";
 import {GameState} from "./gameState.mjs";
 import {BoardState} from "./boardState.mjs";
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as generalUI from "./generalUI.mjs";
 
@@ -21,7 +21,7 @@ export class ReplayInitState extends GameState {
 
 		generalUI.init();
 		gameDiv.hidden = false;
-		window.top.postMessage({type: "gameStarted"});
+		window.parent.postMessage({type: "gameStarted"});
 
 		// deck selection elements aren't needed anymore.
 		deckDropzone.remove();

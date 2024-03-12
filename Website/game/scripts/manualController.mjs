@@ -1,13 +1,13 @@
 // This module exports the manual controller, used for manually operated Cross Universe games.
 
 import {InteractionController} from "./interactionController.mjs";
-import {locale} from "/scripts/locale.mjs";
-import {Zone} from "/rulesEngine/src/zones.mjs";
-import {Card} from "/rulesEngine/src/card.mjs";
+import {locale} from "../../scripts/locale.mjs";
+import {Zone} from "../../rulesEngine/src/zones.mjs";
+import {Card} from "../../rulesEngine/src/card.mjs";
 import {netSend, zoneToLocal} from "./netcode.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as manualUI from "./manualUI.mjs";
-import * as cardLoader from "/scripts/cardLoader.mjs";
+import * as cardLoader from "../../scripts/cardLoader.mjs";
 
 class tokenZone {
 	constructor() {
@@ -357,7 +357,7 @@ export class ManualController extends InteractionController {
 			const winner = player.next();
 			winner.victoryConditions.push("lifeZero");
 			gameUI.playerWon(winner);
-			window.top.postMessage({type: "playerWon", players: [winner.index]});
+			window.parent.postMessage({type: "playerWon", players: [winner.index]});
 		}
 	}
 	setMana(player, value) {

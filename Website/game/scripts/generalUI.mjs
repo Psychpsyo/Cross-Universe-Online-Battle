@@ -1,11 +1,11 @@
 
-import {locale} from "/scripts/locale.mjs";
-import {deckToCardIdList} from "/scripts/deckUtils.mjs";
-import {Card} from "/rulesEngine/src/card.mjs";
+import {locale} from "../../scripts/locale.mjs";
+import {deckToCardIdList} from "../../scripts/deckUtils.mjs";
+import {Card} from "../../rulesEngine/src/card.mjs";
 import {netSend} from "./netcode.mjs";
-import "/scripts/profilePicture.mjs";
-import * as cardLoader from "/scripts/cardLoader.mjs";
-import * as abilities from "/rulesEngine/src/abilities.mjs";
+import "../../scripts/profilePicture.mjs";
+import * as cardLoader from "../../scripts/cardLoader.mjs";
+import * as abilities from "../../rulesEngine/src/abilities.mjs";
 
 const abilityTypes = new Map([
 	[abilities.CastAbility, "cast"],

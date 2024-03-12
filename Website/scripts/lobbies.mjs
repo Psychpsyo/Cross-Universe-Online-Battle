@@ -8,9 +8,9 @@
 //
 // TODO: Refactor all of this into separate host and client code
 
-import {locale} from "/scripts/locale.mjs";
-import {startGame} from "/scripts/gameStarter.mjs";
-import "/scripts/profilePicture.mjs";
+import {locale} from "./locale.mjs";
+import {startGame} from "./gameStarter.mjs";
+import "./profilePicture.mjs";
 
 const unloadWarning = new AbortController();
 const settingsList = ["name", "userLimit", "hasPassword", "password", "gameMode", "draftFormat", "automatic", "oldManaRule"];
@@ -457,7 +457,7 @@ async function beginGame(isCaller) {
 		useOldManaRule: currentLobby.oldManaRule
 	}
 	if (currentLobby.gameMode === "draft") {
-		gameOptions.draftFormat = await (await fetch("data/draftFormats/beginner.json")).json();
+		gameOptions.draftFormat = await (await fetch("./data/draftFormats/beginner.json")).json();
 	}
 	await startGame(isCaller, gameOptions)
 	currentLobby.playingAgainst = null;

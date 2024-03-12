@@ -1,7 +1,7 @@
-import {locale} from "/scripts/locale.mjs";
-import {startEffect, stopEffect} from "/scripts/levitationEffect.mjs";
-import {startGame, loadReplay} from "/scripts/gameStarter.mjs";
-import * as uiUtils from "/scripts/uiUtils.mjs";
+import {locale} from "./locale.mjs";
+import {startEffect, stopEffect} from "./levitationEffect.mjs";
+import {startGame, loadReplay} from "./gameStarter.mjs";
+import * as uiUtils from "./uiUtils.mjs";
 
 // randomizing the default room code
 function randomizeRoomcode() {
@@ -18,7 +18,6 @@ let socket = null; // used for signalling through room code
 
 window.addEventListener("message", async e => {
 	if (e.source !== gameFrame.contentWindow) return;
-	if (e.data.type !== "sdp") return;
 
 	switch (e.data.type) {
 		case "sdp": {
@@ -170,6 +169,8 @@ connectBtn.addEventListener("click", () => connect());
 
 // canceling a connection
 cancelWaitingBtn.addEventListener("click", function() {
+	socket.close();
+	socket = null;
 	gameFrame.removeAttribute("src");
 	waitingForOpponentHolder.hidden = true;
 	roomCodeInputFieldHolder.hidden = false;

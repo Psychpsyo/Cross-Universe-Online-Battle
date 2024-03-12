@@ -1,12 +1,12 @@
-import {getCardImageFromID} from "/scripts/cardLoader.mjs";
-import {locale} from "/scripts/locale.mjs";
+import {getCardImageFromID} from "../scripts/cardLoader.mjs";
+import {locale} from "../scripts/locale.mjs";
 
 const categoryLinks = {
 	"cardGameRecommendation": "https://crossuniverse.jp/原作小説/",
 	"cardGameDystopia": "https://kakuyomu.jp/works/16817330652761030151"
 }
 
-const profilePictureInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
+const profilePictureInfo = await fetch("./data/profilePictureInfo.json").then(async response => await response.json());
 fetch("../data/profilePictureGroups.json")
 .then(async response => await response.json())
 .then(profilePictureGroups => {

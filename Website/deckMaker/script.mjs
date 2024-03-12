@@ -1,12 +1,12 @@
-import {locale} from "/scripts/locale.mjs";
-import * as cardLoader from "/scripts/cardLoader.mjs";
-import * as deckUtils from "/scripts/deckUtils.mjs";
-import * as uiUtils from "/scripts/uiUtils.mjs";
+import {locale} from "../scripts/locale.mjs";
+import * as cardLoader from "../scripts/cardLoader.mjs";
+import * as deckUtils from "../scripts/deckUtils.mjs";
+import * as uiUtils from "../scripts/uiUtils.mjs";
 import * as cardPrinter from "./cardPrinter.mjs";
 
 //load illustrator & contest winner tags
-let illustratorTags = await fetch("data/illustratorTags.json").then(async response => await response.json());
-let contestWinnerTags = await fetch("data/contestWinnerTags.json").then(async response => await response.json());
+let illustratorTags = await fetch("./data/illustratorTags.json").then(async response => await response.json());
+let contestWinnerTags = await fetch("./data/contestWinnerTags.json").then(async response => await response.json());
 
 // translate page
 // main section
@@ -849,7 +849,7 @@ printCardBacksBtn.addEventListener("click", () => {
 window.addEventListener("beforeprint", () => {
 	if (printBack) {
 		printBack = false;
-		cardPrinter.setCards(deckList.map(cardId => "/images/cardBack.jpg"), undefined, true);
+		cardPrinter.setCards(deckList.map(cardId => "./images/cardBack.jpg"), undefined, true);
 	} else {
 		cardPrinter.setCards(deckList.map(cardId => cardLoader.getCardImageFromID(cardId)));
 	}

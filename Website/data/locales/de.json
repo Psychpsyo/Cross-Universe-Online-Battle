@@ -467,7 +467,7 @@
 		"customization": {
 			"title": "Display & Themes",
 			"fieldLabelToggle": "Feldbeschriftung zeigen",
-			"cardBackToggle": "Gegnerische Kartenrücken deaktivieren",
+			"hideOpponentCardBacks": "Gegnerische Kartenrücken deaktivieren",
 			"opponentCardLanguage": "Zeige Karten des Gegners in der Sprache des Gegners",
 			"previewCardLanguage": "Kartenvorschau auch in anderen Sprache zeigen",
 			"fieldLeftToggle": "Feld links auf dem Bildschirm platzieren",

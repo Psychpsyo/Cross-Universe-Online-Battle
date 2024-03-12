@@ -1,6 +1,6 @@
 import {getCardImageFromID} from "./cardLoader.mjs";
 
-export const cardAlignmentInfo = await fetch("../data/profilePictureInfo.json").then(async response => await response.json());
+export const cardAlignmentInfo = await fetch("./data/profilePictureInfo.json").then(async response => await response.json());
 
 class ProfilePicture extends HTMLElement {
 	constructor() {

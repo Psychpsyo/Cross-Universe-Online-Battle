@@ -1,14 +1,14 @@
 // This module exports the DeckState class which is the state at the beginning of a (non-draft) match where players select their decks.
 import {GameState} from "./gameState.mjs";
 import {BoardState} from "./boardState.mjs";
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {netSend} from "./netcode.mjs";
-import {toDeckx, countDeckCards} from "/scripts/deckUtils.mjs";
+import {toDeckx, countDeckCards} from "../../scripts/deckUtils.mjs";
 import {loadDeckPreview, openDeckView, closeDeckView} from "./generalUI.mjs";
-import {ScriptParserError} from "/rulesEngine/src/cdfScriptInterpreter/parser.mjs";
+import {ScriptParserError} from "../../rulesEngine/src/cdfScriptInterpreter/parser.mjs";
 import * as gameUI from "./gameUI.mjs";
-import * as cardLoader from "/scripts/cardLoader.mjs";
-import * as deckErrors from "/rulesEngine/src/deckErrors.mjs";
+import * as cardLoader from "../../scripts/cardLoader.mjs";
+import * as deckErrors from "../../rulesEngine/src/deckErrors.mjs";
 
 let builtInDecks = [];
 let currentDeckList = "default";
@@ -33,7 +33,7 @@ async function addDecksToDeckSelector(deckList) {
 	let deckPromises = [];
 	for (const deckID of builtInDecks[deckList]) {
 		deckPromises.push(
-			fetch("data/decks/" + deckID + ".deckx")
+			fetch("./data/decks/" + deckID + ".deckx")
 			.then(response => response.json())
 			.then(deck => {
 				return {id: deckID, deck: deck};
@@ -77,7 +77,7 @@ export class DeckState extends GameState {
 		super();
 		gameState = this;
 
-		fetch("data/deckList.json")
+		fetch("./data/deckList.json")
 		.then(response => response.json())
 		.then(decks => {
 			builtInDecks = decks;

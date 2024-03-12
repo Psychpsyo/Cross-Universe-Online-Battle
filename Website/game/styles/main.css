@@ -45,7 +45,7 @@ body {
 	height: 100%;
 	filter: var(--theme-field-filter);
 
-	background-image: url("/images/field.jpg");
+	background-image: url("../../images/field.jpg");
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center;
@@ -320,10 +320,10 @@ img[src$="cardBackFrameP0.png"], img[src$="cardBackFrameP1.png"] {
 	background-position: center;
 }
 img[src$="cardBackFrameP0.png"] {
-	background-image: var(--p0-card-back), url("/images/cardBack.jpg");
+	background-image: var(--p0-card-back), url("../../images/cardBack.jpg");
 }
 img[src$="cardBackFrameP1.png"] {
-	background-image: var(--p1-card-back), url("/images/cardBack.jpg");
+	background-image: var(--p1-card-back), url("../../images/cardBack.jpg");
 }
 
 .fieldCardContainer {
