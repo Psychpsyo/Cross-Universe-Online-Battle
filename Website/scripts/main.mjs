@@ -18,7 +18,6 @@ let socket = null; // used for signalling through room code
 
 window.addEventListener("message", async e => {
 	if (e.source !== gameFrame.contentWindow) return;
-	if (e.data.type !== "sdp") return;
 
 	switch (e.data.type) {
 		case "sdp": {
@@ -170,6 +169,8 @@ connectBtn.addEventListener("click", () => connect());
 
 // canceling a connection
 cancelWaitingBtn.addEventListener("click", function() {
+	socket.close();
+	socket = null;
 	gameFrame.removeAttribute("src");
 	waitingForOpponentHolder.hidden = true;
 	roomCodeInputFieldHolder.hidden = false;
