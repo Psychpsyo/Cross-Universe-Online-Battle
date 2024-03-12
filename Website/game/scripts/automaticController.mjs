@@ -311,12 +311,12 @@ export class AutomaticController extends InteractionController {
 			}
 			case "playerWon": {
 				gameUI.playerWon(events[0].player);
-				window.top.postMessage({type: "playerWon", players: [events[0].player.index]});
+				window.parent.postMessage({type: "playerWon", players: [events[0].player.index]});
 				return;
 			}
 			case "gameDrawn": {
 				gameUI.gameDrawn();
-				window.top.postMessage({type: "gameDrawn"});
+				window.parent.postMessage({type: "gameDrawn"});
 				return;
 			}
 			case "damageDealt": {

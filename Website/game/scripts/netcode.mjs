@@ -28,7 +28,7 @@ export async function callOpponent(isCaller) {
 	peerConnection = new RTCPeerConnection(webRtcConfig);
 	peerConnection.addEventListener("icegatheringstatechange", () => {
 		if (peerConnection.iceGatheringState === "complete") {
-			window.top.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
+			window.parent.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
 		}
 	});
 
@@ -40,7 +40,7 @@ export async function callOpponent(isCaller) {
 		if (!opponentLeft) {
 			chat.putMessage(locale.game.notices.connectionLost, "error", makeChatLeaveButton());
 		}
-		window.top.postMessage({type: "connectionLost"});
+		window.parent.postMessage({type: "connectionLost"});
 	});
 
 	unreliableChannel = peerConnection.createDataChannel("unreliable data", {negotiated: true, id: 1, maxRetransmits: 0});
@@ -85,7 +85,7 @@ function makeChatLeaveButton() {
 	const button = document.createElement("button");
 	button.textContent = locale.game.gameOver.leaveGame;
 	button.addEventListener("click", () => {
-		window.top.postMessage({type: "leaveGame"});
+		window.parent.postMessage({type: "leaveGame"});
 	});
 	holder.appendChild(button);
 	return holder;

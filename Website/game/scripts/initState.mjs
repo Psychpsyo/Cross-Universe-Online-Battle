@@ -54,7 +54,7 @@ export class InitState extends GameState {
 				return true;
 			}
 			case "cardBack": {
-				if (localStorage.getItem("cardBackToggle") === "false") {
+				if (localStorage.getItem("hideOpponentCardBacks") === "false") {
 					document.documentElement.style.setProperty("--p0-card-back", "url('" + message + "')");
 				}
 				return true;
@@ -86,7 +86,7 @@ export class InitState extends GameState {
 		// switch to game view
 		generalUI.init();
 		gameDiv.hidden = false;
-		window.top.postMessage({type: "gameStarted"});
+		window.parent.postMessage({type: "gameStarted"});
 
 		// Start game
 		switch (this.gameMode) {

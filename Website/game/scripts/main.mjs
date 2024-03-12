@@ -72,4 +72,4 @@ window.addEventListener("message", e => {
 	}
 });
 
-window.top.postMessage({type: "ready"});
+window.parent.postMessage({type: "ready"});
