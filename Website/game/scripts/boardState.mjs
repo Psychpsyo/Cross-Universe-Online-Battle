@@ -1,6 +1,6 @@
 // This module exports the board state which is the main game state where the players actually play.
 
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {GameState} from "./gameState.mjs";
 import {netSend} from "./netcode.mjs";
 import {ManualController} from "./manualController.mjs";

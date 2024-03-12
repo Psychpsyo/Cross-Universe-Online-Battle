@@ -1,18 +1,18 @@
 // This module exports the controller for the automatic simulator which verifies the cross universe game rules
 
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {InteractionController} from "./interactionController.mjs";
 import {netSend} from "./netcode.mjs";
 import * as autopass from "./autopass.mjs";
-import {BaseCard} from "/rulesEngine/src/card.mjs";
-import {Player} from "/rulesEngine/src/player.mjs";
+import {BaseCard} from "../../rulesEngine/src/card.mjs";
+import {Player} from "../../rulesEngine/src/player.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as autoUI from "./automaticUI.mjs";
 import * as generalUI from "./generalUI.mjs";
-import * as actions from "/rulesEngine/src/actions.mjs";
-import * as blocks from "/rulesEngine/src/blocks.mjs";
-import * as cardLoader from "/scripts/cardLoader.mjs";
-import * as zones from "/rulesEngine/src/zones.mjs";
+import * as actions from "../../rulesEngine/src/actions.mjs";
+import * as blocks from "../../rulesEngine/src/blocks.mjs";
+import * as cardLoader from "../../scripts/cardLoader.mjs";
+import * as zones from "../../rulesEngine/src/zones.mjs";
 
 // for ability activation buttons
 const circledDigits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];

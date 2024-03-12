@@ -1,6 +1,6 @@
 import {InitState} from "./initState.mjs";
 import {ReplayInitState} from "./replayInitState.mjs";
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {incomingSdp} from "./netcode.mjs";
 
 // setup

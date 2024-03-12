@@ -44,10 +44,10 @@
 }
 
 .levitateCard::before {
-	background-image: var(--p1-card-back), url("/images/cardBack.jpg");
+	background-image: var(--p1-card-back), url("../images/cardBack.jpg");
 	background-position: center;
 }
 
 .levitateCard::after {
-	background-image: url("/images/cardBackFrameP1.png");
+	background-image: url("../images/cardBackFrameP1.png");
 }

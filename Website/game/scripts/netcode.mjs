@@ -1,4 +1,4 @@
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 
 export let youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and player selection, as far as the board is concerned, the local player is always player 1.)
 

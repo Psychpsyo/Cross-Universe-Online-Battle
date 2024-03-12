@@ -1,7 +1,7 @@
-import {locale} from "/scripts/locale.mjs";
-import {startEffect, stopEffect} from "/scripts/levitationEffect.mjs";
-import {startGame, loadReplay} from "/scripts/gameStarter.mjs";
-import * as uiUtils from "/scripts/uiUtils.mjs";
+import {locale} from "./locale.mjs";
+import {startEffect, stopEffect} from "./levitationEffect.mjs";
+import {startGame, loadReplay} from "./gameStarter.mjs";
+import * as uiUtils from "./uiUtils.mjs";
 
 // randomizing the default room code
 function randomizeRoomcode() {

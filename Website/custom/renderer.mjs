@@ -1,4 +1,4 @@
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../scripts/locale.mjs";
 
 function loadImage(imageUrl) {
 	return new Promise((resolve, reject) => {
@@ -11,10 +11,10 @@ function loadImage(imageUrl) {
 };
 
 let backgrounds = {
-	"unit": loadImage("/custom/images/unit.png"),
-	"standardSpell": loadImage("/custom/images/spell.png"),
-	"standardItem": loadImage("/custom/images/item.png"),
-	"token": loadImage("/custom/images/token.png")
+	"unit": loadImage("./custom/images/unit.png"),
+	"standardSpell": loadImage("./custom/images/spell.png"),
+	"standardItem": loadImage("./custom/images/item.png"),
+	"token": loadImage("./custom/images/token.png")
 }
 // set spell & item variants
 backgrounds.continuousSpell = backgrounds.standardSpell;
@@ -23,12 +23,12 @@ backgrounds.continuousItem = backgrounds.standardItem;
 backgrounds.equipableItem = backgrounds.standardItem;
 
 // bracket images
-let bracketLeftTop = loadImage("/custom/images/bracketLeftTop.png");
-let bracketLeftMiddle = loadImage("/custom/images/bracketLeftMiddle.png");
-let bracketLeftBottom = loadImage("/custom/images/bracketLeftBottom.png");
-let bracketRightTop = loadImage("/custom/images/bracketRightTop.png");
-let bracketRightMiddle = loadImage("/custom/images/bracketRightMiddle.png");
-let bracketRightBottom = loadImage("/custom/images/bracketRightBottom.png");
+let bracketLeftTop = loadImage("./custom/images/bracketLeftTop.png");
+let bracketLeftMiddle = loadImage("./custom/images/bracketLeftMiddle.png");
+let bracketLeftBottom = loadImage("./custom/images/bracketLeftBottom.png");
+let bracketRightTop = loadImage("./custom/images/bracketRightTop.png");
+let bracketRightMiddle = loadImage("./custom/images/bracketRightMiddle.png");
+let bracketRightBottom = loadImage("./custom/images/bracketRightBottom.png");
 
 const lineGap = 3;
 

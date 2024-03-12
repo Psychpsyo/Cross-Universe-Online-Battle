@@ -1,12 +1,12 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {previewCard} from "./generalUI.mjs";
-import {cardAlignmentInfo} from "/scripts/profilePicture.mjs";
-import {FieldZone} from "/rulesEngine/src/zones.mjs";
+import {cardAlignmentInfo} from "../../scripts/profilePicture.mjs";
+import {FieldZone} from "../../rulesEngine/src/zones.mjs";
 import * as gameUI from "./gameUI.mjs";
-import * as cardLoader from "/scripts/cardLoader.mjs";
-import * as blocks from "/rulesEngine/src/blocks.mjs";
+import * as cardLoader from "../../scripts/cardLoader.mjs";
+import * as blocks from "../../rulesEngine/src/blocks.mjs";
 
 let currentActivePhaseElem = null;
 

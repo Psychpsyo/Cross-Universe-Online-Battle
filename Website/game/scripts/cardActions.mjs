@@ -1,6 +1,6 @@
 // This module exports a list of functions that need to be accessible as buttons on specific cards.
 
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {openCardSelect} from "./gameUI.mjs";
 import {netSend} from "./netcode.mjs";
 

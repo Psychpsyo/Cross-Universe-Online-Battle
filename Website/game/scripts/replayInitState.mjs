@@ -1,7 +1,7 @@
-import {Game} from "/rulesEngine/src/game.mjs";
+import {Game} from "../../rulesEngine/src/game.mjs";
 import {GameState} from "./gameState.mjs";
 import {BoardState} from "./boardState.mjs";
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as generalUI from "./generalUI.mjs";
 

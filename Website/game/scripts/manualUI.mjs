@@ -1,6 +1,6 @@
 // this file holds all the code needed for UI that is required during manual games.
 
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {netSend} from "./netcode.mjs";
 import * as gameUI from "./gameUI.mjs";
 

@@ -1,5 +1,5 @@
 // This file defines the chat-box custom element
-import {locale} from "/scripts/locale.mjs";
+import {locale} from "./locale.mjs";
 
 const allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 class ChatBox extends HTMLElement {

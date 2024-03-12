@@ -1,6 +1,6 @@
 async function getLocale() {
-	let english = fetch("../data/locales/en.json").then(async response => await response.json());
-	let local = fetch("../data/locales/" + localStorage.getItem("language") + ".json").then(async response => await response.json());
+	let english = fetch("./data/locales/en.json").then(async response => await response.json());
+	let local = fetch("./data/locales/" + localStorage.getItem("language") + ".json").then(async response => await response.json());
 	await Promise.all([english, local]);
 
 	return replaceMissingKeys(await local, await english);

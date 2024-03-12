@@ -1,4 +1,4 @@
-import {reloadLocale, locale} from "/scripts/locale.mjs";
+import {reloadLocale, locale} from "../scripts/locale.mjs";
 import {refetchCardData} from "./profilePictureSelector.mjs";
 import {validateHotkeys, resetHotkeys, relabelAllHotkeys, editHotkey} from "./hotkeys.mjs";
 

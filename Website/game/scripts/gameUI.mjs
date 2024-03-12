@@ -1,9 +1,9 @@
 import {cardActions} from "./cardActions.mjs";
 import {netSend, zoneToLocal} from "./netcode.mjs";
 import {previewCard, closeCardPreview} from "./generalUI.mjs";
-import {locale} from "/scripts/locale.mjs";
-import {getCardImage} from "/scripts/cardLoader.mjs";
-import {Card} from "/rulesEngine/src/card.mjs";
+import {locale} from "../../scripts/locale.mjs";
+import {getCardImage} from "../../scripts/cardLoader.mjs";
+import {Card} from "../../rulesEngine/src/card.mjs";
 import * as fieldOverlay from "./fieldOverlay.mjs";
 
 let cardSlots = [];
