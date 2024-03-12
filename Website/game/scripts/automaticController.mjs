@@ -478,6 +478,12 @@ export class AutomaticController extends InteractionController {
 				}
 				break;
 			}
+			case "abilitySelected": {
+				if (events[0].player !== localPlayer) {
+					chat.putMessage(locale.game.notices.opponentChoseAbility.replaceAll("{#ABILITY}", await cardLoader.getAbilityText(events[0].chosenAbility)), "notice");
+				}
+				break;
+			}
 			case "deckSideSelected": {
 				if (events[0].player !== localPlayer) {
 					chat.putMessage(locale.game.notices.opponentChoseDeckSide[events[0].chosenSide], "notice");
@@ -546,6 +552,10 @@ export class AutomaticController extends InteractionController {
 						message = locale.game.automatic.opponentActions.effectSelectingPlayer.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 					}
 					autoUI.showOpponentAction(message);
+					break;
+				}
+				case "chooseAbility": {
+					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingEffect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
 					break;
 				}
 				case "chooseType": {
@@ -619,8 +629,18 @@ export class AutomaticController extends InteractionController {
 				response.value = (await gameUI.askQuestion(question, locale.game.automatic.playerSelect.you, locale.game.automatic.playerSelect.opponent))? 1 : 0;
 				break;
 			}
+			case "chooseAbility": {
+				response.value = await autoUI.promptDropdownSelection(
+					locale.game.automatic.effectSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					(await Promise.allSettled(request.from.map(abilityId => cardLoader.getAbilityText(abilityId)))).map(promise => promise.value)
+				);
+				break;
+			}
 			case "chooseType": {
-				response.value = await autoUI.promptTypeSelection(locale.game.automatic.typeSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name), request.from);
+				response.value = await autoUI.promptDropdownSelection(
+					locale.game.automatic.typeSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					request.from.map(type => locale.types[type])
+				);
 				break;
 			}
 			case "chooseDeckSide": {

@@ -122,6 +122,7 @@
 			"opponentChoseYou": "Your opponent chose you.",
 			"opponentChoseSelf": "Your opponent chose themselves.",
 			"opponentChoseType": "Your opponent chose {#TYPE}-type.",
+			"opponentChoseAbility": "Your opponent chose:\n{#ABILITY}",
 			"opponentChoseDeckSide": {
 				"top": "Your opponent chose the deck top.",
 				"bottom": "Your opponent chose the deck bottom."
@@ -348,6 +349,11 @@
 				"select": "Select"
 			},
 
+			"effectSelect": {
+				"prompt": "Select an effect for the effect of '{#CARDNAME}':",
+				"select": "Select"
+			},
+
 			"deckSideSelect": {
 				"prompt": "Select the deck top or bottom for the effect of '{#CARDNAME}':",
 				"top": "Deck Top",
@@ -380,6 +386,7 @@
 				"selectingStartingPlayer": "Your opponent is selecting who goes first.",
 
 				"selectingType": "Your opponent is selecting a type for the effect of '{#CARDNAME}'.",
+				"selectingEffect": "Your opponent is selecting an effect for the effect of '{#CARDNAME}'.",
 				"selectingDeckSide": "Your opponent is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'."
 			}
 		}

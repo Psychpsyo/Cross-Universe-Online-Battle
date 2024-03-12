@@ -122,6 +122,7 @@
 			"opponentChoseYou": null,
 			"opponentChoseSelf": null,
 			"opponentChoseType": null,
+			"opponentChoseAbility": null,
 			"opponentChoseDeckSide": {
 				"top": null,
 				"bottom": null
@@ -380,6 +381,7 @@
 				"selectingStartingPlayer": null,
 
 				"selectingType": null,
+				"selectingEffect": null,
 				"selectingDeckSide": null
 			}
 		}

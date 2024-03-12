@@ -122,6 +122,7 @@
 			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
 			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt.",
 			"opponentChoseType": "Dein Gegner hat Typ {#TYPE} gewählt.",
+			"opponentChoseAbility": "Dein Gegner hat gewählt:\n{#ABILITY}",
 			"opponentChoseDeckSide": {
 				"top": "Dein Gegner hat die Deckoberseite gewählt.",
 				"bottom": "Dein Gegner hat die Deckunterseite gewählt."
@@ -380,6 +381,7 @@
 				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt.",
 
 				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
+				"selectingEffect": "Dein Gegner wählt einen Effekt für den Effekt von '{#CARDNAME}'.",
 				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'."
 			}
 		}
