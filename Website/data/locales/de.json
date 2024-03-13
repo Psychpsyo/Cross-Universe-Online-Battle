@@ -349,6 +349,11 @@
 				"select": "Auswählen"
 			},
 
+			"effectSelect": {
+				"prompt": "Wähle einen Effekt für den Effekt von '{#CARDNAME}':",
+				"select": "Auswählen"
+			},
+
 			"deckSideSelect": {
 				"prompt": "Wähle die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}':",
 				"top": "Oberseite",
@@ -723,7 +728,10 @@
 
 		"cardInfo": {
 			"title": "Karteninfo",
-			"generalSection": "Allgemeine Infos",
+			"general": "Allgemeines:",
+			"strategy": "Strategie:",
+			"strategySource": "von crossuniverse.net",
+			"info": "Infos:",
 			"released": "Erschienen:",
 			"illustrator": "Illustrator:",
 			"idea": "Idee:",

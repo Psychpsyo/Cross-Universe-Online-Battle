@@ -728,7 +728,10 @@
 
 		"cardInfo": {
 			"title": "Card Info",
-			"generalSection": "General Info",
+			"general": "General:",
+			"strategy": "Strategy:",
+			"strategySource": "from crossuniverse.net",
+			"info": "Info:",
 			"released": "Released:",
 			"illustrator": "Illustrator:",
 			"idea": "Idea:",

@@ -1,7 +1,7 @@
 // general
 localStorage.setItem("alwaysShowCardButtons", localStorage.getItem("alwaysShowCardButtons") ?? true);
 localStorage.setItem("autoClosePreview", localStorage.getItem("autoClosePreview") ?? false);
-localStorage.setItem("autoWarning", localStorage.getItem("autoWarning") ?? false);
+localStorage.setItem("autoWarning", localStorage.getItem("autoWarning") ?? true);
 localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("hideOpponentCardBacks", localStorage.getItem("hideOpponentCardBacks") ?? true);
 localStorage.setItem("cardDataApiUrl", localStorage.getItem("cardDataApiUrl") ?? "");

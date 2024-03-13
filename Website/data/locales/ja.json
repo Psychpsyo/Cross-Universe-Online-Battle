@@ -349,6 +349,11 @@
 				"select": null
 			},
 
+			"effectSelect": {
+				"prompt": null,
+				"select": null
+			},
+
 			"deckSideSelect": {
 				"prompt": null,
 				"top": "デッキの上",
@@ -647,7 +652,6 @@
 			"title": null,
 			"websocketUrl": null,
 			"websocketUrlTitle": null,
-
 			"lobbyServerUrl": null,
 			"lobbyServerUrlTitle": null,
 			"cardImageUrl": null,
@@ -724,7 +728,10 @@
 
 		"cardInfo": {
 			"title": null,
-			"generalSection": null,
+			"general": null,
+			"strategy": null,
+			"strategySource": "crossuniverse.jpから",
+			"info": null,
 			"released": null,
 			"illustrator": "イラストレイター：",
 			"idea": "原案：",

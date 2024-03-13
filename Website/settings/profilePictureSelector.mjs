@@ -7,7 +7,7 @@ const categoryLinks = {
 }
 
 const profilePictureInfo = await fetch("./data/profilePictureInfo.json").then(async response => await response.json());
-fetch("../data/profilePictureGroups.json")
+fetch("./data/profilePictureGroups.json")
 .then(async response => await response.json())
 .then(profilePictureGroups => {
 	for (const group of Object.keys(profilePictureGroups)) {

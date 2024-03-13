@@ -69,9 +69,8 @@ h1, h2, h3, h4 {
 }
 
 .cardList > * {
-	width: 95%;
-	max-height: 95%;
-	margin: .3em .15em;
+	width: 100%;
+	padding: .3em .15em;
 	position: relative;
 }
 
@@ -101,29 +100,41 @@ h1, h2, h3, h4 {
 #cardInfoPanelContent {
 	max-width: 50vw;
 }
-
+#cardInfoMainArea > section:not(:first-child) {
+	margin-top: .5em;
+}
 #cardInfoImgArea {
 	width: max-content;
 	margin: 0 auto;
 	font-size: .5em;
 }
-
 #cardInfoCardImg {
 	height: 65vh;
 }
-
 #cardInfoCardID {
 	float: right;
 	margin-right: 1em;
 }
-
+#strategyReferenceLink {
+	display: block;
+	font-size: .5em;
+	margin-bottom: .5em;
+}
+#cardInfoStrategy {
+	white-space: pre-wrap;
+	text-align: left;
+	font-size: .75em;
+}
 #cardInfoReleaseDate, #cardInfoIllustrator, #cardInfoIdea {
 	cursor: pointer;
 }
-
 .cardInfoGrid {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.cardInfoGrid > * {
+	max-width: 25%;
 }
 
 /*deck maker panel*/
