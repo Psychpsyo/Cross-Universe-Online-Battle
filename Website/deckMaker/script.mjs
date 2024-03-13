@@ -132,7 +132,10 @@ Array.from(cardSearchTypeInput.children).forEach(typeOption => {
 
 //card info panel
 cardInfoPanel.setAttribute("aria-label", locale.deckMaker.cardInfo.title);
-cardInfoGeneralSection.setAttribute("aria-label", locale.deckMaker.cardInfo.generalSection);
+cardInfoImgArea.setAttribute("aria-label", locale.deckMaker.cardInfo.generalSection);
+cardInfoStrategyHeader.textContent = locale.deckMaker.cardInfo.strategy;
+strategyReferenceLink.textContent = locale.deckMaker.cardInfo.strategySource;
+cardInfoInfoHeader.textContent = locale.deckMaker.cardInfo.info;
 cardInfoReleaseDateLabel.textContent = locale.deckMaker.cardInfo.released;
 cardInfoIllustratorLabel.textContent = locale.deckMaker.cardInfo.illustrator;
 cardInfoIdeaLabel.textContent = locale.deckMaker.cardInfo.idea;
@@ -278,25 +281,24 @@ async function showSearchResults(cards) {
 
 async function fillCardResultGrid(cardList, grid) {
 	if (cardList.length > 0) {
-		while (document.getElementById("cardInfo" + grid + "Grid").firstChild) {
-			document.getElementById("cardInfo" + grid + "Grid").firstChild.remove();
+		const gridElem = document.getElementById("cardInfo" + grid + "Grid");
+		gridElem.innerHTML = "";
+		const cardPromises = cardList.map(async cardId => createCardButton(await cardLoader.getCardInfo(cardId), false));
+		for (const cardElem of await Promise.all(cardPromises)) {
+			gridElem.appendChild(cardElem);
 		}
-
-		cardList.forEach(async cardId => {
-			document.getElementById("cardInfo" + grid + "Grid").appendChild(createCardButton(await cardLoader.getCardInfo(cardId), false));
-		});
 		document.getElementById("cardInfo" + grid + "Area").style.display = "block";
 	}
 }
 
-async function showCardInfo(cardInfo) {
+function showCardInfo(cardInfo) {
 	//fill in basic card info
 	document.getElementById("cardInfoCardImg").src = cardLoader.getCardImageFromID(cardInfo.cardID);
 	document.getElementById("cardInfoCardID").textContent = "CU" + cardInfo.cardID;
 	cardInfoToDeck.dataset.cardID = cardInfo.cardID;
 
 	//hide all info bits (they get re-enabled later, if relevant to the card)
-	document.getElementById("cardInfoReleaseDateArea").style.display = "none";
+	document.getElementById("cardInfoStrategyArea").style.display = "none";
 	document.getElementById("cardInfoIllustratorArea").style.display = "none";
 	document.getElementById("cardInfoIdeaArea").style.display = "none";
 	document.getElementById("cardInfoMentionedArea").style.display = "none";
@@ -324,18 +326,21 @@ async function showCardInfo(cardInfo) {
 	cardInfoCardImg.alt = locale.cardDetailsLevel + (cardInfo.level == -1? "?" : cardInfo.level) + locale.cardDetailsLevelTypeSeparator + locale[cardInfo.cardType + "CardDetailType"] + ".\n" + locale.cardDetailsEffects + "\n" + cardInfo.effectsPlain;
 
 	//fill in release date
-	if (cardInfo.releaseDate) {
-		cardInfoReleaseDate.textContent = cardInfo.releaseDate;
-		cardInfoReleaseDate.dataset.releaseDate = cardInfo.releaseDate;
-		cardInfoReleaseDateArea.style.display = "inline";
-	}
+	cardInfoReleaseDate.textContent = cardInfo.releaseDate;
+	cardInfoReleaseDate.dataset.releaseDate = cardInfo.releaseDate;
 
+	if (cardInfo.webDescription) {
+		cardLoader.getWebLink(cardInfo.cardID).then(link => {
+			strategyReferenceLink.href = link;
+		});
+		cardInfoStrategy.textContent = cardInfo.webDescription;
+		cardInfoStrategyArea.style.display = "block";
+	}
 	if (cardInfo.illustrator) {
 		cardInfoIllustrator.textContent = illustratorTags[cardInfo.illustrator][locale.code] ?? illustratorTags[cardInfo.illustrator]["en"];
 		cardInfoIllustrator.dataset.illustrator = cardInfo.illustrator;
 		cardInfoIllustratorArea.style.display = "inline";
 	}
-
 	if (cardInfo.idea) {
 		cardInfoIdea.textContent = contestWinnerTags[cardInfo.idea][locale.code] ?? contestWinnerTags[cardInfo.idea]["en"];
 		cardInfoIdea.dataset.idea = cardInfo.idea;

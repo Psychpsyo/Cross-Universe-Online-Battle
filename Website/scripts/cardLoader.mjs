@@ -139,8 +139,8 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 }
 
 // TODO: nested sub-abilities do not work
-export async function getAbilityText(abilityID) {
-	const abilityInfo = abilityID.split(":");
+export async function getAbilityText(abilityId) {
+	const abilityInfo = abilityId.split(":");
 	const cardInfo = await getCardInfo(abilityInfo[0]);
 	let currentAbility = 0;
 	for (const effect of cardInfo.effects) {
@@ -157,7 +157,19 @@ export async function getAbilityText(abilityID) {
 			}
 		}
 	}
-	throw new Error("Card does not have an effect with id " + abilityID + "!");
+	throw new Error("Card does not have an effect with id " + abilityId + "!");
+}
+
+// gets the link to the card's page on crossuniverse.net or crossuniverse.jp
+export async function getWebLink(cardId, language = localStorage.getItem("language")) {
+	switch (language) {
+		case "ja": {
+			return (await getCardInfo(cardId)).jpSiteLink;
+		}
+		case "en": {
+			return `https://crossuniverse.net/card/CU${cardId}/`;
+		}
+	}
 }
 
 export async function deckToCdfList(deck, automatic, player) {
