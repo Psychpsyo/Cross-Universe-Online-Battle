@@ -117,8 +117,9 @@ h1, h2, h3, h4 {
 }
 #strategyReferenceLink {
 	display: block;
+	max-width: fit-content;
 	font-size: .5em;
-	margin-bottom: .5em;
+	margin: 0 auto .5em;
 }
 #cardInfoStrategy {
 	white-space: pre-wrap;
