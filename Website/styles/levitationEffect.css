@@ -20,12 +20,15 @@
 	position: absolute;
 	top: 110vh;
 	animation: spin 20s infinite var(--spin-delay) linear;
-	transition: top var(--float-time) linear;
+	transition: top var(--float-time) linear, filter .25s;
 
 	background-size: cover;
 	transform-style: preserve-3d;
 	backface-visibility: hidden;
 	aspect-ratio: 813 / 1185;
+}
+.levitateCard:hover, .levitateCard:hover > * {
+	filter: brightness(1.3);
 }
 
 .levitateCard::before, .levitateCard::after {

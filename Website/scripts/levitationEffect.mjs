@@ -44,7 +44,8 @@ const christmasCards = [
 	"U00287"
 ];
 const cardBaseUrl = (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl"));
-function getRandomCardLink() {
+async function getRandomCardLink() {
+	// special holidays/occasions
 	const date = new Date();
 	const day = date.getDate();
 	const month = date.getMonth();
@@ -54,10 +55,14 @@ function getRandomCardLink() {
 	if (month === 3 && day === 1) {
 		return cardBaseUrl + locale.code + "/S00099.jpg";
 	}
-	return cardBaseUrl + "random?lang=" + locale.code + "&num=" + cardsSoFar;
+
+	// the usual
+	// this goes over an intermediary fetch() so that the URL in the actual src will always point to a definite card.
+	const response = await fetch(cardBaseUrl + "random/?lang=" + locale.code + "&num=" + cardsSoFar);
+	return response.url;
 }
 
-function spawnCard(parentElement) {
+async function spawnCard(parentElement) {
 	const card = document.createElement("div");
 	card.classList.add("levitateCard");
 
@@ -72,7 +77,12 @@ function spawnCard(parentElement) {
 		position += 70;
 	}
 	card.style.left = position + "%";
-	card.style.backgroundImage = `url('${getRandomCardLink()}')`;
+	card.dataset.src = await getRandomCardLink();
+	card.style.backgroundImage = `url('${card.dataset.src}')`;
+	card.addEventListener("click", function() {
+		levitatingCardPreviewImage.src = this.dataset.src;
+		levitatingCardPreviewOverlay.classList.add("shown");
+	});
 	cardsSoFar++;
 
 	parentElement.appendChild(card);
@@ -87,6 +97,10 @@ function spawnCard(parentElement) {
 		this.remove();
 	}.bind(card), floatSeconds * 1000);
 }
+
+levitatingCardPreviewOverlay.addEventListener("click", e => {
+	levitatingCardPreviewOverlay.classList.remove("shown");
+});
 
 export function startEffect(elem) {
 	effectElement = elem;
