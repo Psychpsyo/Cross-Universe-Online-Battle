@@ -113,7 +113,7 @@
 								<label id="lobbyDraftFormatLabel" for="lobbyDraftFormatInput"></label>
 								<select id="lobbyDraftFormatInput">
 									<option id="lobbyDraftFormatBeginner" value="beginner"></option>
-									<option id="lobbyDraftFormatMayhem" value="mayhem" hidden><!-- TODO: implement mayhem drafts --></option>
+									<option id="lobbyDraftFormatMayhem" value="mayhem"></option>
 									<option id="lobbyDraftFormatOG" value="og137"></option>
 								</select>
 							</div>
@@ -131,6 +131,9 @@
 				</div>
 			</main>
 			<footer id="unofficialFooter"></footer>
+			<div id="levitatingCardPreviewOverlay">
+				<img id="levitatingCardPreviewImage" alt="">
+			</div>
 		</div>
 		<iframe id="gameFrame" scrolling="no"></iframe>
 		<script>gameFrame.src="about:blank"</script> <!-- Firefox makes the iframe point to the game on page refresh otherwise -->
