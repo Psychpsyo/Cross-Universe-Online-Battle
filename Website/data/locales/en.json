@@ -132,6 +132,8 @@
 			"opponentDrew": "Your opponent drew:",
 			"youSummoned": "You summoned:",
 			"opponentSummoned": "Your opponent summoned:",
+			"youStandardSummoned": "You standard summoned:",
+			"opponentStandardSummoned": "Your opponent standard summoned:",
 			"youCast": "You cast:",
 			"opponentCast": "Your opponent cast:",
 			"youDeployed": "You deployed:",

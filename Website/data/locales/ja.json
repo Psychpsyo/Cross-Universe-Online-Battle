@@ -132,6 +132,8 @@
 			"opponentDrew": null,
 			"youSummoned": null,
 			"opponentSummoned": null,
+			"youStandardSummoned": null,
+			"opponentStandardSummoned": null,
 			"youCast": null,
 			"opponentCast": null,
 			"youDeployed": null,
