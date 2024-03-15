@@ -402,7 +402,16 @@
 		"opponent": "Gegner",
 		"replayYou": "Magier 1",
 		"replayOpponent": "Magier 2",
-		"colon": ": "
+		"colon": ": ",
+
+		"quickWheel": [
+			"ok",
+			"Dein Zug",
+			"Angriff!",
+			"?!",
+			"Sorry",
+			"gg"
+		]
 	},
 
 	"draft": {

@@ -402,7 +402,16 @@
 		"opponent": "相手",
 		"replayYou": "魔術師１",
 		"replayOpponent": "魔術師２",
-		"colon": "："
+		"colon": "：",
+
+		"quickWheel": [
+			"OK",
+			"ターン\u200Bエンド",
+			null,
+			"⁈",
+			null,
+			"gg"
+		]
 	},
 
 	"draft": {

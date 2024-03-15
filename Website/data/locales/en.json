@@ -402,7 +402,16 @@
 		"opponent": "Opponent",
 		"replayYou": "Sorcerer 1",
 		"replayOpponent": "Sorcerer 2",
-		"colon": ": "
+		"colon": ": ",
+
+		"quickWheel": [
+			"ok",
+			"Your turn",
+			"Attack!",
+			"?!",
+			"Sorry",
+			"gg"
+		]
 	},
 
 	"draft": {
