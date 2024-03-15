@@ -397,6 +397,7 @@
 	"chat": {
 		"title": "Chat",
 		"enterMessage": "Nachricht schreiben...",
+		"typingIndicator": "{#NAME} schreibt...",
 		"you": "Du",
 		"opponent": "Gegner",
 		"replayYou": "Magier 1",

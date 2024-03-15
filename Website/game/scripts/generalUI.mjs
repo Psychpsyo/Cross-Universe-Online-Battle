@@ -58,9 +58,22 @@ export function createAbilityFragment(abilityText) {
 }
 
 // chat
+let isTyping = false;
 chat.addEventListener("message", function(e) {
 	netSend("[chat]" + e.data);
 	this.putMessage(players[1].name + locale["chat"]["colon"] + e.data);
+});
+chat.inputField.addEventListener("input", () => {
+	if (!isTyping) {
+		isTyping = true;
+		netSend("[startTyping]");
+	}
+});
+chat.inputField.addEventListener("blur", () => {
+	if (isTyping) {
+		isTyping = false;
+		netSend("[stopTyping]");
+	}
 });
 
 // card previewing

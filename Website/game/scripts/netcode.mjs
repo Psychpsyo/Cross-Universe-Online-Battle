@@ -97,10 +97,20 @@ function receiveMessage(e) {
 	const command = e.data.substring(1, e.data.indexOf("]"));
 
 	switch (command) {
-		case "chat": { // incoming chat message
+		// chat-related things
+		case "chat": {
 			chat.putMessage(players[0].name + locale["chat"]["colon"] + message.substring(0, 10_000));
+			// no break to also clear typing indicator in "stopTyping"
+		}
+		case "stopTyping": {
+			chat.infoBar.innerHTML = "";
 			break;
 		}
+		case "startTyping": {
+			chat.infoBar.textContent = locale["chat"]["typingIndicator"].replaceAll("{#NAME}", players[0].name);
+			break;
+		}
+		// Networking for distributedRandom.mjs
 		case "distRandValue": {
 			game.rng.importCyphertext(message);
 			return true;
@@ -109,12 +119,14 @@ function receiveMessage(e) {
 			game.rng.importCypherKey(message);
 			return true;
 		}
+		// opponent left (sad)
 		case "leave": {
 			peerConnection.close();
 			opponentLeft = true;
 			chat.putMessage(locale.game.notices.opponentLeft, "error", makeChatLeaveButton());
 			break;
 		}
+		// none of the above, let the current game state handle it
 		default: {
 			if (!gameState?.receiveMessage(command, message)) {
 				console.log("Received unknown message:\nCommand: " + command + "\nMessage: " + message);

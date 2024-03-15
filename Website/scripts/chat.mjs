@@ -10,6 +10,9 @@ class ChatBox extends HTMLElement {
 	connectedCallback() {
 		const header = document.createElement("header");
 		this.messageArea = document.createElement("div");
+		this.messageArea.classList.add("chatMessageArea");
+		this.infoBar = document.createElement("div");
+		this.infoBar.classList.add("chatInfoBar");
 		this.inputField = document.createElement("input");
 
 		header.textContent = locale.chat.title;
@@ -30,6 +33,7 @@ class ChatBox extends HTMLElement {
 
 		this.appendChild(header);
 		this.appendChild(this.messageArea);
+		this.messageArea.appendChild(this.infoBar);
 		this.appendChild(this.inputField);
 	}
 
@@ -72,6 +76,7 @@ class ChatBox extends HTMLElement {
 	// empties the chat
 	clear() {
 		this.messageArea.textContent = "";
+		this.messageArea.appendChild(this.infoBar);
 	}
 }
 customElements.define("chat-box", ChatBox);

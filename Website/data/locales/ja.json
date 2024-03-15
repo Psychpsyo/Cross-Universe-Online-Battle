@@ -396,7 +396,8 @@
 
 	"chat": {
 		"title": "チャット",
-		"enterMessage": "Enter Message...",
+		"enterMessage": null,
+		"typingIndicator": null,
 		"you": "自分",
 		"opponent": "相手",
 		"replayYou": "魔術師１",
