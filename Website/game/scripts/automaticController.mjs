@@ -368,7 +368,17 @@ export class AutomaticController extends InteractionController {
 			case "cardDeployed":
 			case "cardSummoned": {
 				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
-					chat.putMessage(locale.game.notices[(playerIndex == localPlayer.index? "you" : "opponent") + type.substring(4)], "notice", autoUI.chatCards(eventList.map(event => event.card)));
+					// construct chat message locale identifier
+					const player = playerIndex == localPlayer.index? "you" : "opponent";
+					let action = type.substring(4);
+					if (type === "cardSummoned" && game.currentBlock() instanceof blocks.StandardSummon) {
+						action = "StandardSummoned";
+					}
+					chat.putMessage(
+						locale.game.notices[player + action],
+						"notice",
+						autoUI.chatCards(eventList.map(event => event.card))
+					);
 				}
 				for (const event of events) {
 					gameUI.insertCard(event.toZone, event.toIndex);

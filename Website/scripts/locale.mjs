@@ -12,7 +12,15 @@ function replaceMissingKeys(local, english) {
 			local[key] = value;
 			continue;
 		}
-		if (typeof value == "object" && !Array.isArray(value)) {
+		if (Array.isArray(value)) {
+			for (let i = 0; i < value.length; i++) {
+				if (!local[key][i]) {
+					local[key][i] = value[i];
+				}
+			}
+			continue;
+		}
+		if (typeof value === "object") {
 			replaceMissingKeys(local[key], value);
 		}
 	}

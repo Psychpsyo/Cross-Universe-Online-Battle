@@ -132,6 +132,8 @@
 			"opponentDrew": "Your opponent drew:",
 			"youSummoned": "You summoned:",
 			"opponentSummoned": "Your opponent summoned:",
+			"youStandardSummoned": "You standard summoned:",
+			"opponentStandardSummoned": "Your opponent standard summoned:",
 			"youCast": "You cast:",
 			"opponentCast": "Your opponent cast:",
 			"youDeployed": "You deployed:",
@@ -395,11 +397,21 @@
 	"chat": {
 		"title": "Chat",
 		"enterMessage": "Enter Message...",
+		"typingIndicator": "{#NAME} is typing...",
 		"you": "You",
 		"opponent": "Opponent",
 		"replayYou": "Sorcerer 1",
 		"replayOpponent": "Sorcerer 2",
-		"colon": ": "
+		"colon": ": ",
+
+		"quickWheel": [
+			"ok",
+			"Your turn",
+			"Attack!",
+			"?!",
+			"Sorry",
+			"gg"
+		]
 	},
 
 	"draft": {

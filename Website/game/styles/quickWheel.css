@@ -1,0 +1,39 @@
+#quickWheel {
+	position: absolute;
+	width: 12em;
+	height: 12em;
+	transform: translate(-50%, -50%);
+	z-index: 10000;
+	filter: opacity(0);
+	transition-property: filter, width, height;
+	transition-duration: .075s;
+	pointer-events: none;
+}
+#quickWheel.shown {
+	filter: opacity(1);
+	pointer-events: all;
+	width: 15em;
+	height: 15em;
+}
+
+#quickWheel > * {
+	fill: var(--theme-dialog-background-color);
+}
+#quickWheel .hoverIndicator {
+	fill: transparent;
+}
+#quickWheel > :hover .hoverIndicator {
+	fill: var(--theme-button-hover-color);
+	transition: fill .25s;
+}
+
+#quickWheel foreignObject > * {
+	display: flex;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	font-size: .3em;
+	pointer-events: none;
+	word-break: keep-all; /* only needed in Firefox to make "ターン(ZWSP)エンド" work */
+}

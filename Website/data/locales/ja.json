@@ -132,6 +132,8 @@
 			"opponentDrew": null,
 			"youSummoned": null,
 			"opponentSummoned": null,
+			"youStandardSummoned": null,
+			"opponentStandardSummoned": null,
 			"youCast": null,
 			"opponentCast": null,
 			"youDeployed": null,
@@ -394,12 +396,22 @@
 
 	"chat": {
 		"title": "チャット",
-		"enterMessage": "Enter Message...",
+		"enterMessage": null,
+		"typingIndicator": null,
 		"you": "自分",
 		"opponent": "相手",
 		"replayYou": "魔術師１",
 		"replayOpponent": "魔術師２",
-		"colon": "："
+		"colon": "：",
+
+		"quickWheel": [
+			"OK",
+			"ターン\u200Bエンド",
+			null,
+			"⁈",
+			null,
+			"gg"
+		]
 	},
 
 	"draft": {

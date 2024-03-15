@@ -132,6 +132,8 @@
 			"opponentDrew": "Dein Gegner hat gezogen:",
 			"youSummoned": "Du hast beschworen:",
 			"opponentSummoned": "Dein Gegner hat beschworen:",
+			"youStandardSummoned": "Du hast standardbeschworen:",
+			"opponentStandardSummoned": "Dein Gegner hat standardbeschworen:",
 			"youCast": "Du hast gecasted:",
 			"opponentCast": "Dein Gegner hat gecasted:",
 			"youDeployed": "Du hast deployed:",
@@ -395,11 +397,21 @@
 	"chat": {
 		"title": "Chat",
 		"enterMessage": "Nachricht schreiben...",
+		"typingIndicator": "{#NAME} schreibt...",
 		"you": "Du",
 		"opponent": "Gegner",
 		"replayYou": "Magier 1",
 		"replayOpponent": "Magier 2",
-		"colon": ": "
+		"colon": ": ",
+
+		"quickWheel": [
+			"ok",
+			"Dein Zug",
+			"Angriff!",
+			"?!",
+			"Sorry",
+			"gg"
+		]
 	},
 
 	"draft": {
