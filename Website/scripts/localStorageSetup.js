@@ -13,6 +13,7 @@ localStorage.setItem("devMode", localStorage.getItem("devMode") ?? false);
 localStorage.setItem("fieldLabelToggle", localStorage.getItem("fieldLabelToggle") ?? true);
 localStorage.setItem("fieldLeftToggle", localStorage.getItem("fieldLeftToggle") ?? false);
 localStorage.setItem("language", localStorage.getItem("language") ?? (navigator.language.startsWith("ja")? "ja" : "en"));
+localStorage.setItem("loadingScreenHints", localStorage.getItem("loadingScreenHints") ?? true);
 localStorage.setItem("lobbyServerUrl", localStorage.getItem("lobbyServerUrl") ?? "");
 localStorage.setItem("mainMenuCards", localStorage.getItem("mainMenuCards") ?? true);
 localStorage.setItem("opponentCardLanguage", localStorage.getItem("opponentCardLanguage") ?? true);
@@ -51,7 +52,7 @@ var themes = {
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
 		"dialogBackground": "#000c",
-		"textShadow": "2px 2px 2px black",
+		"textShadow": "0 0 .2em black, 0 0 .2em black, .07em .07em .13em black, .07em .07em .13em black",
 		"textColor": "#eee",
 		"disabledTextColor": "#eee8",
 		"disabledBackgroundColor": "#222",
@@ -65,7 +66,7 @@ var themes = {
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
 		"dialogBackground": "#000c",
-		"textShadow": "2px 2px 2px black",
+		"textShadow": "0 0 .2em black, 0 0 .2em black, .07em .07em .13em black, .07em .07em .13em black",
 		"textColor": "#eee",
 		"disabledTextColor": "#eee8",
 		"disabledBackgroundColor": "#222",

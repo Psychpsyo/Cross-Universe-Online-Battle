@@ -26,6 +26,10 @@ const settings = {
 		{
 			id: "alwaysShowCardButtons",
 			type: "toggle"
+		},
+		{
+			id: "loadingScreenHints",
+			type: "toggle"
 		}
 	],
 	profile: [

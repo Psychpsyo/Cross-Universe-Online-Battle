@@ -18,29 +18,37 @@ let socket = null; // used for signalling through room code
 
 window.addEventListener("message", async e => {
 	if (e.source !== gameFrame.contentWindow) return;
+	// game was opened from lobby if socket is null
+	if (!socket) return;
 
 	switch (e.data.type) {
 		case "sdp": {
-			// does not send if socket is null (in that case, the game was opened in a lobby)
-			socket?.send("[sdp]" + e.data.sdp);
+			socket.send("[sdp]" + e.data.sdp);
 			break;
 		}
 		case "gameStarted": {
-			// signalling socket isn't needed anymore once game has started
-			socket.close();
-			socket = null;
+			hideConnectScreen();
 			break;
 		}
 	}
 });
 
-// connecting
-function connect(overrideWebsocketUrl) {
+function showConnectScreen() {
 	// hide input field and show waiting indicator
+	cancelWaitingBtn.disabled = false;
 	roomCodeInputFieldHolder.hidden = true;
 	waitingForOpponentHolder.hidden = false;
 	lobbies.style.display = "none";
+	rulesButton.hidden = true;
+	loadingScreenMessage.hidden = false;
 	loadingIndicator.classList.add("active");
+	stopEffect();
+	if (localStorage.getItem("loadingScreenHints") === "true") {
+		loadingScreenMessage.textContent = `${locale.mainMenu.loadingScreenHint}\n${locale.mainMenu.loadingScreenHints[Math.floor(Math.random() * locale.mainMenu.loadingScreenHints.length)]}`;
+	} else {
+		loadingScreenMessage.textContent = "";
+	}
+
 	// refresh the "Waiting for Opponent" text so screen readers read it out.
 	setTimeout(() => {
 		if (typeof waitingForOpponentText !== "undefined") {
@@ -49,7 +57,25 @@ function connect(overrideWebsocketUrl) {
 		}
 	}, 100);
 
-	stopEffect();
+}
+// stops connecting to an opponent and returns whether or not anything was done.
+function hideConnectScreen() {
+	if (waitingForOpponentHolder.hidden) return false;
+
+	socket.close(); // might've already closed
+	socket = null;
+	waitingForOpponentHolder.hidden = true;
+	roomCodeInputFieldHolder.hidden = false;
+	lobbies.style.display = "flex";
+	rulesButton.hidden = false;
+	loadingScreenMessage.hidden = true;
+	startEffect(levitatingCards);
+	return true;
+}
+
+// connecting
+function connect(overrideWebsocketUrl) {
+	showConnectScreen();
 
 	// Signalling for the game
 	socket = new WebSocket(overrideWebsocketUrl ?? websocketUrl);
@@ -62,16 +88,11 @@ function connect(overrideWebsocketUrl) {
 
 		switch (command) {
 			case "youAre": {
+				cancelWaitingBtn.disabled = true;
+				loadingScreenMessage.textContent = locale.mainMenu.opponentFound;
 				startGame(parseInt(message) === 0, {
 					gameMode: "normal",
 					automatic: gameModeSelect.value === "automatic"
-				}).then(() => {
-					socket?.close(); // might've already closed at game start
-					socket = null;
-					waitingForOpponentHolder.hidden = true;
-					roomCodeInputFieldHolder.hidden = false;
-					lobbies.style.display = "flex";
-					startEffect(levitatingCards);
 				});
 				break;
 			}
@@ -169,12 +190,8 @@ connectBtn.addEventListener("click", () => connect());
 
 // canceling a connection
 cancelWaitingBtn.addEventListener("click", function() {
-	socket.close();
-	socket = null;
+	hideConnectScreen();
 	gameFrame.removeAttribute("src");
-	waitingForOpponentHolder.hidden = true;
-	roomCodeInputFieldHolder.hidden = false;
-	lobbies.style.display = "flex";
 	roomCodeInputField.focus();
 	loadingIndicator.classList.remove("active");
 });
@@ -194,14 +211,14 @@ preGame.addEventListener("dragover", function(e) {
 	e.preventDefault();
 });
 preGame.addEventListener("drop", function(e) {
-	let file = e.dataTransfer.items[0].getAsFile();
+	const file = e.dataTransfer.items[0].getAsFile();
 	if (!file || !file.name.endsWith(".replay")) {
 		return;
 	}
 
 	e.preventDefault();
 
-	let reader = new FileReader();
+	const reader = new FileReader();
 	reader.addEventListener("load", e => {
 		stopEffect();
 		loadReplay(JSON.parse(e.target.result)).then(() => {

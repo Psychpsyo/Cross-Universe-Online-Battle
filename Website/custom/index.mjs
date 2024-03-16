@@ -17,7 +17,7 @@ cardAttackLabel.textContent = locale.customCards.cardAttack;
 cardDefenseLabel.textContent = locale.customCards.cardDefense;
 cardTypeLabel.textContent = locale.customCards.cardType;
 Array.from(cardType.children).forEach(elem => {
-	elem.textContent = locale[elem.value + "CardDetailType"];
+	elem.textContent = locale.cardDetails.cardTypes[elem.value];
 });
 
 cardTypes.title = locale.customCards.possibleTypes.replace("{#TYPES}", Object.values(locale.types).map(val => val.replace(" ", "_")).join(locale.customCards.possibleTypesSeperator));

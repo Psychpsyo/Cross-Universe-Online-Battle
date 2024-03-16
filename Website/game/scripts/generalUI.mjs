@@ -119,7 +119,7 @@ export async function updateCardPreview(card) {
 	}
 
 	insertCardValue(card, "level", cardDetailsLevelValues);
-	cardDetailsTypeValues.textContent = cardTypes.map(type => locale[type + "CardDetailType"]).join("/");
+	cardDetailsTypeValues.textContent = cardTypes.map(type => locale.cardDetails.cardTypes[type]).join("/");
 
 	insertCardValueList(card, "types", cardDetailsTypesValues, locale.typeSeparator, async (type) => locale.types[type], locale.typeless);
 
@@ -165,15 +165,16 @@ export async function updateCardPreview(card) {
 }
 
 function createDomEffect(type, content, classNames = []) {
-	let effectDiv = document.createElement("div");
+	const effectDiv = document.createElement("div");
+	effectDiv.title = locale.cardDetails.effectDescriptions[type];
 	effectDiv.classList.add("cardDetailsEffect");
 	for (const className of classNames) {
 		effectDiv.classList.add(className);
 	}
 
 	if (type != "rule") { // 'rule' effects get no title
-		let effectTitle = document.createElement("span");
-		effectTitle.textContent = locale[type + "CardDetailEffect"];
+		const effectTitle = document.createElement("span");
+		effectTitle.textContent = locale.cardDetails.effectNames[type];
 		effectDiv.appendChild(effectTitle);
 		effectDiv.appendChild(document.createElement("br"));
 	}
@@ -305,11 +306,11 @@ export function closeDeckView() {
 
 // init function
 export function init() {
-	cardDetailsAttack.textContent = locale.cardDetailsAttack;
-	cardDetailsDefense.textContent = locale.cardDetailsDefense;
-	cardDetailsLevel.textContent = locale.cardDetailsLevel;
-	cardDetailsLevelTypeSeparator.textContent = locale.cardDetailsLevelTypeSeparator;
-	cardDetailsTypes.textContent = locale.cardDetailsTypes;
+	cardDetailsAttack.textContent = locale.cardDetails.attack;
+	cardDetailsDefense.textContent = locale.cardDetails.defense;
+	cardDetailsLevel.textContent = locale.cardDetails.level;
+	cardDetailsLevelTypeSeparator.textContent = locale.cardDetails.levelTypeSeparator;
+	cardDetailsTypes.textContent = locale.cardDetails.types;
 
 	infoPanelVS.textContent = locale.game.playerInfo.vs;
 	for (let i = 0; i < 2; i++) {

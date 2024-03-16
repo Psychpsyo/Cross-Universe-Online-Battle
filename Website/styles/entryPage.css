@@ -136,6 +136,14 @@ h1, legend {
 	display: flex;
 	justify-content: space-evenly;
 }
+#loadingScreenMessage {
+	width: 100%;
+	text-align: center;
+	white-space: pre;
+	text-shadow: var(--theme-text-shadow);
+	max-width: max-content;
+	z-index: 10; /* lift it above the hover cards */
+}
 
 #mainNavigation {
 	width: 100%;
