@@ -457,7 +457,7 @@ async function beginGame(isCaller) {
 		useOldManaRule: currentLobby.oldManaRule
 	}
 	if (currentLobby.gameMode === "draft") {
-		gameOptions.draftFormat = await (await fetch("./data/draftFormats/beginner.json")).json();
+		gameOptions.draftFormat = await (await fetch(`./data/draftFormats/${lobbyDraftFormatInput.value}.json`)).json();
 	}
 	await startGame(isCaller, gameOptions)
 	currentLobby.playingAgainst = null;
