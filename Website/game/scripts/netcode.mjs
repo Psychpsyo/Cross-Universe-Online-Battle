@@ -37,10 +37,17 @@ export async function callOpponent(isCaller) {
 	reliableChannel.addEventListener("message", receiveMessage);
 	reliableChannel.addEventListener("close", () => {
 		peerConnection.close();
+		window.parent.postMessage({type: "connectionLost"});
+
+		if (gameDiv.hidden) {
+			// game ended before it even began
+			window.parent.postMessage({type: "leaveGame"});
+			return;
+		}
+
 		if (!opponentLeft) {
 			chat.putMessage(locale.game.notices.connectionLost, "error", makeChatLeaveButton());
 		}
-		window.parent.postMessage({type: "connectionLost"});
 	});
 
 	unreliableChannel = peerConnection.createDataChannel("unreliable data", {negotiated: true, id: 1, maxRetransmits: 0});

@@ -22,6 +22,32 @@
 		"waitingForOpponent": "Warte auf Gegner...",
 		"copyInviteLink": "Invite-Link kopieren",
 		"cancelWaiting": "Abbrechen",
+		"opponentFound": "Gegner gefunden, das Spiel wird gestartet...",
+		"loadingScreenHint": "Tipp:",
+		"loadingScreenHints": [
+			"Du kannst so viele Units retiren, wie du willst, aber nur ein mal pro Zug.",
+			"Wenn dein Gegner viel Mana in deinem Zug hat, könnte er starke Konter spielen, also pass auf.",
+			"Wenn du mit deinem Partner angreifst, können andere Units mit dem selben Typ auch teilnehmen, um einen Combined Attack zu machen.",
+			"Mana das du nicht ausgibst hilft im nächsten Zug dabei, deinen Partner zu bezahlen.",
+			"Wenn Zauber als Antwort auf gegnerische Aktionen spielst, passieren diese Zauber zuerst.",
+			"Im Deck Editor kannst du deinen Decks auch einfach ausrucken.",
+			"Wenn du im Hauptmenü eine interessante Karte vorbeifliegen siehst, klick drauf, um sie dir näher anzusehen.",
+			"In den Einstellungen gibt es praktische Hotkeys.",
+			"Mit der mittleren Maustaste kannst du im Spiel Schnellnachrichten im Chat schicken.",
+			"Da dein Partner das Feld nie verlässt, wird er immer einen Gegenangriff ausführen.",
+			"Du kannst Units in deiner zweiten Mainphase retiren, nachdem sie angegriffen haben.",
+			"Units können schon im selben Zug angreifen, in dem sie beschworen wurden.",
+			"Je mehr Karten du in deinem Deck hast, desto unwahrscheinlicher ist es eine bestimmte davon zu ziehen.",
+			"Du kannst Equippable Items und Enchant Spells auch an gegnerische Units anlegen.",
+			"Du kannst bevor und nachdem dein Gegner das Angriffsziel wählt auf einen Angriff reagieren.",
+			"Karten vom Typ Feuer sind super darin, das Deck deines Gegners zu zerstören.",
+			"Wenn deine Unitzone leer ist, hat dein Gegner freie Bahn, um dich anzugreifen.",
+			"Units haben nur einen Angriff pro Zug, Combined Attacks eingeschlossen.",
+			"Wenn du eine Karte aus deinem Deck wählen darfst, um sie auf die Hand zu nehmen, musst du sie deinem Gegner zeigen.",
+			"Ein Deck muss aus 30 bis 50 Karten bestehen.",
+			"Du kannst die gleiche Karte bis zu drei mal in deinem Deck haben.",
+			"Du kannst diese Tipps in den Einstellungen ausschalten, wenn du willst."
+		],
 		"rulesButton": "Spielregeln",
 		"unofficialNotice": "Diese Seite ist eine Cross Universe Fan-Implementation. Die offizielle Seite findest du unter {#LINK}!",
 		"rulesLink": "https://crossuniverse.net/rules",
@@ -447,7 +473,8 @@
 			"languageWarningName": "Achtung:",
 			"partnerChoiceToggle": "Immer die Wahl des Partners geben",
 			"autoClosePreview": "Kartenvorschau durch Danebenklicken schließen",
-			"alwaysShowCardButtons": "Karteninteraktionsbuttons auch ohne hovern zeigen"
+			"alwaysShowCardButtons": "Karteninteraktionsbuttons auch ohne hovern zeigen",
+			"loadingScreenHints": "Tipps auf dem Verbindungsbildschirm anzeigen"
 		},
 
 		"profile": {

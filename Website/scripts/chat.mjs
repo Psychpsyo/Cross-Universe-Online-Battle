@@ -41,6 +41,7 @@ class ChatBox extends HTMLElement {
 	// type can be undefined or either "notice", "warning", "error" or "success"
 	putMessage(message, type, extraContent) {
 		const messageDiv = document.createElement("div");
+		messageDiv.classList.add("msg");
 
 		while (message.indexOf(":") != -1) {
 			if (message.indexOf(":", message.indexOf(":") + 1) == -1) {
