@@ -825,26 +825,41 @@
 		}
 	},
 
-	"cardDetailsAttack": "Attack: ",
-	"cardDetailsDefense": "Defense: ",
-	"cardDetailsTypes": "Types: ",
-	"cardDetailsEffects": "Effects: ",
-	"cardDetailsLevel": "Lv",
-	"cardDetailsLevelTypeSeparator": " ",
-	"unitCardDetailType": "Unit",
-	"tokenCardDetailType": "Token",
-	"standardSpellCardDetailType": "Standard Spell",
-	"continuousSpellCardDetailType": "Continuous Spell",
-	"enchantSpellCardDetailType": "Enchant Spell",
-	"standardItemCardDetailType": "Standard Item",
-	"continuousItemCardDetailType": "Continuous Item",
-	"equipableItemCardDetailType": "Equipable Item",
-	"optionalCardDetailEffect": "Optional Ability:",
-	"triggerCardDetailEffect": "Trigger Ability:",
-	"staticCardDetailEffect": "Static Ability:",
-	"fastCardDetailEffect": "Fast Ability:",
-	"deployCardDetailEffect": "When Deployed:",
-	"castCardDetailEffect": "When Cast:",
+	"cardDetails": {
+		"attack": "Attack: ",
+		"defense": "Defense: ",
+		"types": "Types: ",
+		"effects": "Effects: ",
+		"level": "Lv",
+		"levelTypeSeparator": " ",
+		"cardTypes": {
+			"unit": "Unit",
+			"token": "Token",
+			"standardSpell": "Standard Spell",
+			"continuousSpell": "Continuous Spell",
+			"enchantSpell": "Enchant Spell",
+			"standardItem": "Standard Item",
+			"continuousItem": "Continuous Item",
+			"equipableItem": "Equipable Item"
+		},
+		"effectNames": {
+			"optional": "Optional Ability:",
+			"trigger": "Trigger Ability:",
+			"static": "Static Ability:",
+			"fast": "Fast Ability:",
+			"deploy": "When Deployed:",
+			"cast": "When Cast:"
+		},
+		"effectDescriptions": {
+			"rule": "This is not an ability. It is a rule that always applies, no matter where the card is and cannot be cancelled.",
+			"optional": "Optional abilities are normal actions that you can activate during your main phase only.",
+			"trigger": "Trigger abilities are quick actions that can (or must) be activate after the given condition is met or once during the given phase.",
+			"static": "Static abilities apply continuously, as long as the card is on the field. (or another zone, if it says so)",
+			"fast": "Fast abilities are quick actions that can be activated at almost any time.",
+			"deploy": "This effect is what happens when you play this item.",
+			"cast": "This effect is what happens when you play this spell."
+		}
+	},
 
 	"subEffectOpeningBracket": "［",
 	"subEffectClosingBracket": "］",

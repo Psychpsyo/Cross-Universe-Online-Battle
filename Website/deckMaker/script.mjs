@@ -201,7 +201,7 @@ function cardToAltText(card) {
 	return locale[(card.cardType == "unit" || card.cardType == "unit")? "unitAltText" : "cardAltText"]
 		.replace("{#NAME}", card.name)
 		.replace("{#LEVEL}", card.level == -1? "?" : card.level)
-		.replace("{#CARDTYPE}", locale[card.cardType + "CardDetailType"])
+		.replace("{#CARDTYPE}", locale.cardDetails.cardTypes[card.cardType])
 		.replace("{#ATK}", card.attack == -1? "?" : card.attack)
 		.replace("{#DEF}", card.defense == -1? "?" : card.defense)
 		.replace("{#TYPES}", card.types.length > 0? card.types.map(type => locale.types[type]).join(locale.typeSeparator) : locale.typeless)
@@ -323,7 +323,7 @@ function showCardInfo(cardInfo) {
 	}
 
 	// set card image alt text
-	cardInfoCardImg.alt = locale.cardDetailsLevel + (cardInfo.level == -1? "?" : cardInfo.level) + locale.cardDetailsLevelTypeSeparator + locale[cardInfo.cardType + "CardDetailType"] + ".\n" + locale.cardDetailsEffects + "\n" + cardInfo.effectsPlain;
+	cardInfoCardImg.alt = locale.cardDetails.level + (cardInfo.level == -1? "?" : cardInfo.level) + locale.cardDetails.levelTypeSeparator + locale.cardDetails.cardTypes[cardInfo.cardType] + ".\n" + locale.cardDetails.effects + "\n" + cardInfo.effectsPlain;
 
 	//fill in release date
 	cardInfoReleaseDate.textContent = cardInfo.releaseDate;

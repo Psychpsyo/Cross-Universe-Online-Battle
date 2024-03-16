@@ -825,26 +825,41 @@
 		}
 	},
 
-	"cardDetailsAttack": "Angriff: ",
-	"cardDetailsDefense": "Verteidigung: ",
-	"cardDetailsTypes": "Typen: ",
-	"cardDetailsEffects": "Effekte: ",
-	"cardDetailsLevel": "Lv",
-	"cardDetailsLevelTypeSeparator": " ",
-	"unitCardDetailType": "Unit",
-	"tokenCardDetailType": "Token",
-	"standardSpellCardDetailType": "Standard-Zauber",
-	"continuousSpellCardDetailType": "Permanenter Zauber",
-	"enchantSpellCardDetailType": "Ausrüstbarer Zauber",
-	"standardItemCardDetailType": "Standard-Item",
-	"continuousItemCardDetailType": "Permanentes Item",
-	"equipableItemCardDetailType": "Ausrüstbares Item",
-	"optionalCardDetailEffect": "Optionale Fähigkeit:",
-	"triggerCardDetailEffect": "Trigger-Fähigkeit:",
-	"staticCardDetailEffect": "Statische Fähigkeit:",
-	"fastCardDetailEffect": "Schnelle Fähigkeit:",
-	"deployCardDetailEffect": "Beim Deployen:",
-	"castCardDetailEffect": "Beim Casten:",
+	"cardDetails": {
+		"attack": "Angriff: ",
+		"defense": "Verteidigung: ",
+		"types": "Typen: ",
+		"effects": "Effekte: ",
+		"level": "Lv",
+		"levelTypeSeparator": " ",
+		"cardTypes": {
+			"unit": "Unit",
+			"token": "Token",
+			"standardSpell": "Standard-Zauber",
+			"continuousSpell": "Permanenter Zauber",
+			"enchantSpell": "Ausrüstbarer Zauber",
+			"standardItem": "Standard-Item",
+			"continuousItem": "Permanentes Item",
+			"equipableItem": "Ausrüstbares Item"
+		},
+		"effectNames": {
+			"optional": "Optionale Fähigkeit:",
+			"trigger": "Trigger-Fähigkeit:",
+			"static": "Statische Fähigkeit:",
+			"fast": "Schnelle Fähigkeit:",
+			"deploy": "Beim Deployen:",
+			"cast": "Beim Casten:"
+		},
+		"effectDescriptions": {
+			"rule": "Dies ist keine Fähigkeit. Es ist ein Regel, die immer gilt, egal wo die Karte ist und nicht gecancelled werden kann.",
+			"optional": "Optionale Fähigkeiten sind normale Aktionen, die du nur in deiner Mainphase aktivieren kannst.",
+			"trigger": "Trigger-Fähigkeiten sind schnelle Aktionen, die aktiviert werden können (oder müssen) nachdem die gegebene Bedingung erfüllt wurde oder ein Mal in der gegebenen Phase.",
+			"static": "Statische Fähigkeiten sind aktiv, solange die Karte auf dem Feld ist. (oder in einer anderen Zone, falls es in der Fähigkeit steht)",
+			"fast": "Schnelle Fähigkeiten sind schnelle Aktionen, die fast immer aktiviert werden können.",
+			"deploy": "Dieser Effekt ist was passiert, wenn du dieses Item spielst.",
+			"cast": "Dieser Effekt ist was passiert, wenn du diesen Zauber spielst."
+		}
+	},
 
 	"subEffectOpeningBracket": "［",
 	"subEffectClosingBracket": "］",
