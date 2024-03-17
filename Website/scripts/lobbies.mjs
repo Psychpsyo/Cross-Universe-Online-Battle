@@ -31,7 +31,7 @@ const settingsLimits = {
 	gameMode: {options: ["normal", "draft"]},
 	draftFormat: {options: ["beginner", "mayhem", "og137"]}
 }
-const possibleStatuses = ["present", "busy", "inGame"];
+const possibleStatuses = ["present", "afk", "busy", "inGame"];
 
 // lobby translation
 lobbyTemplate.content.querySelector(".lobbyUserIcon").textContent = locale.lobbies.userIconAlt;
