@@ -183,7 +183,7 @@ class Lobby {
 		}
 
 		userList.appendChild(userElem);
-		document.getElementById("userElem" + user.id).querySelector("profile-picture").setIcon(user.profilePicture);
+		document.getElementById("userElem" + user.id).querySelector("profile-picture").setIcon(user.profilePicture, false);
 	}
 	// removes and returns a user with the given id
 	removeUser(id) {
