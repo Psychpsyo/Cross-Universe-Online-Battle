@@ -31,7 +31,7 @@ const settingsLimits = {
 	gameMode: {options: ["normal", "draft"]},
 	draftFormat: {options: ["beginner", "mayhem", "og137"]}
 }
-const possibleStatuses = ["present", "busy", "inGame"];
+const possibleStatuses = ["present", "afk", "busy", "inGame"];
 
 // lobby translation
 lobbyTemplate.content.querySelector(".lobbyUserIcon").textContent = locale.lobbies.userIconAlt;
@@ -183,7 +183,7 @@ class Lobby {
 		}
 
 		userList.appendChild(userElem);
-		document.getElementById("userElem" + user.id).querySelector("profile-picture").setIcon(user.profilePicture);
+		document.getElementById("userElem" + user.id).querySelector("profile-picture").setIcon(user.profilePicture, false);
 	}
 	// removes and returns a user with the given id
 	removeUser(id) {

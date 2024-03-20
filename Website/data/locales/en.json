@@ -95,8 +95,9 @@
 		"status": {
 			"setStatus": "Set Status",
 			"present": "Present",
-			"inGame": "In Game",
-			"busy": "Busy"
+			"afk": "AFK",
+			"busy": "Busy",
+			"inGame": "In Game"
 		},
 
 		"incomingChallenge": "{#name} is challenging you to a game:",

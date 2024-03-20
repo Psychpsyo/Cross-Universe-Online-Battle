@@ -355,7 +355,7 @@
 	"I00111": {"neverFlip": true, "left": 52},
 	"I00112": {"neverFlip": true, "left": 34},
 	"I00113": {"neverFlip": true},
-	"I00114": {"neverFlip": true},
+	"I00114": {"neverFlip": true, "left": 54},
 
 	"S00001": {"neverFlip": true},
 	"S00002": {"neverFlip": true},

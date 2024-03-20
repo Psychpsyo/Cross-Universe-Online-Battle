@@ -95,8 +95,9 @@
 		"status": {
 			"setStatus": null,
 			"present": null,
-			"inGame": null,
-			"busy": null
+			"afk": "AFK",
+			"busy": null,
+			"inGame": null
 		},
 
 		"incomingChallenge": null,

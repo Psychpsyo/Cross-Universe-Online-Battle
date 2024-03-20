@@ -95,8 +95,9 @@
 		"status": {
 			"setStatus": "Status Ändern",
 			"present": "Anwesend",
-			"inGame": "Im Spiel",
-			"busy": "Beschäftigt"
+			"afk": "AFK",
+			"busy": "Beschäftigt",
+			"inGame": "Im Spiel"
 		},
 
 		"incomingChallenge": "{#name} fordert dich heraus:",
