@@ -351,7 +351,9 @@ export function clearCardButtons(zone, index, type) {
 function setCardDragEvent(element, uiCardSlot) {
 	element.draggable = false;
 	element.addEventListener("pointerdown", function(e) {
-		element.setPointerCapture(e.pointerId);
+		if (e.button != 1) {
+			element.setPointerCapture(e.pointerId);
+		}
 	});
 	element.addEventListener("pointermove", function(e) {
 		if (e.buttons == 0 || !element.hasPointerCapture(e.pointerId)) {
