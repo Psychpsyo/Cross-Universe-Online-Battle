@@ -151,7 +151,6 @@ export class AutomaticController extends InteractionController {
 		if (!zone.cards[index] || this.playerInfos[player.index].heldCard !== null) {
 			return false;
 		}
-		retireOptions.classList.add("noClick");
 
 		let card = zone.cards[index];
 		let playerInfo = this.playerInfos[player.index];
@@ -178,8 +177,6 @@ export class AutomaticController extends InteractionController {
 		return false;
 	}
 	dropCard(player, zone, index) {
-		retireOptions.classList.remove("noClick");
-
 		let card = this.playerInfos[player.index].heldCard;
 		let playerInfo = this.playerInfos[player.index];
 		playerInfo.clearHeld();
@@ -953,9 +950,11 @@ class AutomaticPlayerInfo {
 		this.heldCard = zone.get(index);
 		gameUI.uiPlayers[this.player.index].setDrag(this.heldCard);
 		gameUI.makeDragSource(zone, index, this.player);
+		retireOptions.classList.add("noClick");
 	}
 	clearHeld() {
 		this.heldCard = null;
 		gameUI.uiPlayers[this.player.index].clearDrag();
+		retireOptions.classList.remove("noClick");
 	}
 }
