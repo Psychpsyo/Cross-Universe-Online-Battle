@@ -226,16 +226,24 @@
 			"discard1": "自分の捨て山：",
 			"exile0": "相手の隔離：",
 			"exile1": "自分の隔離：",
+			"unit0": "相手のユニットゾーン：",
+			"unit1": "自分のユニットゾーン：",
+			"spellItem0": "相手のスペル＆アイテムゾーン：",
+			"spellItem1": "自分のスペル＆アイテムゾーン：",
+			"partner0": "相手のパートナーゾーン：",
+			"partner1": "自分のパートナーゾーン：",
+			"hand0": "相手の手札：",
+			"hand1": "自分の手札：",
 
 			"returnAllToDeck": null
 		},
 
 		"cardChoice": {
 			"confirm": null,
-			"genericTitle": null,
+			"genericTitle": "カードを選ぶ：",
 			"handDiscard": null,
-			"attackTarget": null,
-			"cardEffect": null,
+			"attackTarget": "攻撃対象を選ぶ：",
+			"cardEffect": "《{#CARDNAME}》の効果でカードを選ぶ：",
 			"equipTarget": null,
 			"cardEffectMove": null,
 			"cardEffectSummon": null,

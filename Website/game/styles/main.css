@@ -691,7 +691,19 @@ dialog.popupSelectMenu {
 	gap: 3em;
 }
 
-#cardChoiceGrid {
+#cardChoiceArea {
+	overflow-y: scroll;
+	flex-grow: 1;
+	text-align: left;
+	padding-top: .25em;
+}
+#cardChoiceArea > hr {
+	margin: .25em 0;
+}
+#cardChoiceArea .gridHeader {
+	padding: 0 .5em;
+}
+#cardChoiceArea .cardGrid {
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
 }

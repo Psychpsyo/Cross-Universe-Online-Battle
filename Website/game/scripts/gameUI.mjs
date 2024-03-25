@@ -213,7 +213,7 @@ export function init() {
 	cardChoiceConfirm.addEventListener("click", function() {
 		gameFlexBox.appendChild(cardDetails);
 		cardChoiceMenu.close(cardChoiceSelected.join("|"));
-		cardChoiceGrid.innerHTML = "";
+		cardChoiceArea.innerHTML = "";
 		cardChoiceSelected = [];
 		// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
 		window.setTimeout(closeCardPreview, 0);
@@ -926,9 +926,22 @@ function animate(currentTime) {
 export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1], validate = () => true) {
 	return new Promise(resolve => {
 		let validOptions = 0;
+		let currentGrid;
 		for (let i = 0; i < cards.length; i++) {
-			if (i > 0 && cards[i].zone != cards[i-1].zone) {
-				cardChoiceGrid.appendChild(document.createElement("hr"));
+			if (i === 0 || cards[i].zone != cards[i-1].zone) {
+				const zoneDiv = document.createElement("div");
+				const header = document.createElement("div");
+				header.classList.add("gridHeader");
+				header.textContent = locale.game.cardSelector[gameState.getZoneName(cards[i].zone)];
+				currentGrid = document.createElement("div");
+				currentGrid.classList.add("cardGrid");
+
+				if (i !== 0) {
+					zoneDiv.appendChild(document.createElement("hr"));
+				}
+				zoneDiv.appendChild(header);
+				zoneDiv.appendChild(currentGrid);
+				cardChoiceArea.appendChild(zoneDiv);
 			}
 
 			let cardImg = document.createElement("img");
@@ -941,7 +954,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 					previewCard(cards[i]);
 					if (this.classList.toggle("cardHighlight")) {
 						if (validAmounts.length === 1 && validAmounts[0] === 1 && cardChoiceSelected.length > 0) {
-							for (let elem of Array.from(cardChoiceGrid.querySelectorAll(".cardHighlight"))) {
+							for (let elem of Array.from(cardChoiceArea.querySelectorAll(".cardHighlight"))) {
 								if (elem != this) {
 									elem.classList.remove("cardHighlight");
 								}
@@ -959,7 +972,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 			} else {
 				cardImg.classList.add("unselectableCard");
 			}
-			cardChoiceGrid.appendChild(cardImg);
+			currentGrid.appendChild(cardImg);
 		}
 		cardChoiceMenu.addEventListener("close", function() {
 			resolve(this.returnValue.split("|").map(val => parseInt(val)));
@@ -970,7 +983,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 		cardChoiceMenu.showModal();
 		cardChoiceMenu.appendChild(cardDetails);
 
-		cardChoiceGrid.parentNode.scrollTop = 0;
+		cardChoiceArea.parentNode.scrollTop = 0;
 	});
 }
 
