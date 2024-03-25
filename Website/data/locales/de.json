@@ -226,6 +226,14 @@
 			"discard1": "Dein Ablagestapel:",
 			"exile0": "Exil deines Gegners:",
 			"exile1": "Dein Exil:",
+			"unit0": "Unitzone deines Gegners:",
+			"unit1": "Deine Unitzone:",
+			"spellItem0": "Zauber & Item-Zone deines Gegners:",
+			"spellItem1": "Deine Zauber & Item-Zone:",
+			"partner0": "Partnerzone deines Gegners:",
+			"partner1": "Deine Partnerzone:",
+			"hand0": "Handkarten deines Gegners:",
+			"hand1": "Deine Handkarten:",
 
 			"returnAllToDeck": "Alle zurück in dein Deck mischen"
 		},

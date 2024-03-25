@@ -226,6 +226,14 @@
 			"discard1": "Your Discard Pile:",
 			"exile0": "Opponent's Exile Zone:",
 			"exile1": "Your Exile Zone:",
+			"unit0": "Opponent's Unit Zone:",
+			"unit1": "Your Unit Zone:",
+			"spellItem0": "Opponent's Spell & Item Zone:",
+			"spellItem1": "Your Spell & Item Zone:",
+			"partner0": "Opponent's Partner Zone:",
+			"partner1": "Your Partner Zone:",
+			"hand0": "Opponent's Hand:",
+			"hand1": "Your Hand:",
 
 			"returnAllToDeck": "Return All to your Deck"
 		},
