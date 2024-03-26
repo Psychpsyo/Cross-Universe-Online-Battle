@@ -235,7 +235,7 @@ function shouldStaticAbilitiesBeAutoOrdered(abilities) {
 	const affectedProperties = [];
 	for (const ability of abilities) {
 		const player = ability.card.currentOwner();
-		const modifier = ability.modifier.evalFull(new ScriptContext(ability.card, player, ability))[0].get(player);
+		const modifier = ability.modifier.evalFull(new ScriptContext(ability.card, player, ability)).next().value.get(player);
 		for (const modification of modifier.modifications) {
 			// Mandatory action modifications should never be auto-ordered since their order would only be irrelevant if they did the >exact< same thing. (incredibly unlikely)
 			if (modification instanceof modifiers.ActionModification) {
