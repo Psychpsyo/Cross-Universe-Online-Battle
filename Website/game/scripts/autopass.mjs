@@ -59,6 +59,15 @@ export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
 				}
 				break;
 			}
+			case "enterBattlePhase": {
+				if (alwaysPass) {
+					return {
+						type: "enterBattlePhase",
+						value: false
+					}
+				}
+				break;
+			}
 		}
 	}
 
