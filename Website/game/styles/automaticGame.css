@@ -171,6 +171,11 @@
 #stackDisplayHolder > div {
 	position: relative;
 }
+#stackDisplayHolder > div:not(:last-child) {
+	/* Blocks are visually stacked if there is not enough space by doing roughly ((width of all blocks) - (left panel width)) / (number of blocks - 1) */
+	margin-right: min(((.25em + (var(--block-count) + 1) * ((813 / 1185) * 6em + .25em)) - var(--left-panel-width)) / (var(--block-count) - 1) * -1, 0px);
+}
+
 #stackDisplayHolder::after {
 	content: attr(data-block);
 	height: 100%;

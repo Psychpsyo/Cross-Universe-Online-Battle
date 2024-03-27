@@ -132,6 +132,7 @@ export function newStack(number) {
 	stackTitle.classList.remove("invalid");
 	stackDisplayHolder.innerHTML = "";
 	stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", 1);
+	stackDisplayHolder.style.setProperty("--block-count", 0);
 }
 export function newBlock(block) {
 	let card = null;
@@ -200,6 +201,7 @@ export function newBlock(block) {
 
 	stackDisplayHolder.appendChild(visual);
 	stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", block.stack.blocks.length + 1);
+	stackDisplayHolder.style.setProperty("--block-count", block.stack.blocks.length);
 }
 
 export function indicateRetire(amount) {
