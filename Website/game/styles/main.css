@@ -1,6 +1,7 @@
 html {
 	--p0-card-back: url('');
 	--p1-card-back: url('');
+	--left-panel-width: 30vw;
 }
 
 body {
@@ -165,7 +166,8 @@ dialog #cardDetails {
 #leftPanel {
 	display: flex;
 	flex-direction: column;
-	width: 30vw;
+	width: var(--left-panel-width);
+	flex-shrink: 0;
 	height: 100vh;
 	z-index: 100;
 
