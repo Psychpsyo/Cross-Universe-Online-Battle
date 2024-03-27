@@ -154,6 +154,9 @@
 	height: 6.5em;
 	padding: .25em;
 	gap: .25em;
+
+	/* Blocks are visually stacked if there is not enough space by doing roughly ((width of all blocks) - (left panel width)) / (number of blocks - 1) */
+	--block-margin: min(((.25em + (var(--block-count) + 1) * ((813 / 1185) * 6em + .25em)) - var(--left-panel-width)) / (var(--block-count) - 1) * -1, 0px);
 }
 #stackDisplayHolder img {
 	height: 6em;
@@ -167,13 +170,17 @@
 	font-size: .75em;
 	white-space: pre;
 	text-align: center;
+	pointer-events: none;
 }
 #stackDisplayHolder > div {
 	position: relative;
 }
 #stackDisplayHolder > div:not(:last-child) {
-	/* Blocks are visually stacked if there is not enough space by doing roughly ((width of all blocks) - (left panel width)) / (number of blocks - 1) */
-	margin-right: min(((.25em + (var(--block-count) + 1) * ((813 / 1185) * 6em + .25em)) - var(--left-panel-width)) / (var(--block-count) - 1) * -1, 0px);
+	margin-right: var(--block-margin);
+	transition: transform .2s;
+}
+#stackDisplayHolder > div:not(:last-child):hover {
+	transform: translateX(min(var(--block-margin) + .25em, 0px));
 }
 
 #stackDisplayHolder::after {
