@@ -3,6 +3,7 @@
 import {locale} from "../../scripts/locale.mjs";
 import {netSend} from "./netcode.mjs";
 import * as gameUI from "./gameUI.mjs";
+import * as cardLoader from "../../scripts/cardLoader.mjs";
 
 export function init() {
 	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());
@@ -168,7 +169,9 @@ export function init() {
 export function receiveMessage(command, message) {
 	switch (command) {
 		case "dice": { // opponent clicked the button on 'Fate's Dice' to roll a dice.
-			chat.putMessage(locale.cardActions.I00040.opponentRoll.replace("{#RESULT}", message), "notice");
+			cardLoader.getCardInfo(message.substring(message.indexOf("|") + 1)).then(card => {
+				chat.putMessage(locale.cardActions.I00040.opponentRoll.replaceAll("{#RESULT}", message.substring(0, message.indexOf("|"))).replaceAll("{#CARDNAME}", card.name), "notice");
+			}, ()=>{}); // do nothing on errors
 			return true;
 		}
 		case "laplaceScan": { // opponent used the button on 'Absolute God of the Perfect World' to look at your entire deck

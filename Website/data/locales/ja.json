@@ -984,14 +984,17 @@
 	},
 
 	"cardActions": {
-		"I00040": {
-			"roll": "振る",
-			"yourRoll": "自分の「運命のサイコロ」：{#RESULT}",
-			"opponentRoll": "相手の「運命のサイコロ」：{#RESULT}"
-		},
 		"U00286": {
 			"scan": "ラプラス・スキャン",
 			"activation": null
+		},
+		"S00238": {
+			"roll": "振る"
+		},
+		"I00040": {
+			"roll": "振る",
+			"yourRoll": "自分の《{#CARDNAME}》：{#RESULT}",
+			"opponentRoll": "相手の《{#CARDNAME}》：{#RESULT}"
 		}
 	},
 

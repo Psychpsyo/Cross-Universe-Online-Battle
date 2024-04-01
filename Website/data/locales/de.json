@@ -984,14 +984,17 @@
 	},
 
 	"cardActions": {
-		"I00040": {
-			"roll": "Würfeln",
-			"yourRoll": "Du hast Fate's Dice geworfen. Es war eine {#RESULT}.",
-			"opponentRoll": "Dein Gegner hat Fate's Dice geworfen. Es war eine {#RESULT}."
-		},
 		"U00286": {
 			"scan": "Laplace Scan",
 			"activation": "Dein Gegner sieht sich mit 'Absolute God of the Perfect World' dein Deck an."
+		},
+		"S00238": {
+			"roll": "Würfeln"
+		},
+		"I00040": {
+			"roll": "Würfeln",
+			"yourRoll": "Du hast für '{#CARDNAME}' gewürfelt.\nEs war eine {#RESULT}.",
+			"opponentRoll": "Dein Gegner hat für '{#CARDNAME}' gewürfelt.\nEs war eine {#RESULT}."
 		}
 	},
 
