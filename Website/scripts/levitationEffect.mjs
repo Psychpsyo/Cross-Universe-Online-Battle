@@ -53,7 +53,7 @@ async function getRandomCardLink() {
 		return cardBaseUrl + locale.code + "/" + christmasCards[Math.floor(Math.random(christmasCards.length))] + ".jpg";
 	}
 	if (month === 3 && day === 1) {
-		return cardBaseUrl + locale.code + "/S00099.jpg";
+		return cardBaseUrl + locale.code + (Math.random() > .5? "/S00099.jpg" : "/S00238.jpg"); // Final Impact or Final Dice
 	}
 
 	// the usual
