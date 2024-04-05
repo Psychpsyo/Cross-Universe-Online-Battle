@@ -13,21 +13,6 @@ export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
 	if (requests.length == 1) {
 		const request = requests[0];
 		switch (request.type) {
-			// choosing cards where there is only one possible option
-			case "chooseCards": {
-				const minAmount = Math.min(...request.validAmounts);
-				if (request.reason === "nextCardToApplyStaticAbilityTo") {
-					const choice = [];
-					for (let i = 0; i < minAmount; i++) {
-						choice.push(i);
-					}
-					return {
-						type: "chooseCards",
-						value: choice
-					}
-				}
-				break;
-			}
 			// activating mandatory trigger abilities (when they are the same, so the order probably doesn't matter)
 			case "activateTriggerAbility": {
 				const compareTo = request.eligibleAbilities[0];
