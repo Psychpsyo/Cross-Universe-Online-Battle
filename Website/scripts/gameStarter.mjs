@@ -46,7 +46,7 @@ window.addEventListener("message", e => {
 				replayToLoad = null;
 
 			} else {
-				// repurpose the passed-in options into the connect message
+				// repurpose the passed-in options into the startGame message
 				startingGameSettings.options.type = "connect";
 				startingGameSettings.options.isCaller = startingGameSettings.isCaller;
 				gameFrame.contentWindow.postMessage(startingGameSettings.options);

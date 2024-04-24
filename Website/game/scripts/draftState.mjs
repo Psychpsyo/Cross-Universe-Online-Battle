@@ -11,7 +11,6 @@ import * as cardLoader from "../../scripts/cardLoader.mjs";
 export class DraftState extends GameState {
 	constructor(automatic, format) {
 		super();
-		gameState = this;
 
 		this.automatic = automatic;
 		game.config.validateCardAmounts = false;

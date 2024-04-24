@@ -75,7 +75,6 @@ async function addDecksToDeckSelector(deckList) {
 export class DeckState extends GameState {
 	constructor(automatic) {
 		super();
-		gameState = this;
 
 		fetch("./data/deckList.json")
 		.then(response => response.json())

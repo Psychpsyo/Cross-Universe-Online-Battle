@@ -7,6 +7,21 @@
 		"buttonBack": "Go back"
 	},
 
+	"intro": {
+		"welcome": "Welcome to Cross Universe",
+		"skip": "Skip Intro",
+
+		"namePrompt": "Please set a name for yourself:",
+		"enterName": "Enter Name...",
+		"confirm": "Confirm",
+		"nameNotice": "This will be shown to other players and you can change it in the settings at any time.",
+
+		"tutorialPrompt": "Would you like to play a short tutorial?",
+		"tutorialYes": "Yes, Play Tutorial",
+		"tutorialNo": "No, Skip Tutorial",
+		"tutorialNotice": "You can exit the tutorial at any point and always replay it later."
+	},
+
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Room Code",
 		"enterRoomcode": "Room Code:",

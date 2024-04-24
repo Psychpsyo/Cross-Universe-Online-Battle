@@ -7,6 +7,21 @@
 		"buttonBack": null
 	},
 
+	"intro": {
+		"welcome": null,
+		"skip": null,
+
+		"namePrompt": null,
+		"enterName": null,
+		"confirm": null,
+		"nameNotice": null,
+
+		"tutorialPrompt": null,
+		"tutorialYes": null,
+		"tutorialNo": null,
+		"tutorialNotice": null
+	},
+
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Battle ID",
 		"enterRoomcode": "対戦ID：",

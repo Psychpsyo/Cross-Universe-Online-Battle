@@ -1,7 +1,6 @@
 import {locale} from "./locale.mjs";
 
 let cardsSoFar = 0;
-let effectElement = null;
 let effectInterval = null;
 
 const christmasCards = [
@@ -62,7 +61,7 @@ async function getRandomCardLink() {
 	return response.url;
 }
 
-async function spawnCard(parentElement) {
+async function spawnCard() {
 	const card = document.createElement("div");
 	card.classList.add("levitateCard");
 
@@ -85,7 +84,7 @@ async function spawnCard(parentElement) {
 	});
 	cardsSoFar++;
 
-	parentElement.appendChild(card);
+	levitatingCards.appendChild(card);
 
 	// starts the animation
 	setTimeout(function() {
@@ -98,15 +97,15 @@ async function spawnCard(parentElement) {
 	}.bind(card), floatSeconds * 1000);
 }
 
+document.documentElement.style.setProperty("--p1-card-back", "url('" + localStorage.getItem("cardBack") + "')");
 levitatingCardPreviewOverlay.addEventListener("click", e => {
 	levitatingCardPreviewOverlay.classList.remove("shown");
 });
 
-export function startEffect(elem) {
-	effectElement = elem;
-	spawnCard(effectElement);
+export function startEffect() {
+	spawnCard(levitatingCards);
 	effectInterval = window.setInterval(function() {
-		spawnCard(effectElement);
+		spawnCard(levitatingCards);
 	}, 3000);
 }
 
@@ -115,8 +114,5 @@ export function stopEffect() {
 		clearInterval(effectInterval);
 		effectInterval = null;
 	}
-	if (effectElement !== null) {
-		effectElement.innerHTML = "";
-		effectElement = null;
-	}
+	levitatingCards.innerHTML = "";
 }

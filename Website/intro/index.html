@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html aria-busy="true">
+	<head>
+		<meta charset="utf-8"/>
+		<base href="../">
+
+		<title>Intro - Cross Universe Online Battle</title>
+		<meta name="description" content="Play Cross Universe online against others!">
+		<meta name="keywords" content="Cross Universe, Card Game, Crunis, クロス・ユニバース, クロユニ, card game, カードゲーム">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="icon" type="image/png" href="images/favicon.png">
+		<link rel="manifest" href="manifest.json">
+
+		<link rel="stylesheet" href="styles/index.css">
+		<link rel="stylesheet" href="styles/levitationEffect.css">
+		<link rel="stylesheet" href="intro/style.css">
+	</head>
+	<body>
+		<div id="levitatingCards"></div>
+		<main aria-labelledby="welcomeTitle">
+			<h1 id="welcomeTitle"></h1>
+			<section id="introStep1">
+				<label for="nameInput" id="namePrompt"></label><br>
+				<input id="nameInput" type="text" maxlength="100"><button id="confirmNameBtn"></button><br>
+				<br>
+				<span id="nameNotice" class="notice"></span>
+			</section>
+			<section id="introStep2">
+				<span id="tutorialPrompt"></span><br>
+				<button id="tutorialYesBtn"></button>　　<button id="tutorialNoBtn"></button><br>
+				<br>
+				<span id="tutorialNotice" class="notice"></span>
+			</section>
+		</main>
+
+		<select id="languageSelect">
+			<option value="en">🇬🇧 English</option>
+			<option value="ja">🇯🇵 日本語</option>
+			<option value="de">🇩🇪 Deutsch</option>
+		</select>
+		<button id="skipBtn" class="bigButton"></button>
+
+		<div id="levitatingCardPreviewOverlay">
+			<img id="levitatingCardPreviewImage" alt="">
+		</div>
+
+		<iframe id="gameFrame" scrolling="no"></iframe>
+		<script>gameFrame.src="about:blank"</script> <!-- Firefox makes the iframe point to the game on page refresh otherwise -->
+
+		<script src="scripts/localStorageSetup.js"></script>
+		<script src="intro/intro.mjs" type="module"></script>
+	</body>
+</html>

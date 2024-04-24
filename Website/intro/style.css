@@ -1,0 +1,49 @@
+main {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+
+	background-color: var(--theme-shadow);
+	padding: 1em;
+	padding-bottom: 2.5em;
+	text-align: center;
+}
+
+#levitatingCards {
+	/* puts them behind the skip button's ::before */
+	z-index: -100;
+}
+
+#introStep2 {
+	display: none;
+}
+
+.notice {
+	font-size: .8em;
+}
+
+#languageSelect {
+	position: absolute;
+	bottom: 1em;
+	left: 1em;
+}
+#skipBtn {
+	position: absolute;
+	bottom: 1em;
+	right: 1em;
+	border-radius: .5em;
+	padding: .2em .4em;
+	margin: 0 auto;
+}
+
+#gameFrame {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border: none;
+	width: 100vw;
+	height: 100vh;
+	visibility: hidden;
+}

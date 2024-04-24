@@ -11,7 +11,6 @@ import * as generalUI from "./generalUI.mjs";
 export class BoardState extends GameState {
 	constructor(automatic) {
 		super();
-		gameState = this;
 
 		this.automatic = automatic;
 		this.zones = {};
@@ -145,7 +144,7 @@ export class BoardState extends GameState {
 	// called after partner selection
 	getPartnerFromDeck(partnerPosInDeck = -1) {
 		ui.showBlackoutMessage(locale.game.partnerSelect.waitingForOpponent);
-		if (partnerPosInDeck == -1) {
+		if (partnerPosInDeck === -1) {
 			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == players[localPlayer.index].deck.suggestedPartner});
 		}
 		netSend("[choosePartner]" + partnerPosInDeck);

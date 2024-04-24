@@ -69,7 +69,7 @@ function hideConnectScreen() {
 	lobbies.style.display = "flex";
 	rulesButton.hidden = false;
 	loadingScreenMessage.hidden = true;
-	startEffect(levitatingCards);
+	startEffect();
 	return true;
 }
 
@@ -222,7 +222,7 @@ preGame.addEventListener("drop", function(e) {
 	reader.addEventListener("load", e => {
 		stopEffect();
 		loadReplay(JSON.parse(e.target.result)).then(() => {
-			startEffect(levitatingCards);
+			startEffect();
 		});
 		lobbies.style.display = "none";
 	});
@@ -230,7 +230,6 @@ preGame.addEventListener("drop", function(e) {
 });
 
 // set up the background cards effect
-document.documentElement.style.setProperty("--p1-card-back", "url('" + localStorage.getItem("cardBack") + "')");
 if (localStorage.getItem("mainMenuCards") == "true") {
-	startEffect(levitatingCards);
+	startEffect();
 }
