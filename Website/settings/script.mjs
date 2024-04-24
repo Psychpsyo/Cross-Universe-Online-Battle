@@ -4,8 +4,8 @@ import {validateHotkeys, resetHotkeys, relabelAllHotkeys, editHotkey} from "./ho
 
 const languageNames = {
 	en: "🇬🇧 English",
-	de: "🇩🇪 Deutsch",
-	ja: "🇯🇵 日本語"
+	ja: "🇯🇵 日本語",
+	de: "🇩🇪 Deutsch"
 };
 
 const settings = {
@@ -13,7 +13,7 @@ const settings = {
 		{
 			id: "language",
 			type: "language",
-			options: ["en", "de", "ja"]
+			options: ["en", "ja", "de"]
 		},
 		{
 			id: "partnerChoiceToggle",

@@ -89,6 +89,7 @@ export class AutomaticController extends InteractionController {
 					}
 
 					const autoResponse = passModeSelect.value === "never"? null : autopass.getAutoResponse(
+						game,
 						localRequests,
 						passModeSelect.value.startsWith("until"),
 						localStorage.getItem("usePrivateInfoForAutopass")

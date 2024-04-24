@@ -156,44 +156,6 @@ h1, legend {
 	margin: 0 auto;
 }
 
-#levitatingCards {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	perspective: 1500px;
-	overflow: hidden;
-}
-#levitatingCardPreviewOverlay {
-	backdrop-filter: blur(5px);
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 100;
-	width: 100%;
-	height: 100%;
-
-	filter: opacity(0);
-	transition: filter .25s;
-	pointer-events: none;
-}
-#levitatingCardPreviewOverlay.shown {
-	filter: opacity(1);
-	pointer-events: all;
-}
-#levitatingCardPreviewImage {
-	height: 75%;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-}
-.shown > #levitatingCardPreviewImage {
-	height: 90%;
-	transition: height .3s;
-}
-
 #gameFrame {
 	display: block;
 	border: none;

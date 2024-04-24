@@ -7,6 +7,21 @@
 		"buttonBack": "Go back"
 	},
 
+	"intro": {
+		"welcome": "Welcome to Cross Universe",
+		"skip": "Skip Intro",
+
+		"namePrompt": "Please set a name for yourself:",
+		"enterName": "Enter Name...",
+		"confirm": "Confirm",
+		"nameNotice": "This will be shown to other players and you can change it in the settings at any time.",
+
+		"tutorialPrompt": "Would you like to play a short tutorial?",
+		"tutorialYes": "Yes, Play Tutorial",
+		"tutorialNo": "No, Skip Tutorial",
+		"tutorialNotice": "You can exit the tutorial at any point and always replay it later."
+	},
+
 	"mainMenu": {
 		"roomCodeInputTitle": "Connect through Room Code",
 		"enterRoomcode": "Room Code:",
@@ -951,7 +966,7 @@
 
 		"enableScripting": "Enable Scripting",
 		"scriptingExperimentalWarning": "Note: Effect scripting is currently experimental.\nThat means it is poorly documented and the scripting language might change at any point, potentially breaking your old scripts.",
-		"enterEffectsScripts": "Enter effect scripts here, like so:\n\no: optional\nturnLimit: 1\ncondition: thisCard.zone = field\ncost:\nDISCARD(SELECT(1, [from you.hand]))\nexec:\nopponent.DAMAGE(100)",
+		"enterEffectsScripts": "Enter effect scripts here, like so:\n\no: optional\nturnLimit: 1\ncondition: thisCard.zone = field\ncost:\nDISCARD(SELECT(1, [from you.hand]))\nexec:\nDAMAGE(opponent, 100)",
 
 		"save": "Save Card",
 		"saveCopy": "Save as Copy",
@@ -984,14 +999,17 @@
 	},
 
 	"cardActions": {
-		"I00040": {
-			"roll": "Roll",
-			"yourRoll": "You rolled Fate's Dice. It showed a {#RESULT}.",
-			"opponentRoll": "Your opponent rolled Fate's Dice. It showed a {#RESULT}."
-		},
 		"U00286": {
 			"scan": "Laplace Scan",
 			"activation": "Your opponent is inspecting your deck with 'Absolute God of the Perfect World'."
+		},
+		"S00238": {
+			"roll": "Roll"
+		},
+		"I00040": {
+			"roll": "Roll",
+			"yourRoll": "You rolled for '{#CARDNAME}'.\nIt showed a {#RESULT}.",
+			"opponentRoll": "Your opponent rolled for '{#CARDNAME}'.\nIt showed a {#RESULT}."
 		}
 	},
 

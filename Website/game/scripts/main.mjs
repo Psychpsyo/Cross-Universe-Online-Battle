@@ -1,4 +1,6 @@
-import {InitState} from "./initState.mjs";
+
+import {OnlineInitState} from "./onlineInitState.mjs";
+import {SingleplayerInitState} from "./singleplayerInitState.mjs";
 import {ReplayInitState} from "./replayInitState.mjs";
 import {locale} from "../../scripts/locale.mjs";
 import {incomingSdp} from "./netcode.mjs";
@@ -51,8 +53,12 @@ document.addEventListener("keydown", async function(e) {
 
 window.addEventListener("message", e => {
 	switch (e.data.type) {
+		case "singleplayer": {
+			new SingleplayerInitState(e.data.decks, e.data.replay, e.data.useOldManaRule);
+			break;
+		}
 		case "connect": {
-			new InitState(
+			new OnlineInitState(
 				e.data.isCaller,
 				e.data.gameMode,
 				e.data.automatic,

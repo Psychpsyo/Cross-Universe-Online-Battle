@@ -965,8 +965,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 					} else {
 						cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
 					}
-					cardChoiceConfirm.disabled = (validAmounts.length > 0 && !validAmounts.includes(cardChoiceSelected.length)) ||
-					                             cardChoiceSelected.length === 0 ||
+					cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length) ||
 												 !validate(cardChoiceSelected.map(index => cards[index]));
 				});
 			} else {

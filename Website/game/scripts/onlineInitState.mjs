@@ -6,10 +6,9 @@ import {DeckState} from "./deckState.mjs";
 import {Game} from "../../rulesEngine/src/game.mjs";
 import {netSend, callOpponent, youAre} from "./netcode.mjs";
 
-export class InitState extends GameState {
+export class OnlineInitState extends GameState {
 	constructor(isCaller, gameMode = "normal", automatic = false, useOldManaRule = false, draftFormat = null) {
 		super();
-		gameState = this;
 
 		this.gameMode = gameMode;
 		this.automatic = automatic;

@@ -8,26 +8,11 @@ import * as blocks from "../../rulesEngine/src/blocks.mjs";
 import * as modifiers from "../../rulesEngine/src/valueModifiers.mjs";
 import {ScriptContext} from "../../rulesEngine/src/cdfScriptInterpreter/structs.mjs";
 
-export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
+export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 	// non-pass actions
 	if (requests.length == 1) {
 		const request = requests[0];
 		switch (request.type) {
-			// choosing cards where there is only one possible option
-			case "chooseCards": {
-				const minAmount = Math.min(...request.validAmounts);
-				if (request.reason === "nextCardToApplyStaticAbilityTo") {
-					const choice = [];
-					for (let i = 0; i < minAmount; i++) {
-						choice.push(i);
-					}
-					return {
-						type: "chooseCards",
-						value: choice
-					}
-				}
-				break;
-			}
 			// activating mandatory trigger abilities (when they are the same, so the order probably doesn't matter)
 			case "activateTriggerAbility": {
 				const compareTo = request.eligibleAbilities[0];
@@ -59,6 +44,7 @@ export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
 				}
 				break;
 			}
+			// If you want to just pass through everything, you want to skip ('pass through') the battle phase also
 			case "enterBattlePhase": {
 				if (alwaysPass) {
 					return {
@@ -67,6 +53,11 @@ export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
 					}
 				}
 				break;
+			}
+			// there is zero reason to not do your standard draw
+			// TODO: some players may want to do it manually anyways
+			case "doStandardDraw": {
+				return {type: "doStandardDraw"}
 			}
 		}
 	}
@@ -78,7 +69,7 @@ export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
 	// passing on no real options (only retiring partners, casting spells from a selection of 0 and so on)
 	let importantRequests = 0;
 	for (const request of requests) {
-		if (isImportant(request)) {
+		if (isImportant(request, game)) {
 			importantRequests++;
 		}
 	}
@@ -108,7 +99,7 @@ export function getAutoResponse(requests, alwaysPass, useHiddenInfo) {
 	return null;
 }
 
-function isImportant(request) {
+function isImportant(request, game) {
 	switch (request.type) {
 		case "pass": {
 			return false;

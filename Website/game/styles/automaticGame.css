@@ -212,6 +212,13 @@
 	width: min-content;
 	font-size: .75em;
 }
+#automaticButtonArea > button {
+	box-shadow: orange 0 0 1em;
+	transition: box-shadow .25s;
+}
+#automaticButtonArea > button:disabled {
+	box-shadow: transparent 0 0 0em;
+}
 
 #opponentActionHolder {
 	position: absolute;
