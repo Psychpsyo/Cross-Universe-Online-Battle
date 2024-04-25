@@ -139,7 +139,7 @@ export function newBlock(block) {
 	let label = "";
 	switch(block.constructor) {
 		case blocks.StandardDraw: {
-			card = block.player.deckZone.cards[block.player.deckZone.cards.length - 1];
+			card = block.player.deckZone.cards.at(-1);
 			label = locale.game.automatic.blocks.draw;
 			break;
 		}
