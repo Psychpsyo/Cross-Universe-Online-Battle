@@ -253,8 +253,8 @@ export class ManualController extends InteractionController {
 		if (player === localPlayer) {
 			netSend("[drawCard]");
 		}
-		let card = player.deckZone.cards[player.deckZone.cards.length - 1];
-		let insertedIndex = player.handZone.add(card, player.handZone.cards.length, false);
+		const card = player.deckZone.cards.at(-1);
+		const insertedIndex = player.handZone.add(card, player.handZone.cards.length, false);
 		if (player == localPlayer || this.opponentHandShown) {
 			card.showTo(localPlayer);
 		}
@@ -262,7 +262,7 @@ export class ManualController extends InteractionController {
 		gameUI.insertCard(player.handZone, insertedIndex);
 	}
 	deckShuffle(deckZone) {
-		let order = [];
+		const order = [];
 		for (var i = 0; i < deckZone.cards.length; i++) {
 			order.push(i);
 		}
@@ -316,7 +316,7 @@ export class ManualController extends InteractionController {
 		if (player === localPlayer) {
 			netSend("[deckShowTop]" + deckZone.player.index);
 		}
-		let card = deckZone.cards[deckZone.cards.length - 1];
+		let card = deckZone.cards.at(-1);
 		let presentedZone = this.playerInfos[player.index].presentedZone;
 		let insertedIndex = presentedZone.add(card, presentedZone.cards.length, false);
 		if (player == localPlayer) {

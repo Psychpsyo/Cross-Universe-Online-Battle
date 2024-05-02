@@ -58,12 +58,16 @@ export function startPhase(type) {
 			currentActivePhaseElem = drawPhaseIndicator;
 			break;
 		}
-		case "mainPhase": {
-			currentActivePhaseElem = currentActivePhaseElem == drawPhaseIndicator? firstMainPhaseIndicator : secondMainPhaseIndicator;
+		case "mainPhase1": {
+			currentActivePhaseElem = firstMainPhaseIndicator;
 			break;
 		}
 		case "battlePhase": {
 			currentActivePhaseElem = battlePhaseIndicator;
+			break;
+		}
+		case "mainPhase2": {
+			currentActivePhaseElem = secondMainPhaseIndicator;
 			break;
 		}
 		case "endPhase": {
@@ -108,7 +112,7 @@ export function updateBattlePhaseIndicator() {
 export function indicatePass() {
 	passBtn.disabled = false;
 	// stack 1 block 1 uses the more descriptive 'NEXT PHASE'/'END TURN' label instead of 'PASS'
-	if (game.currentStack().index === 1 && game.currentStack().blocks.length === 0) {
+	if (game.currentStack()?.index === 1 && game.currentStack().blocks.length === 0) {
 		passBtn.textContent = locale.game.automatic.actions[game.currentPhase().types.includes("endPhase")? "endTurn" : "nextPhase"];
 	}
 }
@@ -139,7 +143,7 @@ export function newBlock(block) {
 	let label = "";
 	switch(block.constructor) {
 		case blocks.StandardDraw: {
-			card = block.player.deckZone.cards[block.player.deckZone.cards.length - 1];
+			card = block.player.deckZone.cards.at(-1);
 			label = locale.game.automatic.blocks.draw;
 			break;
 		}
