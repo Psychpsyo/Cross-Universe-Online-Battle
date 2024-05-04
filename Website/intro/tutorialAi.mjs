@@ -32,7 +32,7 @@ export class TutorialAI extends AI {
 
 		// TODO: fallback: choose at random
 		while (optionList.length > 0) {
-			const option = optionList.splice(Math.floor(Math.random(optionList.length)), 1)[0];
+			const option = optionList.splice(Math.floor(Math.random() * optionList.length), 1)[0];
 			const responses = [];
 			for (const response of requests[option.type].generateValidResponses(option)) {
 				responses.push(response);
@@ -40,7 +40,7 @@ export class TutorialAI extends AI {
 			if (responses.length === 0) continue;
 			return {
 				type: option.type,
-				value: responses[Math.floor(Math.random(responses.length))]
+				value: responses[Math.floor(Math.random() * responses.length)]
 			};
 		}
 	}
