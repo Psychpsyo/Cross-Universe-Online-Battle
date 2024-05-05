@@ -1,10 +1,10 @@
 @font-face {
 	font-family: "Atkinson Hyperlegible";
-	src: local("Atkinson Hyperlegible"), url("./fonts/Atkinson-Hyperlegible-Regular-102a.woff2");
+	src: local("Atkinson Hyperlegible"), url("../fonts/Atkinson-Hyperlegible-Regular-102a.woff2");
 }
 @font-face {
 	font-family: "OpenDyslexic";
-	src: local("OpenDyslexic"), url("./fonts/OpenDyslexic-Regular.woff2");
+	src: local("OpenDyslexic"), url("../fonts/OpenDyslexic-Regular.woff2");
 }
 
 *, *::after, *::before {
@@ -59,6 +59,7 @@ a {
 	border-bottom: 2px var(--theme-border-color) solid;
 	line-height: 1.75em;
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 }
 
 header > :is(h1, h2, h3, h4) {
@@ -101,6 +102,7 @@ textarea {
 
 .bigButton::before {
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	content: "";
 	z-index: -10;
 

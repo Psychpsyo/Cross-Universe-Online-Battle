@@ -10,6 +10,7 @@ main {
 	width: 30.5em;
 	margin: auto;
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 }
 
 main > section {

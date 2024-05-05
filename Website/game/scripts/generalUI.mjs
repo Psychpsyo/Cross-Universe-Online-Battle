@@ -312,7 +312,6 @@ export function init() {
 	cardDetailsLevelTypeSeparator.textContent = locale.cardDetails.levelTypeSeparator;
 	cardDetailsTypes.textContent = locale.cardDetails.types;
 
-	infoPanelVS.textContent = locale.game.playerInfo.vs;
 	for (let i = 0; i < 2; i++) {
 		document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
 		document.getElementById("playerDeckButtonImg" + i).alt = locale.game.playerInfo.viewDeck;

@@ -36,7 +36,7 @@ document.addEventListener("keydown", async function(e) {
 			switch(name) {
 				case "chat": {
 					if (!gameDiv.hidden) {
-						document.getElementById("chatInput").focus();
+						chat.inputField.focus();
 						e.preventDefault();
 					}
 					break;

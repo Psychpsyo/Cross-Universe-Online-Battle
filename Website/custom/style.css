@@ -27,6 +27,7 @@ main {
 
 #inputFieldHolder {
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 }
 
 #inputFieldHolder > div {
@@ -49,6 +50,7 @@ main {
 #savedCardsSection {
 	overflow-y: scroll;
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	border-left: 2px var(--theme-border-color) solid;
 	min-width: fit-content;
 }
@@ -126,6 +128,7 @@ main {
 /* Card Effect Editor */
 #effectEditor {
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	padding: 5px;
 	white-space: pre-wrap;
 	overflow-wrap: break-word;

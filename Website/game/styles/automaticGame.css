@@ -78,6 +78,7 @@
 	margin: 0;
 	padding: 0;
 	background-color: #000A;
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	text-align: center;
 	width: 100%;
 	justify-content: center;
@@ -207,6 +208,9 @@
 	display: flex;
 	justify-content: space-around;
 	padding: .25em;
+}
+.leftField #automaticButtonArea {
+	flex-direction: row-reverse;
 }
 #passMode {
 	width: min-content;

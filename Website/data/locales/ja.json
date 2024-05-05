@@ -193,7 +193,6 @@
 		"playerInfo": {
 			"life": "Lp：",
 			"mana": "魔力：",
-			"vs": "VS",
 			"viewDeck": null
 		},
 
