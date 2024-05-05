@@ -62,7 +62,7 @@ export class AutomaticController extends InteractionController {
 	}
 
 	async startGame() {
-		let updateGenerator = game.begin();
+		const updateGenerator = game.begin();
 		let updates = await updateGenerator.next();
 
 		while (!updates.done) {
