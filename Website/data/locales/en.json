@@ -373,8 +373,8 @@
 
 			"battlePhase": {
 				"question": "Do you want to enter the battle phase?",
-				"enter": "Enter Battle Phase",
-				"skip": "Skip Battle Phase"
+				"enter": "Yes, Enter Battle Phase",
+				"skip": "No, Skip to End Phase"
 			},
 
 			"retire": {

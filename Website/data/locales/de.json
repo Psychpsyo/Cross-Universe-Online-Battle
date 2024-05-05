@@ -373,8 +373,8 @@
 
 			"battlePhase": {
 				"question": "Möchtest du die Battle Phase betreten?",
-				"enter": "Battle Phase betreten",
-				"skip": "Battle Phase überspringen"
+				"enter": "Ja, Battle Phase betreten",
+				"skip": "Nein, zu End Phase springen"
 			},
 
 			"retire": {
