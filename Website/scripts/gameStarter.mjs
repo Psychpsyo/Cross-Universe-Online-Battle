@@ -18,7 +18,7 @@ export async function startGame(isCaller, options = {}) {
 }
 
 let replayToLoad = null;
-export async function* loadReplay(replay) {
+export async function loadReplay(replay) {
 	return new Promise((resolve, reject) => {
 		if (startingGameSettings || resolveStartPromise) {
 			reject();
