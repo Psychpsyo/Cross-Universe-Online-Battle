@@ -63,7 +63,13 @@ export class AutomaticController extends InteractionController {
 
 	async startGame() {
 		const updateGenerator = game.begin();
-		let updates = await updateGenerator.next();
+		let updates;
+		try {
+			updates = await updateGenerator.next();
+		} catch(e) {
+			autoUI.rulesEngineCrash();
+			console.error(e);
+		}
 
 		while (!updates.done) {
 			let returnValue;
@@ -125,7 +131,14 @@ export class AutomaticController extends InteractionController {
 					break;
 				}
 			}
-			updates = await updateGenerator.next(returnValue);
+
+			try {
+				updates = await updateGenerator.next(returnValue);
+			} catch(e) {
+				autoUI.rulesEngineCrash(e);
+				console.error(e);
+				break;
+			}
 		}
 	}
 
