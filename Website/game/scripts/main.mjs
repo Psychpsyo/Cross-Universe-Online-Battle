@@ -3,7 +3,7 @@ import {OnlineInitState} from "./onlineInitState.mjs";
 import {SingleplayerInitState} from "./singleplayerInitState.mjs";
 import {ReplayInitState} from "./replayInitState.mjs";
 import {locale} from "../../scripts/locale.mjs";
-import {incomingSdp} from "./netcode.mjs";
+import * as netcode from "./netcode.mjs";
 
 // setup
 document.documentElement.lang = locale.code;
@@ -72,8 +72,11 @@ window.addEventListener("message", e => {
 			break;
 		}
 		case "sdp": {
-			incomingSdp(e.data.sdp);
+			netcode.incomingSdp(e.data.sdp);
 			break;
+		}
+		case "iceCandidate": {
+			netcode.incomingIceCandidate(e.data.candidate);
 		}
 	}
 });

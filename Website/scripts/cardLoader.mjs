@@ -116,7 +116,6 @@ export async function getCdf(cardId) {
 			try {
 				cdfCache[cardId] = generateCustomCardCdf(cardId);
 			} catch (e) {
-				console.log(e);
 				throw new UnsupportedCardError(cardId);
 			}
 		} else {
