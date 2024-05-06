@@ -541,3 +541,33 @@ export function chatCards(cards) {
 	}
 	return cardHolder;
 }
+
+export function rulesEngineCrash() {
+	const holder = document.createElement("div");
+	holder.style.setProperty("display", "flex");
+	holder.style.setProperty("justify-content", "space-evenly");
+	holder.style.setProperty("padding-bottom", ".35em");
+
+	// download button
+	const downloadReplayBtn = document.createElement("button");
+	downloadReplayBtn.textContent = locale.game.notices.downloadReplay;
+	downloadReplayBtn.addEventListener("click", () => {
+		const downloadElement = document.createElement("a");
+		downloadElement.href = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(game.replay));
+		downloadElement.download = "crashReplay.json";
+		downloadElement.click();
+	});
+	holder.appendChild(downloadReplayBtn);
+
+	// email button
+	const sendBugReportBtn = document.createElement("button");
+	sendBugReportBtn.textContent = locale.game.notices.submitBugReport;
+	sendBugReportBtn.addEventListener("click", () => {
+		const issueTitle = "My Rules Engine Crashed";
+		const issueBody = `# Replay\n<!-- Please drop your replay file here to upload it. -->`;
+		window.open(`https://github.com/Psychpsyo/Galaxy-Engine/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(issueBody)}`, "_blank").focus();
+	});
+	holder.appendChild(sendBugReportBtn);
+
+	chat.putMessage(locale.game.notices.rulesEngineCrashed, "error", holder);
+}

@@ -71,7 +71,9 @@
 		"settingsButton": "Einstellungen",
 		"deckCreatorButton": "Deck Editor",
 		"reportBug": "Melde einen Fehler",
-		"joinDiscord": "Discord beitreten"
+		"joinDiscord": "Discord beitreten",
+
+		"invalidReplay": "Die JSON- oder REPLAY-Datei, die du laden wolltest ist kein gültiges Replay."
 	},
 
 	"draftFormats": {
@@ -156,6 +158,9 @@
 		"notices": {
 			"opponentLeft": "Dein Gegner hat das Spiel verlassen.",
 			"connectionLost": "Die Verbindung zu deinem Gegner ist abgebrochen.\n(Die Verbindung kann nicht wieder hergestellt werden, also kannst du das Spiel nun verlassen.)",
+			"rulesEngineCrashed": "Die Rules-Engine ist aufgrund eines fatalen Fehlers gecrasht.\nWenn du möchtest, dass das nicht nochmal passiert, schicke mir das Replay für diese Runde über die untenstehenden Optionen.\n(Replays enthalten keinerlei persönliche Daten.)",
+			"downloadReplay": "Replay speichern",
+			"submitBugReport": "Bugreport einreichen",
 
 			"youStart": "Du bist zuerst dran.",
 			"opponentStarts": "Dein Gegner ist zuerst dran.",

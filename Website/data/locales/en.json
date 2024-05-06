@@ -71,7 +71,9 @@
 		"settingsButton": "Settings",
 		"deckCreatorButton": "Deck Creator",
 		"reportBug": "Report a Bug",
-		"joinDiscord": "Join the Discord"
+		"joinDiscord": "Join the Discord",
+
+		"invalidReplay": "The JSON or REPLAY file you tried to load is not a valid replay file."
 	},
 
 	"draftFormats": {
@@ -156,6 +158,9 @@
 		"notices": {
 			"opponentLeft": "Your opponent left the game.",
 			"connectionLost": "Lost connection to your opponent.\nThis is currently unrecoverable so you can leave the game now: ",
+			"rulesEngineCrashed": "The rules engine has encountered a fatal error and crashed.\nIf you don't want this to happen again, please send in this game's replay using the options below.\n(Note: The replay does not contain any personally identifiable data)",
+			"downloadReplay": "Save Replay",
+			"submitBugReport": "Submit Bug Report",
 
 			"youStart": "You go first.",
 			"opponentStarts": "Your opponent goes first.",

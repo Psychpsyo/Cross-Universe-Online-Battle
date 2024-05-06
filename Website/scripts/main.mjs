@@ -223,7 +223,7 @@ preGame.addEventListener("dragover", function(e) {
 });
 preGame.addEventListener("drop", function(e) {
 	const file = e.dataTransfer.items[0].getAsFile();
-	if (!file || !file.name.endsWith(".replay")) {
+	if (!file || (!file.name.endsWith(".replay") && !file.name.endsWith(".json"))) {
 		return;
 	}
 
@@ -231,11 +231,17 @@ preGame.addEventListener("drop", function(e) {
 
 	const reader = new FileReader();
 	reader.addEventListener("load", e => {
-		stopEffect();
-		loadReplay(JSON.parse(e.target.result)).then(() => {
-			startEffect();
-		});
-		lobbies.style.display = "none";
+		// TODO: add proper replay file validation
+		try {
+			const replay = JSON.parse(e.target.result);
+			stopEffect();
+			loadReplay(replay).then(() => {
+				startEffect();
+			});
+			lobbies.style.display = "none";
+		} catch(e) {
+			alert(locale.mainMenu.invalidReplay);
+		}
 	});
 	reader.readAsText(file);
 });

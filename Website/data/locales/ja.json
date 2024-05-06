@@ -71,7 +71,9 @@
 		"settingsButton": null,
 		"deckCreatorButton": null,
 		"reportBug": null,
-		"joinDiscord": null
+		"joinDiscord": null,
+
+		"invalidReplay": null
 	},
 
 	"draftFormats": {
@@ -156,6 +158,9 @@
 		"notices": {
 			"opponentLeft": null,
 			"connectionLost": null,
+			"rulesEngineCrashed": null,
+			"downloadReplay": null,
+			"submitBugReport": null,
 
 			"youStart": null,
 			"opponentStarts": null,
