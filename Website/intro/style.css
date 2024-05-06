@@ -6,6 +6,7 @@ main {
 	transform: translateY(-50%);
 
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	padding: 1em;
 	padding-bottom: 2.5em;
 	text-align: center;

@@ -173,6 +173,7 @@ dialog #cardDetails {
 
 	border-right: 2px var(--theme-border-color) solid;
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 }
 .leftField #leftPanel {
 	border-right: none;
@@ -235,14 +236,6 @@ dialog #cardDetails {
 	top: .3em;
 	left: .3em;
 	height: 2em;
-}
-#infoPanelVS {
-	position: absolute;
-	top: 40%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	font-weight: bold;
-	font-size: 1.8em;
 }
 
 .valueUp {
@@ -437,6 +430,7 @@ img[src$="cardBackFrameP1.png"] {
 	z-index: 1;
 
 	border-radius: 1em;
+	backdrop-filter: blur(var(--theme-shadow-blur));
 
 	--card-count: 0;
 }
@@ -451,7 +445,7 @@ img[src$="cardBackFrameP1.png"] {
 	transition-duration: .1s;
 }
 #hand0 .card {
-	transform: rotate(180deg) translateY(0);
+	transform: rotate(180deg) translateY(-2vh);
 }
 
 #hand1 :first-child {

@@ -37,6 +37,7 @@ var themes = {
 		"backgroundY": "center",
 		"fieldDropShadow": false,
 		"shadowColor": "#0005",
+		"shadowBlur": "0",
 		"dialogBackground": "#000c",
 		"textShadow": "none",
 		"textColor": "#eee",
@@ -51,6 +52,7 @@ var themes = {
 		"backgroundY": "top",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
+		"shadowBlur": "2px",
 		"dialogBackground": "#000c",
 		"textShadow": "0 0 .2em black, 0 0 .2em black, .07em .07em .13em black, .07em .07em .13em black",
 		"textColor": "#eee",
@@ -65,6 +67,7 @@ var themes = {
 		"backgroundY": "10%",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
+		"shadowBlur": "2px",
 		"dialogBackground": "#000c",
 		"textShadow": "0 0 .2em black, 0 0 .2em black, .07em .07em .13em black, .07em .07em .13em black",
 		"textColor": "#eee",
@@ -79,6 +82,7 @@ var themes = {
 		"backgroundY": "center",
 		"fieldDropShadow": false,
 		"shadowColor": "#0002",
+		"shadowBlur": "0",
 		"dialogBackground": "white",
 		"textShadow": "none",
 		"textColor": "#000",
@@ -95,6 +99,7 @@ function applyTheme(theme) {
 	document.documentElement.style.setProperty("--theme-background-y", themes[theme].backgroundY);
 	document.documentElement.style.setProperty("--theme-field-filter", themes[theme].fieldDropShadow? "drop-shadow(0 0 2vh rgba(0, 0, 0, 0.5))" : "");
 	document.documentElement.style.setProperty("--theme-shadow", themes[theme].shadowColor);
+	document.documentElement.style.setProperty("--theme-shadow-blur", themes[theme].shadowBlur);
 	document.documentElement.style.setProperty("--theme-dialog-background-color", themes[theme].dialogBackground);
 	document.documentElement.style.setProperty("--theme-text-shadow", themes[theme].textShadow);
 	document.documentElement.style.setProperty("--theme-text-color", themes[theme].textColor);

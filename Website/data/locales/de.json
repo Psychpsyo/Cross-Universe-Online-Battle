@@ -193,7 +193,6 @@
 		"playerInfo": {
 			"life": "LP:",
 			"mana": "Mana:",
-			"vs": "VS",
 			"viewDeck": "View Deck"
 		},
 
@@ -373,8 +372,8 @@
 
 			"battlePhase": {
 				"question": "Möchtest du die Battle Phase betreten?",
-				"enter": "Battle Phase betreten",
-				"skip": "Battle Phase überspringen"
+				"enter": "Ja, Battle Phase betreten",
+				"skip": "Nein, zu End Phase springen"
 			},
 
 			"retire": {
@@ -537,7 +536,7 @@
 			"fieldLabelToggle": "Feldbeschriftung zeigen",
 			"hideOpponentCardBacks": "Gegnerische Kartenrücken deaktivieren",
 			"opponentCardLanguage": "Zeige Karten des Gegners in der Sprache des Gegners",
-			"previewCardLanguage": "Kartenvorschau auch in anderen Sprache zeigen",
+			"previewCardLanguage": "Große Kartenanzeige auch in anderen Sprachen zeigen",
 			"fieldLeftToggle": "Feld links auf dem Bildschirm platzieren",
 			"theme": "Theme:",
 			"themeOptions": {

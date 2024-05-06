@@ -193,7 +193,6 @@
 		"playerInfo": {
 			"life": "Life:",
 			"mana": "Mana:",
-			"vs": "VS",
 			"viewDeck": "View Deck"
 		},
 
@@ -373,8 +372,8 @@
 
 			"battlePhase": {
 				"question": "Do you want to enter the battle phase?",
-				"enter": "Enter Battle Phase",
-				"skip": "Skip Battle Phase"
+				"enter": "Yes, Enter Battle Phase",
+				"skip": "No, Skip to End Phase"
 			},
 
 			"retire": {
@@ -537,7 +536,7 @@
 			"fieldLabelToggle": "Show Field Labels",
 			"hideOpponentCardBacks": "Disable Opponent Card Backs",
 			"opponentCardLanguage": "Show Opponent Cards in their Language",
-			"previewCardLanguage": "Also Show Card Preview in that Language",
+			"previewCardLanguage": "Also Show Big Card Preview in that Language",
 			"fieldLeftToggle": "Place Field on The Left Side of your Screen",
 			"theme": "Theme:",
 			"themeOptions": {

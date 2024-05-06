@@ -50,7 +50,6 @@
 							</div>
 							<button id="playerDeckButton0" class="playerDeckButton svgButton" autocomplete="off" disabled><img id="playerDeckButtonImg0" src="images/icons/deck.svg" alt="" draggable="false"></button>
 						</div>
-						<div id="infoPanelVS" class="overlayText"></div>
 					</div>
 					<div id="gameInteractions" class="manualOnly" hidden>
 						<div>
@@ -80,8 +79,6 @@
 						<div id="stackDisplayHolder" data-block=""></div>
 						<hr>
 						<div id="automaticButtonArea">
-							<button id="passBtn" autocomplete="off" disabled></button>
-							<button id="attackBtn" autocomplete="off" disabled></button>
 							<div id="passMode">
 								<label id="passModeLabel" for="passModeSelect"></label>
 								<select id="passModeSelect">
@@ -93,6 +90,8 @@
 									<option value="untilNextPhase"></option>
 								</select>
 							</div>
+							<button id="attackBtn" autocomplete="off" disabled></button>
+							<button id="passBtn" autocomplete="off" disabled></button>
 						</div>
 					</div>
 					<div id="deckDropzone">

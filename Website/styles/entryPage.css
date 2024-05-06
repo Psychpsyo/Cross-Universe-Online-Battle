@@ -13,6 +13,7 @@ body {
 	text-align: center;
 	width: 100vw;
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	border-top: 2px var(--theme-border-color) solid;
 	line-height: 1.75em;
 }
@@ -32,6 +33,7 @@ main {
 #lobbies {
 	min-width: 15em;
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	border-right: 2px var(--theme-border-color) solid;
 	display: flex;
 	flex-direction: column;
@@ -117,6 +119,7 @@ main {
 	z-index: 10; /* puts it above the hover cards */
 
 	background-color: var(--theme-shadow);
+	backdrop-filter: blur(var(--theme-shadow-blur));
 	border: 2px var(--theme-border-color) solid;
 	border-radius: 1em;
 	padding: .5em 1em;
