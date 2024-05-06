@@ -394,23 +394,33 @@ function resolveAnyChatChallenge(userId, resolutionString) {
 window.addEventListener("message", async e => {
 	if (e.source !== gameFrame.contentWindow) return;
 	if (!currentLobby?.playingAgainst) return; // if not playing against anyone, there is no lobby-based signalling
-	if (e.data.type !== "sdp") return;
+	if (!["sdp", "iceCandidate"].includes(e.data.type)) return;
 
-	const message = {
-		type: "sdp",
-		sdp: e.data.sdp
-		// TODO: encrypt sdp something like this.
-		// Below code does not work because RSA-OAEP has
-		// a maximum size for the data to encrypt.
-		//
-		//sdp: u8tos(await crypto.subtle.encrypt(
-		//	{name: "RSA-OAEP"},
-		//	currentLobby.playingAgainst.rsaPublicKey,
-		//	stou8(e.data.sdp)
-		//))
+	const message = {};
+	switch (e.data.type) {
+		case "sdp": {
+			message.type = "sdp";
+			message.sdp = e.data.sdp;
+			// TODO: encrypt sdp something like this.
+			// Below code does not work because RSA-OAEP has
+			// a maximum size for the data to encrypt.
+			//
+			//sdp: u8tos(await crypto.subtle.encrypt(
+			//	{name: "RSA-OAEP"},
+			//	currentLobby.playingAgainst.rsaPublicKey,
+			//	stou8(e.data.sdp)
+			//))
+			message.signature = await signString("challenge", `sdp|${currentLobby.playingAgainst.id}|${message.sdp}`, ++currentLobby.playingAgainst.lastSentChallengeSequenceNum);
+			break;
+		}
+		case "iceCandidate": {
+			message.type = "iceCandidate";
+			message.candidate = e.data.candidate;
+			// TODO: encrypt candidate like sdp above
+			message.signature = await signString("challenge", `ice|${currentLobby.playingAgainst.id}|${message.candidate}`, ++currentLobby.playingAgainst.lastSentChallengeSequenceNum);
+			break;
+		}
 	}
-
-	message.signature = await signString("challenge", `sdp|${currentLobby.playingAgainst.id}|${message.sdp}`, ++currentLobby.playingAgainst.lastSentChallengeSequenceNum);
 
 	if (isHosting) {
 		message.from = currentLobby.ownUserId;
@@ -459,7 +469,7 @@ async function beginGame(isCaller) {
 	if (currentLobby.gameMode === "draft") {
 		gameOptions.draftFormat = await (await fetch(`./data/draftFormats/${lobbyDraftFormatInput.value}.json`)).json();
 	}
-	await startGame(isCaller, gameOptions)
+	await startGame(isCaller, gameOptions);
 	currentLobby.playingAgainst = null;
 	syncNewStatus("present");
 }
@@ -497,6 +507,14 @@ async function sdpReceived(fromUser, sdp, signature) {
 		//	currentLobby.ownRsaKeyPair.privateKey,
 		//	stou8(sdp)
 		//))
+	});
+}
+async function iceReceived(fromUser, candidate, signature) {
+	if (!await verifySignature(signature, "challenge", `ice|${currentLobby.ownUserId}|${candidate}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+	gameFrame.contentWindow.postMessage({
+		type: "iceCandidate",
+		candidate: candidate
+		// TODO: Decrypt candidate like SDP above
 	});
 }
 function getUserFromId(id) {
@@ -702,15 +720,26 @@ function receiveWsMessage(e) {
 			}
 			break;
 		}
-		case "joinRequest": {
+		case "joinRequestOffer": {
 			const pc = new RTCPeerConnection(webRtcConfig);
-			pc.addEventListener("icegatheringstatechange", () => {
-				if (pc.iceGatheringState === "complete") {
-					lobbyServerWs.send(JSON.stringify({
-						"type": "joinLobbyAnswer",
-						"sdp": pc.localDescription.sdp // use this instead of answer to have ice candidates included
-					}));
+			pc.addEventListener("icecandidate", e => {
+				if (e.candidate === null) {
+					const pcData = peerConnections.find(pc => pc.peer === message.peer);
+					pcData.allIcesSent = true;
+					if (pcData.allIcesReceived) {
+						delete pcData.peer;
+						lobbyServerWs.send(JSON.stringify({
+							type: "allIcesSent",
+							peer: message.peer
+						}));
+					}
+					return;
 				}
+				lobbyServerWs.send(JSON.stringify({
+					type: "joinLobbyAnswerIceCandidate",
+					peer: message.peer,
+					candidate: JSON.stringify(e.candidate)
+				}));
 			});
 
 			const dc = pc.createDataChannel("data", {negotiated: true, id: 0});
@@ -746,14 +775,49 @@ function receiveWsMessage(e) {
 			peerConnections.push({
 				connection: pc,
 				dataChannel: dc,
-				userId: null
+				userId: null,
+				allIcesSent: false,
+				allIcesReceived: false,
+				peer: message.peer // used to send messages back to this specific peer during signalling
 			});
 			pc.setRemoteDescription({type: "offer", sdp: message.sdp});
-			pc.createAnswer().then(answer => pc.setLocalDescription(answer));
+			pc.createAnswer().then(async answer => {
+				await pc.setLocalDescription(answer);
+				lobbyServerWs.send(JSON.stringify({
+					type: "joinLobbyAnswer",
+					peer: message.peer,
+					sdp: pc.localDescription.sdp
+				}));
+			});
 			break;
 		}
 		case "joinRequestAnswer": {
 			hostConnection.setRemoteDescription({type: "answer", sdp: message.sdp});
+			break;
+		}
+		case "joinRequestOfferIceCandidate": {
+			const pcData = peerConnections.find(pc => pc.peer === message.peer);
+			const candidate = JSON.parse(message.candidate);
+			if (candidate === null) {
+				pcData.allIcesReceived = true;
+				if (pcData.allIcesSent) {
+					delete pcData.peer;
+					lobbyServerWs.send(JSON.stringify({
+						type: "allIcesSent",
+						peer: message.peer
+					}));
+				}
+				break;
+			}
+			if (pcData.connection.connectionState !== "connected") {
+				pcData.connection.addIceCandidate(JSON.parse(message.candidate));
+			}
+			break;
+		}
+		case "joinRequestAnswerIceCandidate": {
+			if (hostConnection.connectionState !== "connected") {
+				hostConnection.addIceCandidate(JSON.parse(message.candidate));
+			}
 			break;
 		}
 		case "error": {
@@ -781,14 +845,12 @@ async function joinLobby(lobbyId) {
 
 	// create connection
 	hostConnection = new RTCPeerConnection(webRtcConfig);
-	hostConnection.addEventListener("icegatheringstatechange", () => {
-		if (hostConnection.iceGatheringState === "complete") {
-			lobbyServerWs.send(JSON.stringify({
-				"type": "joinLobby",
-				"lobbyId": lobbyId,
-				"sdp": hostConnection.localDescription.sdp // use this instead of offer to have ice candidates included
-			}));
-		}
+	hostConnection.addEventListener("icecandidate", e => {
+		lobbyServerWs.send(JSON.stringify({
+			type: "joinLobbyOfferIceCandidate",
+			lobbyId: lobbyId,
+			candidate: JSON.stringify(e.candidate)
+		}));
 	});
 
 	// add data channel
@@ -804,6 +866,11 @@ async function joinLobby(lobbyId) {
 
 	// set local description
 	await hostConnection.setLocalDescription(await hostConnection.createOffer());
+	lobbyServerWs.send(JSON.stringify({
+		type: "joinLobbyOffer",
+		lobbyId: lobbyId,
+		sdp: hostConnection.localDescription.sdp
+	}));
 }
 
 // used during connection to a lobby
@@ -975,6 +1042,12 @@ async function receiveWebRtcHostMessage(e) {
 			sdpReceived(user, message.sdp, message.signature);
 			break;
 		}
+		case "iceCandidate": { // opponent sent an ice candidate for game connection signalling
+			const user = getUserFromId(message.from);
+			if (user !== currentLobby.playingAgainst) break;
+			iceReceived(user, message.candidate, message.signature);
+			break;
+		}
 	}
 }
 
@@ -1132,6 +1205,20 @@ async function receiveWebRtcVisitorMessage(e) {
 				type: "sdp",
 				from: getConnectionFromDataChannel(this).userId,
 				sdp: message.sdp,
+				signature: message.signature
+			}));
+			break;
+		}
+		case "iceCandidate": {
+			if (message.to === currentLobby.ownUserId) { // is for me?
+				iceReceived(getUserFromDataChannel(this), message.candidate, message.signature);
+				break;
+			}
+			// otherwise, forward to recipient
+			getUserConnection(message.to)?.dataChannel.send(JSON.stringify({
+				type: "iceCandidate",
+				from: getConnectionFromDataChannel(this).userId,
+				candidate: message.candidate,
 				signature: message.signature
 			}));
 			break;

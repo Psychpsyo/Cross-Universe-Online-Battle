@@ -26,6 +26,10 @@ window.addEventListener("message", async e => {
 			socket.send("[sdp]" + e.data.sdp);
 			break;
 		}
+		case "iceCandidate": {
+			socket.send("[iceCandidate]" + e.data.candidate);
+			break;
+		}
 		case "gameStarted": {
 			hideConnectScreen();
 			break;
@@ -100,6 +104,13 @@ function connect(overrideWebsocketUrl) {
 				gameFrame.contentWindow.postMessage({
 					type: "sdp",
 					sdp: message
+				});
+				break;
+			}
+			case "iceCandidate": {
+				gameFrame.contentWindow.postMessage({
+					type: "iceCandidate",
+					candidate: message
 				});
 				break;
 			}

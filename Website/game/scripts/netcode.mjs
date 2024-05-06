@@ -26,9 +26,9 @@ export async function callOpponent(isCaller) {
 	youAre = isCaller? 0 : 1;
 	// create connection
 	peerConnection = new RTCPeerConnection(webRtcConfig);
-	peerConnection.addEventListener("icegatheringstatechange", () => {
-		if (peerConnection.iceGatheringState === "complete") {
-			window.parent.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
+	peerConnection.addEventListener("icecandidate", e => {
+		if (e.candidate) {
+			window.parent.postMessage({type: "iceCandidate", candidate: JSON.stringify(e.candidate)});
 		}
 	});
 
@@ -55,7 +55,10 @@ export async function callOpponent(isCaller) {
 
 	// set local description
 	if (isCaller) {
-		peerConnection.createOffer().then(offer => peerConnection.setLocalDescription(offer));
+		peerConnection.createOffer().then(async offer => {
+			await peerConnection.setLocalDescription(offer);
+			window.parent.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
+		});
 	}
 
 	return new Promise(resolve => {
@@ -65,12 +68,18 @@ export async function callOpponent(isCaller) {
 		});
 	});
 }
+export function incomingIceCandidate(candidate) {
+	peerConnection.addIceCandidate(JSON.parse(candidate));
+}
 export function incomingSdp(sdp) {
 	if (youAre === 0) {
 		peerConnection.setRemoteDescription({type: "answer", sdp: sdp});
 	} else {
 		peerConnection.setRemoteDescription({type: "offer", sdp: sdp});
-		peerConnection.createAnswer().then(answer => peerConnection.setLocalDescription(answer));
+		peerConnection.createAnswer().then(async answer => {
+			await peerConnection.setLocalDescription(answer);
+			window.parent.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
+		});
 	}
 }
 

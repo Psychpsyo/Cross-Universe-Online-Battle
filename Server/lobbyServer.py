@@ -161,30 +161,82 @@ async def setName(websocket, data):
 		"newValue": hostedLobby["data"]["name"]
 	}))
 
-async def joinLobby(websocket, data):
+async def joinLobbyOffer(websocket, data):
 	try:
 		lobby = next(lobby for lobby in allLobbies if lobby["data"]["id"] == data["lobbyId"])
 		if lobby["data"]["userCount"] >= lobby["data"]["userLimit"]:
 			await websocket.send('{"type": "error", "code": "cannotJoinFullLobby"}')
 			return
-		connectionData[lobby["host"]]["incomingPeers"].append(websocket)
+
+		# fill first empty slot in connectionData[lobby["host"]]["incomingPeers"] with websocket or append it to the end
+		addedIndex = -1
+		for i in range(len(connectionData[lobby["host"]]["incomingPeers"])):
+			if connectionData[lobby["host"]]["incomingPeers"][i] == None:
+				connectionData[lobby["host"]]["incomingPeers"][i] = websocket
+				addedIndex = i
+				break
+		if addedIndex == -1:
+			addedIndex = len(connectionData[lobby["host"]]["incomingPeers"])
+			connectionData[lobby["host"]]["incomingPeers"].append(websocket)
+
 		await lobby["host"].send(json.dumps({
-			"type": "joinRequest",
+			"type": "joinRequestOffer",
+			"peer": addedIndex,
 			"sdp": data["sdp"]
 		}))
 	except Exception as e:
 		await websocket.send('{"type": "error", "code": "cannotJoinInvalidLobby"}')
 
 async def joinLobbyAnswer(websocket, data):
-	if len(connectionData[websocket]["incomingPeers"]) == 0:
-		await websocket.send('{"type": "error", "code": "noWaitingPeers"}')
+	if type(data["peer"]) is not int or data["peer"] < 0:
+		await websocket.send('{"type": "error", "code": "invalidPeer"}')
+		return
+	if data["peer"] >= len(connectionData[websocket]["incomingPeers"]) or connectionData[websocket]["incomingPeers"][data["peer"]] == None:
+		await websocket.send('{"type": "error", "code": "noWaitingPeer"}')
 		return
 
-	peer = connectionData[websocket]["incomingPeers"].pop(0)
+	peer = connectionData[websocket]["incomingPeers"][data["peer"]]
 	await peer.send(json.dumps({
 		"type": "joinRequestAnswer",
 		"sdp": data["sdp"]
 	}))
+
+async def joinLobbyOfferIceCandidate(websocket, data):
+	try:
+		lobby = next(lobby for lobby in allLobbies if lobby["data"]["id"] == data["lobbyId"])
+		if websocket not in connectionData[lobby["host"]]["incomingPeers"]:
+			await websocket.send('{"type": "error", "code": "cannotSendIceCandidateToLobbyYouAreNotJoining"}')
+			return
+		await lobby["host"].send(json.dumps({
+			"type": "joinRequestOfferIceCandidate",
+			"peer": connectionData[lobby["host"]]["incomingPeers"].index(websocket),
+			"candidate": data["candidate"]
+		}))
+	except Exception as e:
+		await websocket.send('{"type": "error", "code": "cannotJoinInvalidLobby"}')
+
+async def joinLobbyAnswerIceCandidate(websocket, data):
+	if type(data["peer"]) is not int or data["peer"] < 0:
+		await websocket.send('{"type": "error", "code": "invalidPeer"}')
+		return
+	if data["peer"] >= len(connectionData[websocket]["incomingPeers"]) or connectionData[websocket]["incomingPeers"][data["peer"]] == None:
+		await websocket.send('{"type": "error", "code": "peerNotWaiting"}')
+		return
+
+	peer = connectionData[websocket]["incomingPeers"][data["peer"]]
+	await peer.send(json.dumps({
+		"type": "joinRequestAnswerIceCandidate",
+		"candidate": data["candidate"]
+	}))
+
+async def allIcesSent(websocket, data):
+	if type(data["peer"]) is not int or data["peer"] < 0:
+		await websocket.send('{"type": "error", "code": "invalidPeer"}')
+		return
+	if data["peer"] >= len(connectionData[websocket]["incomingPeers"]) or connectionData[websocket]["incomingPeers"][data["peer"]] == None:
+		await websocket.send('{"type": "error", "code": "peerNotWaiting"}')
+		return
+	connectionData[websocket]["incomingPeers"][data["peer"]] = None
 
 socketFunctions = {
 	"openLobby": openLobby,
@@ -193,8 +245,11 @@ socketFunctions = {
 	"setUserLimit": setUserLimit,
 	"setHasPassword": setHasPassword,
 	"setName": setName,
-	"joinLobby": joinLobby,
-	"joinLobbyAnswer": joinLobbyAnswer
+	"joinLobbyOffer": joinLobbyOffer,
+	"joinLobbyAnswer": joinLobbyAnswer,
+	"joinLobbyOfferIceCandidate": joinLobbyOfferIceCandidate,
+	"joinLobbyAnswerIceCandidate": joinLobbyAnswerIceCandidate,
+	"allIcesSent": allIcesSent
 }
 
 async def clientConnection(websocket, path):
