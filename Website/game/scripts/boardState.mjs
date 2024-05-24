@@ -98,8 +98,30 @@ export class BoardState extends GameState {
 				generalUI.closeCardPreview();
 				return true;
 			}
+			case "zoom": {
+				if (mainGameArea.matches(":hover")) {
+					mainGameArea.classList.add("zoomedIn");
+					return true;
+				}
+				return false;
+			}
 			default: {
 				return this.controller.hotkeyPressed(name);
+			}
+		}
+	}
+
+	hotkeyReleased(name) {
+		if (!mainGameBlackout.classList.contains("hidden")) {
+			return;
+		}
+		switch(name) {
+			case "zoom": {
+				mainGameArea.classList.remove("zoomedIn");
+				return mainGameArea.matches(":hover");
+			}
+			default: {
+				return this.controller.hotkeyReleased(name);
 			}
 		}
 	}

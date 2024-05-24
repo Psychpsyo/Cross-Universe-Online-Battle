@@ -20,6 +20,12 @@ body {
 	position: relative;
 	flex-grow: 1;
 	touch-action: none;
+
+	transform: scale(1);
+	transition: transform .15s, background-position-y .2s; /* background-position-y should be in automaticGame.css but there it would override this  */
+}
+#leftPanel:not(:hover) + #mainGameArea.zoomedIn {
+	transform: scale(5);
 }
 
 #fieldHolder {

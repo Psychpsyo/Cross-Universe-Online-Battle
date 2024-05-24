@@ -598,6 +598,7 @@
 			"shuffleDeck": null,
 			"showDeckTop": null,
 			"previewHandCard": null,
+			"zoom": null,
 			"previewHandButton": "1 - 9",
 
 			"keys": {

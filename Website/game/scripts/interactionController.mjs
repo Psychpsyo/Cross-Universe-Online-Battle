@@ -18,4 +18,7 @@ export class InteractionController {
 	hotkeyPressed(name) {
 		return false;
 	}
+	hotkeyReleased(name) {
+		return false;
+	}
 }

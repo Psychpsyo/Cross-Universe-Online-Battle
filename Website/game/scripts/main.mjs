@@ -50,6 +50,15 @@ document.addEventListener("keydown", async function(e) {
 		}
 	}
 });
+document.addEventListener("keyup", async function(e) {
+	for (const [name, hotkey] of Object.entries(hotkeys)) {
+		if (hotkey.keyCode === e.code && hotkey.ctrl === e.ctrlKey && hotkey.shift === e.shiftKey && hotkey.alt === e.altKey) {
+			if (gameState?.hotkeyReleased(name)) {
+				e.preventDefault();
+			}
+		}
+	}
+});
 
 window.addEventListener("message", e => {
 	switch (e.data.type) {

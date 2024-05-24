@@ -203,6 +203,12 @@ let hotkeyDefaults = {
 		"ctrl": false,
 		"shift": true,
 		"alt": false
+	},
+	"zoom": {
+		"keyCode": "KeyZ",
+		"ctrl": false,
+		"shift": false,
+		"alt": false
 	}
 }
 

@@ -10,4 +10,7 @@ export class GameState {
 	hotkeyPressed(name) {
 		return false;
 	}
+	hotkeyReleased(name) {
+		return false;
+	}
 }
