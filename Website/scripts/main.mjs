@@ -198,6 +198,13 @@ roomCodeInputField.addEventListener("keyup", function(e) {
 // clicking the connect button to connect
 connectBtn.addEventListener("click", () => connect());
 
+// XKCD room code easter egg
+roomCodeInputField.addEventListener("input", () => {
+	xkcdRoomCode.style.display = roomCodeInputField.value === "020518"? "inline" : "none";
+});
+xkcdRoomCode.addEventListener("click", () => {
+	window.open("https://xkcd.com/2937/");
+});
 
 // canceling a connection
 cancelWaitingBtn.addEventListener("click", function() {
