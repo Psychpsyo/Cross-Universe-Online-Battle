@@ -597,6 +597,7 @@ newLobbyBtn.addEventListener("click", async () => {
 // leaving lobby as a visitor
 function leaveLobby() {
 	hostConnection.close();
+	iceBuffer.length = 0;
 	closeLobbyScreen();
 	hostConnection = null;
 	hostDataChannel = null;
@@ -614,6 +615,7 @@ function closeLobby() {
 		}
 		peer.connection.close();
 	}
+	iceBuffer.length = 0;
 	closeLobbyScreen();
 }
 
@@ -678,6 +680,7 @@ function connectWebsocket() {
 }
 connectWebsocket();
 
+const iceBuffer = []; // where ICE candidates go if they arrive before the remote description has been set
 function receiveWsMessage(e) {
 	const message = JSON.parse(e.data);
 
@@ -752,6 +755,7 @@ function receiveWsMessage(e) {
 			dc.addEventListener("message", receiveWebRtcVisitorMessage);
 			dc.addEventListener("close", () => {
 				const connection = peerConnections.splice(peerConnections.findIndex(peer => peer.connection === pc), 1)[0];
+				iceBuffer = iceBuffer.filter(elem => elem.for !== peer);
 				// needs to check for isHosting in case the lobby is being shut down
 				if (isHosting && connection.userId) {
 					// check if the user still exists ( = this disconnect was initiated from their end, unexpectedly)
@@ -772,15 +776,23 @@ function receiveWsMessage(e) {
 				}
 			});
 
-			peerConnections.push({
+			const pcData = {
 				connection: pc,
 				dataChannel: dc,
 				userId: null,
 				allIcesSent: false,
 				allIcesReceived: false,
 				peer: message.peer // used to send messages back to this specific peer during signalling
+			};
+			peerConnections.push(pcData);
+			pc.setRemoteDescription({type: "offer", sdp: message.sdp}).then(() => {
+				for (let i = iceBuffer.length - 1; i >= 0; i--) {
+					if (iceBuffer[i].for === pcData) {
+						pc.addIceCandidate(JSON.parse(iceBuffer[i].candidate));
+						iceBuffer.splice(i, 1);
+					}
+				}
 			});
-			pc.setRemoteDescription({type: "offer", sdp: message.sdp});
 			pc.createAnswer().then(async answer => {
 				await pc.setLocalDescription(answer);
 				lobbyServerWs.send(JSON.stringify({
@@ -792,7 +804,12 @@ function receiveWsMessage(e) {
 			break;
 		}
 		case "joinRequestAnswer": {
-			hostConnection.setRemoteDescription({type: "answer", sdp: message.sdp});
+			hostConnection.setRemoteDescription({type: "answer", sdp: message.sdp}).then(() => {
+				for (const candidate of iceBuffer) {
+					hostConnection.addIceCandidate(JSON.parse(candidate));
+				}
+				iceBuffer.length = 0;
+			});
 			break;
 		}
 		case "joinRequestOfferIceCandidate": {
@@ -807,16 +824,25 @@ function receiveWsMessage(e) {
 						peer: message.peer
 					}));
 				}
-				break;
-			}
-			if (pcData.connection.connectionState !== "connected") {
-				pcData.connection.addIceCandidate(JSON.parse(message.candidate));
+			} else if (pcData.connection.connectionState !== "connected") {
+				if (pcData.connection.remoteDescription) {
+					pcData.connection.addIceCandidate(JSON.parse(message.candidate));
+				} else {
+					iceBuffer.push({
+						for: pcData,
+						candidate: message.candidate
+					});
+				}
 			}
 			break;
 		}
 		case "joinRequestAnswerIceCandidate": {
 			if (hostConnection.connectionState !== "connected") {
-				hostConnection.addIceCandidate(JSON.parse(message.candidate));
+				if (hostConnection.remoteDescription) {
+					hostConnection.addIceCandidate(JSON.parse(message.candidate));
+				} else {
+					iceBuffer.push(message.candidate);
+				}
 			}
 			break;
 		}

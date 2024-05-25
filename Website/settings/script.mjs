@@ -156,6 +156,11 @@ const settings = {
 			action: editHotkey
 		},
 		{
+			id: "zoom",
+			type: "button",
+			action: editHotkey
+		},
+		{
 			id: "previewHand",
 			type: "button"
 		},

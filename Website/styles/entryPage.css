@@ -131,8 +131,11 @@ h1, legend {
 	font-weight: bold;
 }
 
-#roomCodeRefresh {
+#roomCodeRefresh, #xkcdRoomCode {
 	width: 2em;
+}
+#xkcdRoomCode {
+	display: none;
 }
 
 #waitingBtnSpan {

@@ -22,6 +22,7 @@ export async function netSend(message, reliable = true) {
 	(reliable? reliableChannel : unreliableChannel)?.send(message);
 }
 
+const iceBuffer = []; // where ICE candidates go if they arrive before the remote description has been set
 export async function callOpponent(isCaller) {
 	youAre = isCaller? 0 : 1;
 	// create connection
@@ -68,18 +69,25 @@ export async function callOpponent(isCaller) {
 		});
 	});
 }
-export function incomingIceCandidate(candidate) {
-	peerConnection.addIceCandidate(JSON.parse(candidate));
-}
-export function incomingSdp(sdp) {
-	if (youAre === 0) {
-		peerConnection.setRemoteDescription({type: "answer", sdp: sdp});
+export async function incomingIceCandidate(candidate) {
+	if (peerConnection.remoteDescription) {
+		await peerConnection.addIceCandidate(JSON.parse(candidate));
 	} else {
-		peerConnection.setRemoteDescription({type: "offer", sdp: sdp});
+		iceBuffer.push(candidate);
+	}
+}
+export async function incomingSdp(sdp) {
+	if (youAre === 0) {
+		await peerConnection.setRemoteDescription({type: "answer", sdp: sdp});
+	} else {
+		await peerConnection.setRemoteDescription({type: "offer", sdp: sdp});
 		peerConnection.createAnswer().then(async answer => {
 			await peerConnection.setLocalDescription(answer);
 			window.parent.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
 		});
+	}
+	for (const candidate of iceBuffer) {
+		peerConnection.addIceCandidate(JSON.parse(candidate));
 	}
 }
 

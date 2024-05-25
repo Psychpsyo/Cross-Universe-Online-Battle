@@ -159,6 +159,18 @@ export function init() {
 		uiPlayers[1].targetY = (e.clientY - fieldRect.top) / fieldRect.height;
 		uiPlayers[1].posX = uiPlayers[1].targetX;
 		uiPlayers[1].posY = uiPlayers[1].targetY;
+
+		// zoom hotkey related stuff
+		const zoom = 5;
+		const pointerX = e.clientX - mainGameArea.offsetLeft;
+		const pointerY = e.clientY - mainGameArea.offsetTop;
+		const finalX = mainGameArea.offsetWidth / 2;
+		const finalY = mainGameArea.offsetHeight / 2;
+
+		const offsetX = (finalX - pointerX * zoom) / (-zoom + 1);
+		const offsetY = (finalY - pointerY * zoom) / (-zoom + 1);
+
+		mainGameArea.style.setProperty("transform-origin", `${offsetX}px ${offsetY}px`);
 	});
 	document.getElementById("field").addEventListener("pointerleave", function() {
 		hideCursor();
