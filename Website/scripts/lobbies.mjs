@@ -680,7 +680,7 @@ function connectWebsocket() {
 }
 connectWebsocket();
 
-const iceBuffer = []; // where ICE candidates go if they arrive before the remote description has been set
+let iceBuffer = []; // where ICE candidates go if they arrive before the remote description has been set
 function receiveWsMessage(e) {
 	const message = JSON.parse(e.data);
 
