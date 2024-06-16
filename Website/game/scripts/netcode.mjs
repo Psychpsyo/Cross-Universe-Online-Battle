@@ -29,7 +29,7 @@ export async function callOpponent(isCaller) {
 	peerConnection = new RTCPeerConnection(webRtcConfig);
 	peerConnection.addEventListener("icecandidate", e => {
 		if (e.candidate) {
-			window.parent.postMessage({type: "iceCandidate", candidate: JSON.stringify(e.candidate)});
+			callingWindow.postMessage({type: "iceCandidate", candidate: JSON.stringify(e.candidate)});
 		}
 	});
 
@@ -38,11 +38,11 @@ export async function callOpponent(isCaller) {
 	reliableChannel.addEventListener("message", receiveMessage);
 	reliableChannel.addEventListener("close", () => {
 		peerConnection.close();
-		window.parent.postMessage({type: "connectionLost"});
+		callingWindow.postMessage({type: "connectionLost"});
 
 		if (gameDiv.hidden) {
 			// game ended before it even began
-			window.parent.postMessage({type: "leaveGame"});
+			callingWindow.postMessage({type: "leaveGame"});
 			return;
 		}
 
@@ -58,7 +58,7 @@ export async function callOpponent(isCaller) {
 	if (isCaller) {
 		peerConnection.createOffer().then(async offer => {
 			await peerConnection.setLocalDescription(offer);
-			window.parent.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
+			callingWindow.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
 		});
 	}
 
@@ -83,7 +83,7 @@ export async function incomingSdp(sdp) {
 		await peerConnection.setRemoteDescription({type: "offer", sdp: sdp});
 		peerConnection.createAnswer().then(async answer => {
 			await peerConnection.setLocalDescription(answer);
-			window.parent.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
+			callingWindow.postMessage({type: "sdp", sdp: peerConnection.localDescription.sdp});
 		});
 	}
 	for (const candidate of iceBuffer) {
@@ -109,7 +109,7 @@ function makeChatLeaveButton() {
 	const button = document.createElement("button");
 	button.textContent = locale.game.gameOver.leaveGame;
 	button.addEventListener("click", () => {
-		window.parent.postMessage({type: "leaveGame"});
+		callingWindow.postMessage({type: "leaveGame"});
 	});
 	holder.appendChild(button);
 	return holder;

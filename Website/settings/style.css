@@ -47,6 +47,10 @@ hr {
 	display: flow-root; /* Establishes new block formatting context so that float elements fit */
 }
 
+.hideDevOptions .devOption {
+	display: none;
+}
+
 input[type="text"], select, .settingsInput {
 	float: right;
 }

@@ -1,6 +1,7 @@
 import {reloadLocale, locale} from "../scripts/locale.mjs";
 import {refetchCardData} from "./profilePictureSelector.mjs";
 import {validateHotkeys, resetHotkeys, relabelAllHotkeys, editHotkey} from "./hotkeys.mjs";
+import {startDebugGame} from "./debugGame.mjs";
 
 const languageNames = {
 	en: "🇬🇧 English",
@@ -226,6 +227,12 @@ const settings = {
 		{
 			id: "devMode",
 			type: "toggle"
+		},
+		{
+			id: "startDebugGame",
+			type: "centerButton",
+			action: startDebugGame,
+			isDevOption: true
 		}
 	]
 };
@@ -244,49 +251,56 @@ for (const [id, options] of Object.entries(settings)) {
 	sectionHolder.appendChild(section);
 
 	for (const setting of options) {
+		let settingElem;
 		switch (setting.type) {
 			case "toggle": {
-				newToggle(setting, block);
+				settingElem = newToggle(setting);
 				break;
 			}
 			case "text": {
-				newTextInput(setting, block);
+				settingElem = newTextInput(setting);
 				break;
 			}
 			case "dropdown": {
-				newDropdown(setting, block);
+				settingElem = newDropdown(setting);
 				break;
 			}
 			case "button": {
-				newButton(setting, block);
+				settingElem = newButton(setting);
 				break;
 			}
 			case "profilePicture": {
-				newProfilePictureButton(setting, block);
+				settingElem = newProfilePictureButton(setting);
 				break;
 			}
 			case "centerButton": {
-				let button = document.createElement("button");
-				button.id = setting.id + "Button";
+				settingElem = document.createElement("button");
+				settingElem.id = setting.id + "Button";
 				if (setting.action) {
-					button.addEventListener("click", setting.action);
+					settingElem.addEventListener("click", setting.action);
 				}
-				block.appendChild(button);
 				break;
 			}
 			case "language": {
-				newDropdown(setting, block);
-				languageSelector.addEventListener("change", function() {
+				settingElem = newDropdown(setting);
+				settingElem.querySelector("select").addEventListener("change", function() {
 					setLanguage(this.value);
 				});
-				languageSelector.parentElement.id = "languageSelectorDiv";
-				let warningDiv = document.createElement("div");
+				settingElem.id = "languageSelectorDiv";
+				const warningDiv = document.createElement("div");
 				warningDiv.id = "languageWarnings";
-				languageSelector.parentElement.appendChild(warningDiv);
+				settingElem.appendChild(warningDiv);
 				break;
 			}
 		}
+		if (setting.isDevOption) {
+			settingElem.classList.add("devOption");
+		}
+		block.appendChild(settingElem);
 	}
+}
+if (localStorage.getItem("devMode") !== "true") {
+	document.body.classList.add("hideDevOptions")
 }
 themeSelector.addEventListener("change", function() {
 	applyTheme(this.value);
@@ -303,6 +317,7 @@ customFontInput.addEventListener("change", function() {
 });
 updateCustomFontInputDiv();
 setLanguage(languageSelector.value);
+
 for (const [name, hotkey] of Object.entries(JSON.parse(localStorage.getItem("hotkeys")))) {
 	document.getElementById(name + "Button").classList.add("keybind");
 }
@@ -411,7 +426,7 @@ async function setLanguage(language) {
 	document.documentElement.removeAttribute("aria-busy");
 }
 
-function newToggle(setting, block) {
+function newToggle(setting) {
 	let holder = document.createElement("div");
 	let input = document.createElement("input");
 	input.type = "checkbox";
@@ -419,6 +434,9 @@ function newToggle(setting, block) {
 	input.checked = localStorage.getItem(setting.id) === "true";
 	input.addEventListener("change", function() {
 		localStorage.setItem(setting.id, this.checked);
+		if (setting.id === "devMode") {
+			document.body.classList.toggle("hideDevOptions");
+		}
 	});
 	let label = document.createElement("label");
 	label.id = setting.id + "Label";
@@ -426,10 +444,10 @@ function newToggle(setting, block) {
 	holder.appendChild(input);
 	holder.appendChild(document.createTextNode(" "));
 	holder.appendChild(label);
-	block.appendChild(holder);
+	return holder;
 }
 
-function newTextInput(setting, block) {
+function newTextInput(setting) {
 	const holder = document.createElement("div");
 	const input = document.createElement("input");
 	input.type = "text";
@@ -446,10 +464,10 @@ function newTextInput(setting, block) {
 	label.htmlFor = input.id;
 	holder.appendChild(label);
 	holder.appendChild(input);
-	block.appendChild(holder);
+	return holder;
 }
 
-function newDropdown(setting, block) {
+function newDropdown(setting) {
 	let holder = document.createElement("div");
 	let select = document.createElement("select");
 	select.id = setting.id + "Selector";
@@ -464,10 +482,10 @@ function newDropdown(setting, block) {
 	label.htmlFor = select.id;
 	holder.appendChild(label);
 	holder.appendChild(select);
-	block.appendChild(holder);
+	return holder;
 }
 
-function newButton(setting, block) {
+function newButton(setting) {
 	let holder = document.createElement("div");
 	let button = document.createElement("button");
 	button.id = setting.id + "Button";
@@ -480,10 +498,10 @@ function newButton(setting, block) {
 	label.htmlFor = button.id;
 	holder.appendChild(label);
 	holder.appendChild(button);
-	block.appendChild(holder);
+	return holder;
 }
 
-function newProfilePictureButton(setting, block) {
+function newProfilePictureButton(setting) {
 	let holder = document.createElement("div");
 	let button = document.createElement("button");
 	button.id = setting.id + "Button";
@@ -501,5 +519,5 @@ function newProfilePictureButton(setting, block) {
 	label.htmlFor = button.id;
 	holder.appendChild(label);
 	holder.appendChild(button);
-	block.appendChild(holder);
+	return holder;
 }

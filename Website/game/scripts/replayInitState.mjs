@@ -21,7 +21,7 @@ export class ReplayInitState extends GameState {
 
 		generalUI.init();
 		gameDiv.hidden = false;
-		window.parent.postMessage({type: "gameStarted"});
+		callingWindow.postMessage({type: "gameStarted"});
 
 		// deck selection elements aren't needed anymore.
 		deckDropzone.remove();

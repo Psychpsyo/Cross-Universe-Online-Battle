@@ -1071,7 +1071,7 @@ function finishGame(message, subtitle) {
 }
 
 leaveGameBtn.addEventListener("click", () => {
-	window.parent.postMessage({type: "leaveGame"});
+	callingWindow.postMessage({type: "leaveGame"});
 	netSend("[leave]");
 });
 showFieldBtn.addEventListener("click", function() {
