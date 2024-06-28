@@ -250,7 +250,7 @@ class User {
 
 		this.name = name;
 		// potentially add number to name to disambiguate between people with the same name
-		for (let i = 2; currentLobby && currentLobby.users.find(user => user.name === this.name); i++) {
+		for (let i = 2; currentLobby && currentLobby.users.some(user => user.name === this.name); i++) {
 			this.name = `${name} (${i})`;
 		}
 		this.profilePicture = profilePicture;

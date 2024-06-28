@@ -248,7 +248,7 @@ export class DeckState extends GameState {
 	}
 
 	checkReadyConditions() {
-		if (!players.find(player => player.deck == null)) {
+		if (players.every(player => player.deck !== null)) {
 			if (!this.ready) {
 				netSend("[ready]");
 				this.ready = true;

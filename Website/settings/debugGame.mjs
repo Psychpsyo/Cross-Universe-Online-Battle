@@ -12,7 +12,7 @@ export class DebugAI extends AI {
 		}
 
 		// Skip the battle phase
-		if (optionList.find(r => r.type === "enterBattlePhase")) {
+		if (optionList[0].type === "enterBattlePhase") {
 			return {type: "enterBattlePhase", value: false};
 		}
 

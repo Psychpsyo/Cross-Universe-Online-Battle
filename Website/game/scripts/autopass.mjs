@@ -63,7 +63,7 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 	}
 
 	// passing
-	if (!requests.find(request => request.type === "pass")) return null;
+	if (!requests.some(request => request.type === "pass")) return null;
 	if (alwaysPass) return {type: "pass"};
 
 	// passing on no real options (only retiring partners, casting spells from a selection of 0 and so on)
@@ -76,12 +76,12 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 	const player = requests[0].player;
 	if (importantRequests == 0 &&
 		// Either using hidden info is allowed or the player's hand has no cards that are hidden from any other player
-		(useHiddenInfo || player.handZone.cards.find(card => {
+		(useHiddenInfo || !player.handZone.cards.some(card => {
 			for (const hiddenFor of card.hiddenFor) {
 				if (hiddenFor !== player) return true;
 			}
 			return false;
-		}) === undefined)) {
+		}))) {
 		return {type: "pass"};
 	}
 
@@ -90,7 +90,7 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 		const currentStack = game.currentStack();
 		if (currentStack.index === 1 &&
 			currentStack.blocks.length === 1 &&
-			!currentStack.blocks.find(block => block.player !== requests[0].player)
+			!currentStack.blocks.some(block => block.player !== requests[0].player)
 		) {
 			return {type: "pass"};
 		}
@@ -142,8 +142,8 @@ function isImportant(request, game) {
 	if (localStorage.getItem("passOnStackTwo") === "true") {
 		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
 			if (request.type != "activateTriggerAbility" &&
-				(request.type != "castSpell" || request.eligibleSpells.find(isSpellItemTriggered) === undefined) &&
-				(request.type != "deployItem" || request.eligibleItems.find(isSpellItemTriggered) === undefined)
+				(request.type != "castSpell" || !request.eligibleSpells.some(isSpellItemTriggered)) &&
+				(request.type != "deployItem" || !request.eligibleItems.some(isSpellItemTriggered))
 			) {
 				return false;
 			}
@@ -151,7 +151,7 @@ function isImportant(request, game) {
 	}
 
 	let currentPhase = game.currentPhase();
-	if (currentStack.blocks.find(block => !(block instanceof blocks.StandardDraw)) === undefined &&
+	if (currentStack.blocks.every(block => block instanceof blocks.StandardDraw) &&
 		(((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||
 		((currentPhase instanceof phases.EndPhase) && localStorage.getItem("passInEndPhase") === "true") ||
 		((currentPhase instanceof phases.BattlePhase) && localStorage.getItem("passInBattlePhase") === "true" && currentStack.index === 1))
