@@ -6,6 +6,7 @@ import {netSend} from "./netcode.mjs";
 import * as autopass from "./autopass.mjs";
 import {BaseCard} from "../../rulesEngine/src/card.mjs";
 import {Player} from "../../rulesEngine/src/player.mjs";
+import {InputRequest} from "../../rulesEngine/src/inputRequests.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as autoUI from "./automaticUI.mjs";
 import * as generalUI from "./generalUI.mjs";
@@ -73,63 +74,59 @@ export class AutomaticController extends InteractionController {
 
 		while (!updates.done) {
 			let returnValue;
-			switch (updates.value[0].nature) {
-				case "event": {
-					const groupedEvents = Object.groupBy(updates.value, event => event.type);
-					await Promise.all(Object.entries(groupedEvents).map(keyValue => this.handleEvents(keyValue[0], keyValue[1])));
-					break;
+			if (updates.value[0] instanceof InputRequest) {
+				// This code is way more general than it needs to be since there is never cases where both players need to act at the same time.
+				const localRequests = [];
+				const playerPromises = [];
+				for (let i = 0; i < game.players.length; i++) {
+					playerPromises.push([]);
 				}
-				case "request": {
-					// This code is way more general than it needs to be since there is never cases where both players need to act at the same time.
-					const localRequests = [];
-					const playerPromises = [];
-					for (let i = 0; i < game.players.length; i++) {
-						playerPromises.push([]);
-					}
-					for (let request of updates.value) {
-						if (request.player === localPlayer) {
-							localRequests.push(request);
-						} else {
-							playerPromises[request.player.index].push(this.presentInputRequest(request));
-						}
-					}
-
-					const autoResponse = passModeSelect.value === "never"? null : autopass.getAutoResponse(
-						game,
-						localRequests,
-						passModeSelect.value.startsWith("until"),
-						localStorage.getItem("usePrivateInfoForAutopass")
-					);
-					if (autoResponse) {
-						netSend("[inputRequestResponse]" + JSON.stringify(autoResponse));
-						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
+				for (let request of updates.value) {
+					if (request.player === localPlayer) {
+						localRequests.push(request);
 					} else {
-						playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
+						playerPromises[request.player.index].push(this.presentInputRequest(request));
 					}
-
-					const responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
-
-					returnValue = responsePromises.map(promise => promise.value).filter(value => value !== undefined)[0];
-
-					autoUI.clearYourMove();
-					autoUI.clearOpponentAction();
-					this.waitingForOpponentInput = false;
-					for (const playerInfo of this.playerInfos) {
-						playerInfo.canStandardSummon = [];
-						playerInfo.canDeploy = [];
-						playerInfo.canCast = [];
-						playerInfo.canRetire = [];
-					}
-					for (const button of this.unitAttackButtons) {
-						button.parentElement.classList.remove("visible");
-						button.remove();
-					}
-					this.canDeclareToAttack = [];
-					this.unitAttackButtons = [];
-					this.declaredAttackers = [];
-					attackBtn.disabled = true;
-					break;
 				}
+
+				const autoResponse = passModeSelect.value === "never"? null : autopass.getAutoResponse(
+					game,
+					localRequests,
+					passModeSelect.value.startsWith("until"),
+					localStorage.getItem("usePrivateInfoForAutopass")
+				);
+				if (autoResponse) {
+					netSend("[inputRequestResponse]" + JSON.stringify(autoResponse));
+					playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
+				} else {
+					playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
+				}
+
+				const responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
+
+				returnValue = responsePromises.map(promise => promise.value).filter(value => value !== undefined)[0];
+
+				autoUI.clearYourMove();
+				autoUI.clearOpponentAction();
+				this.waitingForOpponentInput = false;
+				for (const playerInfo of this.playerInfos) {
+					playerInfo.canStandardSummon = [];
+					playerInfo.canDeploy = [];
+					playerInfo.canCast = [];
+					playerInfo.canRetire = [];
+				}
+				for (const button of this.unitAttackButtons) {
+					button.parentElement.classList.remove("visible");
+					button.remove();
+				}
+				this.canDeclareToAttack = [];
+				this.unitAttackButtons = [];
+				this.declaredAttackers = [];
+				attackBtn.disabled = true;
+			} else {
+				// we got events instead
+				const groupedEvents = Object.groupBy(updates.value, event => event.type);
+				await Promise.all(Object.entries(groupedEvents).map(keyValue => this.handleEvents(keyValue[0], keyValue[1])));
 			}
 
 			try {
@@ -322,29 +319,29 @@ export class AutomaticController extends InteractionController {
 			}
 			case "playerWon": {
 				gameUI.playerWon(events[0].player);
-				window.parent.postMessage({type: "playerWon", players: [events[0].player.index]});
+				callingWindow.postMessage({type: "playerWon", players: [events[0].player.index]});
 				return;
 			}
 			case "gameDrawn": {
 				gameUI.gameDrawn();
-				window.parent.postMessage({type: "gameDrawn"});
+				callingWindow.postMessage({type: "gameDrawn"});
 				return;
 			}
 			case "damageDealt": {
 				await Promise.all(events.map(async event => {
-					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, this.gameSpeed);
 				}));
 				return this.gameSleep();
 			}
 			case "lifeChanged": {
 				await Promise.all(events.map(async event => {
-					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, this.gameSpeed);
 				}));
 				return this.gameSleep();
 			}
 			case "manaChanged": {
 				await Promise.all(events.map(async event => {
-					return gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
+					return gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, this.gameSpeed);
 				}));
 				return this.gameSleep();
 			}
@@ -355,7 +352,7 @@ export class AutomaticController extends InteractionController {
 					if (event.object instanceof BaseCard) {
 						generalUI.updateCardPreview(event.object);
 						if (["attack", "defense"].includes(event.valueName) && !objects.includes(event.object)) {
-							changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.object, false));
+							changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.object, this.gameSpeed));
 							objects.push(event.object);
 						}
 					} else if (event.object instanceof Player) {
@@ -407,7 +404,7 @@ export class AutomaticController extends InteractionController {
 			case "cardMoved": {
 				chat.putMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", autoUI.chatCards(events.map(event => event.card)));
 				for (const event of events) {
-					gameUI.removeCard(event.card.zone, event.card.index);
+					gameUI.removeCard(event.card.zone ?? event.card.placedTo, event.card.index);
 					autoUI.removeCardAttackDefenseOverlay(event.card);
 					if (!event.card.isToken || event.toZone instanceof zones.FieldZone) {
 						gameUI.insertCard(event.toZone, event.toIndex);
@@ -622,7 +619,7 @@ export class AutomaticController extends InteractionController {
 						title = locale.game.cardChoice[request.reason.substring(0, request.reason.indexOf(":"))]?.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name) ?? locale.game.cardChoice.genericTitle;
 					}
 				}
-				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts, request.validate);
+				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts, request);
 				break;
 			}
 			case "choosePlayer": {
@@ -638,14 +635,16 @@ export class AutomaticController extends InteractionController {
 			case "chooseAbility": {
 				response.value = await autoUI.promptDropdownSelection(
 					locale.game.automatic.effectSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
-					(await Promise.allSettled(request.from.map(abilityId => cardLoader.getAbilityText(abilityId)))).map(promise => promise.value)
+					(await Promise.allSettled(request.from.map(abilityId => cardLoader.getAbilityText(abilityId)))).map(promise => promise.value),
+					request
 				);
 				break;
 			}
 			case "chooseType": {
 				response.value = await autoUI.promptDropdownSelection(
 					locale.game.automatic.typeSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
-					request.from.map(type => locale.types[type])
+					request.from.map(type => locale.types[type]),
+					request
 				);
 				break;
 			}
@@ -863,6 +862,7 @@ export class AutomaticController extends InteractionController {
 				break;
 			}
 		}
+
 		this.madeMoveTarget.dispatchEvent(new CustomEvent("move"));
 		netSend("[inputRequestResponse]" + JSON.stringify(response));
 		return response;

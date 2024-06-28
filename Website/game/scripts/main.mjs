@@ -29,6 +29,11 @@ window.players = [
 	}
 ];
 
+// returns the window that messages should be posted to.
+// For iframes, this is the parent window.
+// For other windows, this is the opener.
+window.callingWindow = window.parent !== window? window.parent : window.opener;
+
 // handle hotkeys
 document.addEventListener("keydown", async function(e) {
 	for (const [name, hotkey] of Object.entries(hotkeys)) {
@@ -90,4 +95,4 @@ window.addEventListener("message", e => {
 	}
 });
 
-window.parent.postMessage({type: "ready"});
+callingWindow.postMessage({type: "ready"});

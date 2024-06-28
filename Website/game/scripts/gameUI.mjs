@@ -856,18 +856,20 @@ export class UiValue {
 		this.value = initial;
 		this.targetValue = initial;
 		this.counter = 0;
-		this.speed = speed;
+		this.baseSpeed = speed;
+		this.speed = speed; // the speed with multiplier applied
 		this.displayElem = displayElem;
 		uiValues.push(this);
 	}
 
-	async set(value, instant) {
+	async set(value, speedMultiplier = 1) {
 		if (value != this.value) {
 			this.targetValue = value;
-			if (instant) {
+			if (speedMultiplier === Infinity) {
 				this.value = value;
 				this.displayElem.textContent = this.value;
 			} else {
+				this.speed = this.baseSpeed * speedMultiplier;
 				this.displayElem.classList.add(value < this.value? "valueDown" : "valueUp");
 				return new Promise(resolve => setTimeout(resolve, Math.abs(this.targetValue - this.value) * this.speed));
 			}
@@ -935,7 +937,7 @@ function animate(currentTime) {
 }
 
 // card choice modal (blocking card selector)
-export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1], validate = () => true) {
+export async function presentCardChoice(cards, title, matchFunction = () => true, validAmounts = [1], request = null) {
 	return new Promise(resolve => {
 		let validOptions = 0;
 		let currentGrid;
@@ -961,7 +963,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 			if (matchFunction(cards[i])) {
 				validOptions++;
 				cardImg.dataset.selectionIndex = i;
-				cardImg.addEventListener("click", function(e) {
+				cardImg.addEventListener("click", async function(e) {
 					e.stopPropagation();
 					previewCard(cards[i]);
 					if (this.classList.toggle("cardHighlight")) {
@@ -973,12 +975,15 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 							}
 							cardChoiceSelected = [];
 						}
-						cardChoiceSelected.push(this.dataset.selectionIndex);
+						cardChoiceSelected.push(parseInt(this.dataset.selectionIndex));
 					} else {
-						cardChoiceSelected.splice(cardChoiceSelected.indexOf(this.dataset.selectionIndex), 1);
+						cardChoiceSelected.splice(cardChoiceSelected.indexOf(parseInt(this.dataset.selectionIndex)), 1);
 					}
 					cardChoiceConfirm.disabled = !validAmounts.includes(cardChoiceSelected.length) ||
-												 !validate(cardChoiceSelected.map(index => cards[index]));
+												 (await request?.validate({
+													type: "chooseCards",
+													value: cardChoiceSelected
+												 }) ?? "") !== "";
 				});
 			} else {
 				cardImg.classList.add("unselectableCard");
@@ -1071,7 +1076,7 @@ function finishGame(message, subtitle) {
 }
 
 leaveGameBtn.addEventListener("click", () => {
-	window.parent.postMessage({type: "leaveGame"});
+	callingWindow.postMessage({type: "leaveGame"});
 	netSend("[leave]");
 });
 showFieldBtn.addEventListener("click", function() {

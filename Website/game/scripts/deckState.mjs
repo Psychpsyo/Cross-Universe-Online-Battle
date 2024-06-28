@@ -73,18 +73,18 @@ async function addDecksToDeckSelector(deckList) {
 }
 
 export class DeckState extends GameState {
-	constructor(automatic) {
+	constructor(automatic, isSinglePlayer = false) {
 		super();
+		this.automatic = automatic;
+		this.isSinglePlayer = isSinglePlayer;
+		this.ready = false;
+		this.opponentReady = false;
 
 		fetch("./data/deckList.json")
 		.then(response => response.json())
 		.then(decks => {
 			builtInDecks = decks;
 		});
-
-		this.automatic = automatic;
-		this.ready = false;
-		this.opponentReady = false;
 
 		//loading custom decks from file
 		document.getElementById("deckDropzone").addEventListener("drop", function(e) {
@@ -173,8 +173,19 @@ export class DeckState extends GameState {
 	async loadDeck(deck) {
 		gameUI.showBlackoutMessage(locale.game.deckSelect.loadingDeck);
 		loadingIndicator.classList.add("active");
+		const cdfList = await cardLoader.deckToCdfList(deck, this.automatic, localPlayer);
 		try {
-			localPlayer.setDeck(await cardLoader.deckToCdfList(deck, this.automatic, localPlayer));
+			localPlayer.setDeck(cdfList); // this will throw an error if the deck is invalid
+			players[localPlayer.index].deck = deck;
+			if (this.isSinglePlayer) {
+				for (let i = 0; i < players.length; i++) {
+					if (!players[i].deck) {
+						game.players[i].setDeck(cdfList);
+						players[i].deck = deck;
+					}
+				}
+				this.opponentReady = true;
+			}
 		} catch (e) {
 			switch (true) {
 				case e instanceof cardLoader.UnsupportedCardError: {
@@ -225,9 +236,8 @@ export class DeckState extends GameState {
 		deckDropzone.remove();
 		deckSelector.classList.add("deckListDisable");
 
-		// sync and load the deck
+		// sync the deck
 		netSend("[deck]" + JSON.stringify(deck));
-		players[localPlayer.index].deck = deck;
 
 		gameUI.updateCard(localPlayer.deckZone, -1);
 		gameUI.showBlackoutMessage(locale.game.deckSelect.waitingForOpponent);
@@ -238,7 +248,7 @@ export class DeckState extends GameState {
 	}
 
 	checkReadyConditions() {
-		if (!players.find(player => player.deck == null)) {
+		if (players.every(player => player.deck !== null)) {
 			if (!this.ready) {
 				netSend("[ready]");
 				this.ready = true;

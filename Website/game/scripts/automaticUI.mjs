@@ -316,13 +316,14 @@ export function clearOpponentAction() {
 	opponentActionDisplay.classList.remove("shown");
 }
 
-export async function promptDropdownSelection(message, options) {
+export async function promptDropdownSelection(message, options, request) {
 	typeSelectPopupText.textContent = message;
 	typePopupSelection.innerHTML = "";
 	for (let i = 0; i < options.length; i++) {
-		let option = document.createElement("option");
+		const option = document.createElement("option");
 		option.value = i;
 		option.textContent = options[i];
+		option.disabled = await request.validate({type: request.type, value: i}) !== "";
 		typePopupSelection.add(option);
 	}
 	typeSelectPopup.showModal();
@@ -330,7 +331,7 @@ export async function promptDropdownSelection(message, options) {
 	return new Promise(resolve => {
 		typePopupConfirm.addEventListener("click", function() {
 			typeSelectPopup.close();
-			resolve(typePopupSelection.value);
+			resolve(parseInt(typePopupSelection.value));
 		}, {once: true});
 	});
 }
@@ -449,8 +450,8 @@ export async function showCardSwap(cardA, cardB) {
 		}
 	}
 	return Promise.all([
-		updateCardAttackDefenseOverlay(cardA.current(), true),
-		updateCardAttackDefenseOverlay(cardB.current(), true)
+		updateCardAttackDefenseOverlay(cardA.current()),
+		updateCardAttackDefenseOverlay(cardB.current())
 	]);
 }
 
@@ -494,14 +495,14 @@ export function removeCardAttackDefenseOverlay(card) {
 	attackUiValues.delete(slot);
 	defenseUiValues.delete(slot);
 }
-export async function updateCardAttackDefenseOverlay(card, instant) {
+export async function updateCardAttackDefenseOverlay(card, speed = Infinity) {
 	if (!(card.zone instanceof FieldZone)) {
 		return;
 	}
 	const slot = document.getElementById("field" + gameUI.fieldSlotIndexFromZone(card.zone, card.index)).parentElement;
 	return Promise.all([
-		attackUiValues.get(slot).set(card.values.current.attack, instant),
-		defenseUiValues.get(slot).set(card.values.current.defense, instant)
+		attackUiValues.get(slot).set(card.values.current.attack, speed),
+		defenseUiValues.get(slot).set(card.values.current.defense, speed)
 	]);
 }
 

@@ -726,7 +726,8 @@
 			"cardImageUrlTitle": null,
 			"cardDataApiUrl": null,
 			"cardDataApiUrlTitle": null,
-			"devMode": null
+			"devMode": null,
+			"startDebugGame": null
 		}
 	},
 

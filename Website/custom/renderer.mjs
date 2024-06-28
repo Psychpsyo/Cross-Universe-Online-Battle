@@ -1,7 +1,7 @@
 import {locale} from "../scripts/locale.mjs";
 
 function loadImage(imageUrl) {
-	return new Promise((resolve, reject) => {
+	return new Promise(resolve => {
 		let img = new Image();
 		img.addEventListener("load", function() {
 			resolve(img);
@@ -100,7 +100,6 @@ function formatEffectText(content, indent, fontSize, blockParent, ctx, bracketCo
 }
 
 async function renderCard(card, canvas) {
-	let language = localStorage.getItem("language");
 	canvas.width = 813;
 	canvas.height = 1185;
 	let ctx = canvas.getContext("2d");
@@ -114,7 +113,7 @@ async function renderCard(card, canvas) {
 	// write level
 	ctx.font = "39pt 'Yu Mincho'";
 	ctx.textAlign = "center";
-	ctx.fillText(card.level < 0? "？" : card.level, 684 + (card.level > 99? 10 : 0), 135);
+	ctx.fillText(card.level < 0? "？" : card.level, 684 + (card.level > 99? 10 : 0), 142);
 
 	// write name
 	let fontSize = 49;
@@ -123,9 +122,9 @@ async function renderCard(card, canvas) {
 		fontSize--;
 		ctx.font = fontSize + "px 'Yu Mincho'";
 	}
-	ctx.fillText(card.name, 108, 135);
+	ctx.fillText(card.name, 108, 142);
 
-	// write type
+	// write types
 	let typeString = card.types.map(type => locale["types"][type]).join(locale["typeSeparator"]);
 	fontSize = 49;
 	ctx.font = fontSize + "px 'Yu Mincho'";
@@ -133,8 +132,8 @@ async function renderCard(card, canvas) {
 		fontSize--;
 		ctx.font = fontSize + "px 'Yu Mincho'";
 	}
-	ctx.textBaseline = "middle";
-	ctx.fillText(typeString, 108, 676);
+	const aHeight = ctx.measureText("A").fontBoundingBoxAscent;
+	ctx.fillText(typeString, 108, 669 + aHeight / 2);
 
 	// write text box
 	fontSize = 28;

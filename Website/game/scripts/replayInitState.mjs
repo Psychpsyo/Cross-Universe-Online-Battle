@@ -21,7 +21,12 @@ export class ReplayInitState extends GameState {
 
 		generalUI.init();
 		gameDiv.hidden = false;
-		window.parent.postMessage({type: "gameStarted"});
+		callingWindow.postMessage({type: "gameStarted"});
+
+		// if this is an error replay from testing, print the crash reason
+		if (replay.extra.crashReason) {
+			chat.putMessage(replay.extra.crashReason, "error");
+		}
 
 		// deck selection elements aren't needed anymore.
 		deckDropzone.remove();

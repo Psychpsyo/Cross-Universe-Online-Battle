@@ -7,11 +7,9 @@ import {GameState} from "./gameState.mjs";
 import {Game} from "../../rulesEngine/src/game.mjs";
 
 export class SingleplayerInitState extends GameState {
-	constructor(decks, replay = null, useOldManaRule = false) {
+	constructor(decks = [null, null], replay = null, useOldManaRule = false) {
 		super();
 		loadingIndicator.classList.add("active");
-		deckDropzone.remove();
-		deckSelector.classList.add("deckListDisable");
 
 		game = new Game();
 		game.config.useOldManaRule = useOldManaRule;
@@ -33,26 +31,31 @@ export class SingleplayerInitState extends GameState {
 		// switch to game view
 		generalUI.init();
 		gameDiv.hidden = false;
-		window.parent.postMessage({type: "gameStarted"});
+		callingWindow.postMessage({type: "gameStarted"});
 
-		// set decks and start game
-		players[0].deck = decks[0];
-		cardLoader.deckToCdfList(decks[0], true, game.players[0]).then(async cdfList => {
-			game.players[0].setDeck(cdfList);
+		(async () => {
+			// set decks
+			for (let i = 0; i < decks.length; i++) {
+				const deck = decks[i] ?? decks[1]; // opponents default to player deck, if given
+				if (!deck) continue;
+				players[i].deck = deck;
+				// TODO: load these simultaneously
+				const cdfList = await cardLoader.deckToCdfList(deck, true, game.players[i]);
+				game.players[i].setDeck(cdfList);
+			}
 
+			// start game
 			if (decks[1] === null) {
-				new DeckState(true);
+				new DeckState(true, true);
 			} else {
-				players[1].deck = decks[1];
-				localPlayer.setDeck(await cardLoader.deckToCdfList(decks[1], true, localPlayer));
+				deckDropzone.remove();
+				deckSelector.classList.add("deckListDisable");
 				playerDeckButton1.disabled = false;
 				mainGameArea.hidden = false;
 				gameUI.init();
 				new BoardState(true);
-				const aiPartnerPosInDeck = game.players[0].deckZone.cards.findIndex(card => {return card.cardId === players[0].deck.suggestedPartner});
-				gameState.setPartner(game.players[0], aiPartnerPosInDeck);
 			}
 			loadingIndicator.classList.remove("active");
-		});
+		})();
 	}
 }

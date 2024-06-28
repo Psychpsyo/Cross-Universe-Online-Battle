@@ -85,7 +85,7 @@ export class OnlineInitState extends GameState {
 		// switch to game view
 		generalUI.init();
 		gameDiv.hidden = false;
-		window.parent.postMessage({type: "gameStarted"});
+		callingWindow.postMessage({type: "gameStarted"});
 
 		// Start game
 		switch (this.gameMode) {
