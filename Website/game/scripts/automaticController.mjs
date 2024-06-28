@@ -332,19 +332,19 @@ export class AutomaticController extends InteractionController {
 			}
 			case "damageDealt": {
 				await Promise.all(events.map(async event => {
-					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, this.gameSpeed);
 				}));
 				return this.gameSleep();
 			}
 			case "lifeChanged": {
 				await Promise.all(events.map(async event => {
-					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, false);
+					return gameUI.uiPlayers[event.player.index].life.set(event.player.life, this.gameSpeed);
 				}));
 				return this.gameSleep();
 			}
 			case "manaChanged": {
 				await Promise.all(events.map(async event => {
-					return gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, false);
+					return gameUI.uiPlayers[event.player.index].mana.set(event.player.mana, this.gameSpeed);
 				}));
 				return this.gameSleep();
 			}
@@ -355,7 +355,7 @@ export class AutomaticController extends InteractionController {
 					if (event.object instanceof BaseCard) {
 						generalUI.updateCardPreview(event.object);
 						if (["attack", "defense"].includes(event.valueName) && !objects.includes(event.object)) {
-							changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.object, false));
+							changeAnimPromises.push(autoUI.updateCardAttackDefenseOverlay(event.object, this.gameSpeed));
 							objects.push(event.object);
 						}
 					} else if (event.object instanceof Player) {

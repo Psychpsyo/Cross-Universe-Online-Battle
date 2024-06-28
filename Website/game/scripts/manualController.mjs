@@ -352,7 +352,7 @@ export class ManualController extends InteractionController {
 		if (player === localPlayer) {
 			netSend("[life]" + localPlayer.life);
 		}
-		await gameUI.uiPlayers[player.index].life.set(value, false);
+		await gameUI.uiPlayers[player.index].life.set(value);
 		if (value === 0) {
 			const winner = player.next();
 			winner.victoryConditions.push("lifeZero");
@@ -366,7 +366,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		player.mana = value;
-		gameUI.uiPlayers[player.index].mana.set(value, true);
+		gameUI.uiPlayers[player.index].mana.set(value, Infinity);
 		if (player === localPlayer) {
 			netSend("[mana]" + localPlayer.mana);
 		}

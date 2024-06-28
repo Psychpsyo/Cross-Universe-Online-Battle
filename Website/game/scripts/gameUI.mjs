@@ -856,18 +856,20 @@ export class UiValue {
 		this.value = initial;
 		this.targetValue = initial;
 		this.counter = 0;
-		this.speed = speed;
+		this.baseSpeed = speed;
+		this.speed = speed; // the speed with multiplier applied
 		this.displayElem = displayElem;
 		uiValues.push(this);
 	}
 
-	async set(value, instant) {
+	async set(value, speedMultiplier = 1) {
 		if (value != this.value) {
 			this.targetValue = value;
-			if (instant) {
+			if (speedMultiplier === Infinity) {
 				this.value = value;
 				this.displayElem.textContent = this.value;
 			} else {
+				this.speed = this.baseSpeed * speedMultiplier;
 				this.displayElem.classList.add(value < this.value? "valueDown" : "valueUp");
 				return new Promise(resolve => setTimeout(resolve, Math.abs(this.targetValue - this.value) * this.speed));
 			}
