@@ -1,16 +1,25 @@
+// All the necessary stuff to start a game against a do-nothing AI.
+
 import {AI} from "../rulesEngine/src/aiSystems/ai.mjs";
 
 export class DebugAI extends AI {
 	async selectMove(optionList, player) {
+		// Pass if you can
 		for (const option of optionList) {
 			if (option.type === "pass") {
 				return {type: "pass"};
 			}
 		}
 
+		// Skip the battle phase
+		if (optionList.find(r => r.type === "enterBattlePhase")) {
+			return {type: "enterBattlePhase", value: false};
+		}
+
+		// Just pick the first valid choice otherwise
 		return {
 			type: optionList[0].type,
-			value: await optionList[0].generateValidResponses().next()
+			value: (await optionList[0].generateValidResponses().next()).value
 		}
 	}
 }
@@ -22,7 +31,6 @@ export function startDebugGame() {
 }
 
 window.addEventListener("message", e => {
-	console.log(e);
 	if (!debugGameWindows.includes(e.source)) return;
 
 	switch (e.data.type) {

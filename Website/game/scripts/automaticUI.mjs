@@ -316,13 +316,14 @@ export function clearOpponentAction() {
 	opponentActionDisplay.classList.remove("shown");
 }
 
-export async function promptDropdownSelection(message, options) {
+export async function promptDropdownSelection(message, options, request) {
 	typeSelectPopupText.textContent = message;
 	typePopupSelection.innerHTML = "";
 	for (let i = 0; i < options.length; i++) {
-		let option = document.createElement("option");
+		const option = document.createElement("option");
 		option.value = i;
 		option.textContent = options[i];
+		option.disabled = await request.validate({type: request.type, value: i}) !== "";
 		typePopupSelection.add(option);
 	}
 	typeSelectPopup.showModal();
@@ -330,7 +331,7 @@ export async function promptDropdownSelection(message, options) {
 	return new Promise(resolve => {
 		typePopupConfirm.addEventListener("click", function() {
 			typeSelectPopup.close();
-			resolve(typePopupSelection.value);
+			resolve(parseInt(typePopupSelection.value));
 		}, {once: true});
 	});
 }
