@@ -407,7 +407,8 @@ export class AutomaticController extends InteractionController {
 					gameUI.removeCard(event.card.zone ?? event.card.placedTo, event.card.index);
 					autoUI.removeCardAttackDefenseOverlay(event.card);
 					if (!event.card.isToken || event.toZone instanceof zones.FieldZone) {
-						gameUI.insertCard(event.toZone, event.toIndex);
+						// toIndex is null for exiles and discards since they always go to the top
+						gameUI.insertCard(event.toZone, event.toIndex ?? (event.toZone.cards.length - 1));
 						autoUI.addCardAttackDefenseOverlay(event.card.current());
 					}
 				}
