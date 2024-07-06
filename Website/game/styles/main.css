@@ -194,19 +194,18 @@ dialog #cardDetails {
 	display: flex;
 	white-space: nowrap;
 }
-#infoPanel > hr {
-	margin: 0;
-}
-.playerInfoSide {
+.playerInfo {
 	position: relative;
-	width: 50%;
+	width: 100%; /* makes these as wide as they can be */
 	padding: .6em;
 }
-#playerInfoSide0 {
+.playerInfo:not(:first-child) {
 	padding-left: .9em;
+	border-left: 1px var(--theme-border-color) solid;
 }
-#playerInfoSide1 {
+.playerInfo:not(:last-child) {
 	padding-right: .9em;
+	border-right: 1px var(--theme-border-color) solid;
 }
 .playerInfoHolder {
 	display: flex;
