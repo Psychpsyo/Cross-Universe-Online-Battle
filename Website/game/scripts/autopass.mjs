@@ -59,6 +59,18 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 			case "doStandardDraw": {
 				return {type: "doStandardDraw"}
 			}
+			// don't bother the player with optional effect sections that don't have their targets
+			case "doOptionalEffectSection": {
+				// TODO: ideally, we'd have access to the actual ScriptContext here to also take prior targets into account
+				//       Also, this might need to be reconsidered in case a multi-step optional section can have only some of its targets
+				if (!request.section.hasAllTargets(new ScriptContext(request.ability.card, requests[0].player, request.ability))) {
+					return {
+						type: "doOptionalEffectSection",
+						value: false
+					};
+				}
+				break;
+			}
 		}
 	}
 
@@ -99,11 +111,13 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 	return null;
 }
 
+// returns whether or not a request represents a meaningful choice for the player.
 function isImportant(request, game) {
 	switch (request.type) {
 		case "pass": {
 			return false;
 		}
+		// being able to play 0 of a card is unimportant.
 		case "doStandardSummon": {
 			if (request.eligibleUnits.length == 0) {
 				return false;
@@ -122,12 +136,14 @@ function isImportant(request, game) {
 			}
 			break;
 		}
+		// retiring your partner is unimportant
 		case "doRetire": {
 			if (request.eligibleUnits.length == 1 && request.eligibleUnits[0].zone.type == "partner") {
 				return false;
 			}
 			break;
 		}
+		// being able to activate 0 of a type of ability is unimportant
 		case "activateOptionalAbility":
 		case "activateFastAbility":
 		case "activateTriggerAbility": {
@@ -138,18 +154,19 @@ function isImportant(request, game) {
 		}
 	}
 
+	// On stack 2, only trigger abilities and conditional spells are important
 	const currentStack = game.currentStack();
 	if (localStorage.getItem("passOnStackTwo") === "true") {
 		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
 			if (request.type != "activateTriggerAbility" &&
-				(request.type != "castSpell" || !request.eligibleSpells.some(isSpellItemTriggered)) &&
-				(request.type != "deployItem" || !request.eligibleItems.some(isSpellItemTriggered))
+				(request.type != "castSpell" || !request.eligibleSpells.some(isSpellItemTriggered))
 			) {
 				return false;
 			}
 		}
 	}
 
+	// during the draw, battle, and end phase, only trigger abilities, conditional spells and attack declarations are important
 	let currentPhase = game.currentPhase();
 	if (currentStack.blocks.every(block => block instanceof blocks.StandardDraw) &&
 		(((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||

@@ -296,14 +296,14 @@ export async function activate(card) {
 	}
 }
 
-export async function revealHandCard(card) {
+export async function revealHandCard(card, duration) {
 	let cardImg = document.getElementById("hand" + card.currentOwner().index).children.item(card.index);
 	cardImg.classList.add("revealed");
 	cardImg.src = cardLoader.getCardImage(card);
 	if (card.currentOwner().index === 0) {
 		previewCard(card);
 	}
-	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1500));
+	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1500 * duration));
 	cardImg.src = cardLoader.getCardImage(card.current());
 	cardImg.classList.remove("revealed");
 }

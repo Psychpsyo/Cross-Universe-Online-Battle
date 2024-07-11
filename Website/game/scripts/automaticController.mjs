@@ -271,11 +271,11 @@ export class AutomaticController extends InteractionController {
 				await Promise.all(events.map(async event => {
 					switch (event.card.zone.type) {
 						case "hand": {
-							return autoUI.revealHandCard(event.card);
+							return autoUI.revealHandCard(event.card, events.length / 2);
 						}
 					}
 				}));
-				return this.gameSleep(events.length / 2);
+				return this.gameSleep();
 			}
 			case "cardViewed": {
 				let localPlayerViewed = events.filter(event => event.player === localPlayer);
@@ -285,11 +285,11 @@ export class AutomaticController extends InteractionController {
 				await Promise.all(events.map(async event => {
 					switch (event.card.zone.type) {
 						case "hand": {
-							return autoUI.revealHandCard(event.card);
+							return autoUI.revealHandCard(event.card, events.length / 2);
 						}
 					}
 				}));
-				return this.gameSleep(events.length / 2);
+				return this.gameSleep();
 			}
 			case "turnStarted": {
 				autoUI.startTurn();
@@ -570,6 +570,19 @@ export class AutomaticController extends InteractionController {
 					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingDeckSide.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
 					break;
 				}
+				case "applyActionModificationAbility": {
+					autoUI.showOpponentAction(locale.game.automatic.opponentActions.decidingOnModificationAbility
+						.replaceAll("{#CARD}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
+						.replaceAll("{#TARGET}", (await Promise.all(request.target.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
+					);
+					break;
+				}
+				case "doOptionalEffectSection": {
+					autoUI.showOpponentAction(locale.game.automatic.opponentActions.decidingOnOptionalbilitySection
+						.replaceAll("{#CARDNAME}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
+					);
+					break;
+				}
 			}
 
 			// If this is not directed at the local player, we might need to wait for an opponent input.
@@ -794,6 +807,15 @@ export class AutomaticController extends InteractionController {
 						.replaceAll("{#TARGET}", (await Promise.all(request.target.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
 					locale.game.automatic.modificationAbilityPrompt.yes,
 					locale.game.automatic.modificationAbilityPrompt.no
+				);
+				break;
+			}
+			case "doOptionalEffectSection": {
+				response.value = await gameUI.askQuestion(
+					locale.game.automatic.optionalAbilitySection.question
+						.replaceAll("{#CARDNAME}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					locale.game.automatic.optionalAbilitySection.yes,
+					locale.game.automatic.optionalAbilitySection.no
 				);
 				break;
 			}

@@ -422,6 +422,12 @@
 				"no": "Nein"
 			},
 
+			"optionalAbilitySection": {
+				"question": "Möchtest du den optionalen Teil von '{#CARDNAME}'s Effekt nutzen?",
+				"yes": "Ja",
+				"no": "Nein"
+			},
+
 			"orderSelect": {
 				"confirm": "Bestätigen",
 				"abilityPrompt": "Wähle, in welcher Reihenfolge diese Statischen Fähigkeiten auf '{#CARDNAME}' angewandt werden sollen:",
@@ -443,7 +449,9 @@
 
 				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
 				"selectingEffect": "Dein Gegner wählt einen Effekt für den Effekt von '{#CARDNAME}'.",
-				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'."
+				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'.",
+				"decidingOnModificationAbility": "Dein Gegner entscheidet, ob er die Fähigkeit von '{#CARD}' auf '{#TARGET}' anwenden möchte.",
+				"decidingOnOptionalbilitySection": "Dein Gegner entscheidet, ob er den optionalen Teil von '{#CARDNAME}'s Effekt nutzen möchte."
 			}
 		}
 	},
