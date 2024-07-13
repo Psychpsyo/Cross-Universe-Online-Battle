@@ -59,18 +59,6 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 			case "doStandardDraw": {
 				return {type: "doStandardDraw"}
 			}
-			// don't bother the player with optional effect sections that don't have their targets
-			case "doOptionalEffectSection": {
-				// TODO: ideally, we'd have access to the actual ScriptContext here to also take prior targets into account
-				//       Also, this might need to be reconsidered in case a multi-step optional section can have only some of its targets
-				if (!request.section.hasAllTargets(new ScriptContext(request.ability.card, requests[0].player, request.ability))) {
-					return {
-						type: "doOptionalEffectSection",
-						value: false
-					};
-				}
-				break;
-			}
 		}
 	}
 
