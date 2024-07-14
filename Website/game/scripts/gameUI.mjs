@@ -328,6 +328,7 @@ export function clearDragSource(zone, index, player) {
 export function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
 		netSend("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
+		document.documentElement.classList.add("localPlayerActiveGrab");
 		return true;
 	}
 	return false;
@@ -336,6 +337,7 @@ export function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
 			netSend("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
+			document.documentElement.classList.remove("localPlayerActiveGrab");
 		}
 		gameState.controller.dropCard(player, zone, index);
 	}

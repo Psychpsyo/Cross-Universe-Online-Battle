@@ -152,7 +152,7 @@ export function init() {
 				return;
 			}
 			e.stopPropagation();
-			let presentedZone = gameState.controller.playerInfos[player.index].presentedZone;
+			const presentedZone = gameState.controller.playerInfos[player.index].presentedZone;
 			gameUI.dropCard(localPlayer, presentedZone, presentedZone.cards.length);
 		});
 	}
