@@ -318,8 +318,8 @@ export class AutomaticController extends InteractionController {
 				return;
 			}
 			case "playerWon": {
-				gameUI.playerWon(events[0].player);
 				callingWindow.postMessage({type: "playerWon", players: [events[0].player.index]});
+				await gameUI.playerWon(events[0].player);
 				return;
 			}
 			case "gameDrawn": {

@@ -367,8 +367,8 @@ export class ManualController extends InteractionController {
 		if (value === 0) {
 			const winner = player.next();
 			winner.victoryConditions.push("lifeZero");
-			gameUI.playerWon(winner);
 			callingWindow.postMessage({type: "playerWon", players: [winner.index]});
+			await gameUI.playerWon(winner);
 		}
 	}
 	setMana(player, value) {
