@@ -11,25 +11,48 @@
 	display: block;
 }
 
+/* Presented Cards */
 .presentedCards {
 	position: absolute;
 	left: 50%;
-	transform: translateX(-50%);
+	transform: translate(-50%, -50%);
 	display: flex;
 	justify-content: center;
 	padding: .5vh 1vh;
-	height: 35%;
+	min-width: 16.3vh;
+	box-sizing: content-box;
+	min-height: 35%;
+	max-height: 35%;
 	border-radius: 1vh;
 	background-color: #0005;
 	gap: 1vh;
 	z-index: 75;
+	opacity: 1;
+
+	transition-duration: .1s;
+	transition-property: top, min-height, opacity;
+	transition-timing-function: ease-out;
+}
+
+:where(#presentedCards0) {
+	flex-direction: row-reverse;
+	top: 25%;
+}
+:where(#presentedCards1) {
+	top: 75%;
 }
 
 .presentedCards:empty {
-	display: none;
+	top: 50%;
+	min-height: 2.5vh;
+	opacity: 0;
+	pointer-events: none;
+}
+.localPlayerActiveGrab #presentedCards1:not(.presentedCardsDragSource) {
+	opacity: 1;
+	pointer-events: auto;
 }
 
-/* Presented Cards */
 .presentedCardsDragSource {
 	pointer-events: none;
 	opacity: 35%;
@@ -51,12 +74,4 @@
 
 .presentedCards img {
 	height: 100%;
-}
-
-#presentedCards0 {
-	flex-direction: row-reverse;
-	top: 13%;
-}
-#presentedCards1 {
-	top: 52%;
 }

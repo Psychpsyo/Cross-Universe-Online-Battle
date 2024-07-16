@@ -35,6 +35,13 @@ export async function callOpponent(isCaller) {
 
 	// add data channels
 	reliableChannel = peerConnection.createDataChannel("reliable data", {negotiated: true, id: 0});
+	const openPromise = new Promise(resolve => {
+		reliableChannel.addEventListener("open", () => {
+			console.log("channel open!");
+			netConnected = true;
+			resolve();
+		});
+	});
 	reliableChannel.addEventListener("message", receiveMessage);
 	reliableChannel.addEventListener("close", () => {
 		peerConnection.close();
@@ -62,12 +69,7 @@ export async function callOpponent(isCaller) {
 		});
 	}
 
-	return new Promise(resolve => {
-		reliableChannel.addEventListener("open", () => {
-			netConnected = true;
-			resolve();
-		});
-	});
+	return openPromise;
 }
 export async function incomingIceCandidate(candidate) {
 	if (peerConnection.remoteDescription) {

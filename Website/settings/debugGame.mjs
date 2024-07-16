@@ -1,28 +1,6 @@
 // All the necessary stuff to start a game against a do-nothing AI.
 
-import {AI} from "../rulesEngine/src/aiSystems/ai.mjs";
-
-export class DebugAI extends AI {
-	async selectMove(optionList, player) {
-		// Pass if you can
-		for (const option of optionList) {
-			if (option.type === "pass") {
-				return {type: "pass"};
-			}
-		}
-
-		// Skip the battle phase
-		if (optionList[0].type === "enterBattlePhase") {
-			return {type: "enterBattlePhase", value: false};
-		}
-
-		// Just pick the first valid choice otherwise
-		return {
-			type: optionList[0].type,
-			value: (await optionList[0].generateValidResponses().next()).value
-		}
-	}
-}
+import {PassiveAI} from "../rulesEngine/src/aiSystems/passiveAI.mjs";
 
 const debugGameWindows = [];
 
@@ -35,7 +13,7 @@ window.addEventListener("message", e => {
 
 	switch (e.data.type) {
 		case "ready": {
-			e.source.opponentAi = new DebugAI();
+			e.source.opponentAi = new PassiveAI();
 			e.source.postMessage({
 				type: "singleplayer"
 			});

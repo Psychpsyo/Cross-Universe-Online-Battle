@@ -9,7 +9,7 @@ import * as gameUI from "./gameUI.mjs";
 import * as manualUI from "./manualUI.mjs";
 import * as cardLoader from "../../scripts/cardLoader.mjs";
 
-class tokenZone {
+class TokenZone {
 	constructor() {
 		this.type = "tokens";
 		this.cards = [];
@@ -31,6 +31,17 @@ class tokenZone {
 
 	get(index) {
 		return this.cards[index];
+	}
+}
+class PresentedZone extends Zone {
+	constructor(player) {
+		super(player, "presented");
+	}
+
+	add(card, index, clearValues) {
+		const insertedIndex = super.add(card, index, clearValues);
+		card.showTo(this.player);
+		return insertedIndex;
 	}
 }
 
@@ -55,7 +66,7 @@ export class ManualController extends InteractionController {
 
 		manualUI.init();
 
-		this.tokenZone = new tokenZone();
+		this.tokenZone = new TokenZone();
 		gameState.zones["tokens"] = this.tokenZone;
 	}
 
@@ -165,7 +176,7 @@ export class ManualController extends InteractionController {
 	}
 
 	dropCard(player, zone, index) {
-		let card = this.playerInfos[player.index].heldCard;
+		const card = this.playerInfos[player.index].heldCard;
 		if (!card) {
 			return;
 		}
@@ -190,9 +201,9 @@ export class ManualController extends InteractionController {
 			return;
 		}
 
-		let source = card.zone;
-		let sourceIndex = card.index;
-		let insertedIndex = zone.add(card, index, false);
+		const source = card.zone;
+		const sourceIndex = card.index;
+		const insertedIndex = zone.add(card, index, false);
 		if (card.zone === zone) {
 			if (source) {
 				gameUI.removeCard(source, sourceIndex);
@@ -316,10 +327,10 @@ export class ManualController extends InteractionController {
 		if (player === localPlayer) {
 			netSend("[deckShowTop]" + deckZone.player.index);
 		}
-		let card = deckZone.cards.at(-1);
-		let presentedZone = this.playerInfos[player.index].presentedZone;
-		let insertedIndex = presentedZone.add(card, presentedZone.cards.length, false);
-		if (player == localPlayer) {
+		const card = deckZone.cards.at(-1);
+		const presentedZone = this.playerInfos[player.index].presentedZone;
+		const insertedIndex = presentedZone.add(card, presentedZone.cards.length, false);
+		if (player === localPlayer) {
 			card.showTo(localPlayer);
 		}
 		gameUI.removeCard(deckZone, deckZone.cards.length);
@@ -356,8 +367,8 @@ export class ManualController extends InteractionController {
 		if (value === 0) {
 			const winner = player.next();
 			winner.victoryConditions.push("lifeZero");
-			gameUI.playerWon(winner);
 			callingWindow.postMessage({type: "playerWon", players: [winner.index]});
+			await gameUI.playerWon(winner);
 		}
 	}
 	setMana(player, value) {
@@ -377,7 +388,7 @@ class ManualPlayerInfo {
 	constructor(player) {
 		this.player = player;
 		this.heldCard = null;
-		this.presentedZone = new Zone(player, "presented");
+		this.presentedZone = new PresentedZone(player);
 		gameState.zones["presented" + player.index] = this.presentedZone;
 	}
 

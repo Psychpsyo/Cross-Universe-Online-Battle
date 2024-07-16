@@ -328,6 +328,7 @@ export function clearDragSource(zone, index, player) {
 export function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
 		netSend("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
+		document.documentElement.classList.add("localPlayerActiveGrab");
 		return true;
 	}
 	return false;
@@ -336,6 +337,7 @@ export function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
 			netSend("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
+			document.documentElement.classList.remove("localPlayerActiveGrab");
 		}
 		gameState.controller.dropCard(player, zone, index);
 	}
@@ -1058,10 +1060,16 @@ export function showBlackoutMessage(message, subtitle = "") {
 	mainGameBlackout.classList.remove("hidden");
 }
 
-export function playerWon(player) {
+export async function playerWon(player) {
+	let winString = "";
+	if (player.victoryConditions[0].startsWith("cardEffect:")) {
+		winString = locale.game.gameOver[player == localPlayer? "winReasons" : "loseReasons"].cardEffect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+	} else {
+		winString = locale.game.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.victoryConditions[0]];
+	}
 	finishGame(
 		player == localPlayer? locale.game.gameOver.youWon : locale.game.gameOver.youLost,
-		locale.game.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.victoryConditions[0]]
+		winString
 	);
 }
 export function gameDrawn() {

@@ -1,6 +1,6 @@
 import {locale} from "./locale.mjs";
 import {startEffect, stopEffect} from "./levitationEffect.mjs";
-import {startGame, loadReplay} from "./gameStarter.mjs";
+import {startGame, loadReplay, gameFrameReady} from "./gameStarter.mjs";
 import * as uiUtils from "./uiUtils.mjs";
 
 // randomizing the default room code
@@ -86,7 +86,7 @@ function connect(overrideWebsocketUrl) {
 	socket.addEventListener("open", () => {
 		socket.send("[roomcode]" + getRoomcode() + gameModeSelect.value);
 	});
-	socket.addEventListener("message", e => {
+	socket.addEventListener("message", async e => {
 		const message = e.data.substring(e.data.indexOf("]") + 1);
 		const command = e.data.substring(1, e.data.indexOf("]"));
 
@@ -101,6 +101,7 @@ function connect(overrideWebsocketUrl) {
 				break;
 			}
 			case "sdp": {
+				await gameFrameReady;
 				gameFrame.contentWindow.postMessage({
 					type: "sdp",
 					sdp: message
@@ -108,6 +109,7 @@ function connect(overrideWebsocketUrl) {
 				break;
 			}
 			case "iceCandidate": {
+				await gameFrameReady;
 				gameFrame.contentWindow.postMessage({
 					type: "iceCandidate",
 					candidate: message

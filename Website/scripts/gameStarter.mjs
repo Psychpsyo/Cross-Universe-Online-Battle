@@ -1,6 +1,9 @@
-let resolveStartPromise = null;
-
+let resolveStartPromise = null; // function to resolve the promise returned by startGame()
+let resolveReadyPromise = null; // function to resolve the gameFrameReady promise
 let startingGameSettings = null; // An object, containing the game parameters for the currently starting game
+
+export let gameFrameReady = null; // promise that fulfills once the game is ready
+
 // starts a game and returns a promise that resolves when the game is over.
 export async function startGame(isCaller, options = {}) {
 	return new Promise((resolve, reject) => {
@@ -12,6 +15,9 @@ export async function startGame(isCaller, options = {}) {
 			options: options
 		}
 		resolveStartPromise = resolve;
+		gameFrameReady = new Promise(resolve => {
+			resolveReadyPromise = resolve;
+		});
 		gameFrame.contentWindow.location.replace(location.href.substring(0, location.href.lastIndexOf("/")) + "/game/index.html");
 		loadingIndicator.classList.add("active");
 	});
@@ -25,6 +31,9 @@ export async function loadReplay(replay) {
 		}
 		replayToLoad = replay;
 		resolveStartPromise = resolve;
+		gameFrameReady = new Promise(resolve => {
+			resolveReadyPromise = resolve;
+		});
 		gameFrame.contentWindow.location.replace(location.href.substring(0, location.href.lastIndexOf("/")) + "/game/index.html");
 		loadingIndicator.classList.add("active");
 	});
@@ -38,6 +47,7 @@ window.addEventListener("message", e => {
 
 	switch (e.data.type) {
 		case "ready": {
+			resolveReadyPromise();
 			if (replayToLoad) {
 				gameFrame.contentWindow.postMessage({
 					type: "replay",
@@ -73,6 +83,7 @@ window.addEventListener("message", e => {
 			break;
 		}
 		case "leaveGame": {
+			gameFrameReady = null;
 			unloadWarning.abort();
 			resolveStartPromise();
 			resolveStartPromise = null;

@@ -422,6 +422,12 @@
 				"no": "No"
 			},
 
+			"optionalAbilitySection": {
+				"question": "Do you want to do the optional part of '{#CARDNAME}'s effect?",
+				"yes": "Yes",
+				"no": "No"
+			},
+
 			"orderSelect": {
 				"confirm": "Confirm",
 				"abilityPrompt": "Select the order in which to apply these static abilities to '{#CARDNAME}':",
@@ -443,7 +449,9 @@
 
 				"selectingType": "Your opponent is selecting a type for the effect of '{#CARDNAME}'.",
 				"selectingEffect": "Your opponent is selecting an effect for the effect of '{#CARDNAME}'.",
-				"selectingDeckSide": "Your opponent is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'."
+				"selectingDeckSide": "Your opponent is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'.",
+				"decidingOnModificationAbility": "Your opponent is deciding whether or not to apply the ability of '{#CARD}' to '{#TARGET}'.",
+				"decidingOnOptionalbilitySection": "Your opponent is deciding whether or not to do the optional part of '{#CARDNAME}'s effect."
 			}
 		}
 	},

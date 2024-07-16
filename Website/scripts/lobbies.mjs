@@ -9,7 +9,7 @@
 // TODO: Refactor all of this into separate host and client code
 
 import {locale} from "./locale.mjs";
-import {startGame} from "./gameStarter.mjs";
+import {startGame, gameFrameReady} from "./gameStarter.mjs";
 import "./profilePicture.mjs";
 
 const unloadWarning = new AbortController();
@@ -495,6 +495,7 @@ async function challengeGotCancelled(byUser, signature) {
 }
 async function sdpReceived(fromUser, sdp, signature) {
 	if (!await verifySignature(signature, "challenge", `sdp|${currentLobby.ownUserId}|${sdp}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+	await gameFrameReady;
 	gameFrame.contentWindow.postMessage({
 		type: "sdp",
 		sdp: sdp
@@ -511,6 +512,7 @@ async function sdpReceived(fromUser, sdp, signature) {
 }
 async function iceReceived(fromUser, candidate, signature) {
 	if (!await verifySignature(signature, "challenge", `ice|${currentLobby.ownUserId}|${candidate}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+	await gameFrameReady;
 	gameFrame.contentWindow.postMessage({
 		type: "iceCandidate",
 		candidate: candidate
