@@ -360,6 +360,7 @@
 	"I00116": {"neverFlip": true, "left": 52},
 	"I00117": {"flip": true},
 	"I00118": {"neverFlip": true, "left": 30},
+	"I00119": {"neverFlip": true},
 
 	"S00001": {"neverFlip": true},
 	"S00002": {"neverFlip": true},
@@ -587,5 +588,7 @@
 	"S00235": {"left": 38.5},
 	"S00236": {"flip": true},
 	"S00237": {"left": 55},
-	"S00238": {"neverFlip": true}
+	"S00238": {"neverFlip": true},
+	"S00240": {"neverFlip": true},
+	"S00241": {"neverFlip": true}
 }
