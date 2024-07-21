@@ -37,7 +37,6 @@ export async function callOpponent(isCaller) {
 	reliableChannel = peerConnection.createDataChannel("reliable data", {negotiated: true, id: 0});
 	const openPromise = new Promise(resolve => {
 		reliableChannel.addEventListener("open", () => {
-			console.log("channel open!");
 			netConnected = true;
 			resolve();
 		});
