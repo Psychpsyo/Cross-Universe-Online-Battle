@@ -48,8 +48,6 @@ export class SingleplayerInitState extends GameState {
 			if (decks[1] === null) {
 				new DeckState(true, true);
 			} else {
-				deckDropzone.remove();
-				deckSelector.classList.add("deckListDisable");
 				playerDeckButton1.disabled = false;
 				mainGameArea.hidden = false;
 				gameUI.init();

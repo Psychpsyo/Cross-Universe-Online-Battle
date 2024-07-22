@@ -202,11 +202,10 @@
 		},
 
 		"deckSelect": {
-			"chooseYourDeck": "Choose your deck.",
-			"loadingDeck": "Loading deck...",
-			"waitingForOpponent": "Waiting for opponent to choose their deck...",
 			"dropYourDeck": "Drag & drop your deck here.",
 			"useOfficialDeck": "Or choose one of the official ones.",
+			"loadingDeck": "Loading deck...",
+			"waitingForOpponent": "Waiting for opponent to choose their deck...",
 			"dialogHeader": "Select a Deck",
 			"unnamedDeck": "Unnamed Deck",
 			"noDescriptionSet": "No description set.",
