@@ -170,7 +170,11 @@ export function init() {
 		const offsetX = (finalX - pointerX * zoom) / (-zoom + 1);
 		const offsetY = (finalY - pointerY * zoom) / (-zoom + 1);
 
-		mainGameArea.style.setProperty("transform-origin", `${offsetX}px ${offsetY}px`);
+		mainGameArea.style.setProperty("transform-origin", `${
+			Math.min(Math.max(offsetX, 0), mainGameArea.offsetWidth)
+		}px ${
+			Math.min(Math.max(offsetY, 0), mainGameArea.offsetHeight)
+		}px`);
 	});
 	document.getElementById("field").addEventListener("pointerleave", function() {
 		hideCursor();

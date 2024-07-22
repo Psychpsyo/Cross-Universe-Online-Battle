@@ -202,11 +202,10 @@
 		},
 
 		"deckSelect": {
-			"chooseYourDeck": "Wähle dein Deck.",
-			"loadingDeck": "Deck wird geladen...",
-			"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
 			"dropYourDeck": "Deck per Drag & Drop hier ablegen.",
 			"useOfficialDeck": "Oder eines der Offiziellen auswählen.",
+			"loadingDeck": "Deck wird geladen...",
+			"waitingForOpponent": "Warte darauf, dass dein Gegner ein Deck wählt...",
 			"dialogHeader": "Wähle ein Deck",
 			"unnamedDeck": "Unbenanntes Deck",
 			"noDescriptionSet": "Keine Beschreibung angegeben.",

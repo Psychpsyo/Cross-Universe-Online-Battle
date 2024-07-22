@@ -71,6 +71,42 @@ async function addDecksToDeckSelector(deckList) {
 	deckSelectorCardGrid.innerHTML = "";
 	deckSelectorDescription.innerHTML = "";
 }
+// for deck loading related event listeners
+function openDeckSelector(e) {
+	e.stopPropagation();
+	currentDeckList = "default";
+	addDecksToDeckSelector(currentDeckList);
+	openDeckView();
+}
+function deckDropped(e) {
+	deckDropLabel.classList.remove("deckHover");
+	if (!e.dataTransfer.items[0].getAsFile()) {
+		return;
+	}
+	loadDeckFile(e.dataTransfer.items[0].getAsFile());
+}
+function dragDeckOver(e) {
+	e.preventDefault();
+	deckDropLabel.classList.add("deckHover");
+}
+function dragDeckLeave(e) {
+	e.preventDefault();
+	deckDropLabel.classList.remove("deckHover");
+}
+
+// toggling the prepared deck selector stuff on the mainGameBlackout
+function activateDeckDropArea() {
+	gameUI.showBlackoutMessage(locale.game.deckSelect.dropYourDeck, locale.game.deckSelect.useOfficialDeck);
+	blackoutSubtitle.addEventListener("click", openDeckSelector);
+	blackoutSubtitle.classList.add("clickableText");
+	deckDropLabel.display = "block";
+}
+function deactivateDeckDropArea() {
+	gameUI.showBlackoutMessage(locale.game.deckSelect.loadingDeck);
+	blackoutSubtitle.removeEventListener("click", openDeckSelector);
+	blackoutSubtitle.classList.remove("clickableText");
+	deckDropLabel.display = "none";
+}
 
 export class DeckState extends GameState {
 	constructor(automatic, isSinglePlayer = false) {
@@ -87,42 +123,32 @@ export class DeckState extends GameState {
 		});
 
 		//loading custom decks from file
-		document.getElementById("deckDropzone").addEventListener("drop", function(e) {
-			document.getElementById("deckDropzone").style.removeProperty("background-color");
-			if (!e.dataTransfer.items[0].getAsFile()) {
-				return;
-			}
-			loadDeckFile(e.dataTransfer.items[0].getAsFile());
-		});
-		document.getElementById("deckDropzone").addEventListener("dragover", function(e) {
-			e.preventDefault();
-			this.style.backgroundColor = "#ffffff33";
-		});
-		document.getElementById("deckDropzone").addEventListener("dragleave", function(e) {
-			e.preventDefault();
-			this.style.removeProperty("background-color");
-		});
-		document.getElementById("fileSelectDeckLoader").addEventListener("change", function() {
+		const fileSelectDeckLoader = document.createElement("input");
+		fileSelectDeckLoader.id = "fileSelectDeckLoader";
+		fileSelectDeckLoader.type = "file";
+		fileSelectDeckLoader.accept = ".deck,.deckx";
+		fileSelectDeckLoader.addEventListener("change", function() {
 			loadDeckFile(this.files[0]);
 		});
+		document.body.appendChild(fileSelectDeckLoader);
 
+		const deckDropLabel = document.createElement("label");
+		deckDropLabel.id = "deckDropLabel";
+		deckDropLabel.htmlFor = "fileSelectDeckLoader";
+		deckDropLabel.addEventListener("drop", deckDropped);
+		deckDropLabel.addEventListener("dragover", dragDeckOver);
+		deckDropLabel.addEventListener("dragleave", dragDeckLeave);
+		mainGameBlackoutContent.firstChild.before(deckDropLabel);
+		activateDeckDropArea();
+
+		// deck selector deck list buttons
 		document.getElementById("loadSelectedDeckBtn").addEventListener("click", function() {
 			if (!document.getElementById("selectedDeck")) {
 				return;
 			}
-
 			closeDeckView();
 			this.loadDeck(builtInDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
 		}.bind(this));
-
-		// opening the deck selector
-		document.getElementById("deckSelectSpan").addEventListener("click", function(e) {
-			e.stopPropagation();
-			currentDeckList = "default";
-			addDecksToDeckSelector(currentDeckList);
-			openDeckView();
-		});
-		// deck selector deck list buttons
 		document.getElementById("defaultDecksBtn").addEventListener("click", function() {
 			if (currentDeckList != "default") {
 				currentDeckList = "default";
@@ -135,15 +161,13 @@ export class DeckState extends GameState {
 				addDecksToDeckSelector("legacy");
 			}
 		});
+		deckSelector.classList.remove("deckListDisable");
 
 		// show game area
-		dropDeckHereLabel.textContent = locale.game.deckSelect.dropYourDeck;
-		deckSelectSpan.textContent = locale.game.deckSelect.useOfficialDeck;
 		deckViewTitle.textContent = locale.game.deckSelect.dialogHeader;
 		defaultDecksBtn.textContent = locale.game.deckSelect.deckListDefault;
 		legacyDecksBtn.textContent = locale.game.deckSelect.deckListLegacy;
 		loadSelectedDeckBtn.textContent = locale.game.deckSelect.deckListLoadSelected;
-		gameUI.showBlackoutMessage(locale.game.deckSelect.chooseYourDeck);
 
 		mainGameArea.hidden = false;
 		gameUI.init();
@@ -171,7 +195,7 @@ export class DeckState extends GameState {
 	}
 
 	async loadDeck(deck) {
-		gameUI.showBlackoutMessage(locale.game.deckSelect.loadingDeck);
+		deactivateDeckDropArea();
 		loadingIndicator.classList.add("active");
 		const cdfList = await cardLoader.deckToCdfList(deck, this.automatic, localPlayer);
 		try {
@@ -226,14 +250,15 @@ export class DeckState extends GameState {
 					alert(locale.game.deckSelect.errors.generic);
 				}
 			}
-			gameUI.showBlackoutMessage(locale.game.deckSelect.chooseYourDeck);
+			activateDeckDropArea();
 			return;
 		} finally {
 			loadingIndicator.classList.remove("active");
 		}
 
-		// deck selection elements aren't needed anymore.
-		deckDropzone.remove();
+		// disable deck selection
+		deckDropLabel.remove();
+		fileSelectDeckLoader.remove();
 		deckSelector.classList.add("deckListDisable");
 
 		// sync the deck

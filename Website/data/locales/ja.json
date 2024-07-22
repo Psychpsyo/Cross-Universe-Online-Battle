@@ -202,11 +202,10 @@
 		},
 
 		"deckSelect": {
-			"chooseYourDeck": null,
-			"loadingDeck": null,
-			"waitingForOpponent": null,
 			"dropYourDeck": "デッキをドラック＆ドロップしてください。",
 			"useOfficialDeck": "もしくは、公式デッキを選択してください。",
+			"loadingDeck": null,
+			"waitingForOpponent": null,
 			"dialogHeader": null,
 			"unnamedDeck": null,
 			"noDescriptionSet": null,

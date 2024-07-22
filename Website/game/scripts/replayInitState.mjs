@@ -28,10 +28,6 @@ export class ReplayInitState extends GameState {
 			chat.putMessage(replay.extra.crashReason, "error");
 		}
 
-		// deck selection elements aren't needed anymore.
-		deckDropzone.remove();
-		deckSelector.classList.add("deckListDisable");
-
 		gameUI.init();
 		new BoardState(true);
 		gameState.doStartGame();

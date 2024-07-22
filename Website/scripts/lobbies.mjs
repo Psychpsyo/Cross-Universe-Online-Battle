@@ -470,8 +470,10 @@ async function beginGame(isCaller) {
 		gameOptions.draftFormat = await (await fetch(`./data/draftFormats/${lobbyDraftFormatInput.value}.json`)).json();
 	}
 	await startGame(isCaller, gameOptions);
-	currentLobby.playingAgainst = null;
-	syncNewStatus("present");
+	if (currentLobby) { // in case the lobby shut down since
+		currentLobby.playingAgainst = null;
+		syncNewStatus("present");
+	}
 }
 async function challengeGotDenied(byUser, signature) {
 	byUser.lastChallengeSequenceNum++;

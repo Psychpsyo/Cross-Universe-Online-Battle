@@ -31,10 +31,6 @@ export class DraftState extends GameState {
 		draftDeckOwner0.textContent = players[0].name;
 		draftDeckOwner1.textContent = players[1].name;
 
-		// deck loading elements won't be needed
-		deckDropzone.remove();
-		deckSelector.classList.add("deckListDisable");
-
 		draftDeckCount0.textContent = "0/" + format.deckSize;
 		draftDeckCount1.textContent = "0/" + format.deckSize;
 

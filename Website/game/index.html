@@ -95,16 +95,6 @@
 							<button id="passBtn" autocomplete="off" disabled></button>
 						</div>
 					</div>
-					<div id="deckDropzone">
-						<div id="deckDropPanel" class="sideBox">
-							<input id="fileSelectDeckLoader" type="file" accept=".deck,.deckx">
-							<label for="fileSelectDeckLoader"></label>
-							<div id="deckDropTextContainer">
-								<span id="dropDeckHereLabel"></span><br>
-								<span id="deckSelectSpan" class="clickableText"></span><br>
-							</div>
-						</div>
-					</div>
 					<div id="chatHolder">
 						<chat-box id="chat" class="sideBox"></chat-box>
 					</div>
@@ -395,9 +385,7 @@
 					<div id="hand0" class="hand"></div>
 					<div id="hand1" class="hand"></div>
 
-					<div id="opponentActionHolder">
-						<div id="opponentActionDisplay"></div>
-					</div>
+					<div id="opponentActionDisplay" class="automaticOnly"></div>
 
 					<section id="mainGameBlackout">
 						<div id="mainGameBlackoutContent"> <!-- So that the drop shadow doesn't apply to the darker background -->
@@ -450,7 +438,7 @@
 			</dialog>
 
 			<!--Deck Selector-->
-			<dialog id="deckSelector" class="centerDialog popupSelectMenu">
+			<dialog id="deckSelector" class="centerDialog popupSelectMenu deckListDisable">
 				<section class="dialogContent">
 					<header><h1 id="deckViewTitle"></h1></header>
 					<div id="deckSelectorFlex">
