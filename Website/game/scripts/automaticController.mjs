@@ -265,8 +265,8 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "cardRevealed": {
-				for (const [playerIndex, events] of Object.entries(Object.groupBy(events, event => event.player.index))) {
-					chat.putMessage(locale.game.notices[playerIndex == localPlayer.index? "youRevealed" : "opponentRevealed"], "notice", autoUI.chatCards(events.map(event => event.card)));
+				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
+					chat.putMessage(locale.game.notices[playerIndex == localPlayer.index? "youRevealed" : "opponentRevealed"], "notice", autoUI.chatCards(eventList.map(event => event.card)));
 				}
 				await Promise.all(events.map(async event => {
 					switch (event.card.zone.type) {

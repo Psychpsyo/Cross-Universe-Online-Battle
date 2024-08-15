@@ -151,12 +151,17 @@
 }
 #stackDisplayHolder {
 	display: flex;
+	flex-direction: row-reverse;
 	height: 6.5em;
 	padding: .25em;
 	gap: .25em;
 
-	/* Blocks are visually stacked if there is not enough space by doing roughly ((width of all blocks) - (left panel width)) / (number of blocks - 1) */
-	--block-margin: min(((.25em + (var(--block-count) + 1) * ((813 / 1185) * 6em + .25em)) - var(--left-panel-width)) / (var(--block-count) - 1) * -1, 0px);
+	/* Blocks are visually stacked if there is not enough space by doing roughly ((width of all blocks) - (total width)) / (number of blocks - 1) */
+	container-type: inline-size;
+	--block-margin: min((((var(--block-count) + 1) * ((813 / 1185) * 6em + .25em)) - 100cqw) / (var(--block-count) - 1) * -1, 0px);
+}
+.leftField #stackDisplayHolder {
+	flex-direction: row;
 }
 #stackDisplayHolder img {
 	height: 6em;
@@ -176,10 +181,17 @@
 	position: relative;
 }
 #stackDisplayHolder > div:not(:last-child) {
-	margin-right: var(--block-margin);
+	margin-left: var(--block-margin);
 	transition: transform .2s;
 }
+.leftField #stackDisplayHolder > div:not(:last-child) {
+	margin-left: 0;
+	margin-right: var(--block-margin);
+}
 #stackDisplayHolder > div:not(:last-child):hover {
+	transform: translateX(max((var(--block-margin) + .25em) * -1, 0px));
+}
+.leftField #stackDisplayHolder > div:not(:last-child):hover {
 	transform: translateX(min(var(--block-margin) + .25em, 0px));
 }
 

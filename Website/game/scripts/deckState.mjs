@@ -197,8 +197,8 @@ export class DeckState extends GameState {
 	async loadDeck(deck) {
 		deactivateDeckDropArea();
 		loadingIndicator.classList.add("active");
-		const cdfList = await cardLoader.deckToCdfList(deck, this.automatic, localPlayer);
 		try {
+			const cdfList = await cardLoader.deckToCdfList(deck, this.automatic, localPlayer);
 			localPlayer.setDeck(cdfList); // this will throw an error if the deck is invalid
 			players[localPlayer.index].deck = deck;
 			if (this.isSinglePlayer) {

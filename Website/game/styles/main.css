@@ -1,7 +1,6 @@
 html {
 	--p0-card-back: url('');
 	--p1-card-back: url('');
-	--left-panel-width: 30vw;
 }
 
 body {
@@ -9,8 +8,26 @@ body {
 	touch-action: none; /* no zooming or panning around on mobile */
 }
 
+/* responsiveness moves left panel to the top */
+@media (max-aspect-ratio: 3/4) {
+	#gameFlexBox {
+		flex-direction: column;
+	}
+	#chatHolder {
+		display: none;
+	}
+
+	#leftPanel {
+		border: none;
+	}
+}
+
 #gameFlexBox {
 	display: flex;
+	height: 100vh;
+}
+#gameFlexBox > :not(:first-child) {
+	flex-basis: 100%;
 }
 
 .leftField #gameFlexBox {
@@ -19,8 +36,8 @@ body {
 
 #mainGameArea {
 	position: relative;
-	flex-grow: 1;
 	overflow: hidden;
+	container-type: size;
 
 	transform: scale(1);
 	transition: transform .15s, background-position-y .2s; /* background-position-y should be in automaticGame.css but there it would override this  */
@@ -31,7 +48,7 @@ body {
 
 #fieldHolder {
 	display: flex;
-	height: 100vh;
+	height: 100%;
 	align-items: center;
 	justify-content: center;
 }
@@ -60,7 +77,7 @@ body {
 }
 
 #cardDetails {
-	height: 65vh;
+	width: min(45vh, 100vw - 1em);
 	aspect-ratio: 813 / 1185;
 
 	overflow: visible;
@@ -173,9 +190,9 @@ dialog #cardDetails {
 #leftPanel {
 	display: flex;
 	flex-direction: column;
-	width: var(--left-panel-width);
-	flex-shrink: 0;
-	height: 100vh;
+	min-width: 30vw;
+	flex-basis: 0;
+	width: 100%; /* for it to stretch out in portrait mode */
 	z-index: 100;
 
 	border-right: 2px var(--theme-border-color) solid;
@@ -221,7 +238,7 @@ dialog #cardDetails {
 	margin-bottom: .5em;
 }
 .profilePictureHolder profile-picture {
-	width: 100%;
+	width: min(100%, 10em);
 	--border-width: 4px;
 	transition: filter 1s;
 }
@@ -426,7 +443,7 @@ img[src$="cardBackFrameP1.png"] {
 
 .hand {
 	position: absolute;
-	height: 23vh;
+	height: 23cqh;
 	display: flex;
 	justify-content: center;
 	align-items: end;
@@ -442,29 +459,32 @@ img[src$="cardBackFrameP1.png"] {
 }
 
 .hand .card {
-	height: 25vh;
-	width: 100vw / var(--card-count);
+	height: 25cqh;
 	user-select: none;
-	margin-right: min(((var(--card-count) * (813 / 1185) * 25vh - (100% - 1.5em)) / (var(--card-count) - 1)) * -1, .1vw); /* (cardAmount * cardWidth - handMax) / (cardAmount - 1) */
+	margin-right: min(
+		/* (cardAmount * cardWidth - handMax) / (cardAmount - 1) */
+		((var(--card-count) * (813 / 1185) * 25cqh - (100% - 1.5em)) / (var(--card-count) - 1)) * -1,
+		.1cqw
+	);
 
 	transition-property: transform;
 	transition-duration: .1s;
 }
 #hand0 .card {
-	transform: rotate(180deg) translateY(-2vh);
+	transform: rotate(180deg) translateY(-2cqh);
 }
 
 #hand1 :first-child {
-	margin-left: .5vw;
+	margin-left: .5cqw;
 }
 #hand1 :last-child {
-	margin-right: .5vw;
+	margin-right: .5cqw;
 }
 #hand0 :first-child {
-	margin-right: .5vw;
+	margin-right: .5cqw;
 }
 #hand0 :last-child {
-	margin-left: .5vw;
+	margin-left: .5cqw;
 }
 
 #hand0.shown .card:hover  {
@@ -481,7 +501,7 @@ img[src$="cardBackFrameP1.png"] {
 }
 
 #hand0 {
-	top: -11vh;
+	top: -11cqh;
 	flex-direction: row-reverse;
 	background: linear-gradient(var(--theme-shadow) 50%, var(--theme-shadow) 80%);
 }
@@ -490,7 +510,7 @@ img[src$="cardBackFrameP1.png"] {
 }
 
 #hand1 {
-	bottom: -11vh;
+	bottom: -11cqh;
 	background: linear-gradient(var(--theme-shadow) 20%, var(--theme-shadow) 50%);
 }
 #hand1.shown {

@@ -761,7 +761,8 @@
 		"quickSearch": {
 			"title": "Quick Search",
 			"prompt": "Search by card name or effect... (or press Enter to show all cards)",
-			"noResults": "Couldn't find any cards."
+			"noResults": "Couldn't find any cards.",
+			"error": "There was an error during the search."
 		},
 
 		"searchMenu": {

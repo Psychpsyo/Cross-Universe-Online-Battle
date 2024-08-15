@@ -9,6 +9,7 @@
 #lobbyLeft {
 	background-color: var(--theme-shadow);
 	backdrop-filter: blur(var(--theme-shadow-blur));
+	border-right: 2px var(--theme-border-color) solid;
 	min-width: 15em;
 	display: flex;
 	flex-direction: column;
