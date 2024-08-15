@@ -761,7 +761,8 @@
 		"quickSearch": {
 			"title": "Schnellsuche",
 			"prompt": "Suche nach Kartennamen oder Effekten... (oder drücke Enter um alle Karten zu zeigen)",
-			"noResults": "Konnte keine Karten finden."
+			"noResults": "Konnte keine Karten finden.",
+			"error": "Bei der Suche ist ein Fehler aufgetreten."
 		},
 
 		"searchMenu": {

@@ -20,7 +20,6 @@ headerSearchButtonImg.alt = locale.deckMaker.searchButton;
 
 quickSearch.setAttribute("aria-label", locale.deckMaker.quickSearch.title);
 quickSearch.placeholder = locale.deckMaker.quickSearch.prompt;
-noResultsMessage.textContent = locale.deckMaker.quickSearch.noResults;
 
 deckMakerPanels.setAttribute("aria-label", locale.deckMaker.searchResults);
 deckMakerUnits.setAttribute("aria-label", locale.deckMaker.unitTokenColumn);
@@ -158,7 +157,14 @@ if (localStorage.getItem("compactMode") === "true") {
 	deckMakerPanels.classList.add("compact");
 }
 
-quickSearch.addEventListener("keyup", function(e) {
+function searchError() {
+	loadingIndicator.classList.remove("active");
+	document.body.classList.add("noResults");
+	noResultsMessage.textContent = locale.deckMaker.quickSearch.error;
+	noResultsMessage.hidden = false;
+}
+
+quickSearch.addEventListener("keyup", async function(e) {
 	if (e.key === "Enter") {
 		if (this.value === "") {
 			searchCards({});
@@ -172,14 +178,16 @@ quickSearch.addEventListener("keyup", function(e) {
 
 		let url = localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl");
 		url += url.endsWith("/")? "stringSearch" : "/stringSearch";
-		fetch(
-			url,
-			{method: "POST", body: JSON.stringify({input: this.value, language: locale.warnings.includes("noCards")? "en" : locale.code})}
-		).then(response => response.text())
-		.then(async (response) => {
+		try {
+			const response = await (await fetch(
+				url,
+				{method: "POST", body: JSON.stringify({input: this.value, language: locale.warnings.includes("noCards")? "en" : locale.code})}
+			)).text();
 			loadingIndicator.classList.remove("active");
 			showSearchResults(JSON.parse(response));
-		});
+		} catch {
+			searchError();
+		}
 	}
 });
 
@@ -225,8 +233,8 @@ function createCardButton(card, lazyLoading) {
 	return cardButton;
 }
 
-function searchCards(query) {
-	//clear current card lists:
+async function searchCards(query) {
+	// clear current card lists:
 	Array.from(document.getElementsByClassName("deckMakerGrid")).forEach(list => {
 		list.innerHTML = "";
 	});
@@ -236,19 +244,22 @@ function searchCards(query) {
 
 	query.language = locale.warnings.includes("noCards")? "en" : locale.code;
 
-	fetch(
-		localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl"),
-		{method: "POST", body: JSON.stringify(query)}
-	).then(response => response.text())
-	.then(async (response) => {
+	try {
+		const response = await (await fetch(
+			localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl"),
+			{method: "POST", body: JSON.stringify(query)}
+		)).text();
 		loadingIndicator.classList.remove("active");
 		showSearchResults(JSON.parse(response));
-	});
+	} catch {
+		searchError();
+	}
 }
 
 async function showSearchResults(cards) {
 	if (cards.length === 0) {
 		document.body.classList.add("noResults");
+		noResultsMessage.textContent = locale.deckMaker.quickSearch.noResults;
 		noResultsMessage.hidden = false;
 		return;
 	}

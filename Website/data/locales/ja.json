@@ -761,7 +761,8 @@
 		"quickSearch": {
 			"title": null,
 			"prompt": null,
-			"noResults": null
+			"noResults": null,
+			"error": null
 		},
 
 		"searchMenu": {
