@@ -141,31 +141,37 @@ textarea {
 }
 
 .svgButton {
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	gap: .5em;
 	background-color: transparent;
 	border: 0;
-	padding: 0;
+	padding: .2em;
 	font-size: inherit;
+	color: white;
+	font-weight: bold;
+}
+.svgButton > * {
+	filter: drop-shadow(0 .2em .1em #0008);
 }
 .svgButton > img {
 	height: 100%;
-	padding: .2em;
 	aspect-ratio: 1;
 }
-.svgButton:hover > img {
+.svgButton:hover > * {
 	transform: translateY(-3.5%);
-	filter: drop-shadow(0 .2em .1em #0008);
 }
-.svgButton:active > img {
+.svgButton:active > * {
 	transform: translateY(3.5%);
 	filter: drop-shadow(0 0 .1em #0008);
 }
-.svgButton > img, .svgButton:disabled > img {
+.svgButton > *, .svgButton:disabled > * {
 	transform: translateY(0);
 	filter: drop-shadow(0 .1em .1em #0008);
 }
 .svgButton:disabled {
 	opacity: 50%;
+	color: white; /* still white */
 }
 
 

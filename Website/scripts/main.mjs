@@ -177,9 +177,9 @@ rulesButton.href = locale.mainMenu.rulesLink;
 discordButton.href = locale.mainMenu.discordLink;
 
 lobbyHeading.textContent = locale.lobbies.title;
-newLobbyBtn.title = locale.lobbies.newLobbyButton;
-newLobbyBtnImg.alt = locale.lobbies.newLobbyButton;
 lobbyList.dataset.message = locale.lobbies.noLobbyServer;
+newLobbyBtnText.textContent = locale.lobbies.newLobbyButton;
+newLobbyBtnImg.alt = "";
 
 document.documentElement.lang = locale.code;
 document.documentElement.removeAttribute("aria-busy");

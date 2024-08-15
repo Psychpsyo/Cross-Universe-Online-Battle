@@ -32,6 +32,8 @@ main {
 
 #lobbies {
 	min-width: 15em;
+	width: 100%;
+	flex-basis: 0;
 	background-color: var(--theme-shadow);
 	backdrop-filter: blur(var(--theme-shadow-blur));
 	border-right: 2px var(--theme-border-color) solid;
@@ -44,11 +46,11 @@ main {
 	padding: .15em;
 	border-bottom: 2px solid var(--theme-border-color);
 }
-#newLobbyBtn {
-	position: absolute;
-	top: 50%;
-	right: 0;
-	transform: translateY(-50%);
+#lobbies > footer {
+	position: relative;
+	text-align: center;
+	padding: .15em;
+	border-top: 2px solid var(--theme-border-color);
 }
 #lobbyListHolder {
 	flex-grow: 1;
@@ -96,7 +98,7 @@ main {
 	align-items: center;
 	text-align: center;
 	justify-content: center;
-	flex-grow: 1;
+	flex-basis: 100%;
 }
 
 #mainLogoHolder {
