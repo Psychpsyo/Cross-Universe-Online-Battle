@@ -432,11 +432,11 @@ export class AutomaticController extends InteractionController {
 			case "actionCancelled": {
 				for (const event of events) {
 					// units that got excluded from retires
-					if (event.action instanceof actions.Discard && event.action.step?.block instanceof blocks.Retire) {
+					if (event.action instanceof actions.Discard && event.action.properties.dueTo.get()[0] === "retire") {
 						gameUI.clearDragSource(
 							event.action.card.zone,
 							event.action.card.index,
-							event.action.step.block.player
+							event.action.player
 						);
 					}
 				}
