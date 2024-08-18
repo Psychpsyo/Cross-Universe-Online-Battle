@@ -537,6 +537,9 @@ img[src$="cardBackFrameP1.png"] {
 #deckDropLabel.deckHover {
 	background-color: #fff3;
 }
+#deckDropLabel.deckHover + #blackoutMessageHolder {
+	pointer-events: none;
+}
 
 #chatHolder {
 	padding: .75em;
