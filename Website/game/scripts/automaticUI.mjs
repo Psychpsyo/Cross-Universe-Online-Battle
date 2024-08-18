@@ -304,8 +304,17 @@ export async function revealHandCard(card, duration) {
 		previewCard(card);
 	}
 	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1500 * duration));
-	cardImg.src = cardLoader.getCardImage(card.current());
 	cardImg.classList.remove("revealed");
+	if (card.current().hiddenFor.includes(card.currentOwner().next())) {
+		cardImg.src = cardLoader.getCardImage(card.current());
+	} else {
+		cardImg.classList.add("permanentlyRevealed");
+	}
+}
+export async function unrevealHandCard(card) {
+	let cardImg = document.getElementById("hand" + card.currentOwner().index).children.item(card.index);
+	cardImg.src = cardLoader.getCardImage(card.current());
+	cardImg.classList.remove("permanentlyRevealed");
 }
 export function showOpponentAction(message) {
 	opponentActionDisplay.textContent = message;

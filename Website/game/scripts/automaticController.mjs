@@ -277,6 +277,16 @@ export class AutomaticController extends InteractionController {
 				}));
 				return this.gameSleep();
 			}
+			case "cardUnrevealed": {
+				await Promise.all(events.map(async event => {
+					switch (event.card.zone.type) {
+						case "hand": {
+							return autoUI.unrevealHandCard(event.card);
+						}
+					}
+				}));
+				return this.gameSleep();
+			}
 			case "cardViewed": {
 				let localPlayerViewed = events.filter(event => event.player === localPlayer);
 				if (localPlayerViewed.length > 0) {
