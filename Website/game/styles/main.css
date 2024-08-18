@@ -487,11 +487,14 @@ img[src$="cardBackFrameP1.png"] {
 	margin-left: .5cqw;
 }
 
-#hand0.shown .card:hover  {
+#hand0.shown .card:hover, #hand0 .card.permanentlyRevealed {
 	transform: rotate(180deg) translateY(-15%);
 }
 #hand0 .card.revealed {
 	transform: rotate(180deg) translateY(-25%);
+}
+#hand1 .card.permanentlyRevealed {
+	transform: translateY(-10%);
 }
 #hand1 .card:hover {
 	transform: translateY(-15%);
