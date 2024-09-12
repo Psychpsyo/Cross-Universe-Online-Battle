@@ -10,7 +10,7 @@ function loadImage(imageUrl) {
 	});
 };
 
-let backgrounds = {
+const backgrounds = {
 	"unit": loadImage("./custom/images/unit.png"),
 	"standardSpell": loadImage("./custom/images/spell.png"),
 	"standardItem": loadImage("./custom/images/item.png"),
@@ -23,12 +23,15 @@ backgrounds.continuousItem = backgrounds.standardItem;
 backgrounds.equipableItem = backgrounds.standardItem;
 
 // bracket images
-let bracketLeftTop = loadImage("./custom/images/bracketLeftTop.png");
-let bracketLeftMiddle = loadImage("./custom/images/bracketLeftMiddle.png");
-let bracketLeftBottom = loadImage("./custom/images/bracketLeftBottom.png");
-let bracketRightTop = loadImage("./custom/images/bracketRightTop.png");
-let bracketRightMiddle = loadImage("./custom/images/bracketRightMiddle.png");
-let bracketRightBottom = loadImage("./custom/images/bracketRightBottom.png");
+const bracketLeftTop = loadImage("./custom/images/bracketLeftTop.png");
+const bracketLeftMiddle = loadImage("./custom/images/bracketLeftMiddle.png");
+const bracketLeftBottom = loadImage("./custom/images/bracketLeftBottom.png");
+const bracketRightTop = loadImage("./custom/images/bracketRightTop.png");
+const bracketRightMiddle = loadImage("./custom/images/bracketRightMiddle.png");
+const bracketRightBottom = loadImage("./custom/images/bracketRightBottom.png");
+
+// the "NO IMAGE" card image
+const noImage = loadImage("./custom/images/noImage.png");
 
 const lineGap = 3;
 
@@ -109,6 +112,7 @@ async function renderCard(card, canvas) {
 	ctx.fillStyle = "black";
 
 	ctx.drawImage(await backgrounds[card.cardType], 0, 0);
+	ctx.drawImage(await noImage, 74, 61);
 
 	// write level
 	ctx.font = "39pt 'Yu Mincho'";
