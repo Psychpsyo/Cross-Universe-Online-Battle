@@ -233,7 +233,7 @@
 			"selectManually": null,
 			"popupTitle": null,
 			"waitingForOpponent": null,
-			"revealPartner": null
+			"revealPartner": "パートナーを公開する"
 		},
 
 		"cardSelector": {
@@ -253,7 +253,7 @@
 			"hand0": "相手の手札：",
 			"hand1": "自分の手札：",
 
-			"returnAllToDeck": null
+			"returnAllToDeck": "全てをデッキに戻す"
 		},
 
 		"cardChoice": {
@@ -307,7 +307,7 @@
 				"search": "サーチ",
 				"showTop": "トップ確認",
 				"dropTop": "一番上に戻す",
-				"dropShuffle": "シャッフルする",
+				"dropShuffle": "シャッフル",
 				"dropBottom": "一番下に戻す",
 				"dropCancel": "キャンセル"
 			},
@@ -521,7 +521,7 @@
 			"profilePictureMenu": {
 				"header": null,
 				"categoriesTab": null,
-				"allCardsTab": null,
+				"allCardsTab": "全てのカード",
 				"close": null,
 				"categories": {
 					"units": "ユニット",
@@ -591,19 +591,19 @@
 			"keyCtrl": "Ctrl",
 			"keyShift": "Shift",
 			"keyAlt": "Alt",
-			"showYourDiscard": null,
-			"showOpponentDiscard": null,
-			"showYourExile": null,
-			"showOpponentExile": null,
-			"showDeck": null,
+			"showYourDiscard": "捨て山を確認する",
+			"showOpponentDiscard": "相手の捨て山を確認する",
+			"showYourExile": "隔離ゾーンを確認する",
+			"showOpponentExile": "相手の隔離ゾーンを確認する",
+			"showDeck": "デッキを確認する",
 			"searchDeck": null,
 			"selectToken": null,
-			"showField": null,
-			"destroyToken": null,
+			"showField": "フィールドを確認する",
+			"destroyToken": "トークンを破壊する",
 			"chat": null,
 			"drawCard": null,
-			"shuffleDeck": null,
-			"showDeckTop": null,
+			"shuffleDeck": "デッキをシャッフルする",
+			"showDeckTop": "デッキの上を確認する",
 			"previewHandCard": null,
 			"zoom": null,
 			"previewHandButton": "1 - 9",
