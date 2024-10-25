@@ -60,19 +60,19 @@ export function createAbilityFragment(abilityText) {
 // chat
 let isTyping = false;
 chat.addEventListener("message", function(e) {
-	netSend("[chat]" + e.data);
-	this.putMessage(players[1].name + locale["chat"]["colon"] + e.data);
+	netSend("chat", e.data);
+	this.putMessage(playerData[localPlayer.index].name + locale["chat"]["colon"] + e.data);
 });
 chat.inputField.addEventListener("input", () => {
 	if (!isTyping) {
 		isTyping = true;
-		netSend("[startTyping]");
+		netSend("startTyping");
 	}
 });
 chat.inputField.addEventListener("blur", () => {
 	if (isTyping) {
 		isTyping = false;
-		netSend("[stopTyping]");
+		netSend("stopTyping");
 	}
 });
 
@@ -83,7 +83,7 @@ export function closeCardPreview() {
 }
 
 export async function previewCard(card, specific = true) {
-	if (!card?.cardId || card.hiddenFor.includes(localPlayer)) {
+	if (!card?.cardId || (localPlayer? card.hiddenFor.includes(localPlayer) : card.hiddenFor.length > 0)) {
 		return;
 	}
 	// if the already shown card was clicked again
@@ -316,15 +316,15 @@ export function init() {
 		document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
 		document.getElementById("playerDeckButtonImg" + i).alt = locale.game.playerInfo.viewDeck;
 		document.getElementById("playerDeckButton" + i).addEventListener("click", function() {
-			loadDeckPreview(players[i].deck);
+			loadDeckPreview(playerData[i].deck);
 			openDeckView();
 		});
 	}
 
 	// profile pictures
 	for (let i = 0; i < 2; i++) {
-		document.getElementById("username" + i).textContent = players[i].name;
-		document.getElementById("profilePicture" + i).setIcon(players[i].profilePicture, i === 0);
+		document.getElementById("username" + i).textContent = playerData[i].name;
+		document.getElementById("profilePicture" + i).setIcon(playerData[i].profilePicture, i === 0);
 	}
 
 	// card preview

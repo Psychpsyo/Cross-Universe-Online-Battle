@@ -1,6 +1,7 @@
 // This module exports the controller for the automatic simulator which verifies the cross universe game rules
 
-import {locale} from "../../scripts/locale.mjs";
+import localize from "../../scripts/locale.mjs";
+import {perspectives} from "../../scripts/localeConstants.mjs";
 import {InteractionController} from "./interactionController.mjs";
 import {netSend} from "./netcode.mjs";
 import * as autopass from "./autopass.mjs";
@@ -19,6 +20,7 @@ import * as zones from "../../rulesEngine/src/zones.mjs";
 const circledDigits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
 
 export class AutomaticController extends InteractionController {
+	#started = false;
 	constructor() {
 		super();
 
@@ -62,7 +64,13 @@ export class AutomaticController extends InteractionController {
 		window.addEventListener("blur", this.ctrlReleased.bind(this));
 	}
 
-	async startGame() {
+	async startGame(fromTheBeginning) {
+		this.#started = true;
+		let fastForwarding = false;
+		if (!fromTheBeginning) {
+			this.gameSpeed = 0;
+			fastForwarding = true;
+		}
 		const updateGenerator = game.begin();
 		let updates;
 		try {
@@ -75,6 +83,11 @@ export class AutomaticController extends InteractionController {
 		while (!updates.done) {
 			let returnValue;
 			if (updates.value[0] instanceof InputRequest) {
+				// input requests need to knock us out of the spectate mode sync fast-forward
+				if (fastForwarding) {
+					fastForwarding = false;
+					this.gameSpeed = 1;
+				}
 				// This code is way more general than it needs to be since there is never cases where both players need to act at the same time.
 				const localRequests = [];
 				const playerPromises = [];
@@ -89,17 +102,19 @@ export class AutomaticController extends InteractionController {
 					}
 				}
 
-				const autoResponse = passModeSelect.value === "never"? null : autopass.getAutoResponse(
-					game,
-					localRequests,
-					passModeSelect.value.startsWith("until"),
-					localStorage.getItem("usePrivateInfoForAutopass")
-				);
-				if (autoResponse) {
-					netSend("[inputRequestResponse]" + JSON.stringify(autoResponse));
-					playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
-				} else {
-					playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
+				if (localPlayer) {
+					const autoResponse = passModeSelect.value === "never"? null : autopass.getAutoResponse(
+						game,
+						localRequests,
+						passModeSelect.value.startsWith("until"),
+						localStorage.getItem("usePrivateInfoForAutopass")
+					);
+					if (autoResponse) {
+						netSend("inputRequestResponse", JSON.stringify(autoResponse));
+						playerPromises[localPlayer.index].push(new Promise(resolve => {resolve(autoResponse)}));
+					} else {
+						playerPromises[localPlayer.index] = localRequests.map(request => this.presentInputRequest(request));
+					}
 				}
 
 				const responsePromises = await Promise.allSettled(playerPromises.map(promises => Promise.any(promises)));
@@ -139,7 +154,7 @@ export class AutomaticController extends InteractionController {
 		}
 	}
 
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		switch (command) {
 			case "inputRequestResponse": {
 				let move = JSON.parse(message);
@@ -151,7 +166,7 @@ export class AutomaticController extends InteractionController {
 				return true;
 			}
 			case "cancelRetire": {
-				this.cancelRetire(game.players[0]);
+				this.cancelRetire(player);
 				return true;
 			}
 		}
@@ -236,17 +251,17 @@ export class AutomaticController extends InteractionController {
 		switch (type) {
 			case "deckShuffled": {
 				for (const event of events) {
-					chat.putMessage(event.player == localPlayer? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+					chat.putMessage(localize("game.notices.deckShuffled", event.deck), "notice");
 				}
 				return this.gameSleep();
 			}
 			case "startingPlayerSelected": {
-				chat.putMessage(events[0].player == localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
+				chat.putMessage(localize("game.notices.playerStarts", events[0].player), "notice");
 				return this.gameSleep();
 			}
 			case "cardsDrawn": {
 				for (const [playerIndex, cards] of Object.entries(Object.groupBy(events.map(event => event.cards).flat(), card => card.owner.index))) {
-					chat.putMessage(locale.game.notices[playerIndex == localPlayer.index? "youDrew" : "opponentDrew"], "notice", autoUI.chatCards(cards));
+					chat.putMessage(localize("game.notices.playerDrew", game.players[playerIndex]), "notice", autoUI.chatCards(cards));
 				}
 				await Promise.all(events.map(async event => {
 					for (let i = event.cards.length; i > 0; i--) {
@@ -266,7 +281,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "cardRevealed": {
 				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
-					chat.putMessage(locale.game.notices[playerIndex == localPlayer.index? "youRevealed" : "opponentRevealed"], "notice", autoUI.chatCards(eventList.map(event => event.card)));
+					chat.putMessage(localize("game.notices.playerRevealed", game.players[playerIndex]), "notice", autoUI.chatCards(eventList.map(event => event.card)));
 				}
 				await Promise.all(events.map(async event => {
 					switch (event.card.zone.type) {
@@ -290,7 +305,7 @@ export class AutomaticController extends InteractionController {
 			case "cardViewed": {
 				let localPlayerViewed = events.filter(event => event.player === localPlayer);
 				if (localPlayerViewed.length > 0) {
-					chat.putMessage(locale.game.notices.viewed, "notice", autoUI.chatCards(localPlayerViewed.map(event => event.card)));
+					chat.putMessage(localize("game.notices.viewed"), "notice", autoUI.chatCards(localPlayerViewed.map(event => event.card)));
 				}
 				await Promise.all(events.map(async event => {
 					switch (event.card.zone.type) {
@@ -387,13 +402,12 @@ export class AutomaticController extends InteractionController {
 			case "cardSummoned": {
 				for (const [playerIndex, eventList] of Object.entries(Object.groupBy(events, event => event.player.index))) {
 					// construct chat message locale identifier
-					const player = playerIndex == localPlayer.index? "you" : "opponent";
 					let action = type.substring(4);
 					if (type === "cardSummoned" && game.currentBlock() instanceof blocks.StandardSummon) {
 						action = "StandardSummoned";
 					}
 					chat.putMessage(
-						locale.game.notices[player + action],
+						localize(`game.notices.player${action}`, game.players[playerIndex]),
 						"notice",
 						autoUI.chatCards(eventList.map(event => event.card))
 					);
@@ -412,7 +426,7 @@ export class AutomaticController extends InteractionController {
 			case "cardDiscarded":
 			case "cardExiled":
 			case "cardMoved": {
-				chat.putMessage(locale.game.notices[type[4].toLowerCase() + type.substring(5)], "notice", autoUI.chatCards(events.map(event => event.card)));
+				chat.putMessage(localize(`game.notices.${type[4].toLowerCase() + type.substring(5)}`), "notice", autoUI.chatCards(events.map(event => event.card)));
 				for (const event of events) {
 					gameUI.removeCard(event.card.zone ?? event.card.placedTo, event.card.index);
 					autoUI.removeCardAttackDefenseOverlay(event.card);
@@ -468,7 +482,7 @@ export class AutomaticController extends InteractionController {
 			case "blockCreated": {
 				if (events[0].block instanceof blocks.AbilityActivation) {
 					await autoUI.activate(events[0].block.card);
-					chat.putMessage(locale.game.notices[events[0].block.player === localPlayer? "youActivated" : "opponentActivated"], "notice", autoUI.chatCards([events[0].block.card]));
+					chat.putMessage(localize("game.notices.playerActivated", events[0].block.player), "notice", autoUI.chatCards([events[0].block.card]));
 				}
 				if (passModeSelect.value === "untilBattle" && events[0].block instanceof blocks.AttackDeclaration) {
 					this.setPassMode("auto");
@@ -482,25 +496,31 @@ export class AutomaticController extends InteractionController {
 			}
 			case "playerSelected": {
 				if (events[0].player !== localPlayer) {
-					chat.putMessage(game.players[events[0].chosenPlayer] === localPlayer? locale.game.notices.opponentChoseYou : locale.game.notices.opponentChoseSelf, "notice");
+					chat.putMessage(localize("game.notices.playerChosePlayer", {PLAYER: events[0].player, TARGET: game.players[events[0].chosenPlayer]}), "notice");
 				}
 				break;
 			}
 			case "typeSelected": {
 				if (events[0].player !== localPlayer) {
-					chat.putMessage(locale.game.notices.opponentChoseType.replaceAll("{#TYPE}", locale.types[events[0].chosenType]), "notice");
+					chat.putMessage(
+						localize("game.notices.playerChoseType", {PLAYER: events[0].player, TYPE: localize(`types.${events[0].chosenType}`)}),
+						"notice"
+					);
 				}
 				break;
 			}
 			case "abilitySelected": {
 				if (events[0].player !== localPlayer) {
-					chat.putMessage(locale.game.notices.opponentChoseAbility.replaceAll("{#ABILITY}", await cardLoader.getAbilityText(events[0].chosenAbility)), "notice");
+					chat.putMessage(
+						localize("game.notices.playerChoseAbility", {PLAYER: events[0].player, ABILITY: await cardLoader.getAbilityText(events[0].chosenAbility)}),
+						"notice"
+					);
 				}
 				break;
 			}
 			case "deckSideSelected": {
 				if (events[0].player !== localPlayer) {
-					chat.putMessage(locale.game.notices.opponentChoseDeckSide[events[0].chosenSide], "notice");
+					chat.putMessage(localize(`game.notices.playerChoseDeckSide.${events[0].chosenSide}`, events[0].player), "notice");
 				}
 				break;
 			}
@@ -531,27 +551,27 @@ export class AutomaticController extends InteractionController {
 			// show opponent action indicator
 			switch (request.type) {
 				case "chooseCards": {
-					let message = locale.game.automatic.opponentActions.selectingCards;
+					let message = localize("game.automatic.opponentActions.selectingCards", request.player);
 					switch (request.reason) {
 						case "handTooFull": {
-							message = locale.game.automatic.opponentActions.selectingHandDiscard;
+							message = localize("game.automatic.opponentActions.selectingHandDiscard", request.player);
 							break;
 						}
 						case "selectAttackTarget": {
-							message = locale.game.automatic.opponentActions.selectingAttackTarget;
+							message = localize("game.automatic.opponentActions.selectingAttackTarget", request.player);
 							break;
 						}
 						case "nextCardToApplyStaticAbilityTo": {
-							message = locale.game.automatic.opponentActions.selectingNextCardToApplyStaticAbilityTo;
+							message = localize("game.automatic.opponentActions.selectingNextCardToApplyStaticAbilityTo", request.player);
 							break;
 						}
 						default: {
 							if (request.reason.startsWith("cardEffect:")) {
-								message = locale.game.automatic.opponentActions.effectSelectingCards.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+								message = localize("game.automatic.opponentActions.effectSelectingCards", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.reason.split(":")[1])).name});
 							} else if (request.reason.startsWith("equipTarget:")) {
-								message = locale.game.automatic.opponentActions.selectingEquipTarget.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+								message = localize("game.automatic.opponentActions.selectingEquipTarget", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.reason.split(":")[1])).name});
 							} else if (request.reason.startsWith("cardEffectMove:")) {
-								message = locale.game.automatic.opponentActions.effectMoveSelectingCards.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+								message = localize("game.automatic.opponentActions.effectMoveSelectingCards", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.reason.split(":")[1])).name});
 							}
 						}
 					}
@@ -559,38 +579,40 @@ export class AutomaticController extends InteractionController {
 					break;
 				}
 				case "choosePlayer": {
-					let message = locale.game.automatic.opponentActions.selectingPlayer;
+					let message = localize("game.automatic.opponentActions.selectingPlayer", request.player);
 					if (request.reason == "chooseStartingPlayer") {
-						message = locale.game.automatic.opponentActions.selectingStartingPlayer;
+						message = localize("game.automatic.opponentActions.selectingStartingPlayer", request.player);
 					} else if (request.reason.startsWith("cardEffect:")) {
-						message = locale.game.automatic.opponentActions.effectSelectingPlayer.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+						message = localize("game.automatic.opponentActions.effectSelectingPlayer", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.reason.split(":")[1])).name});
 					}
 					autoUI.showOpponentAction(message);
 					break;
 				}
 				case "chooseAbility": {
-					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingEffect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
+					autoUI.showOpponentAction(localize("game.automatic.opponentActions.selectingEffect", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.effect.split(":")[0])).name}));
 					break;
 				}
 				case "chooseType": {
-					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingType.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
+					autoUI.showOpponentAction(localize("game.automatic.opponentActions.selectingType", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.effect.split(":")[0])).name}));
 					break;
 				}
 				case "chooseDeckSide": {
-					autoUI.showOpponentAction(locale.game.automatic.opponentActions.selectingDeckSide.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name));
+					autoUI.showOpponentAction(localize("game.automatic.opponentActions.selectingDeckSide", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.effect.split(":")[0])).name}));
 					break;
 				}
 				case "applyActionModificationAbility": {
-					autoUI.showOpponentAction(locale.game.automatic.opponentActions.decidingOnModificationAbility
-						.replaceAll("{#CARD}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
-						.replaceAll("{#TARGET}", (await Promise.all(request.target.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
-					);
+					autoUI.showOpponentAction(localize("game.automatic.opponentActions.decidingOnModificationAbility", {
+						PLAYER: request.player,
+						CARD: (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"),
+						TARGET: (await Promise.all(request.target.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")
+					}));
 					break;
 				}
 				case "doOptionalEffectSection": {
-					autoUI.showOpponentAction(locale.game.automatic.opponentActions.decidingOnOptionalbilitySection
-						.replaceAll("{#CARDNAME}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
-					);
+					autoUI.showOpponentAction(localize("game.automatic.opponentActions.decidingOnOptionalbilitySection", {
+						PLAYER: request.player,
+						CARDNAME: (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")
+					}));
 					break;
 				}
 			}
@@ -625,40 +647,43 @@ export class AutomaticController extends InteractionController {
 		}
 		switch (request.type) {
 			case "chooseCards": {
-				let title = locale.game.cardChoice.genericTitle;
+				let title = localize("game.cardChoice.genericTitle");
 				switch (request.reason) {
 					case "handTooFull": {
-						title = locale.game.cardChoice.handDiscard;
+						title = localize("game.cardChoice.handDiscard");
 						break;
 					}
 					case "selectAttackTarget": {
-						title = locale.game.cardChoice.attackTarget;
+						title = localize("game.cardChoice.attackTarget");
 						break;
 					}
 					case "nextCardToApplyStaticAbilityTo": {
-						title = locale.game.cardChoice.nextCardToApplyStaticAbilityTo;
+						title = localize("game.cardChoice.nextCardToApplyStaticAbilityTo");
 						break;
 					}
 					default: {
-						title = locale.game.cardChoice[request.reason.substring(0, request.reason.indexOf(":"))]?.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name) ?? locale.game.cardChoice.genericTitle;
+						title = localize(
+							`game.cardChoice.${request.reason.substring(0, request.reason.indexOf(":"))}`,
+							(await cardLoader.getCardInfo(request.reason.split(":")[1])).name
+						) ?? localize("game.cardChoice.genericTitle");
 					}
 				}
 				response.value = await gameUI.presentCardChoice(request.from, title, undefined, request.validAmounts, request);
 				break;
 			}
 			case "choosePlayer": {
-				let question = locale.game.automatic.playerSelect.question;
+				let question = localize("game.automatic.playerSelect.question");
 				if (request.reason == "chooseStartingPlayer") {
-					question = locale.game.automatic.playerSelect.startingPlayerQuestion;
+					question = localize("game.automatic.playerSelect.startingPlayerQuestion");
 				} else if (request.reason.startsWith("cardEffect:")) {
-					question = locale.game.automatic.playerSelect.cardEffectQuestion.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+					question = localize("game.automatic.playerSelect.cardEffectQuestion", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
 				}
-				response.value = (await gameUI.askQuestion(question, locale.game.automatic.playerSelect.you, locale.game.automatic.playerSelect.opponent))? 1 : 0;
+				response.value = (await gameUI.askQuestion(question, localize("game.automatic.playerSelect.you"), localize("game.automatic.playerSelect.opponent")))? 1 : 0;
 				break;
 			}
 			case "chooseAbility": {
 				response.value = await autoUI.promptDropdownSelection(
-					locale.game.automatic.effectSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					localize("game.automatic.effectSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
 					(await Promise.allSettled(request.from.map(abilityId => cardLoader.getAbilityText(abilityId)))).map(promise => promise.value),
 					request
 				);
@@ -666,14 +691,18 @@ export class AutomaticController extends InteractionController {
 			}
 			case "chooseType": {
 				response.value = await autoUI.promptDropdownSelection(
-					locale.game.automatic.typeSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
-					request.from.map(type => locale.types[type]),
+					localize("game.automatic.typeSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					request.from.map(type => localize(`types.${type}`)),
 					request
 				);
 				break;
 			}
 			case "chooseDeckSide": {
-				response.value = (await gameUI.askQuestion(locale.game.automatic.deckSideSelect.prompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name), locale.game.automatic.deckSideSelect.top, locale.game.automatic.deckSideSelect.bottom))? "top" : "bottom";
+				response.value = (await gameUI.askQuestion(
+					localize("game.automatic.deckSideSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					localize("game.automatic.deckSideSelect.top"),
+					localize("game.automatic.deckSideSelect.bottom"))
+				)? "top" : "bottom";
 				break;
 			}
 			case "pass": {
@@ -755,7 +784,7 @@ export class AutomaticController extends InteractionController {
 					this.unitAttackButtons.push(gameUI.addCardButton(
 						request.eligibleUnits[i].zone,
 						request.eligibleUnits[i].index,
-						locale.game.automatic.cardOptions.attack,
+						localize("game.automatic.cardOptions.attack"),
 						"attackDeclaration",
 						function() {
 							this.toggleAttacker(i);
@@ -804,28 +833,29 @@ export class AutomaticController extends InteractionController {
 			}
 			case "enterBattlePhase": {
 				response.value = await gameUI.askQuestion(
-					locale.game.automatic.battlePhase.question,
-					locale.game.automatic.battlePhase.enter,
-					locale.game.automatic.battlePhase.skip
+					localize("game.automatic.battlePhase.question"),
+					localize("game.automatic.battlePhase.enter"),
+					localize("game.automatic.battlePhase.skip")
 				);
 				break;
 			}
 			case "applyActionModificationAbility": {
 				response.value = await gameUI.askQuestion(
-					locale.game.automatic.modificationAbilityPrompt.question
-						.replaceAll("{#CARD}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"))
-						.replaceAll("{#TARGET}", (await Promise.all(request.target.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
-					locale.game.automatic.modificationAbilityPrompt.yes,
-					locale.game.automatic.modificationAbilityPrompt.no
+					localize("game.automatic.modificationAbilityPrompt.question", {
+						CARD: (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/"),
+						TARGET: (await Promise.all(request.target.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")
+					}),
+					localize("game.automatic.modificationAbilityPrompt.yes"),
+					localize("game.automatic.modificationAbilityPrompt.no")
 				);
 				break;
 			}
 			case "doOptionalEffectSection": {
 				response.value = await gameUI.askQuestion(
-					locale.game.automatic.optionalAbilitySection.question
-						.replaceAll("{#CARDNAME}", (await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
-					locale.game.automatic.optionalAbilitySection.yes,
-					locale.game.automatic.optionalAbilitySection.no
+					localize("game.automatic.optionalAbilitySection.question",
+						(await Promise.all(request.ability.card.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					localize("game.automatic.optionalAbilitySection.yes"),
+					localize("game.automatic.optionalAbilitySection.no")
 				);
 				break;
 			}
@@ -839,8 +869,8 @@ export class AutomaticController extends InteractionController {
 							request.eligibleAbilities[i].card.zone,
 							request.eligibleAbilities[i].card.index,
 							request.eligibleAbilities[i].card.values.current.abilities.length === 1?
-								locale.game.automatic.cardOptions.activate :
-								locale.game.automatic.cardOptions.activateMultiple.replace("{#ABILITY}", circledDigits[abilityIndex] ?? (abilityIndex + 1)),
+								localize("game.automatic.cardOptions.activate") :
+								localize("game.automatic.cardOptions.activateMultiple", circledDigits[abilityIndex] ?? (abilityIndex + 1)),
 							"activateAbility",
 							function() {
 								resolve(i);
@@ -880,24 +910,24 @@ export class AutomaticController extends InteractionController {
 			}
 			case "chooseAbilityOrder": {
 				response.value = await autoUI.promptOrderSelection(
-					locale.game.automatic.orderSelect.abilityPrompt.replaceAll("{#CARDNAME}", (await Promise.all(request.applyTo.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
+					localize("game.automatic.orderSelect.abilityPrompt", (await Promise.all(request.applyTo.values.current.names.map(idName => cardLoader.getCardInfo(idName)))).map(info => info.name).join("/")),
 					(await Promise.allSettled(request.abilities.map(ability => cardLoader.getAbilityText(ability.id)))).map(promise => generalUI.createAbilityFragment(promise.value)),
-					locale.game.automatic.orderSelect.confirm
+					localize("game.automatic.orderSelect.confirm")
 				);
 				break;
 			}
 			case "orderCards": {
 				response.value = await autoUI.promptOrderSelection(
-					locale.game.automatic.orderSelect.cardPrompt.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name),
+					localize("game.automatic.orderSelect.cardPrompt", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name),
 					(await Promise.allSettled(request.cards.map(card => cardLoader.getCardInfo(card.values.current.names[0])))).map(promise => document.createTextNode(promise.value.name)),
-					locale.game.automatic.orderSelect.confirm
+					localize("game.automatic.orderSelect.confirm")
 				);
 				break;
 			}
 		}
 
 		this.madeMoveTarget.dispatchEvent(new CustomEvent("move"));
-		netSend("[inputRequestResponse]" + JSON.stringify(response));
+		netSend("inputRequestResponse", JSON.stringify(response));
 		return response;
 	}
 
@@ -907,7 +937,7 @@ export class AutomaticController extends InteractionController {
 
 	cancelRetire(player) {
 		if (player == localPlayer) {
-			netSend("[cancelRetire]");
+			netSend("cancelRetire");
 		}
 		for (let card of this.playerInfos[player.index].retiring) {
 			gameUI.clearDragSource(card.zone, card.index, player);
@@ -979,6 +1009,10 @@ export class AutomaticController extends InteractionController {
 		} else {
 			passModeSelect.value = newValue;
 		}
+	}
+
+	syncToSpectator(spectator) {
+		spectator.send(`${localPlayer.index}[initReplay]${JSON.stringify({replay: game.replay, started: this.#started})}`);
 	}
 }
 

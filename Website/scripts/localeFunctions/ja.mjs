@@ -1,0 +1,1 @@
+// If the Japanese locale ever needs fancy functions, they will show up in here.

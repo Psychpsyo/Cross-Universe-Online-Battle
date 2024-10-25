@@ -108,13 +108,15 @@
 		"players": "Players",
 		"challenge": "Challenge",
 		"cancelChallenge": "Cancel Challenge",
+		"spectate": "Spectate",
 		"kick": "Kick",
 		"status": {
 			"setStatus": "Set Status",
 			"present": "Present",
 			"afk": "AFK",
 			"busy": "Busy",
-			"inGame": "In Game"
+			"inGame": "In Game",
+			"spectating": "Spectating"
 		},
 
 		"incomingChallenge": "{#name} is challenging you to a game:",
@@ -155,40 +157,45 @@
 	},
 
 	"game": {
+		"players": {
+			"you": "you",
+			"opponent": "your opponent"
+		},
+		"zones": {
+			"deck": "{*POSSESSIVE(#PLAYER)} deck",
+			"discard": "{*POSSESSIVE(#PLAYER)} discard pile",
+			"exile": "{*POSSESSIVE(#PLAYER)} exile zone",
+			"unit": "{*POSSESSIVE(#PLAYER)} unit zone",
+			"spellItem": "{*POSSESSIVE(#PLAYER)} spell & item zone",
+			"partner": "{*POSSESSIVE(#PLAYER)} partner zone",
+			"hand": "{*POSSESSIVE(#PLAYER)} hand",
+			"tokens": "tokens"
+		},
+
 		"notices": {
-			"opponentLeft": "Your opponent left the game.",
+			"playerLeft": "{*SENTENCE(#PLAYER)} left the game.",
 			"connectionLost": "Lost connection to your opponent.\nThis is currently unrecoverable so you can leave the game now: ",
 			"rulesEngineCrashed": "The rules engine has encountered a fatal error and crashed.\nIf you don't want this to happen again, please send in this game's replay using the options below.\n(Note: The replay does not contain any personally identifiable data)",
 			"downloadReplay": "Save Replay",
 			"submitBugReport": "Submit Bug Report",
 
-			"youStart": "You go first.",
-			"opponentStarts": "Your opponent goes first.",
-			"yourDeckShuffled": "Your deck was shuffled.",
-			"opponentDeckShuffled": "Your opponent's deck was shuffled.",
-			"opponentChoseYou": "Your opponent chose you.",
-			"opponentChoseSelf": "Your opponent chose themselves.",
-			"opponentChoseType": "Your opponent chose {#TYPE}-type.",
-			"opponentChoseAbility": "Your opponent chose:\n{#ABILITY}",
-			"opponentChoseDeckSide": {
-				"top": "Your opponent chose the deck top.",
-				"bottom": "Your opponent chose the deck bottom."
+			"playerStarts": "{*SENTENCE(#PLAYER)} {*PRESENT_SIMPLE(go|goes|#PLAYER)} first.",
+			"deckShuffled": "{*SENTENCE(#DECK)} was shuffled.",
+			"playerChosePlayer": "{*SENTENCE(#PLAYER)} chose {*PRONOUN(#TARGET|#PLAYER|themself)}.",
+			"playerChoseType": "{*SENTENCE(#PLAYER)} chose {#TYPE}-type.",
+			"playerChoseAbility": "{*SENTENCE(#PLAYER)} chose:\n{#ABILITY}",
+			"playerChoseDeckSide": {
+				"top": "{*SENTENCE(#PLAYER)} chose the deck top.",
+				"bottom": "{*SENTENCE(#PLAYER)} chose the deck bottom."
 			},
 
-			"youDrew": "You drew:",
-			"opponentDrew": "Your opponent drew:",
-			"youSummoned": "You summoned:",
-			"opponentSummoned": "Your opponent summoned:",
-			"youStandardSummoned": "You standard summoned:",
-			"opponentStandardSummoned": "Your opponent standard summoned:",
-			"youCast": "You cast:",
-			"opponentCast": "Your opponent cast:",
-			"youDeployed": "You deployed:",
-			"opponentDeployed": "Your opponent deployed:",
-			"youActivated": "You activated:",
-			"opponentActivated": "Your opponent activated:",
-			"youRevealed": "You revealed:",
-			"opponentRevealed": "Your opponent revealed:",
+			"playerDrew": "{*SENTENCE(#PLAYER)} drew:",
+			"playerSummoned": "{*SENTENCE(#PLAYER)} summoned:",
+			"playerStandardSummoned": "{*SENTENCE(#PLAYER)} standard summoned:",
+			"playerCast": "{*SENTENCE(#PLAYER)} cast:",
+			"playerDeployed": "{*SENTENCE(#PLAYER)} deployed:",
+			"playerActivated": "{*SENTENCE(#PLAYER)} activated:",
+			"playerRevealed": "{*SENTENCE(#PLAYER)} revealed:",
 			"discarded": "Discarded:",
 			"exiled": "Exiled:",
 			"moved": "Moved:",
@@ -237,22 +244,7 @@
 		},
 
 		"cardSelector": {
-			"tokens": "Tokens:",
-			"deck0": "Opponent's Deck:",
-			"deck1": "Your Deck:",
-			"discard0": "Opponent's Discard Pile:",
-			"discard1": "Your Discard Pile:",
-			"exile0": "Opponent's Exile Zone:",
-			"exile1": "Your Exile Zone:",
-			"unit0": "Opponent's Unit Zone:",
-			"unit1": "Your Unit Zone:",
-			"spellItem0": "Opponent's Spell & Item Zone:",
-			"spellItem1": "Your Spell & Item Zone:",
-			"partner0": "Opponent's Partner Zone:",
-			"partner1": "Your Partner Zone:",
-			"hand0": "Opponent's Hand:",
-			"hand1": "Your Hand:",
-
+			"title": "{*TITLE(#ZONE)}:",
 			"returnAllToDeck": "Return All to your Deck"
 		},
 
@@ -279,22 +271,17 @@
 		},
 
 		"gameOver": {
-			"youWon": "You Won!",
-			"youLost": "You Lost!",
+			"victory": "You Won!",
+			"loss": "You Lost!",
+			"playerWon": "{*TITLE(#PLAYER)} Won!",
 			"draw": "Draw!",
 			"bothWon": "Both players won.",
-			"winReasons": {
-				"lifeZero": "Your opponent ran out of life points.",
-				"partnerCostTooHigh": "Your opponent couldn't pay for their partner.",
-				"drawFromEmptyDeck": "Your opponent drew from an empty deck.",
-				"cardEffect": "You won due to the effect of {#CARDNAME}."
-			},
-			"loseReasons": {
-				"lifeZero": "You ran out of life points.",
-				"partnerCostTooHigh": "You couldn't pay for your partner.",
-				"drawFromEmptyDeck": "You drew from an empty deck.",
-				"cardEffect": "Your opponent won due to the effect of {#CARDNAME}."
-			},
+
+			"lifeZero": "{*SENTENCE(#PLAYER)} ran out of life points.",
+			"partnerCostTooHigh": "{*SENTENCE(#PLAYER)} couldn't pay for their partner.",
+			"drawFromEmptyDeck": "{*SENTENCE(#PLAYER)} drew from an empty deck.",
+			"cardEffect": "{*SENTENCE(#PLAYER)} won due to the effect of {#CARD}.",
+
 			"leaveGame": "Leave Game",
 			"showField": "Show Field",
 			"reopenGameOverMenu": "Reopen Game Over Menu"
@@ -434,24 +421,28 @@
 			},
 
 			"opponentActions": {
-				"selectingCards": "Your opponent is selecting card(s).",
-				"effectSelectingCards": "Your opponent is selecting card(s) for the effect of '{#CARDNAME}'.",
-				"effectMoveSelectingCards": "Your opponent is selecting which card(s) should be moved for the effect of '{#CARDNAME}'.",
-				"selectingHandDiscard": "Your opponent is selecting card(s) from hand to discard down to 8.",
-				"selectingEquipTarget": "Your opponent is selecting what unit to equip '{#CARDNAME}' to.",
-				"selectingAttackTarget": "Your opponent is selecting the attack target.",
-				"selectingNextCardToApplyStaticAbilityTo": "Your opponent is selecting for which of their cards static abilities should be handled next.",
+				"selectingCards": "{*SENTENCE(#PLAYER)} is selecting card(s).",
+				"effectSelectingCards": "{*SENTENCE(#PLAYER)} is selecting card(s) for the effect of '{#CARDNAME}'.",
+				"effectMoveSelectingCards": "{*SENTENCE(#PLAYER)} is selecting which card(s) should be moved for the effect of '{#CARDNAME}'.",
+				"selectingHandDiscard": "{*SENTENCE(#PLAYER)} is selecting card(s) from hand to discard down to 8.",
+				"selectingEquipTarget": "{*SENTENCE(#PLAYER)} is selecting what unit to equip '{#CARDNAME}' to.",
+				"selectingAttackTarget": "{*SENTENCE(#PLAYER)} is selecting the attack target.",
+				"selectingNextCardToApplyStaticAbilityTo": "{*SENTENCE(#PLAYER)} is selecting for which of their cards static abilities should be handled next.",
 
-				"selectingPlayer": "Your opponent is selecting a player.",
-				"effectSelectingPlayer": "Your opponent is selecting a player for the effect of '{#CARDNAME}'.",
-				"selectingStartingPlayer": "Your opponent is selecting who goes first.",
+				"selectingPlayer": "{*SENTENCE(#PLAYER)} is selecting a player.",
+				"effectSelectingPlayer": "{*SENTENCE(#PLAYER)} is selecting a player for the effect of '{#CARDNAME}'.",
+				"selectingStartingPlayer": "{*SENTENCE(#PLAYER)} is selecting who goes first.",
 
-				"selectingType": "Your opponent is selecting a type for the effect of '{#CARDNAME}'.",
-				"selectingEffect": "Your opponent is selecting an effect for the effect of '{#CARDNAME}'.",
-				"selectingDeckSide": "Your opponent is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'.",
-				"decidingOnModificationAbility": "Your opponent is deciding whether or not to apply the ability of '{#CARD}' to '{#TARGET}'.",
-				"decidingOnOptionalbilitySection": "Your opponent is deciding whether or not to do the optional part of '{#CARDNAME}'s effect."
+				"selectingType": "{*SENTENCE(#PLAYER)} is selecting a type for the effect of '{#CARDNAME}'.",
+				"selectingEffect": "{*SENTENCE(#PLAYER)} is selecting an effect for the effect of '{#CARDNAME}'.",
+				"selectingDeckSide": "{*SENTENCE(#PLAYER)} is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'.",
+				"decidingOnModificationAbility": "{*SENTENCE(#PLAYER)} is deciding whether or not to apply the ability of '{#CARD}' to '{#TARGET}'.",
+				"decidingOnOptionalbilitySection": "{*SENTENCE(#PLAYER)} is deciding whether or not to do the optional part of '{#CARDNAME}'s effect."
 			}
+		},
+
+		"spectation": {
+			"waitingForGameToStart": "Waiting for the game to start..."
 		}
 	},
 
@@ -1015,15 +1006,14 @@
 	"cardActions": {
 		"U00286": {
 			"scan": "Laplace Scan",
-			"activation": "Your opponent is inspecting your deck with 'Absolute God of the Perfect World'."
+			"activation": "{*SENTENCE(#PLAYER)} is inspecting {*POSSESSIVE(#TARGET)} deck with 'Absolute God of the Perfect World'."
 		},
 		"S00238": {
 			"roll": "Roll"
 		},
 		"I00040": {
 			"roll": "Roll",
-			"yourRoll": "You rolled for '{#CARDNAME}'.\nIt showed a {#RESULT}.",
-			"opponentRoll": "Your opponent rolled for '{#CARDNAME}'.\nIt showed a {#RESULT}."
+			"playerRolled": "{*SENTENCE(#PLAYER)} rolled a dice for '{#CARDNAME}'.\nIt showed a {#RESULT}."
 		}
 	},
 

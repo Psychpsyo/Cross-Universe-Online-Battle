@@ -3,7 +3,7 @@
 // a commit-then-reveal protocol.
 
 import {CURandom} from "../../rulesEngine/src/random.mjs";
-import {netSend, youAre} from "./netcode.mjs";
+import {netSend, youAre, sendToSpectators} from "./netcode.mjs";
 
 export class DistRandom extends CURandom {
 	constructor() {
@@ -34,20 +34,22 @@ export class DistRandom extends CURandom {
 		}
 
 		// send own decryption key now that the opponent has entered the commitment
-		netSend("[distRandKey]" + u8tos(new Uint8Array(await crypto.subtle.exportKey("raw", this.valueKeys.shift()))));
+		netSend("distRandKey", u8tos(new Uint8Array(await crypto.subtle.exportKey("raw", this.valueKeys.shift()))));
 
-		let cypherKey = await this.receiveKey();
-		let view = new DataView(await crypto.subtle.decrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, cypherKey, cyphertext));
+		const cypherKey = await this.receiveKey();
+		const view = new DataView(await crypto.subtle.decrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, cypherKey, cyphertext));
 		if (view.getFloat64(ranges.length * 8) != 0) {
 			throw new Error("Random value has been altered!");
 		}
 
-		return this.values.shift().map((value, i) => Math.floor((value + view.getFloat64(i * 8)) * ranges[i]) % ranges[i]);
+		const result = this.values.shift().map((value, i) => Math.floor((value + view.getFloat64(i * 8)) * ranges[i]) % ranges[i]);
+		sendToSpectators(localPlayer, "spectateRandomValue", result.join("|"));
+		return result;
 	}
 
 	async nextPlayerIndex(game) {
 		let player = await this.nextInt(game.players.length);
-		if (youAre == 1) {
+		if (youAre === 1) {
 			player = (player + 1) % game.players.length;
 		}
 		return player;
@@ -65,7 +67,7 @@ export class DistRandom extends CURandom {
 		}
 		this.values.push(valueList);
 
-		netSend("[distRandValue]" + u8tos(new Uint8Array(await crypto.subtle.encrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, key, view))));
+		netSend("distRandValue", u8tos(new Uint8Array(await crypto.subtle.encrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, key, view))));
 	}
 
 	async receiveKey() {

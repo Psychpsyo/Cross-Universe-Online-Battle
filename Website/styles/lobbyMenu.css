@@ -60,7 +60,8 @@
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	white-space: nowrap;
+	display: flex;
+	gap: 0.3em;
 }
 .userStatusText {
 	transform: translateY(-.1em);
@@ -73,11 +74,18 @@
 .presentStatus {
 	color: lightgreen;
 }
-.afkStatus {
+.afkStatus, .spectatingStatus {
 	color: orange;
 }
 .inGameStatus, .busyStatus {
 	color: red;
+}
+:not(.inGameStatus) + * > .spectateBtn {
+	display: none;
+}
+.inGameStatus + * > .challengeBtn,
+.spectatingStatus + * > .challengeBtn {
+	display: none;
 }
 
 #lobbySettings {

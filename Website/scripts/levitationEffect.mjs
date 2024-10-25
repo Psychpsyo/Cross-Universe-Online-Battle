@@ -103,6 +103,7 @@ levitatingCardPreviewOverlay.addEventListener("click", e => {
 });
 
 export function startEffect() {
+	if (localStorage.getItem("mainMenuCards") !== "true") return;
 	spawnCard(levitatingCards);
 	effectInterval = window.setInterval(function() {
 		spawnCard(levitatingCards);

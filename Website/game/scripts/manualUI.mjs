@@ -1,46 +1,53 @@
 // this file holds all the code needed for UI that is required during manual games.
 
-import {locale} from "../../scripts/locale.mjs";
+import localize from "../../scripts/locale.mjs";
 import {netSend} from "./netcode.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as cardLoader from "../../scripts/cardLoader.mjs";
 
 export function init() {
 	Array.from(document.querySelectorAll(".automaticOnly")).forEach(elem => elem.remove());
+	document.documentElement.classList.add("manualGame");
 
+	if (localPlayer) {
+		initInteraction();
+	}
+}
+
+function initInteraction() {
 	// translation
 	for (let i = 0; i < 2; i++) {
-		document.getElementById("deckTopBtn"+ i).textContent = locale.game.manual.deck.dropTop;
-		document.getElementById("deckShuffleInBtn" + i).textContent = locale.game.manual.deck.dropShuffle;
-		document.getElementById("deckBottomBtn" + i).textContent = locale.game.manual.deck.dropBottom;
-		document.getElementById("deckCancelBtn" + i).textContent = locale.game.manual.deck.dropCancel;
-		document.getElementById("showTopBtn" + i).textContent = locale.game.manual.deck.showTop;
+		document.getElementById("deckTopBtn"+ i).textContent = localize("game.manual.deck.dropTop");
+		document.getElementById("deckShuffleInBtn" + i).textContent = localize("game.manual.deck.dropShuffle");
+		document.getElementById("deckBottomBtn" + i).textContent = localize("game.manual.deck.dropBottom");
+		document.getElementById("deckCancelBtn" + i).textContent = localize("game.manual.deck.dropCancel");
+		document.getElementById("showTopBtn" + i).textContent = localize("game.manual.deck.showTop");
 	}
 
-	drawBtn.textContent = locale.game.manual.deck.draw;
-	shuffleBtn.textContent = locale.game.manual.deck.shuffle;
-	deckSearchBtn.textContent = locale.game.manual.deck.search;
+	drawBtn.textContent = localize("game.manual.deck.draw");
+	shuffleBtn.textContent = localize("game.manual.deck.shuffle");
+	deckSearchBtn.textContent = localize("game.manual.deck.search");
 
-	lifeBtnHeader.textContent = locale.game.manual.actions.life;
-	manaBtnHeader.textContent = locale.game.manual.actions.mana;
-	tokenBtn.textContent = locale.game.manual.actions.tokens;
-	lifeHalf.textContent = locale.game.manual.actions.half;
-	showHandBtn.textContent = locale.game.manual.actions.showHand;
+	lifeBtnHeader.textContent = localize("game.manual.actions.life");
+	manaBtnHeader.textContent = localize("game.manual.actions.mana");
+	tokenBtn.textContent = localize("game.manual.actions.tokens");
+	lifeHalf.textContent = localize("game.manual.actions.half");
+	showHandBtn.textContent = localize("game.manual.actions.showHand");
 
-	cardSelectorReturnToDeck.textContent = locale.game.cardSelector.returnAllToDeck;
+	cardSelectorReturnToDeck.textContent = localize("game.cardSelector.returnAllToDeck");
 
 	gameInteractions.hidden = false;
 
 	//showing/hiding your hand
 	function hideHand() {
-		netSend("[hideHand]");
-		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.showHand;
+		netSend("hideHand");
+		document.getElementById("showHandBtn").textContent = localize("game.manual.actions.showHand");
 		document.getElementById("showHandBtn").addEventListener("click", showHand, {once: true});
 		document.getElementById("hand1").classList.remove("shown");
 	}
 	function showHand() {
-		netSend("[showHand]");
-		document.getElementById("showHandBtn").textContent = locale.game.manual.actions.hideHand;
+		netSend("showHand");
+		document.getElementById("showHandBtn").textContent = localize("game.manual.actions.hideHand");
 		document.getElementById("showHandBtn").addEventListener("click", hideHand, {once: true});
 		document.getElementById("hand1").classList.add("shown");
 	}
@@ -93,7 +100,7 @@ export function init() {
 		btn.addEventListener("click", function() {
 			let fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
 			addCounter(fieldSlot);
-			netSend("[counterAdd]" + fieldSlot);
+			netSend("counterAdd", fieldSlot);
 		});
 	}
 
@@ -162,42 +169,44 @@ export function init() {
 		gameState.controller.returnAllToDeck(gameUI.cardSelectorMainSlot.zone);
 		gameUI.closeCardSelect();
 	});
-
-	document.documentElement.classList.add("manualGame");
 }
 
-export function receiveMessage(command, message) {
+export function receiveMessage(command, message, player) {
 	switch (command) {
 		case "dice": { // opponent clicked the button on 'Fate's Dice' to roll a dice.
 			cardLoader.getCardInfo(message.substring(message.indexOf("|") + 1)).then(card => {
-				chat.putMessage(locale.cardActions.I00040.opponentRoll.replaceAll("{#RESULT}", message.substring(0, message.indexOf("|"))).replaceAll("{#CARDNAME}", card.name), "notice");
+				chat.putMessage(localize("cardActions.I00040.playerRolled", {
+					PLAYER: player,
+					CARDNAME: card.name,
+					RESULT: message.substring(0, message.indexOf("|"))
+				}), "notice");
 			}, ()=>{}); // do nothing on errors
 			return true;
 		}
 		case "laplaceScan": { // opponent used the button on 'Absolute God of the Perfect World' to look at your entire deck
-			chat.putMessage(locale.cardActions.U00286.activation, "notice");
+			chat.putMessage(localize("cardActions.U00286.activation", {PLAYER: player, TARGET: player.next()}), "notice");
 			return true;
 		}
 		case "counterAdd": {
-			addCounter(19 - message);
+			addCounter(getCounterSlotIndex(parseInt(message), player));
 			return true;
 		}
 		case "counterIncrease": {
-			const slotIndex = 19 - message.substring(0, message.indexOf("|"));
+			const slotIndex = getCounterSlotIndex(parseInt(message.substring(0, message.indexOf("|"))), player);
 			const counterIndex = message.substring(message.indexOf("|") + 1);
 			const counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
 			gameUI.setCounter(counter, parseInt(counter.innerHTML) + 1);
 			return true;
 		}
 		case "counterDecrease": {
-			const slotIndex = 19 - message.substring(0, message.indexOf("|"));
+			const slotIndex = getCounterSlotIndex(parseInt(message.substring(0, message.indexOf("|"))), player);
 			const counterIndex = message.substring(message.indexOf("|") + 1);
 			const counter = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex);
 			gameUI.setCounter(counter, parseInt(counter.innerHTML) - 1);
 			return true;
 		}
 		case "counterRemove": {
-			const slotIndex = 19 - message.substring(0, message.indexOf("|"));
+			const slotIndex = getCounterSlotIndex(parseInt(message.substring(0, message.indexOf("|"))), player);
 			const counterIndex = message.substring(message.indexOf("|") + 1);
 			document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder").children.item(counterIndex).remove();
 			return true;
@@ -226,7 +235,7 @@ export function showDeckOptions(deckZone) {
 
 // adds a counter to the specified field slot
 function addCounter(slotIndex) {
-	const counter = gameUI.addCounter(slotIndex); document.createElement("div");
+	const counter = gameUI.addCounter(slotIndex);
 	// prevent middle click default actions
 	counter.addEventListener("mousedown", function (e) {e.preventDefault();})
 	// edit the counter
@@ -234,7 +243,7 @@ function addCounter(slotIndex) {
 		gameUI.setCounter(this, parseInt(this.textContent) + 1);
 		const fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
 		const counterIndex = Array.from(this.parentElement.children).indexOf(this);
-		netSend("[counterIncrease]" + fieldSlot + "|" + counterIndex);
+		netSend("counterIncrease", fieldSlot + "|" + counterIndex);
 	});
 	counter.addEventListener("auxclick", function(e) {
 		const fieldSlot = parseInt(this.parentElement.parentElement.querySelector("img").id.substring(5));
@@ -242,18 +251,23 @@ function addCounter(slotIndex) {
 		switch (e.button) {
 			case 1:
 				this.remove();
-				netSend("[counterRemove]" + fieldSlot + "|" + counterIndex);
+				netSend("counterRemove", fieldSlot + "|" + counterIndex);
 				break;
 			case 2:
 				if (parseInt(this.textContent) == 0) {
 					this.remove();
-					netSend("[counterRemove]" + fieldSlot + "|" + counterIndex);
+					netSend("counterRemove", fieldSlot + "|" + counterIndex);
 				} else {
 					gameUI.setCounter(this, parseInt(this.textContent) - 1);
-					netSend("[counterDecrease]" + fieldSlot + "|" + counterIndex);
+					netSend("counterDecrease", fieldSlot + "|" + counterIndex);
 				}
 				break;
 		}
 		e.preventDefault();
 	});
+}
+
+export function getCounterSlotIndex(slotIndex, fromPlayer) {
+	const distance = fromPlayer.index - (localPlayer?.index ?? 1);
+	return ((distance + game.players.length) % 2) === 0? slotIndex : 19 - slotIndex;
 }

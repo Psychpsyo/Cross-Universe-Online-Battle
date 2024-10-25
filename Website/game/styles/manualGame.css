@@ -7,7 +7,7 @@
 	border: 2px var(--theme-border-color) solid;
 	font-weight: bold;
 }
-.fieldCardContainer:hover img:not([src="images/cardHidden.png"]) ~ .counterHolder .counterAddBtn {
+.interactable .fieldCardContainer:hover img:not([src="images/cardHidden.png"]) ~ .counterHolder .counterAddBtn {
 	display: block;
 }
 

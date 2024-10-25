@@ -108,13 +108,15 @@
 		"players": "プレーヤー",
 		"challenge": null,
 		"cancelChallenge": null,
+		"spectate": null,
 		"kick": null,
 		"status": {
 			"setStatus": null,
 			"present": null,
 			"afk": "AFK",
 			"busy": null,
-			"inGame": null
+			"inGame": "ゲーム内",
+			"spectating": null
 		},
 
 		"incomingChallenge": null,
@@ -155,40 +157,45 @@
 	},
 
 	"game": {
+		"players": {
+			"you": "自分",
+			"opponent": "相手"
+		},
+		"zones": {
+			"deck": "{#PLAYER}のデッキ",
+			"discard": "{#PLAYER}の捨て山",
+			"exile": "{#PLAYER}の隔離",
+			"unit": "{#PLAYER}のユニットゾーン",
+			"spellItem": "{#PLAYER}のスペル＆アイテムゾーン",
+			"partner": "{#PLAYER}のパートナーゾーン",
+			"hand": "{#PLAYER}の手札",
+			"tokens": "トークン"
+		},
+
 		"notices": {
-			"opponentLeft": null,
+			"playerLeft": null,
 			"connectionLost": null,
 			"rulesEngineCrashed": null,
 			"downloadReplay": null,
 			"submitBugReport": null,
 
-			"youStart": null,
-			"opponentStarts": null,
-			"yourDeckShuffled": null,
-			"opponentDeckShuffled": null,
-			"opponentChoseYou": null,
-			"opponentChoseSelf": null,
-			"opponentChoseType": null,
-			"opponentChoseAbility": null,
-			"opponentChoseDeckSide": {
+			"playerStarts": null,
+			"deckShuffled": null,
+			"playerChosePlayer": null,
+			"playerChoseType": null,
+			"playerChoseAbility": null,
+			"playerChoseDeckSide": {
 				"top": null,
 				"bottom": null
 			},
 
-			"youDrew": null,
-			"opponentDrew": null,
-			"youSummoned": null,
-			"opponentSummoned": null,
-			"youStandardSummoned": null,
-			"opponentStandardSummoned": null,
-			"youCast": null,
-			"opponentCast": null,
-			"youDeployed": null,
-			"opponentDeployed": null,
-			"youActivated": null,
-			"opponentActivated": null,
-			"youRevealed": null,
-			"opponentRevealed": null,
+			"playerDrew": null,
+			"playerSummoned": null,
+			"playerStandardSummoned": null,
+			"playerCast": null,
+			"playerDeployed": null,
+			"playerActivated": null,
+			"playerRevealed": null,
 			"discarded": null,
 			"exiled": null,
 			"moved": null,
@@ -237,22 +244,7 @@
 		},
 
 		"cardSelector": {
-			"tokens": "トークン：",
-			"deck0": "相手のデッキ：",
-			"deck1": "自分のデッキ：",
-			"discard0": "相手の捨て山：",
-			"discard1": "自分の捨て山：",
-			"exile0": "相手の隔離：",
-			"exile1": "自分の隔離：",
-			"unit0": "相手のユニットゾーン：",
-			"unit1": "自分のユニットゾーン：",
-			"spellItem0": "相手のスペル＆アイテムゾーン：",
-			"spellItem1": "自分のスペル＆アイテムゾーン：",
-			"partner0": "相手のパートナーゾーン：",
-			"partner1": "自分のパートナーゾーン：",
-			"hand0": "相手の手札：",
-			"hand1": "自分の手札：",
-
+			"title": "{#ZONE}：",
 			"returnAllToDeck": "全てをデッキに戻す"
 		},
 
@@ -279,22 +271,17 @@
 		},
 
 		"gameOver": {
-			"youWon": null,
-			"youLost": null,
+			"victory": null,
+			"loss": null,
+			"playerWon": null,
 			"draw": null,
 			"bothWon": null,
-			"winReasons": {
-				"lifeZero": null,
-				"partnerCostTooHigh": null,
-				"drawFromEmptyDeck": null,
-				"cardEffect": null
-			},
-			"loseReasons": {
-				"lifeZero": null,
-				"partnerCostTooHigh": null,
-				"drawFromEmptyDeck": null,
-				"cardEffect": null
-			},
+
+			"lifeZero": null,
+			"partnerCostTooHigh": null,
+			"drawFromEmptyDeck": null,
+			"cardEffect": null,
+
 			"leaveGame": null,
 			"showField": null,
 			"reopenGameOverMenu": null
@@ -452,6 +439,10 @@
 				"decidingOnModificationAbility": null,
 				"decidingOnOptionalbilitySection": null
 			}
+		},
+
+		"spectation": {
+			"waitingForGameToStart": null
 		}
 	},
 
@@ -1022,8 +1013,7 @@
 		},
 		"I00040": {
 			"roll": "振る",
-			"yourRoll": "自分の《{#CARDNAME}》：{#RESULT}",
-			"opponentRoll": "相手の《{#CARDNAME}》：{#RESULT}"
+			"playerRolled": "{#PLAYER}の《{#CARDNAME}》：{#RESULT}"
 		}
 	},
 

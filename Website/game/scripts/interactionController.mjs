@@ -2,11 +2,12 @@
 // This is to allow switching between a manual simulator and an automatic one.
 
 export class InteractionController {
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		return false;
 	}
 
-	async startGame() {}
+	// fromTheBeginning should be false in cases like spectation, where the game has already advanced.
+	async startGame(fromTheBeginning) {}
 
 	// returns whether or not the card was fully grabbed from the zone
 	grabCard(player, zone, index) {
@@ -21,4 +22,6 @@ export class InteractionController {
 	hotkeyReleased(name) {
 		return false;
 	}
+
+	syncToSpectator(spectator) {}
 }

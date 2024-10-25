@@ -2,6 +2,7 @@ chat-box {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	overflow: hidden;
 }
 chat-box > :not(:first-child):not(.infoBar) {
 	border-top: 2px var(--theme-border-color) solid;
@@ -80,4 +81,8 @@ chat-box > input {
 	color: inherit;
 	outline: none;
 	font-size: .75em;
+}
+
+.uninteractable chat-box > input {
+	display: none;
 }

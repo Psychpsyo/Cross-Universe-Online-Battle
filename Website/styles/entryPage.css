@@ -40,6 +40,11 @@ main {
 	display: flex;
 	flex-direction: column;
 }
+@media (horizontal-viewport-segments: 2) and (device-posture: folded) {
+	#lobbies {
+		flex-basis: env(viewport-segment-bottom 0 0);
+	}
+}
 #lobbies > header {
 	position: relative;
 	text-align: center;

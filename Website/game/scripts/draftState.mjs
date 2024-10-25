@@ -28,8 +28,8 @@ export class DraftState extends GameState {
 		this.opponentReady = false;
 
 		draftStartButton.textContent = locale.draft.startGame;
-		draftDeckOwner0.textContent = players[0].name;
-		draftDeckOwner1.textContent = players[1].name;
+		draftDeckOwner0.textContent = playerData[0].name;
+		draftDeckOwner1.textContent = playerData[1].name;
 
 		draftDeckCount0.textContent = "0/" + format.deckSize;
 		draftDeckCount1.textContent = "0/" + format.deckSize;
@@ -39,7 +39,7 @@ export class DraftState extends GameState {
 		});
 
 		draftStartButton.addEventListener("click", function() {
-			netSend("[ready]");
+			netSend("ready");
 			gameState.pressedReady = true;
 			draftStartButton.textContent = locale.draft.waitingForOpponent;
 			draftStartButton.setAttribute("disabled", "");
@@ -71,12 +71,13 @@ export class DraftState extends GameState {
 			draftGameSetupMenu.hidden = false;
 		}).bind(this));
 	}
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		switch (command) {
 			case "picked": {
 				let cardElem = draftCardSelection.childNodes.item(message);
-				if (this.isForPlayer(cardElem, localPlayer.next())) {
-					this.addToDeck(cardElem, 0);
+				// check if this player is allowed to take this card
+				if (this.isForPlayer(cardElem, player)) {
+					this.addToDeck(cardElem, player.index);
 				}
 				return true;
 			}
@@ -153,7 +154,7 @@ export class DraftState extends GameState {
 			if (!gameState.isForPlayer(this, localPlayer)) return;
 
 			// sync this to the opponent first, since this element may get destroyed by draftAddToDeck if that triggers a reroll.
-			netSend("[picked]" + Array.from(this.parentElement.childNodes).indexOf(this));
+			netSend("picked", Array.from(this.parentElement.childNodes).indexOf(this));
 			gameState.addToDeck(this, 1);
 		});
 		draftCardSelection.appendChild(card);
@@ -194,8 +195,8 @@ export class DraftState extends GameState {
 			// load decks
 			let deckSetupPromises = [];
 			for (let i = 0; i < 2; i++) {
-				players[i].deck = deckFromCardList(Array.from(document.getElementById("draftDeckList" + i).childNodes).map(img => img.dataset.cardId), null, locale.draft.deckName, locale.draft.deckDescription);
-				deckSetupPromises.push(cardLoader.deckToCdfList(players[i].deck, this.automatic, game.players[i]).then(deck => {
+				playerData[i].deck = deckFromCardList(Array.from(document.getElementById("draftDeckList" + i).childNodes).map(img => img.dataset.cardId), null, locale.draft.deckName, locale.draft.deckDescription);
+				deckSetupPromises.push(cardLoader.deckToCdfList(playerData[i].deck, this.automatic, game.players[i]).then(deck => {
 					game.players[i].setDeck(deck);
 					gameUI.updateCard(game.players[i].deckZone, -1);
 					document.getElementById("playerDeckButton" + i).disabled = false;

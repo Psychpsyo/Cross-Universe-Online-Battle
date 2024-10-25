@@ -5,6 +5,7 @@ import {BoardState} from "./boardState.mjs";
 import {DeckState} from "./deckState.mjs";
 import {GameState} from "./gameState.mjs";
 import {Game} from "../../rulesEngine/src/game.mjs";
+import * as localeExtensions from "../../scripts/localeExtensions.mjs";
 
 export class SingleplayerInitState extends GameState {
 	constructor(decks = [null, null], replay = null, useOldManaRule = false) {
@@ -12,6 +13,7 @@ export class SingleplayerInitState extends GameState {
 		loadingIndicator.classList.add("active");
 
 		game = new Game();
+		localeExtensions.extendGame(game);
 		game.config.useOldManaRule = useOldManaRule;
 		localPlayer = game.players[1];
 		game.players[0].aiSystem = window.opponentAi;
@@ -38,7 +40,7 @@ export class SingleplayerInitState extends GameState {
 			for (let i = 0; i < decks.length; i++) {
 				const deck = decks[i] ?? decks[1]; // opponents default to player deck, if given
 				if (!deck) continue;
-				players[i].deck = deck;
+				playerData[i].deck = deck;
 				// TODO: load these simultaneously
 				const cdfList = await cardLoader.deckToCdfList(deck, true, game.players[i]);
 				game.players[i].setDeck(cdfList);
@@ -49,9 +51,8 @@ export class SingleplayerInitState extends GameState {
 				new DeckState(true, true);
 			} else {
 				playerDeckButton1.disabled = false;
-				mainGameArea.hidden = false;
-				gameUI.init();
 				new BoardState(true);
+				gameUI.init();
 			}
 			loadingIndicator.classList.remove("active");
 		})();
