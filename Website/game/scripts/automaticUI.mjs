@@ -1,6 +1,6 @@
 // this file holds all the code needed for UI that is required during automatic games.
 
-import {locale} from "../../scripts/locale.mjs";
+import localize from "../../scripts/locale.mjs";
 import {previewCard} from "./generalUI.mjs";
 import {cardAlignmentInfo} from "../../scripts/profilePicture.mjs";
 import {FieldZone} from "../../rulesEngine/src/zones.mjs";
@@ -13,22 +13,22 @@ let currentActivePhaseElem = null;
 export function init() {
 	Array.from(document.querySelectorAll(".manualOnly")).forEach(elem => elem.remove());
 
-	for (const [key, value] of Object.entries(locale.game.automatic.phases)) {
-		document.getElementById(key + "Indicator").textContent = value;
+	for (const phase of ["manaSupplyPhase", "drawPhase", "firstMainPhase", "battlePhase", "secondMainPhase", "endPhase"]) {
+		document.getElementById(phase + "Indicator").textContent = localize(`game.automatic.phases.${phase}`);
 	}
-	yourTurnDisplayLabel.textContent = locale.game.automatic.turns.you;
-	opponentTurnDisplayLabel.textContent = locale.game.automatic.turns.opponent;
+	yourTurnDisplayLabel.textContent = localize("game.automatic.turns.you");
+	opponentTurnDisplayLabel.textContent = localize("game.automatic.turns.opponent");
 
-	retireCancelBtn.textContent = locale.game.automatic.retire.dropCancel;
-	passBtn.textContent = locale.game.automatic.actions.pass;
-	attackBtn.textContent = locale.game.automatic.actions.attack;
+	retireCancelBtn.textContent = localize("game.automatic.retire.dropCancel");
+	passBtn.textContent = localize("game.automatic.actions.pass");
+	attackBtn.textContent = localize("game.automatic.actions.attack");
 
-	passModeLabel.textContent = locale.game.automatic.actions.passMode;
+	passModeLabel.textContent = localize("game.automatic.actions.passMode");
 	for (const option of passModeSelect.children) {
-		option.textContent = locale.game.automatic.actions.passModes[option.value];
+		option.textContent = localize(`game.automatic.actions.passModes.${option.value}`);
 	}
 
-	typePopupConfirm.textContent = locale.game.automatic.typeSelect.select;
+	typePopupConfirm.textContent = localize("game.automatic.typeSelect.select");
 
 	passBtn.addEventListener("click", function() {
 		this.disabled = true;
@@ -49,7 +49,7 @@ export function startPhase(type) {
 	switch(type) {
 		case "manaSupplyPhase": {
 			currentActivePhaseElem = manaSupplyPhaseIndicator;
-			stackTitle.textContent = locale.game.automatic.stacks.manaSupplyPhase;
+			stackTitle.textContent = localize("game.automatic.stacks.manaSupplyPhase");
 			stackTitle.classList.add("invalid");
 			stackDisplayHolder.dataset.block = "";
 			break;
@@ -113,12 +113,12 @@ export function indicatePass() {
 	passBtn.disabled = false;
 	// stack 1 block 1 uses the more descriptive 'NEXT PHASE'/'END TURN' label instead of 'PASS'
 	if (game.currentStack()?.index === 1 && game.currentStack().blocks.length === 0) {
-		passBtn.textContent = locale.game.automatic.actions[game.currentPhase().types.includes("endPhase")? "endTurn" : "nextPhase"];
+		passBtn.textContent = localize(`game.automatic.actions.${game.currentPhase().types.includes("endPhase")? "endTurn" : "nextPhase"}`);
 	}
 }
 export function clearPass() {
 	passBtn.disabled = true;
-	passBtn.textContent = locale.game.automatic.actions.pass;
+	passBtn.textContent = localize("game.automatic.actions.pass");
 }
 
 export function indicateYourMove() {
@@ -132,10 +132,10 @@ export function clearYourMove() {
 }
 
 export function newStack(number) {
-	stackTitle.textContent = locale.game.automatic.stacks.title.replaceAll("{#NUM}", number);
+	stackTitle.textContent = localize("game.automatic.stacks.title", number);
 	stackTitle.classList.remove("invalid");
 	stackDisplayHolder.innerHTML = "";
-	stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", 1);
+	stackDisplayHolder.dataset.block = localize("game.automatic.stacks.block", 1);
 	stackDisplayHolder.style.setProperty("--block-count", 0);
 }
 export function newBlock(block) {
@@ -144,22 +144,22 @@ export function newBlock(block) {
 	switch(block.constructor) {
 		case blocks.StandardDraw: {
 			card = block.player.deckZone.cards.at(-1);
-			label = locale.game.automatic.blocks.draw;
+			label = localize("game.automatic.blocks.draw");
 			break;
 		}
 		case blocks.Retire: {
 			card = block.units[0];
-			label = locale.game.automatic.blocks.retire;
+			label = localize("game.automatic.blocks.retire");
 			break;
 		}
 		case blocks.AttackDeclaration: {
 			card = block.attackers[0];
-			label = locale.game.automatic.blocks.declare;
+			label = localize("game.automatic.blocks.declare");
 			break;
 		}
 		case blocks.Fight: {
 			card = game.currentAttackDeclaration.target;
-			label = locale.game.automatic.blocks.fight;
+			label = localize("game.automatic.blocks.fight");
 			break;
 		}
 		// These ones need to use the current() version of the card since the one that was summoned/cast/deployed is hidden in the opponent's hand.
@@ -167,22 +167,22 @@ export function newBlock(block) {
 		// it would try to bring up a hidden card.
 		case blocks.StandardSummon: {
 			card = block.card.current().snapshot();
-			label = locale.game.automatic.blocks.summon;
+			label = localize("game.automatic.blocks.summon");
 			break;
 		}
 		case blocks.CastSpell: {
 			card = block.card.current().snapshot();
-			label = locale.game.automatic.blocks.cast;
+			label = localize("game.automatic.blocks.cast");
 			break;
 		}
 		case blocks.DeployItem: {
 			card = block.card.current().snapshot();
-			label = locale.game.automatic.blocks.deploy;
+			label = localize("game.automatic.blocks.deploy");
 			break;
 		}
 		case blocks.AbilityActivation: {
 			card = block.card;
-			label = locale.game.automatic.blocks.activate;
+			label = localize("game.automatic.blocks.activate");
 			break;
 		}
 	}
@@ -204,12 +204,12 @@ export function newBlock(block) {
 	visual.appendChild(labelElem);
 
 	stackDisplayHolder.appendChild(visual);
-	stackDisplayHolder.dataset.block = locale.game.automatic.stacks.block.replaceAll("{#NUM}", block.stack.blocks.length + 1);
+	stackDisplayHolder.dataset.block = localize("game.automatic.stacks.block", block.stack.blocks.length + 1);
 	stackDisplayHolder.style.setProperty("--block-count", block.stack.blocks.length);
 }
 
 export function indicateRetire(amount) {
-	retireBtn.textContent = locale.game.automatic.retire.dropRetire.replaceAll("{#AMOUNT}", amount);
+	retireBtn.textContent = localize("game.automatic.retire.dropRetire", amount);
 	retireOptions.style.display = "block";
 	clearPass();
 }
@@ -231,12 +231,12 @@ export function setAttackTarget(target) {
 			targetDistance = 1;
 			break;
 		}
-		case localPlayer.unitZone: {
+		case game.players[1].unitZone: {
 			targetOffset = target.index;
 			targetDistance = 2;
 			break;
 		}
-		case localPlayer.partnerZone: {
+		case game.players[1].partnerZone: {
 			targetOffset = 2;
 			targetDistance = 3;
 			break;
@@ -452,7 +452,7 @@ export async function showCardSwap(cardA, cardB) {
 			for (const counter in card.counters) {
 				if ((card.counters[counter] ?? 0) === 0) continue;
 
-				const counterElem = gameUI.addCounter(slotIndex, locale.counters[counter]);
+				const counterElem = gameUI.addCounter(slotIndex, localize(`counters.${counter}`));
 				counterElem.classList.add("counterType" + counter);
 				gameUI.setCounter(counterElem, card.counters[counter]);
 			}
@@ -521,7 +521,7 @@ export async function updateCounters(card, type) {
 	const counterHolder = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder");
 	let counterElem = counterHolder.querySelector(".counterType" + type);
 	if (counterElem === null) {
-		counterElem = gameUI.addCounter(slotIndex, locale.counters[type]);
+		counterElem = gameUI.addCounter(slotIndex, localize(`counters.${type}`));
 		counterElem.classList.add("counterType" + type);
 	}
 	const counterCount = card.counters[type] ?? 0;
@@ -560,7 +560,7 @@ export function rulesEngineCrash() {
 
 	// download button
 	const downloadReplayBtn = document.createElement("button");
-	downloadReplayBtn.textContent = locale.game.notices.downloadReplay;
+	downloadReplayBtn.textContent = localize("game.notices.downloadReplay");
 	downloadReplayBtn.addEventListener("click", () => {
 		const downloadElement = document.createElement("a");
 		downloadElement.href = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(game.replay));
@@ -571,7 +571,7 @@ export function rulesEngineCrash() {
 
 	// email button
 	const sendBugReportBtn = document.createElement("button");
-	sendBugReportBtn.textContent = locale.game.notices.submitBugReport;
+	sendBugReportBtn.textContent = localize("game.notices.submitBugReport");
 	sendBugReportBtn.addEventListener("click", () => {
 		const issueTitle = "My Rules Engine Crashed";
 		const issueBody = `# Replay\n<!-- Please drop your replay file here to upload it. -->`;
@@ -579,5 +579,5 @@ export function rulesEngineCrash() {
 	});
 	holder.appendChild(sendBugReportBtn);
 
-	chat.putMessage(locale.game.notices.rulesEngineCrashed, "error", holder);
+	chat.putMessage(localize("game.notices.rulesEngineCrashed"), "error", holder);
 }

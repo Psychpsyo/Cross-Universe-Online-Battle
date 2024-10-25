@@ -4,7 +4,7 @@ export class GameState {
 	constructor() {
 		gameState = this;
 	}
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		return false;
 	}
 	hotkeyPressed(name) {
@@ -13,4 +13,5 @@ export class GameState {
 	hotkeyReleased(name) {
 		return false;
 	}
+	syncToSpectator(spectator) {}
 }

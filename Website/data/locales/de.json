@@ -108,13 +108,15 @@
 		"players": "Spieler",
 		"challenge": "Herausfordern",
 		"cancelChallenge": "Herausforderung canceln",
+		"spectate": "Zuschauen",
 		"kick": "Kicken",
 		"status": {
 			"setStatus": "Status Ändern",
 			"present": "Anwesend",
 			"afk": "AFK",
 			"busy": "Beschäftigt",
-			"inGame": "Im Spiel"
+			"inGame": "Im Spiel",
+			"spectating": "Schaut zu"
 		},
 
 		"incomingChallenge": "{#name} fordert dich heraus:",
@@ -155,40 +157,45 @@
 	},
 
 	"game": {
+		"players": {
+			"you": "du",
+			"opponent": "dein Gegner"
+		},
+		"zones": {
+			"deck": "{*POSSESSIV(#PLAYER|Deck)}",
+			"discard": "{*POSSESSIV(#PLAYER|Ablagestapel)}",
+			"exile": "{*POSSESSIV(#PLAYER|Exil)}",
+			"unit": "{*POSSESSIV(#PLAYER|Unitzone)}",
+			"spellItem": "{*POSSESSIV(#PLAYER|Zauber & Item-Zone)}",
+			"partner": "{*POSSESSIV(#PLAYER|Partnerzone)}",
+			"hand": "{*POSSESSIV(#PLAYER|Handkarten)}",
+			"tokens": "Tokens"
+		},
+
 		"notices": {
-			"opponentLeft": "Dein Gegner hat das Spiel verlassen.",
-			"connectionLost": "Die Verbindung zu deinem Gegner ist abgebrochen.\n(Die Verbindung kann nicht wieder hergestellt werden, also kannst du das Spiel nun verlassen.)",
-			"rulesEngineCrashed": "Die Rules-Engine ist aufgrund eines fatalen Fehlers gecrasht.\nWenn du möchtest, dass das nicht nochmal passiert, schicke mir das Replay für diese Runde über die untenstehenden Optionen.\n(Replays enthalten keinerlei persönliche Daten.)",
+			"playerLeft": "{*SATZ(#PLAYER)} *PRAESENS(hast|hat|#PLAYER) das Spiel verlassen.",
+			"connectionLost": "Die Verbindung zu {*DATIV(*DER(#PLAYER))} ist abgebrochen.\n(Die Verbindung kann nicht wieder hergestellt werden, also kannst du das Spiel nun verlassen.)",
+			"rulesEngineCrashed": "Die Regel-Engine ist aufgrund eines fatalen Fehlers gecrasht.\nWenn du möchtest, dass das nicht nochmal passiert, schicke mir das Replay für diese Runde über die untenstehenden Optionen.\n(Replays enthalten keinerlei persönliche Daten.)",
 			"downloadReplay": "Replay speichern",
 			"submitBugReport": "Bugreport einreichen",
 
-			"youStart": "Du bist zuerst dran.",
-			"opponentStarts": "Dein Gegner ist zuerst dran.",
-			"yourDeckShuffled": "Dein Deck wurde gemischt.",
-			"opponentDeckShuffled": "Das Deck deines Gegners wurde gemischt.",
-			"opponentChoseYou": "Dein Gegner hat dich gewählt.",
-			"opponentChoseSelf": "Dein Gegner hat sich selbst gewählt.",
-			"opponentChoseType": "Dein Gegner hat Typ {#TYPE} gewählt.",
-			"opponentChoseAbility": "Dein Gegner hat gewählt:\n{#ABILITY}",
-			"opponentChoseDeckSide": {
-				"top": "Dein Gegner hat die Deckoberseite gewählt.",
-				"bottom": "Dein Gegner hat die Deckunterseite gewählt."
+			"playerStarts": "{*SATZ(#PLAYER)} {*PRAESENS(bist|ist|#PLAYER)} zuerst dran.",
+			"deckShuffled": "{*SATZ(*DAS(#DECK))} wurde gemischt.",
+			"playerChosePlayer": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} {*PRONOMEN(#TARGET|#PLAYER|sich selbst)} gewählt.",
+			"playerChoseType": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} Typ {#TYPE} gewählt.",
+			"playerChoseAbility": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} gewählt:\n{#ABILITY}",
+			"playerChoseDeckSide": {
+				"top": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} die Deckoberseite gewählt.",
+				"bottom": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} die Deckunterseite gewählt."
 			},
 
-			"youDrew": "Du hast gezogen:",
-			"opponentDrew": "Dein Gegner hat gezogen:",
-			"youSummoned": "Du hast beschworen:",
-			"opponentSummoned": "Dein Gegner hat beschworen:",
-			"youStandardSummoned": "Du hast standardbeschworen:",
-			"opponentStandardSummoned": "Dein Gegner hat standardbeschworen:",
-			"youCast": "Du hast gecasted:",
-			"opponentCast": "Dein Gegner hat gecasted:",
-			"youDeployed": "Du hast deployed:",
-			"opponentDeployed": "Dein Gegner hat deployed:",
-			"youActivated": "Du hast aktiviert:",
-			"opponentActivated": "Dein Gegner hat aktiviert:",
-			"youRevealed": "Du hast gezeigt:",
-			"opponentRevealed": "Dein Gegner hat gezeigt:",
+			"playerDrew": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} gezogen:",
+			"playerSummoned": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} beschworen:",
+			"playerStandardSummoned": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} standardbeschworen:",
+			"playerCast": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} gecasted:",
+			"playerDeployed": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} deployed:",
+			"playerActivated": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} aktiviert:",
+			"playerRevealed": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} gezeigt:",
 			"discarded": "Abgeworfen:",
 			"exiled": "Ins Exil geschickt:",
 			"moved": "Verschoben:",
@@ -237,22 +244,7 @@
 		},
 
 		"cardSelector": {
-			"tokens": "Tokens:",
-			"deck0": "Deck deines Gegners:",
-			"deck1": "Dein Deck:",
-			"discard0": "Ablagestapel deines Gegners:",
-			"discard1": "Dein Ablagestapel:",
-			"exile0": "Exil deines Gegners:",
-			"exile1": "Dein Exil:",
-			"unit0": "Unitzone deines Gegners:",
-			"unit1": "Deine Unitzone:",
-			"spellItem0": "Zauber & Item-Zone deines Gegners:",
-			"spellItem1": "Deine Zauber & Item-Zone:",
-			"partner0": "Partnerzone deines Gegners:",
-			"partner1": "Deine Partnerzone:",
-			"hand0": "Handkarten deines Gegners:",
-			"hand1": "Deine Handkarten:",
-
+			"title": "{*SATZ(#ZONE)}:",
 			"returnAllToDeck": "Alle zurück in dein Deck mischen"
 		},
 
@@ -279,22 +271,17 @@
 		},
 
 		"gameOver": {
-			"youWon": "Gewonnen!",
-			"youLost": "Verloren!",
+			"victory": "Gewonnen!",
+			"loss": "Verloren!",
+			"playerWon": "{*SATZ(#PLAYER)} hat gewonnen!",
 			"draw": "Unentschieden!",
 			"bothWon": "Beide Spieler haben gewonnen.",
-			"winReasons": {
-				"lifeZero": "Die LP deines Gegners sind auf 0 gesunken.",
-				"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
-				"drawFromEmptyDeck": "Dein Gegner musste vom leeren Deck ziehen.",
-				"cardEffect": "Du hast durch den Effekt von {#CARDNAME} gewonnen."
-			},
-			"loseReasons": {
-				"lifeZero": "Deine LP sind auf 0 gesunken.",
-				"partnerCostTooHigh": "Du konntest deinen Partner nicht bezahlen.",
-				"drawFromEmptyDeck": "Du musstest vom leeren Deck ziehen.",
-				"cardEffect": "Dein Gegner hat durch den Effekt von {#CARDNAME} gewonnen."
-			},
+
+			"lifeZero": "{*SATZ(*POSSESSIV(#PLAYER|die LP))} sind auf 0 gesunken.",
+			"partnerCostTooHigh": "Dein Gegner konnte seinen Partner nicht bezahlen.",
+			"drawFromEmptyDeck": "{*SATZ(#PLAYER)} *PRAESENS(musstest|musste|#PLAYER) vom leeren Deck ziehen.",
+			"cardEffect": "{*SATZ(#PLAYER)} *PRAESENS(hast|hat|#PLAYER) durch den Effekt von {#CARDNAME} gewonnen.",
+
 			"leaveGame": "Spiel verlassen",
 			"showField": "Feld anzeigen",
 			"reopenGameOverMenu": "Game-Over-Menü wieder öffnen"
@@ -434,24 +421,28 @@
 			},
 
 			"opponentActions": {
-				"selectingCards": "Dein Gegner wählt Karte(n).",
-				"effectSelectingCards": "Dein Gegner wählt Karte(n) für den Effekt von '{#CARDNAME}'.",
-				"effectMoveSelectingCards": "Dein Gegner wählt aus, welche Karte(n) durch den Effekt von '{#CARDNAME}' verschoben werden sollen.",
-				"selectingHandDiscard": "Dein Gegner wählt Handkarte(n), weil er mehr als 8 hat.",
-				"selectingEquipTarget": "Dein Gegner wählt aus, welche Unit er mit '{#CARDNAME}' ausrüsten möchte.",
-				"selectingAttackTarget": "Dein Gegner wählt eine Unit zum Angriff aus.",
-				"selectingNextCardToApplyStaticAbilityTo": "Dein Gegner wählt aus, auf welche seiner Units als nächstes Statische Fähigkeiten angewandt werden sollen.",
+				"selectingCards": "{*SATZ(#PLAYER)} wählt Karte(n).",
+				"effectSelectingCards": "{*SATZ(#PLAYER)} wählt Karte(n) für den Effekt von '{#CARDNAME}'.",
+				"effectMoveSelectingCards": "{*SATZ(#PLAYER)} wählt aus, welche Karte(n) durch den Effekt von '{#CARDNAME}' verschoben werden sollen.",
+				"selectingHandDiscard": "{*SATZ(#PLAYER)} wählt überschüssige Handkarte(n) zum abwerfen aus.",
+				"selectingEquipTarget": "{*SATZ(#PLAYER)} wählt aus, welche Unit mit '{#CARDNAME}' ausgerüstet werden soll.",
+				"selectingAttackTarget": "{*SATZ(#PLAYER)} wählt eine Unit zum Angriff aus.",
+				"selectingNextCardToApplyStaticAbilityTo": "{*SATZ(#PLAYER)} wählt aus, auf welche Unit Statische Fähigkeiten als nächstes angewandt werden sollen.",
 
-				"selectingPlayer": "Dein Gegner wählt einen Spieler.",
-				"effectSelectingPlayer": "Dein Gegner wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
-				"selectingStartingPlayer": "Dein Gegner wählt, wer anfängt.",
+				"selectingPlayer": "{*SATZ(#PLAYER)} wählt einen Spieler.",
+				"effectSelectingPlayer": "{*SATZ(#PLAYER)} wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
+				"selectingStartingPlayer": "{*SATZ(#PLAYER)} wählt, wer anfängt.",
 
-				"selectingType": "Dein Gegner wählt einen Typ für den Effekt von '{#CARDNAME}'.",
-				"selectingEffect": "Dein Gegner wählt einen Effekt für den Effekt von '{#CARDNAME}'.",
-				"selectingDeckSide": "Dein Gegner wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'.",
-				"decidingOnModificationAbility": "Dein Gegner entscheidet, ob er die Fähigkeit von '{#CARD}' auf '{#TARGET}' anwenden möchte.",
-				"decidingOnOptionalbilitySection": "Dein Gegner entscheidet, ob er den optionalen Teil von '{#CARDNAME}'s Effekt nutzen möchte."
+				"selectingType": "{*SATZ(#PLAYER)} wählt einen Typ für den Effekt von '{#CARDNAME}'.",
+				"selectingEffect": "{*SATZ(#PLAYER)} wählt einen Effekt für den Effekt von '{#CARDNAME}'.",
+				"selectingDeckSide": "{*SATZ(#PLAYER)} wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'.",
+				"decidingOnModificationAbility": "{*SATZ(#PLAYER)} entscheidet darüber, die Fähigkeit von '{#CARD}' auf '{#TARGET}' anzuwenden oder nicht.",
+				"decidingOnOptionalbilitySection": "{*SATZ(#PLAYER)} entscheidet darüber, den optionalen Teil von '{#CARDNAME}'s Effekt zu nutzen oder nicht."
 			}
+		},
+
+		"spectation": {
+			"waitingForGameToStart": "Warte auf Spielstart..."
 		}
 	},
 
@@ -1015,15 +1006,14 @@
 	"cardActions": {
 		"U00286": {
 			"scan": "Laplace Scan",
-			"activation": "Dein Gegner sieht sich mit 'Absolute God of the Perfect World' dein Deck an."
+			"activation": "{*SATZ(#PLAYER)} sieht sich mit 'Absolute God of the Perfect World' {*POSSESSIV(#TARGET|das Deck)} an."
 		},
 		"S00238": {
 			"roll": "Würfeln"
 		},
 		"I00040": {
 			"roll": "Würfeln",
-			"yourRoll": "Du hast für '{#CARDNAME}' gewürfelt.\nEs war eine {#RESULT}.",
-			"opponentRoll": "Dein Gegner hat für '{#CARDNAME}' gewürfelt.\nEs war eine {#RESULT}."
+			"playerRolled": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)}  für '{#CARDNAME}' gewürfelt.\nEs war eine {#RESULT}."
 		}
 	},
 

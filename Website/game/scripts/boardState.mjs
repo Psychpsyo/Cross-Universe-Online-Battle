@@ -2,7 +2,7 @@
 
 import {locale} from "../../scripts/locale.mjs";
 import {GameState} from "./gameState.mjs";
-import {netSend} from "./netcode.mjs";
+import {netSend, spectators} from "./netcode.mjs";
 import {ManualController} from "./manualController.mjs";
 import {AutomaticController} from "./automaticController.mjs";
 import * as ui from "./gameUI.mjs";
@@ -34,32 +34,34 @@ export class BoardState extends GameState {
 
 		this.controller = automatic? new AutomaticController() : new ManualController();
 
-		this.givePartnerChoice();
+		if (localPlayer) {
+			this.givePartnerChoice();
+		}
 
 		// Any AI-controlled players just pick the deck's assigned partner
 		for (const player of game.players) {
 			if (!player.aiSystem) continue;
-			const aiPartnerPosInDeck = player.deckZone.cards.findIndex(card => {return card.cardId === players[player.index].deck.suggestedPartner});
+			const aiPartnerPosInDeck = player.deckZone.cards.findIndex(card => {return card.cardId === playerData[player.index].deck.suggestedPartner});
 			gameState.setPartner(player, aiPartnerPosInDeck);
 		}
 	}
 
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		switch (command) {
 			case "choosePartner": { // opponent selected their partner
 				let partnerPosInDeck = parseInt(message);
-				this.setPartner(game.players[0], partnerPosInDeck);
+				this.setPartner(player, partnerPosInDeck);
 				return true;
 			}
 			case "revealPartner": { // opponent revealed their partner
-				game.players[0].partnerZone.cards[0].hiddenFor = [];
-				ui.updateCard(game.players[0].partnerZone, 0);
+				player.partnerZone.cards[0].hiddenFor = [];
+				ui.updateCard(player.partnerZone, 0);
 				return true;
 			}
 			default: {
-				let done = ui.receiveMessage(command, message);
+				let done = ui.receiveMessage(command, message, player);
 				if (!done) {
-					done = this.controller.receiveMessage(command, message);
+					done = this.controller.receiveMessage(command, message, player);
 				}
 				return done;
 			}
@@ -95,7 +97,7 @@ export class BoardState extends GameState {
 				if (deckSelector.open) {
 					generalUI.closeDeckView();
 				} else {
-					generalUI.loadDeckPreview(players[1].deck);
+					generalUI.loadDeckPreview(playerData[1].deck);
 					generalUI.openDeckView();
 				}
 				return true;
@@ -133,11 +135,15 @@ export class BoardState extends GameState {
 		}
 	}
 
+	syncToSpectator(spectator) {
+		this.controller.syncToSpectator(spectator);
+	}
+
 	givePartnerChoice() {
 		// Do we already have a partner? (happens when replays are loaded)
 		if (localPlayer.partnerZone.cards[0]) return;
 
-		if (players[localPlayer.index].deck.suggestedPartner) {
+		if (playerData[localPlayer.index].deck.suggestedPartner) {
 			if (localStorage.getItem("partnerChoiceToggle") === "true") {
 				ui.askQuestion(locale.game.partnerSelect.useSuggestedQuestion, locale.game.partnerSelect.useSuggested, locale.game.partnerSelect.selectManually).then(result => {
 					if (result) {
@@ -178,16 +184,19 @@ export class BoardState extends GameState {
 	getPartnerFromDeck(partnerPosInDeck = -1) {
 		ui.showBlackoutMessage(locale.game.partnerSelect.waitingForOpponent);
 		if (partnerPosInDeck === -1) {
-			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == players[localPlayer.index].deck.suggestedPartner});
+			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == playerData[localPlayer.index].deck.suggestedPartner});
 		}
-		netSend("[choosePartner]" + partnerPosInDeck);
+		netSend("choosePartner", partnerPosInDeck);
 		this.setPartner(localPlayer, partnerPosInDeck);
 	}
 
-	doStartGame() {
+	doStartGame(fromTheBeginning = true) {
 		if (game.players[0].partnerZone.cards[0] && game.players[1].partnerZone.cards[0]) {
 			mainGameBlackout.classList.add("hidden");
-			this.controller.startGame();
+			for (const spectator of spectators) {
+				this.syncToSpectator(spectator);
+			}
+			this.controller.startGame(fromTheBeginning);
 		}
 	}
 }

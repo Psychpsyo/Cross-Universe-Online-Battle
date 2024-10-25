@@ -150,6 +150,7 @@ textarea {
 	font-size: inherit;
 	color: white;
 	font-weight: bold;
+	cursor: pointer;
 }
 .svgButton > * {
 	filter: drop-shadow(0 .2em .1em #0008);

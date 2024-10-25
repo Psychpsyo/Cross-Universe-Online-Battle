@@ -48,7 +48,7 @@ var themes = {
 	},
 	"worldTree": {
 		"backgroundColor": "black",
-		"background": "https://crossuniverse.net/images/background.jpg",
+		"background": "../images/background.jpg",
 		"backgroundY": "top",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
@@ -63,7 +63,7 @@ var themes = {
 	},
 	"deepSea": {
 		"backgroundColor": "black",
-		"background": "https://crossuniverse.net/images/backgroundDark.jpg",
+		"background": "../images/backgroundDark.jpg",
 		"backgroundY": "10%",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",

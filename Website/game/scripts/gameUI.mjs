@@ -1,6 +1,7 @@
 import {cardActions} from "./cardActions.mjs";
-import {netSend, zoneToLocal} from "./netcode.mjs";
+import {netSend, parseNetZone} from "./netcode.mjs";
 import {previewCard, closeCardPreview} from "./generalUI.mjs";
+import localize from "../../scripts/locale.mjs";
 import {locale} from "../../scripts/locale.mjs";
 import {getCardImage} from "../../scripts/cardLoader.mjs";
 import {Card} from "../../rulesEngine/src/card.mjs";
@@ -20,40 +21,40 @@ let cardChoiceSelected = [];
 
 // localization
 for (const elem of Array.from(document.querySelectorAll(".lifeTitle"))) {
-	elem.textContent = locale.game.playerInfo.life;
+	elem.textContent = localize("game.playerInfo.life");
 }
 for (const elem of Array.from(document.querySelectorAll(".manaTitle"))) {
-	elem.textContent = locale.game.playerInfo.mana;
+	elem.textContent = localize("game.playerInfo.mana");
 }
 
-cardChoiceConfirm.textContent = locale.game.cardChoice.confirm;
-leaveGameBtn.textContent = locale.game.gameOver.leaveGame;
-showFieldBtn.textContent = locale.game.gameOver.showField;
+cardChoiceConfirm.textContent = localize("game.cardChoice.confirm");
+leaveGameBtn.textContent = localize("game.gameOver.leaveGame");
+showFieldBtn.textContent = localize("game.gameOver.showField");
 
 if (localStorage.getItem("fieldLabelToggle") == "true") {
 	document.querySelectorAll(".fieldLabelUnitZone").forEach(label => {
-		label.textContent = locale.game.fieldLabels.unitZone;
+		label.textContent = localize("game.fieldLabels.unitZone");
 	});
 	document.querySelectorAll(".fieldLabelSpellItemZone").forEach(label => {
-		label.textContent = locale.game.fieldLabels.spellItemZone;
+		label.textContent = localize("game.fieldLabels.spellItemZone");
 	});
 	document.querySelectorAll(".fieldLabelPartnerZone").forEach(label => {
-		label.textContent = locale.game.fieldLabels.partnerZone;
+		label.textContent = localize("game.fieldLabels.partnerZone");
 	});
 	document.querySelectorAll(".fieldLabelDeck").forEach(label => {
-		label.textContent = locale.game.fieldLabels.deck;
+		label.textContent = localize("game.fieldLabels.deck");
 		if (locale.game.fieldLabels.verticalText) {
 			label.classList.add("verticalFieldLabel");
 		}
 	});
 	document.querySelectorAll(".fieldLabelDiscardPile").forEach(label => {
-		label.textContent = locale.game.fieldLabels.discardPile;
+		label.textContent = localize("game.fieldLabels.discardPile");
 		if (locale.game.fieldLabels.verticalText) {
 			label.classList.add("verticalFieldLabel");
 		}
 	});
 	document.querySelectorAll(".fieldLabelExileZone").forEach(label => {
-		label.textContent = locale.game.fieldLabels.exileZone;
+		label.textContent = localize("game.fieldLabels.exileZone");
 		if (locale.game.fieldLabels.verticalText) {
 			label.classList.add("verticalFieldLabel");
 		}
@@ -111,7 +112,7 @@ function hideCursor() {
 		return;
 	}
 	cursorHidden = true;
-	netSend("[hideCursor]");
+	netSend("hideCursor");
 }
 
 export function init() {
@@ -128,7 +129,33 @@ export function init() {
 		for (let i = 0; i < 4; i++) {
 			new FieldCardSlot(player.spellItemZone, i);
 		}
+	}
 
+	// card selector
+	cardSelectorMainSlot = new CardSelectorMainSlot()
+	cardSelector.addEventListener("click", function(e) {
+		if (e.target === cardSelector) {
+			closeCardSelect();
+		}
+	});
+	cardSelector.addEventListener("cancel", function(e) {
+		e.preventDefault();
+		closeCardSelect();
+	});
+
+	if (localPlayer) {
+		document.body.classList.add("interactable");
+		initInteraction();
+	} else {
+		document.body.classList.add("uninteractable");
+	}
+
+	recalculateFieldRect();
+	lastFrame = performance.now();
+	animate();
+}
+function initInteraction() {
+	for (const player of game.players) {
 		document.getElementById("hand" + player.index).addEventListener("pointerup", function(e) {
 			if (e.pointerId != currentPointer) {
 				return;
@@ -188,7 +215,7 @@ export function init() {
 		}
 		// check if the normalized cursor position is within the bounds of the visual field
 		if (Math.abs(uiPlayers[1].posX) < 3500 / 2741 / 2) { // 3500 and 2741 being the width and height of the field graphic
-			netSend("[placeCursor]" + uiPlayers[1].posX + "|" + uiPlayers[1].posY, false);
+			netSend("placeCursor", uiPlayers[1].posX + "|" + uiPlayers[1].posY, false);
 			cursorHidden = false;
 		} else {
 			hideCursor();
@@ -210,18 +237,6 @@ export function init() {
 		}
 	});
 
-	// card selector
-	cardSelectorMainSlot = new CardSelectorMainSlot()
-	cardSelector.addEventListener("click", function(e) {
-		if (e.target === cardSelector) {
-			closeCardSelect();
-		}
-	});
-	cardSelector.addEventListener("cancel", function(e) {
-		e.preventDefault();
-		closeCardSelect();
-	});
-
 	// card choice menu
 	cardChoiceMenu.addEventListener("cancel", function(e) {
 		e.preventDefault();
@@ -234,44 +249,47 @@ export function init() {
 		// The timeout is necessary because reparenting and transitioning an element at the same time skips the transition.
 		window.setTimeout(closeCardPreview, 0);
 	});
-
-	recalculateFieldRect();
-	lastFrame = performance.now();
-	animate();
 }
 
-export function receiveMessage(command, message) {
+export function receiveMessage(command, message, player) {
 	switch (command) {
 		case "uiGrabbedCard": { // opponent picked up a card
-			let zone = zoneToLocal(message.substring(0, message.indexOf("|")));
+			let zone = parseNetZone(message.substring(0, message.indexOf("|")), player);
 			let index = message.substring(message.indexOf("|") + 1);
 
-			grabCard(game.players[0], zone, index);
+			grabCard(player, zone, index);
 			return true;
 		}
 		case "uiDroppedCard": { // opponent dropped a card
 			let zone = null;
 			let index = 0;
 			if (message != "") {
-				zone = zoneToLocal(message.substring(0, message.indexOf("|")));
+				zone = parseNetZone(message.substring(0, message.indexOf("|")), player);
 				index = message.substring(message.indexOf("|") + 1);
 			}
-			dropCard(game.players[0], zone, index);
+			dropCard(player, zone, index);
 			return true;
 		}
 		case "hideCursor": { // hide opponent's cursor
-			uiPlayers[0].dragCardElem.hidden = true;
-			uiPlayers[0].cursorElem.hidden = true;
+			uiPlayers[player.index].dragCardElem.hidden = true;
+			uiPlayers[player.index].cursorElem.hidden = true;
 			return true;
 		}
 		case "placeCursor": { // move the opponent's cursor somewhere on the field
-			uiPlayers[0].targetX = message.substring(0, message.indexOf("|")) * -1;
-			uiPlayers[0].targetY = 1 - message.substring(message.indexOf("|") + 1);
-			if (uiPlayers[0].dragCardElem.hidden) {
-				uiPlayers[0].dragCardElem.hidden = false;
-				uiPlayers[0].cursorElem.hidden = false;
-				uiPlayers[0].posX = uiPlayers[0].targetX;
-				uiPlayers[0].posY = uiPlayers[0].targetY;
+			const uiPlayer = uiPlayers[player.index];
+			// only the player on the top half of the screen needs to get their cursor flipped
+			if (player.index === 0) {
+				uiPlayer.targetX = message.substring(0, message.indexOf("|")) * -1;
+				uiPlayer.targetY = 1 - message.substring(message.indexOf("|") + 1);
+			} else {
+				uiPlayer.targetX = parseFloat(message.substring(0, message.indexOf("|")));
+				uiPlayer.targetY = parseFloat(message.substring(message.indexOf("|") + 1));
+			}
+			if (uiPlayer.dragCardElem.hidden) {
+				uiPlayer.dragCardElem.hidden = false;
+				uiPlayer.cursorElem.hidden = false;
+				uiPlayer.posX = uiPlayer.targetX;
+				uiPlayer.posY = uiPlayer.targetY;
 			}
 			return true;
 		}
@@ -331,7 +349,7 @@ export function clearDragSource(zone, index, player) {
 
 export function grabCard(player, zone, index) {
 	if (gameState.controller.grabCard(player, zone, index) && player === localPlayer) {
-		netSend("[uiGrabbedCard]" + gameState.getZoneName(zone) + "|" + index);
+		netSend("uiGrabbedCard", gameState.getZoneName(zone) + "|" + index);
 		document.documentElement.classList.add("localPlayerActiveGrab");
 		return true;
 	}
@@ -340,7 +358,7 @@ export function grabCard(player, zone, index) {
 export function dropCard(player, zone, index) {
 	if (uiPlayers[player.index].dragging) {
 		if (player === localPlayer) {
-			netSend("[uiDroppedCard]" + (zone? gameState.getZoneName(zone) + "|" + index : ""));
+			netSend("uiDroppedCard", (zone? gameState.getZoneName(zone) + "|" + index : ""));
 			document.documentElement.classList.remove("localPlayerActiveGrab");
 		}
 		gameState.controller.dropCard(player, zone, index);
@@ -368,6 +386,7 @@ export function clearCardButtons(zone, index, type) {
 
 function setCardDragEvent(element, uiCardSlot) {
 	element.draggable = false;
+	if (!localPlayer) return;
 	element.addEventListener("pointerdown", function(e) {
 		if (e.button != 1) {
 			element.setPointerCapture(e.pointerId);
@@ -491,7 +510,7 @@ class FieldCardSlot extends UiCardSlot {
 			if (!gameState.automatic && !card.hiddenFor.includes(localPlayer) && this.zone.player === localPlayer) {
 				if (card.cardId in cardActions) {
 					for (const [key, value] of Object.entries(cardActions[card.cardId])) {
-						this.addCardButton(locale.cardActions[card.cardId][key], "cardSpecific", value);
+						this.addCardButton(localize(`cardActions.${card.cardId}.${key}`), "cardSpecific", value);
 					}
 				}
 			}
@@ -655,11 +674,11 @@ class PresentedCardSlot extends UiCardSlot {
 
 		if (this.zone.player === localPlayer) {
 			this.revealBtn = document.createElement("button");
-			this.revealBtn.textContent = locale.game.manual.presented[this.isRevealed? "hide" : "reveal"];
+			this.revealBtn.textContent = localize(`game.manual.presented.${this.isRevealed? "hide" : "reveal"}`);
 			this.revealBtn.addEventListener("click", function() {
 				this.isRevealed = !this.isRevealed;
-				netSend((this.isRevealed? "[revealCard]" : "[unrevealCard]") + this.index);
-				this.revealBtn.textContent = locale.game.manual.presented[this.isRevealed? "hide" : "reveal"];
+				netSend(this.isRevealed? "revealCard" : "unrevealCard", this.index);
+				this.revealBtn.textContent = localize(`game.manual.presented.${this.isRevealed? "hide" : "reveal"}`);
 			}.bind(this));
 			this.cardElem.appendChild(this.revealBtn);
 		}
@@ -771,7 +790,7 @@ export function openCardSelect(zone) {
 	}
 
 	//show selector
-	cardSelectorTitle.textContent = locale.game.cardSelector[gameState.getZoneName(zone)];
+	cardSelectorTitle.textContent = localize("game.cardSelector.title", zone);
 	if (document.getElementById("cardSelectorReturnToDeck")) {
 		if ((zone.player === localPlayer) && (zone.type == "discard" || zone.type == "exile")) {
 			cardSelectorReturnToDeck.hidden = false;
@@ -833,7 +852,7 @@ class UiPlayer {
 		this.cursorElem.style.setProperty("pointer-events", "none");
 		draggedCardImages.appendChild(this.cursorElem);
 		draggedCardImages.appendChild(this.dragCardElem);
-		if (player == localPlayer) {
+		if (player === localPlayer) {
 			this.dragCardElem.id = "yourDragCard";
 			this.cursorElem.hidden = true;
 		} else {
@@ -862,7 +881,7 @@ export class UiValue {
 		this.value = initial;
 		this.targetValue = initial;
 		this.counter = 0;
-		this.baseSpeed = speed;
+		this.baseSpeed = speed; // larger values = slower, 0 = instant
 		this.speed = speed; // the speed with multiplier applied
 		this.displayElem = displayElem;
 		uiValues.push(this);
@@ -871,7 +890,7 @@ export class UiValue {
 	async set(value, speedMultiplier = 1) {
 		if (value != this.value) {
 			this.targetValue = value;
-			if (speedMultiplier === Infinity) {
+			if (speedMultiplier === 0) {
 				this.value = value;
 				this.displayElem.textContent = this.value;
 			} else {
@@ -952,7 +971,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 				const zoneDiv = document.createElement("div");
 				const header = document.createElement("div");
 				header.classList.add("gridHeader");
-				header.textContent = locale.game.cardSelector[gameState.getZoneName(cards[i].zone)];
+				header.textContent = localize("game.cardSelector.title", cards[i].zone);
 				currentGrid = document.createElement("div");
 				currentGrid.classList.add("cardGrid");
 
@@ -1037,7 +1056,7 @@ export function addCounter(slotIndex, name) {
 		counter.title = name;
 	}
 
-	const holder = document.getElementById("field" + slotIndex).parentElement.querySelector(".counterHolder");
+	const holder = document.getElementById(`field${slotIndex}`).parentElement.querySelector(".counterHolder");
 	holder.insertBefore(counter, holder.querySelector(".counterAddBtn"));
 	return counter;
 }
@@ -1067,17 +1086,18 @@ export function showBlackoutMessage(message, subtitle = "") {
 export async function playerWon(player) {
 	let winString = "";
 	if (player.victoryConditions[0].startsWith("cardEffect:")) {
-		winString = locale.game.gameOver[player == localPlayer? "winReasons" : "loseReasons"].cardEffect.replaceAll("{#CARDNAME}", (await cardLoader.getCardInfo(request.reason.split(":")[1])).name);
+		winString = localize(`game.gameOver.cardEffect`, {PLAYER: player, CARD: (await cardLoader.getCardInfo(request.reason.split(":")[1])).name});
 	} else {
-		winString = locale.game.gameOver[player == localPlayer? "winReasons" : "loseReasons"][player.victoryConditions[0]];
+		winString = localize(`game.gameOver.${player.victoryConditions[0]}`, player.next());
 	}
 	finishGame(
-		player == localPlayer? locale.game.gameOver.youWon : locale.game.gameOver.youLost,
+		// Victory message is focused on the local player, or the winner if there is no local player
+		localPlayer? localize(`game.gameOver.${player === localPlayer? "victory" : "loss"}`) : localize("game.gameOver.playerWon", player),
 		winString
 	);
 }
 export function gameDrawn() {
-	finishGame(locale.game.gameOver.draw, locale.game.gameOver.bothWon);
+	finishGame(localize("game.gameOver.draw"), localize("game.gameOver.bothWon"));
 }
 
 function finishGame(message, subtitle) {
@@ -1089,14 +1109,14 @@ function finishGame(message, subtitle) {
 
 leaveGameBtn.addEventListener("click", () => {
 	callingWindow.postMessage({type: "leaveGame"});
-	netSend("[leave]");
+	netSend("leave");
 });
 showFieldBtn.addEventListener("click", function() {
 	if (mainGameBlackout.hidden) {
 		mainGameBlackout.hidden = false;
-		this.textContent = locale.game.gameOver.showField;
+		this.textContent = localize("game.gameOver.showField");
 	} else {
 		mainGameBlackout.hidden = true;
-		this.textContent = locale.game.gameOver.reopenGameOverMenu;
+		this.textContent = localize("game.gameOver.reopenGameOverMenu");
 	}
 });

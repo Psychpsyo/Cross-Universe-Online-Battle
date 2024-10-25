@@ -104,7 +104,8 @@ function connect(overrideWebsocketUrl) {
 				await gameFrameReady;
 				gameFrame.contentWindow.postMessage({
 					type: "sdp",
-					sdp: message
+					sdp: message,
+					negotiationIndex: 0
 				});
 				break;
 			}
@@ -112,7 +113,8 @@ function connect(overrideWebsocketUrl) {
 				await gameFrameReady;
 				gameFrame.contentWindow.postMessage({
 					type: "iceCandidate",
-					candidate: message
+					candidate: message,
+					negotiationIndex: 0
 				});
 				break;
 			}
@@ -256,6 +258,4 @@ preGame.addEventListener("drop", function(e) {
 });
 
 // set up the background cards effect
-if (localStorage.getItem("mainMenuCards") == "true") {
-	startEffect();
-}
+startEffect();

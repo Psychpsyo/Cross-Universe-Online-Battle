@@ -6,10 +6,10 @@
 // (probably through some sort of as of yet nonexistant identity provider/account system or similar)
 // For now, the rest of the cryptography implementation is here since I wrote a lot of it before noticing this obvious problem.
 //
-// TODO: Refactor all of this into separate host and client code
+// This is kind-of a big mess and stands to be re-organized at some point
 
 import {locale} from "./locale.mjs";
-import {startGame, gameFrameReady} from "./gameStarter.mjs";
+import {startGame, spectate, gameFrameReady} from "./gameStarter.mjs";
 import "./profilePicture.mjs";
 
 const unloadWarning = new AbortController();
@@ -31,12 +31,13 @@ const settingsLimits = {
 	gameMode: {options: ["normal", "draft"]},
 	draftFormat: {options: ["beginner", "mayhem", "og137"]}
 }
-const possibleStatuses = ["present", "afk", "busy", "inGame"];
+const possibleStatuses = ["present", "afk", "busy", "inGame", "spectating"];
 
 // lobby translation
 lobbyTemplate.content.querySelector(".lobbyUserIcon").textContent = locale.lobbies.userIconAlt;
 userListHeader.textContent = locale.lobbies.players;
 lobbyUserTemplate.content.querySelector(".challengeBtn").textContent = locale.lobbies.challenge;
+lobbyUserTemplate.content.querySelector(".spectateBtn").textContent = locale.lobbies.spectate;
 lobbyUserTemplate.content.querySelector(".kickBtn").textContent = locale.lobbies.kick;
 for (const option of lobbyUserTemplate.content.querySelector(".statusSelect").children) {
 	option.textContent = locale.lobbies.status[option.value];
@@ -90,6 +91,7 @@ function getSettingLabel(setting) {
 }
 
 class Lobby {
+	#ownPublicSequenceNum = 0; // used to prevent replay attacks on chat messages
 	constructor(name, userLimit, hasPassword, password, gameMode, draftFormat, automatic, oldManaRule, users, ownUserId, ownRsaKeyPair, ownEcdsaKeyPair) {
 		this.setSetting("name", name);
 		this.setSetting("userLimit", userLimit);
@@ -103,7 +105,6 @@ class Lobby {
 		// the RSA keys are for encryption, the ecdsa keys are for signatures
 		this.ownRsaKeyPair = ownRsaKeyPair;
 		this.ownEcdsaKeyPair = ownEcdsaKeyPair;
-		this.ownChatSequenceNum = 0; // used to prevent replay attacks on chat messages
 
 		this.users = [];
 		for (const user of users) {
@@ -112,7 +113,17 @@ class Lobby {
 		this.largestUserId = 0; // largest ID given to a user in this lobby (host only, so it can just start at 0)
 
 		this.currentlyChallenging = null; // the user that is currently being challenge
-		this.playingAgainst = null; // the opponent that is currently being played against
+		this.connectedTo = null; // the player that is currently being played against or spectated
+	}
+
+	set ownPublicSequenceNum(newValue) {
+		this.#ownPublicSequenceNum = newValue;
+		if (isHosting) {
+			getUserFromId(this.ownUserId).lastPublicSequenceNum = this.#ownPublicSequenceNum;
+		}
+	}
+	get ownPublicSequenceNum() {
+		return this.#ownPublicSequenceNum;
 	}
 
 	addUser(user) {
@@ -149,7 +160,7 @@ class Lobby {
 				this.textContent = locale.lobbies.cancelChallenge;
 				loadingIndicator.classList.add("active");
 
-				const signature = await signString("challenge", `offer|${user.id}`, ++user.lastSentChallengeSequenceNum);
+				const signature = await signString("personal", `offer|${user.id}`, ++user.lastSentChallengeSequenceNum);
 				if (isHosting) {
 					getUserConnection(user.id).dataChannel.send(JSON.stringify({
 						type: "challenge",
@@ -162,6 +173,23 @@ class Lobby {
 						to: user.id,
 						signature: signature
 					}));
+				}
+			});
+
+			userElem.querySelector(".spectateBtn").addEventListener("click", async function() {
+				// inform other users of unavailability
+				if (currentLobby.currentlyChallenging) cancelCurrentChallenge();
+				syncNewStatus("spectating");
+
+				// start spectating
+				loadingIndicator.classList.add("active");
+
+				currentLobby.connectedTo = user;
+				user.negotiationIndex = 0;
+				await spectate();
+				if (currentLobby) { // check if the lobby hasn't shut down since
+					currentLobby.connectedTo = null;
+					syncNewStatus("present");
 				}
 			});
 
@@ -267,10 +295,13 @@ class User {
 
 		// used to prevent replay attacks
 		this.lastPublicSequenceNum = lastPublicSequenceNum;
-		this.lastChallengeSequenceNum = 0; // this one is only checked by the client for simplicity and so can start at 0
+		this.lastPersonalSequenceNum = 0; // this one is only checked by the client for simplicity and so can start at 0
 
 		// this is for sent challenges
 		this.lastSentChallengeSequenceNum = 0;
+
+		// for passing into the iframe (will be changed for spectators)
+		this.negotiationIndex = -1;
 	}
 
 	setStatus(newStatus) {
@@ -311,9 +342,12 @@ let hostDataChannel = null; // data channel for communication with the lobby hos
 let doneHandshake = false; // Whether or not the user already did the handshake for the current lobby. This is to prevent a malicious host from spamming password popups.
 const peerConnections = []; // connections to the other users when hosting a lobby
 
+// increased with each spectator in a game the local user is playing, resets to 1 on a new game
+let spectationNegotiationCounter = 1;
+
 // utility functions
 async function syncNewStatus(status) {
-	const signature = await signString("public", `status|${status}`, ++currentLobby.ownChatSequenceNum);
+	const signature = await signString("public", `status|${status}`, ++currentLobby.ownPublicSequenceNum);
 	if (isHosting) {
 		broadcast(JSON.stringify({
 			type: "userStatus",
@@ -343,7 +377,7 @@ async function cancelCurrentChallenge() {
 
 	const message = {
 		type: "challengeCancelled",
-		signature: await signString("challenge", `challengeCancelled|${user.id}`, ++user.lastSentChallengeSequenceNum)
+		signature: await signString("personal", `challengeCancelled|${user.id}`, ++user.lastSentChallengeSequenceNum)
 	}
 
 	if (isHosting) {
@@ -355,8 +389,9 @@ async function cancelCurrentChallenge() {
 	}
 }
 async function presentChallengeInChat(fromUser, signature) {
-	if (!await verifySignature(signature, "challenge", `offer|${currentLobby.ownUserId}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
-	if (currentLobby.playingAgainst || fromUser.hasSentChallenge) {
+	if (!await verifySignature(signature, "personal", `offer|${currentLobby.ownUserId}`, ++fromUser.lastPersonalSequenceNum, fromUser)) return;
+	// auto-deny challenges while in-game and repeat challenges
+	if (currentLobby.connectedTo || fromUser.hasSentChallenge) {
 		acceptOrDenyChallenge(fromUser, false);
 		return;
 	}
@@ -393,9 +428,10 @@ function resolveAnyChatChallenge(userId, resolutionString) {
 
 window.addEventListener("message", async e => {
 	if (e.source !== gameFrame.contentWindow) return;
-	if (!currentLobby?.playingAgainst) return; // if not playing against anyone, there is no lobby-based signalling
+	if (!currentLobby?.connectedTo) return; // if not playing against anyone, there is no lobby-based signalling
 	if (!["sdp", "iceCandidate"].includes(e.data.type)) return;
 
+	const targetUser = currentLobby.users.find(user => user.negotiationIndex === e.data.negotiationIndex);
 	const message = {};
 	switch (e.data.type) {
 		case "sdp": {
@@ -407,26 +443,26 @@ window.addEventListener("message", async e => {
 			//
 			//sdp: u8tos(await crypto.subtle.encrypt(
 			//	{name: "RSA-OAEP"},
-			//	currentLobby.playingAgainst.rsaPublicKey,
+			//	targetUser.rsaPublicKey,
 			//	stou8(e.data.sdp)
 			//))
-			message.signature = await signString("challenge", `sdp|${currentLobby.playingAgainst.id}|${message.sdp}`, ++currentLobby.playingAgainst.lastSentChallengeSequenceNum);
+			message.signature = await signString("personal", `sdp|${targetUser.id}|${message.sdp}`, ++targetUser.lastSentChallengeSequenceNum);
 			break;
 		}
 		case "iceCandidate": {
 			message.type = "iceCandidate";
 			message.candidate = e.data.candidate;
 			// TODO: encrypt candidate like sdp above
-			message.signature = await signString("challenge", `ice|${currentLobby.playingAgainst.id}|${message.candidate}`, ++currentLobby.playingAgainst.lastSentChallengeSequenceNum);
+			message.signature = await signString("personal", `ice|${targetUser.id}|${message.candidate}`, ++targetUser.lastSentChallengeSequenceNum);
 			break;
 		}
 	}
 
 	if (isHosting) {
 		message.from = currentLobby.ownUserId;
-		getUserConnection(currentLobby.playingAgainst.id).dataChannel.send(JSON.stringify(message));
+		getUserConnection(targetUser.id).dataChannel.send(JSON.stringify(message));
 	} else {
-		message.to = currentLobby.playingAgainst.id;
+		message.to = targetUser.id;
 		hostDataChannel.send(JSON.stringify(message));
 	}
 });
@@ -435,11 +471,13 @@ async function acceptOrDenyChallenge(fromUser, accepted) {
 	fromUser.hasSentChallenge = false;
 	const response = {type: accepted? "challengeAccepted" : "challengeDenied"};
 	if (accepted) {
-		currentLobby.playingAgainst = fromUser;
-
-		beginGame(true);
+		currentLobby.connectedTo = fromUser;
+		fromUser.negotiationIndex = 0;
+		doGame(true).then(() => {
+			fromUser.negotiationIndex = -1;
+		})
 	}
-	response.signature = await signString("challenge", `${response.type}|${fromUser.id}`, ++fromUser.lastSentChallengeSequenceNum);
+	response.signature = await signString("personal", `${response.type}|${fromUser.id}`, ++fromUser.lastSentChallengeSequenceNum);
 
 	if (isHosting) {
 		response.from = currentLobby.ownUserId;
@@ -450,16 +488,17 @@ async function acceptOrDenyChallenge(fromUser, accepted) {
 	}
 }
 async function challengeGotAccepted(byUser, signature) {
-	byUser.lastChallengeSequenceNum++;
+	byUser.lastPersonalSequenceNum++;
 	if (!currentLobby.currentlyChallenging || currentLobby.currentlyChallenging.id !== byUser.id) return;
-	if (!await verifySignature(signature, "challenge", `challengeAccepted|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
+	if (!await verifySignature(signature, "personal", `challengeAccepted|${currentLobby.ownUserId}`, byUser.lastPersonalSequenceNum, byUser)) return;
 	lobbyChat.putMessage(locale.lobbies.challengeAcceptedMessage.replaceAll("{#name}", byUser.name), "success");
 	clearCurrentlyChallenging();
-	currentLobby.playingAgainst = byUser;
-
-	beginGame(false);
+	currentLobby.connectedTo = byUser;
+	byUser.negotiationIndex = 0;
+	await doGame(false);
+	byUser.negotiationIndex = -1;
 }
-async function beginGame(isCaller) {
+async function doGame(isCaller) {
 	syncNewStatus("inGame");
 	const gameOptions = {
 		gameMode: currentLobby.gameMode,
@@ -470,23 +509,24 @@ async function beginGame(isCaller) {
 		gameOptions.draftFormat = await (await fetch(`./data/draftFormats/${lobbyDraftFormatInput.value}.json`)).json();
 	}
 	await startGame(isCaller, gameOptions);
-	if (currentLobby) { // in case the lobby shut down since
-		currentLobby.playingAgainst = null;
+	if (currentLobby) { // check if the lobby hasn't shut down since
+		currentLobby.connectedTo = null;
+		spectationNegotiationCounter = 1;
 		syncNewStatus("present");
 	}
 }
 async function challengeGotDenied(byUser, signature) {
-	byUser.lastChallengeSequenceNum++;
+	byUser.lastPersonalSequenceNum++;
 	if (!currentLobby.currentlyChallenging || currentLobby.currentlyChallenging.id !== byUser.id) return;
-	if (!await verifySignature(signature, "challenge", `challengeDenied|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
+	if (!await verifySignature(signature, "personal", `challengeDenied|${currentLobby.ownUserId}`, byUser.lastPersonalSequenceNum, byUser)) return;
 	lobbyChat.putMessage(locale.lobbies.challengeDeniedMessage.replaceAll("{#name}", byUser.name), "error");
 	clearCurrentlyChallenging();
 }
 async function challengeGotCancelled(byUser, signature) {
-	byUser.lastChallengeSequenceNum++;
-	if (!await verifySignature(signature, "challenge", `challengeCancelled|${currentLobby.ownUserId}`, byUser.lastChallengeSequenceNum, byUser)) return;
+	byUser.lastPersonalSequenceNum++;
+	if (!await verifySignature(signature, "personal", `challengeCancelled|${currentLobby.ownUserId}`, byUser.lastPersonalSequenceNum, byUser)) return;
 	byUser.hasSentChallenge = false;
-	if (currentLobby.playingAgainst && currentLobby.playingAgainst.id === byUser.id) {
+	if (currentLobby.connectedTo && currentLobby.connectedTo.id === byUser.id) {
 		gameFrame.style.visibility = "hidden";
 		preGame.style.display = "flex";
 		gameFrame.contentWindow.location.replace("about:blank");
@@ -496,11 +536,16 @@ async function challengeGotCancelled(byUser, signature) {
 	}
 }
 async function sdpReceived(fromUser, sdp, signature) {
-	if (!await verifySignature(signature, "challenge", `sdp|${currentLobby.ownUserId}|${sdp}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+	if (!currentLobby.connectedTo) return;
+	if (!await verifySignature(signature, "personal", `sdp|${currentLobby.ownUserId}|${sdp}`, ++fromUser.lastPersonalSequenceNum, fromUser)) return;
+	if (fromUser !== currentLobby.connectedTo) { // this must be a new spectator
+		fromUser.negotiationIndex = spectationNegotiationCounter++;
+	};
 	await gameFrameReady;
 	gameFrame.contentWindow.postMessage({
 		type: "sdp",
-		sdp: sdp
+		sdp: sdp,
+		negotiationIndex: fromUser.negotiationIndex
 		// TODO: decrypt sdp something like this.
 		// Below code does not work because RSA-OAEP has
 		// a maximum size for the data to encrypt.
@@ -513,11 +558,12 @@ async function sdpReceived(fromUser, sdp, signature) {
 	});
 }
 async function iceReceived(fromUser, candidate, signature) {
-	if (!await verifySignature(signature, "challenge", `ice|${currentLobby.ownUserId}|${candidate}`, ++fromUser.lastChallengeSequenceNum, fromUser)) return;
+	if (!await verifySignature(signature, "personal", `ice|${currentLobby.ownUserId}|${candidate}`, ++fromUser.lastPersonalSequenceNum, fromUser)) return;
 	await gameFrameReady;
 	gameFrame.contentWindow.postMessage({
 		type: "iceCandidate",
-		candidate: candidate
+		candidate: candidate,
+		negotiationIndex: fromUser.negotiationIndex
 		// TODO: Decrypt candidate like SDP above
 	});
 }
@@ -1068,13 +1114,13 @@ async function receiveWebRtcHostMessage(e) {
 		}
 		case "sdp": { // opponent sent an SDP for game connection signalling
 			const user = getUserFromId(message.from);
-			if (user !== currentLobby.playingAgainst) break;
 			sdpReceived(user, message.sdp, message.signature);
 			break;
 		}
 		case "iceCandidate": { // opponent sent an ice candidate for game connection signalling
 			const user = getUserFromId(message.from);
-			if (user !== currentLobby.playingAgainst) break;
+			// refuse ICEs when the user has not initiated a connection. (either via connection process or via spectation SDP)
+			if (user.negotiationIndex === -1) break;
 			iceReceived(user, message.candidate, message.signature);
 			break;
 		}
@@ -1297,7 +1343,7 @@ leaveLobbyButton.addEventListener("click", function() {
 });
 
 lobbyChat.addEventListener("message", async function(e) {
-	const signature = await signString("public", `chat|${e.data}`, ++currentLobby.ownChatSequenceNum);
+	const signature = await signString("public", `chat|${e.data}`, ++currentLobby.ownPublicSequenceNum);
 	if (isHosting) {
 		broadcast(JSON.stringify({
 			type: "chat",

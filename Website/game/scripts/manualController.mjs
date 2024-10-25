@@ -1,18 +1,20 @@
 // This module exports the manual controller, used for manually operated Cross Universe games.
 
 import {InteractionController} from "./interactionController.mjs";
-import {locale} from "../../scripts/locale.mjs";
+import localize from "../../scripts/locale.mjs";
 import {Zone} from "../../rulesEngine/src/zones.mjs";
 import {Card} from "../../rulesEngine/src/card.mjs";
-import {netSend, zoneToLocal} from "./netcode.mjs";
+import {netSend, parseNetZone} from "./netcode.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as manualUI from "./manualUI.mjs";
 import * as cardLoader from "../../scripts/cardLoader.mjs";
+import * as localeExtensions from "../../scripts/localeExtensions.mjs";
 
 class TokenZone {
 	constructor() {
 		this.type = "tokens";
 		this.cards = [];
+		this.localeInfo = localeExtensions.zoneExtension;
 
 		fetch("https://crossuniverse.net/cardInfo", {
 			method: "POST",
@@ -38,6 +40,10 @@ class PresentedZone extends Zone {
 		super(player, "presented");
 	}
 
+	get defaultHiddenFor() {
+		return game.players.filter(p => p !== this.player);
+	}
+
 	add(card, index, clearValues) {
 		const insertedIndex = super.add(card, index, clearValues);
 		card.showTo(this.player);
@@ -46,11 +52,11 @@ class PresentedZone extends Zone {
 }
 
 function addPartnerRevealButton() {
-	gameUI.addCardButton(localPlayer.partnerZone, 0, locale.game.partnerSelect.revealPartner, "revealPartner", function() {
+	gameUI.addCardButton(localPlayer.partnerZone, 0, localize("game.partnerSelect.revealPartner"), "revealPartner", function() {
 		gameUI.clearCardButtons(localPlayer.partnerZone, 0, "revealPartner");
 		localPlayer.partnerZone.cards[0].hiddenFor = [];
 		gameUI.updateCard(localPlayer.partnerZone, 0);
-		netSend("[revealPartner]");
+		netSend("revealPartner");
 	}, true);
 }
 
@@ -58,7 +64,6 @@ export class ManualController extends InteractionController {
 	constructor() {
 		super();
 
-		this.opponentHandShown = false;
 		this.playerInfos = [];
 		for (const player of game.players) {
 			this.playerInfos.push(new ManualPlayerInfo(player));
@@ -66,91 +71,94 @@ export class ManualController extends InteractionController {
 
 		manualUI.init();
 
-		this.tokenZone = new TokenZone();
-		gameState.zones["tokens"] = this.tokenZone;
+		// only if there is an actual player do we need a token zone
+		if (localPlayer) {
+			this.tokenZone = new TokenZone();
+			gameState.zones["tokens"] = this.tokenZone;
+		}
 	}
 
-	async startGame() {
-		this.deckShuffle(localPlayer.deckZone);
-		let startingPlayer = await game.randomPlayer();
-		chat.putMessage(startingPlayer === localPlayer? locale.game.notices.youStart : locale.game.notices.opponentStarts, "notice");
-		addPartnerRevealButton();
+	async startGame(fromTheBeginning) {
+		if (fromTheBeginning) {
+			if (localPlayer) this.deckShuffle(localPlayer.deckZone);
+			const startingPlayer = await game.randomPlayer();
+			chat.putMessage(localize("game.notices.playerStarts", startingPlayer), "notice");
+			if (localPlayer) addPartnerRevealButton();
+		}
 	}
 
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		switch (command) {
-			case "life": { // set opponent's life
-				this.setLife(game.players[0], parseInt(message), false);
+			case "life": { // set player's life
+				this.setLife(player, parseInt(message), false);
 				return true;
 			}
-			case "mana": { // set opponent's mana
-				this.setMana(game.players[0], parseInt(message));
+			case "mana": { // set player's mana
+				this.setMana(player, parseInt(message));
 				return true;
 			}
 			case "grabToken": {
-				cardLoader.getManualCdf(message).then(cdf => this.playerInfos[0].setHeld(new Card(game.players[0], cdf)));
+				cardLoader.getManualCdf(message).then(cdf => this.playerInfos[player.index].setHeld(new Card(player, cdf)));
 				return true;
 			}
 			case "drawCard": {
-				this.deckDraw(game.players[0]);
+				this.deckDraw(player);
 				return true;
 			}
 			case "deckToTop": { // opponent sent their held card to the top of a deck
-				this.deckToTop(game.players[0], zoneToLocal("deck" + message));
+				this.deckToTop(player, parseNetZone("deck" + message, player));
 				return true;
 			}
 			case "deckToBottom": { // opponent sent their held card to the bottom of a deck
-				this.deckToBottom(game.players[0], zoneToLocal("deck" + message));
+				this.deckToBottom(player, parseNetZone("deck" + message, player));
 				return true;
 			}
 			case "deckShuffleIn": { // opponent shuffles their held card into a deck
-				this.deckShuffleIn(game.players[0], zoneToLocal("deck" + message));
+				this.deckShuffleIn(player, parseNetZone("deck" + message, player));
 				return true;
 			}
 			case "deckCancel": { // opponent cancelled dropping their held card into a deck
-				this.deckCancelDrop(game.players[0]);
+				this.deckCancelDrop(player);
 				return true;
 			}
 			case "deckShowTop": { // opponent presented a card
-				this.deckShowTop(game.players[0], zoneToLocal("deck" + message));
+				this.deckShowTop(player, parseNetZone("deck" + message, player));
 				return true;
 			}
 			case "returnAllToDeck": {
-				this.returnAllToDeck(zoneToLocal(message));
+				this.returnAllToDeck(parseNetZone(message, player));
 				return true;
 			}
 			case "deckOrder": { // opponent shuffled a deck
-				let deck = zoneToLocal("deck" + message[0]);
+				const deck = parseNetZone("deck" + message[0], player);
 				message = message.substring(2);
-				let order = message.split("|").map(i => parseInt(i));
+				const order = message.split("|").map(i => parseInt(i));
 				deck.cards.sort((a, b) => order.indexOf(deck.cards.indexOf(a)) - order.indexOf(deck.cards.indexOf(b)));
 				deck.reindex();
 				for (let i = 0; i < deck.cards.length; i++) {
 					gameUI.updateCard(deck, i);
 				}
-				chat.putMessage(deck.player.index == 1? locale.game.notices.yourDeckShuffled : locale.game.notices.opponentDeckShuffled, "notice");
+				chat.putMessage(localize("game.notices.deckShuffled", deck), "notice");
 				return true;
 			}
 			case "showHand": {
-				this.opponentHandShown = true;
-				document.getElementById("hand0").classList.add("shown");
-				for (let i = 0; i < game.players[0].handZone.cards.length; i++) {
-					game.players[0].handZone.cards[i].showTo(localPlayer);
-					gameUI.updateCard(game.players[0].handZone, i);
+				document.getElementById("hand" + player.index).classList.add("shown");
+				for (let i = 0; i < player.handZone.cards.length; i++) {
+					player.handZone.cards[i].showTo(localPlayer);
+					gameUI.updateCard(player.handZone, i);
 				}
 				return true;
 			}
 			case "hideHand": {
-				this.opponentHandShown = false;
-				document.getElementById("hand0").classList.remove("shown");
-				for (let i = 0; i < game.players[0].handZone.cards.length; i++) {
-					game.players[0].handZone.cards[i].hideFrom(localPlayer);
-					gameUI.updateCard(game.players[0].handZone, i);
+				document.getElementById("hand" + player.index).classList.remove("shown");
+				for (let i = 0; i < player.handZone.cards.length; i++) {
+					player.handZone.cards[i].hideFrom(localPlayer);
+					gameUI.updateCard(player.handZone, i);
 				}
 				return true;
 			}
 			default: {
-				return manualUI.receiveMessage(command, message);
+				return manualUI.receiveMessage(command, message, player);
 			}
 		}
 	}
@@ -162,7 +170,7 @@ export class ManualController extends InteractionController {
 		}
 		if (zone == this.tokenZone) {
 			cardLoader.getManualCdf(zone.cards[index].cardId).then(cdf => this.playerInfos[player.index].setHeld(new Card(localPlayer, cdf)));
-			netSend("[grabToken]" + zone.cards[index].cardId);
+			netSend("grabToken", zone.cards[index].cardId);
 			return false;
 		}
 		for (const playerInfo of this.playerInfos) {
@@ -210,7 +218,7 @@ export class ManualController extends InteractionController {
 			}
 			if (insertedIndex != -1) {
 				if (zone === game.players[0].handZone) {
-					if (this.opponentHandShown) {
+					if (document.getElementById("hand0").classList.contains("shown")) {
 						card.showTo(localPlayer);
 					} else {
 						card.hideFrom(localPlayer);
@@ -236,7 +244,7 @@ export class ManualController extends InteractionController {
 			case "destroyToken": {
 				let heldCard = this.playerInfos[localPlayer.index].heldCard;
 				if (heldCard && heldCard.isToken) {
-					netSend("[uiDroppedCard]" + gameState.getZoneName(localPlayer.discardPile) + "|0");
+					netSend("uiDroppedCard", gameState.getZoneName(localPlayer.discardPile) + "|0");
 					this.dropCard(localPlayer, localPlayer.discardPile, 0);
 				}
 				return true;
@@ -262,11 +270,11 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		if (player === localPlayer) {
-			netSend("[drawCard]");
+			netSend("drawCard");
 		}
 		const card = player.deckZone.cards.at(-1);
 		const insertedIndex = player.handZone.add(card, player.handZone.cards.length, false);
-		if (player == localPlayer || this.opponentHandShown) {
+		if (player === localPlayer || document.getElementById("hand0").classList.contains("shown")) {
 			card.showTo(localPlayer);
 		}
 		gameUI.removeCard(player.deckZone, player.deckZone.cards.length);
@@ -289,31 +297,31 @@ export class ManualController extends InteractionController {
 		for (let i = 0; i < deckZone.cards.length; i++) {
 			gameUI.updateCard(deckZone, i);
 		}
-		netSend("[deckOrder]" + deckZone.player.index + "|" + order.join("|"));
-		chat.putMessage(locale.game.notices[deckZone.player === localPlayer? "yourDeckShuffled" : "opponentDeckShuffled"], "notice");
+		netSend("deckOrder", deckZone.player.index + "|" + order.join("|"));
+		chat.putMessage(localize("game.notices.deckShuffled", deckZone), "notice");
 	}
 	deckToTop(player, deckZone) {
 		if (player === localPlayer) {
-			netSend("[deckToTop]" + deckZone.player.index);
+			netSend("deckToTop", deckZone.player.index);
 		}
 		this.dropCard(player, deckZone, deckZone.cards.length);
 	}
 	deckToBottom(player, deckZone) {
 		if (player === localPlayer) {
-			netSend("[deckToBottom]" + deckZone.player.index);
+			netSend("deckToBottom", deckZone.player.index);
 		}
 		this.dropCard(player, deckZone, 0);
 	}
 	deckShuffleIn(player, deckZone) {
 		this.dropCard(player, deckZone, 0);
 		if (player === localPlayer) {
-			netSend("[deckShuffleIn]" + deckZone.player.index);
+			netSend("deckShuffleIn", deckZone.player.index);
 			this.deckShuffle(deckZone);
 		}
 	}
 	deckCancelDrop(player) {
 		if (player === localPlayer) {
-			netSend("[deckCancel]");
+			netSend("deckCancel");
 		}
 		let card = this.playerInfos[player.index].heldCard;
 
@@ -325,7 +333,7 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		if (player === localPlayer) {
-			netSend("[deckShowTop]" + deckZone.player.index);
+			netSend("deckShowTop", deckZone.player.index);
 		}
 		const card = deckZone.cards.at(-1);
 		const presentedZone = this.playerInfos[player.index].presentedZone;
@@ -349,7 +357,7 @@ export class ManualController extends InteractionController {
 			gameUI.insertCard(zone.player.deckZone, 0);
 		}
 		if (zone.player === localPlayer) {
-			netSend("[returnAllToDeck]" + gameState.getZoneName(zone));
+			netSend("returnAllToDeck", gameState.getZoneName(zone));
 			this.deckShuffle(localPlayer.deckZone);
 		}
 	}
@@ -361,7 +369,7 @@ export class ManualController extends InteractionController {
 		}
 		player.life = value;
 		if (player === localPlayer) {
-			netSend("[life]" + localPlayer.life);
+			netSend("life", localPlayer.life);
 		}
 		await gameUI.uiPlayers[player.index].life.set(value);
 		if (value === 0) {
@@ -377,10 +385,39 @@ export class ManualController extends InteractionController {
 			return;
 		}
 		player.mana = value;
-		gameUI.uiPlayers[player.index].mana.set(value, Infinity);
+		gameUI.uiPlayers[player.index].mana.set(value, 0);
 		if (player === localPlayer) {
-			netSend("[mana]" + localPlayer.mana);
+			netSend("mana", localPlayer.mana);
 		}
+	}
+
+	syncToSpectator(spectator) {
+		const manualState = {
+			players: this.playerInfos.map(playerInfo => {return {
+				index: playerInfo.player.index,
+				life: playerInfo.player.life,
+				mana: playerInfo.player.mana,
+				heldCardZone: playerInfo.heldCard? gameState.getZoneName(playerInfo.heldCard.zone) : null,
+				heldCardIndex: playerInfo.heldCard?.index
+			}}),
+			cards: this.getAllCards().map(card => {return {
+				id: card.cardId,
+				zone: gameState.getZoneName(card.zone),
+				index: card.index,
+				player: card.owner.index,
+				hiddenFor: card.hiddenFor.map(player => player.index)
+			}}),
+			counters: Array.from(Array(20).keys()).map(i => {
+				const counterHolder = document.getElementById(`field${i}`).parentElement.querySelector(".counterHolder");
+				const counters = Array.from(counterHolder.querySelectorAll(".counter"));
+				return counters.map(counter => parseInt(counter.innerHTML));
+			})
+		}
+		spectator.send(`${localPlayer.index}[initManual]${JSON.stringify(manualState)}`);
+	}
+
+	getAllCards() {
+		return game.getAllCards().concat(this.playerInfos.map(playerInfo => playerInfo.presentedZone.cards).flat());
 	}
 }
 

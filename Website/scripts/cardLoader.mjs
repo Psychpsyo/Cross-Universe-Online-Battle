@@ -133,8 +133,12 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 	if (!card) {
 		return "./images/cardHidden.png";
 	}
-	let language = (useOwnerLanguage? players[card.owner.index].language : null) ?? localStorage.getItem("language");
-	return card.hiddenFor.includes(localPlayer)? "./images/cardBackFrameP" + card.owner.index + ".png" : getCardImageFromID(card.cardId, language);
+	// If there is a local player, we check if it's hidden for them. If not, we are spectating and only fully public cards should be shown.
+	if(localPlayer? card.hiddenFor.includes(localPlayer) : card.hiddenFor.length > 0) {
+		return `./images/cardBackFrameP${card.owner.index}.png`;
+	}
+	const language = (useOwnerLanguage? playerData[card.owner.index].language : null) ?? localStorage.getItem("language");
+	return getCardImageFromID(card.cardId, language);
 }
 
 // TODO: nested sub-abilities do not work

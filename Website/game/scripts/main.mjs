@@ -1,7 +1,7 @@
-
 import {OnlineInitState} from "./onlineInitState.mjs";
 import {SingleplayerInitState} from "./singleplayerInitState.mjs";
 import {ReplayInitState} from "./replayInitState.mjs";
+import {SpectateInitState} from "./spectateInitState.mjs";
 import {locale} from "../../scripts/locale.mjs";
 import * as netcode from "./netcode.mjs";
 
@@ -14,18 +14,22 @@ window.game = null;
 window.localPlayer = null;
 window.gameState = null;
 
-window.players = [
+window.playerData = [
 	{
 		name: locale.chat.opponent,
 		profilePicture: "S00093",
 		deck: null,
-		language: null
+		initialPartner: null,
+		language: null,
+		ingame: null // the rules engine player object associated with this player
 	},
 	{
 		name: localStorage.getItem("username")? localStorage.getItem("username") : locale.chat.you,
 		profilePicture: localStorage.getItem("profilePicture"),
 		deck: null,
-		language: localStorage.getItem("language")
+		initialPartner: null,
+		language: localStorage.getItem("language"),
+		ingame: null // the rules engine player object associated with this player
 	}
 ];
 
@@ -81,16 +85,20 @@ window.addEventListener("message", e => {
 			);
 			break;
 		}
+		case "spectate": {
+			new SpectateInitState();
+			break;
+		}
 		case "replay": {
 			new ReplayInitState(e.data.data);
 			break;
 		}
 		case "sdp": {
-			netcode.incomingSdp(e.data.sdp);
+			netcode.incomingSdp(e.data.sdp, e.data.negotiationIndex);
 			break;
 		}
 		case "iceCandidate": {
-			netcode.incomingIceCandidate(e.data.candidate);
+			netcode.incomingIceCandidate(e.data.candidate, e.data.negotiationIndex);
 		}
 	}
 });

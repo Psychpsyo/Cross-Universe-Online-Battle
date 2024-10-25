@@ -4,18 +4,19 @@ import {BoardState} from "./boardState.mjs";
 import {locale} from "../../scripts/locale.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as generalUI from "./generalUI.mjs";
+import * as localeExtensions from "../../scripts/localeExtensions.mjs";
 
 export class ReplayInitState extends GameState {
 	constructor(replay) {
 		super();
-		gameState = this;
 
-		players[0].name = locale.chat.replayOpponent;
-		players[1].name = locale.chat.replayYou;
-		players[0].profilePicture = "U00001";
-		players[1].profilePicture = "U00001";
+		playerData[0].name = locale.chat.replayOpponent;
+		playerData[1].name = locale.chat.replayYou;
+		playerData[0].profilePicture = "U00001";
+		playerData[1].profilePicture = "U00001";
 
 		game = new Game();
+		localeExtensions.extendGame(game);
 		localPlayer = game.players[1];
 		game.setReplay(replay);
 
@@ -28,8 +29,8 @@ export class ReplayInitState extends GameState {
 			chat.putMessage(replay.extra.crashReason, "error");
 		}
 
-		gameUI.init();
 		new BoardState(true);
+		gameUI.init();
 		gameState.doStartGame();
 	}
 }

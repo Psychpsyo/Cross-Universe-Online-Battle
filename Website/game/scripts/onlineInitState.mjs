@@ -5,6 +5,7 @@ import {DraftState} from "./draftState.mjs";
 import {DeckState} from "./deckState.mjs";
 import {Game} from "../../rulesEngine/src/game.mjs";
 import {netSend, callOpponent, youAre} from "./netcode.mjs";
+import * as localeExtensions from "../../scripts/localeExtensions.mjs";
 
 export class OnlineInitState extends GameState {
 	constructor(isCaller, gameMode = "normal", automatic = false, useOldManaRule = false, draftFormat = null) {
@@ -15,40 +16,42 @@ export class OnlineInitState extends GameState {
 		this.draftFormat = draftFormat;
 		this.opponentReady = false;
 
-		callOpponent(isCaller).then(() => {
+		// set up the game
+		game = new Game();
+		localeExtensions.extendGame(game);
+		localPlayer = game.players[1];
+		game.config.useOldManaRule = useOldManaRule;
+		game.rng = new DistRandom();
+
+		callOpponent(isCaller).then(async () => {
 			// send your own info
 			if (localStorage.getItem("username")) {
-				netSend("[username]" + localStorage.getItem("username"));
+				netSend("username", localStorage.getItem("username"));
 			}
 			if (localStorage.getItem("profilePicture")) {
-				netSend("[profilePicture]" + localStorage.getItem("profilePicture"));
+				netSend("profilePicture", localStorage.getItem("profilePicture"));
 			}
 			if (localStorage.getItem("cardBack")) {
-				netSend("[cardBack]" + localStorage.getItem("cardBack"));
+				netSend("cardBack", localStorage.getItem("cardBack"));
 			}
-			netSend("[language]" + localStorage.getItem("language"));
+			netSend("language", localStorage.getItem("language"));
 
-			// set up the game
-			game = new Game();
-			game.config.useOldManaRule = useOldManaRule;
-			game.rng = new DistRandom();
-			localPlayer = game.players[1];
-			netSend("[ready]");
+			netSend("ready");
 			this.checkReadyConditions();
 		});
 	}
 
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		switch (command) {
 			case "username": {
 				if (message) {
-					players[0].name = message.substring(0, 100);
+					playerData[player.index].name = message.substring(0, 100);
 				}
 				return true;
 			}
 			case "profilePicture": {
 				if (/^[USIT]\d{5}$/.test(message)) {
-					players[0].profilePicture = message;
+					playerData[player.index].profilePicture = message;
 				}
 				return true;
 			}
@@ -59,7 +62,7 @@ export class OnlineInitState extends GameState {
 				return true;
 			}
 			case "language": {
-				players[0].language = message;
+				playerData[player.index].language = message;
 				return true;
 			}
 			case "ready": {

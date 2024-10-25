@@ -220,6 +220,9 @@
 	justify-content: space-around;
 	padding: .25em;
 }
+.uninteractable #automaticButtonArea {
+	display: none;
+}
 .leftField #automaticButtonArea {
 	flex-direction: row-reverse;
 }

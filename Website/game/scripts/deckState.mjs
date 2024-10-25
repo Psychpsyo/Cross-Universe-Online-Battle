@@ -16,7 +16,7 @@ let currentDeckList = "default";
 function loadDeckFile(file) {
 	let reader = new FileReader();
 	reader.onload = function(e) {
-		//check if deck is in VCI Generator format (ending is .deck) and if so, convert it to deckx
+		// check if deck is in VCI Generator format (ending is .deck) and if so, convert it to deckx
 		gameState.loadDeck(this.fileName.endsWith(".deck")? toDeckx(JSON.parse(e.target.result)) : JSON.parse(e.target.result));
 	};
 
@@ -24,7 +24,7 @@ function loadDeckFile(file) {
 	reader.readAsText(file);
 }
 
-//loading decks into the deck list
+// loading decks into the deck list
 async function addDecksToDeckSelector(deckList) {
 	//empty the deck selector
 	document.getElementById("deckList").innerHTML = "";
@@ -173,14 +173,14 @@ export class DeckState extends GameState {
 		gameUI.init();
 	}
 
-	receiveMessage(command, message) {
+	receiveMessage(command, message, player) {
 		switch (command) {
 			case "deck": {
-				let deck = JSON.parse(message);
-				cardLoader.deckToCdfList(deck, this.automatic, game.players[0]).then(cdfList => {
-					players[0].deck = deck;
-					game.players[0].setDeck(cdfList);
-					gameUI.updateCard(game.players[0].deckZone, -1);
+				const deck = JSON.parse(message);
+				cardLoader.deckToCdfList(deck, this.automatic, player).then(cdfList => {
+					playerData[player.index].deck = deck;
+					player.setDeck(cdfList);
+					gameUI.updateCard(player.deckZone, -1);
 					gameState.checkReadyConditions();
 				});
 				return true;
@@ -200,12 +200,12 @@ export class DeckState extends GameState {
 		try {
 			const cdfList = await cardLoader.deckToCdfList(deck, this.automatic, localPlayer);
 			localPlayer.setDeck(cdfList); // this will throw an error if the deck is invalid
-			players[localPlayer.index].deck = deck;
+			playerData[localPlayer.index].deck = deck;
 			if (this.isSinglePlayer) {
-				for (let i = 0; i < players.length; i++) {
-					if (!players[i].deck) {
+				for (let i = 0; i < playerData.length; i++) {
+					if (!playerData[i].deck) {
 						game.players[i].setDeck(cdfList);
-						players[i].deck = deck;
+						playerData[i].deck = deck;
 					}
 				}
 				this.opponentReady = true;
@@ -262,7 +262,7 @@ export class DeckState extends GameState {
 		deckSelector.classList.add("deckListDisable");
 
 		// sync the deck
-		netSend("[deck]" + JSON.stringify(deck));
+		netSend("deck", JSON.stringify(deck));
 
 		gameUI.updateCard(localPlayer.deckZone, -1);
 		gameUI.showBlackoutMessage(locale.game.deckSelect.waitingForOpponent);
@@ -273,9 +273,9 @@ export class DeckState extends GameState {
 	}
 
 	checkReadyConditions() {
-		if (players.every(player => player.deck !== null)) {
+		if (playerData.every(player => player.deck !== null)) {
 			if (!this.ready) {
-				netSend("[ready]");
+				netSend("ready");
 				this.ready = true;
 			}
 			if (this.opponentReady) {
