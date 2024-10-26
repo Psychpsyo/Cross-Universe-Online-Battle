@@ -1,6 +1,6 @@
 // This file contains localeInfos to extend objects in the rules engine with.
 import localize from "./locale.mjs"
-import {perspectives} from "../../scripts/localeConstants.mjs";
+import {perspectives} from "./localeConstants.mjs";
 
 export function extendGame(game) {
 	for (const player of game.players) {

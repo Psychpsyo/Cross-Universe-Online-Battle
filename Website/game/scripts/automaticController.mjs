@@ -1,7 +1,6 @@
 // This module exports the controller for the automatic simulator which verifies the cross universe game rules
 
 import localize from "../../scripts/locale.mjs";
-import {perspectives} from "../../scripts/localeConstants.mjs";
 import {InteractionController} from "./interactionController.mjs";
 import {netSend} from "./netcode.mjs";
 import * as autopass from "./autopass.mjs";
