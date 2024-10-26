@@ -20,7 +20,12 @@ export class SpectateRandom extends CURandom {
 	// dictates the next value(s) this random will spit out.
 	// this should always be an array, even if it has just 1 element for nextInt() in it
 	insertValue(value) {
-		this.#promiseResolvers.shift()(value);
+		let func = this.#promiseResolvers.shift();
+		if (func) {
+			func(value);
+		} else {
+			this.#nextValues.push(value);
+		}
 	}
 	async #waitForValue() {
 		return new Promise(resolve => {
