@@ -10,6 +10,9 @@
 		<link rel="icon" type="image/png" href="../images/favicon.png">
 		<link rel="manifest" href="manifest.json">
 
+		<script src="scripts/localStorageSetup.js"></script>
+		<link rel="modulepreload" href="custom/index.mjs" as="script">
+
 		<link rel="stylesheet" href="styles/index.css">
 		<link rel="stylesheet" href="/custom/style.css">
 	</head>
@@ -67,7 +70,6 @@
 				<ul id="savedCardsList"></ul>
 			</section>
 		</main>
-		<script src="/scripts/localStorageSetup.js"></script>
-		<script src="/custom/index.mjs" type="module"></script>
+		<script src="custom/index.mjs" type="module"></script>
 	</body>
 </html>

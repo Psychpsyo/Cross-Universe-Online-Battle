@@ -17,6 +17,10 @@
 		<link rel="icon" type="image/png" href="images/favicon.png">
 		<link rel="manifest" href="manifest.json">
 
+		<script src="scripts/polyfills.js"></script>
+		<script src="scripts/localStorageSetup.js"></script>
+		<link rel="modulepreload" href="scripts/main.mjs" as="script">
+
 		<link rel="stylesheet" href="styles/index.css">
 		<link rel="stylesheet" href="styles/entryPage.css">
 		<link rel="stylesheet" href="styles/loadingIndicator.css">
@@ -45,7 +49,7 @@
 				<section id="centeredDiv">
 					<div id="levitatingCards"></div>
 					<div id="mainLogoHolder">
-						<img id="mainLogo" src="./images/logo.png" alt="">
+						<img id="mainLogo" src="./images/logo.webp" alt="">
 					</div>
 					<fieldset id="centerRoomCode" aria-labelledby="roomCodeInputTitle">
 						<div id="roomCodeInputFieldHolder">
@@ -185,10 +189,8 @@
 			</li>
 		</template>
 
-		<script src="scripts/polyfills.js"></script>
-		<script src="scripts/localStorageSetup.js"></script>
-		<script src="scripts/navigationHandler.js"></script>
 		<script src="scripts/main.mjs" type="module"></script>
 		<script src="scripts/lobbies.mjs" type="module"></script>
+		<script src="scripts/navigationHandler.mjs" type="module"></script>
 	</body>
 </html>

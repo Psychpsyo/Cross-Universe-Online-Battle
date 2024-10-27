@@ -48,7 +48,7 @@ var themes = {
 	},
 	"worldTree": {
 		"backgroundColor": "black",
-		"background": "../images/background.jpg",
+		"background": "../images/background.webp",
 		"backgroundY": "top",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
@@ -63,7 +63,7 @@ var themes = {
 	},
 	"deepSea": {
 		"backgroundColor": "black",
-		"background": "../images/backgroundDark.jpg",
+		"background": "../images/backgroundDark.webp",
 		"backgroundY": "10%",
 		"fieldDropShadow": true,
 		"shadowColor": "rgba(0, 0, 0, 0.7)",
@@ -117,7 +117,7 @@ var fonts = {
 	"openDyslexic": "OpenDyslexic",
 	"comicSans": "Comic Sans MS",
 	"custom": localStorage.getItem("customFont")
-}
+};
 function applyFont(font) {
 	localStorage.setItem("font", font);
 	document.documentElement.style.setProperty("--custom-font", fonts[font]);
@@ -125,7 +125,7 @@ function applyFont(font) {
 applyFont(localStorage.getItem("font") ?? "default");
 
 // hotkeys
-let hotkeyDefaults = {
+const hotkeyDefaults = {
 	"showYourDiscard": {
 		"keyCode": "KeyD",
 		"ctrl": false,
@@ -228,4 +228,20 @@ if (localStorage.getItem("hotkeys")) {
 //position the menu on the right if that option is enabled
 if (localStorage.getItem("fieldLeftToggle") == "true") {
 	document.documentElement.classList.add("leftField");
+}
+
+function preload(href, as, isModule) {
+	const link = document.createElement("link");
+	link.href = href;
+	link.as = as;
+	link.rel = isModule? "modulepreload" : "preload";
+	document.head.appendChild(link);
+}
+
+preload("scripts/locale.mjs", "script", true);
+preload("scripts/localeFunctions/en.mjs", "script", true);
+preload("data/locales/en.json", "fetch", false);
+if (localStorage.getItem("language") !== "en") {
+	preload(`scripts/localeFunctions/${localStorage.getItem("language")}.mjs`, "script", true);
+	preload(`data/locales/${localStorage.getItem("language")}.json`, "fetch", false);
 }
