@@ -94,7 +94,8 @@ export async function previewCard(card, specific = true) {
 	currentPreviewedCard = card;
 
 	// set the image preview
-	cardDetailsImage.style.backgroundImage = "url(" + cardLoader.getCardImage(card, localStorage.getItem("opponentCardLanguage") === "true" && localStorage.getItem("previewCardLanguage") === "true") + ")";
+	const useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true" && localStorage.getItem("previewCardLanguage") === "true";
+	cardDetailsImage.style.backgroundImage = `url(${cardLoader.getCardImage(card, undefined, useOwnerLanguage)}), url(${cardLoader.getCardImage(card, "tiny", useOwnerLanguage)})`;
 
 	return updateCardPreview(card);
 }
@@ -254,7 +255,7 @@ export function loadDeckPreview(deck) {
 	let partnerAdded = false;
 	deckToCardIdList(deck).forEach(cardId => {
 		let cardImg = document.createElement("img");
-		cardImg.src = cardLoader.getCardImageFromID(cardId);
+		cardImg.src = cardLoader.getCardImageFromID(cardId, "tiny");
 		cardImg.dataset.cardId = cardId;
 
 		// make partner card glow

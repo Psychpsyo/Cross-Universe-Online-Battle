@@ -8,7 +8,7 @@ class ProfilePicture extends HTMLElement {
 	}
 
 	setIcon(cardId, flip = null) {
-		this.style.backgroundImage = "url('" + getCardImageFromID(cardId) + "')";
+		this.style.backgroundImage = "url('" + getCardImageFromID(cardId, "small") + "')";
 		if (cardAlignmentInfo[cardId]?.left) {
 			this.style.backgroundPositionX = cardAlignmentInfo[cardId].left + "%";
 		}

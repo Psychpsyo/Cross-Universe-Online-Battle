@@ -138,7 +138,7 @@ export class DraftState extends GameState {
 		const boosterElement = this.currentBooster.pop();
 		card.dataset.cardId = boosterElement.card;
 		card.dataset.forPlayer = boosterElement.forPlayer;
-		card.src = cardLoader.getCardImageFromID(card.dataset.cardId);
+		card.src = cardLoader.getCardImageFromID(card.dataset.cardId, "tiny");
 		card.addEventListener("click", async function(e) {
 			if (e.shiftKey || e.ctrlKey || e.altKey) {
 				e.stopPropagation();

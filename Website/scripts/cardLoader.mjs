@@ -28,11 +28,12 @@ export class UnsupportedCardError extends Error {
 	}
 }
 
-export function getCardImageFromID(cardId, language = localStorage.getItem("language")) {
+// size should be one of "small" or "tiny", if the image should not be loaded at full size
+export function getCardImageFromID(cardId, size, language = localStorage.getItem("language")) {
 	if (cardId.startsWith("C")) {
 		return customCardURLs[parseInt(cardId.substring(1))];
 	}
-	return (localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")) + (cardLanguages.includes(language)? language : "en") + "/" + cardId + ".jpg";
+	return `${localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")}${cardLanguages.includes(language)? language : "en"}/${size? `${size}/` : ""}${cardId}.${size? "avif" : "jpg"}`;
 }
 
 export async function getCardInfo(cardId) {
@@ -129,7 +130,7 @@ export async function getCdf(cardId) {
 	return cdfCache[cardId];
 }
 
-export function getCardImage(card, useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true") {
+export function getCardImage(card, size, useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true") {
 	if (!card) {
 		return "./images/cardHidden.png";
 	}
@@ -138,7 +139,7 @@ export function getCardImage(card, useOwnerLanguage = localStorage.getItem("oppo
 		return `./images/cardBackFrameP${card.owner.index}.png`;
 	}
 	const language = (useOwnerLanguage? playerData[card.owner.index].language : null) ?? localStorage.getItem("language");
-	return getCardImageFromID(card.cardId, language);
+	return getCardImageFromID(card.cardId, size, language);
 }
 
 // TODO: nested sub-abilities do not work

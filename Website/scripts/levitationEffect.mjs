@@ -49,15 +49,15 @@ async function getRandomCardLink() {
 	const day = date.getDate();
 	const month = date.getMonth();
 	if (month === 11 && ([23, 24, 25, 26].includes(day))) {
-		return cardBaseUrl + locale.code + "/" + christmasCards[Math.floor(Math.random(christmasCards.length))] + ".jpg";
+		return `${cardBaseUrl}${locale.code}/tiny/${christmasCards[Math.floor(Math.random(christmasCards.length))]}.avif`;
 	}
 	if (month === 3 && day === 1) {
-		return cardBaseUrl + locale.code + (Math.random() > .5? "/S00099.jpg" : "/S00238.jpg"); // Final Impact or Final Dice
+		return `${cardBaseUrl}${locale.code}/tiny/${Math.random() > .5? "S00099" : "S00238"}.avif`; // Final Impact or Final Dice
 	}
 
 	// the usual
 	// this goes over an intermediary fetch() so that the URL in the actual src will always point to a definite card.
-	const response = await fetch(cardBaseUrl + "random/?lang=" + locale.code + "&num=" + cardsSoFar);
+	const response = await fetch(`${cardBaseUrl}random/tiny/?lang=${locale.code}&num=${cardsSoFar}`);
 	return response.url;
 }
 
@@ -77,10 +77,14 @@ async function spawnCard() {
 	}
 	card.style.left = position + "%";
 	card.dataset.src = await getRandomCardLink();
+	card.dataset.cardId = card.dataset.src.match(/(?<=\/)[USIT]\d{5}(?=.)/);
 	card.style.backgroundImage = `url('${card.dataset.src}')`;
 	card.addEventListener("click", function() {
 		levitatingCardPreviewImage.src = this.dataset.src;
-		levitatingCardPreviewOverlay.classList.add("shown");
+		setTimeout(() => {
+			levitatingCardPreviewImage.src = `${cardBaseUrl}${locale.code}/${this.dataset.cardId}.jpg`;
+			levitatingCardPreviewOverlay.classList.add("shown");
+		}, 0);
 	});
 	cardsSoFar++;
 
@@ -98,7 +102,7 @@ async function spawnCard() {
 }
 
 document.documentElement.style.setProperty("--p1-card-back", "url('" + localStorage.getItem("cardBack") + "')");
-levitatingCardPreviewOverlay.addEventListener("click", e => {
+levitatingCardPreviewOverlay.addEventListener("click", () => {
 	levitatingCardPreviewOverlay.classList.remove("shown");
 });
 

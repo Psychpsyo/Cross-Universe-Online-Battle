@@ -216,7 +216,7 @@ function cardToAltText(card) {
 		.replace("{#EFFECTS}", card.effectsPlain);
 }
 
-function createCardButton(card, lazyLoading) {
+function createCardButton(card, size, lazyLoading) {
 	let cardButton = document.createElement("button");
 	cardButton.classList.add("cardButton");
 	cardButton.dataset.cardID = card.cardID;
@@ -224,7 +224,7 @@ function createCardButton(card, lazyLoading) {
 	if (lazyLoading) {
 		cardImg.loading = "lazy";
 	}
-	cardImg.src = cardLoader.getCardImageFromID(card.cardID);
+	cardImg.src = cardLoader.getCardImageFromID(card.cardID, size);
 	cardImg.alt = cardToAltText(card);
 	cardButton.addEventListener("click", async function() {
 		showCardInfo(await cardLoader.getCardInfo(this.dataset.cardID));
@@ -283,8 +283,8 @@ async function showSearchResults(cards) {
 			}
 		}
 		if (display) {
-			let listItem = document.createElement("li");
-			listItem.appendChild(createCardButton(card, true));
+			const listItem = document.createElement("li");
+			listItem.appendChild(createCardButton(card, "tiny", true));
 			document.getElementById(card.cardType + "Grid").appendChild(listItem);
 		}
 	}
@@ -294,7 +294,7 @@ async function fillCardResultGrid(cardList, grid) {
 	if (cardList.length > 0) {
 		const gridElem = document.getElementById("cardInfo" + grid + "Grid");
 		gridElem.innerHTML = "";
-		const cardPromises = cardList.map(async cardId => createCardButton(await cardLoader.getCardInfo(cardId), false));
+		const cardPromises = cardList.map(async cardId => createCardButton(await cardLoader.getCardInfo(cardId), "tiny", false));
 		for (const cardElem of await Promise.all(cardPromises)) {
 			gridElem.appendChild(cardElem);
 		}
@@ -490,7 +490,7 @@ async function addCardToDeck(cardId) {
 		//need to add the card to the list
 		let cardListElement = document.createElement("div");
 		cardListElement.dataset.cardID = cardId;
-		cardListElement.appendChild(createCardButton(card));
+		cardListElement.appendChild(createCardButton(card, "small"));
 
 		let btnDiv = document.createElement("div");
 		btnDiv.classList.add("deckMakerCardListElementBtns");
@@ -704,7 +704,7 @@ async function recalculateDeckStats() {
 
 async function addRecentCard(cardId) {
 	let cardImg = document.createElement("img");
-	cardImg.src = cardLoader.getCardImageFromID(cardId);
+	cardImg.src = cardLoader.getCardImageFromID(cardId, "tiny");
 	cardImg.addEventListener("click", function() {
 		addCardToDeck(cardIdFromLink(this.src));
 		this.remove();

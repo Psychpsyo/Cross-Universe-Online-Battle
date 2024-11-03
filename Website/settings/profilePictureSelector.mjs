@@ -67,7 +67,7 @@ function setProfilePicture(newPicture) {
 		}
 	}
 
-	profilePictureImage.src = getCardImageFromID(newPicture);
+	profilePictureImage.src = getCardImageFromID(newPicture, "tiny");
 	profilePictureImage.style.setProperty("--left", -(profilePictureInfo[newPicture]?.left ?? 50) + "%");
 }
 
@@ -90,7 +90,7 @@ function addProfilePictureList(name, cardIdList, targetDiv) {
 
 		let img = document.createElement("img");
 		img.loading = "lazy";
-		img.src = getCardImageFromID(cardId);
+		img.src = getCardImageFromID(cardId, "tiny");
 		img.style.setProperty("--left", -(profilePictureInfo[cardId]?.left ?? 50) + "%");
 		button.appendChild(img);
 		list.appendChild(button);

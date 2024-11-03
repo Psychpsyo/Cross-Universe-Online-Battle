@@ -190,7 +190,7 @@ export function newBlock(block) {
 	let visual = document.createElement("div");
 
 	let img = document.createElement("img");
-	img.src = cardLoader.getCardImage(card);
+	img.src = cardLoader.getCardImage(card, "tiny");
 	img.draggable = false;
 	visual.appendChild(img);
 	img.addEventListener("click", function(e) {
@@ -286,7 +286,7 @@ export async function activate(card) {
 			let img = document.getElementById(card.zone.type + card.zone.player.index);
 			let slot = img.parentElement;
 			let previousSrc = img.src;
-			img.src = cardLoader.getCardImage(card);
+			img.src = cardLoader.getCardImage(card, "tiny");
 			slot.classList.add("activating");
 			await gameState.controller.gameSleep(1);
 			slot.classList.remove("activating");
@@ -299,21 +299,21 @@ export async function activate(card) {
 export async function revealHandCard(card, duration) {
 	let cardImg = document.getElementById("hand" + card.currentOwner().index).children.item(card.index);
 	cardImg.classList.add("revealed");
-	cardImg.src = cardLoader.getCardImage(card);
+	cardImg.src = cardLoader.getCardImage(card, "tiny");
 	if (card.currentOwner().index === 0) {
 		previewCard(card);
 	}
 	await new Promise(resolve => setTimeout(resolve, gameState.controller.gameSpeed * 1500 * duration));
 	cardImg.classList.remove("revealed");
 	if (card.current().hiddenFor.includes(card.currentOwner().next())) {
-		cardImg.src = cardLoader.getCardImage(card.current());
+		cardImg.src = cardLoader.getCardImage(card.current(), "tiny");
 	} else {
 		cardImg.classList.add("permanentlyRevealed");
 	}
 }
 export async function unrevealHandCard(card) {
 	let cardImg = document.getElementById("hand" + card.currentOwner().index).children.item(card.index);
-	cardImg.src = cardLoader.getCardImage(card.current());
+	cardImg.src = cardLoader.getCardImage(card.current(), "tiny");
 	cardImg.classList.remove("permanentlyRevealed");
 }
 export function showOpponentAction(message) {
@@ -405,7 +405,9 @@ export async function showCoolAttackAnim(defender, attackers) {
 	});
 
 	const imgs = document.querySelectorAll(".coolAttackImgHolder > img");
-	imgs[0].src = cardLoader.getCardImage(defender);
+	// first display the tiny image which we likely already have, then start overriding it with the big one
+	imgs[0].src = cardLoader.getCardImage(defender,"tiny");
+	setTimeout(() => {imgs[0].src = cardLoader.getCardImage(defender)}, 0);
 	if (cardAlignmentInfo[defender.cardId]?.flip) {
 		imgs[0].style.setProperty("--left", -100 + (cardAlignmentInfo[defender.cardId]?.left ?? 50) + "%");
 		imgs[0].style.transform = "skew(5deg) scaleX(-1)";
@@ -415,7 +417,9 @@ export async function showCoolAttackAnim(defender, attackers) {
 	}
 
 	for (let i = 0; i < attackers.length; i++) {
-		imgs[i+1].src = cardLoader.getCardImage(attackers[i]);
+		// first display the tiny image which we likely already have, then start overriding it with the big one
+		imgs[i+1].src = cardLoader.getCardImage(attackers[i], "tiny");
+		setTimeout(() => {imgs[i+1].src = cardLoader.getCardImage(attackers[i])}, 0);
 		if (!cardAlignmentInfo[attackers[i].cardId]?.flip && !cardAlignmentInfo[attackers[i].cardId]?.neverFlip) {
 			imgs[i+1].style.setProperty("--left", -100 + (cardAlignmentInfo[attackers[i].cardId]?.left ?? 50) + "%");
 			imgs[i+1].style.transform = "skew(5deg) scaleX(-1)";
@@ -542,7 +546,7 @@ export function chatCards(cards) {
 			card = card.current().snapshot();
 		}
 		const cardImg = document.createElement("img");
-		cardImg.src = cardLoader.getCardImage(card);
+		cardImg.src = cardLoader.getCardImage(card, "tiny");
 		cardImg.addEventListener("click", function () {
 			previewCard(card);
 		});
