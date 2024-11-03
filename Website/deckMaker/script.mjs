@@ -227,7 +227,7 @@ function createCardButton(card, size, lazyLoading) {
 	cardImg.src = cardLoader.getCardImageFromID(card.cardID, size);
 	cardImg.alt = cardToAltText(card);
 	cardButton.addEventListener("click", async function() {
-		showCardInfo(await cardLoader.getCardInfo(this.dataset.cardID));
+		showCardInfo(await cardLoader.getCardInfo(this.dataset.cardID), size);
 	});
 	cardButton.appendChild(cardImg);
 	return cardButton;
@@ -302,13 +302,16 @@ async function fillCardResultGrid(cardList, grid) {
 	}
 }
 
-function showCardInfo(cardInfo) {
-	//fill in basic card info
-	document.getElementById("cardInfoCardImg").src = cardLoader.getCardImageFromID(cardInfo.cardID);
-	document.getElementById("cardInfoCardID").textContent = "CU" + cardInfo.cardID;
+function showCardInfo(cardInfo, availableSize) {
+	// fill in basic card info
+	cardInfoCardImg.src = cardLoader.getCardImageFromID(cardInfo.cardID, availableSize);
+	setTimeout(() => { // the higher-res version will visually replace the available one once loaded
+		cardInfoCardImg.src = cardLoader.getCardImageFromID(cardInfo.cardID);
+	}, 0);
+	cardInfoCardID.textContent = "CU" + cardInfo.cardID;
 	cardInfoToDeck.dataset.cardID = cardInfo.cardID;
 
-	//hide all info bits (they get re-enabled later, if relevant to the card)
+	// hide all info bits (they get re-enabled later, if relevant to the card)
 	document.getElementById("cardInfoStrategyArea").style.display = "none";
 	document.getElementById("cardInfoIllustratorArea").style.display = "none";
 	document.getElementById("cardInfoIdeaArea").style.display = "none";
@@ -317,7 +320,7 @@ function showCardInfo(cardInfo) {
 	document.getElementById("cardInfoVisibleArea").style.display = "none";
 	document.getElementById("cardInfoVisibleOnArea").style.display = "none";
 
-	//fill in name
+	// fill in name
 	if (cardInfo.nameFurigana) {
 		let cardNameFurigana = cardInfo.name;
 		cardInfo.nameFurigana.toReversed().forEach(furigana => {
@@ -336,7 +339,7 @@ function showCardInfo(cardInfo) {
 	// set card image alt text
 	cardInfoCardImg.alt = locale.cardDetails.level + (cardInfo.level == -1? "?" : cardInfo.level) + locale.cardDetails.levelTypeSeparator + locale.cardDetails.cardTypes[cardInfo.cardType] + ".\n" + locale.cardDetails.effects + "\n" + cardInfo.effectsPlain;
 
-	//fill in release date
+	// fill in release date
 	cardInfoReleaseDate.textContent = cardInfo.releaseDate;
 	cardInfoReleaseDate.dataset.releaseDate = cardInfo.releaseDate;
 
@@ -358,14 +361,14 @@ function showCardInfo(cardInfo) {
 		cardInfoIdeaArea.style.display = "inline";
 	}
 
-	//add mentioned cards to grid
+	// add mentioned cards to grid
 	fillCardResultGrid(cardInfo.cardMentions, "Mentioned");
 	fillCardResultGrid(cardInfo.mentionedOn, "MentionedOn");
 	fillCardResultGrid(cardInfo.visibleCards, "Visible");
 	fillCardResultGrid(cardInfo.visibleOn, "VisibleOn");
 
 
-	//enable card info display
+	// enable card info display
 	if (!cardInfoPanel.open) {
 		cardInfoPanel.showModal();
 	}
