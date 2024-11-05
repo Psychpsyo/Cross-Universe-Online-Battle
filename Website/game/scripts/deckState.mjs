@@ -99,13 +99,13 @@ function activateDeckDropArea() {
 	gameUI.showBlackoutMessage(locale.game.deckSelect.dropYourDeck, locale.game.deckSelect.useOfficialDeck);
 	blackoutSubtitle.addEventListener("click", openDeckSelector);
 	blackoutSubtitle.classList.add("clickableText");
-	deckDropLabel.display = "block";
+	deckDropLabel.hidden = false;
 }
 function deactivateDeckDropArea() {
 	gameUI.showBlackoutMessage(locale.game.deckSelect.loadingDeck);
 	blackoutSubtitle.removeEventListener("click", openDeckSelector);
 	blackoutSubtitle.classList.remove("clickableText");
-	deckDropLabel.display = "none";
+	deckDropLabel.hidden = true;
 }
 
 export class DeckState extends GameState {

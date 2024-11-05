@@ -202,7 +202,7 @@ Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 
 // gets a card's ID from a link to its image
 function cardIdFromLink(imgLink) {
-	return imgLink.substring(imgLink.length - 10, imgLink.length - 4);
+	return imgLink.match(/(?<=\/)[USIT]\d{5}(?=.)/);
 }
 
 function cardToAltText(card) {
@@ -443,7 +443,7 @@ document.addEventListener("keyup", function(e) {
 	switch(e.code) {
 		//[S]earch
 		case "KeyS": {
-			if (window.getComputedStyle(document.getElementById("cardSearchPanel")).display != "none") {
+			if (cardSearchPanel.open) {
 				closeAllDeckMakerOverlays();
 			} else {
 				closeAllDeckMakerOverlays();
@@ -454,8 +454,8 @@ document.addEventListener("keyup", function(e) {
 
 		//[D]eck
 		case "KeyD": {
-			if (window.getComputedStyle(document.getElementById("deckCreationPanel")).display != "none") {
-				closeAllDeckMakerOverlays();
+			if (deckCreationPanel.open) {
+				deckCreationPanel.close();
 			} else {
 				closeAllDeckMakerOverlays();
 				deckCreationPanel.showModal();
@@ -463,11 +463,6 @@ document.addEventListener("keyup", function(e) {
 			break;
 		}
 
-		//close all overlays
-		case "Escape": {
-			closeAllDeckMakerOverlays();
-			break;
-		}
 		//also closes all but is closer to S and D
 		case "KeyX": {
 			closeAllDeckMakerOverlays();
