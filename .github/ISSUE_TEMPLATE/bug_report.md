@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what isn't working correctly.
+Describe what isn't working correctly here.
 
 **To Reproduce**
 Steps to reproduce the behavior:
@@ -18,7 +18,7 @@ Steps to reproduce the behavior:
 4. See error
 
 **Expected behavior**
-A clear and concise description of what should have happened.
+Describe what should have happened here.
 
 **Screenshots**
 You may add screenshots to help explain your problem. (optional)
