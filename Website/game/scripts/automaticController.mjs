@@ -387,6 +387,18 @@ export class AutomaticController extends InteractionController {
 				}
 				return await Promise.all(changeAnimPromises);
 			}
+			case "cardLiftedOutOfCurrentZone": {
+				for (const event of events) {
+					gameUI.removeCard(event.card.zone, event.card.index);
+				}
+				break;
+			}
+			case "undoCardLiftedOutOfCurrentZone": {
+				for (const event of events) {
+					gameUI.insertCard(event.card.zone, event.card.index);
+				}
+				break;
+			}
 			case "cardPlaced": {
 				for (const event of events) {
 					gameUI.insertCard(event.toZone, event.toIndex);
