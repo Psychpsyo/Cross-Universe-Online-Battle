@@ -507,7 +507,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "playerSelected": {
 				if (events[0].player !== localPlayer) {
-					chat.putMessage(localize("game.notices.playerChosePlayer", {PLAYER: events[0].player, TARGET: game.players[events[0].chosenPlayer]}), "notice");
+					chat.putMessage(localize("game.notices.playerChosePlayer", {PLAYER: events[0].player, TARGET: events[0].chosenPlayer}), "notice");
 				}
 				break;
 			}
