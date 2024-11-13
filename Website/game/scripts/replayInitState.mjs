@@ -5,6 +5,7 @@ import {locale} from "../../scripts/locale.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as generalUI from "./generalUI.mjs";
 import * as localeExtensions from "../../scripts/localeExtensions.mjs";
+import { PassiveAI } from "../../rulesEngine/src/aiSystems/passiveAI.mjs";
 
 export class ReplayInitState extends GameState {
 	constructor(replay) {
@@ -32,5 +33,6 @@ export class ReplayInitState extends GameState {
 		new BoardState(true);
 		gameUI.init();
 		gameState.doStartGame();
+		game.players[0].aiSystem = new PassiveAI();
 	}
 }
