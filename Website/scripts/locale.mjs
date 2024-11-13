@@ -65,26 +65,31 @@ function toValue(thing) {
 
 // the actual localize function
 export default function localize(localeKey, insert) {
-	const path = localeKey.split(".");
-	let current = locale;
-	for (const part of path) {
-		current = current[part];
-		if (current === undefined) return;
+	try {
+		const path = localeKey.split(".");
+		let current = locale;
+		for (const part of path) {
+			current = current[part];
+			if (current === undefined) return "";
+		}
+		// variable-inserting code blocks
+		const expr = {s: current};
+		current = "";
+		let nextBlockAt = expr.s.search(/(?<!\\){/);
+		while (nextBlockAt !== -1) {
+			// handle escape sequences as they get pulled out of the string \\ and \{
+			current += expr.s.substring(0, nextBlockAt).replaceAll(/\\\\|\\{|/g, (seq) => seq.substring(1));
+			expr.s = expr.s.substring(nextBlockAt + 1);
+			current += interpret(expr, insert, /(?<!\\)}/).text;
+			expr.s = expr.s.substring(1);
+			nextBlockAt = expr.s.search(/(?<!\\){/);
+		}
+		current += expr.s.replaceAll(/\\\\|\\{|/g, (seq) => seq.substring(1));
+		return current;
+	} catch (e) {
+		console.error(`Error while localizing ${localeKey} with insert these inserts:`, insert, `The error was:\n${e}`);
+		return localeKey;
 	}
-	// variable-inserting code blocks
-	const expr = {s: current};
-	current = "";
-	let nextBlockAt = expr.s.search(/(?<!\\){/);
-	while (nextBlockAt !== -1) {
-		// handle escape sequences as they get pulled out of the string \\ and \{
-		current += expr.s.substring(0, nextBlockAt).replaceAll(/\\\\|\\{|/g, (seq) => seq.substring(1));
-		expr.s = expr.s.substring(nextBlockAt + 1);
-		current += interpret(expr, insert, /(?<!\\)}/).text;
-		expr.s = expr.s.substring(1);
-		nextBlockAt = expr.s.search(/(?<!\\){/);
-	}
-	current += expr.s.replaceAll(/\\\\|\\{|/g, (seq) => seq.substring(1));
-	return current;
 };
 
 // setup

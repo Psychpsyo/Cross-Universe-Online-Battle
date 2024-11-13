@@ -3,7 +3,13 @@ import {locale} from "./locale.mjs";
 import {renderCard} from "../custom/renderer.mjs";
 import {deckToCardIdList} from "./deckUtils.mjs";
 
-export let cardInfoCache = {};
+// these just have placeholder info so that the UI doesn't freak out.
+export let cardInfoCache = {
+	U00000: {name: "Debug Unit", cardType: "unit", level: -1, types: [], effects: []},
+	S00000: {name: "Debug Spell", cardType: "standardSpell", level: -1, types: [], effects: []},
+	I00000: {name: "Debug Item", cardType: "standardItem", level: -1, types: [], effects: []},
+	T00000: {name: "Debug Token", cardType: "unit", level: -1, types: [], effects: []}
+};
 let cdfCache = {};
 let scriptedCardList = null;
 let nextCustomCardIDs = [1, 2];
@@ -32,6 +38,9 @@ export class UnsupportedCardError extends Error {
 export function getCardImageFromID(cardId, size, language = localStorage.getItem("language")) {
 	if (cardId.startsWith("C")) {
 		return customCardURLs[parseInt(cardId.substring(1))];
+	}
+	if (cardId.substring(1) === "00000") {
+		return `images/debugCards/${cardId}.png`;
 	}
 	return `${localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")}${cardLanguages.includes(language)? language : "en"}/${size? `${size}/` : ""}${cardId}.${size? "avif" : "jpg"}`;
 }
@@ -161,6 +170,7 @@ export async function getAbilityText(abilityId) {
 			}
 		}
 	}
+	if (abilityInfo[0].substring(1) === "00000") return "This is a debug effect, created by a unit test.\nRead the unit test to see its definition.";
 	throw new Error("Card does not have an effect with id " + abilityId + "!");
 }
 
