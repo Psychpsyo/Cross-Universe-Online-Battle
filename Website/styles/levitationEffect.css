@@ -63,7 +63,7 @@
 	width: 100%;
 	height: 100%;
 	perspective: 1500px;
-	overflow: hidden;
+	overflow: clip;
 }
 #levitatingCardPreviewOverlay {
 	backdrop-filter: blur(5px);

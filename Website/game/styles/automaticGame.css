@@ -105,7 +105,7 @@
 
 .turnDisplay {
 	position: absolute;
-	overflow: hidden;
+	overflow: clip;
 }
 #yourTurnDisplay {
 	top: 100%;
@@ -207,7 +207,7 @@
 	transition: color .5s, border-color .5s, filter .5s;
 	word-break: keep-all;
 	text-align: center;
-	overflow: hidden;
+	overflow: clip;
 }
 #stackDisplayHolder.yourMove::after {
 	color: orange;
@@ -316,7 +316,7 @@
 .coolAttackSlot {
 	position: relative;
 	width: 100%;
-	overflow: hidden;
+	overflow: clip;
 	/* Some of these are accounting for weird artifacts around the borders of skewed elements, that's why the numbers are weird 1px / .1% stuff */
 	border-left: 6px solid white;
 	border-right: 6px solid white;
@@ -342,7 +342,7 @@
 	transform: translateX(-50%);
 	height: 100%;
 	aspect-ratio: 1;
-	overflow: hidden;
+	overflow: clip;
 }
 .coolAttackImgHolder:first-child {
 	position: relative;

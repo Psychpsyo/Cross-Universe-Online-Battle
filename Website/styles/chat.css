@@ -2,7 +2,7 @@ chat-box {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	overflow: hidden;
+	overflow: clip;
 }
 chat-box > :not(:first-child):not(.infoBar) {
 	border-top: 2px var(--theme-border-color) solid;

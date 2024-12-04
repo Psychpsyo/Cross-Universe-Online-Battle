@@ -4,7 +4,7 @@ html {
 }
 
 body {
-	overflow: hidden;
+	overflow: clip;
 	touch-action: none; /* no zooming or panning around on mobile */
 }
 
@@ -36,7 +36,7 @@ body {
 
 #mainGameArea {
 	position: relative;
-	overflow: hidden;
+	overflow: clip;
 	container-type: size;
 
 	transform: scale(1);

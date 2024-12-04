@@ -82,7 +82,7 @@ header > :is(h1, h2, h3, h4) {
 }
 header .svgButton {
 	height: 100%;
-	overflow: hidden;
+	overflow: clip;
 }
 
 
@@ -198,7 +198,7 @@ dialog {
 	height: max-content;
 	max-height: 90vh;
 	width: 100%;
-	overflow: hidden;
+	overflow: clip;
 	border-radius: 1em;
 }
 
