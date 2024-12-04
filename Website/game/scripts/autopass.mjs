@@ -90,7 +90,8 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 		const currentStack = game.currentStack();
 		if (currentStack.index === 1 &&
 			currentStack.blocks.length === 1 &&
-			!currentStack.blocks.some(block => block.player !== requests[0].player)
+			!currentStack.blocks.some(block => block.player !== requests[0].player) && // there is no opponent blocks
+			!requests.some(request => request.type === "activateTriggerAbility") // the responses are not trigger abilities
 		) {
 			return {type: "pass"};
 		}

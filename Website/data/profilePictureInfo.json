@@ -601,5 +601,7 @@
 	"S00246": {"flip": true, "left": 37},
 	"S00247": {"flip": true, "left": 58.5},
 	"S00248": {"left": 52},
-	"S00249": {"flip": true, "left": 57}
+	"S00249": {"flip": true, "left": 57},
+	"S00250": {"flip": true, "left": 52.5},
+	"S00251": {"neverFlip": true, "left": 43}
 }
