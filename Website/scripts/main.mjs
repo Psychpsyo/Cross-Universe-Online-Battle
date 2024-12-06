@@ -219,9 +219,9 @@ cancelWaitingBtn.addEventListener("click", function() {
 });
 // generating an invite link
 copyInviteLink.addEventListener("click", function() {
-	let inviteURL = location.origin + "?id=" + encodeURIComponent(getRoomcode());
+	let inviteURL = `${location.origin}${location.pathname}?id=${encodeURIComponent(getRoomcode())}`;
 	if (gameModeSelect.value !== "normal") {
-		inviteURL += "&m=" + encodeURIComponent(gameModeSelect.value);
+		inviteURL += `&m=${encodeURIComponent(gameModeSelect.value)}`;
 	}
 	navigator.clipboard.writeText(inviteURL);
 });
