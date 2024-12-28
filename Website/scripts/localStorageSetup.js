@@ -235,6 +235,7 @@ function preload(href, as, isModule) {
 	link.href = href;
 	link.as = as;
 	link.rel = isModule? "modulepreload" : "preload";
+	link.crossOrigin = "anonymous";
 	document.head.appendChild(link);
 }
 
