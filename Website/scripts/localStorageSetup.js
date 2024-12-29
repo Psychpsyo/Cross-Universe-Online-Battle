@@ -6,6 +6,7 @@ localStorage.setItem("cardBack", localStorage.getItem("cardBack") ?? "");
 localStorage.setItem("hideOpponentCardBacks", localStorage.getItem("hideOpponentCardBacks") ?? true);
 localStorage.setItem("cardDataApiUrl", localStorage.getItem("cardDataApiUrl") ?? "");
 localStorage.setItem("cardImageUrl", localStorage.getItem("cardImageUrl") ?? "");
+localStorage.setItem("cardPreviewImagePreference", localStorage.getItem("cardPreviewImagePreference") ?? true);
 localStorage.setItem("compactMode", localStorage.getItem("compactMode") ?? false);
 localStorage.setItem("customCards", localStorage.getItem("customCards") ?? "[]");
 localStorage.setItem("customFont", localStorage.getItem("customFont") ?? "");

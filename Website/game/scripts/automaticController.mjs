@@ -493,7 +493,14 @@ export class AutomaticController extends InteractionController {
 			case "blockCreated": {
 				if (events[0].block instanceof blocks.AbilityActivation) {
 					await autoUI.activate(events[0].block.card);
-					chat.putMessage(localize("game.notices.playerActivated", events[0].block.player), "notice", autoUI.chatCards([events[0].block.card]));
+					chat.putMessage(
+						localize("game.notices.playerActivated", events[0].block.player),
+						"notice",
+						autoUI.chatCards(
+							[events[0].block.card],
+							[events[0].block.ability.card.values.current.abilities.indexOf(events[0].block.ability)]
+						)
+					);
 				}
 				if (passModeSelect.value === "untilBattle" && events[0].block instanceof blocks.AttackDeclaration) {
 					this.setPassMode("auto");
@@ -883,7 +890,15 @@ export class AutomaticController extends InteractionController {
 								localize("game.automatic.cardOptions.activate") :
 								localize("game.automatic.cardOptions.activateMultiple", circledDigits[abilityIndex] ?? (abilityIndex + 1)),
 							"activateAbility",
-							function() {
+							function(e) {
+								if (e.shiftKey) {
+									generalUI.previewCard(
+										request.eligibleAbilities[i].card,
+										true,
+										request.eligibleAbilities[i].card.values.current.abilities.indexOf(request.eligibleAbilities[i])
+									);
+									return;
+								}
 								resolve(i);
 							}
 						)

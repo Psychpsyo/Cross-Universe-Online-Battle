@@ -17,6 +17,7 @@ const abilityTypes = new Map([
 ]);
 
 let currentPreviewedCard = null;
+let currentHighlightedEffect = null;
 
 export function createAbilityFragment(abilityText) {
 	const fragment = new DocumentFragment();
@@ -82,28 +83,43 @@ export function closeCardPreview() {
 	currentPreviewedCard = null;
 }
 
-export async function previewCard(card, specific = true) {
+export async function previewCard(card, specific = true, highlightedEffect = null) {
 	if (!card?.cardId || (localPlayer? card.hiddenFor.includes(localPlayer) : card.hiddenFor.length > 0)) {
 		return;
 	}
-	// if the already shown card was clicked again
-	if ((currentPreviewedCard == card && specific) || (currentPreviewedCard?.cardId == card.cardId && !specific)) {
+	// if the already shown card was clicked again, close the preview
+	const alreadyShowingThisCard = (currentPreviewedCard === card && specific) || (currentPreviewedCard?.cardId === card.cardId && !specific);
+	// except if we need to switch to the other view to highlight an effect
+	const showingCardInRightMode = highlightedEffect === null || cardDetailsImage.style.display === "none";
+	if (alreadyShowingThisCard && showingCardInRightMode) {
 		closeCardPreview();
 		return;
 	}
 	currentPreviewedCard = card;
 
+	// if an effect should be highlighted, switch to that view
+	if (highlightedEffect !== null) {
+		cardDetailsImage.style.display = "none";
+	} else {
+		cardDetailsImage.style.display = localStorage.getItem("cardPreviewImagePreference") === "true"? "revert" : "none";
+	}
+
 	// set the image preview
 	const useOwnerLanguage = localStorage.getItem("opponentCardLanguage") === "true" && localStorage.getItem("previewCardLanguage") === "true";
 	cardDetailsImage.style.backgroundImage = `url(${cardLoader.getCardImage(card, undefined, useOwnerLanguage)}), url(${cardLoader.getCardImage(card, "tiny", useOwnerLanguage)})`;
 
-	return updateCardPreview(card);
+	return updateCardPreview(card, highlightedEffect);
 }
 
-export async function updateCardPreview(card) {
+export async function updateCardPreview(card, highlightedEffect) {
 	if (currentPreviewedCard != card) {
 		return;
 	}
+	// this is so that a card's already displayed values can be updated without caring about which effect needs to be highlighted
+	if (highlightedEffect !== undefined) {
+		currentHighlightedEffect = highlightedEffect;
+	}
+
 	// general info
 	insertCardValueList(card, "names", cardDetailsName, "/", async (name) => (await cardLoader.getCardInfo(name)).name);
 
@@ -137,14 +153,14 @@ export async function updateCardPreview(card) {
 	let effectDivs = [];
 	if (!card.cardId.startsWith("C")) {
 		// insert rule sections from the API since the card object does not specify how many there are.
-		let effects = (await cardLoader.getCardInfo(card.cardId)).effects;
-		for (const effect of effects) {
+		for (const effect of (await cardLoader.getCardInfo(card.cardId)).effects) {
 			if (effect.type === "rule") {
 				effectDivs.push(createDomEffect(effect.type, effect.text));
 			}
 		}
 
 		// all other effects come from the card object.
+		let currentEffect = 0;
 		for (const ability of card.values.current.abilities) {
 			let divClasses = [];
 			if (!card.values.base.abilities.includes(ability)) {
@@ -153,13 +169,20 @@ export async function updateCardPreview(card) {
 			if (ability.isCancelled) {
 				divClasses.push("valueGone");
 			}
+			if (currentEffect === currentHighlightedEffect) {
+				divClasses.push("valueHighlighted");
+			}
 			effectDivs.push(createDomEffect(abilityTypes.get(ability.constructor), await cardLoader.getAbilityText(ability.id), divClasses));
+			currentEffect++;
 		}
 	}
 	// all at once to prevent getting too many effects when this function is called multiple times at once.
 	cardDetailsEffectList.innerHTML = "";
-	for (const div of effectDivs) {
-		cardDetailsEffectList.appendChild(div);
+	for (let i = 0; i < effectDivs.length; i++) {
+		cardDetailsEffectList.appendChild(effectDivs[i]);
+		if (i < effectDivs.length - 1) {
+			cardDetailsEffectList.appendChild(document.createElement("hr"));
+		}
 	}
 
 	cardDetails.style.setProperty("--side-distance", ".5em");
@@ -340,7 +363,9 @@ export function init() {
 		e.stopPropagation();
 	});
 	cardDetailsSwitch.addEventListener("click", function(e) {
-		cardDetailsImage.style.display = window.getComputedStyle(cardDetailsImage).display == "none"? "revert" : "none";
+		const imagePreference = !(localStorage.getItem("cardPreviewImagePreference") === "true");
+		localStorage.setItem("cardPreviewImagePreference", imagePreference);
+		cardDetailsImage.style.display = imagePreference? "revert" : "none";
 		e.stopPropagation();
 	});
 	cardDetailsClose.addEventListener("click", closeCardPreview);

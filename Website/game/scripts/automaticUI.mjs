@@ -538,17 +538,18 @@ export async function updateCounters(card, type) {
 }
 
 // generates a card list to insert in chat
-export function chatCards(cards) {
+export function chatCards(cards, effectHighlights = new Array(cards.length).fill(null)) {
 	const cardHolder = document.createElement("div");
 	cardHolder.classList.add("chatCardHolder");
-	for (let card of cards) {
+	for (let i = 0; i < cards.length; i++) {
+		let card = cards[i];
 		if (card.hiddenFor.includes(localPlayer) && card.current()) {
 			card = card.current().snapshot();
 		}
 		const cardImg = document.createElement("img");
 		cardImg.src = cardLoader.getCardImage(card, "tiny");
 		cardImg.addEventListener("click", function () {
-			previewCard(card);
+			previewCard(card, true, effectHighlights[i]);
 		});
 		cardImg.addEventListener("dragstart", e => e.preventDefault());
 		cardHolder.appendChild(cardImg);

@@ -151,13 +151,17 @@ dialog #cardDetails {
 	border-radius: 1em 0 1em 1em;
 
 	overflow-y: auto;
+
+	hr {
+		border: 1px var(--theme-border-color) solid; /* 1px cause top and bottom */
+		margin: 0;
+	}
 }
 .leftField #cardDetailsText {
 	border-radius: 0 1em 1em 1em;
 }
 
 #cardDetailsName, #cardDetailsInfo, .cardDetailsEffect {
-	border-bottom: 2px var(--theme-border-color) solid;
 	padding: .25em .5em;
 }
 
@@ -167,10 +171,6 @@ dialog #cardDetails {
 
 #cardDetailsAttackDefense > span {
 	flex-grow: 1;
-}
-
-#cardDetailsEffectList > :last-child {
-	border-bottom: none;
 }
 
 .cardDetailsIndent {
@@ -275,6 +275,9 @@ dialog #cardDetails {
 }
 .valueAdded {
 	font-weight: bold;
+}
+.valueHighlighted {
+	filter: drop-shadow(orange 0 0 .15em) drop-shadow(orange 0 0 .15em);
 }
 
 #gameInteractions {
