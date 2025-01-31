@@ -217,17 +217,17 @@ function cardToAltText(card) {
 }
 
 function createCardButton(card, size, lazyLoading) {
-	let cardButton = document.createElement("button");
+	const cardButton = document.createElement("button");
 	cardButton.classList.add("cardButton");
-	cardButton.dataset.cardID = card.cardID;
-	let cardImg = document.createElement("img");
+	cardButton.dataset.cardId = card.cardID;
+	const cardImg = document.createElement("img");
 	if (lazyLoading) {
 		cardImg.loading = "lazy";
 	}
 	cardImg.src = cardLoader.getCardImageFromID(card.cardID, size);
 	cardImg.alt = cardToAltText(card);
 	cardButton.addEventListener("click", async function() {
-		showCardInfo(await cardLoader.getCardInfo(this.dataset.cardID), size);
+		showCardInfo(await cardLoader.getCardInfo(this.dataset.cardId), size);
 	});
 	cardButton.appendChild(cardImg);
 	return cardButton;
@@ -309,7 +309,7 @@ function showCardInfo(cardInfo, availableSize) {
 		cardInfoCardImg.src = cardLoader.getCardImageFromID(cardInfo.cardID);
 	}, 0);
 	cardInfoCardID.textContent = "CU" + cardInfo.cardID;
-	cardInfoToDeck.dataset.cardID = cardInfo.cardID;
+	cardInfoToDeck.dataset.cardId = cardInfo.cardID;
 
 	// hide all info bits (they get re-enabled later, if relevant to the card)
 	document.getElementById("cardInfoStrategyArea").style.display = "none";
@@ -471,26 +471,26 @@ document.addEventListener("keyup", function(e) {
 	}
 });
 
-//editing the work-in-progress deck
+// editing the work-in-progress deck
 async function addCardToDeck(cardId) {
-	let card = await cardLoader.getCardInfo(cardId);
-	//add card to the list on the left
+	const card = await cardLoader.getCardInfo(cardId);
+	// add card to the list on the left
 	if (deckList.includes(cardId)) {
-		//card already there, just increase its counter by one
-		let cardAmountDiv = (document.getElementById("deckCreatorCardList").querySelectorAll("[data-card-i-d='" + cardId + "']"))[0].children.item(1).children.item(1);
-		cardAmountDiv.textContent = deckList.filter(x => x === cardId).length + 1;
+		// card already there, just increase its counter by one
+		const cardAmountDiv = (deckCreatorCardList.querySelectorAll(`[data-card-id='${cardId}']`))[0].children.item(1).children.item(1);
+		cardAmountDiv.textContent = parseInt(cardAmountDiv.textContent) + 1;
 
-		//check if the card limit for that card was exceeded
+		// check if the card limit for that card was exceeded
 		if (cardAmountDiv.textContent > card.deckLimit) {
 			cardAmountDiv.style.color = "red";
 		}
 	} else {
-		//need to add the card to the list
-		let cardListElement = document.createElement("div");
-		cardListElement.dataset.cardID = cardId;
+		// need to add the card to the list
+		const cardListElement = document.createElement("div");
+		cardListElement.dataset.cardId = cardId;
 		cardListElement.appendChild(createCardButton(card, "small"));
 
-		let btnDiv = document.createElement("div");
+		const btnDiv = document.createElement("div");
 		btnDiv.classList.add("deckMakerCardListElementBtns");
 		cardListElement.appendChild(btnDiv);
 
@@ -502,10 +502,10 @@ async function addCardToDeck(cardId) {
 		btnDiv.children.item(2).textContent = "+";
 
 		btnDiv.children.item(0).addEventListener("click", function() {
-			removeCardFromDeck(this.parentElement.parentElement.dataset.cardID);
+			removeCardFromDeck(this.parentElement.parentElement.dataset.cardId);
 		});
 		btnDiv.children.item(2).addEventListener("click", function() {
-			addCardToDeck(this.parentElement.parentElement.dataset.cardID);
+			addCardToDeck(this.parentElement.parentElement.dataset.cardId);
 		});
 
 		document.getElementById("deckCreatorCardList").appendChild(cardListElement);
@@ -539,7 +539,7 @@ async function removeCardFromDeck(cardId) {
 	deckList.splice(deckList.indexOf(cardId), 1);
 
 	//find the card on the page
-	let cardListElement = (document.getElementById("deckCreatorCardList").querySelectorAll("[data-card-i-d='" + cardId + "']"))[0];
+	let cardListElement = (document.getElementById("deckCreatorCardList").querySelectorAll("[data-card-id='" + cardId + "']"))[0];
 
 	if (deckList.includes(cardId)) {
 		//card still here, just decrease number by one
@@ -577,18 +577,18 @@ async function removeCardFromDeck(cardId) {
 
 function sortCardsInDeck() {
 	let sortedOptions = Array.from(document.getElementById("deckCreatorCardList").children).sort(function(a, b) {
-		if (!a.dataset.cardID) {
+		if (!a.dataset.cardId) {
 			return 1;
 		}
-		if (!b.dataset.cardID) {
+		if (!b.dataset.cardId) {
 			return -1;
 		}
 
 		let cardTypeOrderings = ["U", "S", "I", "T"];
-		if (cardTypeOrderings.indexOf(a.dataset.cardID[0]) != cardTypeOrderings.indexOf(b.dataset.cardID[0])) {
-			return cardTypeOrderings.indexOf(a.dataset.cardID[0]) - cardTypeOrderings.indexOf(b.dataset.cardID[0]);
+		if (cardTypeOrderings.indexOf(a.dataset.cardId[0]) != cardTypeOrderings.indexOf(b.dataset.cardId[0])) {
+			return cardTypeOrderings.indexOf(a.dataset.cardId[0]) - cardTypeOrderings.indexOf(b.dataset.cardId[0]);
 		} else {
-			return cardLoader.cardInfoCache[a.dataset.cardID].level - cardLoader.cardInfoCache[b.dataset.cardID].level;
+			return cardLoader.cardInfoCache[a.dataset.cardId].level - cardLoader.cardInfoCache[b.dataset.cardId].level;
 		}
 	});
 
@@ -610,7 +610,7 @@ async function recalculateDeckStats() {
 
 	for (const cardId of deckList) {
 		let card = await cardLoader.getCardInfo(cardId);
-		//max necessary to catch the Lvl? Token that is denoted as -1 in the dataset
+		// max necessary to catch the Lvl? Token that is denoted as -1 in the dataset
 		levelDist[Math.max(0, card.level)].total++;
 		switch (cardId[0]) {
 			case "U": {
@@ -630,7 +630,7 @@ async function recalculateDeckStats() {
 			}
 			case "T": {
 				tokenCount++;
-				//don't count tokens in the level distribution
+				// don't count tokens in the level distribution
 				levelDist[Math.max(0, card.level)].total--;
 				break;
 			}
@@ -643,13 +643,13 @@ async function recalculateDeckStats() {
 		deckMakerDetailsSpellCountValue.textContent = spellCount + " (" + (spellCount / deckList.length * 100).toFixed(2) + "%)";
 		deckMakerDetailsItemCountValue.textContent = itemCount + " (" + (itemCount / deckList.length * 100).toFixed(2) + "%)";
 	} else {
-		//set preset values to avoid divide by 0 above
+		// set preset values to avoid divide by 0 above
 		deckMakerDetailsUnitCountValue.textContent = "0 (0.00%)";
 		deckMakerDetailsSpellCountValue.textContent = "0 (0.00%)";
 		deckMakerDetailsItemCountValue.textContent = "0 (0.00%)";
 	}
 
-	//set level distribution
+	// set level distribution
 	let levelCardMax = 0;
 	for (let i = 0; i <= 12; i++) {
 		deckMakerLevelDistribution.children.item(i).children.item(0).style.display = levelDist[i].items == 0? "none" : "block";
@@ -684,7 +684,7 @@ async function recalculateDeckStats() {
 	dotDeckExportBtn.disabled = deckMakerDetailsPartnerSelect.value === "";
 	deckCodeCopyBtn.disabled = deckList.length === 0;
 
-	//enable/disable warnings
+	// enable/disable warnings
 	document.getElementById("unitWarning").style.display = unitCount == 0? "block" : "none";
 	document.getElementById("tokenWarning").style.display = tokenCount == 0? "none" : "block";
 	document.getElementById("cardMinWarning").style.display = deckList.length >= 30? "none" : "block";
@@ -701,34 +701,37 @@ async function recalculateDeckStats() {
 }
 
 async function addRecentCard(cardId) {
-	let cardImg = document.createElement("img");
+	for (const child of recentCardsList.children) {
+		if (child.dataset.cardId === cardId) child.remove();
+	}
+	const cardImg = document.createElement("img");
+	cardImg.dataset.cardId = cardId;
 	cardImg.src = cardLoader.getCardImageFromID(cardId, "tiny");
 	cardImg.addEventListener("click", function() {
-		addCardToDeck(cardIdFromLink(this.src));
+		addCardToDeck(this.dataset.cardId);
 		this.remove();
 	});
-	let cardInfo = await cardLoader.getCardInfo(cardId);
-	cardImg.alt = cardInfo.name;
-	document.getElementById("recentCardsList").insertBefore(cardImg, document.getElementById("recentCardsList").firstChild);
+	cardImg.alt = (await cardLoader.getCardInfo(cardId)).name;
+	recentCardsList.insertBefore(cardImg, document.getElementById("recentCardsList").firstChild);
 
-	//start removing elements from the recent list once it gets too long
+	// start removing elements from the recent list once it gets too long
 	if (document.getElementById("recentCardsList").childElementCount > 25) {
 		document.getElementById("recentCardsList").lastChild.remove();
 	}
 }
 
-//add card to deck from card detail view and go to deck
+// add card to deck from card detail view and go to deck
 document.getElementById("cardInfoToDeck").addEventListener("click", function(e) {
-	addCardToDeck(this.dataset.cardID);
+	addCardToDeck(this.dataset.cardId);
 
-	//don't open deck when holding shift
+	// don't open deck when holding shift
 	if (!e.shiftKey) {
 		closeAllDeckMakerOverlays();
 		deckCreationPanel.showModal();
 	}
 });
 
-//update deck analytics when setting a partner
+// update deck analytics when setting a partner
 document.getElementById("deckMakerDetailsPartnerSelect").addEventListener("change", function() {
 	recalculateDeckStats();
 });
