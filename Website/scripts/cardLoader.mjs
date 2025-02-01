@@ -4,16 +4,19 @@ import {renderCard} from "../custom/renderer.mjs";
 import {deckToCardIdList} from "./deckUtils.mjs";
 
 // these just have placeholder info so that the UI doesn't freak out.
-export let cardInfoCache = {
+export const cardInfoCache = {
 	U00000: {name: "Debug Unit", cardType: "unit", level: -1, types: [], effects: []},
 	S00000: {name: "Debug Spell", cardType: "standardSpell", level: -1, types: [], effects: []},
 	I00000: {name: "Debug Item", cardType: "standardItem", level: -1, types: [], effects: []},
 	T00000: {name: "Debug Token", cardType: "unit", level: -1, types: [], effects: []}
 };
-let cdfCache = {};
+let cardFetchPromise = null;
+let resolveCardFetchPromise = null;
+let cardsToFetch = [];
+const cdfCache = {};
 let scriptedCardList = null;
-let nextCustomCardIDs = [1, 2];
-let customCardURLs = [];
+const nextCustomCardIDs = [1, 2];
+const customCardURLs = [];
 let resoniteAvailability = null;
 
 const cardLanguages = ["en", "ja"];
@@ -34,6 +37,36 @@ export class UnsupportedCardError extends Error {
 	}
 }
 
+async function cardFetcher() {
+	if (!cardFetchPromise) return;
+	const localCardsToFetch = cardsToFetch;
+	cardsToFetch = [];
+
+	const cardInfoEndpoint = localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl");
+	const languageToFetchIn =  (locale.warnings.includes("noCards")? "en" : locale.code);
+	if (localCardsToFetch.length === 1) {
+		const response = await fetch(
+			`${cardInfoEndpoint}?lang=${languageToFetchIn}&cardID=${localCardsToFetch[0]}`,
+			{cache: "force-cache"}
+		);
+		if (!response.ok) {
+			return;
+		}
+		cardInfoCache[localCardsToFetch[0]] = await response.json();
+	} else {
+		const response = await fetch(
+			cardInfoEndpoint,
+			{method: "POST", cache: "force-cache", body: JSON.stringify({language: languageToFetchIn})}
+		);
+		for (const card of await response.json()) {
+			cardInfoCache[card.cardID] = card;
+		}
+	}
+	cardFetchPromise = null;
+	resolveCardFetchPromise();
+	resolveCardFetchPromise = null;
+}
+
 // size should be one of "small" or "tiny", if the image should not be loaded at full size
 export function getCardImageFromID(cardId, size, language = localStorage.getItem("language")) {
 	if (cardId.startsWith("C")) {
@@ -47,15 +80,16 @@ export function getCardImageFromID(cardId, size, language = localStorage.getItem
 
 export async function getCardInfo(cardId) {
 	if (!cardInfoCache[cardId]) {
-		let cardInfoEndpoint = localStorage.getItem("cardDataApiUrl") === ""? "https://crossuniverse.net/cardInfo/" : localStorage.getItem("cardDataApiUrl");
-		const response = await fetch(
-			cardInfoEndpoint + "?lang=" + (locale.warnings.includes("noCards")? "en" : locale.code) + "&cardID=" + cardId,
-			{cache: "force-cache"}
-		);
-		if (!response.ok) {
+		if (!cardFetchPromise) {
+			cardFetchPromise = new Promise(resolve => {
+				resolveCardFetchPromise = resolve;
+			});
+			setTimeout(cardFetcher, 0);
+		}
+		await cardFetchPromise;
+		if (!cardInfoCache[cardId]) {
 			throw new NonexistantCardError(cardId);
 		}
-		cardInfoCache[cardId] = await response.json();
 	}
 	return cardInfoCache[cardId];
 }

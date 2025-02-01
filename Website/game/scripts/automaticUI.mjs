@@ -328,12 +328,12 @@ export function clearOpponentAction() {
 export async function promptDropdownSelection(message, options, request) {
 	typeSelectPopupText.textContent = message;
 	typePopupSelection.innerHTML = "";
-	for (let i = 0; i < options.length; i++) {
-		const option = document.createElement("option");
-		option.value = i;
-		option.textContent = options[i];
-		option.disabled = await request.validate({type: request.type, value: i}) !== "";
-		typePopupSelection.add(option);
+	for (const option of options) {
+		const optionElement = document.createElement("option");
+		optionElement.value = option.value;
+		optionElement.textContent = option.label;
+		optionElement.disabled = await request.validate({type: request.type, value: option.value}) !== "";
+		typePopupSelection.add(optionElement);
 	}
 	typeSelectPopup.showModal();
 

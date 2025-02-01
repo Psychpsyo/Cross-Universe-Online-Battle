@@ -181,9 +181,10 @@
 
 			"playerStarts": "{*SENTENCE(#PLAYER)} {*PRESENT_SIMPLE(go|goes|#PLAYER)} first.",
 			"deckShuffled": "{*SENTENCE(#DECK)} was shuffled.",
-			"playerChosePlayer": "{*SENTENCE(#PLAYER)} chose {*PRONOUN(#TARGET|#PLAYER|themself)}.",
-			"playerChoseType": "{*SENTENCE(#PLAYER)} chose {#TYPE}-type.",
-			"playerChoseAbility": "{*SENTENCE(#PLAYER)} chose:\n{#ABILITY}",
+			"playerChoseCardName": "{*SENTENCE(#PLAYER)} stated '{#CARDNAME}'.",
+			"playerChosePlayer": "{*SENTENCE(#PLAYER)} selected {*PRONOUN(#TARGET|#PLAYER|themself)}.",
+			"playerChoseType": "{*SENTENCE(#PLAYER)} stated {#TYPE}-type.",
+			"playerChoseAbility": "{*SENTENCE(#PLAYER)} selected:\n{#ABILITY}",
 			"playerChoseDeckSide": {
 				"top": "{*SENTENCE(#PLAYER)} chose the deck top.",
 				"bottom": "{*SENTENCE(#PLAYER)} chose the deck bottom."
@@ -433,9 +434,10 @@
 				"effectSelectingPlayer": "{*SENTENCE(#PLAYER)} is selecting a player for the effect of '{#CARDNAME}'.",
 				"selectingStartingPlayer": "{*SENTENCE(#PLAYER)} is selecting who goes first.",
 
-				"selectingType": "{*SENTENCE(#PLAYER)} is selecting a type for the effect of '{#CARDNAME}'.",
+				"selectingCardName": "{*SENTENCE(#PLAYER)} is stating a card name for the effect of '{#CARDNAME}'.",
+				"selectingType": "{*SENTENCE(#PLAYER)} is stating a type for the effect of '{#CARDNAME}'.",
 				"selectingEffect": "{*SENTENCE(#PLAYER)} is selecting an effect for the effect of '{#CARDNAME}'.",
-				"selectingDeckSide": "{*SENTENCE(#PLAYER)} is selecting the top or bottom of the deck for the effect of '{#CARDNAME}'.",
+				"selectingDeckSide": "{*SENTENCE(#PLAYER)} is choosing the top or bottom of the deck for the effect of '{#CARDNAME}'.",
 				"decidingOnModificationAbility": "{*SENTENCE(#PLAYER)} is deciding whether or not to apply the ability of '{#CARD}' to '{#TARGET}'.",
 				"decidingOnOptionalbilitySection": "{*SENTENCE(#PLAYER)} is deciding whether or not to do the optional part of '{#CARDNAME}'s effect."
 			}

@@ -1,6 +1,7 @@
 // This module exports the controller for the automatic simulator which verifies the cross universe game rules
 
 import localize from "../../scripts/locale.mjs";
+import {locale} from "../../scripts/locale.mjs";
 import {InteractionController} from "./interactionController.mjs";
 import {netSend} from "./netcode.mjs";
 import * as autopass from "./autopass.mjs";
@@ -527,6 +528,15 @@ export class AutomaticController extends InteractionController {
 				}
 				break;
 			}
+			case "cardNameSelected": {
+				if (events[0].player !== localPlayer) {
+					chat.putMessage(
+						localize("game.notices.playerChoseCardName", {PLAYER: events[0].player, CARDNAME: (await cardLoader.getCardInfo(events[0].chosenCardName)).name}),
+						"notice"
+					);
+				}
+				break;
+			}
 			case "abilitySelected": {
 				if (events[0].player !== localPlayer) {
 					chat.putMessage(
@@ -612,6 +622,10 @@ export class AutomaticController extends InteractionController {
 				}
 				case "chooseType": {
 					autoUI.showOpponentAction(localize("game.automatic.opponentActions.selectingType", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.effect.split(":")[0])).name}));
+					break;
+				}
+				case "chooseCardName": {
+					autoUI.showOpponentAction(localize("game.automatic.opponentActions.selectingCardName", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.effect.split(":")[0])).name}));
 					break;
 				}
 				case "chooseDeckSide": {
@@ -702,7 +716,9 @@ export class AutomaticController extends InteractionController {
 			case "chooseAbility": {
 				response.value = await autoUI.promptDropdownSelection(
 					localize("game.automatic.effectSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
-					(await Promise.allSettled(request.from.map(abilityId => cardLoader.getAbilityText(abilityId)))).map(promise => promise.value),
+					(await Promise.allSettled(request.from.map(abilityId => cardLoader.getAbilityText(abilityId)))).map((promise, i) => {
+						return {label: promise.value, value: i};
+					}),
 					request
 				);
 				break;
@@ -710,7 +726,20 @@ export class AutomaticController extends InteractionController {
 			case "chooseType": {
 				response.value = await autoUI.promptDropdownSelection(
 					localize("game.automatic.typeSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
-					request.from.map(type => localize(`types.${type}`)),
+					request.from.map((type, i) => {
+						return {label: localize(`types.${type}`), value: i, sortName: locale.optional.typeSortNames?.[type] ?? localize(`types.${type}`)}
+					}).sort((a, b) => a.sortName > b.sortName? 1 : -1),
+					request
+				);
+				break;
+			}
+			case "chooseCardName": {
+				const cardInfoPromises = request.from.map(cardId => cardLoader.getCardInfo(cardId));
+				response.value = await autoUI.promptDropdownSelection(
+					localize("game.automatic.cardNameSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					(await Promise.allSettled(cardInfoPromises)).map(promise => promise.value)
+						.map((card, i) => {return {label: card.name, value: i, sortName: card.nameHiragana ?? card.name}})
+						.sort((a, b) => a.sortName > b.sortName? 1 : -1),
 					request
 				);
 				break;

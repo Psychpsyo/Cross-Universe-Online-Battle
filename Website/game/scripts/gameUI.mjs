@@ -5,6 +5,7 @@ import localize from "../../scripts/locale.mjs";
 import {locale} from "../../scripts/locale.mjs";
 import {getCardImage} from "../../scripts/cardLoader.mjs";
 import {Card} from "../../rulesEngine/src/card.mjs";
+import * as cardLoader from "../../scripts/cardLoader.mjs";
 import * as fieldOverlay from "./fieldOverlay.mjs";
 
 let cardSlots = [];

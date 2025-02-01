@@ -181,6 +181,7 @@
 
 			"playerStarts": "{*SATZ(#PLAYER)} {*PRAESENS(bist|ist|#PLAYER)} zuerst dran.",
 			"deckShuffled": "{*SATZ(*DAS(#DECK))} wurde gemischt.",
+			"playerChoseCardName": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} '{#CARDNAME}' gewählt.",
 			"playerChosePlayer": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} {*PRONOMEN(#TARGET|#PLAYER|sich selbst)} gewählt.",
 			"playerChoseType": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} Typ {#TYPE} gewählt.",
 			"playerChoseAbility": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} gewählt:\n{#ABILITY}",
@@ -433,6 +434,7 @@
 				"effectSelectingPlayer": "{*SATZ(#PLAYER)} wählt einen Spieler für den Effekt von '{'CARDNAME}'.",
 				"selectingStartingPlayer": "{*SATZ(#PLAYER)} wählt, wer anfängt.",
 
+				"selectingCardName": "{*SATZ(#PLAYER)} wählt einen Kartennamen für den Effekt von '{#CARDNAME}'.",
 				"selectingType": "{*SATZ(#PLAYER)} wählt einen Typ für den Effekt von '{#CARDNAME}'.",
 				"selectingEffect": "{*SATZ(#PLAYER)} wählt einen Effekt für den Effekt von '{#CARDNAME}'.",
 				"selectingDeckSide": "{*SATZ(#PLAYER)} wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'.",

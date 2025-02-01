@@ -181,6 +181,7 @@
 
 			"playerStarts": null,
 			"deckShuffled": null,
+			"playerChoseCardName": null,
 			"playerChosePlayer": null,
 			"playerChoseType": null,
 			"playerChoseAbility": null,
@@ -433,6 +434,7 @@
 				"effectSelectingPlayer": null,
 				"selectingStartingPlayer": null,
 
+				"selectingCardName": null,
 				"selectingType": null,
 				"selectingEffect": null,
 				"selectingDeckSide": null,
