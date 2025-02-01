@@ -387,14 +387,11 @@
 				"opponent": null
 			},
 
-			"typeSelect": {
-				"prompt": null,
-				"select": null
-			},
-
-			"effectSelect": {
-				"prompt": null,
-				"select": null
+			"selectPopup": {
+				"confirm": null,
+				"typePrompt": null,
+				"effectPrompt": null,
+				"cardNamePrompt": null
 			},
 
 			"deckSideSelect": {

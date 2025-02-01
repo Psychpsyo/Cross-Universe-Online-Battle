@@ -715,7 +715,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "chooseAbility": {
 				response.value = await autoUI.promptDropdownSelection(
-					localize("game.automatic.effectSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					localize("game.automatic.selectPopup.effectPrompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
 					(await Promise.allSettled(request.from.map(abilityId => cardLoader.getAbilityText(abilityId)))).map((promise, i) => {
 						return {label: promise.value, value: i};
 					}),
@@ -725,7 +725,7 @@ export class AutomaticController extends InteractionController {
 			}
 			case "chooseType": {
 				response.value = await autoUI.promptDropdownSelection(
-					localize("game.automatic.typeSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					localize("game.automatic.selectPopup.typePrompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
 					request.from.map((type, i) => {
 						return {label: localize(`types.${type}`), value: i, sortName: locale.optional.typeSortNames?.[type] ?? localize(`types.${type}`)}
 					}).sort((a, b) => a.sortName > b.sortName? 1 : -1),
@@ -736,7 +736,7 @@ export class AutomaticController extends InteractionController {
 			case "chooseCardName": {
 				const cardInfoPromises = request.from.map(cardId => cardLoader.getCardInfo(cardId));
 				response.value = await autoUI.promptDropdownSelection(
-					localize("game.automatic.cardNameSelect.prompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					localize("game.automatic.selectPopup.cardNamePrompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
 					(await Promise.allSettled(cardInfoPromises)).map(promise => promise.value)
 						.map((card, i) => {return {label: card.name, value: i, sortName: card.nameHiragana ?? card.name}})
 						.sort((a, b) => a.sortName > b.sortName? 1 : -1),

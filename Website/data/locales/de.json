@@ -387,14 +387,11 @@
 				"opponent": "Dein Gegner"
 			},
 
-			"typeSelect": {
-				"prompt": "Wähle einen Typ für den Effekt von '{#CARDNAME}':",
-				"select": "Auswählen"
-			},
-
-			"effectSelect": {
-				"prompt": "Wähle einen Effekt für den Effekt von '{#CARDNAME}':",
-				"select": "Auswählen"
+			"selectPopup": {
+				"confirm": "Auswählen",
+				"typePrompt": "Wähle einen Typ für den Effekt von '{#CARDNAME}':",
+				"effectPrompt": "Wähle einen Effekt für den Effekt von '{#CARDNAME}':",
+				"cardNamePrompt": "Wähle einen Kartennamen für den Effekt von '{#CARDNAME}':"
 			},
 
 			"deckSideSelect": {

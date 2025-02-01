@@ -28,7 +28,7 @@ export function init() {
 		option.textContent = localize(`game.automatic.actions.passModes.${option.value}`);
 	}
 
-	typePopupConfirm.textContent = localize("game.automatic.typeSelect.select");
+	selectPopupConfirm.textContent = localize("game.automatic.selectPopup.confirm");
 
 	passBtn.addEventListener("click", function() {
 		this.disabled = true;
@@ -327,20 +327,20 @@ export function clearOpponentAction() {
 
 export async function promptDropdownSelection(message, options, request) {
 	typeSelectPopupText.textContent = message;
-	typePopupSelection.innerHTML = "";
+	selectPopupSelect.innerHTML = "";
 	for (const option of options) {
 		const optionElement = document.createElement("option");
 		optionElement.value = option.value;
 		optionElement.textContent = option.label;
 		optionElement.disabled = await request.validate({type: request.type, value: option.value}) !== "";
-		typePopupSelection.add(optionElement);
+		selectPopupSelect.add(optionElement);
 	}
 	typeSelectPopup.showModal();
 
 	return new Promise(resolve => {
-		typePopupConfirm.addEventListener("click", function() {
+		selectPopupConfirm.addEventListener("click", function() {
 			typeSelectPopup.close();
-			resolve(parseInt(typePopupSelection.value));
+			resolve(parseInt(selectPopupSelect.value));
 		}, {once: true});
 	});
 }

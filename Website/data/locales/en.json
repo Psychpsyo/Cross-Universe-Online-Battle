@@ -387,14 +387,11 @@
 				"opponent": "Your Opponent"
 			},
 
-			"typeSelect": {
-				"prompt": "Select a type for the effect of '{#CARDNAME}':",
-				"select": "Select"
-			},
-
-			"effectSelect": {
-				"prompt": "Select an effect for the effect of '{#CARDNAME}':",
-				"select": "Select"
+			"selectPopup": {
+				"confirm": "Select",
+				"typePrompt": "Select a type for the effect of '{#CARDNAME}':",
+				"effectPrompt": "Select an effect for the effect of '{#CARDNAME}':",
+				"cardNamePrompt": "State a card name for the effect of '{#CARDNAME}':"
 			},
 
 			"deckSideSelect": {
