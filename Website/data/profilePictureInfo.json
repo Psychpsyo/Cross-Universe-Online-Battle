@@ -89,7 +89,7 @@
 	"U00121": {"flip": true},
 	"U00123": {"neverFlip": true},
 	"U00124": {"neverFlip": true},
-	"U00126": {"left": 25},
+	"U00126": {"flip": true, "left": 25},
 	"U00127": {"left": 40},
 	"U00129": {"flip": true, "left": 56},
 	"U00131": {"left": 25},
