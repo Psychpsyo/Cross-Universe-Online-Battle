@@ -198,11 +198,6 @@ Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 	});
 });
 
-// gets a card's ID from a link to its image
-function cardIdFromLink(imgLink) {
-	return imgLink.match(/(?<=\/)[USIT]\d{5}(?=.)/);
-}
-
 function cardToAltText(card) {
 	return locale[(card.cardType == "unit" || card.cardType == "unit")? "unitAltText" : "cardAltText"]
 		.replace("{#NAME}", card.name)
