@@ -190,6 +190,7 @@ quickSearch.addEventListener("keyup", async function(e) {
 });
 
 // make dialogs work
+// TODO: Remove this once closedby is supported in Firefox and Safari
 Array.from(document.getElementsByTagName("dialog")).forEach(elem => {
 	elem.addEventListener("click", function(e) {
 		if (e.target === elem) {
