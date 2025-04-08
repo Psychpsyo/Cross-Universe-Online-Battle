@@ -165,7 +165,7 @@ h1, h2, h3, h4 {
 
 .deckCreatorScrollArea {
 	flex-grow: 1;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 .deckCreatorScrollArea h4 {

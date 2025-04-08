@@ -811,8 +811,6 @@
 
 		"deckMenu": {
 			"title": null,
-			"cardListTitle": null,
-			"detailsTitle": null,
 			"recentCardsTitle": null,
 
 			"name": "デッキ名：",

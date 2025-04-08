@@ -37,8 +37,6 @@ equipableItemHeader.textContent = locale.deckMaker.equipableItems;
 
 // deck menu
 deckCreationPanelHeader.textContent = locale.deckMaker.deckMenu.title;
-deckCardListHeader.textContent = locale.deckMaker.deckMenu.cardListTitle;
-deckDetailsHeader.textContent = locale.deckMaker.deckMenu.detailsTitle;
 recentCardsHeaderBtn.textContent = locale.deckMaker.deckMenu.recentCardsTitle;
 
 deckMakerDetailsName.textContent = locale.deckMaker.deckMenu.name;

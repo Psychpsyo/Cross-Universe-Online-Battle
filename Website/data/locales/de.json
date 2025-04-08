@@ -811,8 +811,6 @@
 
 		"deckMenu": {
 			"title": "Deck-Übersicht",
-			"cardListTitle": "Kartenliste",
-			"detailsTitle": "Details",
 			"recentCardsTitle": "Zuletzt Benutzte Karten",
 
 			"name": "Deckname:",

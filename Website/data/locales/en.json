@@ -811,8 +811,6 @@
 
 		"deckMenu": {
 			"title": "Deck Overview",
-			"cardListTitle": "Card List",
-			"detailsTitle": "Details",
 			"recentCardsTitle": "Recent Cards",
 
 			"name": "Deck Name:",
