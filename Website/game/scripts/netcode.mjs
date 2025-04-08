@@ -202,7 +202,7 @@ function receiveMessage(message, command, player) {
 	switch (command) {
 		// chat-related things
 		case "chat": {
-			chat.putMessage(playerData[player.index].name + localize("chat.colon") + message.substring(0, 10_000));
+			chat.putPlayerMessage(playerData[player.index].name, message);
 			// no break to also clear typing indicator in "stopTyping"
 		}
 		case "stopTyping": {

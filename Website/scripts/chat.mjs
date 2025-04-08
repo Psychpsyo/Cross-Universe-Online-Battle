@@ -1,5 +1,41 @@
 // This file defines the chat-box custom element
+import { deckToCardIdList, decodeDeckCode } from "./deckUtils.mjs";
 import {locale} from "./locale.mjs";
+import localize from "./locale.mjs";
+import * as cardLoader from "./cardLoader.mjs"
+
+class ChatIntegration {
+	constructor() {}
+
+	// checks if a message is an eligible integration and, if so, returns the extraContent to be included.
+	integrateMessage(message) {
+		return null;
+	}
+}
+class ImageIntegration extends ChatIntegration {
+	constructor(name, regex) {
+		super();
+		this.name = name;
+		this.regex = regex;
+	}
+
+	integrateMessage(message) {
+		const match = message.match(this.regex);
+		if (!match) return null;
+
+		const image = document.createElement("img");
+		image.alt = localize("chat.externalImage", this.name);
+		image.classList.add("chatImage");
+		image.src = message;
+		return image;
+	}
+}
+
+const chatIntegrations = [
+	new ImageIntegration("Tenor", new RegExp("^https://media\.tenor\.com\/.+$", "i")),
+	new ImageIntegration("Discord", new RegExp("^https://cdn.discordapp.com/attachments/.+\.(avif|gif|jpg|jpeg|png|webm).+$", "i")),
+	new ImageIntegration("Imgur", new RegExp("^https://i\.imgur\.com/.+$", "i"))
+];
 
 const allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
 class ChatBox extends HTMLElement {
@@ -37,7 +73,7 @@ class ChatBox extends HTMLElement {
 		this.appendChild(this.inputField);
 	}
 
-	// displays a message in chat. extraContent is an html element to be included in the message
+	// Displays a message in chat. extraContent is an html element to be included in the message.
 	// type can be undefined or either "notice", "warning", "error" or "success"
 	putMessage(message, type, extraContent) {
 		const messageDiv = document.createElement("div");
@@ -65,13 +101,33 @@ class ChatBox extends HTMLElement {
 		}
 		messageDiv.appendChild(document.createTextNode(message));
 
-		if (extraContent) messageDiv.appendChild(extraContent);
+		if (extraContent) {
+			// Always insert a <br> in case extraContent is an inline element.
+			// An example of this is images appended to chat messages.
+			messageDiv.appendChild(document.createElement("br"));
+			messageDiv.appendChild(extraContent);
+		}
 
 		if (type) {
 			messageDiv.classList.add(type);
 		}
 		this.messageArea.appendChild(messageDiv);
 		this.messageArea.scrollTop = this.messageArea.scrollHeight - this.messageArea.clientHeight;
+	}
+
+	putPlayerMessage(username, message) {
+		message = message.substring(0, 10_000);
+		let extraContent;
+
+		for (const integration of chatIntegrations) {
+			extraContent = integration.integrateMessage(message);
+			if (extraContent) {
+				message = "";
+				break;
+			};
+		}
+
+		this.putMessage(`${username}${localize("chat.colon")}${message}`, undefined, extraContent);
 	}
 
 	// empties the chat

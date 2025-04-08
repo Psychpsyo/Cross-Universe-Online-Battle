@@ -86,3 +86,7 @@ chat-box > input {
 .uninteractable chat-box > input {
 	display: none;
 }
+
+.chatImage {
+	max-width: min(100%, 15em);
+}

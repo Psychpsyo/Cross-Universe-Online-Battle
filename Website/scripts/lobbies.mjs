@@ -1043,7 +1043,7 @@ async function receiveWebRtcHostMessage(e) {
 			if (!user || typeof message.message !== "string") break;
 			if (!await verifySignature(message.signature, "public", `chat|${message.message}`, ++user.lastPublicSequenceNum, user)) break;
 
-			lobbyChat.putMessage(user.name + locale["chat"]["colon"] + message.message.substring(0, 10_000));
+			lobbyChat.putPlayerMessage(user.name, message.message);
 			break;
 		}
 		case "userStatus": {
@@ -1200,7 +1200,7 @@ async function receiveWebRtcVisitorMessage(e) {
 			}));
 
 			if (!await verifySignature(message.signature, "public", `chat|${message.message}`, ++user.lastPublicSequenceNum, user)) break;
-			lobbyChat.putMessage(user.name + locale["chat"]["colon"] + message.message.substring(0, 10_000));
+			lobbyChat.putPlayerMessage(user.name, message.message);
 			break;
 		}
 		case "setStatus": {
@@ -1347,15 +1347,15 @@ lobbyChat.addEventListener("message", async function(e) {
 	if (isHosting) {
 		broadcast(JSON.stringify({
 			type: "chat",
-			message: e.data,
+			message: e.data.substring(0, 10_000),
 			userId: currentLobby.ownUserId,
 			signature: signature
 		}));
-		lobbyChat.putMessage(getUserFromId(currentLobby.ownUserId).name + locale["chat"]["colon"] + e.data);
+		lobbyChat.putPlayerMessage(getUserFromId(currentLobby.ownUserId).name, e.data);
 	} else {
 		hostDataChannel.send(JSON.stringify({
 			type: "chat",
-			message: e.data,
+			message: e.data.substring(0, 10_000),
 			signature: signature
 		}));
 	}

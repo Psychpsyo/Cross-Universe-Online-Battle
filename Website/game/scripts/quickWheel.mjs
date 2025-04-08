@@ -80,7 +80,7 @@ for (const option of contents) {
 	segment.addEventListener("mouseup", function(e) {
 		if (e.button !== 1) return;
 		netSend("chat", this.dataset.message);
-		chat.putMessage(playerData[1].name + locale["chat"]["colon"] + this.dataset.message);
+		chat.putPlayerMessage(playerData[1].name, this.dataset.message);
 	});
 
 	quickWheel.appendChild(segment);

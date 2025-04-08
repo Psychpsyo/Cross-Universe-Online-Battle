@@ -62,7 +62,7 @@ export function createAbilityFragment(abilityText) {
 let isTyping = false;
 chat.addEventListener("message", function(e) {
 	netSend("chat", e.data);
-	this.putMessage(playerData[localPlayer.index].name + locale["chat"]["colon"] + e.data);
+	this.putPlayerMessage(playerData[localPlayer.index].name, e.data);
 });
 chat.inputField.addEventListener("input", () => {
 	if (!isTyping) {
