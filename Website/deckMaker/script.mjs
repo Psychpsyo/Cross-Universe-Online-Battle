@@ -1,4 +1,4 @@
-import {locale} from "../scripts/locale.mjs";
+import localize, {locale} from "../scripts/locale.mjs";
 import * as cardLoader from "../scripts/cardLoader.mjs";
 import * as deckUtils from "../scripts/deckUtils.mjs";
 import * as uiUtils from "../scripts/uiUtils.mjs";
@@ -744,7 +744,12 @@ document.getElementById("fileImportBtn").addEventListener("click", function() {
 document.getElementById("deckCodeImportBtn").addEventListener("click", function() {
 	const deckCode = prompt(locale.deckMaker.deckMenu.deckCodeImportPrompt)?.trim();
 	if (deckCode) {
-		loadDeck(deckUtils.decodeDeckCode(deckCode));
+		const deck = deckUtils.decodeDeckCode(deckCode);
+		if (deck) {
+			loadDeck(deck);
+		} else {
+			alert(localize("deckMaker.deckMenu.invalidDeckCode"));
+		}
 	}
 });
 
@@ -759,7 +764,7 @@ function loadDeckFile(file) {
 }
 
 async function loadDeck(deck) {
-	if (deckList.length > 0 && !confirm(locale.deckMaker.unsavedChangesWarning)) return;
+	if (deckList.length > 0 && !confirm(localize("deckMaker.unsavedChangesWarning"))) return;
 
 	// remove all cards from current deck
 	while (deckList.length > 0) {

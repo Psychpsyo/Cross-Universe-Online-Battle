@@ -231,23 +231,46 @@ export function decodeDeckCode(code) {
 	let binary = "";
 	for (const char of code) {
 		let num = deckCodeChars.indexOf(char);
+		if (num === -1) return null;
 		binary += num.toString(2).padStart(5, "0");
 	}
+
+	// we need at least 10 bits to parse out the bitCount and partnerIndex
+	if (binary.length < 10) return null;
 
 	let deck = {
 		cards: []
 	};
 
 	let i = 0;
+	// how many bits are used to encode each card
 	let bitCount = parseInt(binary.substring(i, i+=4), 2);
+	// the how-manyeth encoded card type is the partner
 	let partnerIndex = parseInt(binary.substring(i, i+=6), 2) - 1;
 
 	let lastCardId = 1;
 	let currentCard = 0;
 	while (binary.substring(i).includes("1")) {
-		lastCardId += parseInt(binary.substring(i, i+=bitCount), 2);
+		// Error check: We need to have enough bits left for the card
+		if (binary.length <= i+bitCount) return null;
+
+		const increment = parseInt(binary.substring(i, i+=bitCount), 2);
+
+		// Error check: The same card can't be encoded twice in a row.
+		if (increment === 0 && lastCardId > 1) return null;
+		lastCardId += increment;
+
+		// Error check: We need to have enough bits left for the card amount
+		if (binary.length <= i+2) return null;
+
 		let cardCount = parseInt(binary.substring(i, i+=2), 2);
-		if (cardCount === 0) cardCount = parseInt(binary.substring(i, i+=6), 2);
+		// A card amount of 0 means we need parse a longer card amount (6 bits)
+		if (cardCount === 0) {
+			// Error check: We need to have enough bits left for the extended card amount
+			if (binary.length <= i+6) return null;
+
+			cardCount = parseInt(binary.substring(i, i+=6), 2);
+		}
 
 		const cardId = uninterlaceCardId(lastCardId);
 		deck.cards.push({
@@ -259,5 +282,7 @@ export function decodeDeckCode(code) {
 		}
 		currentCard++;
 	}
+	// Could not parse a partner when there should be one.
+	if (partnerIndex >= 0 && !deck.suggestedPartner) return null;
 	return deck;
 }

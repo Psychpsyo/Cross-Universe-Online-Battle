@@ -840,6 +840,7 @@
 			"copyDeckCode": null,
 			"importDeckFromCode": null,
 			"deckCodeImportPrompt": null,
+			"invalidDeckCode": null,
 			"printDeck": null,
 			"printCardBacks": null,
 			"drawStartingHand": null

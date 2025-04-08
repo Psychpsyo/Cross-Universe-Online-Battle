@@ -840,6 +840,7 @@
 			"copyDeckCode": "Deck-Code kopieren",
 			"importDeckFromCode": "Deck-Code importieren",
 			"deckCodeImportPrompt": "Füge deinen Deck-Code hier ein.\n(Er sollte in etwa so aussehen: a4z8bb3n558a77sa1gi2h8pg8a2v4i58a )",
+			"invalidDeckCode": "Das sieht nicht nach einem gültigen Deck-Code aus, sorry!",
 			"printDeck": "Deck ausdrucken",
 			"printCardBacks": "Kartenrücken drucken",
 			"drawStartingHand": "Starthand ziehen"
