@@ -165,7 +165,7 @@ export function encodeDeckCode(deck) {
 		lastId = id;
 	}
 
-	const bitCount = Math.ceil(Math.log2(maxDist));
+	const bitCount = Math.max(1, Math.ceil(Math.log2(maxDist)));
 
 	binaryData.push((bitCount & 0b1000) !== 0);
 	binaryData.push((bitCount & 0b0100) !== 0);
