@@ -15,7 +15,8 @@
 		<link rel="manifest" href="manifest.json">
 
 		<script src="scripts/localStorageSetup.js"></script>
-		<link rel="modulepreload" href="settings/script.mjs" as="script">
+		<link rel="modulepreload" href="settings/script.mjs" as="script" fetchpriority="high">
+		<link rel="preconnect" href="https://crossuniverse.net"> <!-- for card images -->
 
 		<link rel="stylesheet" href="styles/index.css">
 		<link rel="stylesheet" href="settings/style.css">
@@ -52,6 +53,6 @@
 			<a class="warningNote" href="https://github.com/Psychpsyo/Cross-Universe-Online-Frontend/tree/main/Website/data/locales" target="_blank"><b class="warningNoteIcon" aria-role="img">ⓘ</b> <span class="warningText"></span></a>
 		</template>
 
-		<script src="settings/script.mjs" type="module"></script>
+		<script src="settings/script.mjs" type="module" fetchpriority="high"></script>
 	</body>
 </html>

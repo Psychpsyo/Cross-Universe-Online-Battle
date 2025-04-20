@@ -15,7 +15,8 @@
 		<link rel="manifest" href="manifest.json">
 
 		<script src="scripts/localStorageSetup.js"></script>
-		<link rel="modulepreload" href="intro/intro.mjs" as="script">
+		<link rel="modulepreload" href="intro/intro.mjs" as="script" fetchpriority="high">
+		<link rel="preconnect" href="https://crossuniverse.net"> <!-- for card images -->
 
 		<link rel="stylesheet" href="styles/index.css">
 		<link rel="stylesheet" href="styles/levitationEffect.css">
@@ -53,6 +54,17 @@
 		<iframe id="gameFrame" scrolling="no"></iframe>
 		<script>gameFrame.src="about:blank"</script> <!-- Firefox makes the iframe point to the game on page refresh otherwise -->
 
-		<script src="intro/intro.mjs" type="module"></script>
+		<script src="intro/intro.mjs" type="module" fetchpriority="high"></script>
+
+		<!-- Prefetch the main menu in advance to make it available right away when the user finishes the intro -->
+		<script type="speculationrules">
+			{
+			  "prefetch": [
+				{
+				  "urls": ["/index.html"]
+				}
+			  ]
+			}
+		</script>
 	</body>
 </html>

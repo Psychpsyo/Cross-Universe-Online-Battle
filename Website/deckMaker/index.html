@@ -15,7 +15,8 @@
 
 		<script src="scripts/polyfills.js"></script>
 		<script src="scripts/localStorageSetup.js"></script>
-		<link rel="modulepreload" href="deckMaker/script.mjs" as="script">
+		<link rel="modulepreload" href="deckMaker/script.mjs" as="script" fetchpriority="high">
+		<link rel="preconnect" href="https://crossuniverse.net"> <!-- for card images -->
 
 		<link rel="stylesheet" href="styles/index.css">
 		<link rel="stylesheet" href="deckMaker/style.css">
@@ -359,7 +360,7 @@
 		<object id="loadingIndicator" type="image/svg+xml" data="./images/icons/loading.svg" width="150" height="150"></object>
 
 		<!--scripts-->
-		<script src="deckMaker/script.mjs" type="module"></script>
+		<script src="deckMaker/script.mjs" type="module" fetchpriority="high"></script>
 		<script src="deckMaker/startingHands.mjs" type="module"></script>
 	</body>
 </html>

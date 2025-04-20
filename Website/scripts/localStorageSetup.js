@@ -231,19 +231,21 @@ if (localStorage.getItem("fieldLeftToggle") == "true") {
 	document.documentElement.classList.add("leftField");
 }
 
-function preload(href, as, isModule) {
+function preload(href, as, {isModule, fetchPriority} = {}) {
 	const link = document.createElement("link");
 	link.href = href;
 	link.as = as;
 	link.rel = isModule? "modulepreload" : "preload";
-	link.crossOrigin = "anonymous";
+	if (as !== "image") link.crossOrigin = "anonymous";
+	if (fetchPriority) link.fetchpriority = fetchPriority;
 	document.head.appendChild(link);
 }
 
-preload("scripts/locale.mjs", "script", true);
-preload("scripts/localeFunctions/en.mjs", "script", true);
-preload("data/locales/en.json", "fetch", false);
+preload("scripts/locale.mjs", "script", {isModule: true});
+preload("scripts/localeFunctions/en.mjs", "script", {isModule: true});
+preload("data/locales/en.json", "fetch", {fetchPriority: "high"});
+preload(themes[localStorage.getItem("theme")].background, "image");
 if (localStorage.getItem("language") !== "en") {
-	preload(`scripts/localeFunctions/${localStorage.getItem("language")}.mjs`, "script", true);
-	preload(`data/locales/${localStorage.getItem("language")}.json`, "fetch", false);
+	preload(`scripts/localeFunctions/${localStorage.getItem("language")}.mjs`, "script", {isModule: true});
+	preload(`data/locales/${localStorage.getItem("language")}.json`, "fetch", {fetchPriority: "high"});
 }

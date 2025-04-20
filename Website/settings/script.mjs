@@ -1,7 +1,11 @@
 import {reloadLocale, locale} from "../scripts/locale.mjs";
-import {refetchCardData} from "./profilePictureSelector.mjs";
-import {validateHotkeys, resetHotkeys, relabelAllHotkeys, editHotkey} from "./hotkeys.mjs";
-import {startDebugGame} from "./debugGame.mjs";
+
+const profilePictureModule = import("./profilePictureSelector.mjs");
+const hotkeyModule = import("./hotkeys.mjs");
+hotkeyModule.then(({validateHotkeys}) => validateHotkeys());
+async function editHotkey() {
+	(await hotkeyModule).editHotkey();
+}
 
 const languageNames = {
 	en: "🇬🇧 English",
@@ -168,7 +172,7 @@ const settings = {
 		{
 			id: "resetHotkeys",
 			type: "centerButton",
-			action: resetHotkeys
+			action: async function() {(await hotkeyModule).resetHotkeys()}
 		}
 	],
 	deckMaker: [
@@ -231,7 +235,9 @@ const settings = {
 		{
 			id: "startDebugGame",
 			type: "centerButton",
-			action: startDebugGame,
+			action: () => {
+				import("./debugGame.mjs").then(({startDebugGame}) => startDebugGame());
+			},
 			isDevOption: true
 		}
 	]
@@ -318,12 +324,11 @@ customFontInput.addEventListener("change", function() {
 updateCustomFontInputDiv();
 setLanguage(languageSelector.value);
 
-for (const [name, hotkey] of Object.entries(JSON.parse(localStorage.getItem("hotkeys")))) {
+for (const name of Object.keys(JSON.parse(localStorage.getItem("hotkeys")))) {
 	document.getElementById(name + "Button").classList.add("keybind");
 }
 previewHandButton.classList.add("keybind");
 previewHandButton.disabled = true;
-validateHotkeys();
 
 function updateCustomFontInputDiv() {
 	customFontInput.value = localStorage.getItem("customFont");
@@ -333,8 +338,8 @@ function updateCustomFontInputDiv() {
 
 async function setLanguage(language) {
 	localStorage.setItem("language", language);
-	refetchCardData();
 	await reloadLocale();
+	profilePictureModule.then(({refetchCardData}) => refetchCardData());
 
 	title.textContent = locale.settings.title;
 	headerBackButton.title = locale.general.buttonBack;
@@ -415,7 +420,7 @@ async function setLanguage(language) {
 		categoryHeading.textContent = locale.settings.profile.profilePictureMenu.categories[categoryHeading.dataset.category];
 	}
 
-	relabelAllHotkeys();
+	hotkeyModule.then(({relabelAllHotkeys}) => relabelAllHotkeys());
 
 	websocketUrlInput.placeholder = "wss://battle.crossuniverse.net:443/ws/";
 	lobbyServerUrlInput.placeholder = "wss://battle.crossuniverse.net:443/lobbies/";

@@ -15,7 +15,8 @@
 
 		<script src="scripts/polyfills.js"></script>
 		<script src="scripts/localStorageSetup.js"></script>
-		<link rel="modulepreload" href="game/scripts/main.mjs" as="script">
+		<link rel="modulepreload" href="game/scripts/main.mjs" as="script" fetchpriority="high">
+		<link rel="preconnect" href="https://crossuniverse.net"> <!-- for card images -->
 
 		<link rel="stylesheet" href="styles/index.css">
 		<link rel="stylesheet" href="styles/loadingIndicator.css">
@@ -531,7 +532,7 @@
 		<object id="loadingIndicator" type="image/svg+xml" data="./images/icons/loading.svg" width="150px" height="150px"></object>
 
 		<script src="scripts/chat.mjs" type="module"></script>
-		<script src="game/scripts/main.mjs" type="module"></script>
+		<script src="game/scripts/main.mjs" type="module" fetchpriority="high"></script>
 		<script src="game/scripts/quickWheel.mjs" type="module"></script>
 	</body>
 </html>
