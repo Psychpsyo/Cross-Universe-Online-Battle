@@ -10,28 +10,22 @@ function loadImage(imageUrl) {
 	});
 };
 
-const backgrounds = {
-	"unit": loadImage("./custom/images/unit.png"),
-	"standardSpell": loadImage("./custom/images/spell.png"),
-	"standardItem": loadImage("./custom/images/item.png"),
-	"token": loadImage("./custom/images/token.png")
+let imageMap = new Map();
+async function getImage(url) {
+	if (!imageMap.has(url)) imageMap.set(url, loadImage(url));
+	return imageMap.get(url);
 }
-// set spell & item variants
-backgrounds.continuousSpell = backgrounds.standardSpell;
-backgrounds.enchantSpell = backgrounds.standardSpell;
-backgrounds.continuousItem = backgrounds.standardItem;
-backgrounds.equipableItem = backgrounds.standardItem;
 
-// bracket images
-const bracketLeftTop = loadImage("./custom/images/bracketLeftTop.png");
-const bracketLeftMiddle = loadImage("./custom/images/bracketLeftMiddle.png");
-const bracketLeftBottom = loadImage("./custom/images/bracketLeftBottom.png");
-const bracketRightTop = loadImage("./custom/images/bracketRightTop.png");
-const bracketRightMiddle = loadImage("./custom/images/bracketRightMiddle.png");
-const bracketRightBottom = loadImage("./custom/images/bracketRightBottom.png");
-
-// the "NO IMAGE" card image
-const noImage = loadImage("./custom/images/noImage.png");
+const backgroundUrls = {
+	unit: "./custom/images/unit.png",
+	standardSpell: "./custom/images/spell.png",
+	continuousSpell: "./custom/images/spell.png",
+	enchantSpell: "./custom/images/spell.png",
+	standardItem: "./custom/images/item.png",
+	continuousItem: "./custom/images/item.png",
+	equipableItem: "./custom/images/item.png",
+	token: "./custom/images/token.png"
+}
 
 const lineGap = 3;
 
@@ -111,8 +105,8 @@ async function renderCard(card, canvas) {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.fillStyle = "black";
 
-	ctx.drawImage(await backgrounds[card.cardType], 0, 0);
-	ctx.drawImage(await noImage, 74, 61);
+	ctx.drawImage(await getImage(backgroundUrls[card.cardType]), 0, 0);
+	ctx.drawImage(await getImage("./custom/images/noImage.png"), 74, 61);
 
 	// write level
 	ctx.font = "39pt 'Yu Mincho'";
@@ -153,13 +147,13 @@ async function renderCard(card, canvas) {
 	});
 	// draw brackets
 	effects.brackets.forEach(async bracket => {
-		ctx.drawImage(await bracketLeftTop, 95 + bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap));
-		ctx.drawImage(await bracketLeftMiddle, 95 + bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap) + 7, 17, (bracket.lastLine - bracket.firstLine) * (fontSize + lineGap) - 14);
-		ctx.drawImage(await bracketLeftBottom, 95 + bracket.indent * fontSize, 779 + bracket.lastLine * (fontSize + lineGap) - 7);
+		ctx.drawImage(await getImage("./custom/images/bracketLeftTop.png"), 95 + bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap));
+		ctx.drawImage(await getImage("./custom/images/bracketLeftMiddle.png"), 95 + bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap) + 7, 17, (bracket.lastLine - bracket.firstLine) * (fontSize + lineGap) - 14);
+		ctx.drawImage(await getImage("./custom/images/bracketLeftBottom.png"), 95 + bracket.indent * fontSize, 779 + bracket.lastLine * (fontSize + lineGap) - 7);
 
-		ctx.drawImage(await bracketRightTop, 701 - bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap));
-		ctx.drawImage(await bracketRightMiddle, 701 - bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap) + 7, 17, (bracket.lastLine - bracket.firstLine) * (fontSize + lineGap) - 14);
-		ctx.drawImage(await bracketRightBottom, 701 - bracket.indent * fontSize, 779 + bracket.lastLine * (fontSize + lineGap) - 7);
+		ctx.drawImage(await getImage("./custom/images/bracketRightTop.png"), 701 - bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap));
+		ctx.drawImage(await getImage("./custom/images/bracketRightMiddle.png"), 701 - bracket.indent * fontSize, 779 + bracket.firstLine * (fontSize + lineGap) + 7, 17, (bracket.lastLine - bracket.firstLine) * (fontSize + lineGap) - 14);
+		ctx.drawImage(await getImage("./custom/images/bracketRightBottom.png"), 701 - bracket.indent * fontSize, 779 + bracket.lastLine * (fontSize + lineGap) - 7);
 	});
 
 	// write token notice and author (but not both)
