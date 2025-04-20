@@ -247,14 +247,14 @@ saveCopyButton.addEventListener("click", function() {
 });
 createNewButton.addEventListener("click", blankSlate);
 downloadImageButton.addEventListener("click", function() {
-	let downloadElement = document.createElement("a");
+	const downloadElement = document.createElement("a");
 	downloadElement.href = cardCanvas.toDataURL();
 	downloadElement.download = cardName.value + ".card";
 	downloadElement.click();
 });
 downloadCardButton.addEventListener("click", function() {
-	let downloadElement = document.createElement("a");
-	let card = getCard();
+	const downloadElement = document.createElement("a");
+	const card = getCard();
 	downloadElement.href = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(card));
 	downloadElement.download = card.name + ".card";
 	downloadElement.click();

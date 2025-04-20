@@ -26,12 +26,12 @@ export function deckFromCardList(cards, partner = null, name = null, description
 	return deck;
 }
 
-// Creates a .deck json from a .deckx json, based on the user's current locale
+// Creates a .deck json from a list of card IDs and other necessary info.
 export function basicDeckFromCardList(cards, partner = null, name = null, description = null) {
 	let deck = {};
 	deck.Cards = [];
 	deck.Description = description ?? "";
-	deck.Name = name ?? "";
+	deck.Name = name ?? defaultDeckName;
 
 	//add the cards
 	for (const card of cards.toSorted().reverse()) {
@@ -47,30 +47,30 @@ export function basicDeckFromCardList(cards, partner = null, name = null, descri
 
 // Converts an official Cross Universe .deck format file to .deckx with respect to the current user-selected locale.
 export function toDeckx(cuDeck) {
-	let jsonDeck = {};
+	const jsonDeck = {};
 
 	//set name
-	jsonDeck["name"] = {};
-	jsonDeck["name"][locale.code] = cuDeck["Name"] ?? locale.deckxDefaultName;
-	jsonDeck["description"] = {};
-	jsonDeck["description"][locale.code] = cuDeck["Description"] ?? "";
+	jsonDeck.name = {};
+	jsonDeck.name[locale.code] = cuDeck.Name ?? locale.defaultDeckName;
+	jsonDeck.description = {};
+	jsonDeck.description[locale.code] = cuDeck.Description ?? "";
 
 	//set partner
-	jsonDeck["cards"] = [];
-	if (cuDeck["Partner"]) {
-		jsonDeck["suggestedPartner"] = cuDeck["Partner"].substring(2);
-		jsonDeck["cards"].push({"id": cuDeck["Partner"].substring(2), "amount": 1});
+	jsonDeck.cards = [];
+	if (cuDeck.Partner) {
+		jsonDeck.suggestedPartner = cuDeck.Partner.substring(2);
+		jsonDeck.cards.push({id: cuDeck.Partner.substring(2), amount: 1});
 	}
 
 	//add the rest of the cards
-	for (const card of cuDeck["Cards"]) {
-		let alreadyThere = jsonDeck["cards"].filter(oldCard => {
-			return oldCard["id"] === card.substring(2);
+	for (const card of cuDeck.Cards) {
+		const alreadyThere = jsonDeck.cards.filter(oldCard => {
+			return oldCard.id === card.substring(2);
 		});
 		if (alreadyThere[0]) {
-			alreadyThere[0]["amount"]++;
+			alreadyThere[0].amount++;
 		} else {
-			jsonDeck["cards"].push({"id": card.substring(2), "amount": 1});
+			jsonDeck.cards.push({id: card.substring(2), amount: 1});
 		}
 	}
 

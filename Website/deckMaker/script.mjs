@@ -802,8 +802,8 @@ document.getElementById("dotDeckExportBtn").addEventListener("click", function()
 		deckMakerDetailsDescriptionInput.value
 	);
 
-	//generate the actual download
-	let downloadElement = document.createElement("a");
+	// generate the actual download
+	const downloadElement = document.createElement("a");
 	downloadElement.href = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(deck));
 	downloadElement.download = deck.Name + ".deck";
 	downloadElement.click();

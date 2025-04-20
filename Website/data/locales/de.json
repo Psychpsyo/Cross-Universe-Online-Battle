@@ -1016,7 +1016,7 @@
 		}
 	},
 
-	"deckxDefaultName": "Cross Universe VCI Generator Deck",
+	"defaultDeckName": "Unbenanntes Deck",
 
 	"optional": {}
 }
