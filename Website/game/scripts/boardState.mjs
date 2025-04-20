@@ -94,11 +94,10 @@ export class BoardState extends GameState {
 				return true;
 			}
 			case "showDeck": {
-				if (deckSelector.open) {
-					generalUI.closeDeckView();
+				if (deckSelector.parentElement.open) {
+					deckSelector.parentElement.close();
 				} else {
-					generalUI.loadDeckPreview(playerData[1].deck);
-					generalUI.openDeckView();
+					generalUI.openDeckView(playerData[1].deck, true);
 				}
 				return true;
 			}
@@ -184,7 +183,7 @@ export class BoardState extends GameState {
 	getPartnerFromDeck(partnerPosInDeck = -1) {
 		ui.showBlackoutMessage(locale.game.partnerSelect.waitingForOpponent);
 		if (partnerPosInDeck === -1) {
-			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId == playerData[localPlayer.index].deck.suggestedPartner});
+			partnerPosInDeck = localPlayer.deckZone.cards.findIndex(card => {return card.cardId === playerData[localPlayer.index].deck.suggestedPartner});
 		}
 		netSend("choosePartner", partnerPosInDeck);
 		this.setPartner(localPlayer, partnerPosInDeck);

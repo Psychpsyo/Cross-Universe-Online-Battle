@@ -216,10 +216,12 @@
 			"waitingForOpponent": null,
 			"dialogHeader": null,
 			"unnamedDeck": null,
-			"noDescriptionSet": null,
+			"downloadDeck": "デッキをダウンロドする",
 
-			"deckListDefault": "参考デッキ",
-			"deckListLegacy": "過去のデッキ",
+			"deckLists": {
+				"default": "参考デッキ",
+				"legacy": "過去のデッキ"
+			},
 			"deckListLoadSelected": "選択したデッキを配置する",
 			"deckListCardAmount": "{#CARDS}枚",
 

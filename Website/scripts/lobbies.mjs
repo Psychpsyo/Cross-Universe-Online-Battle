@@ -671,7 +671,7 @@ function closeLobby() {
 
 // show or hide the actual in-lobby menu
 async function openLobbyScreen() {
-	await import("./chat.mjs");
+	await Promise.all([import("./chat.mjs"), import("./deckDialog.mjs")]);
 	lobbySettings.disabled = !isHosting;
 	lobbyChat.clear();
 

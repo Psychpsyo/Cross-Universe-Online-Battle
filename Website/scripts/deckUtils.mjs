@@ -1,5 +1,5 @@
 // Utility functions for handling and converting decks
-import {locale} from "./locale.mjs";
+import localize, {locale} from "./locale.mjs";
 
 // Creates a .deckx from a list of cards, a name and a description, with respect to the current user-selected locale.
 export function deckFromCardList(cards, partner = null, name = null, description = null) {
@@ -31,7 +31,7 @@ export function basicDeckFromCardList(cards, partner = null, name = null, descri
 	let deck = {};
 	deck.Cards = [];
 	deck.Description = description ?? "";
-	deck.Name = name ?? defaultDeckName;
+	deck.Name = name ?? localize("defaultDeckName");
 
 	//add the cards
 	for (const card of cards.toSorted().reverse()) {
@@ -45,13 +45,24 @@ export function basicDeckFromCardList(cards, partner = null, name = null, descri
 	return deck;
 }
 
+// converts a .deckx to an official Cross Universe .deck format file with respect to the current user-selected locale.
+export function toBasicDeck(deck) {
+	console.log(deck);
+	return basicDeckFromCardList(
+		deckToCardIdList(deck),
+		deck.suggestedPartner,
+		deck.name?.[locale.code] ?? deck.name?.en ?? Object.values(deck.name ?? {})[0],
+		deck.description?.[locale.code] ?? deck.description?.en ?? Object.values(deck.description ?? {})[0]
+	);
+}
+
 // Converts an official Cross Universe .deck format file to .deckx with respect to the current user-selected locale.
 export function toDeckx(cuDeck) {
 	const jsonDeck = {};
 
 	//set name
 	jsonDeck.name = {};
-	jsonDeck.name[locale.code] = cuDeck.Name ?? locale.defaultDeckName;
+	jsonDeck.name[locale.code] = cuDeck.Name ?? localize("defaultDeckName");
 	jsonDeck.description = {};
 	jsonDeck.description[locale.code] = cuDeck.Description ?? "";
 

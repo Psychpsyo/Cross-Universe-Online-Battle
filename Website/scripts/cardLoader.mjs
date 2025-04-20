@@ -1,7 +1,5 @@
 
 import {locale} from "./locale.mjs";
-import {renderCard} from "../custom/renderer.mjs";
-import {deckToCardIdList} from "./deckUtils.mjs";
 
 // these just have placeholder info so that the UI doesn't freak out.
 export const cardInfoCache = {
@@ -94,7 +92,10 @@ export async function getCardInfo(cardId) {
 	return cardInfoCache[cardId];
 }
 
+let renderCard;
 export async function registerCustomCard(cardData, player) {
+	// import() renderCard here in case it's never needed
+	renderCard ??= (await import("../custom/renderer.mjs")).renderCard;
 	let canvas = document.createElement("canvas");
 	await renderCard(cardData, canvas);
 	customCardURLs[nextCustomCardIDs[player.index]] = canvas.toDataURL();
@@ -220,13 +221,16 @@ export async function getWebLink(cardId, language = localStorage.getItem("langua
 	}
 }
 
+let deckToCardIdList;
 export async function deckToCdfList(deck, automatic, player) {
+	// import deckUtils here to prevent loading it up front in case this function is never needed.
+	deckToCardIdList ??= (await import("./deckUtils.mjs")).deckToCardIdList;
 	let deckList = deckToCardIdList(deck);
 	for (let i = 0; i < deckList.length; i++) {
 		if (deckList[i].startsWith("C")) {
 			let oldId = deckList[i];
 			deckList[i] = await registerCustomCard(deck.customs[parseInt(deckList[i].substring(1)) - 1], player);
-			if (deck.suggestedPartner == oldId) {
+			if (deck.suggestedPartner === oldId) {
 				deck.suggestedPartner = deckList[i];
 			}
 		}

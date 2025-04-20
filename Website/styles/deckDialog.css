@@ -1,0 +1,96 @@
+.deckDialogFlex {
+	display: flex;
+	height: 80vh;
+}
+
+.deckDialogListPane {
+	display: flex;
+	flex-direction: column;
+	min-width: 35%;
+	border-right: 2px var(--theme-border-color) solid;
+}
+
+.deckDialogList {
+	overflow-y: scroll;
+	flex: auto;
+
+	/*hide scrollbar*/
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.deckDialogListHeader {
+	display: flex;
+	height: 2em;
+	align-items: stretch;
+}
+
+.deckDialogListHeader > * {
+	border-top: none;
+	border-right: none;
+	flex-grow: 1;
+}
+
+.deckDialogListHeader > :first-child {
+	border-left: none;
+}
+
+.deckDialogLoadButton {
+	height: 2em;
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
+	border-bottom-left-radius: 1em;
+}
+
+.deckDialogList > * {
+	display: block;
+	width: 100%;
+	padding: .5em .5em;
+	line-height: 1em;
+	text-align: left;
+	border-top: none;
+	border-left: none;
+	border-right: none;
+}
+
+.deckCardAmount {
+	font-size: .8em;
+}
+
+.selectedDeck {
+	background-color: #126c;
+}
+
+.deckDialogDeckView {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	flex-grow: 1;
+}
+
+.deckDialogDeckView > div {
+	overflow-y: auto;
+}
+
+.deckDialogDeckView > .cardGrid {
+	flex-grow: 1;
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+
+	/*hide scrollbar*/
+	scrollbar-width: none;
+}
+
+.deckDialogDescription {
+	min-height: 20%;
+	padding: .25em .5em;
+	border-top: 2px solid var(--theme-border-color);
+	white-space: pre-wrap;
+	text-align: left;
+	font-size: .8em;
+}
+/* description gets less horizontal space when the deck list is open, so we give it more vertical space */
+.deckDialogListPane:not([hidden]) + * .deckDialogDescription {
+	min-height: 30%;
+}

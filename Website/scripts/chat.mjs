@@ -1,5 +1,5 @@
 // This file defines the chat-box custom element
-import { deckToCardIdList, decodeDeckCode } from "./deckUtils.mjs";
+import {deckToCardIdList, decodeDeckCode} from "./deckUtils.mjs";
 import {locale} from "./locale.mjs";
 import localize from "./locale.mjs";
 import * as cardLoader from "./cardLoader.mjs"
@@ -30,11 +30,38 @@ class ImageIntegration extends ChatIntegration {
 		return image;
 	}
 }
+class DeckIntegration extends ChatIntegration {
+	constructor() {
+		super();
+	}
+
+	integrateMessage(message) {
+		if (!message.startsWith("deck:")) return null;
+
+		const deck = decodeDeckCode(message.substring(5).trim());
+		// if this does not parse as a valid deck, do not integrate anything
+		if (!deck) return null;
+
+		const deckElement = document.createElement("div");
+		deckElement.classList = "chatDeck";
+		for (const cardId of deckToCardIdList(deck)) {
+			const img = document.createElement("img");
+			img.src = cardLoader.getCardImageFromID(cardId, "tiny");
+			img.alt = "";
+			deckElement.appendChild(img);
+		}
+		deckElement.addEventListener("click", () => {
+			deckSelector.openForDeck(deck, {allowDownload: true});
+		})
+		return deckElement;
+	}
+}
 
 const chatIntegrations = [
 	new ImageIntegration("Tenor", new RegExp("^https://media\.tenor\.com\/.+$", "i")),
 	new ImageIntegration("Discord", new RegExp("^https://cdn.discordapp.com/attachments/.+\.(avif|gif|jpg|jpeg|png|webm).+$", "i")),
-	new ImageIntegration("Imgur", new RegExp("^https://i\.imgur\.com/.+$", "i"))
+	new ImageIntegration("Imgur", new RegExp("^https://i\.imgur\.com/.+$", "i")),
+	new DeckIntegration()
 ];
 
 const allEmoji = ["card", "haniwa", "candle", "dice", "medusa", "barrier", "contract", "rei", "trooper", "gogo", "gogo_mad", "wingL", "wingR", "knight"];
@@ -64,6 +91,14 @@ class ChatBox extends HTMLElement {
 			}
 			if (e.code == "Escape") {
 				this.blur();
+			}
+		});
+		this.inputField.addEventListener("paste", function(e) {
+			const pasted = e.clipboardData.getData("text").trim();
+			const deck = decodeDeckCode(pasted);
+			if (deck && (this.value.trim() === "" || (this.selectionStart === 0 && this.selectionEnd === this.value.length))) {
+				e.preventDefault();
+				this.value = `deck:${pasted}`;
 			}
 		});
 

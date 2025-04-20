@@ -3,15 +3,14 @@ import {GameState} from "./gameState.mjs";
 import {BoardState} from "./boardState.mjs";
 import {locale} from "../../scripts/locale.mjs";
 import {netSend} from "./netcode.mjs";
-import {toDeckx, countDeckCards} from "../../scripts/deckUtils.mjs";
-import {loadDeckPreview, openDeckView, closeDeckView} from "./generalUI.mjs";
+import {toDeckx} from "../../scripts/deckUtils.mjs";
 import {ScriptParserError} from "../../rulesEngine/src/cdfScriptInterpreter/parser.mjs";
+import {previewCard} from "./generalUI.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as cardLoader from "../../scripts/cardLoader.mjs";
 import * as deckErrors from "../../rulesEngine/src/deckErrors.mjs";
 
 let builtInDecks = [];
-let currentDeckList = "default";
 
 function loadDeckFile(file) {
 	let reader = new FileReader();
@@ -24,59 +23,20 @@ function loadDeckFile(file) {
 	reader.readAsText(file);
 }
 
-// loading decks into the deck list
-async function addDecksToDeckSelector(deckList) {
-	//empty the deck selector
-	document.getElementById("deckList").innerHTML = "";
-	currentDeckList = deckList;
-
-	let deckPromises = [];
-	for (const deckID of builtInDecks[deckList]) {
-		deckPromises.push(
-			fetch("./data/decks/" + deckID + ".deckx")
-			.then(response => response.json())
-			.then(deck => {
-				return {id: deckID, deck: deck};
-			})
-		);
-	}
-
-	let deckResults = await Promise.allSettled(deckPromises);
-	for (let result of deckResults) {
-		let deck = result.value.deck;
-		builtInDecks[currentDeckList][result.value.id] = deck;
-		let deckDiv = document.createElement("div");
-		deckDiv.classList.add("bigButton");
-		deckDiv.textContent = deck["name"][locale.code] ?? deck["name"]["en"] ?? deck["name"]["ja"] ?? "---";
-		deckDiv.dataset.deck = result.value.id;
-
-		let cardAmountSubtitle = document.createElement("span");
-		cardAmountSubtitle.classList.add("deckCardAmount");
-		cardAmountSubtitle.textContent = locale.game.deckSelect.deckListCardAmount.replace("{#CARDS}", countDeckCards(deck));
-
-		deckDiv.addEventListener("click", function() {
-			if (document.getElementById("selectedDeck")) {
-				document.getElementById("selectedDeck").id = "";
-			}
-			this.id = "selectedDeck";
-			loadDeckPreview(builtInDecks[currentDeckList][this.dataset.deck]);
-		});
-
-		deckDiv.appendChild(document.createElement("br"));
-		deckDiv.appendChild(cardAmountSubtitle);
-		document.getElementById("deckList").appendChild(deckDiv);
-	}
-
-	//also remove all cards still on the right side, as selectedDeck will be wiped
-	deckSelectorCardGrid.innerHTML = "";
-	deckSelectorDescription.innerHTML = "";
-}
 // for deck loading related event listeners
 function openDeckSelector(e) {
 	e.stopPropagation();
-	currentDeckList = "default";
-	addDecksToDeckSelector(currentDeckList);
-	openDeckView();
+	deckSelector.openAsDeckSelector(
+		builtInDecks,
+		{
+			onCardClicked: async function(e) {
+				e.stopPropagation();
+				previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId)), false);
+			},
+			allowDownload: true
+		}
+	);
+	deckSelector.parentElement.appendChild(cardDetails);
 }
 function deckDropped(e) {
 	deckDropLabel.classList.remove("deckHover");
@@ -141,34 +101,7 @@ export class DeckState extends GameState {
 		mainGameBlackoutContent.firstChild.before(deckDropLabel);
 		activateDeckDropArea();
 
-		// deck selector deck list buttons
-		document.getElementById("loadSelectedDeckBtn").addEventListener("click", function() {
-			if (!document.getElementById("selectedDeck")) {
-				return;
-			}
-			closeDeckView();
-			this.loadDeck(builtInDecks[currentDeckList][document.getElementById("selectedDeck").dataset.deck]);
-		}.bind(this));
-		document.getElementById("defaultDecksBtn").addEventListener("click", function() {
-			if (currentDeckList != "default") {
-				currentDeckList = "default";
-				addDecksToDeckSelector("default");
-			}
-		});
-		document.getElementById("legacyDecksBtn").addEventListener("click", function() {
-			if (currentDeckList != "legacy") {
-				currentDeckList = "legacy";
-				addDecksToDeckSelector("legacy");
-			}
-		});
-		deckSelector.classList.remove("deckListDisable");
-
 		// show game area
-		deckViewTitle.textContent = locale.game.deckSelect.dialogHeader;
-		defaultDecksBtn.textContent = locale.game.deckSelect.deckListDefault;
-		legacyDecksBtn.textContent = locale.game.deckSelect.deckListLegacy;
-		loadSelectedDeckBtn.textContent = locale.game.deckSelect.deckListLoadSelected;
-
 		mainGameArea.hidden = false;
 		gameUI.init();
 	}
@@ -259,7 +192,6 @@ export class DeckState extends GameState {
 		// disable deck selection
 		deckDropLabel.remove();
 		fileSelectDeckLoader.remove();
-		deckSelector.classList.add("deckListDisable");
 
 		// sync the deck
 		netSend("deck", JSON.stringify(deck));

@@ -90,3 +90,11 @@ chat-box > input {
 .chatImage {
 	max-width: min(100%, 15em);
 }
+
+.chatDeck {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+}
+.chatDeck > img {
+	width: 100%;
+}

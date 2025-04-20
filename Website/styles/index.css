@@ -207,6 +207,7 @@ dialog {
 }
 
 .centerDialog header {
+	position: relative;
 	border-bottom: 2px solid var(--theme-border-color);
 	padding: .3em;
 	text-align: center;
@@ -250,4 +251,15 @@ dialog {
 	height: 100%;
 	aspect-ratio: 1;
 	margin: 0;
+}
+
+
+/*
+	This seems very specific and maybe should be moved somewhere else.
+	It currently isn't because it's kinda used all over the place.
+*/
+.cardGrid img {
+	width: 85%;
+	margin: .3em auto;
+	user-select: none;
 }

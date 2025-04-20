@@ -1,7 +1,4 @@
-
-import {locale} from "../../scripts/locale.mjs";
-import {deckToCardIdList} from "../../scripts/deckUtils.mjs";
-import {Card} from "../../rulesEngine/src/card.mjs";
+import localize from "../../scripts/locale.mjs";
 import {netSend} from "./netcode.mjs";
 import "../../scripts/profilePicture.mjs";
 import * as cardLoader from "../../scripts/cardLoader.mjs";
@@ -25,7 +22,7 @@ export function createAbilityFragment(abilityText) {
 	let indentCount = 0; // how many characters to un-indent
 	let marginCount = 0; // how much of a margin to put
 	// margin and indent count are different so that whitespace can be cut out while still being margined
-	let indentChars = ["　", "●", "：", locale.subEffectOpeningBracket];
+	let indentChars = ["　", "●", "：", localize("subEffectOpeningBracket")];
 	abilityText.split("\n").forEach(line => {
 		const lineDiv = document.createElement("div");
 
@@ -136,9 +133,9 @@ export async function updateCardPreview(card, highlightedEffect) {
 	}
 
 	insertCardValue(card, "level", cardDetailsLevelValues);
-	cardDetailsTypeValues.textContent = cardTypes.map(type => locale.cardDetails.cardTypes[type]).join("/");
+	cardDetailsTypeValues.textContent = cardTypes.map(type => localize(`cardDetails.cardTypes.${type}`)).join("/");
 
-	insertCardValueList(card, "types", cardDetailsTypesValues, locale.typeSeparator, async (type) => locale.types[type], locale.typeless);
+	insertCardValueList(card, "types", cardDetailsTypesValues, localize("typeSeparator"), async (type) => localize(`types.${type}`), localize("typeless"));
 
 	// attack & defense
 	if (card.values.current.cardTypes.includes("unit")) {
@@ -190,7 +187,7 @@ export async function updateCardPreview(card, highlightedEffect) {
 
 function createDomEffect(type, content, classNames = []) {
 	const effectDiv = document.createElement("div");
-	effectDiv.title = locale.cardDetails.effectDescriptions[type];
+	effectDiv.title = localize(`cardDetails.effectDescriptions.${type}`);
 	effectDiv.classList.add("cardDetailsEffect");
 	for (const className of classNames) {
 		effectDiv.classList.add(className);
@@ -198,7 +195,7 @@ function createDomEffect(type, content, classNames = []) {
 
 	if (type != "rule") { // 'rule' effects get no title
 		const effectTitle = document.createElement("span");
-		effectTitle.textContent = locale.cardDetails.effectNames[type];
+		effectTitle.textContent = localize(`cardDetails.effectNames.${type}`);
 		effectDiv.appendChild(effectTitle);
 		effectDiv.appendChild(document.createElement("br"));
 	}
@@ -268,80 +265,33 @@ function insertCardValueList(card, valueName, target, separator, localizer, none
 	}
 }
 
-// showing a deck in the deck view
-export function loadDeckPreview(deck) {
-	// remove existing cards
-	document.getElementById("deckSelectorCardGrid").innerHTML = "";
-	document.getElementById("deckSelectorCardGrid").scrollTop = 0;
-
-	//add new cards
-	let partnerAdded = false;
-	deckToCardIdList(deck).forEach(cardId => {
-		let cardImg = document.createElement("img");
-		cardImg.src = cardLoader.getCardImageFromID(cardId, "tiny");
-		cardImg.dataset.cardId = cardId;
-
-		// make partner card glow
-		if (cardId == deck.suggestedPartner && !partnerAdded) {
-			partnerAdded = true;
-			cardImg.classList.add("cardHighlight");
+export function openDeckView(deck, download=false) {
+	deckSelector.openForDeck(
+		deck,
+		{
+			onCardClicked: async function(e) {
+				e.stopPropagation();
+				previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId)), false);
+			},
+			download
 		}
-
-		document.getElementById("deckSelectorCardGrid").appendChild(cardImg);
-		cardImg.addEventListener("click", async function(e) {
-			e.stopPropagation();
-			previewCard(new Card(localPlayer, await cardLoader.getManualCdf(this.dataset.cardId)), false);
-		});
-	});
-
-	// set the name
-	if (deck.name) {
-		deckViewTitle.classList.remove("textPlaceholder");
-		deckViewTitle.textContent = deck.name[locale.code] ?? deck.name.en ?? deck.name[Object.keys(deck.description)[0]] ?? "";
-	} else {
-		deckViewTitle.textContent = "";
-	}
-	if (deckViewTitle.textContent === "") {
-		deckViewTitle.textContent = locale.game.deckSelect.unnamedDeck;
-		deckViewTitle.classList.add("textPlaceholder");
-	}
-
-	// set the description
-	if (deck.description) {
-		deckSelectorDescription.textContent = deck.description[locale.code] ?? deck.description.en ?? deck.description[Object.keys(deck.description)[0]] ?? "";
-		deckSelectorDescription.classList.remove("textPlaceholder");
-	} else {
-		deckSelectorDescription.textContent = "";
-	}
-	if (deckSelectorDescription.textContent === "") {
-		deckSelectorDescription.textContent = locale.game.deckSelect.noDescriptionSet;
-		deckSelectorDescription.classList.add("textPlaceholder");
-	}
-}
-
-export function openDeckView() {
-	deckSelector.showModal();
-	deckSelector.appendChild(cardDetails);
-}
-export function closeDeckView() {
-	gameFlexBox.appendChild(cardDetails);
-	deckSelector.close();
+	);
+	deckSelector.parentElement.appendChild(cardDetails);
 }
 
 // init function
 export function init() {
-	cardDetailsAttack.textContent = locale.cardDetails.attack;
-	cardDetailsDefense.textContent = locale.cardDetails.defense;
-	cardDetailsLevel.textContent = locale.cardDetails.level;
-	cardDetailsLevelTypeSeparator.textContent = locale.cardDetails.levelTypeSeparator;
-	cardDetailsTypes.textContent = locale.cardDetails.types;
+	cardDetailsAttack.textContent = localize("cardDetails.attack");
+	cardDetailsDefense.textContent = localize("cardDetails.defense");
+	cardDetailsLevel.textContent = localize("cardDetails.level");
+	cardDetailsLevelTypeSeparator.textContent = localize("cardDetails.levelTypeSeparator");
+	cardDetailsTypes.textContent = localize("cardDetails.types");
 
 	for (let i = 0; i < 2; i++) {
-		document.getElementById("playerDeckButton" + i).title = locale.game.playerInfo.viewDeck;
-		document.getElementById("playerDeckButtonImg" + i).alt = locale.game.playerInfo.viewDeck;
+		document.getElementById("playerDeckButton" + i).title = localize("game.playerInfo.viewDeck");
+		document.getElementById("playerDeckButtonImg" + i).alt = localize("game.playerInfo.viewDeck");
 		document.getElementById("playerDeckButton" + i).addEventListener("click", function() {
-			loadDeckPreview(playerData[i].deck);
-			openDeckView();
+			openDeckView(playerData[i].deck, false);
 		});
 	}
 
@@ -371,11 +321,7 @@ export function init() {
 	cardDetailsClose.addEventListener("click", closeCardPreview);
 	cardDetails.show();
 
-
-	// selecting deck from the deck selector list
-	deckSelector.addEventListener("click", function(e) {
-		if (e.target == document.getElementById("deckSelector")) {
-			closeDeckView();
-		}
+	deckSelector.parentElement.addEventListener("close", () => {
+		gameFlexBox.appendChild(cardDetails);
 	});
 }

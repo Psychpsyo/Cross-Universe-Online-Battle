@@ -94,8 +94,8 @@ export default function localize(localeKey, insert) {
 
 // setup
 async function getLocale() {
-	const english = fetch("./data/locales/en.json").then(async response => await response.json());
-	const local = fetch("./data/locales/" + localStorage.getItem("language") + ".json").then(async response => await response.json());
+	const english = fetch("./data/locales/en.json", {priority: "high"}).then(async response => await response.json());
+	const local = fetch("./data/locales/" + localStorage.getItem("language") + ".json", {priority: "high"}).then(async response => await response.json());
 	await Promise.all([english, local]);
 	return replaceMissingKeys(await local, await english);
 }

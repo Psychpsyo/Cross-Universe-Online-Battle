@@ -21,6 +21,7 @@
 		<link rel="stylesheet" href="styles/index.css">
 		<link rel="stylesheet" href="styles/loadingIndicator.css">
 		<link rel="stylesheet" href="styles/chat.css">
+		<link rel="stylesheet" href="styles/deckDialog.css">
 		<link rel="stylesheet" href="styles/profilePicture.css">
 		<link rel="stylesheet" href="game/styles/main.css">
 		<link rel="stylesheet" href="game/styles/fieldOverlay.css">
@@ -445,30 +446,8 @@
 			</dialog>
 
 			<!--Deck Selector-->
-			<dialog id="deckSelector" class="centerDialog popupSelectMenu deckListDisable">
-				<section class="dialogContent">
-					<header><h1 id="deckViewTitle"></h1></header>
-					<div id="deckSelectorFlex">
-						<div id="deckSelectorList">
-							<div id="deckListHeader">
-								<button id="defaultDecksBtn" class="bigButton"></button>
-								<button id="legacyDecksBtn" class="bigButton"></button>
-							</div>
-							<div id="deckList">
-								<!--decks get filled in by js-->
-							</div>
-							<button id="loadSelectedDeckBtn" class="bigButton"></button>
-						</div>
-						<div id="deckSelectorRight">
-							<div id="deckSelectorCardGrid" class="cardGrid">
-								<!--cards get filled in by js-->
-							</div>
-							<div id="deckSelectorDescription">
-								<!--description gets filled in by js-->
-							</div>
-						</div>
-					</div>
-				</section>
+			<dialog class="centerDialog popupSelectMenu" closedby="any">
+				<deck-dialog id="deckSelector"></deck-dialog>
 			</dialog>
 
 			<!--Yes/No Question Modal-->
@@ -532,6 +511,7 @@
 		<object id="loadingIndicator" type="image/svg+xml" data="./images/icons/loading.svg" width="150px" height="150px"></object>
 
 		<script src="scripts/chat.mjs" type="module"></script>
+		<script src="scripts/deckDialog.mjs" type="module"></script>
 		<script src="game/scripts/main.mjs" type="module" fetchpriority="high"></script>
 		<script src="game/scripts/quickWheel.mjs" type="module"></script>
 	</body>

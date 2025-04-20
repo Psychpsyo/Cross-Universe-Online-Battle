@@ -216,10 +216,12 @@
 			"waitingForOpponent": "Waiting for opponent to choose their deck...",
 			"dialogHeader": "Select a Deck",
 			"unnamedDeck": "Unnamed Deck",
-			"noDescriptionSet": "No description set.",
+			"downloadDeck": "Download Deck",
 
-			"deckListDefault": "Default",
-			"deckListLegacy": "Legacy (old)",
+			"deckLists": {
+				"default": "Default",
+				"legacy": "Legacy (old)"
+			},
 			"deckListLoadSelected": "Load Selected Deck",
 			"deckListCardAmount": "{#CARDS} cards",
 
