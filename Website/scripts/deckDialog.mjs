@@ -81,7 +81,6 @@ class DeckDialog extends HTMLElement {
 		this.#clearDeck();
 		this.#deck = deck;
 
-		console.log(allowDownload);
 		if (allowDownload) {
 			this.downloadBtn.style.removeProperty("display");
 		} else {
