@@ -87,7 +87,7 @@ export default function localize(localeKey, insert) {
 		current += expr.s.replaceAll(/\\\\|\\{|/g, (seq) => seq.substring(1));
 		return current;
 	} catch (e) {
-		console.error(`Error while localizing ${localeKey} with insert these inserts:`, insert, `The error was:\n${e}`);
+		console.error(`Error while localizing ${localeKey} with these inserts:`, insert, `The error was:\n${e}`);
 		return localeKey;
 	}
 };

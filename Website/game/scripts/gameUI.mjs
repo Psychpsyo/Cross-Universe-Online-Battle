@@ -972,7 +972,7 @@ export async function presentCardChoice(cards, title, matchFunction = () => true
 				const zoneDiv = document.createElement("div");
 				const header = document.createElement("div");
 				header.classList.add("gridHeader");
-				header.textContent = localize("game.cardSelector.title", cards[i].zone);
+				header.textContent = localize("game.cardSelector.title", cards[i].current().zone);
 				currentGrid = document.createElement("div");
 				currentGrid.classList.add("cardGrid");
 
