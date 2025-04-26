@@ -1,6 +1,6 @@
 import localize from "../../scripts/locale.mjs";
 import {SpectateRandom} from "./spectateRandom.mjs";
-import {DistRandom} from "./distributedRandom.mjs";
+import {DistributedRandom} from "./distributedRandom.mjs";
 
 export let youAre = null; // Whether this client is player 0 or player 1. (Mainly for draft games and player selection, as far as the board is concerned, the local player is always player 1.)
 
@@ -215,7 +215,7 @@ function receiveMessage(message, command, player) {
 		}
 		// Networking for distributedRandom.mjs
 		case "distRandValue": {
-			if (!(game.rng instanceof DistRandom)) {
+			if (!(game.rng instanceof DistributedRandom)) {
 				console.error("Networked player sent unexpected [distRandValue].");
 				break;
 			}
@@ -223,7 +223,7 @@ function receiveMessage(message, command, player) {
 			break;
 		}
 		case "distRandKey": {
-			if (!(game.rng instanceof DistRandom)) {
+			if (!(game.rng instanceof DistributedRandom)) {
 				console.error("Networked player sent unexpected [distRandKey].");
 				break;
 			}

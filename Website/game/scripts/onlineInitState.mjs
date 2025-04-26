@@ -1,5 +1,5 @@
 import * as generalUI from "./generalUI.mjs";
-import {DistRandom} from "./distributedRandom.mjs";
+import {DistributedRandom} from "./distributedRandom.mjs";
 import {GameState} from "./gameState.mjs";
 import {DraftState} from "./draftState.mjs";
 import {DeckState} from "./deckState.mjs";
@@ -21,7 +21,7 @@ export class OnlineInitState extends GameState {
 		localeExtensions.extendGame(game);
 		localPlayer = game.players[1];
 		game.config.useOldManaRule = useOldManaRule;
-		game.rng = new DistRandom();
+		game.rng = new DistributedRandom();
 
 		callOpponent(isCaller).then(async () => {
 			// send your own info

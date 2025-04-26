@@ -5,17 +5,14 @@
 import {CURandom} from "../../rulesEngine/src/random.mjs";
 import {netSend, youAre, sendToSpectators} from "./netcode.mjs";
 
-export class DistRandom extends CURandom {
-	constructor() {
-		super();
-		this.values = [];
-		this.valueKeys = [];
-		this.cyphertexts = [];
-		this.cypherKeys = [];
+export class DistributedRandom extends CURandom {
+	#cyphertextReceiver = new EventTarget();
+	#cypherKeyReceiver = new EventTarget();
+	#values = [];
+	#valueKeys = [];
+	#cyphertexts = [];
+	#cypherKeys = [];
 
-		this.cyphertextReceiver = new EventTarget();
-		this.cypherKeyReceiver = new EventTarget();
-	}
 	async nextInt(range) {
 		return (await this.nextInts([range]))[0];
 	}
@@ -24,17 +21,17 @@ export class DistRandom extends CURandom {
 		await this.prepareValues(ranges.length);
 
 		// wait for opponent cyphertext
-		let cyphertext = this.cyphertexts.shift();
+		let cyphertext = this.#cyphertexts.shift();
 		if (cyphertext === undefined) {
 			cyphertext = await new Promise(resolve => {
-				this.cyphertextReceiver.addEventListener("textReceived", function() {
-					resolve(this.cyphertexts.shift());
+				this.#cyphertextReceiver.addEventListener("textReceived", function() {
+					resolve(this.#cyphertexts.shift());
 				}.bind(this), {once: true});
 			});
 		}
 
 		// send own decryption key now that the opponent has entered the commitment
-		netSend("distRandKey", u8tos(new Uint8Array(await crypto.subtle.exportKey("raw", this.valueKeys.shift()))));
+		netSend("distRandKey", u8tos(new Uint8Array(await crypto.subtle.exportKey("raw", this.#valueKeys.shift()))));
 
 		const cypherKey = await this.receiveKey();
 		const view = new DataView(await crypto.subtle.decrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, cypherKey, cyphertext));
@@ -42,7 +39,7 @@ export class DistRandom extends CURandom {
 			throw new Error("Random value has been altered!");
 		}
 
-		const result = this.values.shift().map((value, i) => Math.floor((value + view.getFloat64(i * 8)) * ranges[i]) % ranges[i]);
+		const result = this.#values.shift().map((value, i) => Math.floor((value + view.getFloat64(i * 8)) * ranges[i]) % ranges[i]);
 		sendToSpectators(localPlayer, "spectateRandomValue", result.join("|"));
 		return result;
 	}
@@ -57,7 +54,7 @@ export class DistRandom extends CURandom {
 
 	async prepareValues(amount) {
 		let key = await crypto.subtle.generateKey({name: "AES-CTR", length: 256}, true, ["encrypt", "decrypt"]);
-		this.valueKeys.push(key);
+		this.#valueKeys.push(key);
 
 		let valueList = [];
 		let view = new DataView(new ArrayBuffer(amount * 64 + 64));
@@ -65,17 +62,17 @@ export class DistRandom extends CURandom {
 			view.setFloat64(i * 8, Math.random());
 			valueList.push(view.getFloat64(i * 8));
 		}
-		this.values.push(valueList);
+		this.#values.push(valueList);
 
 		netSend("distRandValue", u8tos(new Uint8Array(await crypto.subtle.encrypt({name: "AES-CTR", counter: new Uint8Array(16), length: 64}, key, view))));
 	}
 
 	async receiveKey() {
-		let key = this.cypherKeys.shift();
+		let key = this.#cypherKeys.shift();
 		if (key === undefined) {
 			key = await new Promise(resolve => {
-				this.cypherKeyReceiver.addEventListener("keyReceived", function() {
-					resolve(this.cypherKeys.shift());
+				this.#cypherKeyReceiver.addEventListener("keyReceived", function() {
+					resolve(this.#cypherKeys.shift());
 				}.bind(this), {once: true});
 			});
 		}
@@ -83,14 +80,14 @@ export class DistRandom extends CURandom {
 	}
 
 	importCyphertext(stringValue) {
-		this.cyphertexts.push(stou8(stringValue));
-		this.cyphertextReceiver.dispatchEvent(new CustomEvent("textReceived"));
+		this.#cyphertexts.push(stou8(stringValue));
+		this.#cyphertextReceiver.dispatchEvent(new CustomEvent("textReceived"));
 	}
 
 	async importCypherKey(stringKey) {
 		let key = await crypto.subtle.importKey("raw", stou8(stringKey), {name: "AES-CTR", counter: new Uint8Array(16), length: 256}, true, ["encrypt", "decrypt"]);
-		this.cypherKeys.push(key);
-		this.cypherKeyReceiver.dispatchEvent(new CustomEvent("keyReceived"));
+		this.#cypherKeys.push(key);
+		this.#cypherKeyReceiver.dispatchEvent(new CustomEvent("keyReceived"));
 		return
 	}
 }
