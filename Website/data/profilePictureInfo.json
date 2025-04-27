@@ -226,6 +226,8 @@
 	"U00294": {"left": 25},
 	"U00295": {"left": 25},
 	"U00296": {"left": 32.5},
+	"U00297": {"neverFlip": true},
+	"U00298": {"flip": true},
 
 	"T00001": {"flip": true, "left": 45},
 	"T00002": {"flip": true, "left": 46},
