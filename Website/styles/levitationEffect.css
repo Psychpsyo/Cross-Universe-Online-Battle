@@ -83,13 +83,14 @@
 	pointer-events: all;
 }
 #levitatingCardPreviewImage {
-	height: 75%;
+	height: min(90svh, 90svw * 1185 / 813);
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(-50%, -50%);
+	translate: -50% -50%;
+	transform: scale(.75);
+	transition: transform .3s;
 }
 .shown > #levitatingCardPreviewImage {
-	height: 90%;
-	transition: height .3s;
+	transform: scale(1);
 }
