@@ -111,6 +111,7 @@ main {
 	max-height: 35vh;
 	flex-grow: 1;
 	pointer-events: none;
+	user-select: none;
 }
 #mainLogo {
 	position: relative;
