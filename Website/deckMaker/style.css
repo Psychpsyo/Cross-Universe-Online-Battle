@@ -1,5 +1,5 @@
 html {
-	height: 100vh;
+	height: 100dvh;
 }
 
 body {
@@ -147,7 +147,7 @@ h1, h2, h3, h4 {
 	display: flex;
 	border-bottom: 2px var(--theme-border-color) solid;
 	min-height: 50vh;
-	height: 100vh;
+	height: 100dvh;
 }
 
 #deckMakerMainArea > * {

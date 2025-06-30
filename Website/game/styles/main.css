@@ -24,7 +24,7 @@ body {
 
 #gameFlexBox {
 	display: flex;
-	height: 100vh;
+	height: 100dvh;
 }
 #gameFlexBox > :not(:first-child) {
 	flex-basis: 100%;
