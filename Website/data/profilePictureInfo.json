@@ -228,6 +228,14 @@
 	"U00296": {"left": 32.5},
 	"U00297": {"neverFlip": true},
 	"U00298": {"flip": true},
+	"U00299": {"left": 67.6},
+	"U00300": {"left": 46.5},
+	"U00301": {"neverFlip": true, "left": 50.4},
+	"U00302": {"flip": true, "left": 54},
+	"U00303": {"flip": true, "left": 49},
+	"U00304": {"left": 25},
+	"U00305": {"flip": true, "left": 25},
+	"U00306": {"flip": true, "left": 71.9},
 
 	"T00001": {"flip": true, "left": 45},
 	"T00002": {"flip": true, "left": 46},
@@ -370,6 +378,9 @@
 	"I00119": {"neverFlip": true},
 	"I00120": {"neverFlip": true},
 	"I00121": {"flip": true, "left": 65},
+	"I00122": {"left": 54.7},
+	"I00123": {"neverFlip": true, "left": 57.6},
+	"I00124": {"neverFlip": true, "left": 57.9},
 
 	"S00001": {"neverFlip": true},
 	"S00002": {"neverFlip": true},
@@ -619,5 +630,14 @@
 	"S00258": {"neverFlip": true},
 	"S00259": {"neverFlip": true, "left": 75},
 	"S00260": {"neverFlip": true},
-	"S00261": {"neverFlip": true}
+	"S00261": {"neverFlip": true},
+	"S00262": {"neverFlip": true, "left": 54.7},
+	"S00263": {"left": 56.5},
+	"S00264": {"neverFlip": true, "left": 51.1},
+	"S00265": {"flip": true, "left": 62.7},
+	"S00266": {"left": 46.1},
+	"S00267": {"left": 67.3},
+	"S00268": {"neverFlip": true},
+	"S00269": {"neverFlip": true, "left": 49.2},
+	"S00270": {"left": 25}
 }
