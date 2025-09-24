@@ -545,12 +545,9 @@ img[src$="cardBackFrameP1.png"] {
 }
 
 #chatHolder {
-	padding: .75em;
 	flex-grow: 1;
 }
 #chat {
-	border: 2px var(--theme-border-color) solid;
-	border-radius: .5em;
 	background-color: #0001;
 }
 .chatCardHolder > img {
