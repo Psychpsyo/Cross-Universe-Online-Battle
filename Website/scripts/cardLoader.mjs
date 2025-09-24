@@ -73,7 +73,7 @@ export function getCardImageFromID(cardId, size, language = localStorage.getItem
 	if (cardId.substring(1) === "00000") {
 		return `images/debugCards/${cardId}.png`;
 	}
-	return `${localStorage.getItem("cardImageUrl") === ""? "https://crossuniverse.net/images/cards/" : localStorage.getItem("cardImageUrl")}${cardLanguages.includes(language)? language : "en"}/${size? `${size}/` : ""}${cardId}.${size? "avif" : "jpg"}`;
+	return `${localStorage.getItem("cardImageUrl") || "https://crossuniverse.net/images/cards/"}${cardLanguages.includes(language)? language : "en"}/${size? `${size}/` : ""}${cardId}.${size? "avif" : "jpg"}`;
 }
 
 export async function getCardInfo(cardId) {

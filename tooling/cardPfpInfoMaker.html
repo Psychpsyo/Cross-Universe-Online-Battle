@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>PFP Info Maker</title>
+		<link rel="stylesheet" href="../Website/styles/profilePicture.css">
+		<base href="../Website/">
+		<style>
+			profile-picture {
+				width: 20em;
+ 				margin: 1em;
+			}
+		</style>
+	</head>
+	<body>
+		<b>Make the card below look to the right!</b>
+		<fieldset>
+			Flipped: <input id="flipped" type="checkbox"> (only correctly previews if card has no info yet)<br>
+			NeverFlip: <input id="neverFlip" type="checkbox"> (has no impact on preview)<br>
+			Position: <button id="minus">-</button><input id="slider" type="range" min="25" max="75" step="0.1"><button id="plus">+</button><br>
+			Card ID: <input id="cardId"><button id="nextCard">+</button><br>
+			<button id="resetBtn">Reset</button><br>
+			<output id="output" for="flipped slider"></output>
+		</fieldset>
+		<profile-picture id="preview"></profile-picture>
+		<script>
+			// needed for the profile picture to be loaded
+			localStorage.setItem("language", "en");
+		</script>
+		<script type="module" src="../tooling/cardPfpInfoMaker.mjs"></script>
+	</body>
+</html>

@@ -17,6 +17,8 @@ class ProfilePicture extends HTMLElement {
 			if ((flip && (!cardAlignmentInfo[cardId]?.flip && !cardAlignmentInfo[cardId]?.neverFlip)) ||
 				(!flip && cardAlignmentInfo[cardId]?.flip)) {
 				this.style.transform = "scaleX(-1)";
+			} else {
+				this.style.transform = "";
 			}
 		}
 	}
