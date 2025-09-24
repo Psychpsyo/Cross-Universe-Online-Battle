@@ -545,7 +545,7 @@
 			"fieldLeftToggle": "Feld links auf dem Bildschirm platzieren",
 			"theme": "Theme:",
 			"themeOptions": {
-				"default": "Standard",
+				"default": "Dunkel",
 				"light": "Hell",
 				"worldTree": "Der World Tree",
 				"deepSea": "Tiefsee"
