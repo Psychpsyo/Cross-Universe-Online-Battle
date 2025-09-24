@@ -86,11 +86,26 @@ var themes = {
 		"shadowBlur": "0",
 		"dialogBackground": "white",
 		"textShadow": "none",
-		"textColor": "#000",
+		"textColor": "#222",
 		"disabledTextColor": "#0008",
 		"disabledBackgroundColor": "#ccc",
 		"borderColor": "#888",
 		"buttonHoverColor": "#00f3"
+	},
+	"hotdog": {
+		"backgroundColor": "red",
+		"background": null,
+		"backgroundY": "center",
+		"fieldDropShadow": false,
+		"shadowColor": "yellow",
+		"shadowBlur": "0",
+		"dialogBackground": "red",
+		"textShadow": "none",
+		"textColor": "black",
+		"disabledTextColor": "#0008",
+		"disabledBackgroundColor": "#0004",
+		"borderColor": "black",
+		"buttonHoverColor": "red"
 	}
 }
 function applyTheme(theme) {

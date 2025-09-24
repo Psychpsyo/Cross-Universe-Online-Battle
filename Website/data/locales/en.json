@@ -548,7 +548,8 @@
 				"default": "Dark",
 				"light": "Light",
 				"worldTree": "The World Tree",
-				"deepSea": "Deep Sea"
+				"deepSea": "Deep Sea",
+				"hotdog": "Hot Dog Stand"
 			},
 			"mainMenuCards": "Show Floating Cards in Main Menu"
 		},

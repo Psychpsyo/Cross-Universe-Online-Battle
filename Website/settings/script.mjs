@@ -76,7 +76,7 @@ const settings = {
 		{
 			id: "theme",
 			type: "dropdown",
-			options: ["default", "light", "worldTree", "deepSea"]
+			options: ["default", "light", "worldTree", "deepSea", "hotdog"]
 		},
 		{
 			id: "mainMenuCards",

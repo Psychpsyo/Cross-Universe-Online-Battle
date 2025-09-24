@@ -548,7 +548,8 @@
 				"default": "Dunkel",
 				"light": "Hell",
 				"worldTree": "Der World Tree",
-				"deepSea": "Tiefsee"
+				"deepSea": "Tiefsee",
+				"hotdog": "Hotdog-Stand"
 			},
 			"mainMenuCards": "Zeige schwebende Karten im Hauptmenü"
 		},
