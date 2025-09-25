@@ -1,7 +1,7 @@
 html {
 	scrollbar-gutter: stable;
 }
-html.dialogOpen {
+html:has(dialog[open]) {
 	overflow-y: hidden;
 }
 

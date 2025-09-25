@@ -113,16 +113,7 @@ function addProfilePictureList(name, cardIdList, targetDiv) {
 	targetDiv.appendChild(list);
 }
 
-function closeProfilePictureSelector() {
-	profilePictureDialog.close();
-	document.documentElement.classList.remove("dialogOpen");
-}
-profilePictureCloseBtn.addEventListener("click", closeProfilePictureSelector);
-profilePictureDialog.addEventListener("click", function(e) {
-	if (e.target === profilePictureDialog) {
-		closeProfilePictureSelector();
-	}
-});
+profilePictureCloseBtn.addEventListener("click", () => profilePictureDialog.close());
 
 profilePicturesAllBtn.addEventListener("click", function() {
 	profilePicturesAllBtn.disabled = true;

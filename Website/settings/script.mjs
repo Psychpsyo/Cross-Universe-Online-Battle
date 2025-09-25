@@ -512,10 +512,7 @@ function newProfilePictureButton(setting) {
 	button.id = setting.id + "Button";
 	button.classList.add("settingsInput");
 	button.classList.add("profilePictureBtn");
-	button.addEventListener("click", () => {
-		profilePictureDialog.showModal();
-		document.documentElement.classList.add("dialogOpen");
-	});
+	button.addEventListener("click", () => profilePictureDialog.showModal());
 	let img = document.createElement("img");
 	img.id = "profilePictureImage";
 	button.appendChild(img);
