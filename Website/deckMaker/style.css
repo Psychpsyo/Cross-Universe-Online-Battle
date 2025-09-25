@@ -22,6 +22,7 @@ h1, h2, h3, h4 {
 	flex-basis: 33%;
 	overflow-y: scroll;
 	padding-top: .5em;
+	contain: strict; /* mainly just for isolation */
 }
 
 .deckMakerGrid {
