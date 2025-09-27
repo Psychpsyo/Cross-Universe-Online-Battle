@@ -8,20 +8,6 @@ body {
 	touch-action: none; /* no zooming or panning around on mobile */
 }
 
-/* responsiveness moves left panel to the top */
-@media (max-aspect-ratio: 3/4) {
-	#gameFlexBox {
-		flex-direction: column;
-	}
-	#chatHolder {
-		display: none;
-	}
-
-	#leftPanel {
-		border: none;
-	}
-}
-
 #gameFlexBox {
 	display: flex;
 	height: 100dvh;
@@ -30,7 +16,8 @@ body {
 	flex-basis: 100%;
 }
 
-.leftField #gameFlexBox {
+/* needs to be overridable in portrait aspect ratio */
+:where(.leftField) #gameFlexBox {
 	flex-direction: row-reverse;
 }
 
@@ -199,7 +186,7 @@ dialog #cardDetails {
 	background-color: var(--theme-shadow);
 	backdrop-filter: blur(var(--theme-shadow-blur));
 }
-.leftField #leftPanel {
+:where(.leftField) #leftPanel {
 	border-right: none;
 	border-left: 2px var(--theme-border-color) solid;
 }
@@ -714,4 +701,18 @@ dialog.popupSelectMenu {
 	background-color: black;
 	border-radius: 50%;
 	border: 2px var(--theme-border-color) solid;
+}
+
+/* responsiveness moves left panel to the top */
+@media (max-aspect-ratio: 3/4) {
+	#gameFlexBox {
+		flex-direction: column;
+	}
+	#chatHolder {
+		display: none;
+	}
+
+	#leftPanel {
+		border: none;
+	}
 }
