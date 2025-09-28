@@ -632,6 +632,10 @@ export class AutomaticController extends InteractionController {
 					autoUI.showOpponentAction(localize("game.automatic.opponentActions.selectingDeckSide", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.effect.split(":")[0])).name}));
 					break;
 				}
+				case "chooseNumber": {
+					autoUI.showOpponentAction(localize("game.automatic.opponentActions.selectingNumber", {PLAYER: request.player, CARDNAME: (await cardLoader.getCardInfo(request.effect.split(":")[0])).name}));
+					break;
+				}
 				case "applyActionModificationAbility": {
 					autoUI.showOpponentAction(localize("game.automatic.opponentActions.decidingOnModificationAbility", {
 						PLAYER: request.player,
@@ -750,6 +754,16 @@ export class AutomaticController extends InteractionController {
 					localize("game.automatic.deckSideSelect.top"),
 					localize("game.automatic.deckSideSelect.bottom"))
 				)? "top" : "bottom";
+				break;
+			}
+			case "chooseNumber": {
+				response.value = await autoUI.promptDropdownSelection(
+					localize("game.automatic.selectPopup.numberPrompt", (await cardLoader.getCardInfo(request.effect.split(":")[0])).name),
+					request.eligibleNumbers.map((number) => {
+						return {label: number, value: number}
+					}),
+					request
+				);
 				break;
 			}
 			case "pass": {

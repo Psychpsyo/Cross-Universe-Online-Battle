@@ -393,7 +393,8 @@
 				"confirm": "Select",
 				"typePrompt": "Select a type for the effect of '{#CARDNAME}':",
 				"effectPrompt": "Select an effect for the effect of '{#CARDNAME}':",
-				"cardNamePrompt": "State a card name for the effect of '{#CARDNAME}':"
+				"cardNamePrompt": "State a card name for the effect of '{#CARDNAME}':",
+				"numberPrompt": "Select a number for the effect of '{#CARDNAME}':"
 			},
 
 			"deckSideSelect": {
@@ -437,6 +438,7 @@
 				"selectingType": "{*SENTENCE(#PLAYER)} is stating a type for the effect of '{#CARDNAME}'.",
 				"selectingEffect": "{*SENTENCE(#PLAYER)} is selecting an effect for the effect of '{#CARDNAME}'.",
 				"selectingDeckSide": "{*SENTENCE(#PLAYER)} is choosing the top or bottom of the deck for the effect of '{#CARDNAME}'.",
+				"selectingNumber": "{*SENTENCE(#PLAYER)} is choosing a number for the effect of '{#CARDNAME}'.",
 				"decidingOnModificationAbility": "{*SENTENCE(#PLAYER)} is deciding whether or not to apply the ability of '{#CARD}' to '{#TARGET}'.",
 				"decidingOnOptionalbilitySection": "{*SENTENCE(#PLAYER)} is deciding whether or not to do the optional part of '{#CARDNAME}'s effect."
 			}

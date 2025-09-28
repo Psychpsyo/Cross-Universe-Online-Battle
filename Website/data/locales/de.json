@@ -393,7 +393,8 @@
 				"confirm": "Auswählen",
 				"typePrompt": "Wähle einen Typ für den Effekt von '{#CARDNAME}':",
 				"effectPrompt": "Wähle einen Effekt für den Effekt von '{#CARDNAME}':",
-				"cardNamePrompt": "Wähle einen Kartennamen für den Effekt von '{#CARDNAME}':"
+				"cardNamePrompt": "Wähle einen Kartennamen für den Effekt von '{#CARDNAME}':",
+				"numberPrompt": "Wähle eine Zahl für den Effekt von '{#CARDNAME}':"
 			},
 
 			"deckSideSelect": {
@@ -437,6 +438,7 @@
 				"selectingType": "{*SATZ(#PLAYER)} wählt einen Typ für den Effekt von '{#CARDNAME}'.",
 				"selectingEffect": "{*SATZ(#PLAYER)} wählt einen Effekt für den Effekt von '{#CARDNAME}'.",
 				"selectingDeckSide": "{*SATZ(#PLAYER)} wählt die Deckober- oder Unterseite für den Effekt von '{#CARDNAME}'.",
+				"selectingNumber": "{*SATZ(#PLAYER)} wählt eine Zahl für den Effekt von '{#CARDNAME}'.",
 				"decidingOnModificationAbility": "{*SATZ(#PLAYER)} entscheidet darüber, die Fähigkeit von '{#CARD}' auf '{#TARGET}' anzuwenden oder nicht.",
 				"decidingOnOptionalbilitySection": "{*SATZ(#PLAYER)} entscheidet darüber, den optionalen Teil von '{#CARDNAME}'s Effekt zu nutzen oder nicht."
 			}

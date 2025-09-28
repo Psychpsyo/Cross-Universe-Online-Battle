@@ -393,7 +393,8 @@
 				"confirm": null,
 				"typePrompt": null,
 				"effectPrompt": null,
-				"cardNamePrompt": null
+				"cardNamePrompt": null,
+				"numberPrompt": null
 			},
 
 			"deckSideSelect": {
@@ -437,6 +438,7 @@
 				"selectingType": null,
 				"selectingEffect": null,
 				"selectingDeckSide": null,
+				"selectingNumber": null,
 				"decidingOnModificationAbility": null,
 				"decidingOnOptionalbilitySection": null
 			}
