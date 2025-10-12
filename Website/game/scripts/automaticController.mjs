@@ -106,8 +106,15 @@ export class AutomaticController extends InteractionController {
 					const autoResponse = passModeSelect.value === "never"? null : autopass.getAutoResponse(
 						game,
 						localRequests,
-						passModeSelect.value.startsWith("until"),
-						localStorage.getItem("usePrivateInfoForAutopass")
+						{
+							alwaysPass: passModeSelect.value.startsWith("until"),
+							useHiddenInfo: localStorage.getItem("usePrivateInfoForAutopass") === "true",
+							passOnOwnBlocks: localStorage.getItem("passOnOwnBlocks") === "true",
+							passOnStackTwo: localStorage.getItem("passOnStackTwo") === "true",
+							passInDrawPhase: localStorage.getItem("passInDrawPhase") === "true",
+							passInBattlePhase: localStorage.getItem("passInBattlePhase") === "true",
+							passInEndPhase: localStorage.getItem("passInEndPhase") === "true"
+						}
 					);
 					if (autoResponse) {
 						netSend("inputRequestResponse", JSON.stringify(autoResponse));

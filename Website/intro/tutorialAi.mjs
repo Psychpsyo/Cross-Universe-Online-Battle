@@ -4,7 +4,18 @@ import * as requests from "../rulesEngine/src/inputRequests.mjs";
 
 export class TutorialAI extends AI {
 	async selectMove(optionList, player) {
-		const autoResponse = autopass.getAutoResponse(player.game, optionList, false, true);
+		const autoResponse = autopass.getAutoResponse(
+			player.game,
+			optionList,
+			{
+				useHiddenInfo: true,
+				passOnOwnBlocks: false,
+				passOnStackTwo: false,
+				passInDrawPhase: true,
+				passInBattlePhase: true,
+				passInEndPhase: true
+			}
+		);
 		if (autoResponse) return autoResponse;
 
 		switch (player.game.currentTurn().index) {

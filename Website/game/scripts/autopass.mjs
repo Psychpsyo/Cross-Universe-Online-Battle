@@ -8,7 +8,7 @@ import * as blocks from "../../rulesEngine/src/blocks.mjs";
 import * as modifiers from "../../rulesEngine/src/valueModifiers.mjs";
 import {ScriptContext} from "../../rulesEngine/src/cdfScriptInterpreter/structs.mjs";
 
-export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
+export function getAutoResponse(game, requests, {alwaysPass = false, useHiddenInfo = false, passOnOwnBlocks = false, passOnStackTwo = false, passInDrawPhase = false, passInBattlePhase = false, passInEndPhase = false}) {
 	// non-pass actions
 	if (requests.length == 1) {
 		const request = requests[0];
@@ -69,7 +69,7 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 	// passing on no real options (only retiring partners, casting spells from a selection of 0 and so on)
 	let importantRequests = 0;
 	for (const request of requests) {
-		if (isImportant(request, game)) {
+		if (isImportant(request, game, passOnStackTwo, passInDrawPhase, passInBattlePhase, passInEndPhase)) {
 			importantRequests++;
 		}
 	}
@@ -86,12 +86,13 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 	}
 
 	// passing in response to your own actions
-	if (localStorage.getItem("passOnOwnBlocks") === "true") {
+	if (passOnOwnBlocks) {
 		const currentStack = game.currentStack();
 		if (currentStack.index === 1 &&
 			currentStack.blocks.length === 1 &&
 			!currentStack.blocks.some(block => block.player !== requests[0].player) && // there is no opponent blocks
-			!requests.some(request => request.type === "activateTriggerAbility") // the responses are not trigger abilities
+			!requests.some(request => request.type === "activateTriggerAbility") && // the responses are not trigger abilities
+			!requests.some(request => request-type === "castSpell" && request.eligibleSpells.some(isSpellItemTriggered)) // the responses are not triggered spells
 		) {
 			return {type: "pass"};
 		}
@@ -101,7 +102,7 @@ export function getAutoResponse(game, requests, alwaysPass, useHiddenInfo) {
 }
 
 // returns whether or not a request represents a meaningful choice for the player.
-function isImportant(request, game) {
+function isImportant(request, game, passOnStackTwo, passInDrawPhase, passInBattlePhase, passInEndPhase) {
 	switch (request.type) {
 		case "pass": {
 			return false;
@@ -145,7 +146,7 @@ function isImportant(request, game) {
 
 	// On stack 2, only trigger abilities and conditional spells are important
 	const currentStack = game.currentStack();
-	if (localStorage.getItem("passOnStackTwo") === "true") {
+	if (passOnStackTwo) {
 		if (currentStack && currentStack.index > 1 && currentStack.blocks.length == 0) {
 			if (request.type != "activateTriggerAbility" &&
 				(request.type != "castSpell" || !request.eligibleSpells.some(isSpellItemTriggered))
@@ -158,9 +159,9 @@ function isImportant(request, game) {
 	// during the draw, battle, and end phase, only trigger abilities, conditional spells and attack declarations are important
 	let currentPhase = game.currentPhase();
 	if (currentStack.blocks.every(block => block instanceof blocks.StandardDraw) &&
-		(((currentPhase instanceof phases.DrawPhase) && localStorage.getItem("passInDrawPhase") === "true") ||
-		((currentPhase instanceof phases.EndPhase) && localStorage.getItem("passInEndPhase") === "true") ||
-		((currentPhase instanceof phases.BattlePhase) && localStorage.getItem("passInBattlePhase") === "true" && currentStack.index === 1))
+		(((currentPhase instanceof phases.DrawPhase) && passInDrawPhase) ||
+		((currentPhase instanceof phases.EndPhase) && passInEndPhase) ||
+		((currentPhase instanceof phases.BattlePhase) && passInBattlePhase && currentStack.index === 1))
 	) {
 		switch (request.type) {
 			case "activateTriggerAbility": {
