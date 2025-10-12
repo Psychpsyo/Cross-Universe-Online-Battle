@@ -1,5 +1,5 @@
 import AI from "../rulesEngine/src/aiSystems/baseAI.mjs";
-import * as autopass from "../game/scripts/autopass.mjs";
+import * as autopass from "../rulesEngine/src/extras/autopass.mjs";
 import * as requests from "../rulesEngine/src/inputRequests.mjs";
 
 export class TutorialAI extends AI {

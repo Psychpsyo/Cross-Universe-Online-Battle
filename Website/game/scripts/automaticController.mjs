@@ -4,7 +4,7 @@ import localize from "../../scripts/locale.mjs";
 import {locale} from "../../scripts/locale.mjs";
 import {InteractionController} from "./interactionController.mjs";
 import {netSend} from "./netcode.mjs";
-import * as autopass from "./autopass.mjs";
+import * as autopass from "../../rulesEngine/src/extras/autopass.mjs";
 import {BaseCard} from "../../rulesEngine/src/card.mjs";
 import {Player} from "../../rulesEngine/src/player.mjs";
 import {InputRequest} from "../../rulesEngine/src/inputRequests.mjs";
