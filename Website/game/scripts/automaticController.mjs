@@ -565,15 +565,15 @@ export class AutomaticController extends InteractionController {
 	async presentInputRequest(request) {
 		switch (request.type) {
 			case "doStandardSummon": {
-				this.playerInfos[request.player.index].canStandardSummon = request.eligibleUnits;
+				this.playerInfos[request.player.index].canStandardSummon = request.eligibleCards;
 				break;
 			}
 			case "deployItem": {
-				this.playerInfos[request.player.index].canDeploy = request.eligibleItems;
+				this.playerInfos[request.player.index].canDeploy = request.eligibleCards;
 				break;
 			}
 			case "castSpell": {
-				this.playerInfos[request.player.index].canCast = request.eligibleSpells;
+				this.playerInfos[request.player.index].canCast = request.eligibleCards;
 				break;
 			}
 			case "doRetire": {

@@ -23,7 +23,7 @@ export class TutorialAI extends AI {
 				for (const option of optionList) {
 					if (option.type !== "doStandardSummon") continue;
 
-					for (const card of option.eligibleUnits) {
+					for (const card of option.eligibleCards) {
 						if (card.cardId === "U00044") {
 							return {
 								type: "doStandardSummon",
