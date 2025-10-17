@@ -148,6 +148,15 @@ export class AutomaticController extends InteractionController {
 			} else {
 				// we got events instead
 				const groupedEvents = Object.groupBy(updates.value, event => event.type);
+				// Any discard that also has a destroy for the same card gets shadowed by that.
+				if (groupedEvents.cardDiscarded && groupedEvents.cardDestroyed) {
+					groupedEvents.cardDiscarded = groupedEvents.cardDiscarded.filter(
+						discard => !groupedEvents.cardDestroyed.some(destroy => destroy.card === discard.card)
+					);
+					if (groupedEvents.cardDiscarded.length === 0) {
+						delete groupedEvents.cardDiscarded;
+					}
+				}
 				await Promise.all(Object.entries(groupedEvents).map(keyValue => this.handleEvents(keyValue[0], keyValue[1])));
 			}
 
@@ -443,6 +452,7 @@ export class AutomaticController extends InteractionController {
 				return this.gameSleep();
 			}
 			case "cardDiscarded":
+			case "cardDestroyed":
 			case "cardExiled":
 			case "cardMoved": {
 				chat.putMessage(localize(`game.notices.${type[4].toLowerCase() + type.substring(5)}`), "notice", autoUI.chatCards(events.map(event => event.card)));

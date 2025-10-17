@@ -198,6 +198,7 @@
 			"playerActivated": "{*SENTENCE(#PLAYER)} activated:",
 			"playerRevealed": "{*SENTENCE(#PLAYER)} revealed:",
 			"discarded": "Discarded:",
+			"destroyed": "Destroyed:",
 			"exiled": "Exiled:",
 			"moved": "Moved:",
 			"viewed": "Looked at:"

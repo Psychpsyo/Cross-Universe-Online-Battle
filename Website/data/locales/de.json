@@ -198,6 +198,7 @@
 			"playerActivated": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} aktiviert:",
 			"playerRevealed": "{*SATZ(#PLAYER)} {*PRAESENS(hast|hat|#PLAYER)} gezeigt:",
 			"discarded": "Abgeworfen:",
+			"destroyed": "Zerstört:",
 			"exiled": "Ins Exil geschickt:",
 			"moved": "Verschoben:",
 			"viewed": "Angesehen:"
