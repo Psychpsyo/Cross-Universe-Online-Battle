@@ -126,7 +126,7 @@ function connect(overrideWebsocketUrl) {
 const queryString = new URLSearchParams(location.search);
 if (queryString.get("id")) {
 	roomCodeInputField.placeholder = queryString.get("id");
-	const gameMode = queryString.get("m");
+	let gameMode = queryString.get("m");
 	if (!["manual", "automatic"].includes(gameMode)) {
 		gameMode = "manual";
 	} else {
