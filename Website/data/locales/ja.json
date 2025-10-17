@@ -180,7 +180,7 @@
 			"submitBugReport": null,
 
 			"playerStarts": null,
-			"deckShuffled": null,
+			"deckShuffled": "{#DECK}がシャッフルされた。",
 			"playerChoseCardName": null,
 			"playerChosePlayer": null,
 			"playerChoseType": null,
