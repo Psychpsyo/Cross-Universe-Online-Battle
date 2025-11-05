@@ -5,6 +5,7 @@ import {locale} from "../../scripts/locale.mjs";
 import {netSend} from "./netcode.mjs";
 import {toDeckx} from "../../scripts/deckUtils.mjs";
 import {ScriptParserError} from "../../rulesEngine/src/cdfScriptInterpreter/parser.mjs";
+import {Card} from "../../rulesEngine/src/card.mjs";
 import {previewCard} from "./generalUI.mjs";
 import * as gameUI from "./gameUI.mjs";
 import * as cardLoader from "../../scripts/cardLoader.mjs";
