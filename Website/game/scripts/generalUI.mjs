@@ -76,7 +76,8 @@ chat.inputField.addEventListener("blur", () => {
 
 // card previewing
 export function closeCardPreview() {
-	cardDetails.style.setProperty("--side-distance", "-50vh");
+	cardDetails.close();
+	cardDetails.inert = true;
 	currentPreviewedCard = null;
 }
 
@@ -182,7 +183,8 @@ export async function updateCardPreview(card, highlightedEffect) {
 		}
 	}
 
-	cardDetails.style.setProperty("--side-distance", ".5em");
+	cardDetails.show();
+	cardDetails.inert = false;
 }
 
 function createDomEffect(type, content, classNames = []) {
@@ -319,7 +321,6 @@ export function init() {
 		e.stopPropagation();
 	});
 	cardDetailsClose.addEventListener("click", closeCardPreview);
-	cardDetails.show();
 
 	deckSelector.parentElement.addEventListener("close", () => {
 		gameFlexBox.appendChild(cardDetails);

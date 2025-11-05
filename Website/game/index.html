@@ -406,8 +406,8 @@
 				</main>
 			</div>
 
-			<!-- Pop-in card preview -->
-			<dialog id="cardDetails">
+			<!-- Pop-in card preview (must be inert to prevent browsers from trying to scroll to it while off-screen) -->
+			<dialog id="cardDetails" inert>
 				<div id="cardDetailsControl">
 					<button id="cardDetailsSwitch" class="bigButton">i</button>
 					<button id="cardDetailsClose" class="bigButton">X</button>

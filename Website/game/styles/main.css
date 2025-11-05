@@ -12,7 +12,7 @@ body {
 	display: flex;
 	height: 100dvh;
 }
-#gameFlexBox > :not(:first-child) {
+#gameFlexBox > main {
 	flex-basis: 100%;
 }
 
@@ -74,15 +74,19 @@ body {
 	color: var(--theme-text-color);
 	text-align: left;
 
-	position: absolute;
 	top: 50%;
-	--side-distance: -50vh;
+	--side-distance: .5em;
 	right: var(--side-distance);
 	left: unset;
 	transform: translateY(-50%);
 	transition: right 0.2s ease-out;
 
 	z-index: 500;
+
+	&:not([open]) {
+		display: initial;
+		--side-distance: -50vh;
+	}
 }
 dialog #cardDetails {
 	right: calc(var(--side-distance) - 20vw - 10%);
