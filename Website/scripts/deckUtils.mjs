@@ -47,7 +47,6 @@ export function basicDeckFromCardList(cards, partner = null, name = null, descri
 
 // converts a .deckx to an official Cross Universe .deck format file with respect to the current user-selected locale.
 export function toBasicDeck(deck) {
-	console.log(deck);
 	return basicDeckFromCardList(
 		deckToCardIdList(deck),
 		deck.suggestedPartner,
