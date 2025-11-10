@@ -30,9 +30,8 @@ hr {
 }
 
 .settingsBlock {
-	width: 30em;
+	width: 100%;
 	max-width: 100%;
-	margin: auto;
 	text-align: center;
 }
 
@@ -42,7 +41,7 @@ hr {
 
 .settingsBlock > div {
 	position: relative;
-	padding: .1em .4em;
+	padding: .1em .5em;
 	text-align: left;
 	display: flow-root; /* Establishes new block formatting context so that float elements fit */
 }
