@@ -92,7 +92,7 @@ input[type="text"], select, .settingsInput {
 .profilePictureBtn {
 	background-color: transparent;
 	padding: 0;
-	width: min(8vw, 8em);
+	width: min(30vw, 8em);
 	aspect-ratio: 1;
 	border-radius: 50%;
 	border: 3px solid var(--theme-border-color);
