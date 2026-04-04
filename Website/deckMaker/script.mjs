@@ -865,8 +865,8 @@ printCardBacksBtn.addEventListener("click", () => {
 window.addEventListener("beforeprint", () => {
 	if (printBack) {
 		printBack = false;
-		cardPrinter.setCards(deckList.map(cardId => "./images/cardBack.jpg"), undefined, true);
+		cardPrinter.setCards(deckList.map(cardId => "./images/cardBack.jpg"), {width: "6cm", backsides: true});
 	} else {
-		cardPrinter.setCards(deckList.map(cardId => cardLoader.getCardImageFromID(cardId)));
+		cardPrinter.setCards(deckList.map(cardId => cardLoader.getCardImageFromID(cardId)), {width: "6cm"});
 	}
 });

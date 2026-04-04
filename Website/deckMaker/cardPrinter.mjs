@@ -63,7 +63,7 @@ document.body.appendChild(cardPrinterDiv);
 }
 
 // needs to be called at some point before printing, like the beforeprint event handler
-export function setCards(images, width = "6.3cm", backsides = false) {
+export function setCards(images, { width = "6.3cm", backsides = false } = {}) {
 	cardPrinterDiv.innerHTML = "";
 	if (width instanceof Number) {
 		width = width + "cm";
